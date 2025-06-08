@@ -66,8 +66,7 @@ class ApiService {
     }
 
     return response.json();
-  }
-  // Create current patient information
+  }  // Create current patient information
   async createCurrentPatient(patientData) {
     const response = await fetch(`${this.baseURL}/api/v1/patients/me`, {
       method: 'POST',
@@ -77,12 +76,18 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
       throw new Error(error.detail || 'Failed to create patient information');
     }
 
     return response.json();
   }
-
   // Update current patient information
   async updateCurrentPatient(patientData) {
     const response = await fetch(`${this.baseURL}/api/v1/patients/me`, {
@@ -93,6 +98,13 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
       throw new Error(error.detail || 'Failed to update patient information');
     }
 
@@ -129,7 +141,6 @@ class ApiService {
 
     return response.json();
   }
-
   // Get medications
   async getMedications() {
     const response = await fetch(`${this.baseURL}/api/v1/medications`, {
@@ -138,6 +149,84 @@ class ApiService {
 
     if (!response.ok) {
       throw new Error('Failed to fetch medications');
+    }
+
+    return response.json();
+  }
+
+  // Get medications for a specific patient
+  async getPatientMedications(patientId) {
+    const response = await fetch(`${this.baseURL}/api/v1/medications/patient/${patientId}`, {
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch patient medications');
+    }
+
+    return response.json();
+  }
+  // Create a new medication
+  async createMedication(medicationData) {
+    const response = await fetch(`${this.baseURL}/api/v1/medications`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(medicationData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to create medication');
+    }
+
+    return response.json();
+  }
+  // Update a medication
+  async updateMedication(medicationId, medicationData) {
+    const response = await fetch(`${this.baseURL}/api/v1/medications/${medicationId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(medicationData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to update medication');
+    }
+
+    return response.json();
+  }
+  // Delete a medication
+  async deleteMedication(medicationId) {
+    const response = await fetch(`${this.baseURL}/api/v1/medications/${medicationId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to delete medication');
     }
 
     return response.json();

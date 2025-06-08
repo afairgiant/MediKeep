@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import PatientInfo from './pages/Patient-Info';
+import Medication from './pages/Medication';
 import PlaceholderPage from './pages/PlaceholderPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -53,7 +54,7 @@ function App() {
             path="/medications" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Medication />
               </ProtectedRoute>
             } 
           />
