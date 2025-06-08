@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import PatientInfo from './pages/Patient-Info';
 import PlaceholderPage from './pages/PlaceholderPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -24,6 +25,14 @@ function App() {
           />
           
           {/* Protected routes for all medical sections */}
+          <Route 
+            path="/patients/me" 
+            element={
+              <ProtectedRoute>
+                <PatientInfo />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/patients/:section?" 
             element={
