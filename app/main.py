@@ -12,7 +12,7 @@ from app.core.database import create_tables
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
+    openapi_url="/api/v1/openapi.json",
 )
 
 # Add CORS middleware
@@ -35,25 +35,6 @@ if os.path.exists(static_dir):
     @app.get("/")
     async def read_index():
         """Serve React app index.html for root path"""
-        return FileResponse(os.path.join(static_dir, "index.html"))
-
-    @app.get("/{full_path:path}")
-    async def serve_react_app(full_path: str):
-        """Serve React app for all non-API routes (SPA routing)"""
-        # Don't intercept API routes
-        if (
-            full_path.startswith("api/")
-            or full_path.startswith("docs")
-            or full_path.startswith("health")
-        ):
-            return {"error": "Not found"}
-
-        # Try to serve static file first
-        file_path = os.path.join(static_dir, full_path)
-        if os.path.isfile(file_path):
-            return FileResponse(file_path)
-
-        # Fallback to index.html for client-side routing
         return FileResponse(os.path.join(static_dir, "index.html"))
 
 
