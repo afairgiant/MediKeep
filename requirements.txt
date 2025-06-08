@@ -28,8 +28,7 @@ colorama==0.4.6
 typing_extensions==4.14.0
 typing-inspection==0.4.1
 
-# Template engine
-jinja2==3.1.6
+# Markup and utilities
 MarkupSafe==3.0.2
 
 # Configuration
