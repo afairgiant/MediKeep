@@ -7,7 +7,9 @@ class Settings:
     # App Info
     APP_NAME: str = "Medical Records Management System"
     VERSION: str = "0.0.1"
-    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    DEBUG: bool = (
+        os.getenv("DEBUG", "True").lower() == "true"
+    )  # Enable debug by default in development
 
     # Database Configuration
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./medical_records.db")

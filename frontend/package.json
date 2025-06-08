@@ -18,7 +18,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd ../. && .venv/Scripts/activate && python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "frontend": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [
@@ -40,6 +43,7 @@
   },
   "proxy": "http://localhost:8000",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "http-proxy-middleware": "^3.0.5"
   }
 }

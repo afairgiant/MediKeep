@@ -12,7 +12,7 @@ from app.core.database import create_tables
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    openapi_url="/api/v1/openapi.json",
+    openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
 )
 
 # Add CORS middleware
@@ -26,6 +26,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(api_router, prefix="/api/v1")
+
 
 # Serve static files (React build) in production
 static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
