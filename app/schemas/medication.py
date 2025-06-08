@@ -147,7 +147,7 @@ class MedicationUpdate(BaseModel):
             if not v or len(v.strip()) < 2:
                 raise ValueError("Medication name must be at least 2 characters long")
             if len(v) > 100:
-                raise ValueError("Medication name must be less than 100 characters")            
+                raise ValueError("Medication name must be less than 100 characters")
             return v.strip()
         return v
 
