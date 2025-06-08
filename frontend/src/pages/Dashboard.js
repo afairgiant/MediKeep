@@ -1,0 +1,147 @@
+import React, { useState, useEffect } from 'react';
+import DashboardCard from '../components/DashboardCard';
+import { apiService } from '../services/api';
+import '../styles/Dashboard.css';
+
+const Dashboard = () => {
+  const [user, setUser] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch user data from your FastAPI backend
+    fetchUserData();
+    fetchRecentActivity();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const userData = await apiService.getCurrentPatient();
+      setUser(userData);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRecentActivity = async () => {
+    try {
+      const activity = await apiService.getRecentActivity();
+      setRecentActivity(activity);
+    } catch (error) {
+      console.error('Error fetching activity:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
+
+  const dashboardItems = [
+    {
+      title: "📋 Patient Information",
+      description: "View and update your personal details",
+      link: "/patients/me"
+    },
+    {
+      title: "🧪 Lab Results",
+      description: "Access your laboratory test results",
+      link: "/lab-results"
+    },
+    {
+      title: "💊 Medications",
+      description: "Track your current medications",
+      link: "/medications"
+    },
+    {
+      title: "💉 Immunizations",
+      description: "Check your immunization records",
+      link: "/immunizations"
+    },
+    {
+      title: "Procedures",
+      description: "Review your Procedures",
+      link: "/procedures"
+    },
+    {
+      title: "Allergies",
+      description: "Review your allergies",
+      link: "/allergies"
+    },
+    {
+      title: "Conditions",
+      description: "Review your medical conditions",
+      link: "/conditions"
+    },
+    {
+      title: "Treatments",
+      description: "Review your treatments",
+      link: "/treatments"
+    },
+    {
+      title: "Visit History",
+      description: "Review your visits",
+      link: "/visits"
+    }
+  ];
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="dashboard-container">
+      <header>
+        <h1>🏥 Medical Records Dashboard</h1>
+        <nav>
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        <div className="welcome-section">
+          <h2>Welcome to your Medical Records System</h2>
+          <p>Manage your personal health information securely and efficiently.</p>
+          {user && <p>Hello, {user.name}!</p>}
+        </div>
+
+        <div className="dashboard-grid">
+          {dashboardItems.map((item, index) => (
+            <DashboardCard
+              key={index}
+              title={item.title}
+              description={item.description}
+              link={item.link}
+            />
+          ))}
+
+          <div className="recent-activity">
+            <h3>Recent Activity</h3>
+            {recentActivity.length > 0 ? (
+              <ul>
+                {recentActivity.map((activity, index) => (
+                  <li key={index}>{activity.description}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No recent activity to display.</p>
+            )}
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <p>&copy; 2025 Medical Records System. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+};
+
+export default Dashboard;
