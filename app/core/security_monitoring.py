@@ -66,7 +66,7 @@ class SecurityMonitor:
         # Process different event types
         if event_type == "authentication_attempt":
             self._process_auth_event(event_data, ip_address, timestamp)
-        elif "suspicious" in event_type or "threat" in event_type:
+        elif event_type and ("suspicious" in event_type or "threat" in event_type):
             self._process_threat_event(event_data, ip_address, timestamp)
         elif event_type == "session_event":
             self._process_session_event(event_data, timestamp)

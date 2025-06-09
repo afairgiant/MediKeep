@@ -220,16 +220,17 @@ def login(
     )
 
     # Log session start
-    security_audit.log_session_event(
-        event_type="session_start",
-        user_id=user_id,
-        username=form_data.username,
-        ip_address=client_ip,
-        session_data={
-            "token_expires": access_token_expires.total_seconds(),
-            "user_agent": user_agent,
-        },
-    )
+    if user_id is not None:
+        security_audit.log_session_event(
+            event_type="session_start",
+            user_id=user_id,
+            username=form_data.username,
+            ip_address=client_ip,
+            session_data={
+                "token_expires": access_token_expires.total_seconds(),
+                "user_agent": user_agent,
+            },
+        )
 
     # Log successful login
     logger.info(
