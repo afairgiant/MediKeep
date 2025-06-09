@@ -22,15 +22,15 @@ from app.core.security_audit import security_audit
 class MedicalDataAuditor:
     """
     Comprehensive medical data audit logging system.
-    
+
     Provides detailed audit trails for all medical data operations including
     patient records, medications, lab results, treatments, and more.
     """
-    
+
     def __init__(self):
         self.medical_logger = get_logger("medical_auditor", "medical")
         self.security_logger = get_logger("medical_auditor", "security")
-    
+
     def log_patient_data_access(
         self,
         user_id: int,
@@ -44,11 +44,11 @@ class MedicalDataAuditor:
         error_message: Optional[str] = None,
         previous_values: Optional[Dict] = None,
         new_values: Optional[Dict] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """
         Log patient data access with comprehensive audit information.
-        
+
         Args:
             user_id: ID of the user performing the action
             patient_id: ID of the patient whose data is being accessed
@@ -73,18 +73,18 @@ class MedicalDataAuditor:
             "ip_address": ip_address,
             "success": success,
             "fields_accessed": fields_accessed or [],
-            "username": username or "unknown"
+            "username": username or "unknown",
         }
-        
+
         if error_message:
             audit_data["error_message"] = error_message
-            
+
         if previous_values:
             audit_data["previous_values"] = previous_values
-            
+
         if new_values:
             audit_data["new_values"] = new_values
-          # Log to medical audit log
+        # Log to medical audit log
         log_medical_access(
             self.medical_logger,
             event=f"medical_data_{action}",
@@ -97,9 +97,9 @@ class MedicalDataAuditor:
             fields_accessed=fields_accessed or [],
             success=success,
             error_message=error_message,
-            timestamp=datetime.utcnow().isoformat()
+            timestamp=datetime.utcnow().isoformat(),
         )
-        
+
         # Also log to security audit system
         security_audit.log_data_access(
             user_id=user_id,
@@ -113,10 +113,10 @@ class MedicalDataAuditor:
                 "patient_id": patient_id,
                 "fields_accessed": fields_accessed,
                 "error_message": error_message,
-                "has_changes": bool(previous_values or new_values)
-            }
+                "has_changes": bool(previous_values or new_values),
+            },
         )
-    
+
     def log_medication_operation(
         self,
         user_id: int,
@@ -128,13 +128,13 @@ class MedicalDataAuditor:
         previous_data: Optional[Dict] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """Log medication-specific operations."""
         fields_accessed = []
         if medication_data:
             fields_accessed = list(medication_data.keys())
-        
+
         self.log_patient_data_access(
             user_id=user_id,
             patient_id=patient_id,
@@ -147,9 +147,9 @@ class MedicalDataAuditor:
             error_message=error_message,
             previous_values=previous_data,
             new_values=medication_data,
-            username=username
+            username=username,
         )
-    
+
     def log_lab_result_operation(
         self,
         user_id: int,
@@ -161,13 +161,13 @@ class MedicalDataAuditor:
         previous_data: Optional[Dict] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """Log lab result specific operations."""
         fields_accessed = []
         if lab_data:
             fields_accessed = list(lab_data.keys())
-        
+
         self.log_patient_data_access(
             user_id=user_id,
             patient_id=patient_id,
@@ -180,9 +180,9 @@ class MedicalDataAuditor:
             error_message=error_message,
             previous_values=previous_data,
             new_values=lab_data,
-            username=username
+            username=username,
         )
-    
+
     def log_treatment_operation(
         self,
         user_id: int,
@@ -194,13 +194,13 @@ class MedicalDataAuditor:
         previous_data: Optional[Dict] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """Log treatment specific operations."""
         fields_accessed = []
         if treatment_data:
             fields_accessed = list(treatment_data.keys())
-        
+
         self.log_patient_data_access(
             user_id=user_id,
             patient_id=patient_id,
@@ -213,9 +213,9 @@ class MedicalDataAuditor:
             error_message=error_message,
             previous_values=previous_data,
             new_values=treatment_data,
-            username=username
+            username=username,
         )
-    
+
     def log_file_operation(
         self,
         user_id: int,
@@ -228,7 +228,7 @@ class MedicalDataAuditor:
         file_size: Optional[int] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """Log file upload/download/delete operations."""
         file_data = {}
@@ -238,7 +238,7 @@ class MedicalDataAuditor:
             file_data["file_type"] = file_type
         if file_size:
             file_data["file_size"] = file_size
-        
+
         self.log_patient_data_access(
             user_id=user_id,
             patient_id=patient_id,
@@ -250,9 +250,9 @@ class MedicalDataAuditor:
             success=success,
             error_message=error_message,
             new_values=file_data if file_data else None,
-            username=username
+            username=username,
         )
-    
+
     def log_bulk_operation(
         self,
         user_id: int,
@@ -264,16 +264,16 @@ class MedicalDataAuditor:
         operation_details: Optional[Dict] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """Log bulk operations affecting multiple records."""
         bulk_data = {
             "affected_records": affected_records,
-            "operation_type": "bulk_operation"
+            "operation_type": "bulk_operation",
         }
         if operation_details:
             bulk_data.update(operation_details)
-        
+
         self.log_patient_data_access(
             user_id=user_id,
             patient_id=patient_id,
@@ -285,9 +285,9 @@ class MedicalDataAuditor:
             success=success,
             error_message=error_message,
             new_values=bulk_data,
-            username=username
+            username=username,
         )
-    
+
     def log_medical_history_access(
         self,
         user_id: int,
@@ -297,16 +297,13 @@ class MedicalDataAuditor:
         date_range: Optional[Dict] = None,
         success: bool = True,
         error_message: Optional[str] = None,
-        username: Optional[str] = None
+        username: Optional[str] = None,
     ):
         """Log comprehensive medical history access."""
-        history_data = {
-            "history_types": history_types,
-            "comprehensive_access": True
-        }
+        history_data = {"history_types": history_types, "comprehensive_access": True}
         if date_range:
             history_data["date_range"] = date_range
-        
+
         self.log_patient_data_access(
             user_id=user_id,
             patient_id=patient_id,
@@ -318,7 +315,7 @@ class MedicalDataAuditor:
             success=success,
             error_message=error_message,
             new_values=history_data,
-            username=username
+            username=username,
         )
 
 

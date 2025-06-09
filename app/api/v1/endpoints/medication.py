@@ -26,12 +26,12 @@ def create_medication(
     Create new medication.
     """
     client_ip = request.client.host if request.client else "unknown"
-    
+
     try:
         medication_obj = medication.create(db=db, obj_in=medication_in)
         medication_id = getattr(medication_obj, "id", None)
         patient_id = getattr(medication_obj, "patient_id", None)
-        
+
         # Log successful medication creation
         if patient_id and medication_id:
             medical_auditor.log_medication_operation(
@@ -41,11 +41,11 @@ def create_medication(
                 action="create",
                 ip_address=client_ip,
                 medication_data=medication_in.dict(),
-                success=True
+                success=True,
             )
-        
+
         return medication_obj
-        
+
     except Exception as e:
         # Log failed medication creation
         patient_id_input = getattr(medication_in, "patient_id", None)
@@ -58,7 +58,7 @@ def create_medication(
                 ip_address=client_ip,
                 medication_data=medication_in.dict(),
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
         raise
 
@@ -110,7 +110,7 @@ def update_medication(
     Update a medication.
     """
     client_ip = request.client.host if request.client else "unknown"
-    
+
     medication_obj = medication.get(db=db, id=medication_id)
     if not medication_obj:
         # Log failed medication access
@@ -121,10 +121,10 @@ def update_medication(
             action="update",
             ip_address=client_ip,
             success=False,
-            error_message="Medication not found"
+            error_message="Medication not found",
         )
         raise HTTPException(status_code=404, detail="Medication not found")
-    
+
     # Get previous values for audit
     previous_data = {
         "medication_name": getattr(medication_obj, "medication_name", None),
@@ -133,12 +133,12 @@ def update_medication(
         "status": getattr(medication_obj, "status", None),
     }
     patient_id = getattr(medication_obj, "patient_id", None)
-    
+
     try:
         updated_medication = medication.update(
             db=db, db_obj=medication_obj, obj_in=medication_in
         )
-        
+
         # Log successful medication update
         if patient_id:
             medical_auditor.log_medication_operation(
@@ -149,11 +149,11 @@ def update_medication(
                 ip_address=client_ip,
                 medication_data=medication_in.dict(exclude_unset=True),
                 previous_data=previous_data,
-                success=True
+                success=True,
             )
-        
+
         return updated_medication
-        
+
     except Exception as e:
         # Log failed medication update
         if patient_id:
@@ -166,7 +166,7 @@ def update_medication(
                 medication_data=medication_in.dict(exclude_unset=True),
                 previous_data=previous_data,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
         raise
 
@@ -183,7 +183,7 @@ def delete_medication(
     Delete a medication.
     """
     client_ip = request.client.host if request.client else "unknown"
-    
+
     medication_obj = medication.get(db=db, id=medication_id)
     if not medication_obj:
         # Log failed medication access
@@ -194,10 +194,10 @@ def delete_medication(
             action="delete",
             ip_address=client_ip,
             success=False,
-            error_message="Medication not found"
+            error_message="Medication not found",
         )
         raise HTTPException(status_code=404, detail="Medication not found")
-    
+
     # Get medication data for audit before deletion
     patient_id = getattr(medication_obj, "patient_id", None)
     medication_data = {
@@ -206,10 +206,10 @@ def delete_medication(
         "frequency": getattr(medication_obj, "frequency", None),
         "status": getattr(medication_obj, "status", None),
     }
-    
+
     try:
         medication.delete(db=db, id=medication_id)
-        
+
         # Log successful medication deletion
         if patient_id:
             medical_auditor.log_medication_operation(
@@ -219,11 +219,11 @@ def delete_medication(
                 action="delete",
                 ip_address=client_ip,
                 previous_data=medication_data,
-                success=True
+                success=True,
             )
-        
+
         return {"message": "Medication deleted successfully"}
-        
+
     except Exception as e:
         # Log failed medication deletion
         if patient_id:
@@ -235,7 +235,7 @@ def delete_medication(
                 ip_address=client_ip,
                 previous_data=medication_data,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
         raise
 

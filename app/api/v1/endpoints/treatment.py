@@ -27,12 +27,12 @@ def create_treatment(
     Create new treatment.
     """
     client_ip = request.client.host if request.client else "unknown"
-    
+
     try:
         treatment_obj = treatment.create(db=db, obj_in=treatment_in)
         treatment_id = getattr(treatment_obj, "id", None)
         patient_id = getattr(treatment_obj, "patient_id", None)
-        
+
         # Log successful treatment creation
         if patient_id and treatment_id:
             medical_auditor.log_treatment_operation(
@@ -42,11 +42,11 @@ def create_treatment(
                 action="create",
                 ip_address=client_ip,
                 treatment_data=treatment_in.dict(),
-                success=True
+                success=True,
             )
-        
+
         return treatment_obj
-        
+
     except Exception as e:
         # Log failed treatment creation
         patient_id_input = getattr(treatment_in, "patient_id", None)
@@ -59,7 +59,7 @@ def create_treatment(
                 ip_address=client_ip,
                 treatment_data=treatment_in.dict(),
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
         raise
 
@@ -123,7 +123,7 @@ def update_treatment(
     Update a treatment.
     """
     client_ip = request.client.host if request.client else "unknown"
-    
+
     treatment_obj = treatment.get(db=db, id=treatment_id)
     if not treatment_obj:
         # Log failed treatment access
@@ -134,10 +134,10 @@ def update_treatment(
             action="update",
             ip_address=client_ip,
             success=False,
-            error_message="Treatment not found"
+            error_message="Treatment not found",
         )
         raise HTTPException(status_code=404, detail="Treatment not found")
-    
+
     # Get previous values for audit
     previous_data = {
         "treatment_type": getattr(treatment_obj, "treatment_type", None),
@@ -146,10 +146,12 @@ def update_treatment(
         "end_date": str(getattr(treatment_obj, "end_date", None)),
     }
     patient_id = getattr(treatment_obj, "patient_id", None)
-    
+
     try:
-        updated_treatment = treatment.update(db=db, db_obj=treatment_obj, obj_in=treatment_in)
-        
+        updated_treatment = treatment.update(
+            db=db, db_obj=treatment_obj, obj_in=treatment_in
+        )
+
         # Log successful treatment update
         if patient_id:
             medical_auditor.log_treatment_operation(
@@ -160,11 +162,11 @@ def update_treatment(
                 ip_address=client_ip,
                 treatment_data=treatment_in.dict(exclude_unset=True),
                 previous_data=previous_data,
-                success=True
+                success=True,
             )
-        
+
         return updated_treatment
-        
+
     except Exception as e:
         # Log failed treatment update
         if patient_id:
@@ -177,7 +179,7 @@ def update_treatment(
                 treatment_data=treatment_in.dict(exclude_unset=True),
                 previous_data=previous_data,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
         raise
 
@@ -194,7 +196,7 @@ def delete_treatment(
     Delete a treatment.
     """
     client_ip = request.client.host if request.client else "unknown"
-    
+
     treatment_obj = treatment.get(db=db, id=treatment_id)
     if not treatment_obj:
         # Log failed treatment access
@@ -205,10 +207,10 @@ def delete_treatment(
             action="delete",
             ip_address=client_ip,
             success=False,
-            error_message="Treatment not found"
+            error_message="Treatment not found",
         )
         raise HTTPException(status_code=404, detail="Treatment not found")
-    
+
     # Get treatment data for audit before deletion
     patient_id = getattr(treatment_obj, "patient_id", None)
     treatment_data = {
@@ -217,10 +219,10 @@ def delete_treatment(
         "start_date": str(getattr(treatment_obj, "start_date", None)),
         "end_date": str(getattr(treatment_obj, "end_date", None)),
     }
-    
+
     try:
         treatment.delete(db=db, id=treatment_id)
-        
+
         # Log successful treatment deletion
         if patient_id:
             medical_auditor.log_treatment_operation(
@@ -230,11 +232,11 @@ def delete_treatment(
                 action="delete",
                 ip_address=client_ip,
                 previous_data=treatment_data,
-                success=True
+                success=True,
             )
-        
+
         return {"message": "Treatment deleted successfully"}
-        
+
     except Exception as e:
         # Log failed treatment deletion
         if patient_id:
@@ -246,7 +248,7 @@ def delete_treatment(
                 ip_address=client_ip,
                 previous_data=treatment_data,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
         raise
 
