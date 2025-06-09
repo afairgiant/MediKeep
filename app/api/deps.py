@@ -1,5 +1,5 @@
 from typing import Generator
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -8,9 +8,13 @@ from app.core.config import settings
 from app.core.database import SessionLocal
 from app.crud.user import user
 from app.models.models import User
+from app.core.logging_config import get_logger, log_security_event
 
 # Security scheme for JWT tokens
 security = HTTPBearer()
+
+# Initialize security logger
+security_logger = get_logger(__name__, "security")
 
 
 def get_db() -> Generator:
@@ -44,6 +48,8 @@ def get_current_user(
     Raises:
         HTTPException 401: If token is invalid or user not found
     """
+    # Note: IP address logging is handled by middleware for request-level context
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -59,14 +65,45 @@ def get_current_user(
         )
         username = payload.get("sub")
         if username is None:
+            log_security_event(
+                security_logger,
+                event="token_invalid_no_subject",
+                ip_address="middleware",  # IP will be captured by middleware
+                message="JWT token missing subject claim",
+            )
             raise credentials_exception
-    except JWTError:
+
+    except JWTError as e:
+        log_security_event(
+            security_logger,
+            event="token_decode_failed",
+            ip_address="middleware",  # IP will be captured by middleware
+            message=f"JWT token decode failed: {str(e)}",
+        )
         raise credentials_exception
 
     # Get user from database
     db_user = user.get_by_username(db, username=username)
     if db_user is None:
+        log_security_event(
+            security_logger,
+            event="token_user_not_found",
+            ip_address="middleware",  # IP will be captured by middleware
+            message=f"Token valid but user not found: {username}",
+            username=username,
+        )
         raise credentials_exception
+
+    # Log successful token validation
+    user_id = getattr(db_user, "id", None)
+    log_security_event(
+        security_logger,
+        event="token_validated_success",
+        user_id=user_id,
+        ip_address="middleware",  # IP will be captured by middleware
+        message=f"Token successfully validated for user: {username}",
+        username=username,
+    )
 
     return db_user
 

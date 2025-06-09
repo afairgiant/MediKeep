@@ -6,6 +6,7 @@ from app.api import deps
 from app.crud.patient import patient
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 from app.core.logging_config import get_logger, log_medical_access
+from app.core.security_audit import security_audit
 
 router = APIRouter()
 
@@ -33,6 +34,18 @@ def get_my_patient_record(
 
     patient_record = patient.get_by_user_id(db, user_id=user_id)
     if not patient_record:
+        # Enhanced logging for missing patient record
+        security_audit.log_data_access(
+            user_id=user_id,
+            username="unknown",  # Would need to get from token
+            ip_address=client_ip,
+            resource_type="patient_record",
+            resource_id=None,
+            action="read",
+            success=False,
+            details={"reason": "patient_record_not_found"},
+        )
+
         logger.warning(
             f"Patient record not found for user {user_id}",
             extra={
@@ -43,8 +56,31 @@ def get_my_patient_record(
             },
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
-    # Log successful patient record access
+
+    # Enhanced logging for successful patient record access
     patient_id = getattr(patient_record, "id", 0)
+
+    # Log medical data access for audit trail
+    security_audit.log_data_access(
+        user_id=user_id,
+        username="unknown",  # Would need to get from token for full audit
+        ip_address=client_ip,
+        resource_type="patient_record",
+        resource_id=patient_id,
+        action="read",
+        success=True,
+        details={
+            "fields_accessed": [
+                "first_name",
+                "last_name",
+                "birthDate",
+                "gender",
+                "address",
+            ]
+        },
+    )
+
+    # Log successful patient record access
     log_medical_access(
         medical_logger,
         event="patient_record_accessed",

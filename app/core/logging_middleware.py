@@ -17,6 +17,7 @@ from app.core.logging_config import (
     log_security_event,
     log_performance_event,
 )
+from app.core.security_audit import security_audit
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -41,9 +42,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         method = request.method
         path = request.url.path
         client_ip = self._get_client_ip(request)
-        user_agent = request.headers.get("user-agent", "Unknown")
-
-        # Extract user information if available
+        user_agent = request.headers.get(
+            "user-agent", "Unknown"
+        )  # Extract user information if available
         user_id = None
         auth_header = request.headers.get("authorization")
         if auth_header:
@@ -52,6 +53,26 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 user_id = getattr(request.state, "user_id", None)
             except AttributeError:
                 pass
+
+        # Check for rate limiting using security audit
+        if security_audit.track_api_request(client_ip):
+            # Rate limit exceeded - return 429 status
+            response = StarletteResponse(
+                content="Rate limit exceeded",
+                status_code=429,
+                headers={"Retry-After": "60"},
+            )
+            duration_ms = int((time.time() - start_time) * 1000)
+            self._log_request_complete(
+                method=method,
+                path=path,
+                status_code=429,
+                client_ip=client_ip,
+                user_id=user_id,
+                duration_ms=duration_ms,
+                correlation_id=correlation_id,
+            )
+            return response
 
         # Log the incoming request
         self._log_request_start(
@@ -63,7 +84,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             correlation_id=correlation_id,
         )
 
-        # Check for suspicious patterns
+        # Check for suspicious patterns (enhanced with security audit)
         self._check_security_patterns(request, client_ip, user_id)
 
         # Process the request
@@ -218,7 +239,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             "duration": duration_ms,
             "correlation_id": correlation_id,
         }
-
         self.logger.error(
             f"Request failed: {method} {path} - {error}", extra=extra_data
         )
@@ -226,11 +246,30 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     def _check_security_patterns(
         self, request: Request, client_ip: str, user_id: Optional[int] = None
     ):
-        """Check for suspicious security patterns in requests."""
+        """Check for suspicious security patterns in requests (enhanced with security audit)."""
         path = request.url.path.lower()
         query = str(request.url.query).lower()
+        combined_input = f"{path} {query}"
 
-        # Check for common attack patterns
+        # Use security audit system to check for suspicious input
+        if security_audit.check_suspicious_input(
+            combined_input,
+            context="http_request",
+            user_id=user_id,
+            ip_address=client_ip,
+        ):
+            # Additional logging through existing system for backwards compatibility
+            log_security_event(
+                self.security_logger,
+                event="suspicious_input_middleware",
+                user_id=user_id,
+                ip_address=client_ip,
+                message="Suspicious input detected in HTTP request",
+                path=path,
+                query=query,
+            )
+
+        # Additional specific checks for common attack patterns
         suspicious_patterns = {
             "sql_injection": [
                 "union",
@@ -250,6 +289,21 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         for attack_type, patterns in suspicious_patterns.items():
             for pattern in patterns:
                 if pattern in path or pattern in query:
+                    # Log through security audit system
+                    security_audit.log_security_threat(
+                        threat_type=f"http_{attack_type}",
+                        ip_address=client_ip,
+                        details={
+                            "pattern": pattern,
+                            "attack_type": attack_type,
+                            "path": path,
+                            "query": query,
+                            "method": request.method,
+                        },
+                        user_id=user_id,
+                    )
+
+                    # Also log through existing system
                     log_security_event(
                         self.security_logger,
                         event=f"suspicious_{attack_type}_pattern",
@@ -262,10 +316,16 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     )
                     break
 
-        # Check for excessive request rate (simple rate limiting detection)
-        # This is a basic implementation - in production you might use Redis or similar
+        # Enhanced user agent checking
         user_agent = request.headers.get("user-agent", "")
         if not user_agent or len(user_agent) < 10:
+            security_audit.log_security_threat(
+                threat_type="suspicious_user_agent",
+                ip_address=client_ip,
+                details={"user_agent": user_agent, "reason": "missing_or_too_short"},
+                user_id=user_id,
+            )
+
             log_security_event(
                 self.security_logger,
                 event="suspicious_user_agent",

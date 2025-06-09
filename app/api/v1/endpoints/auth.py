@@ -12,6 +12,7 @@ from app.schemas.patient import PatientCreate
 from app.core.security import create_access_token
 from app.core.logging_config import get_logger, log_security_event
 from datetime import date
+from app.core.security_audit import security_audit
 
 router = APIRouter()
 
@@ -35,8 +36,15 @@ def register(
     A basic patient record is automatically created for the user.
     """
     client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
 
-    # Log registration attempt
+    # Check for suspicious input in username
+    if security_audit.check_suspicious_input(
+        user_in.username, "user_registration", ip_address=client_ip
+    ):
+        raise HTTPException(status_code=400, detail="Invalid input detected")
+
+    # Log registration attempt using security audit system
     logger.info(
         f"User registration attempt for username: {user_in.username}",
         extra={
@@ -50,7 +58,15 @@ def register(
     # Check if username already exists
     existing_user = user.get_by_username(db, username=user_in.username)
     if existing_user:
-        # Log failed registration attempt
+        # Enhanced logging with security audit
+        security_audit.log_authentication_attempt(
+            username=user_in.username,
+            ip_address=client_ip,
+            user_agent=user_agent,
+            success=False,
+            failure_reason="username_already_exists",
+        )
+
         log_security_event(
             security_logger,
             event="registration_failed_username_exists",
@@ -73,13 +89,21 @@ def register(
         address="Please update your address",  # Placeholder address
     )
 
-    try:
-        # Get the actual user ID value from the SQLAlchemy model
+    try:  # Get the actual user ID value from the SQLAlchemy model
         user_id = getattr(new_user, "id", None)
         if user_id is None:
             raise ValueError("User ID not found after creation")
 
         patient.create_for_user(db, user_id=user_id, patient_data=default_patient_data)
+
+        # Enhanced logging with security audit
+        security_audit.log_authentication_attempt(
+            username=user_in.username,
+            ip_address=client_ip,
+            user_agent=user_agent,
+            success=True,
+            user_id=user_id,
+        )
 
         # Log successful registration
         logger.info(
@@ -122,6 +146,19 @@ def login(
     Returns a JWT token that can be used for authenticated requests.
     """
     client_ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    # Check for rate limiting
+    if security_audit.track_api_request(client_ip):
+        raise HTTPException(
+            status_code=429, detail="Too many requests. Please try again later."
+        )
+
+    # Check for suspicious input in username
+    if security_audit.check_suspicious_input(
+        form_data.username, "user_login", ip_address=client_ip
+    ):
+        raise HTTPException(status_code=400, detail="Invalid input detected")
 
     # Log login attempt
     logger.info(
@@ -140,6 +177,15 @@ def login(
     )
 
     if not db_user:
+        # Enhanced failed login logging with security audit
+        security_audit.log_authentication_attempt(
+            username=form_data.username,
+            ip_address=client_ip,
+            user_agent=user_agent,
+            success=False,
+            failure_reason="invalid_credentials",
+        )
+
         # Log failed login attempt
         log_security_event(
             security_logger,
@@ -161,8 +207,31 @@ def login(
         data={"sub": db_user.username}, expires_delta=access_token_expires
     )
 
-    # Log successful login
+    # Get user ID for logging
     user_id = getattr(db_user, "id", None)
+
+    # Enhanced successful login logging with security audit
+    security_audit.log_authentication_attempt(
+        username=form_data.username,
+        ip_address=client_ip,
+        user_agent=user_agent,
+        success=True,
+        user_id=user_id,
+    )
+
+    # Log session start
+    security_audit.log_session_event(
+        event_type="session_start",
+        user_id=user_id,
+        username=form_data.username,
+        ip_address=client_ip,
+        session_data={
+            "token_expires": access_token_expires.total_seconds(),
+            "user_agent": user_agent,
+        },
+    )
+
+    # Log successful login
     logger.info(
         f"Login successful for username: {form_data.username}",
         extra={
