@@ -7,6 +7,11 @@ import os
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import create_tables
+from app.core.logging_middleware import RequestLoggingMiddleware
+from app.core.logging_config import get_logger
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 # Create FastAPI app
 app = FastAPI(
@@ -14,6 +19,9 @@ app = FastAPI(
     version=settings.VERSION,
     openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
 )
+
+# Add logging middleware (should be added first)
+app.add_middleware(RequestLoggingMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
@@ -42,10 +50,25 @@ if os.path.exists(static_dir):
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables on startup"""
+    logger.info(
+        "Application starting up",
+        extra={
+            "category": "app",
+            "event": "application_startup",
+            "version": settings.VERSION,
+        },
+    )
     create_tables()
+    logger.info(
+        "Application startup completed",
+        extra={"category": "app", "event": "application_startup_complete"},
+    )
 
 
 @app.get("/health")
 def health():
     """Health check endpoint"""
+    logger.info(
+        "Health check requested", extra={"category": "app", "event": "health_check"}
+    )
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}

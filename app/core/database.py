@@ -3,6 +3,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.models.models import Base
+from app.core.logging_config import get_logger
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 class DatabaseConfig:
@@ -34,7 +38,22 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def create_tables():
     """Create all tables in the database"""
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info(
+            "Database tables created successfully",
+            extra={"category": "app", "event": "database_tables_created"},
+        )
+    except Exception as e:
+        logger.error(
+            f"Failed to create database tables: {e}",
+            extra={
+                "category": "app",
+                "event": "database_tables_creation_failed",
+                "error": str(e),
+            },
+        )
+        raise
 
 
 def drop_tables():
@@ -56,9 +75,20 @@ def check_database_connection():
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
+        logger.info(
+            "Database connection check successful",
+            extra={"category": "app", "event": "database_connection_check_success"},
+        )
         return True
     except Exception as e:
-        print(f"Database connection error: {e}")
+        logger.error(
+            f"Database connection check failed: {e}",
+            extra={
+                "category": "app",
+                "event": "database_connection_check_failed",
+                "error": str(e),
+            },
+        )
         return False
 
 

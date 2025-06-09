@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Optional
 
 
 class Settings:
@@ -19,11 +18,15 @@ class Settings:
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your_default_secret_key")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-    )
-
-    # File Storage
+    )  # File Storage
     UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", "./uploads"))
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024)))  # 10MB
+
+    # Logging Configuration
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
+    LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
+    ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
 
     def __init__(self):
         # Ensure upload directory exists

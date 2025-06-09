@@ -1,17 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import Any
 
 from app.api import deps
 from app.crud.patient import patient
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
+from app.core.logging_config import get_logger, log_medical_access
 
 router = APIRouter()
+
+# Initialize loggers
+logger = get_logger(__name__, "app")
+medical_logger = get_logger(__name__, "medical")
 
 
 @router.get("/me", response_model=Patient)
 def get_my_patient_record(
-    db: Session = Depends(deps.get_db), user_id: int = Depends(deps.get_current_user_id)
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get current user's patient record.
@@ -22,9 +29,31 @@ def get_my_patient_record(
     - gender
     - address
     """
+    client_ip = request.client.host if request.client else "unknown"
+
     patient_record = patient.get_by_user_id(db, user_id=user_id)
     if not patient_record:
+        logger.warning(
+            f"Patient record not found for user {user_id}",
+            extra={
+                "category": "medical",
+                "event": "patient_record_not_found",
+                "user_id": user_id,
+                "ip": client_ip,
+            },
+        )
         raise HTTPException(status_code=404, detail="Patient record not found")
+    # Log successful patient record access
+    patient_id = getattr(patient_record, "id", 0)
+    log_medical_access(
+        medical_logger,
+        event="patient_record_accessed",
+        user_id=user_id,
+        patient_id=patient_id,
+        ip_address=client_ip,
+        message=f"User {user_id} accessed their patient record",
+    )
+
     return patient_record
 
 
