@@ -14,6 +14,7 @@ from app.api.v1.endpoints import (
     allergy,
     practitioner,
     medication,
+    frontend_logs,
 )
 
 api_router = APIRouter()
@@ -45,4 +46,9 @@ api_router.include_router(
 )
 api_router.include_router(
     medication.router, prefix="/medications", tags=["medications"]
+)
+
+# Frontend logging endpoints
+api_router.include_router(
+    frontend_logs.router, prefix="/frontend-logs", tags=["frontend-logs"]
 )

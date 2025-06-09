@@ -1,18 +1,80 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import PatientInfo from './pages/Patient-Info';
 import Medication from './pages/Medication';
 import PlaceholderPage from './pages/PlaceholderPage';
+import LoggingTest from './components/LoggingTest';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import frontendLogger from './services/frontendLogger';
 import './App.css';
 
+// Component to track navigation
+function NavigationTracker() {
+  const location = useLocation();
+  const previousLocation = React.useRef(location.pathname);
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const previousPath = previousLocation.current;
+
+    if (currentPath !== previousPath) {
+      // Log navigation as a user interaction
+      frontendLogger.logUserInteraction('navigation', 'page', {
+        fromPath: previousPath,
+        toPath: currentPath,
+        search: location.search,
+        hash: location.hash
+      });
+      
+      // Log page load as an event
+      frontendLogger.logEvent({
+        type: 'page_load',
+        message: `Page loaded: ${currentPath}`,
+        pathname: currentPath,
+        search: location.search,
+        hash: location.hash,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    previousLocation.current = currentPath;
+  }, [location]);
+
+  return null;
+}
+
 function App() {
+  useEffect(() => {
+    // Initialize frontend logging
+    frontendLogger.logEvent({
+      type: 'app_lifecycle',
+      message: 'Medical Records App initialized',
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+      url: window.location.href
+    });
+
+    // Set up performance monitoring
+    const startTime = performance.now();
+    
+    return () => {
+      const loadTime = performance.now() - startTime;
+      frontendLogger.logPerformance({
+        type: 'app_lifecycle',
+        loadTime: loadTime,
+        component: 'App',
+        timestamp: new Date().toISOString()
+      });
+    };
+  }, []);
+
   return (
-    <ErrorBoundary>
+    <ErrorBoundary componentName="App">
       <Router>
+        <NavigationTracker />
         <div className="App">
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -105,6 +167,12 @@ function App() {
                 <PlaceholderPage />
               </ProtectedRoute>
             } 
+          />
+          
+          {/* Logging Test Page - Development/Testing only */}
+          <Route 
+            path="/logging-test" 
+            element={<LoggingTest />} 
           />
           
           <Route path="/" element={<Navigate to="/dashboard" />} />
