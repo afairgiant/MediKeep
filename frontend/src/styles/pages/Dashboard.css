@@ -110,6 +110,51 @@
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
+/* Secondary Items Section */
+.secondary-items {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  grid-column: 1 / -1;
+  margin-bottom: 1rem;
+}
+
+.secondary-items h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Small Dashboard Card */
+.dashboard-card-small {
+  padding: 1rem;
+  max-width: 250px;
+}
+
+.dashboard-card-small h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.dashboard-card-small p {
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.dashboard-card-small .card-link {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
 .recent-activity {
   background: white;
   padding: 1.5rem;
@@ -173,9 +218,16 @@
   .welcome-section h2 {
     font-size: 1.5rem;
   }
-  
-  .dashboard-grid {
+    .dashboard-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+  
+  .secondary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-card-small {
+    max-width: none;
   }
 }

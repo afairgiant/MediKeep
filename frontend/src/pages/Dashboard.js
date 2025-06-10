@@ -79,13 +79,22 @@ const Dashboard = () => {
       title: "Treatments",
       description: "Review your treatments",
       link: "/treatments"
-    },
-    {
+    },    {
       title: "Visit History",
       description: "Review your visits",
       link: "/visits"
     }
   ];
+
+  // Smaller secondary items for additional features
+  const secondaryItems = [
+    {
+      title: "👨‍⚕️ Doctors",
+      description: "View practitioner information",
+      link: "/practitioners"
+    }
+  ];
+
   if (loading) {
     return (
       <div className="loading">
@@ -110,9 +119,7 @@ const Dashboard = () => {
           <h2>Welcome to your Medical Records System</h2>
           <p>Manage your personal health information securely and efficiently.</p>
           {user && <p>Hello, {user.name}!</p>}
-        </div>
-
-        <div className="dashboard-grid">
+        </div>        <div className="dashboard-grid">
           {dashboardItems.map((item, index) => (
             <DashboardCard
               key={index}
@@ -121,6 +128,22 @@ const Dashboard = () => {
               link={item.link}
             />
           ))}
+
+          {/* Secondary/smaller items section */}
+          <div className="secondary-items">
+            <h3>Additional Resources</h3>
+            <div className="secondary-grid">
+              {secondaryItems.map((item, index) => (
+                <DashboardCard
+                  key={`secondary-${index}`}
+                  title={item.title}
+                  description={item.description}
+                  link={item.link}
+                  size="small"
+                />
+              ))}
+            </div>
+          </div>
 
           <div className="recent-activity">
             <h3>Recent Activity</h3>

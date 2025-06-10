@@ -12,11 +12,11 @@ Features:
 - HIPAA-compliant logging format
 """
 
-import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional
 from app.core.logging_config import get_logger, log_medical_access
 from app.core.security_audit import security_audit
+from app.core.config import settings
 
 
 class MedicalDataAuditor:
@@ -63,6 +63,10 @@ class MedicalDataAuditor:
             new_values: New values for update operations
             username: Username of the person accessing data
         """
+        # Skip logging if medical audit logging is disabled
+        if not settings.ENABLE_MEDICAL_AUDIT_LOGGING:
+            return
+
         audit_data = {
             "timestamp": datetime.utcnow().isoformat(),
             "user_id": user_id,

@@ -168,6 +168,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/practitioners" 
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Logging Test Page - Development/Testing only */}
           <Route 

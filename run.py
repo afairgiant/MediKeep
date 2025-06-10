@@ -10,7 +10,7 @@ import os
 import sys
 
 # Add the app directory to Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "app"))
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -19,5 +19,5 @@ if __name__ == "__main__":
         port=8000,
         reload=True,
         reload_dirs=["app"],
-        log_level="info"
+        log_level="DEBUG",
     )

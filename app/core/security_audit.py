@@ -7,8 +7,8 @@ authorization failures, suspicious activities, and compliance-related actions.
 """
 
 import time
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Any, List
+from datetime import datetime
+from typing import Dict, Optional, Any
 from collections import defaultdict
 from threading import Lock
 import hashlib
@@ -31,16 +31,18 @@ class SecurityAuditManager:
 
     def __init__(self):
         self.security_logger = get_logger(__name__, "security")
-        self.audit_logger = get_logger(__name__, "audit")
-
-        # Thread-safe counters for rate limiting detection
+        self.audit_logger = get_logger(__name__, "audit")        # Thread-safe counters for rate limiting detection
         self._failed_logins = defaultdict(list)  # IP -> [timestamps]
         self._api_requests = defaultdict(list)  # IP -> [timestamps]
-        self._lock = Lock()  # Configuration - more lenient in development mode
+        self._lock = Lock()
+
+        # Configuration - respect development security settings
         self.max_failed_logins = 5
         self.failed_login_window = 300  # 5 minutes
         # Higher rate limit in development mode to accommodate frontend batching
         self.max_requests_per_minute = 200 if settings.DEBUG else 60
+        
+        # Disable suspicious pattern detection in development if configured
         self.suspicious_patterns = [
             "union",
             "select",
@@ -50,8 +52,7 @@ class SecurityAuditManager:
             "update",
             "1=1",
             "1=0",
-            "or 1",
-            "and 1",
+            "or 1",            "and 1",
             "--",
             "/*",
             "*/",
@@ -59,7 +60,7 @@ class SecurityAuditManager:
             "javascript:",
             "onerror=",
             "onload=",
-        ]
+        ] if settings.ENABLE_SUSPICIOUS_INPUT_DETECTION else []
 
     def log_authentication_attempt(
         self,
@@ -71,6 +72,10 @@ class SecurityAuditManager:
         user_id: Optional[int] = None,
     ) -> None:
         """Log authentication attempts with rate limiting detection."""
+
+        # Skip logging if security audit logging is disabled
+        if not settings.ENABLE_SECURITY_AUDIT_LOGGING:
+            return
 
         event_data = {
             "event": "authentication_attempt",
@@ -86,8 +91,8 @@ class SecurityAuditManager:
         if not success:
             event_data["failure_reason"] = failure_reason
 
-            # Track failed login attempts for rate limiting (skip in debug mode)
-            if not settings.DEBUG:
+            # Track failed login attempts for rate limiting (skip if disabled)
+            if settings.ENABLE_FAILED_LOGIN_TRACKING and not settings.DEBUG:
                 with self._lock:
                     now = time.time()
                     self._failed_logins[ip_address].append(now)
@@ -228,8 +233,8 @@ class SecurityAuditManager:
     def track_api_request(self, ip_address: str) -> bool:
         """Track API requests for rate limiting. Returns True if rate limit exceeded."""
 
-        # Skip rate limiting in debug/development mode
-        if settings.DEBUG:
+        # Skip rate limiting if disabled in configuration or debug mode
+        if not settings.ENABLE_RATE_LIMITING or settings.DEBUG:
             return False
 
         with self._lock:
