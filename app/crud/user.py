@@ -1,10 +1,10 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-import hashlib
 
 from app.crud.base import CRUDBase
 from app.models.models import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.core.security import verify_password, get_password_hash
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -72,9 +72,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 role="user"
             )
             new_user = user_crud.create(db, obj_in=user_data)
-        """
-        # Hash the password before storing it
-        hashed_password = self._hash_password(obj_in.password)
+        """  # Hash the password before storing it
+        hashed_password = get_password_hash(obj_in.password)
 
         # Create the User object with hashed password
         # We manually create the object instead of using the base create method
@@ -124,10 +123,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         # If user doesn't exist, return None
         if not user:
-            return None
-
-        # If user exists, verify the password
-        if not self._verify_password(password, str(user.password_hash)):
+            return None  # If user exists, verify the password using bcrypt
+        if not verify_password(password, str(user.password_hash)):
             return None
 
         # If both username and password are correct, return the user
@@ -154,10 +151,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user = self.get(db, id=user_id)
 
         if not user:
-            return None
-
-        # Hash the new password
-        hashed_password = self._hash_password(new_password)
+            return None  # Hash the new password
+        hashed_password = get_password_hash(new_password)
 
         # Update the password hash using setattr
         setattr(user, "password_hash", hashed_password)
@@ -220,39 +215,10 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         # If updating an existing user, exclude their current record
         if exclude_user_id:
-            query = query.filter(User.id != exclude_user_id)
-
-        # Check if any matching records exist
+            query = query.filter(
+                User.id != exclude_user_id
+            )  # Check if any matching records exist
         return query.first() is not None
-
-    def _hash_password(self, password: str) -> str:
-        """
-        Hash a plain text password.
-
-        Args:
-            password: Plain text password
-
-        Returns:
-            Hashed password string
-
-        Note: This is a simple implementation. In production, use bcrypt or similar.
-        """
-        # Simple SHA-256 hashing (use bcrypt in production for better security)
-        return hashlib.sha256(password.encode()).hexdigest()
-
-    def _verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """
-        Verify a plain text password against a hashed password.
-
-        Args:
-            plain_password: Plain text password to verify
-            hashed_password: Stored hashed password
-
-        Returns:
-            True if passwords match, False otherwise
-        """
-        # Hash the plain password and compare with the stored hash
-        return self._hash_password(plain_password) == hashed_password
 
 
 # Create an instance of CRUDUser to use throughout the application

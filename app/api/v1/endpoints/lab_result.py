@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -41,7 +41,7 @@ def get_lab_result(lab_result_id: int, db: Session = Depends(get_db)):
     return db_lab_result
 
 
-@router.post("/", response_model=LabResultResponse)
+@router.post("/", response_model=LabResultResponse, status_code=status.HTTP_201_CREATED)
 def create_lab_result(lab_result_in: LabResultCreate, db: Session = Depends(get_db)):
     """
     Create a new lab result

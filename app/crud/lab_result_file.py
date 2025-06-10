@@ -1,6 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+from datetime import datetime
 
 from app.crud.base import CRUDBase
 from app.models.models import LabResultFile
@@ -11,6 +12,22 @@ class CRUDLabResultFile(
     CRUDBase[LabResultFile, LabResultFileCreate, LabResultFileUpdate]
 ):
     """CRUD operations for LabResultFile"""
+
+    def create(self, db: Session, *, obj_in: LabResultFileCreate) -> LabResultFile:
+        """Create a new lab result file with proper datetime handling"""
+        # Convert to dict and handle datetime fields manually
+        obj_data = obj_in.dict()
+
+        # Ensure uploaded_at is set to current time if not provided
+        if not obj_data.get("uploaded_at"):
+            obj_data["uploaded_at"] = datetime.utcnow()
+
+        # Create the database object directly with datetime objects (no string conversion)
+        db_obj = LabResultFile(**obj_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
 
     def get_by_lab_result(
         self, db: Session, *, lab_result_id: int

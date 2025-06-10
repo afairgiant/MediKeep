@@ -1,14 +1,79 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+from datetime import datetime
 
 from app.crud.base import CRUDBase
 from app.models.models import LabResult, LabResultFile
 from app.schemas.lab_result import LabResultCreate, LabResultUpdate
+from app.core.datetime_utils import LAB_RESULT_CONVERTER
 
 
 class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
     """CRUD operations for LabResult"""
+
+    def create(self, db: Session, *, obj_in: LabResultCreate) -> LabResult:
+        """
+        Create a new lab result with proper datetime conversion.
+
+        Args:
+            db: Database session
+            obj_in: Lab result data to create
+
+        Returns:
+            Created lab result object
+        """
+        # Convert the Pydantic model to dict and handle datetime conversion
+        obj_data = LAB_RESULT_CONVERTER.convert_model_data(obj_in)
+
+        # Set created_at and updated_at timestamps
+        now = datetime.utcnow()
+        obj_data["created_at"] = now
+        obj_data["updated_at"] = now
+
+        # Create the database object
+        db_obj = self.model(**obj_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def update(
+        self, db: Session, *, db_obj: LabResult, obj_in: LabResultUpdate
+    ) -> LabResult:
+        """
+        Update a lab result with proper datetime conversion.
+
+        Args:
+            db: Database session
+            db_obj: Existing lab result object
+            obj_in: Updated lab result data
+
+        Returns:
+            Updated lab result object
+        """  # Convert the update data and handle datetime conversion
+        if hasattr(obj_in, "dict"):
+            update_data = obj_in.dict(exclude_unset=True)
+        else:
+            update_data = dict(obj_in) if obj_in else {}
+
+        if update_data:
+            # Convert datetime fields
+            update_data = LAB_RESULT_CONVERTER.convert(update_data)
+
+            # Set updated_at timestamp
+            update_data["updated_at"] = datetime.utcnow()
+
+            # Apply updates to the database object
+            for field, value in update_data.items():
+                if hasattr(db_obj, field):
+                    setattr(db_obj, field, value)
+
+            db.add(db_obj)
+            db.commit()
+            db.refresh(db_obj)
+
+        return db_obj
 
     def get_by_patient(
         self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
@@ -34,25 +99,29 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
             .all()
         )
 
-    def get_by_code(
-        self, db: Session, *, code: str, skip: int = 0, limit: int = 100
+    def get_by_test_code(
+        self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Get all lab results by test code (e.g., LOINC code)"""
         return (
             db.query(self.model)
-            .filter(LabResult.code == code)
+            .filter(LabResult.test_code == test_code)
             .offset(skip)
             .limit(limit)
             .all()
         )
 
-    def get_by_patient_and_code(
-        self, db: Session, *, patient_id: int, code: str
+    def get_by_patient_and_test_code(
+        self, db: Session, *, patient_id: int, test_code: str
     ) -> List[LabResult]:
         """Get lab results for a specific patient and test code"""
         return (
             db.query(self.model)
-            .filter(and_(LabResult.patient_id == patient_id, LabResult.code == code))
+            .filter(
+                and_(
+                    LabResult.patient_id == patient_id, LabResult.test_code == test_code
+                )
+            )
             .all()
         )
 
@@ -60,13 +129,13 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         """Get lab result with associated files"""
         return db.query(self.model).filter(LabResult.id == lab_result_id).first()
 
-    def search_by_code_pattern(
-        self, db: Session, *, code_pattern: str, skip: int = 0, limit: int = 100
+    def search_by_test_code_pattern(
+        self, db: Session, *, test_code_pattern: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
-        """Search lab results by code pattern (partial match)"""
+        """Search lab results by test code pattern (partial match)"""
         return (
             db.query(self.model)
-            .filter(LabResult.code.ilike(f"%{code_pattern}%"))
+            .filter(LabResult.test_code.ilike(f"%{test_code_pattern}%"))
             .offset(skip)
             .limit(limit)
             .all()

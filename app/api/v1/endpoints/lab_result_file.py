@@ -134,6 +134,8 @@ async def upload_file(
         )
 
     # Create file entry in database
+    from datetime import datetime
+
     file_create = LabResultFileCreate(
         lab_result_id=lab_result_id,
         file_name=file.filename,
@@ -141,6 +143,7 @@ async def upload_file(
         file_type=file.content_type,
         file_size=len(file_content),
         description=description,
+        uploaded_at=datetime.utcnow(),
     )
 
     file_obj = lab_result_file.create(db=db, obj_in=file_create)

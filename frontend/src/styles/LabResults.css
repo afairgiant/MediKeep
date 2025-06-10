@@ -235,13 +235,42 @@
   align-items: center;
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
 .card-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
 }
 
-.interpretation {
+.file-indicator {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.file-indicator:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.interpretation,
+.status-badge {
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 12px;
@@ -250,6 +279,28 @@
   letter-spacing: 0.5px;
 }
 
+/* Status-based styles */
+.status-completed {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.status-in-progress {
+  background-color: #f39c12;
+  color: white;
+}
+
+.status-ordered {
+  background-color: #3498db;
+  color: white;
+}
+
+.status-cancelled {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* Legacy interpretation styles for compatibility */
 .interpretation-normal {
   background-color: #2ecc71;
   color: white;
@@ -333,10 +384,24 @@
   font-size: 14px;
 }
 
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
 .detail-item strong {
   color: #2c3e50;
   display: block;
   margin-bottom: 4px;
+}
+
+.notes-content {
+  background-color: white;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-top: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Files Section */
@@ -430,6 +495,20 @@
 .file-actions {
   display: flex;
   gap: 8px;
+}
+
+/* File indicator styles */
+.file-indicator {
+  color: #2ecc71;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.no-files {
+  color: #95a5a6;
+  font-style: italic;
 }
 
 /* Animations */

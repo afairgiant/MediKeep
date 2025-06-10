@@ -5,41 +5,34 @@ import '../styles/LabResults.css';
 
 const LabResults = () => {
   const [labResults, setLabResults] = useState([]);
+  const [filesCounts, setFilesCounts] = useState({}); // Track file counts per lab result
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [error, setError] = useState(null);  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingLabResult, setEditingLabResult] = useState(null);
   const [selectedLabResult, setSelectedLabResult] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
   const [currentPatient, setCurrentPatient] = useState(null);
-
-  // Form state for creating/editing lab results
+  // Form state for creating/editing lab results (simplified schema)
   const [formData, setFormData] = useState({
-    code: '',
-    display: '',
-    value_quantity: '',
-    value_unit: '',
-    value_string: '',
-    reference_range: '',
-    interpretation: '',
-    status: 'final',
-    effective_date: '',
-    category: ''
-  });
-  const navigate = useNavigate();
-  const interpretationOptions = [
-    'normal', 'high', 'low', 'critical high', 'critical low',
-    'abnormal', 'positive', 'negative', 'inconclusive'
-  ];
-
+    test_name: '',
+    test_code: '',
+    test_category: '',
+    status: 'ordered',
+    ordered_date: '',
+    completed_date: '',
+    notes: ''
+  });  const navigate = useNavigate();
+  
   const statusOptions = [
-    'registered', 'partial', 'preliminary', 'final', 
-    'amended', 'corrected', 'cancelled', 'entered-in-error'
+    'ordered', 'in-progress', 'completed', 'cancelled'
   ];
 
   const categoryOptions = [
-    'laboratory', 'imaging', 'pathology', 'microbiology',
-    'chemistry', 'hematology', 'immunology', 'genetics'
+    'blood work', 'imaging', 'pathology', 'microbiology',
+    'chemistry', 'hematology', 'immunology', 'genetics',
+    'cardiology', 'pulmonology', 'other'
   ];
 
   useEffect(() => {
@@ -55,21 +48,25 @@ const LabResults = () => {
       console.error('Error fetching current patient:', error);
     }
   };
-
   const fetchLabResults = async () => {
     try {
       setLoading(true);
       setError(null);
       
+      let results;
       // If we have a current patient, fetch their lab results
       if (currentPatient?.id) {
-        const results = await apiService.getPatientLabResults(currentPatient.id);
-        setLabResults(results);
+        results = await apiService.getPatientLabResults(currentPatient.id);
       } else {
         // Otherwise fetch all lab results (for admin users)
-        const results = await apiService.getLabResults();
-        setLabResults(results);
+        results = await apiService.getLabResults();
       }
+      
+      setLabResults(results);
+      
+      // Load file counts for each lab result
+      await loadFilesCounts(results);
+      
     } catch (error) {
       console.error('Error fetching lab results:', error);
       setError(error.message);
@@ -90,29 +87,25 @@ const LabResults = () => {
     e.preventDefault();
     try {
       setError(null);
-      
-      // Prepare data for submission
+        // Prepare data for submission (simplified schema)
       const labResultData = {
         ...formData,
         patient_id: currentPatient?.id,
-        value_quantity: formData.value_quantity ? parseFloat(formData.value_quantity) : null,
-        effective_date: formData.effective_date || null,
+        ordered_date: formData.ordered_date || new Date().toISOString(),
+        completed_date: formData.completed_date || null,
       };
 
       await apiService.createLabResult(labResultData);
       
       // Reset form and refresh list
       setFormData({
-        code: '',
-        display: '',
-        value_quantity: '',
-        value_unit: '',
-        value_string: '',
-        reference_range: '',
-        interpretation: '',
-        status: 'final',
-        effective_date: '',
-        category: ''
+        test_name: '',
+        test_code: '',
+        test_category: '',
+        status: 'ordered',
+        ordered_date: '',
+        completed_date: '',
+        notes: ''
       });
       setShowCreateForm(false);
       fetchLabResults();
@@ -134,6 +127,55 @@ const LabResults = () => {
     }
   };
 
+  const handleEditLabResult = (labResult) => {
+    setEditingLabResult(labResult);
+    setFormData({
+      test_name: labResult.test_name || '',
+      test_code: labResult.test_code || '',
+      test_category: labResult.test_category || '',
+      status: labResult.status || 'ordered',
+      ordered_date: labResult.ordered_date ? labResult.ordered_date.slice(0, 16) : '',
+      completed_date: labResult.completed_date ? labResult.completed_date.slice(0, 16) : '',
+      notes: labResult.notes || ''
+    });
+    setShowEditForm(true);
+  };
+
+  const handleUpdateLabResult = async (e) => {
+    e.preventDefault();
+    if (!editingLabResult) return;
+
+    try {
+      setError(null);
+      
+      // Prepare data for submission
+      const labResultData = {
+        ...formData,
+        ordered_date: formData.ordered_date || new Date().toISOString(),
+        completed_date: formData.completed_date || null,
+      };
+
+      await apiService.updateLabResult(editingLabResult.id, labResultData);
+      
+      // Reset form and refresh list
+      setFormData({
+        test_name: '',
+        test_code: '',
+        test_category: '',
+        status: 'ordered',
+        ordered_date: '',
+        completed_date: '',
+        notes: ''
+      });
+      setShowEditForm(false);
+      setEditingLabResult(null);
+      fetchLabResults();
+    } catch (error) {
+      console.error('Error updating lab result:', error);
+      setError(error.message);
+    }
+  };
+
   const handleViewDetails = async (labResult) => {
     try {
       setSelectedLabResult(labResult);
@@ -145,7 +187,6 @@ const LabResults = () => {
       setError(error.message);
     }
   };
-
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!fileUpload.file || !selectedLabResult) return;
@@ -160,6 +201,12 @@ const LabResults = () => {
       // Refresh files list
       const files = await apiService.getLabResultFiles(selectedLabResult.id);
       setSelectedFiles(files);
+      
+      // Update the file count for this lab result
+      setFilesCounts(prev => ({
+        ...prev,
+        [selectedLabResult.id]: files.length
+      }));
       
       // Reset file upload form
       setFileUpload({ file: null, description: '' });
@@ -198,37 +245,55 @@ const LabResults = () => {
         setError(error.message);
       }
     }
-  };
-
-  const formatDate = (dateString) => {
+  };  const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
 
-  const formatValue = (labResult) => {
-    if (labResult.value_quantity !== null && labResult.value_unit) {
-      return `${labResult.value_quantity} ${labResult.value_unit}`;
-    } else if (labResult.value_string) {
-      return labResult.value_string;
-    }
-    return 'N/A';
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString();
   };
 
-  const getInterpretationClass = (interpretation) => {
-    if (!interpretation) return '';
-    switch (interpretation.toLowerCase()) {
-      case 'high':
-      case 'critical high':
-        return 'interpretation-high';
-      case 'low':
-      case 'critical low':
-        return 'interpretation-low';
-      case 'normal':
-        return 'interpretation-normal';
-      case 'abnormal':
-        return 'interpretation-abnormal';
+  const getStatusClass = (status) => {
+    if (!status) return '';
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'status-completed';
+      case 'in-progress':
+        return 'status-in-progress';
+      case 'ordered':
+        return 'status-ordered';
+      case 'cancelled':
+        return 'status-cancelled';
       default:
         return '';
+    }  };
+
+  // Load file counts for all lab results
+  const loadFilesCounts = async (results) => {
+    try {
+      console.log('Loading file counts for', results.length, 'lab results');
+      const counts = {};
+      // Load file counts for each lab result
+      await Promise.all(
+        results.map(async (result) => {
+          try {
+            const files = await apiService.getLabResultFiles(result.id);
+            counts[result.id] = files.length;
+            console.log(`Lab result ${result.id} has ${files.length} files`);
+          } catch (error) {
+            // If we can't get files for this lab result, set count to 0
+            console.log(`Error loading files for lab result ${result.id}:`, error);
+            counts[result.id] = 0;
+          }
+        })
+      );
+      console.log('Final file counts:', counts);
+      setFilesCounts(counts);
+    } catch (error) {
+      console.error('Error loading file counts:', error);
+      // Don't fail the whole page if file counts fail
     }
   };
 
@@ -276,86 +341,40 @@ const LabResults = () => {
               >
                 ×
               </button>
-            </div>
-            <form onSubmit={handleCreateLabResult} className="lab-result-form">
+            </div>            <form onSubmit={handleCreateLabResult} className="lab-result-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Test Code *</label>
+                  <label>Test Name *</label>
                   <input
                     type="text"
-                    name="code"
-                    value={formData.code}
+                    name="test_name"
+                    value={formData.test_name}
                     onChange={handleInputChange}
                     required
-                    placeholder="e.g., LOINC code"
+                    placeholder="e.g., Complete Blood Count"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Display Name</label>
+                  <label>Test Code</label>
                   <input
                     type="text"
-                    name="display"
-                    value={formData.display}
+                    name="test_code"
+                    value={formData.test_code}
                     onChange={handleInputChange}
-                    placeholder="e.g., Blood Glucose"
+                    placeholder="e.g., CBC, LOINC code"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Numeric Value</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="value_quantity"
-                    value={formData.value_quantity}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 95.5"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Unit</label>
-                  <input
-                    type="text"
-                    name="value_unit"
-                    value={formData.value_unit}
-                    onChange={handleInputChange}
-                    placeholder="e.g., mg/dL"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Text Value</label>
-                  <input
-                    type="text"
-                    name="value_string"
-                    value={formData.value_string}
-                    onChange={handleInputChange}
-                    placeholder="For non-numeric results"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Reference Range</label>
-                  <input
-                    type="text"
-                    name="reference_range"
-                    value={formData.reference_range}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 70-100 mg/dL"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Interpretation</label>
+                  <label>Test Category</label>
                   <select
-                    name="interpretation"
-                    value={formData.interpretation}
+                    name="test_category"
+                    value={formData.test_category}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select interpretation</option>
-                    {interpretationOptions.map(option => (
+                    <option value="">Select category</option>
+                    {categoryOptions.map(option => (
                       <option key={option} value={option}>
                         {option.charAt(0).toUpperCase() + option.slice(1)}
                       </option>
@@ -380,29 +399,34 @@ const LabResults = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Test Date</label>
+                  <label>Ordered Date</label>
                   <input
-                    type="date"
-                    name="effective_date"
-                    value={formData.effective_date}
+                    type="datetime-local"
+                    name="ordered_date"
+                    value={formData.ordered_date}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Category</label>
-                  <select
-                    name="category"
-                    value={formData.category}
+                  <label>Completed Date</label>
+                  <input
+                    type="datetime-local"
+                    name="completed_date"
+                    value={formData.completed_date}
                     onChange={handleInputChange}
-                  >
-                    <option value="">Select category</option>
-                    {categoryOptions.map(option => (
-                      <option key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </option>
-                    ))}
-                  </select>
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label>Notes</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    placeholder="Additional notes about the test"
+                    rows="3"
+                  />
                 </div>
               </div>
 
@@ -419,6 +443,131 @@ const LabResults = () => {
         </div>
       )}
 
+      {/* Edit Lab Result Form */}
+      {showEditForm && editingLabResult && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Edit Lab Result</h2>
+              <button 
+                className="close-btn"
+                onClick={() => {
+                  setShowEditForm(false);
+                  setEditingLabResult(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpdateLabResult} className="lab-result-form">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Test Name *</label>
+                  <input
+                    type="text"
+                    name="test_name"
+                    value={formData.test_name}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="e.g., Complete Blood Count"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Test Code</label>
+                  <input
+                    type="text"
+                    name="test_code"
+                    value={formData.test_code}
+                    onChange={handleInputChange}
+                    placeholder="e.g., CBC, LOINC code"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Test Category</label>
+                  <select
+                    name="test_category"
+                    value={formData.test_category}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select category</option>
+                    {categoryOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    {statusOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Ordered Date</label>
+                  <input
+                    type="datetime-local"
+                    name="ordered_date"
+                    value={formData.ordered_date}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Completed Date</label>
+                  <input
+                    type="datetime-local"
+                    name="completed_date"
+                    value={formData.completed_date}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label>Notes</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    placeholder="Additional notes about the test"
+                    rows="3"
+                  />
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingLabResult(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Update Lab Result
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Lab Results List */}
       <div className="lab-results-list">
         {labResults.length === 0 ? (
@@ -426,44 +575,55 @@ const LabResults = () => {
             <p>No lab results found.</p>
             <p>Click "Add New Lab Result" to get started.</p>
           </div>
-        ) : (
-          <div className="results-grid">
-            {labResults.map(result => (
-              <div key={result.id} className="lab-result-card">
+        ) : (          <div className="results-grid">            {labResults.map(result => {
+              console.log(`Rendering lab result ${result.id}, file count:`, filesCounts[result.id]);
+              return (              <div key={result.id} className="lab-result-card">
                 <div className="card-header">
-                  <h3>{result.display || result.code}</h3>
-                  <span className={`interpretation ${getInterpretationClass(result.interpretation)}`}>
-                    {result.interpretation || 'N/A'}
+                  <h3>{result.test_name}</h3>
+                  <span className={`status-badge ${getStatusClass(result.status)}`}>
+                    {result.status}
                   </span>
                 </div>
                 
                 <div className="card-body">
                   <div className="result-info">
                     <div className="info-row">
-                      <span className="label">Value:</span>
-                      <span className="value">{formatValue(result)}</span>
+                      <span className="label">Test Code:</span>
+                      <span className="value">{result.test_code || 'N/A'}</span>
                     </div>
                     <div className="info-row">
-                      <span className="label">Reference:</span>
-                      <span className="value">{result.reference_range || 'N/A'}</span>
+                      <span className="label">Category:</span>
+                      <span className="value">{result.test_category || 'N/A'}</span>
                     </div>
                     <div className="info-row">
-                      <span className="label">Date:</span>
-                      <span className="value">{formatDate(result.effective_date)}</span>
+                      <span className="label">Ordered:</span>
+                      <span className="value">{formatDateTime(result.ordered_date)}</span>
                     </div>
-                    <div className="info-row">
-                      <span className="label">Status:</span>
-                      <span className="value status">{result.status}</span>
-                    </div>
-                    {result.category && (
+                    {result.completed_date && (
                       <div className="info-row">
-                        <span className="label">Category:</span>
-                        <span className="value">{result.category}</span>
+                        <span className="label">Completed:</span>
+                        <span className="value">{formatDateTime(result.completed_date)}</span>
                       </div>
-                    )}
+                    )}                    <div className="info-row">
+                      <span className="label">Status:</span>
+                      <span className={`value status ${getStatusClass(result.status)}`}>
+                        {result.status}
+                      </span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Files:</span>
+                      <span className="value">
+                        {filesCounts[result.id] > 0 ? (
+                          <span className="file-indicator" title={`${filesCounts[result.id]} file(s) attached`}>
+                            📎 {filesCounts[result.id]} attached
+                          </span>
+                        ) : (
+                          <span className="no-files">No files attached</span>
+                        )}
+                      </span>
+                    </div>
                   </div>
-                </div>
-
+                </div>                
                 <div className="card-actions">
                   <button 
                     className="btn btn-secondary"
@@ -472,24 +632,30 @@ const LabResults = () => {
                     View Details
                   </button>
                   <button 
+                    className="btn btn-primary"
+                    onClick={() => handleEditLabResult(result)}
+                  >
+                    Edit
+                  </button>
+                  <button 
                     className="btn btn-danger"
                     onClick={() => handleDeleteLabResult(result.id)}
                   >
                     Delete
-                  </button>
-                </div>
+                  </button>                
+                  </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Lab Result Details Modal */}
-      {selectedLabResult && (
-        <div className="modal-overlay">
+      {selectedLabResult && (        <div className="modal-overlay">
           <div className="modal-content large">
             <div className="modal-header">
-              <h2>{selectedLabResult.display || selectedLabResult.code}</h2>
+              <h2>{selectedLabResult.test_name}</h2>
               <button 
                 className="close-btn"
                 onClick={() => setSelectedLabResult(null)}
@@ -503,35 +669,32 @@ const LabResults = () => {
                 <h3>Lab Result Details</h3>
                 <div className="details-grid">
                   <div className="detail-item">
-                    <strong>Code:</strong> {selectedLabResult.code}
+                    <strong>Test Name:</strong> {selectedLabResult.test_name}
                   </div>
                   <div className="detail-item">
-                    <strong>Display:</strong> {selectedLabResult.display || 'N/A'}
+                    <strong>Test Code:</strong> {selectedLabResult.test_code || 'N/A'}
                   </div>
                   <div className="detail-item">
-                    <strong>Value:</strong> {formatValue(selectedLabResult)}
+                    <strong>Category:</strong> {selectedLabResult.test_category || 'N/A'}
                   </div>
                   <div className="detail-item">
-                    <strong>Reference Range:</strong> {selectedLabResult.reference_range || 'N/A'}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Interpretation:</strong> 
-                    <span className={`interpretation ${getInterpretationClass(selectedLabResult.interpretation)}`}>
-                      {selectedLabResult.interpretation || 'N/A'}
+                    <strong>Status:</strong> 
+                    <span className={`status-badge ${getStatusClass(selectedLabResult.status)}`}>
+                      {selectedLabResult.status}
                     </span>
                   </div>
                   <div className="detail-item">
-                    <strong>Status:</strong> {selectedLabResult.status}
+                    <strong>Ordered Date:</strong> {formatDateTime(selectedLabResult.ordered_date)}
                   </div>
-                  <div className="detail-item">
-                    <strong>Test Date:</strong> {formatDate(selectedLabResult.effective_date)}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Issued Date:</strong> {formatDate(selectedLabResult.issued_date)}
-                  </div>
-                  {selectedLabResult.category && (
+                  {selectedLabResult.completed_date && (
                     <div className="detail-item">
-                      <strong>Category:</strong> {selectedLabResult.category}
+                      <strong>Completed Date:</strong> {formatDateTime(selectedLabResult.completed_date)}
+                    </div>
+                  )}
+                  {selectedLabResult.notes && (
+                    <div className="detail-item full-width">
+                      <strong>Notes:</strong> 
+                      <div className="notes-content">{selectedLabResult.notes}</div>
                     </div>
                   )}
                 </div>

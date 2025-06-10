@@ -112,20 +112,24 @@ class LabResult(Base):
     practitioner_id = Column(
         Integer, ForeignKey("practitioners.id"), nullable=True
     )  # Ordering practitioner
-    
+
     # Basic test information
     test_name = Column(String, nullable=False)  # Name/description of the test
-    test_code = Column(String, nullable=True)   # Optional code (LOINC, CPT, etc.)
-    test_category = Column(String, nullable=True)  # e.g., 'blood work', 'imaging', 'pathology'
-    
+    test_code = Column(String, nullable=True)  # Optional code (LOINC, CPT, etc.)
+    test_category = Column(
+        String, nullable=True
+    )  # e.g., 'blood work', 'imaging', 'pathology'
+
     # Status and dates
-    status = Column(String, nullable=False, default='ordered')  # 'ordered', 'completed', 'cancelled'
+    status = Column(
+        String, nullable=False, default="ordered"
+    )  # 'ordered', 'completed', 'cancelled'
     ordered_date = Column(DateTime, nullable=False)  # When the test was ordered
     completed_date = Column(DateTime, nullable=True)  # When results were received
-    
+
     # Optional notes
     notes = Column(Text, nullable=True)  # Any additional notes about the test
-    
+
     # Audit fields
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
@@ -135,7 +139,9 @@ class LabResult(Base):
     practitioner = relationship("Practitioner", back_populates="lab_results")
 
     # One-to-Many relationship with LabResultFile (actual test results: PDFs, images, etc.)
-    files = relationship("LabResultFile", back_populates="lab_result", cascade="all, delete-orphan")
+    files = relationship(
+        "LabResultFile", back_populates="lab_result", cascade="all, delete-orphan"
+    )
 
 
 class LabResultFile(Base):
@@ -146,6 +152,8 @@ class LabResultFile(Base):
     file_name = Column(String, nullable=False)  # Name of the file
     file_path = Column(String, nullable=False)  # Path to the file on the server
     file_type = Column(String, nullable=False)  # e.g., 'pdf', 'image/png', etc.
+    file_size = Column(Integer, nullable=True)  # Size of the file in bytes
+    description = Column(String, nullable=True)  # Optional description of the file
     uploaded_at = Column(
         DateTime, nullable=False
     )  # Timestamp of when the file was uploaded
