@@ -14,6 +14,7 @@ from threading import Lock
 import hashlib
 
 from app.core.logging_config import get_logger, log_security_event
+from app.core.config import settings
 
 
 class SecurityAuditManager:
@@ -83,32 +84,32 @@ class SecurityAuditManager:
 
         if user_id:
             event_data["user_id"] = user_id
-
         if not success:
             event_data["failure_reason"] = failure_reason
 
-            # Track failed login attempts for rate limiting
-            with self._lock:
-                now = time.time()
-                self._failed_logins[ip_address].append(now)
+            # Track failed login attempts for rate limiting (skip in debug mode)
+            if not settings.DEBUG:
+                with self._lock:
+                    now = time.time()
+                    self._failed_logins[ip_address].append(now)
 
-                # Clean old entries
-                cutoff = now - self.failed_login_window
-                self._failed_logins[ip_address] = [
-                    ts for ts in self._failed_logins[ip_address] if ts > cutoff
-                ]
+                    # Clean old entries
+                    cutoff = now - self.failed_login_window
+                    self._failed_logins[ip_address] = [
+                        ts for ts in self._failed_logins[ip_address] if ts > cutoff
+                    ]
 
-                # Check for rate limiting
-                if len(self._failed_logins[ip_address]) >= self.max_failed_logins:
-                    self.log_security_threat(
-                        "rate_limit_exceeded",
-                        ip_address=ip_address,
-                        details={
-                            "failed_attempts": len(self._failed_logins[ip_address]),
-                            "time_window_seconds": self.failed_login_window,
-                            "username": username,
-                        },
-                    )
+                    # Check for rate limiting
+                    if len(self._failed_logins[ip_address]) >= self.max_failed_logins:
+                        self.log_security_threat(
+                            "rate_limit_exceeded",
+                            ip_address=ip_address,
+                            details={
+                                "failed_attempts": len(self._failed_logins[ip_address]),
+                                "time_window_seconds": self.failed_login_window,
+                                "username": username,
+                            },
+                        )
 
         log_security_event(self.security_logger, **event_data)
 
@@ -227,6 +228,10 @@ class SecurityAuditManager:
 
     def track_api_request(self, ip_address: str) -> bool:
         """Track API requests for rate limiting. Returns True if rate limit exceeded."""
+
+        # Skip rate limiting in debug/development mode
+        if settings.DEBUG:
+            return False
 
         with self._lock:
             now = time.time()

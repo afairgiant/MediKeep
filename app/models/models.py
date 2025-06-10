@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -112,16 +112,30 @@ class LabResult(Base):
     practitioner_id = Column(
         Integer, ForeignKey("practitioners.id"), nullable=True
     )  # Ordering practitioner
-    code = Column(
-        String, nullable=False
-    )  # Code for the lab test (e.g., LOINC code or test name)
+    
+    # Basic test information
+    test_name = Column(String, nullable=False)  # Name/description of the test
+    test_code = Column(String, nullable=True)   # Optional code (LOINC, CPT, etc.)
+    test_category = Column(String, nullable=True)  # e.g., 'blood work', 'imaging', 'pathology'
+    
+    # Status and dates
+    status = Column(String, nullable=False, default='ordered')  # 'ordered', 'completed', 'cancelled'
+    ordered_date = Column(DateTime, nullable=False)  # When the test was ordered
+    completed_date = Column(DateTime, nullable=True)  # When results were received
+    
+    # Optional notes
+    notes = Column(Text, nullable=True)  # Any additional notes about the test
+    
+    # Audit fields
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
 
     # Table Relationships
     patient = relationship("Patient", back_populates="lab_results")
     practitioner = relationship("Practitioner", back_populates="lab_results")
 
-    # One-to-Many relationship with LabResultFile (attachments like PDFs, images)
-    files = relationship("LabResultFile", back_populates="lab_result")
+    # One-to-Many relationship with LabResultFile (actual test results: PDFs, images, etc.)
+    files = relationship("LabResultFile", back_populates="lab_result", cascade="all, delete-orphan")
 
 
 class LabResultFile(Base):

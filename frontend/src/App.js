@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import PatientInfo from './pages/Patient-Info';
 import Medication from './pages/Medication';
+import LabResults from './pages/LabResults';
 import PlaceholderPage from './pages/PlaceholderPage';
 import LoggingTest from './components/LoggingTest';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -108,7 +109,7 @@ function App() {
             path="/lab-results" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <LabResults />
               </ProtectedRoute>
             } 
           />

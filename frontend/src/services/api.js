@@ -128,7 +128,6 @@ class ApiService {
       return [];
     }
   }
-
   // Get lab results
   async getLabResults() {
     const response = await fetch(`${this.baseURL}/api/v1/lab-results`, {
@@ -137,6 +136,166 @@ class ApiService {
 
     if (!response.ok) {
       throw new Error('Failed to fetch lab results');
+    }
+
+    return response.json();
+  }
+
+  // Get lab results for a specific patient
+  async getPatientLabResults(patientId) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-results/patient/${patientId}`, {
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch patient lab results');
+    }
+
+    return response.json();
+  }
+
+  // Get a specific lab result by ID
+  async getLabResult(labResultId) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-results/${labResultId}`, {
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch lab result');
+    }
+
+    return response.json();
+  }
+
+  // Create a new lab result
+  async createLabResult(labResultData) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-results`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(labResultData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to create lab result');
+    }
+
+    return response.json();
+  }
+
+  // Update a lab result
+  async updateLabResult(labResultId, labResultData) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-results/${labResultId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(labResultData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to update lab result');
+    }
+
+    return response.json();
+  }
+
+  // Delete a lab result
+  async deleteLabResult(labResultId) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-results/${labResultId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to delete lab result');
+    }
+
+    return response.json();
+  }
+
+  // Get files for a specific lab result
+  async getLabResultFiles(labResultId) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-result-files/lab-result/${labResultId}`, {
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch lab result files');
+    }
+
+    return response.json();
+  }
+
+  // Upload a file for a lab result
+  async uploadLabResultFile(labResultId, file, description = '') {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (description) {
+      formData.append('description', description);
+    }
+
+    const response = await fetch(`${this.baseURL}/api/v1/lab-result-files/upload/${labResultId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        // Don't set Content-Type header for FormData, let browser set it with boundary
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to upload file');
+    }
+
+    return response.json();
+  }
+
+  // Download a lab result file
+  async downloadLabResultFile(fileId) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-result-files/${fileId}/download`, {
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to download file');
+    }
+
+    return response.blob();
+  }
+
+  // Delete a lab result file
+  async deleteLabResultFile(fileId) {
+    const response = await fetch(`${this.baseURL}/api/v1/lab-result-files/${fileId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete file');
     }
 
     return response.json();
