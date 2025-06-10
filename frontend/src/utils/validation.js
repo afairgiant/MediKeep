@@ -8,8 +8,7 @@ import { isValidEmail, isValidPhone } from './helpers';
 /**
  * Common validation schemas
  */
-export const validationSchemas = {
-  // Patient Information Validation
+export const validationSchemas = {  // Patient Information Validation
   patientInfo: (values) => {
     const errors = {};
     
@@ -31,12 +30,43 @@ export const validationSchemas = {
       }
     }
     
-    if (!values.gender) {
-      errors.gender = VALIDATION_RULES.REQUIRED;
+    // Gender is now optional
+    if (values.gender && !['M', 'F', 'OTHER', 'U'].includes(values.gender)) {
+      errors.gender = 'Please select a valid gender';
     }
     
-    if (!values.address?.trim()) {
-      errors.address = VALIDATION_RULES.REQUIRED;
+    // Address is now optional
+    if (values.address && values.address.trim().length < 5) {
+      errors.address = 'Address must be at least 5 characters long';
+    }
+    
+    // Blood type validation (optional)
+    if (values.bloodType && !['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(values.bloodType)) {
+      errors.bloodType = 'Please select a valid blood type';
+    }
+    
+    // Height validation (optional)
+    if (values.height) {
+      const height = parseInt(values.height);
+      if (isNaN(height) || height < 12 || height > 120) {
+        errors.height = 'Height must be between 12 and 120 inches';
+      }
+    }
+    
+    // Weight validation (optional)
+    if (values.weight) {
+      const weight = parseInt(values.weight);
+      if (isNaN(weight) || weight < 1 || weight > 1000) {
+        errors.weight = 'Weight must be between 1 and 1000 pounds';
+      }
+    }
+    
+    // Physician ID validation (optional)
+    if (values.physician_id) {
+      const physicianId = parseInt(values.physician_id);
+      if (isNaN(physicianId) || physicianId <= 0) {
+        errors.physician_id = 'Physician ID must be a positive number';
+      }
     }
     
     if (values.email && !isValidEmail(values.email)) {

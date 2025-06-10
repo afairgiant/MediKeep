@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import '../../styles/pages/PatientInfo.css';
 
-const PatientInfo = () => {  const [patientData, setPatientData] = useState(null);
+const PatientInfo = () => {
+  const [patientData, setPatientData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [patientExists, setPatientExists] = useState(true);
+  const [practitioners, setPractitioners] = useState([]);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -19,23 +21,38 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
-
   useEffect(() => {
     fetchPatientData();
+    fetchPractitioners();
   }, []);
+  const fetchPractitioners = async () => {
+    try {
+      console.log('Fetching practitioners...');
+      const practitionersData = await apiService.getPractitioners();
+      console.log('Practitioners data received:', practitionersData);
+      setPractitioners(practitionersData);
+    } catch (error) {
+      console.error('Error fetching practitioners:', error);
+      // Don't set error for practitioners fetch failure, just log it
+    }
+  };
   const fetchPatientData = async () => {
     try {
       setLoading(true);
       setError('');
       const data = await apiService.getCurrentPatient();
       setPatientData(data);
-      setPatientExists(true);
+      setPatientExists(true);      
       setFormData({
         first_name: data.first_name || '',
         last_name: data.last_name || '',
         birthDate: data.birthDate || '',
         gender: data.gender || '',
-        address: data.address || ''
+        address: data.address || '',
+        bloodType: data.bloodType || '',
+        height: data.height || '',
+        weight: data.weight || '',
+        physician_id: data.physician_id || ''
       });
     } catch (error) {
       console.error('Error fetching patient data:', error);
@@ -67,7 +84,6 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
     setError('');
     setSuccessMessage('');
   };
-
   const handleCancel = () => {
     setIsEditing(false);
     setIsCreating(false);
@@ -77,7 +93,11 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
         last_name: patientData.last_name || '',
         birthDate: patientData.birthDate || '',
         gender: patientData.gender || '',
-        address: patientData.address || ''
+        address: patientData.address || '',
+        bloodType: patientData.bloodType || '',
+        height: patientData.height || '',
+        weight: patientData.weight || '',
+        physician_id: patientData.physician_id || ''
       });
     } else {
       setFormData({
@@ -85,7 +105,11 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
         last_name: '',
         birthDate: '',
         gender: '',
-        address: ''
+        address: '',
+        bloodType: '',
+        height: '',
+        weight: '',
+        physician_id: ''
       });
     }
     setError('');
@@ -130,15 +154,22 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
       month: 'long',
       day: 'numeric'
     });
-  };
-
-  const getGenderDisplay = (gender) => {
+  };  const getGenderDisplay = (gender) => {
     switch (gender?.toUpperCase()) {
       case 'M': return 'Male';
       case 'F': return 'Female';
       case 'OTHER': return 'Other';
       default: return 'Not specified';
     }
+  };
+  const getPractitionerDisplay = (physicianId) => {
+    if (!physicianId) return 'Not assigned';
+    
+    const practitioner = practitioners.find(p => p.id === parseInt(physicianId));
+    if (practitioner) {
+      return `${practitioner.name} (${practitioner.specialty})`;
+    }
+    return `ID: ${physicianId}`;
   };
 
   if (loading) {
@@ -222,15 +253,13 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                     required
                     disabled={saving}
                   />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="gender">Gender *</label>
+                </div>                <div className="form-group">
+                  <label htmlFor="gender">Gender</label>
                   <select
                     id="gender"
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    required
                     disabled={saving}
                   >
                     <option value="">Select Gender</option>
@@ -239,19 +268,86 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                     <option value="OTHER">Other</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="address">Address *</label>
+              </div>              <div className="form-group">
+                <label htmlFor="address">Address</label>
                 <textarea
                   id="address"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  required
                   disabled={saving}
                   rows="3"
                 />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="bloodType">Blood Type</label>
+                  <select
+                    id="bloodType"
+                    name="bloodType"
+                    value={formData.bloodType}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                  >
+                    <option value="">Select Blood Type</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="height">Height (inches)</label>
+                  <input
+                    type="number"
+                    id="height"
+                    name="height"
+                    value={formData.height}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    min="12"
+                    max="120"
+                    placeholder="e.g., 70"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="weight">Weight (lbs)</label>
+                  <input
+                    type="number"
+                    id="weight"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    disabled={saving}
+                    min="1"
+                    max="1000"
+                    placeholder="e.g., 150"
+                  />                </div>
+                <div className="form-group">
+                  <label htmlFor="physician_id">Primary Care Physician</label>
+                  <select
+                    id="physician_id"
+                    name="physician_id"
+                    value={formData.physician_id}
+                    onChange={handleInputChange}
+                    disabled={saving}                  >
+                    <option value="">Select Physician (Optional)</option>
+                    {console.log('Rendering practitioners dropdown, practitioners:', practitioners)}
+                    {practitioners.map(practitioner => (
+                      <option key={practitioner.id} value={practitioner.id}>
+                        {practitioner.name} - {practitioner.specialty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="form-actions">
@@ -295,11 +391,29 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                   <label>Gender:</label>
                   <span>{getGenderDisplay(patientData?.gender)}</span>
                 </div>
-              </div>
-
-              <div className="detail-group full-width">
+              </div>              <div className="detail-group full-width">
                 <label>Address:</label>
                 <span>{patientData?.address || 'Not provided'}</span>
+              </div>
+
+              <div className="detail-row">
+                <div className="detail-group">
+                  <label>Blood Type:</label>
+                  <span>{patientData?.bloodType || 'Not provided'}</span>
+                </div>
+                <div className="detail-group">
+                  <label>Height:</label>
+                  <span>{patientData?.height ? `${patientData.height} inches` : 'Not provided'}</span>
+                </div>
+              </div>
+
+              <div className="detail-row">                <div className="detail-group">
+                  <label>Weight:</label>
+                  <span>{patientData?.weight ? `${patientData.weight} lbs` : 'Not provided'}</span>
+                </div>                <div className="detail-group">
+                  <label>Primary Care Physician:</label>
+                  <span>{getPractitionerDisplay(patientData?.physician_id)}</span>
+                </div>
               </div>
 
               {patientData?.id && (

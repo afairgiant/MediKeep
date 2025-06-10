@@ -36,11 +36,9 @@ class Patient(Base):
     height = Column(Integer, nullable=True)  # in inches
     weight = Column(Integer, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
-    address = Column(String, nullable=True)
-
-    # Table Relationships
+    address = Column(String, nullable=True)  # Table Relationships
     user = relationship("User", back_populates="patient")
-    practitioner = relationship("Practitioner", back_populates="practitioners")
+    practitioner = relationship("Practitioner", back_populates="patients")
     medications = relationship("Medication", back_populates="patient")
     encounters = relationship("Encounter", back_populates="patient")
     lab_results = relationship("LabResult", back_populates="patient")
@@ -57,9 +55,8 @@ class Practitioner(Base):
 
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
-    practice = Column(String, nullable=False)
-
-    # Table Relationships
+    practice = Column(String, nullable=False)  # Table Relationships
+    patients = relationship("Patient", back_populates="practitioner")
     medications = relationship("Medication", back_populates="practitioner")
     encounters = relationship("Encounter", back_populates="practitioner")
     lab_results = relationship("LabResult", back_populates="practitioner")

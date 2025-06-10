@@ -4,6 +4,7 @@ import PatientApiService from './patientApi';
 import LabResultApiService from './labResultApi';
 import MedicationApiService from './medicationApi';
 import ImmunizationApiService from './immunizationApi';
+import PractitionerApiService from './practitionerApi';
 
 class ApiService {
   constructor() {
@@ -13,6 +14,7 @@ class ApiService {
     this.labResult = new LabResultApiService();
     this.medication = new MedicationApiService();
     this.immunization = new ImmunizationApiService();
+    this.practitioner = new PractitionerApiService();
   }
 
   // Backward compatibility methods - delegate to appropriate modules
@@ -116,9 +118,29 @@ class ApiService {
   updateImmunization(immunizationId, immunizationData) {
     return this.immunization.updateImmunization(immunizationId, immunizationData);
   }
-
   deleteImmunization(immunizationId) {
     return this.immunization.deleteImmunization(immunizationId);
+  }
+
+  // Practitioner methods
+  getPractitioners(params) {
+    return this.practitioner.getPractitioners(params);
+  }
+
+  getPractitioner(practitionerId) {
+    return this.practitioner.getPractitioner(practitionerId);
+  }
+
+  createPractitioner(practitionerData) {
+    return this.practitioner.createPractitioner(practitionerData);
+  }
+
+  updatePractitioner(practitionerId, practitionerData) {
+    return this.practitioner.updatePractitioner(practitionerId, practitionerData);
+  }
+
+  deletePractitioner(practitionerId) {
+    return this.practitioner.deletePractitioner(practitionerId);
   }
 }
 
