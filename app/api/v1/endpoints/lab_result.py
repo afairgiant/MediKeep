@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api import deps
 from app.core.database import get_db
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
@@ -22,6 +23,7 @@ def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """
     Get all lab results with pagination
@@ -31,7 +33,11 @@ def get_lab_results(
 
 
 @router.get("/{lab_result_id}", response_model=LabResultWithRelations)
-def get_lab_result(lab_result_id: int, db: Session = Depends(get_db)):
+def get_lab_result(
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
     """
     Get a specific lab result by ID with related data
     """
@@ -42,7 +48,11 @@ def get_lab_result(lab_result_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=LabResultResponse, status_code=status.HTTP_201_CREATED)
-def create_lab_result(lab_result_in: LabResultCreate, db: Session = Depends(get_db)):
+def create_lab_result(
+    lab_result_in: LabResultCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
     """
     Create a new lab result
     """
@@ -57,7 +67,10 @@ def create_lab_result(lab_result_in: LabResultCreate, db: Session = Depends(get_
 
 @router.put("/{lab_result_id}", response_model=LabResultResponse)
 def update_lab_result(
-    lab_result_id: int, lab_result_in: LabResultUpdate, db: Session = Depends(get_db)
+    lab_result_id: int,
+    lab_result_in: LabResultUpdate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """
     Update an existing lab result
@@ -78,7 +91,11 @@ def update_lab_result(
 
 
 @router.delete("/{lab_result_id}")
-def delete_lab_result(lab_result_id: int, db: Session = Depends(get_db)):
+def delete_lab_result(
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
     """
     Delete a lab result and associated files
     """
@@ -106,6 +123,7 @@ def get_lab_results_by_patient(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """
     Get all lab results for a specific patient

@@ -35,7 +35,6 @@ class LabResultApiService extends BaseApiService {
   async getLabResultFiles(labResultId) {
     return this.get(`/api/v1/lab-result-files/lab-result/${labResultId}`, 'Failed to fetch lab result files');
   }
-
   // Upload a file for a lab result
   async uploadLabResultFile(labResultId, file, description = '') {
     const formData = new FormData();
@@ -54,6 +53,11 @@ class LabResultApiService extends BaseApiService {
     });
 
     if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
       const error = await response.json();
       throw new Error(error.detail || 'Failed to upload file');
     }
@@ -68,6 +72,11 @@ class LabResultApiService extends BaseApiService {
     });
 
     if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
       throw new Error('Failed to download file');
     }
 
