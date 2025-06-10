@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiService from '../services/api';
-import '../styles/LabResults.css';
+import apiService from '../../services/api';
+import '../../styles/pages/LabResults.css';
 
 const LabResults = () => {
   const [labResults, setLabResults] = useState([]);
@@ -28,17 +28,11 @@ const LabResults = () => {
   const statusOptions = [
     'ordered', 'in-progress', 'completed', 'cancelled'
   ];
-
   const categoryOptions = [
     'blood work', 'imaging', 'pathology', 'microbiology',
     'chemistry', 'hematology', 'immunology', 'genetics',
     'cardiology', 'pulmonology', 'other'
   ];
-
-  useEffect(() => {
-    fetchCurrentPatient();
-    fetchLabResults();
-  }, []);
 
   const fetchCurrentPatient = async () => {
     try {
@@ -48,7 +42,8 @@ const LabResults = () => {
       console.error('Error fetching current patient:', error);
     }
   };
-  const fetchLabResults = async () => {
+
+  const fetchLabResults = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -69,11 +64,15 @@ const LabResults = () => {
       
     } catch (error) {
       console.error('Error fetching lab results:', error);
-      setError(error.message);
-    } finally {
+      setError(error.message);    } finally {
       setLoading(false);
     }
-  };
+  }, [currentPatient?.id]);
+
+  useEffect(() => {
+    fetchCurrentPatient();
+    fetchLabResults();
+  }, [fetchLabResults]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -245,12 +244,7 @@ const LabResults = () => {
         setError(error.message);
       }
     }
-  };  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const formatDateTime = (dateString) => {
+  };  const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString();
   };

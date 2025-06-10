@@ -1,0 +1,171 @@
+/* Medical Card Styles */
+.medical-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.medical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.medical-card-clickable {
+  cursor: pointer;
+}
+
+.medical-card-clickable:hover {
+  border-color: #667eea;
+}
+
+.medical-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.card-title-section {
+  flex: 1;
+}
+
+.card-title {
+  margin: 0 0 0.25rem 0;
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.card-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.medical-card-body {
+  margin-bottom: 1rem;
+}
+
+.medical-card-body .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.medical-card-body .info-row:last-child {
+  margin-bottom: 0;
+}
+
+.medical-card-body .label {
+  font-weight: 500;
+  color: #555;
+  min-width: 100px;
+}
+
+.medical-card-body .value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+.medical-card-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f3f4;
+}
+
+.date-item {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.medical-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f3f4;
+}
+
+/* Status Badge Styles within Card */
+.medical-card .status-badge {
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+/* Status-specific styles */
+.status-active {
+  background-color: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.status-stopped,
+.status-on-hold {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border-color: #d6d8db;
+}
+
+.status-completed {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
+.status-in-progress,
+.status-ordered {
+  background-color: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.status-unknown {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #dee2e6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .medical-card {
+    padding: 1rem;
+  }
+  
+  .medical-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  
+  .medical-card .status-badge {
+    margin-left: 0;
+  }
+  
+  .medical-card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .medical-card-dates {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

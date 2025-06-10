@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiService } from '../services/api';
-import '../styles/PatientInfo.css';
+import { apiService } from '../../services/api';
+import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {  const [patientData, setPatientData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);

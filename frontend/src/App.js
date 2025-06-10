@@ -1,14 +1,12 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import Login from './pages/Login';
+import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
-import PatientInfo from './pages/Patient-Info';
-import Medication from './pages/Medication';
-import LabResults from './pages/LabResults';
+import PatientInfo from './pages/medical/Patient-Info';
+import Medication from './pages/medical/Medication';
+import LabResults from './pages/medical/LabResults';
 import PlaceholderPage from './pages/PlaceholderPage';
-import LoggingTest from './components/LoggingTest';
-import ProtectedRoute from './components/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
+import { LoggingTest, ProtectedRoute, ErrorBoundary } from './components';
 import frontendLogger from './services/frontendLogger';
 import './App.css';
 

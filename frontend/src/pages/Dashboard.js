@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import DashboardCard from '../components/DashboardCard';
+import { DashboardCard } from '../components';
 import { apiService } from '../services/api';
-import '../styles/Dashboard.css';
+import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);

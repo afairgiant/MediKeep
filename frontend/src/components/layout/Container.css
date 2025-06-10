@@ -1,0 +1,50 @@
+/* Container Component Styles */
+.page-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Max Width Variants */
+.container-small {
+  max-width: 600px;
+}
+
+.container-medium {
+  max-width: 900px;
+}
+
+.container-large {
+  max-width: 1200px;
+}
+
+.container-full {
+  max-width: 100%;
+}
+
+/* Padding Variants */
+.padding-none {
+  padding: 0;
+}
+
+.padding-small {
+  padding: 1rem;
+}
+
+.padding-default {
+  padding: 2rem;
+}
+
+.padding-large {
+  padding: 3rem;
+}
+
+/* Responsive Padding */
+@media (max-width: 768px) {
+  .padding-default {
+    padding: 1rem;
+  }
+  
+  .padding-large {
+    padding: 1.5rem;
+  }
+}

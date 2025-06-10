@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiService } from '../services/api';
-import '../styles/Medication.css';
+import { apiService } from '../../services/api';
+import '../../styles/pages/Medication.css';
 
 const Medication = () => {
   const [medications, setMedications] = useState([]);

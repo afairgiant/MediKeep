@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import frontendLogger from '../services/frontendLogger';
+import frontendLogger from '../../services/frontendLogger';
 import './LoggingTest.css';
 
 const LoggingTest = () => {

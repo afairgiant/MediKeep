@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import '../styles/PlaceholderPage.css';
+import '../styles/pages/PlaceholderPage.css';
 
 const PlaceholderPage = () => {
   const { section } = useParams();
