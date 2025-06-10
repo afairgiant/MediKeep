@@ -28,9 +28,19 @@ class Patient(Base):
     last_name = Column(String, nullable=False)
     birthDate = Column(Date, nullable=False)
 
-    gender = Column(String, nullable=False)
-    address = Column(String, nullable=False)  # Table Relationships
+    physician_id = Column(
+        Integer, ForeignKey("practitioners.id"), nullable=True
+    )  # Primary care physician
+
+    bloodType = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
+    height = Column(Integer, nullable=True)  # in inches
+    weight = Column(Integer, nullable=True)  # in lbs
+    gender = Column(String, nullable=True)
+    address = Column(String, nullable=True)
+
+    # Table Relationships
     user = relationship("User", back_populates="patient")
+    practitioner = relationship("Practitioner", back_populates="practitioners")
     medications = relationship("Medication", back_populates="patient")
     encounters = relationship("Encounter", back_populates="patient")
     lab_results = relationship("LabResult", back_populates="patient")
