@@ -141,7 +141,9 @@ def get_lab_results_by_patient_and_code(
     """
     Get lab results for a specific patient and test code
     """
-    results = lab_result.get_by_patient_and_code(db, patient_id=patient_id, code=code)
+    # Get all results for the patient first, then filter by code
+    patient_results = lab_result.get_by_patient(db, patient_id=patient_id)
+    results = [result for result in patient_results if result.code == code]
     return results
 
 
@@ -173,8 +175,14 @@ def search_lab_results_by_code(
     """
     Search lab results by test code
     """
-    results = lab_result.get_by_code(db, code=code, skip=skip, limit=limit)
-    return results
+    # Get all results and filter by code - replace with proper CRUD method if available
+    all_results = lab_result.get_multi(db, skip=0, limit=10000)
+    filtered_results = [result for result in all_results if result.code == code]
+    # Apply pagination
+    paginated_results = (
+        filtered_results[skip : skip + limit] if limit else filtered_results[skip:]
+    )
+    return paginated_results
 
 
 @router.get(
@@ -189,10 +197,16 @@ def search_lab_results_by_code_pattern(
     """
     Search lab results by code pattern (partial match)
     """
-    results = lab_result.search_by_code_pattern(
-        db, code_pattern=code_pattern, skip=skip, limit=limit
+    # Get all results and filter by code pattern - replace with proper CRUD method if available
+    all_results = lab_result.get_multi(db, skip=0, limit=10000)
+    filtered_results = [
+        result for result in all_results if code_pattern.lower() in result.code.lower()
+    ]
+    # Apply pagination
+    paginated_results = (
+        filtered_results[skip : skip + limit] if limit else filtered_results[skip:]
     )
-    return results
+    return paginated_results
 
 
 # File Management Endpoints
@@ -290,5 +304,6 @@ def get_code_usage_count(code: str, db: Session = Depends(get_db)):
     """
     Get count of how many times a specific test code has been used
     """
-    results = lab_result.get_by_code(db, code=code)
+    all_results = lab_result.get_multi(db, skip=0, limit=10000)
+    results = [result for result in all_results if result.code == code]
     return {"code": code, "usage_count": len(results)}
