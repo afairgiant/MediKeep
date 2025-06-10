@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.models.models import Base
@@ -22,7 +22,11 @@ class DatabaseConfig:
         """Get engine configuration based on database type"""
         if self.database_url.startswith("sqlite"):
             return {
-                "connect_args": {"check_same_thread": False},
+                "connect_args": {
+                    "check_same_thread": False,
+                    "timeout": 30,  # Increased timeout for busy database
+                    "isolation_level": None,  # Enable autocommit mode
+                },
                 "poolclass": StaticPool,
                 "echo": False,
             }
@@ -32,7 +36,30 @@ class DatabaseConfig:
 
 # Initialize database configuration
 db_config = DatabaseConfig()
+
+# Create engine
 engine = create_engine(db_config.database_url, **db_config.engine_kwargs)
+
+# For SQLite databases, set up WAL mode and other optimizations
+if db_config.database_url.startswith("sqlite"):
+
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        """Set SQLite pragmas for better concurrency"""
+        cursor = dbapi_connection.cursor()
+        # Enable WAL mode for better concurrent access
+        cursor.execute("PRAGMA journal_mode=WAL")
+        # Set busy timeout (30 seconds)
+        cursor.execute("PRAGMA busy_timeout=30000")
+        # Enable foreign key constraints
+        cursor.execute("PRAGMA foreign_keys=ON")
+        # Optimize SQLite performance
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA temp_store=memory")
+        cursor.execute("PRAGMA mmap_size=268435456")  # 256MB
+        cursor.close()
+
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

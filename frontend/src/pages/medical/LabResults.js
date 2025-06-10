@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import '../../styles/pages/LabResults.css';
@@ -7,13 +7,17 @@ const LabResults = () => {
   const [labResults, setLabResults] = useState([]);
   const [filesCounts, setFilesCounts] = useState({}); // Track file counts per lab result
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [error, setError] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [selectedLabResult, setSelectedLabResult] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
   const [currentPatient, setCurrentPatient] = useState(null);
+    // Use useRef to maintain abort controller reference without causing re-renders
+  const abortControllerRef = useRef(null);
+  
   // Form state for creating/editing lab results (simplified schema)
   const [formData, setFormData] = useState({
     test_name: '',
@@ -33,17 +37,24 @@ const LabResults = () => {
     'chemistry', 'hematology', 'immunology', 'genetics',
     'cardiology', 'pulmonology', 'other'
   ];
-
   const fetchCurrentPatient = async () => {
     try {
       const patient = await apiService.getCurrentPatient();
       setCurrentPatient(patient);
     } catch (error) {
       console.error('Error fetching current patient:', error);
+      // Don't set error state for patient fetch failures to avoid blocking the page
     }
-  };
+  };  const fetchLabResults = useCallback(async () => {
+    // Cancel any existing requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-  const fetchLabResults = useCallback(async () => {
+    // Create new abort controller for this request
+    const newAbortController = new AbortController();
+    abortControllerRef.current = newAbortController;
+
     try {
       setLoading(true);
       setError(null);
@@ -57,22 +68,49 @@ const LabResults = () => {
         results = await apiService.getLabResults();
       }
       
+      // Check if request was cancelled
+      if (newAbortController.signal.aborted) {
+        return;
+      }
+      
       setLabResults(results);
       
-      // Load file counts for each lab result
-      await loadFilesCounts(results);
+      // Load file counts for each lab result with cancellation support
+      await loadFilesCounts(results, newAbortController);
       
     } catch (error) {
-      console.error('Error fetching lab results:', error);
-      setError(error.message);    } finally {
-      setLoading(false);
-    }
-  }, [currentPatient?.id]);
+      // Don't show errors if the request was cancelled
+      if (error.name !== 'AbortError' && !newAbortController.signal.aborted) {
+        console.error('Error fetching lab results:', error);
+        setError(error.message);
+      }
+    } finally {
+      if (!newAbortController.signal.aborted) {
+        setLoading(false);
+      }    }
+  }, [currentPatient?.id]); // Only depend on patient ID
 
   useEffect(() => {
     fetchCurrentPatient();
-    fetchLabResults();
-  }, [fetchLabResults]);
+    
+    // Cleanup function to cancel requests when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []); // Only run once on mount
+  
+  useEffect(() => {
+    if (currentPatient) {
+      // Add debouncing to prevent rapid successive calls
+      const timer = setTimeout(() => {
+        fetchLabResults();
+      }, 300); // 300ms debounce
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentPatient, fetchLabResults]); // Run when patient changes
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -262,31 +300,64 @@ const LabResults = () => {
         return 'status-cancelled';
       default:
         return '';
-    }  };
-
-  // Load file counts for all lab results
-  const loadFilesCounts = async (results) => {
+    }  };  // Load file counts for all lab results
+  const loadFilesCounts = async (results, abortController) => {
     try {
       console.log('Loading file counts for', results.length, 'lab results');
       const counts = {};
-      // Load file counts for each lab result
-      await Promise.all(
-        results.map(async (result) => {
-          try {
-            const files = await apiService.getLabResultFiles(result.id);
-            counts[result.id] = files.length;
-            console.log(`Lab result ${result.id} has ${files.length} files`);
-          } catch (error) {
-            // If we can't get files for this lab result, set count to 0
-            console.log(`Error loading files for lab result ${result.id}:`, error);
-            counts[result.id] = 0;
-          }
-        })
-      );
-      console.log('Final file counts:', counts);
-      setFilesCounts(counts);
+      
+      // Process lab results in batches to avoid overwhelming the server
+      const batchSize = 2; // Reduced batch size for faster processing
+      for (let i = 0; i < results.length; i += batchSize) {
+        // Check if request was cancelled
+        if (abortController && abortController.signal.aborted) {
+          console.log('File count loading cancelled');
+          return;
+        }
+        
+        const batch = results.slice(i, i + batchSize);
+        
+        await Promise.all(
+          batch.map(async (result) => {
+            try {
+              // Check cancellation before each request
+              if (abortController && abortController.signal.aborted) {
+                return;
+              }
+              
+              const files = await apiService.getLabResultFiles(result.id);
+              counts[result.id] = files.length;
+              console.log(`Lab result ${result.id} has ${files.length} files`);
+            } catch (error) {
+              // Don't log errors if request was cancelled
+              if (error.name !== 'AbortError' && (!abortController || !abortController.signal.aborted)) {
+                console.log(`Error loading files for lab result ${result.id}:`, error);
+              }
+              counts[result.id] = 0;
+            }
+          })
+        );
+        
+        // Check cancellation before delay
+        if (abortController && abortController.signal.aborted) {
+          return;
+        }
+        
+        // Small delay between batches to prevent overwhelming the server
+        if (i + batchSize < results.length) {
+          await new Promise(resolve => setTimeout(resolve, 150)); // Slightly longer delay
+        }
+      }
+      
+      // Only update state if not cancelled
+      if (!abortController || !abortController.signal.aborted) {
+        console.log('Final file counts:', counts);
+        setFilesCounts(counts);
+      }
     } catch (error) {
-      console.error('Error loading file counts:', error);
+      if (error.name !== 'AbortError' && (!abortController || !abortController.signal.aborted)) {
+        console.error('Error loading file counts:', error);
+      }
       // Don't fail the whole page if file counts fail
     }
   };

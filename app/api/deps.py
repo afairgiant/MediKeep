@@ -1,5 +1,5 @@
 from typing import Generator
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -80,16 +80,24 @@ def get_current_user(
             ip_address="middleware",  # IP will be captured by middleware
             message=f"JWT token decode failed: {str(e)}",
         )
-        raise credentials_exception
-
-    # Get user from database
-    db_user = user.get_by_username(db, username=username)
-    if db_user is None:
+        raise credentials_exception  # Get user from database
+    try:
+        db_user = user.get_by_username(db, username=username)
+        if db_user is None:
+            log_security_event(
+                security_logger,
+                event="token_user_not_found",
+                ip_address="middleware",  # IP will be captured by middleware
+                message=f"Token valid but user not found: {username}",
+                username=username,
+            )
+            raise credentials_exception
+    except Exception as e:
         log_security_event(
             security_logger,
-            event="token_user_not_found",
-            ip_address="middleware",  # IP will be captured by middleware
-            message=f"Token valid but user not found: {username}",
+            event="token_user_lookup_error",
+            ip_address="middleware",
+            message=f"Database error during user lookup for {username}: {str(e)}",
             username=username,
         )
         raise credentials_exception

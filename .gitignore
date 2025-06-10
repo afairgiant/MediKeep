@@ -87,3 +87,5 @@ yarn-error.log*
 frontend/README.md
 DEVELOPMENT_SETUP.md
 /_working
+medical_records.db-wal
+medical_records.db-shm
