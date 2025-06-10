@@ -50,12 +50,16 @@ class LabResultApiService extends BaseApiService {
         // Don't set Content-Type header for FormData, let browser set it with boundary
       },
       body: formData
-    });
-
-    if (!response.ok) {
+    });    if (!response.ok) {
       // Check for authentication errors first
       if (this.handleAuthError(response)) {
         return; // Will redirect to login
+      }
+      
+      // Handle rate limiting
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || '60';
+        throw new Error(`Rate limit exceeded. Please wait ${retryAfter} seconds before trying again.`);
       }
       
       const error = await response.json();
@@ -69,12 +73,16 @@ class LabResultApiService extends BaseApiService {
   async downloadLabResultFile(fileId) {
     const response = await fetch(`${this.baseURL}/api/v1/lab-result-files/${fileId}/download`, {
       headers: this.getAuthHeaders()
-    });
-
-    if (!response.ok) {
+    });    if (!response.ok) {
       // Check for authentication errors first
       if (this.handleAuthError(response)) {
         return; // Will redirect to login
+      }
+      
+      // Handle rate limiting
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || '60';
+        throw new Error(`Rate limit exceeded. Please wait ${retryAfter} seconds before trying again.`);
       }
       
       throw new Error('Failed to download file');

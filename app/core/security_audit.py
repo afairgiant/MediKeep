@@ -36,12 +36,11 @@ class SecurityAuditManager:
         # Thread-safe counters for rate limiting detection
         self._failed_logins = defaultdict(list)  # IP -> [timestamps]
         self._api_requests = defaultdict(list)  # IP -> [timestamps]
-        self._lock = Lock()
-
-        # Configuration
+        self._lock = Lock()  # Configuration - more lenient in development mode
         self.max_failed_logins = 5
         self.failed_login_window = 300  # 5 minutes
-        self.max_requests_per_minute = 60
+        # Higher rate limit in development mode to accommodate frontend batching
+        self.max_requests_per_minute = 200 if settings.DEBUG else 60
         self.suspicious_patterns = [
             "union",
             "select",

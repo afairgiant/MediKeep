@@ -366,8 +366,6 @@ const Medication = () => {
                       <option value="active">Active</option>
                       <option value="stopped">Stopped</option>
                       <option value="on-hold">On Hold</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
 

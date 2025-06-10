@@ -72,11 +72,21 @@ const LabResults = () => {
       if (newAbortController.signal.aborted) {
         return;
       }
+        setLabResults(results);
       
-      setLabResults(results);
-      
-      // Load file counts for each lab result with cancellation support
-      await loadFilesCounts(results, newAbortController);
+      // Only load file counts if there aren't too many lab results to prevent rate limiting
+      if (results.length <= 20) {
+        // Load file counts for each lab result with cancellation support
+        await loadFilesCounts(results, newAbortController);
+      } else {
+        console.log(`Skipping file count loading for ${results.length} lab results to prevent rate limiting`);
+        // Initialize file counts to 0 for all results
+        const counts = {};
+        results.forEach(result => {
+          counts[result.id] = 0;
+        });
+        setFilesCounts(counts);
+      }
       
     } catch (error) {
       // Don't show errors if the request was cancelled
@@ -306,8 +316,8 @@ const LabResults = () => {
       console.log('Loading file counts for', results.length, 'lab results');
       const counts = {};
       
-      // Process lab results in batches to avoid overwhelming the server
-      const batchSize = 2; // Reduced batch size for faster processing
+      // Process lab results in smaller batches to avoid rate limiting
+      const batchSize = 1; // Process one at a time to prevent rate limiting
       for (let i = 0; i < results.length; i += batchSize) {
         // Check if request was cancelled
         if (abortController && abortController.signal.aborted) {
@@ -329,9 +339,14 @@ const LabResults = () => {
               counts[result.id] = files.length;
               console.log(`Lab result ${result.id} has ${files.length} files`);
             } catch (error) {
-              // Don't log errors if request was cancelled
+              // Don't log errors if request was cancelled or rate limited
               if (error.name !== 'AbortError' && (!abortController || !abortController.signal.aborted)) {
-                console.log(`Error loading files for lab result ${result.id}:`, error);
+                // Handle rate limiting gracefully
+                if (error.message && error.message.includes('Rate limit exceeded')) {
+                  console.log(`Rate limited for lab result ${result.id}, setting count to 0`);
+                } else {
+                  console.log(`Error loading files for lab result ${result.id}:`, error);
+                }
               }
               counts[result.id] = 0;
             }
@@ -343,9 +358,9 @@ const LabResults = () => {
           return;
         }
         
-        // Small delay between batches to prevent overwhelming the server
+        // Longer delay between requests to prevent rate limiting
         if (i + batchSize < results.length) {
-          await new Promise(resolve => setTimeout(resolve, 150)); // Slightly longer delay
+          await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay to 500ms
         }
       }
       

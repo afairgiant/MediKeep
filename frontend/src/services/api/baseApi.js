@@ -16,7 +16,6 @@ class BaseApiService {
       ...(token && { 'Authorization': `Bearer ${token}` })
     };
   }
-
   // Helper method to handle authentication errors
   handleAuthError(response) {
     if (response.status === 401) {
@@ -25,15 +24,24 @@ class BaseApiService {
       window.location.href = '/login';
       return true;
     }
+    // Don't treat rate limiting (429) as authentication error
+    if (response.status === 429) {
+      return false; // Let the calling code handle rate limiting
+    }
     return false;
   }
-
   // Helper method to handle common API response patterns
   async handleResponse(response, errorMessage = 'API request failed') {
     if (!response.ok) {
       // Check for authentication errors first
       if (this.handleAuthError(response)) {
         return; // Will redirect to login
+      }
+      
+      // Handle rate limiting specifically
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || '60';
+        throw new Error(`Rate limit exceeded. Please wait ${retryAfter} seconds before trying again.`);
       }
       
       const error = await response.json().catch(() => ({}));
