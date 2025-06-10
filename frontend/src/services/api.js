@@ -16,6 +16,17 @@ class ApiService {
       ...(token && { 'Authorization': `Bearer ${token}` })
     };
   }
+
+  // Helper method to handle authentication errors
+  handleAuthError(response) {
+    if (response.status === 401) {
+      // Clear the token and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return true;
+    }
+    return false;
+  }
   // Login method
   async login(username, password) {
     try {
@@ -53,20 +64,24 @@ class ApiService {
       }
       throw error;
     }
-  }
-  // Get current user/patient info
+  }  // Get current user/patient info
   async getCurrentPatient() {
     const response = await fetch(`${this.baseURL}/api/v1/patients/me`, {
       headers: this.getAuthHeaders()
     });
 
     if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
       const error = await response.json();
       throw new Error(error.detail || 'Failed to fetch user data');
     }
 
     return response.json();
-  }  // Create current patient information
+  }// Create current patient information
   async createCurrentPatient(patientData) {
     const response = await fetch(`${this.baseURL}/api/v1/patients/me`, {
       method: 'POST',
@@ -386,6 +401,122 @@ class ApiService {
       }
       
       throw new Error(error.detail || 'Failed to delete medication');
+    }
+
+    return response.json();
+  }
+
+  // ===== IMMUNIZATION METHODS =====
+  
+  // Get immunizations
+  async getImmunizations() {
+    const response = await fetch(`${this.baseURL}/api/v1/immunizations/`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch immunizations');
+    }
+
+    return response.json();
+  }
+  // Get immunizations for a specific patient
+  async getPatientImmunizations(patientId) {
+    const response = await fetch(`${this.baseURL}/api/v1/immunizations/?patient_id=${patientId}`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch patient immunizations');
+    }
+
+    return response.json();
+  }
+  // Create new immunization
+  async createImmunization(immunizationData) {
+    const response = await fetch(`${this.baseURL}/api/v1/immunizations/`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(immunizationData)
+    });
+
+    if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to create immunization');
+    }
+
+    return response.json();
+  }
+  // Update an immunization
+  async updateImmunization(immunizationId, immunizationData) {
+    const response = await fetch(`${this.baseURL}/api/v1/immunizations/${immunizationId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(immunizationData)
+    });
+
+    if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to update immunization');
+    }
+
+    return response.json();
+  }
+  // Delete an immunization
+  async deleteImmunization(immunizationId) {
+    const response = await fetch(`${this.baseURL}/api/v1/immunizations/${immunizationId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      // Check for authentication errors first
+      if (this.handleAuthError(response)) {
+        return; // Will redirect to login
+      }
+      
+      const error = await response.json();
+      
+      // Handle validation errors (Pydantic errors)
+      if (Array.isArray(error.detail)) {
+        const validationErrors = error.detail.map(err => err.msg).join(', ');
+        throw new Error(`Validation errors: ${validationErrors}`);
+      }
+      
+      throw new Error(error.detail || 'Failed to delete immunization');
     }
 
     return response.json();

@@ -185,14 +185,19 @@ class Immunization(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"))
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
-    vaccine_code = Column(
-        String, nullable=False
-    )  # Code for the vaccine (e.g., CVX code)
-    occurrence_date = Column(
-        Date, nullable=False
-    )  # Date when the immunization was administered
-    lot_number = Column(String, nullable=True)  # Lot number of the vaccine
-    expiration_date = Column(Date, nullable=True)  # Expiration date of the vaccine
+
+    # Primary vaccine information
+    vaccine_name = Column(String, nullable=False)  # Name of the vaccine
+    date_administered = Column(Date, nullable=False)  # Date when administered
+    dose_number = Column(Integer, nullable=True)  # Dose number in series
+
+    # Vaccine details
+    lot_number = Column(String, nullable=True)  # Vaccine lot number
+    manufacturer = Column(String, nullable=True)  # Vaccine manufacturer
+    site = Column(String, nullable=True)  # Injection site
+    route = Column(String, nullable=True)  # Route of administration
+    expiration_date = Column(Date, nullable=True)  # Vaccine expiration date
+    notes = Column(Text, nullable=True)  # Additional notes
 
     # Table Relationships
     patient = relationship("Patient", back_populates="immunizations")

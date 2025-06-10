@@ -13,6 +13,42 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
     Handles patient immunization records, vaccine tracking, and schedules.
     """
 
+    def create(self, db: Session, *, obj_in: ImmunizationCreate) -> Immunization:
+        """
+        Create a new immunization record.
+
+        Override base create method to properly handle date fields without jsonable_encoder.
+        """
+        # Convert Pydantic model to dict while preserving date objects
+        obj_data = obj_in.dict()
+
+        # Create the database object directly from the dict
+        db_obj = self.model(**obj_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def update(
+        self, db: Session, *, db_obj: Immunization, obj_in: ImmunizationUpdate
+    ) -> Immunization:
+        """
+        Update an immunization record.
+
+        Override base update method to properly handle date fields without jsonable_encoder.
+        """
+        # Get the data as dict, excluding None values
+        update_data = obj_in.dict(exclude_unset=True)
+
+        # Update the database object
+        for field, value in update_data.items():
+            setattr(db_obj, field, value)
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
     def get_by_patient(
         self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
     ) -> List[Immunization]:
@@ -23,9 +59,7 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
             db: SQLAlchemy database session
             patient_id: ID of the patient
             skip: Number of records to skip (for pagination)
-            limit: Maximum number of records to return
-
-        Returns:
+            limit: Maximum number of records to return        Returns:
             List of immunizations for the patient
         """
         return (
@@ -41,9 +75,7 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         self, db: Session, *, vaccine_name: str, patient_id: Optional[int] = None
     ) -> List[Immunization]:
         """
-        Retrieve immunizations by vaccine name, optionally filtered by patient.
-
-        Args:
+        Retrieve immunizations by vaccine name, optionally filtered by patient.        Args:
             db: SQLAlchemy database session
             vaccine_name: Name of the vaccine
             patient_id: Optional patient ID to filter by
@@ -72,8 +104,7 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
             days: Number of days to look back
 
         Returns:
-            List of recent immunizations
-        """
+            List of recent immunizations"""
         from datetime import date, timedelta
 
         cutoff_date = date.today() - timedelta(days=days)
@@ -142,10 +173,13 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         )
 
         if not last_dose:
-            return True  # Never vaccinated
+            return True  # Never vaccinated        # Convert to actual date value for comparison
+        last_dose_date = last_dose.date_administered
+        if hasattr(last_dose_date, "date"):
+            last_dose_date = last_dose_date.date()
 
-        due_date = last_dose.date_administered + timedelta(days=months_interval * 30)
-        return date.today() >= due_date
+        due_date = last_dose_date + timedelta(days=months_interval * 30)
+        return bool(date.today() >= due_date)
 
 
 # Create the immunization CRUD instance

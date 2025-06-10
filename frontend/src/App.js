@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import PatientInfo from './pages/medical/Patient-Info';
 import Medication from './pages/medical/Medication';
 import LabResults from './pages/medical/LabResults';
+import Immunization from './pages/medical/Immunization';
 import PlaceholderPage from './pages/PlaceholderPage';
 import { LoggingTest, ProtectedRoute, ErrorBoundary } from './components';
 import frontendLogger from './services/frontendLogger';
@@ -123,7 +124,7 @@ function App() {
             path="/immunizations" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Immunization />
               </ProtectedRoute>
             } 
           />
