@@ -113,7 +113,6 @@ const ModelCreate = () => {
     setValidationErrors(errors);
     return !hasErrors;
   };
-
   const handleCreate = async () => {
     if (!validateForm()) {
       return;
@@ -135,7 +134,24 @@ const ModelCreate = () => {
             submitData[field.name] = value;
           }
         }
-      });
+      });      // Auto-populate patient_id for medical records from current user
+      const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+      if (medicalModels.includes(modelName)) {
+        try {
+          // Import the API service to get current patient
+          const { apiService } = await import('../../services/api');
+          const currentPatient = await apiService.getCurrentPatient();
+          if (currentPatient && currentPatient.id) {
+            submitData.patient_id = currentPatient.id;
+          } else {
+            throw new Error('No patient record found for current user');
+          }
+        } catch (patientError) {
+          setError('Failed to get patient information. Please ensure you have a patient record.');
+          setSaving(false);
+          return;
+        }
+      }
 
       const createdRecord = await adminApiService.createModelRecord(modelName, submitData);
       navigate(`/admin/models/${modelName}/${createdRecord.id}`);
@@ -151,7 +167,6 @@ const ModelCreate = () => {
   const handleCancel = () => {
     navigate(`/admin/models/${modelName}`);
   };
-
   const renderFieldInput = (field) => {
     const value = formData[field.name] || '';
     const hasError = validationErrors[field.name];
@@ -162,6 +177,15 @@ const ModelCreate = () => {
         <div className="field-value readonly">
           Auto-generated
           <small className="field-note">Primary key (auto-generated)</small>
+        </div>
+      );
+    }    // Hide patient_id field for medical records - it will be auto-populated
+    const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+    if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
+      return (
+        <div className="field-value readonly">
+          Auto-populated from current user
+          <small className="field-note">Patient ID (auto-populated)</small>
         </div>
       );
     }

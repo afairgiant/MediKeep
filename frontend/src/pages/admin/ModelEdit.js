@@ -137,7 +137,6 @@ const ModelEdit = () => {
   const handleCancel = () => {
     navigate(`/admin/models/${modelName}/${recordId}`);
   };
-
   const renderFieldInput = (field) => {
     const value = formData[field.name] || '';
     const hasError = validationErrors[field.name];
@@ -148,6 +147,15 @@ const ModelEdit = () => {
         <div className="field-value readonly">
           {value}
           <small className="field-note">Primary key (read-only)</small>
+        </div>
+      );
+    }    // Hide patient_id field for medical records - it should not be changed
+    const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+    if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
+      return (
+        <div className="field-value readonly">
+          {value}
+          <small className="field-note">Patient ID (locked to current user)</small>
         </div>
       );
     }
