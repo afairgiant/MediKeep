@@ -31,7 +31,9 @@ class SecurityAuditManager:
 
     def __init__(self):
         self.security_logger = get_logger(__name__, "security")
-        self.audit_logger = get_logger(__name__, "audit")        # Thread-safe counters for rate limiting detection
+        self.audit_logger = get_logger(
+            __name__, "audit"
+        )  # Thread-safe counters for rate limiting detection
         self._failed_logins = defaultdict(list)  # IP -> [timestamps]
         self._api_requests = defaultdict(list)  # IP -> [timestamps]
         self._lock = Lock()
@@ -41,26 +43,31 @@ class SecurityAuditManager:
         self.failed_login_window = 300  # 5 minutes
         # Higher rate limit in development mode to accommodate frontend batching
         self.max_requests_per_minute = 200 if settings.DEBUG else 60
-        
+
         # Disable suspicious pattern detection in development if configured
-        self.suspicious_patterns = [
-            "union",
-            "select",
-            "drop",
-            "delete",
-            "insert",
-            "update",
-            "1=1",
-            "1=0",
-            "or 1",            "and 1",
-            "--",
-            "/*",
-            "*/",
-            "<script",
-            "javascript:",
-            "onerror=",
-            "onload=",
-        ] if settings.ENABLE_SUSPICIOUS_INPUT_DETECTION else []
+        self.suspicious_patterns = (
+            [
+                "union",
+                "select",
+                "drop",
+                "delete",
+                "insert",
+                "update",
+                "1=1",
+                "1=0",
+                "or 1",
+                "and 1",
+                "--",
+                "/*",
+                "*/",
+                "<script",
+                "javascript:",
+                "onerror=",
+                "onload=",
+            ]
+            if settings.ENABLE_SUSPICIOUS_INPUT_DETECTION
+            else []
+        )
 
     def log_authentication_attempt(
         self,
