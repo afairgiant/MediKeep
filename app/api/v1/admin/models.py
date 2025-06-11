@@ -430,3 +430,70 @@ def update_model_record(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error updating {model_name} record: {str(e)}",
         )
+
+
+@router.post("/{model_name}/")
+def create_model_record(
+    model_name: str,
+    create_data: Dict[str, Any],
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Create a new record for a specific model"""
+    if model_name not in MODEL_REGISTRY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model '{model_name}' not found",
+        )
+
+    model_info = MODEL_REGISTRY[model_name]
+    crud_instance = model_info["crud"]
+
+    try:
+        # Define datetime fields for each model
+        datetime_field_map = {
+            "user": ["created_at", "updated_at", "last_login"],
+            "patient": ["created_at", "updated_at", "date_of_birth"],
+            "practitioner": ["created_at", "updated_at"],
+            "lab_result": [
+                "ordered_date",
+                "completed_date",
+                "created_at",
+                "updated_at",
+            ],
+            "lab_result_file": ["uploaded_at", "created_at", "updated_at"],
+            "medication": ["created_at", "updated_at"],
+            "condition": ["created_at", "updated_at"],
+            "allergy": ["created_at", "updated_at"],
+            "immunization": ["administration_date", "created_at", "updated_at"],
+            "procedure": ["procedure_date", "created_at", "updated_at"],
+            "treatment": ["start_date", "end_date", "created_at", "updated_at"],
+            "encounter": ["encounter_date", "created_at", "updated_at"],
+        }
+
+        # Convert datetime fields if they exist for this model
+        if model_name in datetime_field_map:
+            create_data = convert_datetime_fields(
+                create_data, datetime_field_map[model_name]
+            )
+
+        # Create the record using CRUD create method
+        created_record = crud_instance.create(db, obj_in=create_data)
+
+        # Convert to dictionary for JSON response
+        result = {}
+        for column in model_info["model"].__table__.columns:
+            value = getattr(created_record, column.name, None)
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            result[column.name] = value
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating {model_name} record: {str(e)}",
+        )
