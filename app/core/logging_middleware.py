@@ -17,7 +17,6 @@ from app.core.logging_config import (
     log_security_event,
     log_performance_event,
 )
-from app.core.security_audit import security_audit
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -41,7 +40,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         method = request.method
         path = request.url.path
-        client_ip = self._get_client_ip(request)
+        user_ip = self._get_user_ip(request)
         user_agent = request.headers.get(
             "user-agent", "Unknown"
         )  # Extract user information if available
@@ -54,38 +53,18 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             except AttributeError:
                 pass
 
-        # Check for rate limiting using security audit
-        if security_audit.track_api_request(client_ip):
-            # Rate limit exceeded - return 429 status
-            response = StarletteResponse(
-                content="Rate limit exceeded",
-                status_code=429,
-                headers={"Retry-After": "60"},
-            )
-            duration_ms = int((time.time() - start_time) * 1000)
-            self._log_request_complete(
-                method=method,
-                path=path,
-                status_code=429,
-                client_ip=client_ip,
-                user_id=user_id,
-                duration_ms=duration_ms,
-                correlation_id=correlation_id,
-            )
-            return response
-
         # Log the incoming request
         self._log_request_start(
             method=method,
             path=path,
-            client_ip=client_ip,
+            user_ip=user_ip,
             user_agent=user_agent,
             user_id=user_id,
             correlation_id=correlation_id,
         )
 
         # Check for suspicious patterns (enhanced with security audit)
-        self._check_security_patterns(request, client_ip, user_id)
+        self._check_security_patterns(request, user_ip, user_id)
 
         # Process the request
         try:
@@ -99,7 +78,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 method=method,
                 path=path,
                 status_code=response.status_code,
-                client_ip=client_ip,
+                user_ip=user_ip,
                 user_id=user_id,
                 duration_ms=duration_ms,
                 correlation_id=correlation_id,
@@ -116,7 +95,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     method=method,
                     path=path,
                     user_id=user_id,
-                    ip=client_ip,
+                    ip=user_ip,
                 )
 
             return response
@@ -129,7 +108,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 method=method,
                 path=path,
                 error=str(e),
-                client_ip=client_ip,
+                user_ip=user_ip,
                 user_id=user_id,
                 duration_ms=duration_ms,
                 correlation_id=correlation_id,
@@ -137,7 +116,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             # Re-raise the exception
             raise
 
-    def _get_client_ip(self, request: Request) -> str:
+    def _get_user_ip(self, request: Request) -> str:
         """Extract the real client IP address from the request."""
         # Check for forwarded headers (common in production behind proxies)
         forwarded_for = request.headers.get("x-forwarded-for")
@@ -159,7 +138,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         self,
         method: str,
         path: str,
-        client_ip: str,
+        user_ip: str,
         user_agent: str,
         user_id: Optional[int] = None,
         correlation_id: Optional[str] = None,
@@ -170,7 +149,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             "event": "request_start",
             "method": method,
             "path": path,
-            "ip": client_ip,
+            "ip": user_ip,
             "user_agent": user_agent,
             "user_id": user_id,
             "correlation_id": correlation_id,
@@ -183,7 +162,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         method: str,
         path: str,
         status_code: int,
-        client_ip: str,
+        user_ip: str,
         user_id: Optional[int] = None,
         duration_ms: Optional[int] = None,
         correlation_id: Optional[str] = None,
@@ -195,7 +174,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             "method": method,
             "path": path,
             "status_code": status_code,
-            "ip": client_ip,
+            "ip": user_ip,
             "user_id": user_id,
             "duration": duration_ms,
             "correlation_id": correlation_id,
@@ -222,7 +201,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         method: str,
         path: str,
         error: str,
-        client_ip: str,
+        user_ip: str,
         user_id: Optional[int] = None,
         duration_ms: Optional[int] = None,
         correlation_id: Optional[str] = None,
@@ -234,7 +213,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             "method": method,
             "path": path,
             "error": error,
-            "ip": client_ip,
+            "ip": user_ip,
             "user_id": user_id,
             "duration": duration_ms,
             "correlation_id": correlation_id,
@@ -244,32 +223,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         )
 
     def _check_security_patterns(
-        self, request: Request, client_ip: str, user_id: Optional[int] = None
+        self, request: Request, user_ip: str, user_id: Optional[int] = None
     ):
-        """Check for suspicious security patterns in requests (enhanced with security audit)."""
+        """Check for suspicious security patterns in requests."""
         path = request.url.path.lower()
         query = str(request.url.query).lower()
-        combined_input = f"{path} {query}"
 
-        # Use security audit system to check for suspicious input
-        if security_audit.check_suspicious_input(
-            combined_input,
-            context="http_request",
-            user_id=user_id,
-            ip_address=client_ip,
-        ):
-            # Additional logging through existing system for backwards compatibility
-            log_security_event(
-                self.security_logger,
-                event="suspicious_input_middleware",
-                user_id=user_id,
-                ip_address=client_ip,
-                message="Suspicious input detected in HTTP request",
-                path=path,
-                query=query,
-            )
-
-        # Additional specific checks for common attack patterns
+        # Check for common attack patterns
         suspicious_patterns = {
             "sql_injection": [
                 "union",
@@ -289,26 +249,12 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         for attack_type, patterns in suspicious_patterns.items():
             for pattern in patterns:
                 if pattern in path or pattern in query:
-                    # Log through security audit system
-                    security_audit.log_security_threat(
-                        threat_type=f"http_{attack_type}",
-                        ip_address=client_ip,
-                        details={
-                            "pattern": pattern,
-                            "attack_type": attack_type,
-                            "path": path,
-                            "query": query,
-                            "method": request.method,
-                        },
-                        user_id=user_id,
-                    )
-
-                    # Also log through existing system
+                    # Log security event
                     log_security_event(
                         self.security_logger,
                         event=f"suspicious_{attack_type}_pattern",
                         user_id=user_id,
-                        ip_address=client_ip,
+                        ip_address=user_ip,
                         message=f"Suspicious {attack_type.replace('_', ' ')} pattern detected: {pattern}",
                         path=path,
                         query=query,
@@ -316,21 +262,14 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     )
                     break
 
-        # Enhanced user agent checking
+        # Check user agent
         user_agent = request.headers.get("user-agent", "")
         if not user_agent or len(user_agent) < 10:
-            security_audit.log_security_threat(
-                threat_type="suspicious_user_agent",
-                ip_address=client_ip,
-                details={"user_agent": user_agent, "reason": "missing_or_too_short"},
-                user_id=user_id,
-            )
-
             log_security_event(
                 self.security_logger,
                 event="suspicious_user_agent",
                 user_id=user_id,
-                ip_address=client_ip,
+                ip_address=user_ip,
                 message="Request with suspicious or missing User-Agent",
                 user_agent=user_agent,
             )
