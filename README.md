@@ -12,7 +12,7 @@ A modern medical records management system with React frontend and FastAPI backe
 
 1. **Backend**
 ```bash
-scripts\start-backend.bat
+python run.py
 ```
 
 2. **Frontend** (new terminal)
