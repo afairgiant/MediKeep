@@ -5,7 +5,7 @@ This module provides utilities for handling datetime conversions and validations
 across the Medical Records Management System.
 """
 
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, Union, Any
 import re
 
@@ -93,6 +93,117 @@ def ensure_datetime(value: Union[str, datetime, None]) -> Optional[datetime]:
         return parse_datetime_string(value)
 
     raise ValueError(f"Cannot convert {type(value)} to datetime")
+
+
+def parse_date_string(date_str: str) -> date:
+    """
+    Parse a date string into a Python date object.
+
+    Args:
+        date_str: String representing a date
+
+    Returns:
+        date object
+
+    Raises:
+        ValueError: If the string cannot be parsed as a date
+
+    Examples:
+        >>> parse_date_string("2024-01-15")
+        date(2024, 1, 15)
+    """
+    if not isinstance(date_str, str):
+        raise ValueError(f"Expected string, got {type(date_str)}")
+
+    clean_str = date_str.strip()
+
+    # List of supported date formats
+    formats = [
+        "%Y-%m-%d",  # ISO date format
+        "%m/%d/%Y",  # US format
+        "%d/%m/%Y",  # European format
+        "%Y-%m-%dT%H:%M:%S.%f",  # ISO datetime (extract date part)
+        "%Y-%m-%dT%H:%M:%S",  # ISO datetime without microseconds
+    ]
+
+    for fmt in formats:
+        try:
+            if "T" in fmt:
+                # For datetime formats, parse as datetime then extract date
+                dt = datetime.strptime(clean_str.split("T")[0], "%Y-%m-%d")
+                return dt.date()
+            else:
+                dt = datetime.strptime(clean_str, fmt)
+                return dt.date()
+        except ValueError:
+            continue
+
+    raise ValueError(f"Unsupported date format: {date_str}")
+
+
+def ensure_date(value: Union[str, date, datetime, None]) -> Optional[date]:
+    """
+    Ensure a value is converted to a date object if possible.
+
+    Args:
+        value: String, date object, datetime object, or None
+
+    Returns:
+        date object or None
+
+    Examples:
+        >>> ensure_date("2024-01-15")
+        date(2024, 1, 15)
+
+        >>> ensure_date(None)
+        None
+
+        >>> ensure_date(datetime(2024, 1, 15, 10, 30))
+        date(2024, 1, 15)
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, date):
+        return value
+
+    if isinstance(value, datetime):
+        return value.date()
+
+    if isinstance(value, str):
+        if not value.strip():
+            return None
+        return parse_date_string(value)
+
+    raise ValueError(f"Cannot convert {type(value)} to date")
+
+
+def convert_date_fields(data: dict, date_fields: list) -> dict:
+    """
+    Convert specified date fields in a dictionary from strings to date objects.
+
+    Args:
+        data: Dictionary containing the data
+        date_fields: List of field names that should be converted to date
+
+    Returns:
+        Dictionary with converted date fields
+
+    Examples:
+        >>> data = {"name": "Test", "birthDate": "2024-01-15"}
+        >>> convert_date_fields(data, ["birthDate"])
+        {"name": "Test", "birthDate": date(2024, 1, 15)}
+    """
+    converted_data = data.copy()
+
+    for field in date_fields:
+        if field in converted_data:
+            try:
+                converted_data[field] = ensure_date(converted_data[field])
+            except ValueError as e:
+                raise ValueError(f"Error converting field '{field}': {e}")
+
+    return converted_data
 
 
 def convert_datetime_fields(data: dict, datetime_fields: list) -> dict:
@@ -202,6 +313,53 @@ class DateTimeConverter:
         return self.convert(data)
 
 
+class DateConverter:
+    """
+    A reusable date converter class for specific use cases.
+    """
+
+    def __init__(self, date_fields: list):
+        """
+        Initialize with list of date fields to convert.
+
+        Args:
+            date_fields: List of field names that contain date values
+        """
+        self.date_fields = date_fields
+
+    def convert(self, data: dict) -> dict:
+        """
+        Convert date fields in the provided data.
+
+        Args:
+            data: Dictionary containing data to convert
+
+        Returns:
+            Dictionary with converted date fields
+        """
+        return convert_date_fields(data, self.date_fields)
+
+    def convert_model_data(self, obj_in: Any) -> dict:
+        """
+        Convert date fields from a Pydantic model or dict.
+
+        Args:
+            obj_in: Pydantic model instance or dictionary
+
+        Returns:
+            Dictionary with converted date fields
+        """
+        if hasattr(obj_in, "dict"):
+            # Pydantic model
+            data = obj_in.dict()
+        elif isinstance(obj_in, dict):
+            data = obj_in
+        else:
+            raise ValueError(f"Unsupported data type: {type(obj_in)}")
+
+        return self.convert(data)
+
+
 # Pre-configured converters for common models
 LAB_RESULT_CONVERTER = DateTimeConverter(
     ["ordered_date", "completed_date", "created_at", "updated_at"]
@@ -210,5 +368,7 @@ LAB_RESULT_CONVERTER = DateTimeConverter(
 USER_CONVERTER = DateTimeConverter(["created_at", "updated_at", "last_login"])
 
 PATIENT_CONVERTER = DateTimeConverter(["created_at", "updated_at"])
+
+PATIENT_DATE_CONVERTER = DateConverter(["birthDate"])
 
 FILE_CONVERTER = DateTimeConverter(["uploaded_at", "created_at", "updated_at"])

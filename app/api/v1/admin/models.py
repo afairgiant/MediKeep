@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from app.api import deps
-from app.core.datetime_utils import convert_datetime_fields
+from app.core.datetime_utils import convert_datetime_fields, convert_date_fields
 from app.models.models import (
     User,
     Patient,
@@ -381,12 +381,10 @@ def update_model_record(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"{model_name} record with id {record_id} not found",
-            )
-
-        # Define datetime fields for each model
+            )  # Define datetime fields for each model
         datetime_field_map = {
             "user": ["created_at", "updated_at", "last_login"],
-            "patient": ["created_at", "updated_at", "date_of_birth"],
+            "patient": ["created_at", "updated_at"],
             "practitioner": ["created_at", "updated_at"],
             "lab_result": [
                 "ordered_date",
@@ -403,6 +401,19 @@ def update_model_record(
             "treatment": ["start_date", "end_date", "created_at", "updated_at"],
             "encounter": ["encounter_date", "created_at", "updated_at"],
         }
+
+        # Define date-only fields for each model (fields that should be Date objects, not DateTime)
+        date_field_map = {
+            "patient": ["birthDate"],
+            "immunization": ["date_administered", "expiration_date"],
+            "procedure": ["date"],
+            "treatment": ["start_date", "end_date"],
+            "encounter": ["encounter_date"],
+        }
+
+        # Convert date fields first (these need to be Date objects)
+        if model_name in date_field_map:
+            update_data = convert_date_fields(update_data, date_field_map[model_name])
 
         # Convert datetime fields if they exist for this model
         if model_name in datetime_field_map:
@@ -449,11 +460,10 @@ def create_model_record(
     model_info = MODEL_REGISTRY[model_name]
     crud_instance = model_info["crud"]
 
-    try:
-        # Define datetime fields for each model
+    try:  # Define datetime fields for each model
         datetime_field_map = {
             "user": ["created_at", "updated_at", "last_login"],
-            "patient": ["created_at", "updated_at", "date_of_birth"],
+            "patient": ["created_at", "updated_at"],
             "practitioner": ["created_at", "updated_at"],
             "lab_result": [
                 "ordered_date",
@@ -470,6 +480,19 @@ def create_model_record(
             "treatment": ["start_date", "end_date", "created_at", "updated_at"],
             "encounter": ["encounter_date", "created_at", "updated_at"],
         }
+
+        # Define date-only fields for each model (fields that should be Date objects, not DateTime)
+        date_field_map = {
+            "patient": ["birthDate"],
+            "immunization": ["date_administered", "expiration_date"],
+            "procedure": ["date"],
+            "treatment": ["start_date", "end_date"],
+            "encounter": ["encounter_date"],
+        }
+
+        # Convert date fields first (these need to be Date objects)
+        if model_name in date_field_map:
+            create_data = convert_date_fields(create_data, date_field_map[model_name])
 
         # Convert datetime fields if they exist for this model
         if model_name in datetime_field_map:
