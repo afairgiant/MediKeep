@@ -31,12 +31,18 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
   };
 
   return (
-    <header className="admin-header">
-      <div className="header-left">
+    <header className="admin-header">      <div className="header-left">
         <button className="sidebar-toggle-btn" onClick={handleToggleSidebar}>
           ☰
         </button>
         <h1>Medical Records Admin</h1>
+        <button 
+          className="back-to-dashboard-btn"
+          onClick={() => window.location.href = '/dashboard'}
+          title="Return to Normal Dashboard"
+        >
+          ← Dashboard
+        </button>
       </div>
 
       <div className="header-center">

@@ -5,17 +5,16 @@ Provides generic CRUD operations for all models in the system,
 with automatic discovery of model metadata, relationships, and validation.
 """
 
-import inspect
-from typing import Dict, List, Any, Optional, Type, Union
+from typing import Dict, List, Any, Optional, Type
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import inspect as sql_inspect, text
-from pydantic import BaseModel, create_model
+from sqlalchemy import inspect as sql_inspect
+from pydantic import BaseModel
 from datetime import datetime
 
 from app.api import deps
+from app.core.datetime_utils import convert_datetime_fields
 from app.models.models import (
-    Base,
     User,
     Patient,
     Practitioner,
@@ -292,7 +291,6 @@ def delete_model_record(
     current_user: User = Depends(deps.get_current_admin_user),
 ):
     """Delete a specific record by ID"""
-
     if model_name not in MODEL_REGISTRY:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -311,6 +309,36 @@ def delete_model_record(
                 detail=f"{model_name} record with id {record_id} not found",
             )
 
+        # Special protection for users - prevent deleting the last user
+        if model_name == "user":
+            total_users = db.query(User).count()
+            if total_users <= 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot delete the last remaining user in the system",
+                )
+
+            # Also check if we're trying to delete the last admin user
+            if (
+                hasattr(record, "role")
+                and record.role
+                and record.role.lower() in ["admin", "administrator"]
+            ):
+                admin_users = (
+                    db.query(User)
+                    .filter(
+                        User.role.in_(
+                            ["admin", "Admin", "administrator", "Administrator"]
+                        )
+                    )
+                    .count()
+                )
+                if admin_users <= 1:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Cannot delete the last remaining admin user in the system",
+                    )
+
         # Delete the record
         deleted_record = crud_instance.delete(db, id=record_id)
 
@@ -325,4 +353,80 @@ def delete_model_record(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting {model_name} record: {str(e)}",
+        )
+
+
+@router.put("/{model_name}/{record_id}")
+def update_model_record(
+    model_name: str,
+    record_id: int,
+    update_data: Dict[str, Any],
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Update a specific record by ID"""
+    if model_name not in MODEL_REGISTRY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model '{model_name}' not found",
+        )
+
+    model_info = MODEL_REGISTRY[model_name]
+    crud_instance = model_info["crud"]
+
+    try:
+        # Check if record exists first
+        record = crud_instance.get(db, id=record_id)
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"{model_name} record with id {record_id} not found",
+            )
+
+        # Define datetime fields for each model
+        datetime_field_map = {
+            "user": ["created_at", "updated_at", "last_login"],
+            "patient": ["created_at", "updated_at", "date_of_birth"],
+            "practitioner": ["created_at", "updated_at"],
+            "lab_result": [
+                "ordered_date",
+                "completed_date",
+                "created_at",
+                "updated_at",
+            ],
+            "lab_result_file": ["uploaded_at", "created_at", "updated_at"],
+            "medication": ["created_at", "updated_at"],
+            "condition": ["created_at", "updated_at"],
+            "allergy": ["created_at", "updated_at"],
+            "immunization": ["administration_date", "created_at", "updated_at"],
+            "procedure": ["procedure_date", "created_at", "updated_at"],
+            "treatment": ["start_date", "end_date", "created_at", "updated_at"],
+            "encounter": ["encounter_date", "created_at", "updated_at"],
+        }
+
+        # Convert datetime fields if they exist for this model
+        if model_name in datetime_field_map:
+            update_data = convert_datetime_fields(
+                update_data, datetime_field_map[model_name]
+            )
+
+        # Update the record using CRUD update method
+        updated_record = crud_instance.update(db, db_obj=record, obj_in=update_data)
+
+        # Convert to dictionary for JSON response
+        result = {}
+        for column in model_info["model"].__table__.columns:
+            value = getattr(updated_record, column.name, None)
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            result[column.name] = value
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating {model_name} record: {str(e)}",
         )

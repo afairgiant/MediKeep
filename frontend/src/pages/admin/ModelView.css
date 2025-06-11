@@ -1,0 +1,259 @@
+/* ModelView.css - Styles for the record view page */
+
+.model-view {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.model-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.view-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.view-title h1 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.view-title p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.back-btn:hover {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.view-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.view-actions .btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-actions .btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.view-actions .btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.view-actions .btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.view-actions .btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.record-details {
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.field-group {
+  padding: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.field-group:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.pk-badge, .fk-badge {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.pk-badge {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.fk-badge {
+  background-color: #ddd6fe;
+  color: #6b21a8;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.field-value {
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #374151;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+.field-value.datetime, .field-value.date {
+  color: #059669;
+}
+
+.field-value.boolean {
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+.field-value.number {
+  color: #dc2626;
+}
+
+.field-meta {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.raw-data-section {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.raw-data-section details {
+  cursor: pointer;
+}
+
+.raw-data-section summary {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 1rem;
+  user-select: none;
+}
+
+.raw-json {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.model-view-error {
+  padding: 2rem;
+  text-align: center;
+}
+
+.model-view-error h2 {
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.model-view-error p {
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.model-view-error .btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.model-view-error .btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.model-view-error .btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .field-group {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .model-view {
+    padding: 3rem;
+  }
+  
+  .model-view-header {
+    margin-bottom: 3rem;
+  }
+}

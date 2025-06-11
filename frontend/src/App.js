@@ -9,6 +9,8 @@ import Immunization from './pages/medical/Immunization';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ModelManagement from './pages/admin/ModelManagement';
+import ModelView from './pages/admin/ModelView';
+import ModelEdit from './pages/admin/ModelEdit';
 import { LoggingTest, ProtectedRoute, ErrorBoundary } from './components';
 import frontendLogger from './services/frontendLogger';
 import './App.css';
@@ -200,7 +202,7 @@ function App() {
             path="/admin/models/:modelName/:recordId" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <ModelView />
               </ProtectedRoute>
             } 
           />
@@ -208,7 +210,7 @@ function App() {
             path="/admin/models/:modelName/:recordId/edit" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <ModelEdit />
               </ProtectedRoute>
             } 
           />

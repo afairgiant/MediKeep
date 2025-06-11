@@ -40,6 +40,24 @@
   color: #111827;
 }
 
+.back-to-dashboard-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 20px;
+}
+
+.back-to-dashboard-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
 .header-center {
   flex: 1;
   max-width: 500px;
