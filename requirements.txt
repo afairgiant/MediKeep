@@ -8,6 +8,8 @@ python-multipart==0.0.20
 sqlalchemy==2.0.41
 databases==0.9.0
 aiosqlite==0.21.0
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+alembic==1.14.0  # Database migrations
 greenlet==3.2.2
 
 # Authentication & Security
