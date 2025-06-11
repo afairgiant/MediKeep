@@ -7,12 +7,41 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Fetch user data from your FastAPI backend
     fetchUserData();
     fetchRecentActivity();
+    checkAdminStatus();
   }, []);
+  const checkAdminStatus = () => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('🔍 Checking admin status...');
+      console.log('Token exists:', !!token);
+      
+      if (token) {
+        // Decode JWT token to check role
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('JWT payload:', payload);
+        
+        // Check if user has admin role (this should also be verified on backend)
+        const userRole = payload.role || '';
+        const adminCheck = userRole.toLowerCase() === 'admin' || userRole.toLowerCase() === 'administrator';
+        
+        console.log('User role:', userRole);
+        console.log('Is admin:', adminCheck);
+        
+        setIsAdmin(adminCheck);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -84,9 +113,7 @@ const Dashboard = () => {
       description: "Review your visits",
       link: "/visits"
     }
-  ];
-
-  // Smaller secondary items for additional features
+  ];  // Smaller secondary items for additional features
   const secondaryItems = [
     {
       title: "👨‍⚕️ Doctors",
@@ -94,6 +121,19 @@ const Dashboard = () => {
       link: "/practitioners"
     }
   ];
+  // Add admin dashboard link if user is admin
+  if (isAdmin) {
+    secondaryItems.unshift({
+      title: "⚙️ Admin Dashboard",
+      description: "System administration and management",
+      link: "/admin"
+    });
+  }
+
+  console.log('🔍 Dashboard render state:');
+  console.log('isAdmin:', isAdmin);
+  console.log('secondaryItems:', secondaryItems);
+
 
   if (loading) {
     return (

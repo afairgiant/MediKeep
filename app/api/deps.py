@@ -134,3 +134,44 @@ def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     if user_id is None:
         raise HTTPException(status_code=500, detail="User ID not found")
     return user_id
+
+
+def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Get current authenticated admin user.
+
+    Checks that the current user has admin role privileges.
+
+    Args:
+        current_user: Current authenticated user
+
+    Returns:
+        Current user object if they are an admin
+
+    Raises:
+        HTTPException 403: If user is not an admin
+    """
+    user_role = getattr(current_user, "role", None)
+    if not user_role or user_role.lower() not in ["admin", "administrator"]:
+        log_security_event(
+            security_logger,
+            event="admin_access_denied",
+            user_id=getattr(current_user, "id", None),
+            ip_address="middleware",
+            message=f"Non-admin user attempted admin access: {current_user.username}",
+            username=current_user.username,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required"
+        )
+
+    log_security_event(
+        security_logger,
+        event="admin_access_granted",
+        user_id=getattr(current_user, "id", None),
+        ip_address="middleware",
+        message=f"Admin access granted to: {current_user.username}",
+        username=current_user.username,
+    )
+
+    return current_user

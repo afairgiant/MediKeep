@@ -7,6 +7,8 @@ import Medication from './pages/medical/Medication';
 import LabResults from './pages/medical/LabResults';
 import Immunization from './pages/medical/Immunization';
 import PlaceholderPage from './pages/PlaceholderPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ModelManagement from './pages/admin/ModelManagement';
 import { LoggingTest, ProtectedRoute, ErrorBoundary } from './components';
 import frontendLogger from './services/frontendLogger';
 import './App.css';
@@ -170,6 +172,64 @@ function App() {
           />
           <Route 
             path="/practitioners" 
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Admin Routes */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/models/:modelName" 
+            element={
+              <ProtectedRoute>
+                <ModelManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/models/:modelName/:recordId" 
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/models/:modelName/:recordId/edit" 
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/models/:modelName/create" 
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/bulk-operations" 
+            element={
+              <ProtectedRoute>
+                <PlaceholderPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/system-health" 
             element={
               <ProtectedRoute>
                 <PlaceholderPage />

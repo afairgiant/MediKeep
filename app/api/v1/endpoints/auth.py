@@ -199,12 +199,16 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Create access token
+        )  # Create access token with user role and additional info
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": db_user.username}, expires_delta=access_token_expires
+        data={
+            "sub": db_user.username,
+            "role": getattr(db_user, "role", "user"),
+            "user_id": getattr(db_user, "id", None),
+            "full_name": getattr(db_user, "full_name", ""),
+        },
+        expires_delta=access_token_expires,
     )
 
     # Get user ID for logging

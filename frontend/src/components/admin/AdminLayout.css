@@ -1,0 +1,38 @@
+/* Admin Layout Styles */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+.admin-main.sidebar-open {
+  margin-left: 280px;
+}
+
+.admin-main.sidebar-closed {
+  margin-left: 60px;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-main.sidebar-open {
+    margin-left: 0;
+  }
+  
+  .admin-main.sidebar-closed {
+    margin-left: 0;
+  }
+}
