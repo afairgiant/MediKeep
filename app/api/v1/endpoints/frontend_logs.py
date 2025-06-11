@@ -8,18 +8,16 @@ error tracking and user interaction logging.
 from datetime import datetime
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.logging_config import get_logger
-from app.core.security_audit import security_audit
 
 router = APIRouter()
 
-# Initialize loggers
+# Initialize logger
 frontend_logger = get_logger("frontend", "app")
-security_logger = get_logger("frontend", "security")
 
 
 class FrontendLogRequest(BaseModel):
@@ -78,7 +76,7 @@ def log_frontend_event(
     Accepts log entries from the React frontend and processes them
     through the appropriate logging channels.
     """
-    client_ip = (
+    user_ip = (
         getattr(request.client, "host", "unknown") if request.client else "unknown"
     )
 
@@ -86,7 +84,7 @@ def log_frontend_event(
     log_context = {
         "category": "frontend",
         "frontend_category": log_data.category,
-        "ip": client_ip,
+        "ip": user_ip,
         "frontend_timestamp": log_data.timestamp,
         "user_agent": log_data.user_agent
         or request.headers.get("user-agent", "unknown"),
@@ -131,25 +129,11 @@ def log_frontend_event(
 
     # Add stack trace for errors
     if log_data.stack_trace:
-        log_context["stack_trace"] = log_data.stack_trace
-
-    # Log based on level and category
+        log_context["stack_trace"] = (
+            log_data.stack_trace
+        )  # Log based on level and category
     if log_data.level.lower() == "error":
         frontend_logger.error(f"Frontend Error: {log_data.message}", extra=log_context)
-
-        # Also log security events if applicable
-        if log_data.category in ["security", "auth", "access"]:
-            security_audit.log_security_threat(
-                threat_type="frontend_security_event",
-                ip_address=client_ip,
-                details={
-                    "message": log_data.message,
-                    "category": log_data.category,
-                    "component": log_data.component,
-                    "url": log_data.url,
-                },
-                user_id=log_data.user_id,
-            )
 
     elif log_data.level.lower() == "warn":
         frontend_logger.warning(
@@ -176,7 +160,7 @@ def log_frontend_error(
 
     Specifically designed for React error boundaries and unhandled errors.
     """
-    client_ip = (
+    user_ip = (
         getattr(request.client, "host", "unknown") if request.client else "unknown"
     )
 
@@ -186,7 +170,7 @@ def log_frontend_error(
         "event": "frontend_error",
         "error_type": error_data.error_type,
         "component_name": error_data.component_name,
-        "ip": client_ip,
+        "ip": user_ip,
         "url": error_data.url,
         "frontend_timestamp": error_data.timestamp,
         "user_agent": error_data.user_agent
@@ -204,36 +188,11 @@ def log_frontend_error(
 
     # Add browser info if available
     if error_data.browser_info:
-        error_context["browser_info"] = error_data.browser_info
-
-    # Log the error
+        error_context["browser_info"] = error_data.browser_info  # Log the error
     frontend_logger.error(
         f"Frontend Error: {error_data.error_message} in {error_data.component_name or 'Unknown Component'}",
         extra=error_context,
     )
-
-    # Log as security event if it seems suspicious
-    if any(
-        keyword in error_data.error_message.lower()
-        for keyword in [
-            "unauthorized",
-            "forbidden",
-            "token",
-            "authentication",
-            "permission",
-        ]
-    ):
-        security_audit.log_security_threat(
-            threat_type="frontend_security_error",
-            ip_address=client_ip,
-            details={
-                "error_message": error_data.error_message,
-                "error_type": error_data.error_type,
-                "component": error_data.component_name,
-                "url": error_data.url,
-            },
-            user_id=error_data.user_id,
-        )
 
     return {"status": "error_logged", "timestamp": datetime.utcnow().isoformat()}
 
@@ -250,7 +209,7 @@ def log_user_action(
 
     Tracks user interactions with the medical records system.
     """
-    client_ip = (
+    user_ip = (
         getattr(request.client, "host", "unknown") if request.client else "unknown"
     )
 
@@ -260,7 +219,7 @@ def log_user_action(
         "event": "user_action",
         "action": action_data.action,
         "component": action_data.component,
-        "ip": client_ip,
+        "ip": user_ip,
         "url": action_data.url,
         "frontend_timestamp": action_data.timestamp,
         "user_agent": request.headers.get("user-agent", "unknown"),
@@ -269,46 +228,11 @@ def log_user_action(
 
     # Add additional details if provided
     if action_data.details:
-        action_context["action_details"] = action_data.details
-
-    # Log the user action
+        action_context["action_details"] = action_data.details  # Log the user action
     frontend_logger.info(
         f"User Action: {action_data.action} in {action_data.component}",
         extra=action_context,
     )
-
-    # Log sensitive actions to security audit
-    sensitive_actions = [
-        "view_patient_data",
-        "update_patient_data",
-        "delete_patient_data",
-        "view_medication",
-        "create_medication",
-        "update_medication",
-        "delete_medication",
-        "view_lab_results",
-        "upload_file",
-        "download_file",
-        "login",
-        "logout",
-        "change_password",
-    ]
-
-    if action_data.action in sensitive_actions:
-        security_audit.log_data_access(
-            user_id=current_user_id,
-            username="frontend_user",  # Could be enhanced with actual username
-            ip_address=client_ip,
-            resource_type="frontend_action",
-            resource_id=None,
-            action=action_data.action,
-            success=True,
-            details={
-                "component": action_data.component,
-                "url": action_data.url,
-                "action_details": action_data.details,
-            },
-        )
 
     return {"status": "action_logged", "timestamp": datetime.utcnow().isoformat()}
 

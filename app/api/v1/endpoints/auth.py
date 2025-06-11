@@ -12,7 +12,7 @@ from app.schemas.patient import PatientCreate
 from app.core.security import create_access_token
 from app.core.logging_config import get_logger, log_security_event
 from datetime import date
-from app.core.security_audit import security_audit
+
 
 router = APIRouter()
 
@@ -35,14 +35,8 @@ def register(
     The password will be automatically hashed for security.
     A basic patient record is automatically created for the user.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    user_ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
-
-    # Check for suspicious input in username
-    if security_audit.check_suspicious_input(
-        user_in.username, "user_registration", ip_address=client_ip
-    ):
-        raise HTTPException(status_code=400, detail="Invalid input detected")
 
     # Log registration attempt using security audit system
     logger.info(
@@ -51,29 +45,13 @@ def register(
             "category": "security",
             "event": "user_registration_attempt",
             "username": user_in.username,
-            "ip": client_ip,
+            "ip": user_ip,
         },
     )
 
     # Check if username already exists
     existing_user = user.get_by_username(db, username=user_in.username)
     if existing_user:
-        # Enhanced logging with security audit
-        security_audit.log_authentication_attempt(
-            username=user_in.username,
-            ip_address=client_ip,
-            user_agent=user_agent,
-            success=False,
-            failure_reason="username_already_exists",
-        )
-
-        log_security_event(
-            security_logger,
-            event="registration_failed_username_exists",
-            ip_address=client_ip,
-            message=f"Registration failed: username {user_in.username} already exists",
-            username=user_in.username,
-        )
         raise HTTPException(status_code=400, detail="Username already registered")
 
     # Create new user
@@ -95,25 +73,14 @@ def register(
             raise ValueError("User ID not found after creation")
 
         patient.create_for_user(db, user_id=user_id, patient_data=default_patient_data)
-
-        # Enhanced logging with security audit
-        security_audit.log_authentication_attempt(
-            username=user_in.username,
-            ip_address=client_ip,
-            user_agent=user_agent,
-            success=True,
-            user_id=user_id,
-        )
-
-        # Log successful registration
+        # Log successful patient creation
         logger.info(
-            f"User registration successful for username: {user_in.username}",
+            f"Patient record created for user {user_id} ({user_in.username})",
             extra={
-                "category": "security",
-                "event": "user_registration_success",
+                "category": "app",
+                "event": "patient_creation_success",
                 "user_id": user_id,
                 "username": user_in.username,
-                "ip": client_ip,
             },
         )
 
@@ -134,6 +101,22 @@ def register(
     return new_user
 
 
+def log_successful_login(user_id: int, username: str, ip: str):
+    """
+    Logs a successful login event.
+    """
+    logger.info(
+        f"Login successful for username: {username}",
+        extra={
+            "category": "app",
+            "event": "login_success",
+            "user_id": user_id,
+            "username": username,
+            "ip": ip,
+        },
+    )
+
+
 @router.post("/login", response_model=Token)
 def login(
     request: Request,
@@ -145,29 +128,18 @@ def login(
 
     Returns a JWT token that can be used for authenticated requests.
     """
-    client_ip = request.client.host if request.client else "unknown"
-    user_agent = request.headers.get("user-agent", "unknown")
-
-    # Check for rate limiting
-    if security_audit.track_api_request(client_ip):
-        raise HTTPException(
-            status_code=429, detail="Too many requests. Please try again later."
-        )
-
-    # Check for suspicious input in username
-    if security_audit.check_suspicious_input(
-        form_data.username, "user_login", ip_address=client_ip
-    ):
-        raise HTTPException(status_code=400, detail="Invalid input detected")
+    user_ip = (
+        getattr(request.client, "host", "unknown") if request.client else "unknown"
+    )
 
     # Log login attempt
     logger.info(
         f"Login attempt for username: {form_data.username}",
         extra={
-            "category": "security",
+            "category": "app",
             "event": "login_attempt",
             "username": form_data.username,
-            "ip": client_ip,
+            "ip": user_ip,
         },
     )
 
@@ -177,75 +149,52 @@ def login(
     )
 
     if not db_user:
-        # Enhanced failed login logging with security audit
-        security_audit.log_authentication_attempt(
-            username=form_data.username,
-            ip_address=client_ip,
-            user_agent=user_agent,
-            success=False,
-            failure_reason="invalid_credentials",
-        )
-
         # Log failed login attempt
-        log_security_event(
-            security_logger,
-            event="login_failed",
-            ip_address=client_ip,
-            message=f"Failed login attempt for username: {form_data.username}",
-            username=form_data.username,
+        logger.info(
+            f"Failed login attempt for username: {form_data.username}",
+            extra={
+                "category": "app",
+                "event": "login_failed",
+                "username": form_data.username,
+                "ip": user_ip,
+            },
         )
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
-        )  # Create access token with user role and additional info
+        )
+
+    # Validate required fields
+    if db_user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User ID is missing in the database record",
+        )
+
+    full_name = getattr(db_user, "full_name", None)
+    if not full_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Full name is required for login",
+        )
+
+    # Create access token with user role and additional info
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={
             "sub": db_user.username,
-            "role": getattr(db_user, "role", "user"),
-            "user_id": getattr(db_user, "id", None),
-            "full_name": getattr(db_user, "full_name", ""),
+            "role": db_user.role
+            if db_user.role in ["admin", "user", "guest"]
+            else "user",
+            "user_id": db_user.id,
+            "full_name": full_name,
         },
         expires_delta=access_token_expires,
     )
 
-    # Get user ID for logging
-    user_id = getattr(db_user, "id", None)
-
-    # Enhanced successful login logging with security audit
-    security_audit.log_authentication_attempt(
-        username=form_data.username,
-        ip_address=client_ip,
-        user_agent=user_agent,
-        success=True,
-        user_id=user_id,
-    )
-
-    # Log session start
-    if user_id is not None:
-        security_audit.log_session_event(
-            event_type="session_start",
-            user_id=user_id,
-            username=form_data.username,
-            ip_address=client_ip,
-            session_data={
-                "token_expires": access_token_expires.total_seconds(),
-                "user_agent": user_agent,
-            },
-        )
-
     # Log successful login
-    logger.info(
-        f"Login successful for username: {form_data.username}",
-        extra={
-            "category": "security",
-            "event": "login_success",
-            "user_id": user_id,
-            "username": form_data.username,
-            "ip": client_ip,
-        },
-    )
+    log_successful_login(db_user.id, form_data.username, user_ip)
 
     return {"access_token": access_token, "token_type": "bearer"}
