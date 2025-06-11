@@ -3,6 +3,13 @@ import { Link } from 'react-router-dom';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
+  console.log('🗂️ AdminSidebar render:', {
+    timestamp: new Date().toISOString(),
+    isOpen,
+    currentPath,
+    hasOnToggle: typeof onToggle === 'function'
+  });
+
   const models = [
     { name: 'user', display: 'Users', icon: '👥' },
     { name: 'patient', display: 'Patients', icon: '🏥' },
@@ -18,11 +25,28 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     { name: 'encounter', display: 'Encounters', icon: '📋' },
   ];
 
+  const handleToggle = () => {
+    console.log('🗂️ AdminSidebar toggle clicked');
+    if (onToggle) {
+      onToggle();
+    } else {
+      console.error('❌ onToggle function not provided to AdminSidebar');
+    }
+  };
+
+  const handleLinkClick = (path) => {
+    console.log('🔗 AdminSidebar link clicked:', {
+      timestamp: new Date().toISOString(),
+      path,
+      currentPath
+    });
+  };
+
   return (
     <div className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
         <h2>🔧 Admin</h2>
-        <button className="sidebar-toggle" onClick={onToggle}>
+        <button className="sidebar-toggle" onClick={handleToggle}>
           {isOpen ? '‹' : '›'}
         </button>
       </div>
@@ -33,6 +57,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
           <Link 
             to="/admin" 
             className={`nav-item ${currentPath === '/admin' ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin')}
           >
             <span className="nav-icon">📊</span>
             <span className="nav-text">Overview</span>
@@ -46,6 +71,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
               key={model.name}
               to={`/admin/models/${model.name}`}
               className={`nav-item ${currentPath.includes(`/admin/models/${model.name}`) ? 'active' : ''}`}
+              onClick={() => handleLinkClick(`/admin/models/${model.name}`)}
             >
               <span className="nav-icon">{model.icon}</span>
               <span className="nav-text">{model.display}</span>
@@ -58,6 +84,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
           <Link 
             to="/admin/bulk-operations" 
             className={`nav-item ${currentPath.includes('/admin/bulk-operations') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/bulk-operations')}
           >
             <span className="nav-icon">⚡</span>
             <span className="nav-text">Bulk Operations</span>
@@ -65,6 +92,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
           <Link 
             to="/admin/system-health" 
             className={`nav-item ${currentPath.includes('/admin/system-health') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/system-health')}
           >
             <span className="nav-icon">🔍</span>
             <span className="nav-text">System Health</span>

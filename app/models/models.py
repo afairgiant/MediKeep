@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text
 from sqlalchemy.orm import relationship, declarative_base
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -15,6 +16,12 @@ class User(Base):
 
     # Role-based access control
     role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
     patient = relationship("Patient", back_populates="user", uselist=False)
 

@@ -14,23 +14,36 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadDashboardData();
   }, []);
-
   const loadDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [statsData, activityData, healthData] = await Promise.all([
-        adminApiService.getDashboardStats(),
-        adminApiService.getRecentActivity(),
-        adminApiService.getSystemHealth()
-      ]);
+      console.log('🔄 Loading dashboard data sequentially to prevent concurrent issues...');
 
+      // Load data sequentially instead of all at once to prevent concurrent auth issues
+      console.log('📊 Loading stats...');
+      const statsData = await adminApiService.getDashboardStats();
       setStats(statsData);
+      
+      // Small delay between requests
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      console.log('📋 Loading recent activity...');
+      const activityData = await adminApiService.getRecentActivity();
       setRecentActivity(activityData);
+      
+      // Small delay between requests
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      console.log('🔍 Loading system health...');
+      const healthData = await adminApiService.getSystemHealth();
       setSystemHealth(healthData);
+      
+      console.log('✅ All dashboard data loaded successfully');
+
     } catch (err) {
-      console.error('Error loading dashboard data:', err);
+      console.error('❌ Error loading dashboard data:', err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);

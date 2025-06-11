@@ -2,10 +2,38 @@ import React from 'react';
 import './AdminHeader.css';
 
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
+  console.log('🎯 AdminHeader render:', {
+    timestamp: new Date().toISOString(),
+    user: user?.username,
+    hasOnLogout: typeof onLogout === 'function',
+    hasOnToggleSidebar: typeof onToggleSidebar === 'function'
+  });
+
+  const handleLogout = () => {
+    console.log('🚪 AdminHeader logout button clicked:', {
+      timestamp: new Date().toISOString(),
+      user: user?.username
+    });
+    if (onLogout) {
+      onLogout();
+    } else {
+      console.error('❌ onLogout function not provided to AdminHeader');
+    }
+  };
+
+  const handleToggleSidebar = () => {
+    console.log('📱 AdminHeader sidebar toggle clicked');
+    if (onToggleSidebar) {
+      onToggleSidebar();
+    } else {
+      console.error('❌ onToggleSidebar function not provided to AdminHeader');
+    }
+  };
+
   return (
     <header className="admin-header">
       <div className="header-left">
-        <button className="sidebar-toggle-btn" onClick={onToggleSidebar}>
+        <button className="sidebar-toggle-btn" onClick={handleToggleSidebar}>
           ☰
         </button>
         <h1>Medical Records Admin</h1>
@@ -35,7 +63,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             <span className="notification-badge">3</span>
           </button>
           
-          <button className="logout-btn" onClick={onLogout} title="Logout">
+          <button className="logout-btn" onClick={handleLogout} title="Logout">
             🚪 Logout
           </button>
         </div>

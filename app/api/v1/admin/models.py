@@ -96,7 +96,7 @@ class ModelListResponse(BaseModel):
     total_pages: int
 
 
-def get_model_metadata(model_class: Type[Base]) -> ModelMetadata:
+def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
     """Extract metadata from a SQLAlchemy model class"""
 
     inspector = sql_inspect(model_class)

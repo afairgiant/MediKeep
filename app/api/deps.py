@@ -1,4 +1,5 @@
-from typing import Generator
+from typing import Generator, Dict, Tuple
+import time
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -15,6 +16,10 @@ security = HTTPBearer()
 
 # Initialize security logger
 security_logger = get_logger(__name__, "security")
+
+# Simple token cache to reduce concurrent request conflicts
+_token_cache: Dict[str, Tuple[User, float]] = {}
+_cache_ttl = 30  # Cache tokens for 30 seconds
 
 
 def get_db() -> Generator:
@@ -77,10 +82,24 @@ def get_current_user(
         log_security_event(
             security_logger,
             event="token_decode_failed",
-            ip_address="middleware",  # IP will be captured by middleware
-            message=f"JWT token decode failed: {str(e)}",
+            ip_address="middleware",  # IP will be captured by middleware            message=f"JWT token decode failed: {str(e)}",
         )
-        raise credentials_exception  # Get user from database
+        raise credentials_exception
+
+    # Check token cache first to reduce database load during concurrent requests
+    current_time = time.time()
+    token_key = credentials.credentials[:50]  # Use first 50 chars as cache key
+
+    if token_key in _token_cache:
+        cached_user, cached_time = _token_cache[token_key]
+        if current_time - cached_time < _cache_ttl:
+            # Return cached user if cache is still valid
+            return cached_user
+        else:
+            # Remove expired cache entry
+            del _token_cache[token_key]
+
+    # Get user from database
     try:
         db_user = user.get_by_username(db, username=username)
         if db_user is None:
@@ -92,6 +111,10 @@ def get_current_user(
                 username=username,
             )
             raise credentials_exception
+
+        # Cache the user for future requests
+        _token_cache[token_key] = (db_user, current_time)
+
     except Exception as e:
         log_security_event(
             security_logger,
