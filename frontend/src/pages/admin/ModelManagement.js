@@ -139,14 +139,24 @@ const ModelManagement = () => {
 
     return String(value);
   };
-
   const getDisplayFields = () => {
     if (!metadata) return [];
     
     // Show primary key and first few important fields
     const displayFields = metadata.fields.filter(field => 
       field.primary_key || 
-      ['name', 'username', 'email', 'first_name', 'last_name', 'title', 'medication_name', 'test_name'].includes(field.name)
+      [
+        // User fields
+        'username', 'email', 'full_name', 'role',
+        // Patient fields  
+        'first_name', 'last_name', 'birthDate',
+        // Practitioner fields
+        'name', 'specialty', 'practice',        
+        // Medical record fields
+        'medication_name', 'allergen', 'diagnosis', 'vaccine_name', 'test_name', 'reason', 'name',
+        // Status and date fields
+        'status', 'severity', 'date', 'start_date', 'end_date', 'onset_date', 'duration'
+      ].includes(field.name)
     ).slice(0, 5);
     
     // Always include id if not already included

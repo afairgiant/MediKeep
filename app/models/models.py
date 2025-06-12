@@ -12,10 +12,10 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)  # Role-based access control
+    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'
 
-    # Role-based access control
-    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'    # Timestamps
+    # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -85,8 +85,9 @@ class Medication(Base):
     route = Column(
         String, nullable=True
     )  # How it is administered (e.g., oral, injection, etc.)
-    indication = Column(String, nullable=True)  # What the medication is prescribed for
-    effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
+    indication = Column(
+        String, nullable=True
+    )  # What the medication is prescribed for    effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
     effectivePeriod_end = Column(Date, nullable=True)  # End date of the medication
     status = Column(String, nullable=True)  # e.g., 'active', 'stopped, 'on-hold'
 
@@ -221,6 +222,7 @@ class Procedure(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+    name = Column(String, nullable=False)  # Name of the procedure
     code = Column(String, nullable=True)  # Code for the procedure (e.g., CPT code)
     date = Column(Date, nullable=False)  # Date when the procedure was performed
     description = Column(String, nullable=True)  # Description of the procedure

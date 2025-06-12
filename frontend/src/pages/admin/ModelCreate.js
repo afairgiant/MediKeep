@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
+import { apiService } from '../../services/api';
 import { Loading } from '../../components';
 import './ModelEdit.css'; // Reuse the same styles as ModelEdit
 
@@ -95,13 +96,18 @@ const ModelCreate = () => {
 
     return errors;
   };
-
   const validateForm = () => {
     const errors = {};
     let hasErrors = false;
+    const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
 
     metadata.fields.forEach(field => {
       if (!field.primary_key) { // Don't validate primary keys (they're auto-generated)
+        // Skip patient_id validation for medical models as it will be auto-populated
+        if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
+          return; // Skip validation for auto-populated patient_id
+        }
+        
         const fieldErrors = validateField(field, formData[field.name]);
         if (fieldErrors.length > 0) {
           errors[field.name] = fieldErrors;
@@ -138,8 +144,7 @@ const ModelCreate = () => {
       const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
       if (medicalModels.includes(modelName)) {
         try {
-          // Import the API service to get current patient
-          const { apiService } = await import('../../services/api');
+          // Get current patient directly using the already imported apiService
           const currentPatient = await apiService.getCurrentPatient();
           if (currentPatient && currentPatient.id) {
             submitData.patient_id = currentPatient.id;

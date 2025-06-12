@@ -13,9 +13,37 @@ class AdminApiService extends BaseApiService {
   async getRecentActivity(limit = 20) {
     return this.get('/dashboard/recent-activity', { limit });
   }
-
   async getSystemHealth() {
     return this.get('/dashboard/system-health');
+  }
+  async getSystemMetrics() {
+    return this.get('/dashboard/system-metrics');
+  }
+
+  async getStorageHealth() {
+    // Note: This endpoint is not under /admin, so we use the direct path
+    const response = await fetch('/api/v1/lab-result-files/health/storage', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async getFrontendLogHealth() {
+    // Note: This endpoint is not under /admin, so we use the direct path
+    const response = await fetch('/api/v1/frontend-logs/health', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
   }
 
   // Model management endpoints

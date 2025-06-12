@@ -498,10 +498,12 @@ def create_model_record(
         if model_name in datetime_field_map:
             create_data = convert_datetime_fields(
                 create_data, datetime_field_map[model_name]
-            )
+            )  # Create Pydantic schema object from the processed data
+        create_schema = model_info["create_schema"]
+        create_obj = create_schema(**create_data)
 
         # Create the record using CRUD create method
-        created_record = crud_instance.create(db, obj_in=create_data)
+        created_record = crud_instance.create(db, obj_in=create_obj)
 
         # Convert to dictionary for JSON response
         result = {}
