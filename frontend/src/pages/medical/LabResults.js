@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/LabResults.css';
 
 const LabResults = () => {
@@ -376,18 +377,16 @@ const LabResults = () => {
       // Don't fail the whole page if file counts fail
     }
   };
-
   if (loading) {
     return (
-      <div className="lab-results-container">
+      <div className="medical-page-container">
         <div className="loading">Loading lab results...</div>
       </div>
     );
   }
-
   return (
-    <div className="lab-results-container">
-      <div className="lab-results-header">
+    <div className="medical-page-container">
+      <header className="medical-page-header">
         <button
             className="back-button"
             onClick={() => navigate('/dashboard')}
@@ -395,34 +394,44 @@ const LabResults = () => {
           ← Back to Dashboard            
         </button>
         <h1>🧪 Lab Results</h1>
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowCreateForm(true)}
-        >
-          Add New Lab Result
-        </button>
-      </div>
+      </header>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      <div className="medical-page-content">
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
 
-      {/* Create Lab Result Form */}
+        <div className="medical-page-controls">
+          <div className="controls-left">
+            <button 
+              className="add-button"
+              onClick={() => setShowCreateForm(true)}
+            >
+              + Add New Lab Result
+            </button>
+          </div>
+          
+          <div className="controls-right">
+            {/* Future: Add sort controls if needed */}
+          </div>
+        </div>      {/* Create Lab Result Form */}
       {showCreateForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Add New Lab Result</h2>
+        <div className="medical-form-overlay">
+          <div className="medical-form-modal">
+            <div className="form-header">
+              <h3>Add New Lab Result</h3>
               <button 
-                className="close-btn"
+                className="close-button"
                 onClick={() => setShowCreateForm(false)}
               >
                 ×
               </button>
-            </div>            <form onSubmit={handleCreateLabResult} className="lab-result-form">
-              <div className="form-grid">
+            </div>
+            <div className="medical-form-content">
+              <form onSubmit={handleCreateLabResult}>
+                <div className="form-grid">
                 <div className="form-group">
                   <label>Test Name *</label>
                   <input
@@ -508,29 +517,26 @@ const LabResults = () => {
                     rows="3"
                   />
                 </div>
-              </div>
-
-              <div className="form-actions">
-                <button type="button" onClick={() => setShowCreateForm(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Create Lab Result
-                </button>
-              </div>
-            </form>
+              </div>                <div className="form-actions">
+                  <button type="button" className="cancel-button" onClick={() => setShowCreateForm(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="save-button">
+                    Create Lab Result
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Edit Lab Result Form */}
+      )}      {/* Edit Lab Result Form */}
       {showEditForm && editingLabResult && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Edit Lab Result</h2>
+        <div className="medical-form-overlay">
+          <div className="medical-form-modal">
+            <div className="form-header">
+              <h3>Edit Lab Result</h3>
               <button 
-                className="close-btn"
+                className="close-button"
                 onClick={() => {
                   setShowEditForm(false);
                   setEditingLabResult(null);
@@ -539,8 +545,8 @@ const LabResults = () => {
                 ×
               </button>
             </div>
-            
-            <form onSubmit={handleUpdateLabResult} className="lab-result-form">
+            <div className="medical-form-content">
+              <form onSubmit={handleUpdateLabResult}>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Test Name *</label>
@@ -627,11 +633,10 @@ const LabResults = () => {
                     rows="3"
                   />
                 </div>
-              </div>
-
-              <div className="form-actions">
+              </div>              <div className="form-actions">
                 <button 
                   type="button" 
+                  className="cancel-button"
                   onClick={() => {
                     setShowEditForm(false);
                     setEditingLabResult(null);
@@ -639,112 +644,105 @@ const LabResults = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="save-button">
                   Update Lab Result
                 </button>
               </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Lab Results List */}
-      <div className="lab-results-list">
+      )}{/* Lab Results List */}
+      <div className="medical-items-list">
         {labResults.length === 0 ? (
-          <div className="no-results">
-            <p>No lab results found.</p>
+          <div className="empty-state">
+            <div className="empty-icon">🧪</div>
+            <h3>No lab results found</h3>
             <p>Click "Add New Lab Result" to get started.</p>
           </div>
-        ) : (          <div className="results-grid">            {labResults.map(result => {
+        ) : (          <div className="medical-items-grid">            {labResults.map(result => {
               console.log(`Rendering lab result ${result.id}, file count:`, filesCounts[result.id]);
-              return (              <div key={result.id} className="lab-result-card">
-                <div className="card-header">
-                  <h3>{result.test_name}</h3>
-                  <span className={`status-badge ${getStatusClass(result.status)}`}>
+              return (              <div key={result.id} className="medical-item-card">
+                <div className="medical-item-header">
+                  <h3 className="item-title">{result.test_name}</h3>
+                  <span className={`status-badge status-${result.status.replace(/\s+/g, '-')}`}>
                     {result.status}
                   </span>
                 </div>
                 
-                <div className="card-body">
-                  <div className="result-info">
-                    <div className="info-row">
-                      <span className="label">Test Code:</span>
-                      <span className="value">{result.test_code || 'N/A'}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Category:</span>
-                      <span className="value">{result.test_category || 'N/A'}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Ordered:</span>
-                      <span className="value">{formatDateTime(result.ordered_date)}</span>
-                    </div>
-                    {result.completed_date && (
-                      <div className="info-row">
-                        <span className="label">Completed:</span>
-                        <span className="value">{formatDateTime(result.completed_date)}</span>
-                      </div>
-                    )}                    <div className="info-row">
-                      <span className="label">Status:</span>
-                      <span className={`value status ${getStatusClass(result.status)}`}>
-                        {result.status}
-                      </span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Files:</span>
-                      <span className="value">
-                        {filesCounts[result.id] > 0 ? (
-                          <span className="file-indicator" title={`${filesCounts[result.id]} file(s) attached`}>
-                            📎 {filesCounts[result.id]} attached
-                          </span>
-                        ) : (
-                          <span className="no-files">No files attached</span>
-                        )}
-                      </span>
-                    </div>
+                <div className="medical-item-details">
+                  <div className="detail-item">
+                    <span className="label">Test Code:</span>
+                    <span className="value">{result.test_code || 'N/A'}</span>
                   </div>
-                </div>                
-                <div className="card-actions">
+                  <div className="detail-item">
+                    <span className="label">Category:</span>
+                    <span className="value">{result.test_category || 'N/A'}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Ordered:</span>
+                    <span className="value">{formatDateTime(result.ordered_date)}</span>
+                  </div>
+                  {result.completed_date && (
+                    <div className="detail-item">
+                      <span className="label">Completed:</span>
+                      <span className="value">{formatDateTime(result.completed_date)}</span>
+                    </div>
+                  )}
+                  <div className="detail-item">
+                    <span className="label">Files:</span>
+                    <span className="value">
+                      {filesCounts[result.id] > 0 ? (
+                        <span className="file-indicator" title={`${filesCounts[result.id]} file(s) attached`}>
+                          📎 {filesCounts[result.id]} attached
+                        </span>
+                      ) : (
+                        <span className="no-files">No files attached</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="medical-item-actions">
                   <button 
-                    className="btn btn-secondary"
+                    className="view-button"
                     onClick={() => handleViewDetails(result)}
                   >
-                    View Details
+                    👁️ View
                   </button>
                   <button 
-                    className="btn btn-primary"
+                    className="edit-button"
                     onClick={() => handleEditLabResult(result)}
                   >
-                    Edit
+                    ✏️ Edit
                   </button>
                   <button 
-                    className="btn btn-danger"
+                    className="delete-button"
                     onClick={() => handleDeleteLabResult(result.id)}
                   >
-                    Delete
+                    🗑️ Delete
                   </button>                
-                  </div>
+                </div>
               </div>
               );
             })}
           </div>
         )}
-      </div>
-
-      {/* Lab Result Details Modal */}
-      {selectedLabResult && (        <div className="modal-overlay">
-          <div className="modal-content large">
-            <div className="modal-header">
-              <h2>{selectedLabResult.test_name}</h2>
+      </div>      {/* Lab Result Details Modal */}
+      {selectedLabResult && (
+        <div className="medical-form-overlay">
+          <div className="medical-form-modal">
+            <div className="form-header">
+              <h3>{selectedLabResult.test_name}</h3>
               <button 
-                className="close-btn"
+                className="close-button"
                 onClick={() => setSelectedLabResult(null)}
               >
                 ×
               </button>
             </div>
             
-            <div className="modal-body">
+            <div className="medical-form-content">
               <div className="details-section">
                 <h3>Lab Result Details</h3>
                 <div className="details-grid">
@@ -818,15 +816,14 @@ const LabResults = () => {
                             <span className="file-description">{file.description}</span>
                           )}
                         </div>
-                        <div className="file-actions">
-                          <button 
-                            className="btn btn-sm btn-secondary"
+                        <div className="file-actions">                          <button 
+                            className="view-button"
                             onClick={() => handleDownloadFile(file.id, file.file_name)}
                           >
                             Download
                           </button>
                           <button 
-                            className="btn btn-sm btn-danger"
+                            className="delete-button"
                             onClick={() => handleDeleteFile(file.id)}
                           >
                             Delete
@@ -841,6 +838,7 @@ const LabResults = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
