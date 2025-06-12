@@ -14,7 +14,7 @@ class Settings:  # App Info
     )  # Enable debug by default in development
 
     # Database Configuration
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./medical_records.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
     # Security Configuration
     ALGORITHM: str = "HS256"
