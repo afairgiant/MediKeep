@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import { formatDate } from '../../utils/helpers';
 import '../../styles/pages/Medication.css';
 
 const Medication = () => {
@@ -187,16 +188,10 @@ const Medication = () => {
 
   const handleSortChange = (newSortBy) => {
     if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');    } else {
       setSortBy(newSortBy);
       setSortOrder('asc');
     }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString();
   };
 
   const getStatusBadgeClass = (status) => {

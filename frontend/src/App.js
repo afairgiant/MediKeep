@@ -6,6 +6,12 @@ import PatientInfo from './pages/medical/Patient-Info';
 import Medication from './pages/medical/Medication';
 import LabResults from './pages/medical/LabResults';
 import Immunization from './pages/medical/Immunization';
+import Allergies from './pages/medical/Allergies';
+import Treatments from './pages/medical/Treatments';
+import Procedures from './pages/medical/Procedures';
+import Conditions from './pages/medical/Conditions';
+import Visits from './pages/medical/Visits';
+import Practitioners from './pages/medical/Practitioners';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ModelManagement from './pages/admin/ModelManagement';
@@ -133,12 +139,11 @@ function App() {
                 <Immunization />
               </ProtectedRoute>
             } 
-          />
-          <Route 
+          />          <Route 
             path="/procedures" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Procedures />
               </ProtectedRoute>
             } 
           />
@@ -146,7 +151,7 @@ function App() {
             path="/allergies" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Allergies />
               </ProtectedRoute>
             } 
           />
@@ -154,7 +159,7 @@ function App() {
             path="/conditions" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Conditions />
               </ProtectedRoute>
             } 
           />
@@ -162,7 +167,7 @@ function App() {
             path="/treatments" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Treatments />
               </ProtectedRoute>
             } 
           />
@@ -170,15 +175,14 @@ function App() {
             path="/visits" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Visits />
               </ProtectedRoute>
-            } 
-          />
+            }          />
           <Route 
             path="/practitioners" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <Practitioners />
               </ProtectedRoute>
             } 
           />

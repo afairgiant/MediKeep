@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import { formatDate } from '../../utils/helpers';
+import { DATE_FORMATS } from '../../utils/constants';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
@@ -141,20 +143,11 @@ const PatientInfo = () => {
     } catch (error) {
       console.error('Error saving patient data:', error);
       setError(error.message || 'Failed to save patient information. Please try again.');
-    } finally {
-      setSaving(false);
+    } finally {    setSaving(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not provided';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };  const getGenderDisplay = (gender) => {
+  const getGenderDisplay = (gender) => {
     switch (gender?.toUpperCase()) {
       case 'M': return 'Male';
       case 'F': return 'Female';
@@ -382,10 +375,9 @@ const PatientInfo = () => {
                 </div>
               </div>
 
-              <div className="detail-row">
-                <div className="detail-group">
+              <div className="detail-row">                <div className="detail-group">
                   <label>Birth Date:</label>
-                  <span>{formatDate(patientData?.birthDate)}</span>
+                  <span>{formatDate(patientData?.birthDate, DATE_FORMATS.DISPLAY_LONG)}</span>
                 </div>
                 <div className="detail-group">
                   <label>Gender:</label>

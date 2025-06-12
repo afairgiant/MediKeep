@@ -1,0 +1,74 @@
+/* Conditions Page Specific Styles */
+/* These styles are specific to the Conditions page and complement the shared MedicalPageShared.css */
+
+/* Page-specific status badge colors for conditions */
+.status-badge.status-active {
+  background: #fef9e7;
+  color: #f39c12;
+}
+
+.status-badge.status-resolved {
+  background: #d5f4e6;
+  color: #27ae60;
+}
+
+.status-badge.status-chronic {
+  background: #fadbd8;
+  color: #e74c3c;
+}
+
+.status-badge.status-monitored {
+  background: #ebf3fd;
+  color: #3498db;
+}
+
+/* Severity-specific status badges */
+.status-badge.severity-mild {
+  background: #d5f4e6;
+  color: #27ae60;
+}
+
+.status-badge.severity-moderate {
+  background: #fef9e7;
+  color: #f39c12;
+}
+
+.status-badge.severity-severe {
+  background: #fbeee6;
+  color: #e67e22;
+}
+
+.status-badge.severity-critical {
+  background: #fadbd8;
+  color: #e74c3c;
+}
+
+/* Conditions-specific animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-message {
+  animation: slideIn 0.3s ease;
+}
+
+/* Additional mobile responsive tweaks specific to conditions */
+@media (max-width: 768px) {
+  .status-badges {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  
+  .medical-item-details {
+    grid-template-columns: 1fr;
+  }
+}

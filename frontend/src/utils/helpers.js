@@ -14,13 +14,22 @@ export const formatDate = (date, format = DATE_FORMATS.DISPLAY) => {
   if (!date) return 'N/A';
   
   try {
-    const dateObj = new Date(date);
-    if (isNaN(dateObj.getTime())) return 'Invalid Date';
+    let dateObj;
     
-    // Simple date formatting
+    // Handle timezone issues for date-only strings (YYYY-MM-DD format)
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
+      // Parse as local date to avoid timezone conversion
+      const [year, month, day] = date.trim().split('-');
+      dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } else {
+      dateObj = new Date(date);
+    }
+    
+    if (isNaN(dateObj.getTime())) return 'Invalid Date';
+      // Simple date formatting
     const options = {
       year: 'numeric',
-      month: 'short',
+      month: format.includes('MMMM') ? 'long' : 'short',
       day: '2-digit'
     };
     
