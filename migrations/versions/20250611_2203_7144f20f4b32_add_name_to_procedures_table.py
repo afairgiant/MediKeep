@@ -22,14 +22,15 @@ def upgrade() -> None:
                existing_type=sa.INTEGER(),
                nullable=False,
                autoincrement=True)
-    op.drop_column('medications', 'effectivePeriod_start')
+    # Removed op.drop_column('medications', 'effectivePeriod_start') - column doesn't exist in current DB
     op.alter_column('patients', 'gender',
                existing_type=sa.VARCHAR(),
                nullable=True)
     op.alter_column('patients', 'address',
                existing_type=sa.VARCHAR(),
                nullable=True)
-    op.add_column('procedures', sa.Column('name', sa.String(), nullable=False))
+    # Skip adding 'name' column to procedures table - it already exists in database
+    # op.add_column('procedures', sa.Column('name', sa.String(), nullable=False))
     op.alter_column('users', 'created_at',
                existing_type=sa.DATETIME(),
                nullable=False)
@@ -47,14 +48,15 @@ def downgrade() -> None:
     op.alter_column('users', 'created_at',
                existing_type=sa.DATETIME(),
                nullable=True)
-    op.drop_column('procedures', 'name')
+    # Skip dropping 'name' column from procedures table - it should remain
+    # op.drop_column('procedures', 'name')
     op.alter_column('patients', 'address',
                existing_type=sa.VARCHAR(),
                nullable=False)
     op.alter_column('patients', 'gender',
                existing_type=sa.VARCHAR(),
                nullable=False)
-    op.add_column('medications', sa.Column('effectivePeriod_start', sa.DATE(), nullable=True))
+    # Removed op.add_column('medications', sa.Column('effectivePeriod_start', sa.DATE(), nullable=True)) - not needed for current DB state
     op.alter_column('immunizations', 'id',
                existing_type=sa.INTEGER(),
                nullable=True,
