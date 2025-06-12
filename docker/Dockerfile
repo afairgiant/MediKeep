@@ -11,8 +11,8 @@ WORKDIR /frontend
 # Copy package files first for better layer caching
 COPY frontend/package*.json ./
 
-# Install dependencies with cache mount for faster builds
-RUN npm ci --silent
+# Install dependencies
+RUN npm install --silent --no-audit --no-fund
 
 # Copy frontend source
 COPY frontend/ ./
