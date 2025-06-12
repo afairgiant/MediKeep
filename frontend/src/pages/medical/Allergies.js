@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { MedicalCard, StatusBadge } from '../../components';
+import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
 const Allergies = () => {
@@ -182,13 +183,7 @@ const Allergies = () => {
     } else {
       setSortBy(newSortBy);
       setSortOrder('desc');
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString();
-  };
+    }  };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {

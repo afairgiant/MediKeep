@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import { formatDateTime } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/LabResults.css';
 
@@ -291,11 +292,7 @@ const LabResults = () => {
       } catch (error) {
         console.error('Error deleting file:', error);
         setError(error.message);
-      }
-    }
-  };  const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString();
+      }    }
   };
 
   const getStatusClass = (status) => {

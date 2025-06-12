@@ -93,6 +93,7 @@ export const UI_CONSTANTS = {
 // Date Formats
 export const DATE_FORMATS = {
   DISPLAY: 'MMM DD, YYYY',
+  DISPLAY_LONG: 'MMMM DD, YYYY', // For Patient Info page
   DISPLAY_WITH_TIME: 'MMM DD, YYYY HH:mm',
   INPUT: 'YYYY-MM-DD',
   INPUT_WITH_TIME: 'YYYY-MM-DDTHH:mm',

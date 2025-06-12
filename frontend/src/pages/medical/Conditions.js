@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
 const Conditions = () => {
@@ -119,14 +120,9 @@ const Conditions = () => {
         case 'status':
           return (a.status || '').localeCompare(b.status || '');
         case 'onsetDate':
-        default:
-          return new Date(b.onsetDate || 0) - new Date(a.onsetDate || 0);
+        default:          return new Date(b.onsetDate || 0) - new Date(a.onsetDate || 0);
       }
     });
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString();
-  };
 
   if (loading) {
     return (

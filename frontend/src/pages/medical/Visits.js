@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import { MedicalCard, StatusBadge } from '../../components';
+import { formatDate, formatDateTime } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
 const Visits = () => {
@@ -182,20 +183,8 @@ const Visits = () => {
       case 'follow-up': return 'warning';
       case 'emergency': return 'error';
       case 'routine': return 'success';
-      case 'specialist': return 'info';
-      default: return 'info';
+      case 'specialist': return 'info';      default: return 'info';
     }
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return 'Not specified';
-    const date = new Date(dateString);
-    return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString();
   };
 
   if (loading) {
