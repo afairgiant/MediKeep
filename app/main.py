@@ -37,14 +37,32 @@ app.include_router(api_router, prefix="/api/v1")
 
 
 # Serve static files (React build) in production
-static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
-if os.path.exists(static_dir):
+# Try multiple possible static directory locations
+static_dirs = [
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"),  # Development
+    "/app/static",  # Docker container
+    "static",  # Current directory (Docker workdir is /app)
+]
+
+static_dir = None
+for dir_path in static_dirs:
+    if os.path.exists(dir_path):
+        static_dir = dir_path
+        break
+
+if static_dir:
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    logger.info(f"Serving static files from: {static_dir}")
 
     @app.get("/")
     async def read_index():
         """Serve React app index.html for root path"""
-        return FileResponse(os.path.join(static_dir, "index.html"))
+        if static_dir:  # Additional check for type safety
+            index_path = os.path.join(static_dir, "index.html")
+            return FileResponse(index_path)
+        return {"error": "Static files not available"}
+else:
+    logger.warning("No static directory found - React app will not be served")
 
 
 @app.on_event("startup")
@@ -72,3 +90,20 @@ def health():
         "Health check requested", extra={"category": "app", "event": "health_check"}
     )
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
+
+
+# Catch-all route for React routing (must be last)
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    """Serve React app for all non-API routes"""
+    # Don't interfere with API routes
+    if full_path.startswith("api/"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
+    # Serve React app for frontend routes
+    if static_dir and os.path.exists(os.path.join(static_dir, "index.html")):
+        index_path = os.path.join(static_dir, "index.html")
+        return FileResponse(index_path)
+    
+    return {"error": "React app not available"}
