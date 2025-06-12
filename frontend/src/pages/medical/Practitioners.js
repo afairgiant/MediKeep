@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { MedicalCard, StatusBadge } from '../../components';
 import '../../styles/pages/Practitioners.css';
+import '../../styles/shared/MedicalPageShared.css';
 
 const Practitioners = () => {
+  const navigate = useNavigate();
   const [practitioners, setPractitioners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -169,11 +172,16 @@ const Practitioners = () => {
       </div>
     );
   }
-
   return (
     <div className="practitioners-page">
       <div className="practitioners-header">
-        <h1 className="practitioners-title">Healthcare Practitioners</h1>
+        <button
+          className="back-button"
+          onClick={() => navigate('/dashboard')}
+        >
+          ← Back to Dashboard
+        </button>
+        <h1 className="practitioners-title">👩‍⚕️ Healthcare Practitioners</h1>
         <div className="practitioners-actions">
           <button className="add-practitioner-btn" onClick={handleAddPractitioner}>
             <span>+</span>
