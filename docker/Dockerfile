@@ -60,5 +60,16 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
+# Create a startup script that fixes permissions
+USER root
+RUN echo '#!/bin/bash\n\
+chown -R appuser:appuser /app/logs /app/uploads 2>/dev/null || true\n\
+exec su-exec appuser "$@"' > /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Install su-exec for user switching
+RUN apt-get update && apt-get install -y su-exec && rm -rf /var/lib/apt/lists/*
+
 # Start the application
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

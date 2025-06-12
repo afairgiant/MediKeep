@@ -25,9 +25,7 @@ services:
 
   # Combined Frontend + Backend Application Service
   medical-records-app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest
     container_name: medical-records-app
     ports:
       - "8000:8000"  # Single port serves both React app and FastAPI    
@@ -37,10 +35,10 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}    
     volumes:
-      - ./uploads:/app/uploads
-      - ./logs:/app/logs
+      - app_uploads:/app/uploads
+      - app_logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,6 +54,10 @@ services:
 # Named volumes for data persistence
 volumes:
   postgres_data:
+    driver: local
+  app_uploads:
+    driver: local
+  app_logs:
     driver: local
 
 # Network for service communication

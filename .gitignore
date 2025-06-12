@@ -37,6 +37,8 @@ yarn.lock
 *.env.test.local
 *.env.production.local
 
+!/frontend/.env
+
 # Editor and system files
 .DS_Store
 *.swp
