@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from app.api import deps
-from app.core.datetime_utils import convert_datetime_fields
+from app.core.datetime_utils import convert_datetime_fields, convert_date_fields
 from app.models.models import (
     User,
     Patient,
@@ -42,23 +42,71 @@ from app.crud import (
     treatment,
     encounter,
 )
+from app.schemas.user import UserCreate
+from app.schemas.patient import PatientCreate
+from app.schemas.practitioner import PractitionerCreate
+from app.schemas.medication import MedicationCreate
+from app.schemas.lab_result import LabResultCreate
+from app.schemas.lab_result_file import LabResultFileCreate
+from app.schemas.condition import ConditionCreate
+from app.schemas.allergy import AllergyCreate
+from app.schemas.immunization import ImmunizationCreate
+from app.schemas.procedure import ProcedureCreate
+from app.schemas.treatment import TreatmentCreate
+from app.schemas.encounter import EncounterCreate
 
 router = APIRouter()
 
 # Model registry mapping model names to their classes and CRUD instances
 MODEL_REGISTRY = {
-    "user": {"model": User, "crud": user},
-    "patient": {"model": Patient, "crud": patient},
-    "practitioner": {"model": Practitioner, "crud": practitioner},
-    "medication": {"model": Medication, "crud": medication},
-    "lab_result": {"model": LabResult, "crud": lab_result},
-    "lab_result_file": {"model": LabResultFile, "crud": lab_result_file},
-    "condition": {"model": Condition, "crud": condition},
-    "allergy": {"model": Allergy, "crud": allergy},
-    "immunization": {"model": Immunization, "crud": immunization},
-    "procedure": {"model": Procedure, "crud": procedure},
-    "treatment": {"model": Treatment, "crud": treatment},
-    "encounter": {"model": Encounter, "crud": encounter},
+    "user": {"model": User, "crud": user, "create_schema": UserCreate},
+    "patient": {"model": Patient, "crud": patient, "create_schema": PatientCreate},
+    "practitioner": {
+        "model": Practitioner,
+        "crud": practitioner,
+        "create_schema": PractitionerCreate,
+    },
+    "medication": {
+        "model": Medication,
+        "crud": medication,
+        "create_schema": MedicationCreate,
+    },
+    "lab_result": {
+        "model": LabResult,
+        "crud": lab_result,
+        "create_schema": LabResultCreate,
+    },
+    "lab_result_file": {
+        "model": LabResultFile,
+        "crud": lab_result_file,
+        "create_schema": LabResultFileCreate,
+    },
+    "condition": {
+        "model": Condition,
+        "crud": condition,
+        "create_schema": ConditionCreate,
+    },
+    "allergy": {"model": Allergy, "crud": allergy, "create_schema": AllergyCreate},
+    "immunization": {
+        "model": Immunization,
+        "crud": immunization,
+        "create_schema": ImmunizationCreate,
+    },
+    "procedure": {
+        "model": Procedure,
+        "crud": procedure,
+        "create_schema": ProcedureCreate,
+    },
+    "treatment": {
+        "model": Treatment,
+        "crud": treatment,
+        "create_schema": TreatmentCreate,
+    },
+    "encounter": {
+        "model": Encounter,
+        "crud": encounter,
+        "create_schema": EncounterCreate,
+    },
 }
 
 
@@ -121,7 +169,50 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
         # Check for foreign keys
         foreign_key = None
         if column.foreign_keys:
-            foreign_key = list(column.foreign_keys)[0].target_fullname
+            foreign_key = list(column.foreign_keys)[
+                0
+            ].target_fullname  # Check for predefined choices for specific fields
+        choices = None
+        if column.name == "status":
+            # Define status choices based on model type
+            model_name = model_class.__name__.lower()
+            if model_name == "labresult":
+                choices = ["ordered", "in-progress", "completed", "cancelled"]
+            elif model_name == "medication":
+                choices = ["active", "stopped", "on-hold", "completed", "cancelled"]
+            elif model_name == "allergy":
+                choices = ["active", "inactive", "resolved", "unconfirmed"]
+            elif model_name == "condition":
+                choices = [
+                    "active",
+                    "resolved",
+                    "chronic",
+                    "inactive",
+                    "recurrence",
+                    "relapse",
+                ]
+            elif model_name == "treatment":
+                choices = ["active", "inactive", "completed", "paused"]
+            elif model_name == "immunization":
+                choices = ["completed", "pending", "refused", "contraindicated"]
+            elif model_name == "procedure":
+                choices = [
+                    "scheduled",
+                    "in-progress",
+                    "completed",
+                    "cancelled",
+                    "postponed",
+                ]
+            elif model_name == "encounter":
+                choices = ["scheduled", "in-progress", "completed", "cancelled"]
+            else:
+                choices = ["active", "inactive", "completed", "cancelled"]
+        elif column.name == "severity":
+            choices = ["mild", "moderate", "severe", "life-threatening"]
+        elif column.name == "gender":
+            choices = ["M", "F", "OTHER", "U"]
+        elif column.name == "role":
+            choices = ["patient", "admin", "staff"]
 
         fields.append(
             ModelField(
@@ -131,6 +222,7 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
                 primary_key=column.primary_key,
                 foreign_key=foreign_key,
                 max_length=getattr(column.type, "length", None),
+                choices=choices,
             )
         )
 
@@ -340,7 +432,7 @@ def delete_model_record(
                     )
 
         # Delete the record
-        deleted_record = crud_instance.delete(db, id=record_id)
+        crud_instance.delete(db, id=record_id)
 
         return {
             "message": f"{model_name} record {record_id} deleted successfully",
@@ -381,12 +473,10 @@ def update_model_record(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"{model_name} record with id {record_id} not found",
-            )
-
-        # Define datetime fields for each model
+            )  # Define datetime fields for each model
         datetime_field_map = {
             "user": ["created_at", "updated_at", "last_login"],
-            "patient": ["created_at", "updated_at", "date_of_birth"],
+            "patient": ["created_at", "updated_at"],
             "practitioner": ["created_at", "updated_at"],
             "lab_result": [
                 "ordered_date",
@@ -398,11 +488,26 @@ def update_model_record(
             "medication": ["created_at", "updated_at"],
             "condition": ["created_at", "updated_at"],
             "allergy": ["created_at", "updated_at"],
-            "immunization": ["administration_date", "created_at", "updated_at"],
-            "procedure": ["procedure_date", "created_at", "updated_at"],
-            "treatment": ["start_date", "end_date", "created_at", "updated_at"],
-            "encounter": ["encounter_date", "created_at", "updated_at"],
+            "immunization": ["created_at", "updated_at"],
+            "procedure": ["created_at", "updated_at"],
+            "treatment": ["created_at", "updated_at"],
+            "encounter": ["created_at", "updated_at"],
         }
+
+        # Define date-only fields for each model (fields that should be Date objects, not DateTime)
+        date_field_map = {
+            "patient": ["birthDate"],
+            "immunization": ["date_administered", "expiration_date"],
+            "procedure": ["date"],
+            "treatment": ["start_date", "end_date"],
+            "encounter": ["date"],
+            "condition": ["onsetDate"],
+            "allergy": ["onset_date"],
+        }
+
+        # Convert date fields first (these need to be Date objects)
+        if model_name in date_field_map:
+            update_data = convert_date_fields(update_data, date_field_map[model_name])
 
         # Convert datetime fields if they exist for this model
         if model_name in datetime_field_map:
@@ -429,4 +534,88 @@ def update_model_record(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error updating {model_name} record: {str(e)}",
+        )
+
+
+@router.post("/{model_name}/")
+def create_model_record(
+    model_name: str,
+    create_data: Dict[str, Any],
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Create a new record for a specific model"""
+    if model_name not in MODEL_REGISTRY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model '{model_name}' not found",
+        )
+
+    model_info = MODEL_REGISTRY[model_name]
+    crud_instance = model_info["crud"]
+
+    try:
+        # Define datetime fields for each model
+        datetime_field_map = {
+            "user": ["created_at", "updated_at", "last_login"],
+            "patient": ["created_at", "updated_at"],
+            "practitioner": ["created_at", "updated_at"],
+            "lab_result": [
+                "ordered_date",
+                "completed_date",
+                "created_at",
+                "updated_at",
+            ],
+            "lab_result_file": ["uploaded_at", "created_at", "updated_at"],
+            "medication": ["created_at", "updated_at"],
+            "condition": ["created_at", "updated_at"],
+            "allergy": ["created_at", "updated_at"],
+            "immunization": ["created_at", "updated_at"],
+            "procedure": ["created_at", "updated_at"],
+            "treatment": ["created_at", "updated_at"],
+            "encounter": ["created_at", "updated_at"],
+        }
+
+        # Define date-only fields for each model (fields that should be Date objects, not DateTime)
+        date_field_map = {
+            "patient": ["birthDate"],
+            "immunization": ["date_administered", "expiration_date"],
+            "procedure": ["date"],
+            "treatment": ["start_date", "end_date"],
+            "encounter": ["date"],
+            "condition": ["onsetDate"],
+            "allergy": ["onset_date"],
+        }
+
+        # Convert date fields first (these need to be Date objects)
+        if model_name in date_field_map:
+            create_data = convert_date_fields(create_data, date_field_map[model_name])
+
+        # Convert datetime fields if they exist for this model
+        if model_name in datetime_field_map:
+            create_data = convert_datetime_fields(
+                create_data, datetime_field_map[model_name]
+            )  # Create Pydantic schema object from the processed data
+        create_schema = model_info["create_schema"]
+        create_obj = create_schema(**create_data)
+
+        # Create the record using CRUD create method
+        created_record = crud_instance.create(db, obj_in=create_obj)
+
+        # Convert to dictionary for JSON response
+        result = {}
+        for column in model_info["model"].__table__.columns:
+            value = getattr(created_record, column.name, None)
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            result[column.name] = value
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating {model_name} record: {str(e)}",
         )

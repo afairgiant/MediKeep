@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
+import { apiService } from '../../services/api';
 import { Loading } from '../../components';
-import './ModelEdit.css';
+import './ModelEdit.css'; // Reuse the same styles as ModelEdit
 
-const ModelEdit = () => {
-  const { modelName, recordId } = useParams();
+const ModelCreate = () => {
+  const { modelName } = useParams();
   const navigate = useNavigate();
   
-  const [record, setRecord] = useState(null);
   const [metadata, setMetadata] = useState(null);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -18,33 +18,42 @@ const ModelEdit = () => {
   const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadMetadata = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Load metadata and record in parallel
-        const [metadataResult, recordResult] = await Promise.all([
-          adminApiService.getModelMetadata(modelName),
-          adminApiService.getModelRecord(modelName, recordId)
-        ]);
-
+        const metadataResult = await adminApiService.getModelMetadata(modelName);
         setMetadata(metadataResult);
-        setRecord(recordResult);
-        setFormData(recordResult);
+        
+        // Initialize form data with default values
+        const initialData = {};
+        metadataResult.fields.forEach(field => {
+          if (!field.primary_key) {
+            // Set default values based on field type
+            if (field.type === 'boolean') {
+              initialData[field.name] = null;
+            } else if (field.type === 'number') {
+              initialData[field.name] = '';
+            } else {
+              initialData[field.name] = '';
+            }
+          }
+        });
+        setFormData(initialData);
         
       } catch (err) {
-        console.error('Error loading record:', err);
-        setError(err.message || 'Failed to load record');
+        console.error('Error loading metadata:', err);
+        setError(err.message || 'Failed to load form metadata');
       } finally {
         setLoading(false);
       }
     };
 
-    if (modelName && recordId) {
-      loadData();
+    if (modelName) {
+      loadMetadata();
     }
-  }, [modelName, recordId]);
+  }, [modelName]);
 
   const handleFieldChange = (fieldName, value) => {
     setFormData(prev => ({
@@ -87,13 +96,18 @@ const ModelEdit = () => {
 
     return errors;
   };
-
   const validateForm = () => {
     const errors = {};
     let hasErrors = false;
+    const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
 
     metadata.fields.forEach(field => {
-      if (!field.primary_key) { // Don't validate primary keys
+      if (!field.primary_key) { // Don't validate primary keys (they're auto-generated)
+        // Skip patient_id validation for medical models as it will be auto-populated
+        if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
+          return; // Skip validation for auto-populated patient_id
+        }
+        
         const fieldErrors = validateField(field, formData[field.name]);
         if (fieldErrors.length > 0) {
           errors[field.name] = fieldErrors;
@@ -105,8 +119,7 @@ const ModelEdit = () => {
     setValidationErrors(errors);
     return !hasErrors;
   };
-
-  const handleSave = async () => {
+  const handleCreate = async () => {
     if (!validateForm()) {
       return;
     }
@@ -115,47 +128,69 @@ const ModelEdit = () => {
       setSaving(true);
       setError(null);
 
-      // Create update data excluding primary key fields
-      const updateData = {};
+      // Create submission data excluding primary key fields and empty values
+      const submitData = {};
       metadata.fields.forEach(field => {
         if (!field.primary_key) {
-          updateData[field.name] = formData[field.name];
+          const value = formData[field.name];
+          // Only include non-empty values or explicitly set null/false values
+          if (value !== null && value !== undefined && value !== '') {
+            submitData[field.name] = value;
+          } else if (field.type === 'boolean' && value === false) {
+            submitData[field.name] = value;
+          }
         }
-      });
+      });      // Auto-populate patient_id for medical records from current user
+      const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+      if (medicalModels.includes(modelName)) {
+        try {
+          // Get current patient directly using the already imported apiService
+          const currentPatient = await apiService.getCurrentPatient();
+          if (currentPatient && currentPatient.id) {
+            submitData.patient_id = currentPatient.id;
+          } else {
+            throw new Error('No patient record found for current user');
+          }
+        } catch (patientError) {
+          setError('Failed to get patient information. Please ensure you have a patient record.');
+          setSaving(false);
+          return;
+        }
+      }
 
-      await adminApiService.updateModelRecord(modelName, recordId, updateData);
-      navigate(`/admin/models/${modelName}/${recordId}`);
+      const createdRecord = await adminApiService.createModelRecord(modelName, submitData);
+      navigate(`/admin/models/${modelName}/${createdRecord.id}`);
       
     } catch (err) {
-      console.error('Error saving record:', err);
-      setError(err.message || 'Failed to save record');
+      console.error('Error creating record:', err);
+      setError(err.message || 'Failed to create record');
     } finally {
       setSaving(false);
     }
   };
 
   const handleCancel = () => {
-    navigate(`/admin/models/${modelName}/${recordId}`);
+    navigate(`/admin/models/${modelName}`);
   };
   const renderFieldInput = (field) => {
     const value = formData[field.name] || '';
     const hasError = validationErrors[field.name];
 
-    // Don't render primary key fields as they shouldn't be editable
+    // Don't render primary key fields as they're auto-generated
     if (field.primary_key) {
       return (
         <div className="field-value readonly">
-          {value}
-          <small className="field-note">Primary key (read-only)</small>
+          Auto-generated
+          <small className="field-note">Primary key (auto-generated)</small>
         </div>
       );
-    }    // Hide patient_id field for medical records - it should not be changed
+    }    // Hide patient_id field for medical records - it will be auto-populated
     const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
     if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
       return (
         <div className="field-value readonly">
-          {value}
-          <small className="field-note">Patient ID (locked to current user)</small>
+          Auto-populated from current user
+          <small className="field-note">Patient ID (auto-populated)</small>
         </div>
       );
     }
@@ -165,9 +200,7 @@ const ModelEdit = () => {
       onChange: (e) => handleFieldChange(field.name, e.target.value),
       className: `field-input ${hasError ? 'error' : ''}`,
       disabled: saving
-    };
-
-    switch (field.type) {
+    };    switch (field.type) {
       case 'boolean':
         return (
           <select 
@@ -208,13 +241,16 @@ const ModelEdit = () => {
             {...commonProps}
             type="email"
           />
-        );      case 'text':
+        );
+
+      case 'text':
         if (field.max_length && field.max_length > 255) {
           return (
             <textarea
               {...commonProps}
               rows={4}
               maxLength={field.max_length}
+              placeholder={`Enter ${field.name}...`}
             />
           );
         }
@@ -240,6 +276,7 @@ const ModelEdit = () => {
             {...commonProps}
             type="text"
             maxLength={field.max_length}
+            placeholder={`Enter ${field.name}...`}
           />
         );
     }
@@ -272,8 +309,8 @@ const ModelEdit = () => {
       <div className="model-edit">
         <div className="model-edit-header">
           <div className="edit-title">
-            <h1>Edit {metadata?.display_name || modelName}</h1>
-            <p>Record ID: {recordId}</p>
+            <h1>Create New {metadata?.display_name || modelName}</h1>
+            <p>Fill in the form below to create a new record</p>
           </div>
           
           <div className="edit-actions">
@@ -285,16 +322,16 @@ const ModelEdit = () => {
               Cancel
             </button>
             <button 
-              onClick={handleSave}
+              onClick={handleCreate}
               className="btn btn-primary"
               disabled={saving}
             >
-              {saving ? '💾 Saving...' : '💾 Save Changes'}
+              {saving ? '💾 Creating...' : '💾 Create Record'}
             </button>
           </div>
         </div>
 
-        <form className="edit-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+        <form className="edit-form" onSubmit={(e) => { e.preventDefault(); handleCreate(); }}>
           <div className="form-grid">
             {metadata?.fields.map(field => (
               <div key={field.name} className="field-group">
@@ -330,4 +367,4 @@ const ModelEdit = () => {
   );
 };
 
-export default ModelEdit;
+export default ModelCreate;

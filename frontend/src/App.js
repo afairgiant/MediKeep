@@ -11,6 +11,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import ModelManagement from './pages/admin/ModelManagement';
 import ModelView from './pages/admin/ModelView';
 import ModelEdit from './pages/admin/ModelEdit';
+import ModelCreate from './pages/admin/ModelCreate';
+import SystemHealth from './pages/admin/SystemHealth';
 import { LoggingTest, ProtectedRoute, ErrorBoundary } from './components';
 import frontendLogger from './services/frontendLogger';
 import './App.css';
@@ -218,7 +220,7 @@ function App() {
             path="/admin/models/:modelName/create" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <ModelCreate />
               </ProtectedRoute>
             } 
           />
@@ -234,7 +236,7 @@ function App() {
             path="/admin/system-health" 
             element={
               <ProtectedRoute>
-                <PlaceholderPage />
+                <SystemHealth />
               </ProtectedRoute>
             } 
           />

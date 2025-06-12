@@ -7,19 +7,13 @@ class ProcedureBase(BaseModel):
     name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the procedure"
     )
+    code: Optional[str] = Field(
+        None, max_length=50, description="Code for the procedure (e.g., CPT code)"
+    )
     description: Optional[str] = Field(
         None, max_length=1000, description="Detailed description of the procedure"
     )
     date: DateType = Field(..., description="Date when the procedure was performed")
-    duration: Optional[int] = Field(
-        None, ge=1, description="Duration of the procedure in minutes"
-    )
-    outcome: Optional[str] = Field(
-        None, max_length=500, description="Outcome of the procedure"
-    )
-    complications: Optional[str] = Field(
-        None, max_length=500, description="Any complications that occurred"
-    )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     status: str = Field(..., description="Status of the procedure")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
@@ -46,12 +40,6 @@ class ProcedureBase(BaseModel):
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
 
-    @validator("duration")
-    def validate_duration(cls, v):
-        if v and v > 1440:  # 24 hours in minutes
-            raise ValueError("Duration cannot exceed 1440 minutes (24 hours)")
-        return v
-
 
 class ProcedureCreate(ProcedureBase):
     pass
@@ -59,11 +47,9 @@ class ProcedureCreate(ProcedureBase):
 
 class ProcedureUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=300)
+    code: Optional[str] = Field(None, max_length=50)
     description: Optional[str] = Field(None, max_length=1000)
     date: Optional[DateType] = None
-    duration: Optional[int] = Field(None, ge=1)
-    outcome: Optional[str] = Field(None, max_length=500)
-    complications: Optional[str] = Field(None, max_length=500)
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)
@@ -89,12 +75,6 @@ class ProcedureUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("duration")
-    def validate_duration(cls, v):
-        if v and v > 1440:  # 24 hours in minutes
-            raise ValueError("Duration cannot exceed 1440 minutes (24 hours)")
-        return v
-
 
 class ProcedureResponse(ProcedureBase):
     id: int
@@ -116,7 +96,6 @@ class ProcedureSummary(BaseModel):
     name: str
     date: DateType
     status: str
-    duration: Optional[int]
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 

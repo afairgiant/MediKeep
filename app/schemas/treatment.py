@@ -4,8 +4,11 @@ from pydantic import BaseModel, Field, validator
 
 
 class TreatmentBase(BaseModel):
-    name: str = Field(
+    treatment_name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the treatment"
+    )
+    treatment_type: str = Field(
+        ..., min_length=2, max_length=300, description="Type of treatment"
     )
     description: Optional[str] = Field(
         None, max_length=1000, description="Detailed description of the treatment"
@@ -15,11 +18,19 @@ class TreatmentBase(BaseModel):
     frequency: Optional[str] = Field(
         None, max_length=100, description="Frequency of the treatment"
     )
-    dosage: Optional[str] = Field(
-        None, max_length=200, description="Dosage information"
+    treatment_category: Optional[str] = Field(
+        None,
+        max_length=200,
+        description="Category of treatment (e.g., 'inpatient', 'outpatient')",
+    )
+    outcome: Optional[str] = Field(
+        None, max_length=200, description="Expected outcome of the treatment"
+    )
+    location: Optional[str] = Field(
+        None, max_length=200, description="Location where the treatment is administered"
     )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
-    status: str = Field(..., description="Status of the treatment")
+    status: Optional[str] = Field("active", description="Status of the treatment")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the prescribing practitioner"
@@ -42,6 +53,8 @@ class TreatmentBase(BaseModel):
 
     @validator("status")
     def validate_status(cls, v):
+        if v is None:
+            return "active"  # Default value
         valid_statuses = ["active", "completed", "discontinued", "on-hold", "planned"]
         if v.lower() not in valid_statuses:
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
@@ -53,12 +66,15 @@ class TreatmentCreate(TreatmentBase):
 
 
 class TreatmentUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=2, max_length=300)
+    treatment_name: Optional[str] = Field(None, min_length=2, max_length=300)
+    treatment_type: Optional[str] = Field(None, min_length=2, max_length=300)
     description: Optional[str] = Field(None, max_length=1000)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     frequency: Optional[str] = Field(None, max_length=100)
-    dosage: Optional[str] = Field(None, max_length=200)
+    treatment_category: Optional[str] = Field(None, max_length=200)
+    outcome: Optional[str] = Field(None, max_length=200)
+    location: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)
@@ -115,7 +131,7 @@ class TreatmentWithRelations(TreatmentResponse):
 
 class TreatmentSummary(BaseModel):
     id: int
-    name: str
+    treatment_name: str
     start_date: date
     end_date: Optional[date]
     status: str

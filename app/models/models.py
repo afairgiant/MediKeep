@@ -1,3 +1,4 @@
+from os import name
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
@@ -12,10 +13,10 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)  # Role-based access control
+    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'
 
-    # Role-based access control
-    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'    # Timestamps
+    # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -179,6 +180,9 @@ class Condition(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+
+    # Condition details
+    name = Column(String, nullable=True)  # Name of the condition
     diagnosis = Column(String, nullable=False)
     notes = Column(String, nullable=True)
     onsetDate = Column(
@@ -221,6 +225,8 @@ class Procedure(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+
+    name = Column(String, nullable=False)  # Name of the procedure
     code = Column(String, nullable=True)  # Code for the procedure (e.g., CPT code)
     date = Column(Date, nullable=False)  # Date when the procedure was performed
     description = Column(String, nullable=True)  # Description of the procedure
@@ -240,6 +246,8 @@ class Treatment(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
     condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=True)
+
+    treatment_name = Column(String, nullable=False)  # Name of the treatment
     treatment_type = Column(
         String, nullable=False
     )  # Type of treatment (e.g., 'physical therapy', 'surgery')

@@ -19,9 +19,6 @@ class AllergyBase(BaseModel):
     )
     status: str = Field(default="active", description="Status of the allergy")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
-    practitioner_id: Optional[int] = Field(
-        None, gt=0, description="ID of the practitioner who identified the allergy"
-    )
 
     @validator("severity")
     def validate_severity(cls, v):
@@ -55,7 +52,6 @@ class AllergyUpdate(BaseModel):
     onset_date: Optional[date] = None
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
-    practitioner_id: Optional[int] = Field(None, gt=0)
 
     @validator("severity")
     def validate_severity(cls, v):
@@ -93,7 +89,6 @@ class AllergyResponse(AllergyBase):
 
 class AllergyWithRelations(AllergyResponse):
     patient: Optional[dict] = None
-    practitioner: Optional[dict] = None
 
     class Config:
         from_attributes = True
@@ -106,7 +101,6 @@ class AllergySummary(BaseModel):
     status: str
     onset_date: Optional[date]
     patient_name: Optional[str] = None
-    practitioner_name: Optional[str] = None
 
     class Config:
         from_attributes = True
