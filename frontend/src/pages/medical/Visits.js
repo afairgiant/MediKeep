@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
-import { MedicalCard, StatusBadge } from '../../components';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
