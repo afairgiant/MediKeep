@@ -1,53 +1,62 @@
-# Core FastAPI and web framework
-fastapi==0.115.12
-uvicorn==0.34.3
-starlette==0.46.2
-python-multipart==0.0.20
-
-# Database
-sqlalchemy==2.0.41
-databases==0.9.0
+aiofiles==23.2.1
+aiohappyeyeballs==2.6.1
+aiohttp==3.12.12
+aiosignal==1.3.2
 aiosqlite==0.21.0
-psycopg2-binary==2.9.9  # PostgreSQL adapter
-alembic==1.14.0  # Database migrations
-greenlet==3.2.2
-
-# Authentication & Security
-python-jose[cryptography]==3.3.0
-bcrypt==4.0.1
-
-# Validation (Pydantic v2)
-pydantic==2.11.5
-pydantic_core==2.33.2
+alembic==1.11.1
 annotated-types==0.7.0
-
-# Core dependencies
 anyio==4.9.0
-sniffio==1.3.1
-idna==3.10
+attrs==25.3.0
+bcrypt==4.0.1
+certifi==2025.4.26
+cffi==1.17.1
+charset-normalizer==3.4.2
 click==8.2.1
 colorama==0.4.6
-typing_extensions==4.14.0
-typing-inspection==0.4.1
-
-# Markup and utilities
-MarkupSafe==3.0.2
-
-# Configuration
-python-dotenv==1.1.0
-PyYAML==6.0.2
-
-# Server features
-httptools==0.6.4
-watchfiles==1.0.5
-websockets==15.0.1
+cryptography==45.0.3
+databases==0.9.0
+dnspython==2.7.0
+ecdsa==0.19.1
+email_validator==2.2.0
+fastapi==0.115.12
+frozenlist==1.7.0
+greenlet==3.2.2
 h11==0.16.0
-
-# Logging
-python-json-logger==2.0.7
-
-# Development
+httpcore==1.0.9
+httptools==0.6.4
+httpx==0.25.2
+idna==3.10
+iniconfig==2.1.0
+Jinja2==3.1.6
+Mako==1.3.10
+MarkupSafe==3.0.2
+multidict==6.4.4
+packaging==25.0
+passlib==1.7.4
+pluggy==1.6.0
+propcache==0.3.2
+psycopg2-binary==2.9.10
+pyasn1==0.6.1
+pycparser==2.22
+pydantic==2.11.5
+pydantic_core==2.33.2
 pytest==7.4.3
 pytest-asyncio==0.21.1
-httpx==0.25.2
+python-dotenv==1.1.0
+python-jose==3.3.0
+python-json-logger==2.0.7
+python-multipart==0.0.20
+PyYAML==6.0.2
 requests==2.32.3
+rsa==4.9.1
+six==1.17.0
+sniffio==1.3.1
+SQLAlchemy==2.0.41
+starlette==0.46.2
+typing-inspection==0.4.1
+typing_extensions==4.14.0
+urllib3==2.4.0
+uvicorn==0.34.3
+watchfiles==1.0.5
+websockets==15.0.1
+yarl==1.20.1
