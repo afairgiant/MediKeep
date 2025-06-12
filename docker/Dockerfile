@@ -12,8 +12,7 @@ WORKDIR /frontend
 COPY frontend/package*.json ./
 
 # Install dependencies with cache mount for faster builds
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --silent
+RUN npm ci --silent
 
 # Copy frontend source
 COPY frontend/ ./
@@ -48,9 +47,8 @@ WORKDIR /app
 # Copy requirements first for better layer caching
 COPY requirements.txt .
 
-# Install Python dependencies with cache mount
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend source files
 COPY app/ ./app/
