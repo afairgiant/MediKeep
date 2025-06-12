@@ -196,7 +196,13 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
             elif model_name == "immunization":
                 choices = ["completed", "pending", "refused", "contraindicated"]
             elif model_name == "procedure":
-                choices = ["scheduled", "in-progress", "completed", "cancelled"]
+                choices = [
+                    "scheduled",
+                    "in-progress",
+                    "completed",
+                    "cancelled",
+                    "postponed",
+                ]
             elif model_name == "encounter":
                 choices = ["scheduled", "in-progress", "completed", "cancelled"]
             else:
