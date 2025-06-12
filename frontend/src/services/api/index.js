@@ -11,7 +11,8 @@ import ProcedureApiService from './procedureApi';
 import ConditionApiService from './conditionApi';
 import EncounterApiService from './encounterApi';
 
-class ApiService {  constructor() {
+class ApiService {  
+  constructor() {
     // Initialize all API modules
     this.auth = new AuthApiService();
     this.patient = new PatientApiService();

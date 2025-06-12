@@ -80,7 +80,8 @@ const Visits = () => {
         console.error('Error deleting visit:', err);
       }
     }
-  };const handleSubmit = async (e) => {
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!patientData?.id) {
