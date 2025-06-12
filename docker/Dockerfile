@@ -68,8 +68,8 @@ USER appuser
 EXPOSE 8000
 
 # Add labels for better maintenance
-LABEL maintainer="your-email@example.com" \
-      version="1.0" \
+LABEL maintainer="afairgiant" \
+      version="0.1.0" \
       description="Medical Records System - React + FastAPI"
 
 # Health check with better configuration
