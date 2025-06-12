@@ -198,6 +198,69 @@
   border-color: #667eea;
 }
 
+/* Search Input */
+.search-container {
+  position: relative;
+  min-width: 250px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 5px;
+  background: white;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.search-input::placeholder {
+  color: #6c757d;
+}
+
+/* Filters Container */
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group select {
+  padding: 0.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
 /* Form Modal */
 .medical-form-overlay {
   position: fixed;
@@ -440,6 +503,26 @@
   margin: 5px 0 0 0;
 }
 
+.item-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 5px 0 0 0;
+  line-height: 1.4;
+}
+
+.item-info {
+  flex: 1;
+}
+
+/* Status Badges Container */
+.status-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
 /* Status Badges */
 .status-badge {
   padding: 0.25rem 0.75rem;
@@ -514,6 +597,44 @@
   border-color: #c3e6cb;
 }
 
+/* Severity-specific status badges */
+.severity-mild {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.severity-moderate {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+.severity-severe {
+  background: #fbeee6;
+  color: #e67e22;
+  border-color: #f4d6c7;
+}
+
+.severity-critical {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+/* Condition-specific status badges */
+.status-chronic {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.status-monitored {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+
 /* Item Details */
 .medical-item-details {
   margin-bottom: 1.5rem;
@@ -553,6 +674,30 @@
 
 .detail-item.full-width .value {
   text-align: left;
+}
+
+/* Item Notes */
+.medical-item-notes {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.notes-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.notes-content {
+  color: #333;
+  line-height: 1.5;
+  font-size: 0.9rem;
 }
 
 /* Item Actions */
