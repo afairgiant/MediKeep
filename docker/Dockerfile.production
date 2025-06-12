@@ -1,0 +1,75 @@
+# Production-optimized Dockerfile with distroless base
+# Multi-stage build for React + FastAPI Medical Records System
+
+# Stage 1: Build React frontend
+FROM node:18-alpine AS frontend-build
+
+ENV NODE_ENV=production
+
+WORKDIR /frontend
+
+# Copy package files first for better layer caching
+COPY frontend/package*.json ./
+
+# Install dependencies with cache mount
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --only=production --silent
+
+# Copy frontend source
+COPY frontend/ ./
+
+# Build and optimize
+RUN npm run build && \
+    find build -name "*.map" -delete && \
+    find build -name "*.txt" -delete
+
+# Stage 2: Python build stage
+FROM python:3.12-slim AS python-build
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install requirements
+COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r requirements.txt
+
+# Stage 3: Production runtime
+FROM gcr.io/distroless/python3-debian12:latest AS production
+
+# Copy virtual environment from build stage
+COPY --from=python-build /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Set work directory
+WORKDIR /app
+
+# Copy application
+COPY app/ ./app/
+COPY run.py .
+
+# Copy built React app
+COPY --from=frontend-build /frontend/build ./static
+
+# Create directories
+RUN mkdir -p logs uploads/labwork
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD ["/opt/venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+
+# Start application
+CMD ["/opt/venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
