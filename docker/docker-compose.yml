@@ -1,22 +1,64 @@
-services:
-  # PostgreSQL Database (only service running in Docker for development)
-  # Frontend and Backend will run locally on the development machine
+
+services:  
+
+# PostgreSQL Database Service
   postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
+    container_name: medical-records-db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: medical_records
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME:-medical_records}
+      POSTGRES_USER: ${DB_USER:-medapp}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
     networks:
-      - medical-records
+      - medical-records-network
 
+  # Combined Frontend + Backend Application Service
+  medical-records-app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: medical-records-app
+    ports:
+      - "8000:8000"  # Single port serves both React app and FastAPI    
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-medical_records}
+      DB_USER: ${DB_USER:-medapp}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - medical-records-network
+
+# Named volumes for data persistence
 volumes:
   postgres_data:
+    driver: local
 
+# Network for service communication
 networks:
-  medical-records:
+  medical-records-network:
     driver: bridge
