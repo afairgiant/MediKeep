@@ -79,16 +79,14 @@ class Medication(Base):
 
     __tablename__ = "medications"
     id = Column(Integer, primary_key=True)
-    
+
     medication_name = Column(String, nullable=False)
     dosage = Column(String, nullable=True)
     frequency = Column(String, nullable=True)
     route = Column(
         String, nullable=True
     )  # How it is administered (e.g., oral, injection, etc.)
-    indication = Column(
-        String, nullable=True
-    )  # What the medication is prescribed for
+    indication = Column(String, nullable=True)  # What the medication is prescribed for
     effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
     effectivePeriod_end = Column(Date, nullable=True)  # End date of the medication
     status = Column(String, nullable=True)  # e.g., 'active', 'stopped, 'on-hold'
