@@ -130,11 +130,11 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             allergy_id: ID of the allergy
 
         Returns:
-            Allergy with patient and practitioner relationships loaded
+            Allergy with patient relationship loaded
         """
         return (
             db.query(Allergy)
-            .options(joinedload(Allergy.patient), joinedload(Allergy.practitioner))
+            .options(joinedload(Allergy.patient))
             .filter(Allergy.id == allergy_id)
             .first()
         )

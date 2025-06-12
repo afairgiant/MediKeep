@@ -449,6 +449,16 @@ class PatientWithUser(Patient):
         from_attributes = True
 
 
+class PatientResponse(Patient):
+    """
+    Schema for patient response (alias for Patient).
+
+    This provides consistency with other model Response schemas.
+    """
+
+    pass
+
+
 class PatientSearch(BaseModel):
     """
     Schema for patient search parameters.

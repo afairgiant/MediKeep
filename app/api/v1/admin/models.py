@@ -42,23 +42,71 @@ from app.crud import (
     treatment,
     encounter,
 )
+from app.schemas.user import UserCreate
+from app.schemas.patient import PatientCreate
+from app.schemas.practitioner import PractitionerCreate
+from app.schemas.medication import MedicationCreate
+from app.schemas.lab_result import LabResultCreate
+from app.schemas.lab_result_file import LabResultFileCreate
+from app.schemas.condition import ConditionCreate
+from app.schemas.allergy import AllergyCreate
+from app.schemas.immunization import ImmunizationCreate
+from app.schemas.procedure import ProcedureCreate
+from app.schemas.treatment import TreatmentCreate
+from app.schemas.encounter import EncounterCreate
 
 router = APIRouter()
 
 # Model registry mapping model names to their classes and CRUD instances
 MODEL_REGISTRY = {
-    "user": {"model": User, "crud": user},
-    "patient": {"model": Patient, "crud": patient},
-    "practitioner": {"model": Practitioner, "crud": practitioner},
-    "medication": {"model": Medication, "crud": medication},
-    "lab_result": {"model": LabResult, "crud": lab_result},
-    "lab_result_file": {"model": LabResultFile, "crud": lab_result_file},
-    "condition": {"model": Condition, "crud": condition},
-    "allergy": {"model": Allergy, "crud": allergy},
-    "immunization": {"model": Immunization, "crud": immunization},
-    "procedure": {"model": Procedure, "crud": procedure},
-    "treatment": {"model": Treatment, "crud": treatment},
-    "encounter": {"model": Encounter, "crud": encounter},
+    "user": {"model": User, "crud": user, "create_schema": UserCreate},
+    "patient": {"model": Patient, "crud": patient, "create_schema": PatientCreate},
+    "practitioner": {
+        "model": Practitioner,
+        "crud": practitioner,
+        "create_schema": PractitionerCreate,
+    },
+    "medication": {
+        "model": Medication,
+        "crud": medication,
+        "create_schema": MedicationCreate,
+    },
+    "lab_result": {
+        "model": LabResult,
+        "crud": lab_result,
+        "create_schema": LabResultCreate,
+    },
+    "lab_result_file": {
+        "model": LabResultFile,
+        "crud": lab_result_file,
+        "create_schema": LabResultFileCreate,
+    },
+    "condition": {
+        "model": Condition,
+        "crud": condition,
+        "create_schema": ConditionCreate,
+    },
+    "allergy": {"model": Allergy, "crud": allergy, "create_schema": AllergyCreate},
+    "immunization": {
+        "model": Immunization,
+        "crud": immunization,
+        "create_schema": ImmunizationCreate,
+    },
+    "procedure": {
+        "model": Procedure,
+        "crud": procedure,
+        "create_schema": ProcedureCreate,
+    },
+    "treatment": {
+        "model": Treatment,
+        "crud": treatment,
+        "create_schema": TreatmentCreate,
+    },
+    "encounter": {
+        "model": Encounter,
+        "crud": encounter,
+        "create_schema": EncounterCreate,
+    },
 }
 
 
