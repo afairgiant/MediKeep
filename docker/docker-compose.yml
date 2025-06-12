@@ -1,46 +1,21 @@
-version: '3.8'
-
 services:
-  # FastAPI Backend
-  backend:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.backend
-    ports:
-      - "8000:8000"
+  # PostgreSQL Database (only service running in Docker for development)
+  # Frontend and Backend will run locally on the development machine
+  postgres:
+    image: postgres:latest
     environment:
-      - DATABASE_URL=sqlite:///./medical_records.db
-      - SECRET_KEY=your-secret-key-here
-      - ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: medical_records
+    ports:
+      - "5432:5432"
     volumes:
-      - ../uploads:/app/uploads
-      - ../logs:/app/logs
-      - ../medical_records.db:/app/medical_records.db
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - medical-records
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # React Frontend
-  frontend:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000
-    depends_on:
-      - backend
-    networks:
-      - medical-records
-    volumes:
-      - ../frontend/src:/app/src
-      - ../frontend/public:/app/public
+volumes:
+  postgres_data:
 
 networks:
   medical-records:

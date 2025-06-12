@@ -30,6 +30,14 @@ class DatabaseConfig:
                 "poolclass": StaticPool,
                 "echo": False,
             }
+        elif self.database_url.startswith("postgresql"):
+            return {
+                "pool_pre_ping": True,
+                "pool_recycle": 300,
+                "pool_size": 10,
+                "max_overflow": 20,
+                "echo": False,
+            }
         else:
             return {"pool_pre_ping": True, "pool_recycle": 300, "echo": False}
 

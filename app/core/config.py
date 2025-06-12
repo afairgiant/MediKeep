@@ -8,7 +8,7 @@ load_dotenv()
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.0.8"
+    VERSION: str = "0.0.10"
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development
