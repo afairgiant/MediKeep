@@ -169,7 +169,44 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
         # Check for foreign keys
         foreign_key = None
         if column.foreign_keys:
-            foreign_key = list(column.foreign_keys)[0].target_fullname
+            foreign_key = list(column.foreign_keys)[
+                0
+            ].target_fullname  # Check for predefined choices for specific fields
+        choices = None
+        if column.name == "status":
+            # Define status choices based on model type
+            model_name = model_class.__name__.lower()
+            if model_name == "labresult":
+                choices = ["ordered", "in-progress", "completed", "cancelled"]
+            elif model_name == "medication":
+                choices = ["active", "stopped", "on-hold", "completed", "cancelled"]
+            elif model_name == "allergy":
+                choices = ["active", "inactive", "resolved", "unconfirmed"]
+            elif model_name == "condition":
+                choices = [
+                    "active",
+                    "resolved",
+                    "chronic",
+                    "inactive",
+                    "recurrence",
+                    "relapse",
+                ]
+            elif model_name == "treatment":
+                choices = ["active", "inactive", "completed", "paused"]
+            elif model_name == "immunization":
+                choices = ["completed", "pending", "refused", "contraindicated"]
+            elif model_name == "procedure":
+                choices = ["scheduled", "in-progress", "completed", "cancelled"]
+            elif model_name == "encounter":
+                choices = ["scheduled", "in-progress", "completed", "cancelled"]
+            else:
+                choices = ["active", "inactive", "completed", "cancelled"]
+        elif column.name == "severity":
+            choices = ["mild", "moderate", "severe", "life-threatening"]
+        elif column.name == "gender":
+            choices = ["M", "F", "OTHER", "U"]
+        elif column.name == "role":
+            choices = ["patient", "admin", "staff"]
 
         fields.append(
             ModelField(
@@ -179,6 +216,7 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
                 primary_key=column.primary_key,
                 foreign_key=foreign_key,
                 max_length=getattr(column.type, "length", None),
+                choices=choices,
             )
         )
 
@@ -388,7 +426,7 @@ def delete_model_record(
                     )
 
         # Delete the record
-        deleted_record = crud_instance.delete(db, id=record_id)
+        crud_instance.delete(db, id=record_id)
 
         return {
             "message": f"{model_name} record {record_id} deleted successfully",
@@ -444,10 +482,10 @@ def update_model_record(
             "medication": ["created_at", "updated_at"],
             "condition": ["created_at", "updated_at"],
             "allergy": ["created_at", "updated_at"],
-            "immunization": ["administration_date", "created_at", "updated_at"],
-            "procedure": ["procedure_date", "created_at", "updated_at"],
-            "treatment": ["start_date", "end_date", "created_at", "updated_at"],
-            "encounter": ["encounter_date", "created_at", "updated_at"],
+            "immunization": ["created_at", "updated_at"],
+            "procedure": ["created_at", "updated_at"],
+            "treatment": ["created_at", "updated_at"],
+            "encounter": ["created_at", "updated_at"],
         }
 
         # Define date-only fields for each model (fields that should be Date objects, not DateTime)
@@ -456,7 +494,9 @@ def update_model_record(
             "immunization": ["date_administered", "expiration_date"],
             "procedure": ["date"],
             "treatment": ["start_date", "end_date"],
-            "encounter": ["encounter_date"],
+            "encounter": ["date"],
+            "condition": ["onsetDate"],
+            "allergy": ["onset_date"],
         }
 
         # Convert date fields first (these need to be Date objects)
@@ -508,7 +548,8 @@ def create_model_record(
     model_info = MODEL_REGISTRY[model_name]
     crud_instance = model_info["crud"]
 
-    try:  # Define datetime fields for each model
+    try:
+        # Define datetime fields for each model
         datetime_field_map = {
             "user": ["created_at", "updated_at", "last_login"],
             "patient": ["created_at", "updated_at"],
@@ -523,10 +564,10 @@ def create_model_record(
             "medication": ["created_at", "updated_at"],
             "condition": ["created_at", "updated_at"],
             "allergy": ["created_at", "updated_at"],
-            "immunization": ["administration_date", "created_at", "updated_at"],
-            "procedure": ["procedure_date", "created_at", "updated_at"],
-            "treatment": ["start_date", "end_date", "created_at", "updated_at"],
-            "encounter": ["encounter_date", "created_at", "updated_at"],
+            "immunization": ["created_at", "updated_at"],
+            "procedure": ["created_at", "updated_at"],
+            "treatment": ["created_at", "updated_at"],
+            "encounter": ["created_at", "updated_at"],
         }
 
         # Define date-only fields for each model (fields that should be Date objects, not DateTime)
@@ -535,7 +576,9 @@ def create_model_record(
             "immunization": ["date_administered", "expiration_date"],
             "procedure": ["date"],
             "treatment": ["start_date", "end_date"],
-            "encounter": ["encounter_date"],
+            "encounter": ["date"],
+            "condition": ["onsetDate"],
+            "allergy": ["onset_date"],
         }
 
         # Convert date fields first (these need to be Date objects)

@@ -200,9 +200,7 @@ const ModelCreate = () => {
       onChange: (e) => handleFieldChange(field.name, e.target.value),
       className: `field-input ${hasError ? 'error' : ''}`,
       disabled: saving
-    };
-
-    switch (field.type) {
+    };    switch (field.type) {
       case 'boolean':
         return (
           <select 
@@ -259,6 +257,20 @@ const ModelCreate = () => {
         // Fall through to default
 
       default:
+        // Check if field has predefined choices (for dropdowns)
+        if (field.choices && field.choices.length > 0) {
+          return (
+            <select {...commonProps}>
+              <option value="">-- Select {field.name} --</option>
+              {field.choices.map(choice => (
+                <option key={choice} value={choice}>
+                  {choice.charAt(0).toUpperCase() + choice.slice(1).replace('-', ' ')}
+                </option>
+              ))}
+            </select>
+          );
+        }
+        
         return (
           <input
             {...commonProps}

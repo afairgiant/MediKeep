@@ -40,9 +40,9 @@ def parse_datetime_string(datetime_str: str) -> datetime:
         raise ValueError(f"Expected string, got {type(datetime_str)}")
 
     # Remove timezone info if present (Z or +00:00)
-    clean_str = re.sub(r"[Z]$|[+-]\d{2}:\d{2}$", "", datetime_str.strip())
-
-    # List of supported formats
+    clean_str = re.sub(
+        r"[Z]$|[+-]\d{2}:\d{2}$", "", datetime_str.strip()
+    )  # List of supported formats
     formats = [
         "%Y-%m-%dT%H:%M:%S.%f",  # ISO with microseconds
         "%Y-%m-%dT%H:%M:%S",  # ISO format
@@ -50,6 +50,7 @@ def parse_datetime_string(datetime_str: str) -> datetime:
         "%Y-%m-%d %H:%M:%S",  # Simple format
         "%Y-%m-%dT%H:%M",  # ISO without seconds
         "%Y-%m-%d %H:%M",  # Simple without seconds
+        "%Y-%m-%d",  # Date-only format (convert to datetime at midnight)
     ]
 
     for fmt in formats:
