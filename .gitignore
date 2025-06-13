@@ -91,3 +91,4 @@ DEVELOPMENT_SETUP.md
 /_working
 medical_records.db-wal
 medical_records.db-shm
+docs/SEQUENCE_MONITORING_GUIDE.md

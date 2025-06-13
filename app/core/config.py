@@ -36,13 +36,19 @@ class Settings:  # App Info
 
     # File Storage
     UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", "./uploads"))
-    MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024)))  # 10MB
-
-    # Logging Configuration
+    MAX_FILE_SIZE: int = int(
+        os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024))
+    )  # 10MB    # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
     ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
+
+    # Database Sequence Monitoring (always enabled for data integrity)
+    ENABLE_SEQUENCE_MONITORING: bool = True
+    SEQUENCE_CHECK_ON_STARTUP: bool = True
+    SEQUENCE_AUTO_FIX: bool = True
+    SEQUENCE_MONITOR_INTERVAL_HOURS: int = 24
 
     def __init__(self):
         # Ensure upload directory exists

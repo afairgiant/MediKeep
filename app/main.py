@@ -184,6 +184,35 @@ else:
     logger.warning("❌ No static directory found - React app will not be served")
 
 
+async def check_sequences_on_startup():
+    """Check and fix sequence synchronization on application startup"""
+    if not settings.SEQUENCE_CHECK_ON_STARTUP:
+        return
+
+    try:
+        from scripts.sequence_monitor import SequenceMonitor
+
+        monitor = SequenceMonitor()
+
+        logger.info("🔍 Checking database sequences on startup...")
+        results = monitor.monitor_all_sequences(auto_fix=settings.SEQUENCE_AUTO_FIX)
+
+        if results["out_of_sync_tables"]:
+            if settings.SEQUENCE_AUTO_FIX:
+                logger.info(
+                    f"✅ Auto-fixed {len(results['fixed_tables'])} sequence issues on startup"
+                )
+            else:
+                logger.warning(
+                    f"⚠️  Found {len(results['out_of_sync_tables'])} sequence issues - auto-fix disabled"
+                )
+        else:
+            logger.info("✅ All database sequences are synchronized")
+
+    except Exception as e:
+        logger.error(f"❌ Failed to check sequences on startup: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables on startup"""
@@ -197,6 +226,7 @@ async def startup_event():
     )
     create_tables()
     create_default_user()
+    await check_sequences_on_startup()
     logger.info(
         "Application startup completed",
         extra={"category": "app", "event": "application_startup_complete"},

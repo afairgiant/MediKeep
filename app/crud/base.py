@@ -118,7 +118,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """
-        Create a new record in the database.
+        Create a new record in the database with sequence protection.
 
         Args:
             db: SQLAlchemy database session
@@ -131,24 +131,114 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             user_data = UserCreate(username="john", email="john@example.com")
             new_user = user_crud.create(db, obj_in=user_data)
         """
+        from sqlalchemy.exc import IntegrityError
+        from app.core.logging_config import get_logger
+
+        logger = get_logger(__name__, "crud")
+
         # Convert Pydantic model to a dictionary that SQLAlchemy can use
         # jsonable_encoder handles datetime, UUID, and other special types
         obj_in_data = jsonable_encoder(obj_in)
 
-        # Create a new instance of our SQLAlchemy model with the data
-        # **obj_in_data unpacks the dictionary as keyword arguments
-        db_obj = self.model(**obj_in_data)
+        # Ensure no ID is being passed for auto-increment fields
+        if hasattr(self.model, "id") and "id" in obj_in_data:
+            logger.warning(
+                f"Removing explicit ID from {self.model.__name__} creation data"
+            )
+            del obj_in_data["id"]
 
-        # Add the new object to the database session (staging)
-        db.add(db_obj)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # Create a new instance of our SQLAlchemy model with the data
+                # **obj_in_data unpacks the dictionary as keyword arguments
+                db_obj = self.model(**obj_in_data)
 
-        # Commit the transaction to actually save to database
-        db.commit()
+                # Add the new object to the database session (staging)
+                db.add(db_obj)
 
-        # Refresh the object to get any database-generated values (like auto-increment ID)
-        db.refresh(db_obj)
+                # Commit the transaction to actually save to database
+                db.commit()
 
-        return db_obj
+                # Refresh the object to get any database-generated values (like auto-increment ID)
+                db.refresh(db_obj)
+
+                return db_obj
+
+            except IntegrityError as e:
+                db.rollback()
+
+                # Check if it's a unique constraint violation on primary key
+                if "duplicate key value violates unique constraint" in str(
+                    e
+                ) and "_pkey" in str(e):
+                    logger.warning(
+                        f"Primary key collision detected for {self.model.__name__} "
+                        f"(attempt {attempt + 1}/{max_retries}). Attempting sequence fix..."
+                    )
+
+                    # Try to fix the sequence
+                    if self._fix_sequence(db):
+                        logger.info(
+                            f"Sequence fixed for {self.model.__name__}, retrying..."
+                        )
+                        continue
+                    else:
+                        logger.error(
+                            f"Failed to fix sequence for {self.model.__name__}"
+                        )
+
+                # Re-raise the error if it's not a sequence issue or we can't fix it
+                raise
+
+        # If we've exhausted all retries
+        raise IntegrityError(
+            f"Failed to create {self.model.__name__} after {max_retries} attempts due to sequence issues",
+            None,
+            None,
+        )
+
+    def _fix_sequence(self, db: Session) -> bool:
+        """
+        Attempt to fix PostgreSQL sequence for the model's primary key.
+
+        Returns:
+            True if sequence was successfully fixed, False otherwise
+        """
+        from sqlalchemy import text
+        from app.core.logging_config import get_logger
+
+        logger = get_logger(__name__, "sequence_fix")
+
+        try:
+            # Get table name and primary key column
+            table_name = self.model.__tablename__
+            pk_column = "id"  # Assuming 'id' is the primary key for most models
+
+            # Only attempt for PostgreSQL
+            if not str(db.bind.url).startswith("postgresql"):
+                return False
+
+            # Get max ID from table
+            max_id_result = db.execute(
+                text(f"SELECT COALESCE(MAX({pk_column}), 0) FROM {table_name}")
+            ).fetchone()
+            max_id = max_id_result[0] if max_id_result else 0
+
+            # Reset sequence to max_id + 1
+            sequence_name = f"{table_name}_{pk_column}_seq"
+            next_value = max_id + 1
+
+            db.execute(text(f"SELECT setval('{sequence_name}', {next_value}, false)"))
+            db.commit()
+
+            logger.info(f"Successfully reset sequence {sequence_name} to {next_value}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to fix sequence for {self.model.__name__}: {e}")
+            db.rollback()
+            return False
 
     def update(
         self,
