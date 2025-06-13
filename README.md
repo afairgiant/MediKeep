@@ -1,30 +1,109 @@
 # Medical Records Management System
 
-A modern medical records management system with React frontend and FastAPI backend.
+A medical records management system with React frontend and FastAPI backend.
 
-## 🚀 Quick Start
+## Quick Start
 
-### Prerequisites
-- Python 3.8+
-- Node.js 16+
+### 1️⃣ Install Docker & Docker Compose
 
-### Start the Application
+Ensure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
 
-1. **Backend**
-```bash
-python run.py
+### 2️⃣ Create docker-compose.yml
+
+Create a `docker-compose.yml` file with content:
+
+```yaml
+
+services:  
+
+# PostgreSQL Database Service
+  postgres:
+    image: postgres:15.8-alpine
+    container_name: medical-records-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-medical_records}
+      POSTGRES_USER: ${DB_USER:-medapp}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data-prod:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - medical-records-network
+
+  # Combined Frontend + Backend Application Service
+  medical-records-app:
+    image: ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest
+    # build:
+    #   context: ..
+    #   dockerfile: docker/Dockerfile    
+    container_name: medical-records-app
+    ports:
+      - "8000:8000"  # Single port serves both React app and FastAPI      
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-medical_records}
+      DB_USER: ${DB_USER:-medapp}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DATABASE_URL: postgresql://${DB_USER:-medapp}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-medical_records}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+    volumes:
+      - app_uploads:/app/uploads
+      - app_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - medical-records-network
+
+# Named volumes for data persistence
+volumes:
+  postgres_data-prod:
+    driver: local
+  app_uploads:
+    driver: local
+  app_logs:
+    driver: local
+
+# Network for service communication
+networks:
+  medical-records-network:
+    driver: bridge
 ```
 
-2. **Frontend** (new terminal)
-```bash
-cd frontend
-npm start
+### 3️⃣ Start the Containers
+
+Run the following command to start the services:
+
+```ini
+docker compose up -d
 ```
 
-### Access
-- **App**: http://localhost:3000
-- **API Docs**: http://localhost:8000/docs
+### 4️⃣ Access the app
+
+Once the containers are up, access the app in your browser at:
+
+```ini
+http://localhost:8000
+```
 
 ### Demo Login
-- **Username**: admin
-- **Password**: admin123
+- Username: `admin`
+- Password: `admin123`
+
+
+```
