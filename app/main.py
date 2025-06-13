@@ -59,11 +59,13 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
 )
 
-# Add trailing slash middleware (should be added early)
+
+# Add logging middleware
+app.add_middleware(RequestLoggingMiddleware)
+
+# Add trailing slash middleware
 app.add_middleware(TrailingSlashMiddleware)
 
-# Add logging middleware (should be added first)
-app.add_middleware(RequestLoggingMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
