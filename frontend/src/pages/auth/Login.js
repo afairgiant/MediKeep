@@ -48,15 +48,14 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-  const handleCreateUser = async (e) => {
+  };  const handleCreateUser = async (e) => {
     e.preventDefault();
     setIsCreatingUser(true);
     setCreateUserError('');
 
-    // Client-side validation
-    if (createUserData.password.length < 8) {
-      setCreateUserError('Password must be at least 8 characters long');
+    // Client-side validation - Updated to 6 characters minimum
+    if (createUserData.password.length < 6) {
+      setCreateUserError('Password must be at least 6 characters long');
       setIsCreatingUser(false);
       return;
     }
