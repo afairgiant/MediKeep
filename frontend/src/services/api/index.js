@@ -27,10 +27,13 @@ class ApiService {
     this.encounter = new EncounterApiService();
   }
 
-  // Backward compatibility methods - delegate to appropriate modules
-  // Auth methods
+  // Backward compatibility methods - delegate to appropriate modules  // Auth methods
   login(username, password) {
     return this.auth.login(username, password);
+  }
+
+  register(username, password, email, fullName) {
+    return this.auth.register(username, password, email, fullName);
   }
 
   // Patient methods

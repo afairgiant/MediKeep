@@ -112,8 +112,8 @@ class UserCreate(UserBase):
         Raises:
             ValueError: If password doesn't meet security requirements
         """
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters long")
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters long")
         if len(v) > 128:
             raise ValueError("Password must be less than 128 characters")
 
@@ -254,8 +254,8 @@ class UserChangePassword(BaseModel):
     @validator("new_password")
     def validate_new_password(cls, v):
         """Validate the new password using same rules as UserCreate."""
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters long")
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters long")
         if len(v) > 128:
             raise ValueError("Password must be less than 128 characters")
 

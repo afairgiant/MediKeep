@@ -94,3 +94,215 @@ button[type="submit"]:disabled {
   border: 1px solid #fcc;
   text-align: center;
 }
+
+/* Login Actions */
+.login-actions {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.create-user-btn {
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.create-user-btn:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.create-user-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem 1rem 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.modal-content form {
+  padding: 1.5rem 2rem;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #dee2e6;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Create User Info */
+.create-user-info {
+  padding: 0 2rem 1.5rem 2rem;
+  border-top: 1px solid #e9ecef;
+  margin-top: 1rem;
+  background: #f8f9fa;
+  border-radius: 0 0 10px 10px;
+}
+
+.create-user-info p {
+  margin: 1rem 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Password requirements styling */
+.password-requirements {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Password Requirements Indicators */
+.password-requirements {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  padding: 0.2rem 0;
+  color: #dc3545;
+  transition: color 0.3s ease;
+}
+
+.requirement.valid {
+  color: #28a745;
+}
+
+.requirement:before {
+  content: '✗';
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
+.requirement.valid:before {
+  content: '✓';
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+  .modal-content {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .modal-header,
+  .modal-content form,
+  .create-user-info {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
