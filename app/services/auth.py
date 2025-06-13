@@ -1,8 +1,11 @@
 from typing import Optional
 from sqlalchemy.orm import Session
+from datetime import date
 from app.models.models import User
 from app.crud.user import user
+from app.crud.patient import patient
 from app.schemas.user import UserCreate
+from app.schemas.patient import PatientCreate
 
 
 class AuthService:
@@ -20,7 +23,8 @@ class AuthService:
     def create_user(
         db: Session, username: str, password: str, is_superuser: bool = False
     ) -> User:
-        """Create a new user"""
+        """Create a new user with an associated patient record"""
+        # Create the user first
         user_create = UserCreate(
             username=username,
             email=f"{username}@example.com",  # Default email
@@ -28,4 +32,30 @@ class AuthService:
             role="admin" if is_superuser else "user",
             password=password,
         )
-        return user.create(db, obj_in=user_create)
+        new_user = user.create(db, obj_in=user_create)
+
+        # Create a patient record for the user
+        try:
+            patient_data = PatientCreate(
+                first_name=username.title(),  # Use username as first name
+                last_name="User",  # Default last name
+                birthDate=date(1990, 1, 1),  # Default birth date
+                gender="OTHER",  # Neutral default
+                address="Please update your address",  # Placeholder
+            )
+
+            # Get the user ID
+            user_id = getattr(new_user, "id", None)
+            if user_id:
+                patient.create_for_user(db, user_id=user_id, patient_data=patient_data)
+                print(f"Patient record created for user {username}")
+            else:
+                print(
+                    f"Warning: Could not create patient record for {username} - no user ID"
+                )
+
+        except Exception as e:
+            print(f"Warning: Failed to create patient record for {username}: {e}")
+            # Don't fail user creation if patient creation fails
+
+        return new_user

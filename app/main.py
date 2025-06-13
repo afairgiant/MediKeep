@@ -26,10 +26,11 @@ app.add_middleware(RequestLoggingMiddleware)
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include API routers
@@ -99,7 +100,9 @@ if static_dir:
         ):
             # Use nested directory for static assets (CSS/JS)
             app.mount("/static", StaticFiles(directory=nested_static), name="static")
-            logger.info(f"✅ Serving static assets from nested directory: {nested_static}")
+            logger.info(
+                f"✅ Serving static assets from nested directory: {nested_static}"
+            )
             # Keep HTML files in the current directory
             html_dir = static_dir
             logger.info(f"✅ Serving HTML files from: {html_dir}")

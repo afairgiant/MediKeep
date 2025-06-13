@@ -19,8 +19,10 @@ class Settings:  # App Info
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development    # Database Configuration
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", 
-        f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}" if all([DB_USER, DB_PASS, DB_NAME]) else ""
+        "DATABASE_URL",
+        f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        if all([DB_USER, DB_PASS, DB_NAME])
+        else "",
     )
 
     # Security Configuration

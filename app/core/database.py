@@ -128,7 +128,7 @@ def check_database_connection():
 
 
 def create_default_user():
-    """Create a default user if none exists"""
+    """Create a default admin user and patient record if none exists"""
     from app.services.auth import AuthService
 
     db = SessionLocal()
@@ -137,8 +137,8 @@ def create_default_user():
             AuthService.create_user(
                 db, username="admin", password="admin123", is_superuser=True
             )
-            print("Default admin user created.")
+            print("✅ Default admin user and patient record created successfully.")
         else:
-            print("Default admin user already exists.")
+            print("ℹ️  Default admin user already exists.")
     finally:
         db.close()
