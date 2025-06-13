@@ -14,7 +14,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.0.11"
+    VERSION: str = "0.1.0"
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development    # Database Configuration
