@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 import os
 
 from app.api.v1.api import api_router
@@ -13,12 +15,52 @@ from app.core.logging_config import get_logger
 # Initialize logger
 logger = get_logger(__name__, "app")
 
+
+class TrailingSlashMiddleware(BaseHTTPMiddleware):
+    """Middleware to handle trailing slash redirects for API routes"""
+
+    async def dispatch(self, request: Request, call_next):
+        url_path = str(request.url.path)
+
+        # For API routes that don't end with /, redirect to version with /
+        if (
+            url_path.startswith("/api/v1/")
+            and not url_path.endswith("/")
+            and not url_path.split("/")[
+                -1
+            ].isdigit()  # Don't redirect ID-based routes like /api/v1/treatments/123
+            and url_path not in ["/api/v1/patients/me"]
+        ):  # Don't redirect specific known routes
+            # Check if this is a route that should have a trailing slash
+            route_endings = [
+                "/treatments",
+                "/procedures",
+                "/allergies",
+                "/conditions",
+                "/practitioners",
+                "/medications",
+                "/immunizations",
+                "/encounters",
+            ]
+            if any(url_path.endswith(ending) for ending in route_endings):
+                redirect_url = str(request.url).replace(url_path, url_path + "/")
+                return RedirectResponse(
+                    url=redirect_url, status_code=307
+                )  # 307 preserves the HTTP method
+
+        response = await call_next(request)
+        return response
+
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
     openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
 )
+
+# Add trailing slash middleware (should be added early)
+app.add_middleware(TrailingSlashMiddleware)
 
 # Add logging middleware (should be added first)
 app.add_middleware(RequestLoggingMiddleware)
@@ -170,19 +212,5 @@ def health():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
 
 
-# Catch-all route for React routing (must be last)
-@app.get("/{full_path:path}")
-async def serve_react_app(full_path: str):
-    """Serve React app for all non-API routes"""
-    # Don't interfere with API routes
-    if full_path.startswith("api/"):
-        from fastapi import HTTPException
-
-        raise HTTPException(
-            status_code=404, detail="API endpoint not found"
-        )  # Serve React app for frontend routes
-    if html_dir and os.path.exists(os.path.join(html_dir, "index.html")):
-        index_path = os.path.join(html_dir, "index.html")
-        return FileResponse(index_path)
-
-    return {"error": "React app not available"}
+# Note: Removed catch-all route that was interfering with API endpoints
+# React routing should be handled by the frontend, not by a catch-all backend route
