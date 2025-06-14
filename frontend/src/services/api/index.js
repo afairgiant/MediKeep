@@ -118,11 +118,12 @@ class ApiService {
       throw error;
     }
   }
-
   // Generic HTTP methods with signal support
   get(endpoint, options = {}) {
     return this.request('GET', endpoint, null, options);
-  }  post(endpoint, data, options = {}) {
+  }
+
+  post(endpoint, data, options = {}) {
     return this.request('POST', endpoint, data, options);
   }
 
@@ -157,18 +158,17 @@ class ApiService {
       full_name: fullName 
     }, { signal });
   }
-
   // Patient methods
   getCurrentPatient(signal) {
-    return this.get('/patients/current/', { signal });
+    return this.get('/patients/me/', { signal });
   }
 
   createCurrentPatient(patientData, signal) {
-    return this.post('/patients/', patientData, { signal });
+    return this.post('/patients/me/', patientData, { signal });
   }
 
   updateCurrentPatient(patientData, signal) {
-    return this.put('/patients/current/', patientData, { signal });
+    return this.put('/patients/me/', patientData, { signal });
   }
 
   getRecentActivity(signal) {
@@ -218,18 +218,19 @@ class ApiService {
       signal 
     });
   }
-
   deleteLabResultFile(fileId, signal) {
-    return this.delete(`/lab-result-files/${fileId}/`, { signal });  }
+    return this.delete(`/lab-result-files/${fileId}/`, { signal });
+  }
 
   // Medication methods
   getMedications(signal) {
     return this.get('/medications/', { signal });
   }
-  
-  getPatientMedications(patientId, signal) {
+    getPatientMedications(patientId, signal) {
     return this.get(`/patients/${patientId}/medications/`, { signal });
-  }  createMedication(medicationData, signal) {
+  }
+
+  createMedication(medicationData, signal) {
     // Clean up empty strings which might cause backend validation issues
     const cleanPayload = {};
     Object.keys(medicationData).forEach(key => {

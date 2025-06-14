@@ -86,11 +86,10 @@ export const apiMethods = {
     }),
     deleteFile: (fileId, signal) => apiService.delete(`/lab-result-files/${fileId}/`, { signal }) // Added trailing slash
   },
-
   patients: {
-    getCurrent: (signal) => apiService.get('/patients/current/', { signal }),    getAll: (signal) => apiService.get('/patients/', { signal }),
+    getCurrent: (signal) => apiService.get('/patients/me/', { signal }),    getAll: (signal) => apiService.get('/patients/', { signal }),
     getById: (id, signal) => apiService.get(`/patients/${id}`, { signal }),
-    create: (data, signal) => apiService.post('/patients/', data, { signal }),
+    create: (data, signal) => apiService.post('/patients/me/', data, { signal }),
     update: (id, data, signal) => apiService.put(`/patients/${id}/`, data, { signal }),
     delete: (id, signal) => apiService.delete(`/patients/${id}/`, { signal })
   }
