@@ -116,3 +116,23 @@ def get_active_conditions(
     """
     conditions = condition.get_active_conditions(db, patient_id=patient_id)
     return conditions
+
+
+@router.get(
+    "/patients/{patient_id}/conditions/", response_model=List[ConditionResponse]
+)
+def get_patient_conditions(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all conditions for a specific patient.
+    """
+    conditions = condition.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
+    return conditions

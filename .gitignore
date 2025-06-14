@@ -92,3 +92,4 @@ DEVELOPMENT_SETUP.md
 medical_records.db-wal
 medical_records.db-shm
 docs/SEQUENCE_MONITORING_GUIDE.md
+docker/dev/dev-docker-compose.yml

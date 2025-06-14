@@ -1,38 +1,69 @@
-import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '../services/api';
+import { useState, useCallback, useRef } from 'react';
 
-/**
- * Custom hook for handling API calls with loading states and error handling
- * @param {Function} apiCall - The API function to call
- * @param {Array} dependencies - Dependencies that trigger the API call
- * @param {Object} options - Configuration options
- * @returns {Object} - { data, loading, error, refetch }
- */
-export const useApi = (apiCall, dependencies = [], options = {}) => {
-  const [data, setData] = useState(options.initialData || null);
-  const [loading, setLoading] = useState(true);
+export const useApi = () => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const abortControllerRef = useRef(null);
 
-  const fetchData = useCallback(async () => {
+  const execute = useCallback(async (apiCall, options = {}) => {
+    // Cancel any existing requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       setLoading(true);
       setError(null);
-      const result = await apiCall();
-      setData(result);
+
+      const result = await apiCall(controller.signal);
+      
+      // Check if request was cancelled
+      if (controller.signal.aborted) {
+        return null;
+      }
+
+      return result;
     } catch (err) {
-      setError(err.message || 'An error occurred');
-      console.error('API Error:', err);
+      // Don't show errors if request was cancelled
+      if (err.name !== 'AbortError' && !controller.signal.aborted) {
+        const errorMessage = options.errorMessage || err.message || 'An error occurred';
+        setError(errorMessage);
+        console.error('API Error:', err);
+      }
+      return null;
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
-  }, [apiCall]);
+  }, []);
 
-  useEffect(() => {
-    if (options.manual) return;
-    fetchData();
-  }, dependencies);
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
-  return { data, loading, error, refetch: fetchData };
+  const setErrorMessage = useCallback((message) => {
+    setError(message);
+  }, []);
+
+  const cleanup = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
+  return {
+    loading,
+    error,
+    execute,
+    clearError,
+    setError: setErrorMessage,
+    cleanup
+  };
 };
 
 /**
@@ -91,29 +122,4 @@ export const useForm = (initialValues, validationSchema) => {
     reset,
     setValues
   };
-};
-
-/**
- * Hook for managing async operations with loading states
- * @returns {Object} - Async operation handlers
- */
-export const useAsync = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const execute = useCallback(async (asyncFunction) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await asyncFunction();
-      return result;
-    } catch (err) {
-      setError(err.message || 'An error occurred');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { loading, error, execute };
 };

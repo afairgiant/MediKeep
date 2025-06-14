@@ -1,323 +1,368 @@
-// Main API service that combines all modular services
-import AuthApiService from './authApi';
-import PatientApiService from './patientApi';
-import LabResultApiService from './labResultApi';
-import MedicationApiService from './medicationApi';
-import ImmunizationApiService from './immunizationApi';
-import PractitionerApiService from './practitionerApi';
-import AllergyApiService from './allergyApi';
-import TreatmentApiService from './treatmentApi';
-import ProcedureApiService from './procedureApi';
-import ConditionApiService from './conditionApi';
-import EncounterApiService from './encounterApi';
+// New streamlined API service with abort signal support
 
 class ApiService {  
   constructor() {
-    // Initialize all API modules
-    this.auth = new AuthApiService();
-    this.patient = new PatientApiService();
-    this.labResult = new LabResultApiService();
-    this.medication = new MedicationApiService();
-    this.immunization = new ImmunizationApiService();
-    this.practitioner = new PractitionerApiService();
-    this.allergy = new AllergyApiService();
-    this.treatment = new TreatmentApiService();
-    this.procedure = new ProcedureApiService();
-    this.condition = new ConditionApiService();
-    this.encounter = new EncounterApiService();
+    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
   }
 
-  // Backward compatibility methods - delegate to appropriate modules  // Auth methods
-  login(username, password) {
-    return this.auth.login(username, password);
+  // Core request method with abort signal support
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    const token = localStorage.getItem('token');
+    
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    // Pass through abort signal
+    if (options.signal) {
+      config.signal = options.signal;
+    }
+
+    try {
+      const response = await fetch(url, config);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+      }
+
+      if (options.responseType === 'blob') {
+        return response.blob();
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      }
+      
+      return response.text();
+    } catch (error) {
+      throw new Error(`API request failed: ${error.message}`);
+    }
   }
 
-  register(username, password, email, fullName) {
-    return this.auth.register(username, password, email, fullName);
+  // Generic HTTP methods with signal support
+  get(endpoint, options = {}) {
+    return this.request(endpoint, { method: 'GET', ...options });
+  }
+
+  post(endpoint, data, options = {}) {
+    const isFormData = data instanceof FormData;
+    const body = isFormData ? data : JSON.stringify(data);
+    
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    const headers = isFormData 
+      ? {} 
+      : { 'Content-Type': 'application/json' };
+    
+    return this.request(endpoint, {
+      method: 'POST',
+      body,
+      headers: {
+        ...headers,
+        ...options.headers
+      },
+      ...options,
+    });
+  }
+
+  put(endpoint, data, options = {}) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      ...options,
+    });
+  }
+
+  delete(endpoint, options = {}) {
+    return this.request(endpoint, { method: 'DELETE', ...options });
+  }
+
+  // Simplified API methods for backward compatibility
+  // Auth methods
+  login(username, password, signal) {
+    // FastAPI OAuth2PasswordRequestForm expects form-encoded data
+    const formData = new URLSearchParams();
+    formData.append('username', username);
+    formData.append('password', password);
+    
+    return this.request('/auth/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData,
+      signal
+    });
+  }
+
+  register(username, password, email, fullName, signal) {
+    return this.post('/auth/register/', { 
+      username, 
+      password, 
+      email, 
+      full_name: fullName 
+    }, { signal });
   }
 
   // Patient methods
-  getCurrentPatient() {
-    return this.patient.getCurrentPatient();
+  getCurrentPatient(signal) {
+    return this.get('/patients/current/', { signal });
   }
 
-  createCurrentPatient(patientData) {
-    return this.patient.createCurrentPatient(patientData);
+  createCurrentPatient(patientData, signal) {
+    return this.post('/patients/', patientData, { signal });
   }
 
-  updateCurrentPatient(patientData) {
-    return this.patient.updateCurrentPatient(patientData);
+  updateCurrentPatient(patientData, signal) {
+    return this.put('/patients/current/', patientData, { signal });
   }
 
-  getRecentActivity() {
-    return this.patient.getRecentActivity();
+  getRecentActivity(signal) {
+    return this.get('/patients/recent-activity/', { signal });
   }
 
   // Lab Result methods
-  getLabResults() {
-    return this.labResult.getLabResults();
+  getLabResults(signal) {
+    return this.get('/lab-results/', { signal });
   }
 
-  getPatientLabResults(patientId) {
-    return this.labResult.getPatientLabResults(patientId);
+  getPatientLabResults(patientId, signal) {
+    return this.get(`/patients/${patientId}/lab-results/`, { signal });
   }
 
-  getLabResult(labResultId) {
-    return this.labResult.getLabResult(labResultId);
+  getLabResult(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/`, { signal });
   }
 
-  createLabResult(labResultData) {
-    return this.labResult.createLabResult(labResultData);
+  createLabResult(labResultData, signal) {
+    return this.post('/lab-results/', labResultData, { signal });
   }
 
-  updateLabResult(labResultId, labResultData) {
-    return this.labResult.updateLabResult(labResultId, labResultData);
+  updateLabResult(labResultId, labResultData, signal) {
+    return this.put(`/lab-results/${labResultId}/`, labResultData, { signal });
   }
 
-  deleteLabResult(labResultId) {
-    return this.labResult.deleteLabResult(labResultId);
+  deleteLabResult(labResultId, signal) {
+    return this.delete(`/lab-results/${labResultId}/`, { signal });
   }
 
-  getLabResultFiles(labResultId) {
-    return this.labResult.getLabResultFiles(labResultId);
+  getLabResultFiles(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/files/`, { signal });
   }
 
-  uploadLabResultFile(labResultId, file, description = '') {
-    return this.labResult.uploadLabResultFile(labResultId, file, description);
+  uploadLabResultFile(labResultId, file, description = '', signal) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('description', description);
+    return this.post(`/lab-results/${labResultId}/files/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      signal
+    });
   }
 
-  downloadLabResultFile(fileId) {
-    return this.labResult.downloadLabResultFile(fileId);
+  downloadLabResultFile(fileId, signal) {
+    return this.get(`/lab-result-files/${fileId}/download/`, { 
+      responseType: 'blob',
+      signal 
+    });
   }
 
-  deleteLabResultFile(fileId) {
-    return this.labResult.deleteLabResultFile(fileId);
+  deleteLabResultFile(fileId, signal) {
+    return this.delete(`/lab-result-files/${fileId}/`, { signal });
   }
 
   // Medication methods
-  getMedications() {
-    return this.medication.getMedications();
+  getMedications(signal) {
+    return this.get('/medications/', { signal });
   }
 
-  getPatientMedications(patientId) {
-    return this.medication.getPatientMedications(patientId);
+  getPatientMedications(patientId, signal) {
+    return this.get(`/patients/${patientId}/medications/`, { signal });
   }
 
-  createMedication(medicationData) {
-    return this.medication.createMedication(medicationData);
+  createMedication(medicationData, signal) {
+    return this.post('/medications/', medicationData, { signal });
   }
 
-  updateMedication(medicationId, medicationData) {
-    return this.medication.updateMedication(medicationId, medicationData);
+  updateMedication(medicationId, medicationData, signal) {
+    return this.put(`/medications/${medicationId}/`, medicationData, { signal });
   }
 
-  deleteMedication(medicationId) {
-    return this.medication.deleteMedication(medicationId);
+  deleteMedication(medicationId, signal) {
+    return this.delete(`/medications/${medicationId}/`, { signal });
   }
 
   // Immunization methods
-  getImmunizations() {
-    return this.immunization.getImmunizations();
+  getImmunizations(signal) {
+    return this.get('/immunizations/', { signal });
   }
 
-  getPatientImmunizations(patientId) {
-    return this.immunization.getPatientImmunizations(patientId);
+  getPatientImmunizations(patientId, signal) {
+    return this.get(`/patients/${patientId}/immunizations/`, { signal });
   }
 
-  createImmunization(immunizationData) {
-    return this.immunization.createImmunization(immunizationData);
+  createImmunization(immunizationData, signal) {
+    return this.post('/immunizations/', immunizationData, { signal });
   }
 
-  updateImmunization(immunizationId, immunizationData) {
-    return this.immunization.updateImmunization(immunizationId, immunizationData);
+  updateImmunization(immunizationId, immunizationData, signal) {
+    return this.put(`/immunizations/${immunizationId}/`, immunizationData, { signal });
   }
-  deleteImmunization(immunizationId) {
-    return this.immunization.deleteImmunization(immunizationId);
+
+  deleteImmunization(immunizationId, signal) {
+    return this.delete(`/immunizations/${immunizationId}/`, { signal });
   }
 
   // Practitioner methods
-  getPractitioners(params) {
-    return this.practitioner.getPractitioners(params);
+  getPractitioners(signal) {
+    return this.get('/practitioners/', { signal });
   }
 
-  getPractitioner(practitionerId) {
-    return this.practitioner.getPractitioner(practitionerId);
+  getPractitioner(practitionerId, signal) {
+    return this.get(`/practitioners/${practitionerId}/`, { signal });
   }
 
-  createPractitioner(practitionerData) {
-    return this.practitioner.createPractitioner(practitionerData);
+  createPractitioner(practitionerData, signal) {
+    return this.post('/practitioners/', practitionerData, { signal });
   }
 
-  updatePractitioner(practitionerId, practitionerData) {
-    return this.practitioner.updatePractitioner(practitionerId, practitionerData);
+  updatePractitioner(practitionerId, practitionerData, signal) {
+    return this.put(`/practitioners/${practitionerId}/`, practitionerData, { signal });
   }
-  deletePractitioner(practitionerId) {
-    return this.practitioner.deletePractitioner(practitionerId);
+
+  deletePractitioner(practitionerId, signal) {
+    return this.delete(`/practitioners/${practitionerId}/`, { signal });
   }
 
   // Allergy methods
-  getAllergies() {
-    return this.allergy.getAllergies();
+  getAllergies(signal) {
+    return this.get('/allergies/', { signal });
   }
 
-  getPatientAllergies(patientId) {
-    return this.allergy.getPatientAllergies(patientId);
+  getPatientAllergies(patientId, signal) {
+    return this.get(`/patients/${patientId}/allergies/`, { signal });
   }
 
-  getActiveAllergies(patientId) {
-    return this.allergy.getActiveAllergies(patientId);
+  getAllergy(allergyId, signal) {
+    return this.get(`/allergies/${allergyId}/`, { signal });
   }
 
-  getCriticalAllergies(patientId) {
-    return this.allergy.getCriticalAllergies(patientId);
+  createAllergy(allergyData, signal) {
+    return this.post('/allergies/', allergyData, { signal });
   }
 
-  getAllergy(allergyId) {
-    return this.allergy.getAllergy(allergyId);
+  updateAllergy(allergyId, allergyData, signal) {
+    return this.put(`/allergies/${allergyId}/`, allergyData, { signal });
   }
 
-  createAllergy(allergyData) {
-    return this.allergy.createAllergy(allergyData);
-  }
-
-  updateAllergy(allergyId, allergyData) {
-    return this.allergy.updateAllergy(allergyId, allergyData);
-  }
-
-  deleteAllergy(allergyId) {
-    return this.allergy.deleteAllergy(allergyId);
-  }
-
-  checkAllergenConflict(patientId, allergen) {
-    return this.allergy.checkAllergenConflict(patientId, allergen);
+  deleteAllergy(allergyId, signal) {
+    return this.delete(`/allergies/${allergyId}/`, { signal });
   }
 
   // Treatment methods
-  getTreatments(params) {
-    return this.treatment.getTreatments(params);
+  getTreatments(signal) {
+    return this.get('/treatments/', { signal });
   }
 
-  getPatientTreatments(patientId, params) {
-    return this.treatment.getPatientTreatments(patientId, params);
+  getPatientTreatments(patientId, signal) {
+    return this.get(`/patients/${patientId}/treatments/`, { signal });
   }
 
-  getActiveTreatments(patientId) {
-    return this.treatment.getActiveTreatments(patientId);
+  getTreatment(treatmentId, signal) {
+    return this.get(`/treatments/${treatmentId}/`, { signal });
   }
 
-  getOngoingTreatments(patientId) {
-    return this.treatment.getOngoingTreatments(patientId);
+  createTreatment(treatmentData, signal) {
+    return this.post('/treatments/', treatmentData, { signal });
   }
 
-  getTreatment(treatmentId) {
-    return this.treatment.getTreatment(treatmentId);
+  updateTreatment(treatmentId, treatmentData, signal) {
+    return this.put(`/treatments/${treatmentId}/`, treatmentData, { signal });
   }
 
-  createTreatment(treatmentData) {
-    return this.treatment.createTreatment(treatmentData);
-  }
-
-  updateTreatment(treatmentId, treatmentData) {
-    return this.treatment.updateTreatment(treatmentId, treatmentData);
-  }
-
-  deleteTreatment(treatmentId) {
-    return this.treatment.deleteTreatment(treatmentId);
+  deleteTreatment(treatmentId, signal) {
+    return this.delete(`/treatments/${treatmentId}/`, { signal });
   }
 
   // Procedure methods
-  getProcedures(params) {
-    return this.procedure.getProcedures(params);
+  getProcedures(signal) {
+    return this.get('/procedures/', { signal });
   }
 
-  getPatientProcedures(patientId, params) {
-    return this.procedure.getPatientProcedures(patientId, params);
+  getPatientProcedures(patientId, signal) {
+    return this.get(`/patients/${patientId}/procedures/`, { signal });
   }
 
-  getRecentProcedures(patientId, days) {
-    return this.procedure.getRecentProcedures(patientId, days);
+  getProcedure(procedureId, signal) {
+    return this.get(`/procedures/${procedureId}/`, { signal });
   }
 
-  getProcedure(procedureId) {
-    return this.procedure.getProcedure(procedureId);
+  createProcedure(procedureData, signal) {
+    return this.post('/procedures/', procedureData, { signal });
   }
 
-  createProcedure(procedureData) {
-    return this.procedure.createProcedure(procedureData);
+  updateProcedure(procedureId, procedureData, signal) {
+    return this.put(`/procedures/${procedureId}/`, procedureData, { signal });
   }
 
-  updateProcedure(procedureId, procedureData) {
-    return this.procedure.updateProcedure(procedureId, procedureData);
-  }
-
-  deleteProcedure(procedureId) {
-    return this.procedure.deleteProcedure(procedureId);
+  deleteProcedure(procedureId, signal) {
+    return this.delete(`/procedures/${procedureId}/`, { signal });
   }
 
   // Condition methods
-  getConditions(params) {
-    return this.condition.getConditions(params);
+  getConditions(signal) {
+    return this.get('/conditions/', { signal });
   }
 
-  getPatientConditions(patientId, params) {
-    return this.condition.getPatientConditions(patientId, params);
+  getPatientConditions(patientId, signal) {
+    return this.get(`/patients/${patientId}/conditions/`, { signal });
   }
 
-  getActiveConditions(patientId) {
-    return this.condition.getActiveConditions(patientId);
+  getCondition(conditionId, signal) {
+    return this.get(`/conditions/${conditionId}/`, { signal });
   }
 
-  getChronicConditions(patientId) {
-    return this.condition.getChronicConditions(patientId);
+  createCondition(conditionData, signal) {
+    return this.post('/conditions/', conditionData, { signal });
   }
 
-  getCondition(conditionId) {
-    return this.condition.getCondition(conditionId);
+  updateCondition(conditionId, conditionData, signal) {
+    return this.put(`/conditions/${conditionId}/`, conditionData, { signal });
   }
 
-  createCondition(conditionData) {
-    return this.condition.createCondition(conditionData);
+  deleteCondition(conditionId, signal) {
+    return this.delete(`/conditions/${conditionId}/`, { signal });
   }
 
-  updateCondition(conditionId, conditionData) {
-    return this.condition.updateCondition(conditionId, conditionData);
+  // Encounter methods
+  getEncounters(signal) {
+    return this.get('/encounters/', { signal });
   }
 
-  deleteCondition(conditionId) {
-    return this.condition.deleteCondition(conditionId);
+  getPatientEncounters(patientId, signal) {
+    return this.get(`/patients/${patientId}/encounters/`, { signal });
   }
 
-  // Encounter/Visit methods
-  getEncounters(params) {
-    return this.encounter.getEncounters(params);
+  getEncounter(encounterId, signal) {
+    return this.get(`/encounters/${encounterId}/`, { signal });
   }
 
-  getPatientEncounters(patientId, params) {
-    return this.encounter.getPatientEncounters(patientId, params);
+  createEncounter(encounterData, signal) {
+    return this.post('/encounters/', encounterData, { signal });
   }
 
-  getRecentEncounters(patientId, days) {
-    return this.encounter.getRecentEncounters(patientId, days);
+  updateEncounter(encounterId, encounterData, signal) {
+    return this.put(`/encounters/${encounterId}/`, encounterData, { signal });
   }
 
-  getPractitionerEncounters(practitionerId, params) {
-    return this.encounter.getPractitionerEncounters(practitionerId, params);
-  }
-
-  getEncounter(encounterId) {
-    return this.encounter.getEncounter(encounterId);
-  }
-
-  createEncounter(encounterData) {
-    return this.encounter.createEncounter(encounterData);
-  }
-
-  updateEncounter(encounterId, encounterData) {
-    return this.encounter.updateEncounter(encounterId, encounterData);
-  }
-
-  deleteEncounter(encounterId) {
-    return this.encounter.deleteEncounter(encounterId);
+  deleteEncounter(encounterId, signal) {
+    return this.delete(`/encounters/${encounterId}/`, { signal });
   }
 }
 

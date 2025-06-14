@@ -1,7 +1,7 @@
 // Base API service with common functionality
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? (process.env.REACT_APP_API_URL || '')  // Use relative URLs in production
-  : 'http://localhost:8000';
+  : 'http://localhost:8000/api/v1';
 
 class BaseApiService {
   constructor(basePath = '') {

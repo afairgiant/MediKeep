@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.database import create_tables, create_default_user
 from app.core.logging_middleware import RequestLoggingMiddleware
 from app.core.logging_config import get_logger
+from app.scripts.sequence_monitor import SequenceMonitor
 
 # Initialize logger
 logger = get_logger(__name__, "app")
@@ -81,136 +82,88 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-# Serve static files (React build) in production
-# Try multiple possible static directory locations
+# Serve static files (React build)
+STATIC_DIR = os.environ.get("STATIC_DIR", "static")
+
+# Try multiple possible static directory locations for flexibility
 static_dirs = [
-    os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "static", "static"
-    ),  # Development (nested)
-    "/app/static/static",  # Docker container (nested static directory)
-    "static/static",  # Current directory (Docker workdir is /app) (nested)
-    os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "static"
-    ),  # Development fallback
-    "/app/static",  # Docker container fallback
+    STATIC_DIR,  # Environment variable or default "static"
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"),  # Development
+    "/app/static",  # Docker container
     "static",  # Current directory fallback
 ]
 
-# Debug: Log all attempted paths and their existence
-logger.info("=== DEBUGGING STATIC FILE PATHS ===")
-for i, dir_path in enumerate(static_dirs):
-    exists = os.path.exists(dir_path)
-    logger.info(f"Static path {i + 1}: {dir_path} - Exists: {exists}")
-    if exists:
-        # List contents if it exists
-        try:
-            contents = os.listdir(dir_path)
-            logger.info(f"Contents of {dir_path}: {contents}")
-        except Exception as e:
-            logger.error(f"Error listing {dir_path}: {e}")
-
-# Also check current working directory
-cwd = os.getcwd()
-logger.info(f"Current working directory: {cwd}")
-logger.info(
-    f"Contents of current directory: {os.listdir(cwd) if os.path.exists(cwd) else 'N/A'}"
-)
-
 static_dir = None
-html_dir = None  # Separate directory for HTML files
-
 for dir_path in static_dirs:
     if os.path.exists(dir_path):
         static_dir = dir_path
-        html_dir = dir_path  # Initially same as static_dir
+        logger.info(f"✅ Found static directory: {static_dir}")
         break
 
 if static_dir:
-    # Check if we found the nested static directory directly
-    if static_dir.endswith("/static/static") or static_dir.endswith("\\static\\static"):
-        # We found the nested directory directly, use it for static assets
-        app.mount("/static", StaticFiles(directory=static_dir), name="static")
-        logger.info(f"✅ Serving static assets from nested directory: {static_dir}")
-        # Set html_dir to the parent directory for index.html
-        html_dir = os.path.dirname(static_dir)
-        logger.info(f"✅ Serving HTML files from parent directory: {html_dir}")
+    # Check for nested static directory (common in React builds)
+    nested_static = os.path.join(static_dir, "static")
+    if os.path.exists(nested_static):
+        # Mount the nested static directory for assets
+        app.mount("/static", StaticFiles(directory=nested_static), name="static")
+        logger.info(f"✅ Serving static assets from: {nested_static}")
+        # Use parent directory for index.html
+        html_dir = static_dir
     else:
-        # Check for nested static directory within the found directory
-        nested_static = os.path.join(static_dir, "static")
-        if (
-            os.path.exists(nested_static)
-            and os.path.exists(os.path.join(nested_static, "css"))
-            and os.path.exists(os.path.join(nested_static, "js"))
-        ):
-            # Use nested directory for static assets (CSS/JS)
-            app.mount("/static", StaticFiles(directory=nested_static), name="static")
-            logger.info(
-                f"✅ Serving static assets from nested directory: {nested_static}"
-            )
-            # Keep HTML files in the current directory
-            html_dir = static_dir
-            logger.info(f"✅ Serving HTML files from: {html_dir}")
-        else:
-            # Use the same directory for both static assets and HTML
-            app.mount("/static", StaticFiles(directory=static_dir), name="static")
-            logger.info(f"✅ Serving static files from: {static_dir}")
-            html_dir = static_dir
-
-    # List what's actually in the static directory
-    try:
-        static_contents = os.listdir(static_dir)
-        logger.info(f"Static directory contents: {static_contents}")
-
-        # Check for specific folders
-        css_path = os.path.join(static_dir, "static", "css")
-        js_path = os.path.join(static_dir, "static", "js")
-        logger.info(f"CSS path exists: {os.path.exists(css_path)} - {css_path}")
-        logger.info(f"JS path exists: {os.path.exists(js_path)} - {js_path}")
-
-        if os.path.exists(css_path):
-            logger.info(f"CSS files: {os.listdir(css_path)}")
-        if os.path.exists(js_path):
-            logger.info(f"JS files: {os.listdir(js_path)}")
-
-    except Exception as e:
-        logger.error(f"Error listing static directory: {e}")
+        # Mount the static directory directly
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+        logger.info(f"✅ Serving static files from: {static_dir}")
+        html_dir = static_dir
 
     @app.get("/")
     async def read_index():
         """Serve React app index.html for root path"""
-        if html_dir:  # Use html_dir instead of static_dir
-            index_path = os.path.join(html_dir, "index.html")
+        index_path = os.path.join(html_dir, "index.html")
+        if os.path.exists(index_path):
             return FileResponse(index_path)
-        return {"error": "Static files not available"}
+        return {"error": "React app index.html not found"}
+
 else:
     logger.warning("❌ No static directory found - React app will not be served")
+
+    @app.get("/")
+    async def api_root():
+        return {
+            "message": "Medical Records API",
+            "docs": "/docs",
+            "status": "React app not configured",
+        }
 
 
 async def check_sequences_on_startup():
     """Check and fix sequence synchronization on application startup"""
-    if not settings.SEQUENCE_CHECK_ON_STARTUP:
+    if not getattr(settings, "SEQUENCE_CHECK_ON_STARTUP", False):
         return
 
     try:
-        from scripts.sequence_monitor import SequenceMonitor
+        from app.scripts.sequence_monitor import SequenceMonitor
 
         monitor = SequenceMonitor()
 
         logger.info("🔍 Checking database sequences on startup...")
-        results = monitor.monitor_all_sequences(auto_fix=settings.SEQUENCE_AUTO_FIX)
+        results = monitor.monitor_all_sequences(
+            auto_fix=getattr(settings, "SEQUENCE_AUTO_FIX", False)
+        )
 
-        if results["out_of_sync_tables"]:
-            if settings.SEQUENCE_AUTO_FIX:
+        if results.get("out_of_sync_tables"):
+            if getattr(settings, "SEQUENCE_AUTO_FIX", False):
                 logger.info(
-                    f"✅ Auto-fixed {len(results['fixed_tables'])} sequence issues on startup"
+                    f"✅ Auto-fixed {len(results.get('fixed_tables', []))} sequence issues"
                 )
             else:
                 logger.warning(
-                    f"⚠️  Found {len(results['out_of_sync_tables'])} sequence issues - auto-fix disabled"
+                    f"⚠️  Found {len(results['out_of_sync_tables'])} sequence issues"
                 )
         else:
             logger.info("✅ All database sequences are synchronized")
 
+    except ImportError:
+        logger.info("SequenceMonitor not available - skipping sequence check")
     except Exception as e:
         logger.error(f"❌ Failed to check sequences on startup: {e}")
 
@@ -244,5 +197,26 @@ def health():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
 
 
-# Note: Removed catch-all route that was interfering with API endpoints
-# React routing should be handled by the frontend, not by a catch-all backend route
+# Catch-all route for React Router (MUST be last route)
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    """
+    Serve React app for all non-API routes.
+    This handles React Router client-side routing.
+    MUST be the last route defined.
+    """
+    # Don't serve React for API routes
+    if full_path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+
+    # Don't serve React for docs and special endpoints
+    if full_path in ["docs", "redoc", "openapi.json", "health"]:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    # Serve index.html for all other routes (React Router handles them)
+    if static_dir:
+        index_path = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+
+    raise HTTPException(status_code=404, detail="Page not found")

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from annotated_types import T
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -24,6 +25,8 @@ class Settings:  # App Info
         if all([DB_USER, DB_PASS, DB_NAME])
         else "",
     )
+    SEQUENCE_AUTO_FIX: bool = True  # Always enabled for data integrity
+    SEQUENCE_CHECK_ON_STARTUP: bool = True  # Always enabled for data integrity
 
     # Security Configuration
     ALGORITHM: str = "HS256"

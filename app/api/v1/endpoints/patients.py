@@ -263,3 +263,15 @@ def delete_my_patient_record(
             },
         )
         raise
+
+
+@router.get("/current", response_model=Patient)
+def get_current_patient_record(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get current user's patient record (alias for /me endpoint).
+    """
+    return get_my_patient_record(request, db, user_id)

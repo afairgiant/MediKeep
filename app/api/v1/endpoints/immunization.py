@@ -150,3 +150,23 @@ def check_booster_due(
         "vaccine_name": vaccine_name,
         "booster_due": is_due,
     }
+
+
+@router.get(
+    "/patients/{patient_id}/immunizations/", response_model=List[ImmunizationResponse]
+)
+def get_patient_immunizations(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all immunizations for a specific patient.
+    """
+    immunizations = immunization.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
+    return immunizations
