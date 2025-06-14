@@ -70,13 +70,14 @@ export const apiMethods = {
     update: (id, data, signal) => apiService.put(`/lab-results/${id}/`, { signal }), 
     delete: (id, signal) => apiService.delete(`/lab-results/${id}/`, { signal }),
     // File operations
-    getFiles: (labResultId, signal) => apiService.get(`/lab-results/${labResultId}/files/`, { signal }),
+    getFiles: (labResultId, signal) => apiService.get(`/lab-results/${labResultId}/files/`, { signal }),    
     uploadFile: (labResultId, file, description, signal) => {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('description', description);
+      if (description && description.trim()) {
+        formData.append('description', description);
+      }
       return apiService.post(`/lab-results/${labResultId}/files/`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
         signal
       });
     },

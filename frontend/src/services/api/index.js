@@ -38,18 +38,9 @@ class ApiService {
       let errorMessage;
       let fullErrorData;
       
-      // Log the actual HTTP status for debugging
-      console.error(`HTTP ${response.status} Error on ${method} ${url}:`, {
-        status: response.status,
-        statusText: response.statusText,
-        responseText: errorData
-      });
-      
       try {
         fullErrorData = JSON.parse(errorData);
-        errorMessage = fullErrorData.detail || fullErrorData.message || errorData;
-        
-        // For 422 errors, log the full validation details
+        errorMessage = fullErrorData.detail || fullErrorData.message || errorData;        // For 422 errors, log the full validation details
         if (response.status === 422) {
           console.error('Validation Error Details:', fullErrorData);
           if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
@@ -74,8 +65,7 @@ class ApiService {
       return response.json();
     }
     return response.text();
-  }
-  // Core request method with logging
+  }  // Core request method with logging
   async request(method, url, data = null, options = {}) {
     const { signal, headers: customHeaders = {} } = options;
     
@@ -84,7 +74,9 @@ class ApiService {
     if (!token) {
       logger.error('No authentication token found');
       throw new Error('Authentication required. Please log in again.');
-    }    const config = {
+    }
+
+    const config = {
       method,
       signal,
       headers: {
@@ -93,24 +85,29 @@ class ApiService {
         'Authorization': `Bearer ${token}`, // Always include auth token
         ...customHeaders,
       },
-    };    logger.debug(`${method} request to ${url}`, {
+    };
+
+    logger.debug(`${method} request to ${url}`, {
       url: this.baseURL + url,
       hasAuth: !!token
     });
 
-    // Override Content-Type for FormData
+    // Handle different data types
     if (data instanceof FormData) {
-      delete config.headers['Content-Type'];
-    }    if (data) {
+      delete config.headers['Content-Type']; // Let browser set the boundary
+      config.body = data;
+    } else if (data instanceof URLSearchParams) {
+      config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      config.body = data;
+    } else if (data) {
       config.body = JSON.stringify(data);
-    }    try {
+    }
+
+    try {
       const response = await fetch(this.baseURL + url, config);
-      return await this.handleResponse(response, method, url);
+      return this.handleResponse(response, url, method);
     } catch (error) {
-      // Only log if it's actually a network error, not a handled HTTP error
-      if (!error.message?.includes('HTTP error!')) {
-        logger.apiError(error, url, method);
-      }
+      logger.apiError(error, url, method);
       throw error;
     }
   }
@@ -130,8 +127,7 @@ class ApiService {
     return this.request('DELETE', endpoint, null, options);
   }
 
-  // Simplified API methods for backward compatibility
-  // Auth methods
+  // Simplified API methods for backward compatibility  // Auth methods
   login(username, password, signal) {
     // FastAPI OAuth2PasswordRequestForm expects form-encoded data
     const formData = new URLSearchParams();
@@ -200,15 +196,13 @@ class ApiService {
   getLabResultFiles(labResultId, signal) {
     return this.get(`/lab-results/${labResultId}/files/`, { signal });
   }
-
   uploadLabResultFile(labResultId, file, description = '', signal) {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('description', description);
-    return this.post(`/lab-results/${labResultId}/files/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      signal
-    });
+    if (description && description.trim()) {
+      formData.append('description', description);
+    }
+    return this.post(`/lab-results/${labResultId}/files/`, formData, { signal });
   }
 
   downloadLabResultFile(fileId, signal) {

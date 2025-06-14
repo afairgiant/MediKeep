@@ -235,22 +235,22 @@ const LabResults = () => {
       console.error('Error fetching lab result details:', error);
       setError(error.message);
     }
-  };
-  const handleFileUpload = async (e) => {
+  };  const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!fileUpload.file || !selectedLabResult) return;
 
     try {
-      await apiService.uploadLabResultFile(
-        selectedLabResult.id, 
-        fileUpload.file, 
-        fileUpload.description
-      );
+      const formData = new FormData();
+      formData.append('file', fileUpload.file);
+      if (fileUpload.description && fileUpload.description.trim()) {
+        formData.append('description', fileUpload.description);
+      }
+      
+      await apiService.post(`/lab-results/${selectedLabResult.id}/files/`, formData);
       
       // Refresh files list
       const files = await apiService.getLabResultFiles(selectedLabResult.id);
-      setSelectedFiles(files);
-      
+      setSelectedFiles(files);      
       // Update the file count for this lab result
       setFilesCounts(prev => ({
         ...prev,
