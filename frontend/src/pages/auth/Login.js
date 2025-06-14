@@ -113,12 +113,48 @@ const Login = () => {
         } else {
           toast.error('Account created but login failed. Please try logging in manually.');
           setShowCreateUser(false);
+        }      } else {
+        // Handle different error types
+        let errorMessage = 'Failed to create account';
+        
+        if (typeof registerResult.error === 'string') {
+          errorMessage = registerResult.error;
+        } else if (registerResult.error && typeof registerResult.error === 'object') {
+          // Handle validation error objects
+          if (Array.isArray(registerResult.error.detail)) {
+            const validationErrors = registerResult.error.detail.map(err => {
+              if (typeof err === 'object' && err.msg) {
+                return `${err.loc?.join('.')} - ${err.msg}`;
+              }
+              return String(err);
+            }).join('; ');
+            errorMessage = `Validation Error: ${validationErrors}`;
+          } else if (registerResult.error.detail) {
+            errorMessage = String(registerResult.error.detail);
+          } else {
+            errorMessage = JSON.stringify(registerResult.error);
+          }
         }
-      } else {
-        setCreateUserError(registerResult.error || 'Failed to create account');
+        
+        setCreateUserError(errorMessage);
+      }    } catch (error) {
+      console.error('Error creating user:', error);
+      
+      // Handle different error formats
+      let errorMessage = 'Failed to create user. Please try again.';
+      
+      if (error.detail && Array.isArray(error.detail)) {
+        // Handle validation errors array
+        errorMessage = error.detail.map(error => 
+          `${error.loc?.join('.')} - ${error.msg}`
+        ).join('; ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
       }
-    } catch (error) {
-      setCreateUserError(error.message || 'Failed to create user. Please try again.');
+      
+      setCreateUserError(errorMessage);
     } finally {
       setIsCreatingUser(false);
     }

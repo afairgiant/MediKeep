@@ -172,18 +172,23 @@ class SimpleAuthService {
         error: error.message || 'Network error during login'
       };
     }
-  }
-  // Register user
+  }  // Register user
   async register(userData) {
     try {
       console.log('📝 Attempting registration for:', userData.username);
+      
+      // Add default role if not provided
+      const registrationData = {
+        ...userData,
+        role: userData.role || 'user'  // Default to 'user' role
+      };
       
       const response = await this.makeRequest('/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(registrationData),
       });
 
       console.log('📝 Registration response status:', response.status);
