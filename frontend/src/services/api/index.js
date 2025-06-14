@@ -3,11 +3,8 @@
 class ApiService {  
   constructor() {
     this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
-  }
-
-  // Core request method with abort signal support
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+  }  // Core request method with abort signal support
+  async request(endpoint, options = {}) {    const url = `${this.baseURL}${endpoint}`;
     const token = localStorage.getItem('token');
     
     const config = {
@@ -19,13 +16,42 @@ class ApiService {
       ...options,
     };
 
+    // Debug logging - REMOVE THIS LATER
+    console.log('🔍 API REQUEST DEBUG:', {
+      url,
+      method: config.method,
+      hasToken: !!token,
+      tokenLength: token?.length,
+      headers: config.headers,
+      authHeader: config.headers.Authorization
+    });
+
     // Pass through abort signal
     if (options.signal) {
       config.signal = options.signal;
     }
-
+    
     try {
       const response = await fetch(url, config);
+      
+      // Debug logging for response - REMOVE THIS LATER
+      if (!response.ok) {
+        console.error('🚨 API REQUEST FAILED:', {
+          url,
+          method: config.method,
+          status: response.status,
+          statusText: response.statusText,
+          headers: config.headers
+        });
+        
+        // Try to get the error response body
+        try {
+          const errorBody = await response.clone().text();
+          console.error('🚨 ERROR RESPONSE BODY:', errorBody);
+        } catch (e) {
+          console.error('🚨 Could not read error response body');
+        }
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
@@ -50,21 +76,19 @@ class ApiService {
   get(endpoint, options = {}) {
     return this.request(endpoint, { method: 'GET', ...options });
   }
-
   post(endpoint, data, options = {}) {
     const isFormData = data instanceof FormData;
     const body = isFormData ? data : JSON.stringify(data);
     
     // Don't set Content-Type for FormData - let browser set it with boundary
-    const headers = isFormData 
+    const additionalHeaders = isFormData 
       ? {} 
       : { 'Content-Type': 'application/json' };
-    
-    return this.request(endpoint, {
+      return this.request(endpoint, {
       method: 'POST',
       body,
       headers: {
-        ...headers,
+        ...additionalHeaders,
         ...options.headers
       },
       ...options,
@@ -180,13 +204,12 @@ class ApiService {
   // Medication methods
   getMedications(signal) {
     return this.get('/medications/', { signal });
-  }
-
-  getPatientMedications(patientId, signal) {
+  }  getPatientMedications(patientId, signal) {
     return this.get(`/patients/${patientId}/medications/`, { signal });
   }
-
+  
   createMedication(medicationData, signal) {
+    // Use the original medications endpoint that we know works
     return this.post('/medications/', medicationData, { signal });
   }
 

@@ -19,15 +19,18 @@ logger = get_logger(__name__, "app")
 
 @router.post("/", response_model=MedicationResponse)
 def create_medication(
-    *,
+    medication_in: MedicationCreate,
     request: Request,
     db: Session = Depends(deps.get_db),
-    medication_in: MedicationCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Create new medication.
     """
+    # Debug logging to see what headers we receive - REMOVE THIS LATER
+    auth_header = request.headers.get("authorization")
+    logger.info(f"🔍 MEDICATION ENDPOINT: Authorization header = {auth_header}")
+
     user_ip = request.client.host if request.client else "unknown"
 
     try:

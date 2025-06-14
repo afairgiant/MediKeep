@@ -21,16 +21,16 @@ export const apiMethods = {
     getAll: (signal) => apiService.get('/immunizations/', { signal }),
     getByPatient: (patientId, signal) => apiService.get(`/patients/${patientId}/immunizations/`, { signal }),
     create: (data, signal) => apiService.post('/immunizations/', data, { signal }),
-    update: (id, data, signal) => apiService.put(`/immunizations/${id}/`, data, { signal }),
-    delete: (id, signal) => apiService.delete(`/immunizations/${id}/`, { signal })
+    update: (id, data, signal) => apiService.put(`/immunizations/${id}/`, data, { signal }),    delete: (id, signal) => apiService.delete(`/immunizations/${id}/`, { signal })
   },
   
   medications: {
     getAll: (signal) => apiService.get('/medications/', { signal }),
-    getByPatient: (patientId, signal) => apiService.get(`/medications/patient/${patientId}/`, { signal }),
-    create: (data, signal) => apiService.post('/medications/', data, { signal }),
-    update: (id, data, signal) => apiService.put(`/medications/${id}/`, { signal }),
-    delete: (id, signal) => apiService.delete(`/medications/${id}/`, { signal }), 
+    getByPatient: (patientId, signal) => apiService.get(`/patients/${patientId}/medications/`, { signal }),
+    create: (data, signal) => apiService.post(`/patients/${data.patient_id || 'current'}/medications/`, data, { signal }),
+    update: (id, data, signal) => apiService.put(`/medications/${id}/`, data, { signal }),
+    delete: (id, signal) => apiService.delete(`/medications/${id}/`, { signal })
+  },
   
   procedures: {
     getAll: (signal) => apiService.get('/procedures/', { signal }),
@@ -88,12 +88,10 @@ export const apiMethods = {
   },
 
   patients: {
-    getCurrent: (signal) => apiService.get('/patients/current/', { signal }),
-    getAll: (signal) => apiService.get('/patients/', { signal }),
+    getCurrent: (signal) => apiService.get('/patients/current/', { signal }),    getAll: (signal) => apiService.get('/patients/', { signal }),
     getById: (id, signal) => apiService.get(`/patients/${id}`, { signal }),
     create: (data, signal) => apiService.post('/patients/', data, { signal }),
     update: (id, data, signal) => apiService.put(`/patients/${id}/`, data, { signal }),
     delete: (id, signal) => apiService.delete(`/patients/${id}/`, { signal })
-  }
   }
 };
