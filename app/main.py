@@ -197,26 +197,42 @@ def health():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
 
 
-# Catch-all route for React Router (MUST be last route)
-@app.get("/{full_path:path}")
-async def serve_react_app(full_path: str):
+def setup_spa_routing():
     """
-    Serve React app for all non-API routes.
-    This handles React Router client-side routing.
-    MUST be the last route defined.
+    Setup SPA routing only when React build files exist (production).
+    This avoids conflicts during development.
     """
-    # Don't serve React for API routes
-    if full_path.startswith("api/"):
-        raise HTTPException(status_code=404, detail="API endpoint not found")
+    if not static_dir:
+        logger.info("🔧 Development mode - No static directory, SPA routing disabled")
+        return
 
-    # Don't serve React for docs and special endpoints
-    if full_path in ["docs", "redoc", "openapi.json", "health"]:
-        raise HTTPException(status_code=404, detail="Not found")
+    index_path = os.path.join(static_dir, "index.html")
+    if not os.path.exists(index_path):
+        logger.info("🔧 Development mode - No index.html found, SPA routing disabled")
+        return
 
-    # Serve index.html for all other routes (React Router handles them)
-    if static_dir:
-        index_path = os.path.join(static_dir, "index.html")
-        if os.path.exists(index_path):
-            return FileResponse(index_path)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """
+        Serve React SPA for non-API routes in production only.
+        This route is only created when React build files exist.
+        """
+        # Block API routes explicitly
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
 
-    raise HTTPException(status_code=404, detail="Page not found")
+        # Block special FastAPI routes
+        if full_path in ["docs", "redoc", "openapi.json", "health"]:
+            raise HTTPException(status_code=404, detail="Not found")
+
+        # Serve React app for all other routes
+        return FileResponse(index_path)
+
+    logger.info("✅ Production mode - SPA routing enabled for React Router")
+
+
+# Setup SPA routing (only activates if React build exists)
+setup_spa_routing()
+
+# Note: Catch-all route removed to prevent interference with API endpoints
+# For production deployment, React Router should be handled by the frontend build process
