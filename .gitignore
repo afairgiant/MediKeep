@@ -38,6 +38,7 @@ yarn.lock
 *.env.production.local
 
 !/frontend/.env
+!/app/scripts/
 
 # Editor and system files
 .DS_Store
@@ -59,7 +60,7 @@ audit.log.*
 uploads/
 
 # Testing Scripts
-scripts/
+./scripts/
 
 
 # NPM
@@ -95,3 +96,9 @@ docs/SEQUENCE_MONITORING_GUIDE.md
 docker/dev/dev-docker-compose.yml
 docs/AUTH_SYSTEM_DOCUMENTATION.md
 docs/IMPLEMENTATION_CHECKLIST.md
+scripts/migrate-auth.js
+scripts/sequence_monitor_task.bat
+scripts/sequence_monitor.py
+scripts/start-backend.bat
+scripts/start-backend.ps1
+scripts/start-dev.bat

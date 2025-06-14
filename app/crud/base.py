@@ -189,13 +189,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                         )
 
                 # Re-raise the error if it's not a sequence issue or we can't fix it
-                raise
-
-        # If we've exhausted all retries
+                raise  # If we've exhausted all retries
+        sequence_error = Exception(f"Sequence issues after {max_retries} attempts")
         raise IntegrityError(
-            f"Failed to create {self.model.__name__} after {max_retries} attempts due to sequence issues",
-            None,
-            None,
+            statement=f"Failed to create {self.model.__name__} after {max_retries} attempts due to sequence issues",
+            params=None,
+            orig=sequence_error,
         )
 
     def _fix_sequence(self, db: Session) -> bool:
@@ -212,11 +211,23 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         try:
             # Get table name and primary key column
-            table_name = self.model.__tablename__
-            pk_column = "id"  # Assuming 'id' is the primary key for most models
+            table_name = getattr(self.model, "__tablename__", None)
+            if not table_name:
+                logger.error(
+                    f"Model {self.model.__name__} does not have __tablename__ attribute"
+                )
+                return False
+            pk_column = "id"  # Assuming 'id' is the primary key for most models            # Only attempt for PostgreSQL
+            try:
+                # For SQLAlchemy 2.0+, access the URL properly
+                from app.core.database import engine
 
-            # Only attempt for PostgreSQL
-            if not str(db.bind.url).startswith("postgresql"):
+                db_url = str(engine.url)
+            except Exception:
+                # If all else fails, assume it's not PostgreSQL
+                return False
+
+            if not db_url.startswith("postgresql"):
                 return False
 
             # Get max ID from table
