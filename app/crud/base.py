@@ -212,11 +212,23 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         try:
             # Get table name and primary key column
-            table_name = self.model.__tablename__
-            pk_column = "id"  # Assuming 'id' is the primary key for most models
+            table_name = getattr(self.model, "__tablename__", None)
+            if not table_name:
+                logger.error(
+                    f"Model {self.model.__name__} does not have __tablename__ attribute"
+                )
+                return False
+            pk_column = "id"  # Assuming 'id' is the primary key for most models            # Only attempt for PostgreSQL
+            try:
+                # For SQLAlchemy 2.0+, access the URL properly
+                from app.core.database import engine
 
-            # Only attempt for PostgreSQL
-            if not str(db.bind.url).startswith("postgresql"):
+                db_url = str(engine.url)
+            except Exception:
+                # If all else fails, assume it's not PostgreSQL
+                return False
+
+            if not db_url.startswith("postgresql"):
                 return False
 
             # Get max ID from table
