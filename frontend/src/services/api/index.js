@@ -1,82 +1,103 @@
-// New streamlined API service with abort signal support
+import logger from '../logger';
 
+// Streamlined API service with proper logging integration
 class ApiService {  
   constructor() {
     this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
-  }  // Core request method with abort signal support
-  async request(endpoint, options = {}) {    const url = `${this.baseURL}${endpoint}`;
+  }
+
+  getAuthHeaders() {
     const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    
+    if (token) {
+      try {
+        // Check if token is expired
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Date.now() / 1000;
+        
+        if (payload.exp < currentTime) {
+          logger.warn('Token expired, removing from storage');
+          localStorage.removeItem('token');
+          return headers;
+        }
+        
+        headers['Authorization'] = `Bearer ${token}`;
+      } catch (e) {
+        logger.error('Invalid token format', { error: e.message });
+        localStorage.removeItem('token');
+      }
+    }
+    
+    return headers;
+  }
+
+  async handleResponse(response, endpoint, method) {
+    const responseInfo = {
+      status: response.status,
+      statusText: response.statusText,
+      endpoint,
+      method
+    };
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        logger.warn('Unauthorized request - redirecting to login', responseInfo);
+        if (!endpoint.includes('/login')) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+      } else {
+        logger.apiError(new Error(`HTTP ${response.status}: ${response.statusText}`), endpoint, method);
+      }
+      
+      const error = new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+      error.status = response.status;
+      error.statusText = response.statusText;
+      throw error;
+    }
+
+    logger.debug('API request successful', responseInfo);
+    
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+    return response.text();
+  }
+  // Core request method with logging
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    const method = options.method || 'GET';
     
     const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-        ...options.headers,
-      },
+      headers: this.getAuthHeaders(),
       ...options,
     };
 
-    // Debug logging - REMOVE THIS LATER
-    console.log('🔍 API REQUEST DEBUG:', {
-      url,
-      method: config.method,
-      hasToken: !!token,
-      tokenLength: token?.length,
-      headers: config.headers,
-      authHeader: config.headers.Authorization
-    });
-
-    // Pass through abort signal
-    if (options.signal) {
-      config.signal = options.signal;
+    // Override Content-Type for FormData
+    if (options.body instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
+
+    logger.debug(`${method} request to ${endpoint}`, { 
+      url, 
+      hasAuth: !!config.headers.Authorization 
+    });
     
     try {
       const response = await fetch(url, config);
-      
-      // Debug logging for response - REMOVE THIS LATER
-      if (!response.ok) {
-        console.error('🚨 API REQUEST FAILED:', {
-          url,
-          method: config.method,
-          status: response.status,
-          statusText: response.statusText,
-          headers: config.headers
-        });
-        
-        // Try to get the error response body
-        try {
-          const errorBody = await response.clone().text();
-          console.error('🚨 ERROR RESPONSE BODY:', errorBody);
-        } catch (e) {
-          console.error('🚨 Could not read error response body');
-        }
-      }
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-      }
-
-      if (options.responseType === 'blob') {
-        return response.blob();
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return response.json();
-      }
-      
-      return response.text();
+      return this.handleResponse(response, endpoint, method);
     } catch (error) {
-      throw new Error(`API request failed: ${error.message}`);
+      logger.apiError(error, endpoint, method);
+      throw error;
     }
   }
 
   // Generic HTTP methods with signal support
   get(endpoint, options = {}) {
     return this.request(endpoint, { method: 'GET', ...options });
-  }
-  post(endpoint, data, options = {}) {
+  }  post(endpoint, data, options = {}) {
     const isFormData = data instanceof FormData;
     const body = isFormData ? data : JSON.stringify(data);
     
@@ -84,7 +105,8 @@ class ApiService {
     const additionalHeaders = isFormData 
       ? {} 
       : { 'Content-Type': 'application/json' };
-      return this.request(endpoint, {
+      
+    return this.request(endpoint, {
       method: 'POST',
       body,
       headers: {
@@ -198,13 +220,14 @@ class ApiService {
   }
 
   deleteLabResultFile(fileId, signal) {
-    return this.delete(`/lab-result-files/${fileId}/`, { signal });
-  }
+    return this.delete(`/lab-result-files/${fileId}/`, { signal });  }
 
   // Medication methods
   getMedications(signal) {
     return this.get('/medications/', { signal });
-  }  getPatientMedications(patientId, signal) {
+  }
+  
+  getPatientMedications(patientId, signal) {
     return this.get(`/patients/${patientId}/medications/`, { signal });
   }
   

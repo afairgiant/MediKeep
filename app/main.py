@@ -10,8 +10,11 @@ from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import create_tables, create_default_user
 from app.core.logging_middleware import RequestLoggingMiddleware
-from app.core.logging_config import get_logger
+from app.core.logging_config import get_logger, LoggingConfig
 from app.scripts.sequence_monitor import SequenceMonitor
+
+# Initialize logging configuration
+logging_config = LoggingConfig()
 
 # Initialize logger
 logger = get_logger(__name__, "app")

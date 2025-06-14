@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import frontendLogger from '../../services/frontendLogger';
+import logger from '../../services/logger';
 import './LoggingTest.css';
 
 const LoggingTest = () => {
   const [logs, setLogs] = useState([]);
   const [errorCount, setErrorCount] = useState(0);
-
   useEffect(() => {
     // Initialize frontend logging for this component
-    frontendLogger.logEvent({
-      type: 'component_mount',
-      message: 'LoggingTest component mounted',
-      level: 'info',
-      component: 'LoggingTest'
+    logger.info('LoggingTest component mounted', {
+      component: 'LoggingTest',
+      category: 'component'
     });
 
     return () => {
-      frontendLogger.logEvent({
-        type: 'component_unmount',
-        message: 'LoggingTest component unmounted',
-        level: 'info',
-        component: 'LoggingTest'
+      logger.info('LoggingTest component unmounted', {
+        component: 'LoggingTest',
+        category: 'component'
       });
     };
   }, []);
@@ -29,22 +24,18 @@ const LoggingTest = () => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs(prev => [...prev, { message, type, timestamp }]);
   };
-
   const testGeneralLogging = () => {
-    frontendLogger.logEvent({
-      type: 'user_test',
-      message: 'User triggered general logging test',
-      level: 'info',
+    logger.info('User triggered general logging test', {
       component: 'LoggingTest',
-      action: 'test_general_logging'
+      action: 'test_general_logging',
+      category: 'user_action'
     });
     addLog('✅ General event logged', 'success');
   };
-
   const testUserActionLogging = () => {
-    frontendLogger.logUserInteraction(
+    logger.userAction(
       'button_click',
-      'test_user_action_button',
+      'LoggingTest',
       {
         testType: 'user_action_logging',
         buttonLocation: 'logging_test_page'
@@ -53,19 +44,15 @@ const LoggingTest = () => {
     addLog('✅ User action logged', 'success');
   };
 
-  const testErrorLogging = () => {
-    setErrorCount(prev => prev + 1);
+  const testErrorLogging = () => {    setErrorCount(prev => prev + 1);
     
-    frontendLogger.logError({
-      type: 'test_error',
-      message: `Test error #${errorCount + 1} - This is a simulated error for testing`,
+    const testError = new Error(`Test error #${errorCount + 1} - This is a simulated error for testing`);
+    logger.error('Simulated test error', {
       component: 'LoggingTest',
-      severity: 'medium',
-      stack: new Error().stack,
-      context: {
-        errorCount: errorCount + 1,
-        testType: 'simulated_error'
-      }
+      category: 'test_error',
+      stack: testError.stack,
+      errorCount: errorCount + 1,
+      testType: 'simulated_error'
     });
     addLog(`❌ Test error #${errorCount + 1} logged`, 'error');
   };
@@ -76,11 +63,13 @@ const LoggingTest = () => {
       status: 500
     };
     
-    frontendLogger.logAPIError(
-      mockAPIError,
-      '/api/v1/test-endpoint',
-      'POST'
-    );
+    logger.error('API Error', {
+      component: 'LoggingTest',
+      category: 'api_error',
+      error: mockAPIError,
+      endpoint: '/api/v1/test-endpoint',
+      method: 'POST'
+    });
     addLog('🌐 API error logged', 'warning');
   };
 
@@ -95,8 +84,13 @@ const LoggingTest = () => {
       },
       timestamp: new Date().toISOString()
     };
+    logger.info('Performance metrics', {
+      component: 'LoggingTest',
+      category: 'performance',
+      ...performanceData
+    });
 
-    frontendLogger.logPerformance(performanceData);
+    logger.logPerformance(performanceData);
     addLog('📊 Performance metrics logged', 'info');
   };
 
@@ -176,8 +170,8 @@ const LoggingTest = () => {
         <h3>📊 Current Status:</h3>
         <ul>
           <li>Errors triggered: {errorCount}</li>
-          <li>Session ID: {frontendLogger.sessionId || 'Not initialized'}</li>
-          <li>User ID: {frontendLogger.userId || 'Not set'}</li>
+          <li>Session ID: {logger.sessionId || 'Not initialized'}</li>
+          <li>User ID: {logger.userId || 'Not set'}</li>
           <li>Online: {navigator.onLine ? '✅' : '❌'}</li>
         </ul>
       </div>

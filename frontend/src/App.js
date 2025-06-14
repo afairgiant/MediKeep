@@ -20,7 +20,7 @@ import ModelEdit from './pages/admin/ModelEdit';
 import ModelCreate from './pages/admin/ModelCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import { LoggingTest, ProtectedRoute, ErrorBoundary } from './components';
-import frontendLogger from './services/frontendLogger';
+import logger from './services/logger';
 import './App.css';
 
 // Component to track navigation
@@ -30,11 +30,9 @@ function NavigationTracker() {
 
   useEffect(() => {
     const currentPath = location.pathname;
-    const previousPath = previousLocation.current;
-
-    if (currentPath !== previousPath) {
+    const previousPath = previousLocation.current;    if (currentPath !== previousPath) {
       // Log navigation as a user interaction
-      frontendLogger.logUserInteraction('navigation', 'page', {
+      logger.userAction('navigation', 'App', {
         fromPath: previousPath,
         toPath: currentPath,
         search: location.search,
@@ -42,13 +40,11 @@ function NavigationTracker() {
       });
       
       // Log page load as an event
-      frontendLogger.logEvent({
-        type: 'page_load',
-        message: `Page loaded: ${currentPath}`,
-        pathname: currentPath,
+      logger.info(`Page loaded: ${currentPath}`, {
+        category: 'navigation',        pathname: currentPath,
         search: location.search,
         hash: location.hash,
-        timestamp: new Date().toISOString()
+        component: 'App'
       });
     }
 
@@ -59,13 +55,11 @@ function NavigationTracker() {
 }
 
 function App() {
-  useEffect(() => {
-    // Initialize frontend logging
-    frontendLogger.logEvent({
-      type: 'app_lifecycle',
-      message: 'Medical Records App initialized',
+  useEffect(() => {    // Initialize frontend logging
+    logger.info('Medical Records App initialized', {
+      category: 'app_lifecycle',
+      component: 'App',
       userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString(),
       url: window.location.href
     });
 
@@ -74,11 +68,10 @@ function App() {
     
     return () => {
       const loadTime = performance.now() - startTime;
-      frontendLogger.logPerformance({
-        type: 'app_lifecycle',
-        loadTime: loadTime,
+      logger.debug('App performance metrics', {
+        category: 'performance',
         component: 'App',
-        timestamp: new Date().toISOString()
+        loadTime: loadTime
       });
     };
   }, []);
