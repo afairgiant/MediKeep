@@ -132,8 +132,8 @@ class LabResult(Base):
     test_category = Column(
         String, nullable=True
     )  # e.g., 'blood work', 'imaging', 'pathology'
-
-    # Status and dates
+    test_type = Column(String, nullable=True)  # e.g., 'routine', 'emergency', etc.
+    facility = Column(String, nullable=True)  # Facility where the test was ordered
     status = Column(
         String, nullable=False, default="ordered"
     )  # 'ordered', 'completed', 'cancelled'
@@ -182,7 +182,7 @@ class Condition(Base):
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
 
     # Condition details
-    name = Column(String, nullable=True)  # Name of the condition
+    condition_name = Column(String, nullable=True)  # Name of the condition
     diagnosis = Column(String, nullable=False)
     notes = Column(String, nullable=True)
     onsetDate = Column(
@@ -226,7 +226,7 @@ class Procedure(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
 
-    name = Column(String, nullable=False)  # Name of the procedure
+    procedure_name = Column(String, nullable=False)  # Name of the procedure
     code = Column(String, nullable=True)  # Code for the procedure (e.g., CPT code)
     date = Column(Date, nullable=False)  # Date when the procedure was performed
     description = Column(String, nullable=True)  # Description of the procedure
@@ -234,7 +234,9 @@ class Procedure(Base):
         String, nullable=True
     )  # e.g., 'completed', 'in-progress', 'cancelled'
     notes = Column(String, nullable=True)  # Additional notes about the procedure
-
+    facility = Column(
+        String, nullable=True
+    )  # Facility where the procedure was performed
     # Table Relationships
     patient = relationship("Patient", back_populates="procedures")
     practitioner = relationship("Practitioner", back_populates="procedures")

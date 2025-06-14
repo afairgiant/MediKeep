@@ -182,6 +182,24 @@ async def startup_event():
             "version": settings.VERSION,
         },
     )
+    
+    # Run database migrations
+    try:
+        import subprocess
+        logger.info("🔄 Running database migrations...")
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            cwd=os.path.dirname(os.path.dirname(__file__)),  # Project root
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            logger.info("✅ Database migrations completed successfully")
+        else:
+            logger.error(f"❌ Migration failed: {result.stderr}")
+    except Exception as e:
+        logger.error(f"❌ Failed to run migrations: {e}")
+    
     create_tables()
     create_default_user()
     await check_sequences_on_startup()
