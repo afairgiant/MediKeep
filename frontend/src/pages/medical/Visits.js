@@ -4,10 +4,10 @@ import { apiService } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
-const Visits = () => {
-  const navigate = useNavigate();
+const Visits = () => {  const navigate = useNavigate();
   const [visits, setVisits] = useState([]);
   const [patientData, setPatientData] = useState(null);
+  const [practitioners, setPractitioners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -22,10 +22,20 @@ const Visits = () => {
     notes: '',
     practitioner_id: ''
   });
-
   useEffect(() => {
     fetchPatientAndVisits();
+    fetchPractitioners();
   }, []);
+
+  const fetchPractitioners = async () => {
+    try {
+      const practitionersData = await apiService.getPractitioners();
+      setPractitioners(practitionersData || []);
+    } catch (error) {
+      console.error('Error fetching practitioners:', error);
+      // Don't set error for practitioners fetch failure, just log it
+    }
+  };
 
   const fetchPatientAndVisits = async () => {
     try {
@@ -113,6 +123,15 @@ const Visits = () => {
       setError('Failed to save visit. Please try again.');
       console.error('Error saving visit:', err);
     }
+  };  // Helper function to get practitioner display name
+  const getPractitionerDisplay = (practitionerId) => {
+    if (!practitionerId) return 'No practitioner assigned';
+    
+    const practitioner = practitioners.find(p => p.id === parseInt(practitionerId));
+    if (practitioner) {
+      return `Dr. ${practitioner.name} - ${practitioner.specialty}`;
+    }
+    return `Practitioner ID: ${practitionerId}`;
   };
 
   const handleInputChange = (e) => {
@@ -209,6 +228,9 @@ const Visits = () => {
                 <div className="medical-item-info">
                   <h3>{visit.reason || 'General Visit'}</h3>
                   <p className="medical-item-date">{formatDate(visit.date)}</p>
+                  <p className="medical-item-practitioner">
+                    👨‍⚕️ {getPractitionerDisplay(visit.practitioner_id)}
+                  </p>
                 </div>
               </div>
               <div className="medical-item-actions">
@@ -273,18 +295,21 @@ const Visits = () => {
                   onChange={handleInputChange}
                   required
                 />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="practitioner_id">Practitioner ID</label>
-                <input
-                  type="number"
+              </div>              <div className="form-group">
+                <label htmlFor="practitioner_id">Practitioner</label>
+                <select
                   id="practitioner_id"
                   name="practitioner_id"
                   value={formData.practitioner_id}
                   onChange={handleInputChange}
-                  placeholder="Optional - Enter practitioner ID"
-                />
+                >
+                  <option value="">Select a practitioner (optional)</option>
+                  {practitioners.map(practitioner => (
+                    <option key={practitioner.id} value={practitioner.id}>
+                      Dr. {practitioner.name} - {practitioner.specialty}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
