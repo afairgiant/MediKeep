@@ -1,5 +1,5 @@
 import React from 'react';
-import frontendLogger from '../../services/frontendLogger';
+import logger from '../../services/logger';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -24,31 +24,21 @@ class ErrorBoundary extends React.Component {
     this.setState({
       errorInfo,
       errorId
-    });
-
-    // Log error to our frontend logging system
-    frontendLogger.logError(error, this.props.componentName || 'Unknown Component', {
-      errorInfo,
+    });    // Log error to our frontend logging system
+    logger.error(`React Error Boundary: ${error.message}`, {
+      component: this.props.componentName || 'Unknown Component',
       errorId,
-      props: this.props.logProps ? this.props : undefined,
-      componentStack: errorInfo.componentStack,
-      errorBoundary: true
-    });    // Also log as a critical frontend error
-    frontendLogger.logError({
-      type: 'react_error_boundary',
-      message: `React Error Boundary caught error: ${error.message}`,
       stack: error.stack,
-      component: this.props.componentName || 'ErrorBoundary',
-      errorId,
-      componentStack: errorInfo.componentStack
+      componentStack: errorInfo.componentStack,
+      props: this.props.logProps ? this.props : undefined,
+      category: 'react_error'
     });
 
     console.error('Error caught by boundary:', error, errorInfo);
   }
 
-  handleRetry = () => {
-    // Log retry attempt
-    frontendLogger.logUserAction(
+  handleRetry = () => {    // Log retry attempt
+    logger.userAction(
       'error_boundary_retry',
       this.props.componentName || 'ErrorBoundary',
       {
@@ -137,7 +127,10 @@ export const withErrorBoundary = (WrappedComponent, componentName) => {
 // Hook for manual error reporting
 export const useErrorHandler = () => {
   const reportError = React.useCallback((error, componentName, additionalData = {}) => {
-    frontendLogger.logError(error, componentName, {
+    logger.error(`Manual Error Report: ${error.message}`, {
+      component: componentName,
+      stack: error.stack,
+      category: 'manual_error',
       ...additionalData,
       manualReport: true,
       timestamp: new Date().toISOString()
