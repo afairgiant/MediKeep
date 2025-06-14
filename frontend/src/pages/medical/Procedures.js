@@ -291,14 +291,14 @@ const Procedures = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="procedure_date">Procedure Date</label>
-                    <input
-                      type="date"
-                      id="procedure_date"
-                      name="procedure_date"
-                      value={formData.procedure_date}
-                      onChange={handleInputChange}
-                    />
+                    <label htmlFor="procedure_date">Procedure Date</label>                  <input
+                    type="date"
+                    id="procedure_date"
+                    name="procedure_date"
+                    value={formData.procedure_date}
+                    onChange={handleInputChange}
+                    required
+                  />
                   </div>                  <div className="form-group">
                     <label htmlFor="status">Status</label>
                     <select

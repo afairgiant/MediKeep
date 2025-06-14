@@ -153,7 +153,7 @@ def check_booster_due(
 
 
 @router.get(
-    "/patients/{patient_id}/immunizations/", response_model=List[ImmunizationResponse]
+    "/patient/{patient_id}/immunizations/", response_model=List[ImmunizationResponse]
 )
 def get_patient_immunizations(
     *,
