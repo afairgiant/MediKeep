@@ -93,3 +93,5 @@ medical_records.db-wal
 medical_records.db-shm
 docs/SEQUENCE_MONITORING_GUIDE.md
 docker/dev/dev-docker-compose.yml
+docs/AUTH_SYSTEM_DOCUMENTATION.md
+docs/IMPLEMENTATION_CHECKLIST.md

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { toast } from 'react-toastify';
-import { authService } from '../../services/auth/simpleAuthService';
+import { authAPI } from '../../services/apiClient';
 import '../../styles/pages/Login.css';
 
 const Login = () => {
@@ -17,8 +18,9 @@ const Login = () => {
     password: '',
     email: '',
     fullName: ''
-  });  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  });
   const [createUserError, setCreateUserError] = useState('');
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,8 +41,9 @@ const Login = () => {
       [e.target.name]: e.target.value
     });
   };
+
   const handleCreateUserChange = (e) => {
-    setCreateUserError(''); // Clear errors when user types
+    setCreateUserError('');
     setCreateUserData({
       ...createUserData,
       [e.target.name]: e.target.value
@@ -60,7 +63,8 @@ const Login = () => {
         toast.error(result.error || 'Login failed');
       }
     } catch (error) {
-      toast.error(error.message || 'Login failed');    } finally {
+      toast.error(error.message || 'Login failed');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -70,7 +74,7 @@ const Login = () => {
     setIsCreatingUser(true);
     setCreateUserError('');
 
-    // Client-side validation - Updated to 6 characters minimum
+    // Client-side validation
     if (createUserData.password.length < 6) {
       setCreateUserError('Password must be at least 6 characters long');
       setIsCreatingUser(false);
@@ -89,8 +93,11 @@ const Login = () => {
       setCreateUserError('Username must be at least 3 characters long');
       setIsCreatingUser(false);
       return;
-    }    try {      // Create the user using the simple auth service
-      const registerResult = await authService.register({
+    }
+
+    try {
+      // Create the user
+      const registerResult = await authAPI.register({
         username: createUserData.username,
         password: createUserData.password,
         email: createUserData.email,
@@ -139,160 +146,205 @@ const Login = () => {
     setShowCreateUser(false);
     setCreateUserError('');
   };
+
+  // Show loading while checking authentication
+  if (isLoading && isAuthenticated) {
+    return <LoadingSpinner message="Redirecting..." fullScreen />;
+  }
+
   return (
     <div className="login-container">
-      <div className="login-form">
-        <h1>🏥 Medical Records System</h1>
-        <h2>Login</h2>
-        
-        {error && <div className="error-message">{error}</div>}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username:</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
+      <div className="login-wrapper">
+        <div className="login-card">
+          <div className="login-header">
+            <h1>Medical Records System</h1>
+            <p>Please sign in to access your medical records</p>
           </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
-          </div>
-          
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
 
-        <div className="login-actions">
-          <button 
-            type="button" 
-            className="create-user-btn"
-            onClick={openCreateUserModal}
-            disabled={isLoading}
-          >
-            Create New User Account
-          </button>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                disabled={isLoading}
+                className="form-control"
+                placeholder="Enter your username"
+                autoComplete="username"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={isLoading}
+                className="form-control"
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+            </div>
+
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn btn-primary btn-login"
+            >
+              {isLoading ? (
+                <>
+                  <LoadingSpinner size="small" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
+
+          <div className="login-footer">
+            <p>
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={openCreateUserModal}
+                className="btn btn-link"
+                disabled={isLoading}
+              >
+                Create Account
+              </button>
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Create User Modal */}
       {showCreateUser && (
         <div className="modal-overlay" onClick={closeCreateUserModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Create New User Account</h2>
-              <button className="close-btn" onClick={closeCreateUserModal}>
+              <h2>Create New Account</h2>
+              <button
+                type="button"
+                onClick={closeCreateUserModal}
+                className="btn btn-close"
+                disabled={isCreatingUser}
+              >
                 ×
               </button>
             </div>
 
-            <form onSubmit={handleCreateUser}>
-              {createUserError && <div className="error-message">{createUserError}</div>}
-              
+            <form onSubmit={handleCreateUser} className="modal-form">
               <div className="form-group">
-                <label htmlFor="create-username">Username *</label>
+                <label htmlFor="createUsername">Username</label>
                 <input
                   type="text"
-                  id="create-username"
+                  id="createUsername"
                   name="username"
                   value={createUserData.username}
                   onChange={handleCreateUserChange}
                   required
                   disabled={isCreatingUser}
-                  placeholder="Enter username"
+                  className="form-control"
+                  placeholder="Choose a username (min 3 characters)"
+                  minLength="3"
                 />
-              </div>              <div className="form-group">
-                <label htmlFor="create-password">Password *</label>
-                <input
-                  type="password"
-                  id="create-password"
-                  name="password"
-                  value={createUserData.password}
-                  onChange={handleCreateUserChange}
-                  required
-                  disabled={isCreatingUser}
-                  placeholder="Enter password (min 6 chars, include letter & number)"
-                  minLength={6}
-                />
-                <div className="password-requirements">
-                  <div className={`requirement ${createUserData.password.length >= 6 ? 'valid' : ''}`}>
-                    ✓ At least 6 characters
-                  </div>
-                  <div className={`requirement ${/[a-zA-Z]/.test(createUserData.password) ? 'valid' : ''}`}>
-                    ✓ Contains at least one letter
-                  </div>
-                  <div className={`requirement ${/[0-9]/.test(createUserData.password) ? 'valid' : ''}`}>
-                    ✓ Contains at least one number
-                  </div>
-                </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="create-email">Email *</label>
+                <label htmlFor="createEmail">Email</label>
                 <input
                   type="email"
-                  id="create-email"
+                  id="createEmail"
                   name="email"
                   value={createUserData.email}
                   onChange={handleCreateUserChange}
                   required
                   disabled={isCreatingUser}
-                  placeholder="Enter email address"
+                  className="form-control"
+                  placeholder="Enter your email address"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="create-fullname">Full Name *</label>
+                <label htmlFor="createFullName">Full Name</label>
                 <input
                   type="text"
-                  id="create-fullname"
+                  id="createFullName"
                   name="fullName"
                   value={createUserData.fullName}
                   onChange={handleCreateUserChange}
                   required
                   disabled={isCreatingUser}
-                  placeholder="Enter full name"
+                  className="form-control"
+                  placeholder="Enter your full name"
                 />
               </div>
 
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+              <div className="form-group">
+                <label htmlFor="createPassword">Password</label>
+                <input
+                  type="password"
+                  id="createPassword"
+                  name="password"
+                  value={createUserData.password}
+                  onChange={handleCreateUserChange}
+                  required
+                  disabled={isCreatingUser}
+                  className="form-control"
+                  placeholder="Create a password (min 6 chars, letter + number)"
+                  minLength="6"
+                />
+                <small className="form-text">
+                  Password must be at least 6 characters and contain both letters and numbers
+                </small>
+              </div>
+
+              {createUserError && (
+                <div className="error-message">
+                  {createUserError}
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button
+                  type="button"
                   onClick={closeCreateUserModal}
                   disabled={isCreatingUser}
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
+                <button
+                  type="submit"
                   disabled={isCreatingUser}
+                  className="btn btn-primary"
                 >
-                  {isCreatingUser ? 'Creating Account...' : 'Create Account'}
+                  {isCreatingUser ? (
+                    <>
+                      <LoadingSpinner size="small" />
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    'Create Account'
+                  )}
                 </button>
               </div>
             </form>
-
-            <div className="create-user-info">
-              <p><strong>Note:</strong> A patient record will be automatically created for this user with default role "user".</p>
-            </div>
           </div>
         </div>
       )}
