@@ -189,13 +189,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                         )
 
                 # Re-raise the error if it's not a sequence issue or we can't fix it
-                raise
-
-        # If we've exhausted all retries
+                raise  # If we've exhausted all retries
+        sequence_error = Exception(f"Sequence issues after {max_retries} attempts")
         raise IntegrityError(
-            f"Failed to create {self.model.__name__} after {max_retries} attempts due to sequence issues",
-            None,
-            None,
+            statement=f"Failed to create {self.model.__name__} after {max_retries} attempts due to sequence issues",
+            params=None,
+            orig=sequence_error,
         )
 
     def _fix_sequence(self, db: Session) -> bool:
