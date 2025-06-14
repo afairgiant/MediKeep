@@ -120,21 +120,32 @@ const Medication = () => {
 
       // Debug auth and patient data
       console.log('🔐 Auth token length:', token.length);
-      console.log('🏥 Patient data:', patientData);      const medicationData = {
-        ...formData,
-        patient_id: patientData.id,
-        // Clean up empty strings and null values that might cause validation issues
-        effectivePeriod_start: formData.effectivePeriod_start || null,
-        effectivePeriod_end: formData.effectivePeriod_end || null,
-        practitioner_id: formData.practitioner_id || null,
-        // Ensure required fields are not empty
-        medication_name: formData.medication_name?.trim(),
-        dosage: formData.dosage?.trim(),
-        frequency: formData.frequency?.trim(),
-        route: formData.route?.trim(),
-        indication: formData.indication?.trim(),
-        status: formData.status || 'active'
+      console.log('🏥 Patient data:', patientData);      // Clean and validate medication data
+      const medicationData = {
+        medication_name: formData.medication_name?.trim() || '',
+        dosage: formData.dosage?.trim() || '',
+        frequency: formData.frequency?.trim() || '',
+        route: formData.route?.trim() || '',
+        indication: formData.indication?.trim() || '',
+        status: formData.status || 'active',
+        patient_id: patientData.id
       };
+
+      // Only include dates if they have values
+      if (formData.effectivePeriod_start) {
+        medicationData.effectivePeriod_start = formData.effectivePeriod_start;
+      }
+      if (formData.effectivePeriod_end) {
+        medicationData.effectivePeriod_end = formData.effectivePeriod_end;
+      }
+      if (formData.practitioner_id) {
+        medicationData.practitioner_id = formData.practitioner_id;
+      }
+
+      console.log('🚀 Final medication data:', medicationData);
+      console.log('🔍 Data type check:', typeof medicationData);
+      console.log('🔍 Is object?', medicationData && typeof medicationData === 'object');
+      console.log('🔍 JSON stringify test:', JSON.stringify(medicationData));
 
       console.log('🚀 Submitting medication data:', medicationData);
       console.log('🔍 Form data breakdown:', {

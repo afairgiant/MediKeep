@@ -11,11 +11,7 @@ export const apiMethods = {
     conditions: {
     getAll: (signal) => apiService.get('/conditions/', { signal }),
     getByPatient: (patientId, signal) => apiService.get(`/patients/${patientId}/conditions/`, { signal }),
-    create: (data, signal) => {
-      debugger; // 🔍 BREAKPOINT: API method create called
-      console.log('🌐 API: Creating condition with data:', data);
-      return apiService.post('/conditions/', data, { signal });
-    },
+    create: (data, signal) => {return apiService.post('/conditions/', data, { signal });},
     update: (id, data, signal) => apiService.put(`/conditions/${id}/`, data, { signal }),
     delete: (id, signal) => apiService.delete(`/conditions/${id}/`, { signal })
   },
@@ -24,7 +20,8 @@ export const apiMethods = {
     getAll: (signal) => apiService.get('/immunizations/', { signal }),
     getByPatient: (patientId, signal) => apiService.get(`/patients/${patientId}/immunizations/`, { signal }),
     create: (data, signal) => apiService.post('/immunizations/', data, { signal }),
-    update: (id, data, signal) => apiService.put(`/immunizations/${id}/`, data, { signal }),    delete: (id, signal) => apiService.delete(`/immunizations/${id}/`, { signal })
+    update: (id, data, signal) => apiService.put(`/immunizations/${id}/`, data, { signal }),    
+    delete: (id, signal) => apiService.delete(`/immunizations/${id}/`, { signal })
   },
   
   medications: {

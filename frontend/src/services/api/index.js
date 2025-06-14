@@ -38,13 +38,20 @@ class ApiService {
       let errorMessage;
       let fullErrorData;
       
+      // Log the actual HTTP status for debugging
+      console.error(`HTTP ${response.status} Error on ${method} ${url}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        responseText: errorData
+      });
+      
       try {
         fullErrorData = JSON.parse(errorData);
         errorMessage = fullErrorData.detail || fullErrorData.message || errorData;
         
         // For 422 errors, log the full validation details
         if (response.status === 422) {
-          console.error('🔍 422 Validation Error Details:', fullErrorData);
+          console.error('Validation Error Details:', fullErrorData);
           if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
             const validationErrors = fullErrorData.detail.map(err => 
               `${err.loc?.join('.')} - ${err.msg}`
@@ -77,35 +84,33 @@ class ApiService {
     if (!token) {
       logger.error('No authentication token found');
       throw new Error('Authentication required. Please log in again.');
-    }
-
-    const config = {
+    }    const config = {
       method,
       signal,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': `Bearer ${token}`, // Always include auth token
         ...customHeaders,
       },
-    };
-
-    logger.debug(`${method} request to ${url}`, {
+    };    logger.debug(`${method} request to ${url}`, {
       url: this.baseURL + url,
-      hasAuth: !!token,
-      tokenLength: token?.length,
-      authHeader: config.headers.Authorization?.substring(0, 20) + '...'
+      hasAuth: !!token
     });
 
     // Override Content-Type for FormData
     if (data instanceof FormData) {
       delete config.headers['Content-Type'];
-    }
-
-    try {
-      const response = await fetch(this.baseURL + url, { ...config, body: data ? JSON.stringify(data) : null });
-      return this.handleResponse(response, url, method);
+    }    if (data) {
+      config.body = JSON.stringify(data);
+    }    try {
+      const response = await fetch(this.baseURL + url, config);
+      return await this.handleResponse(response, method, url);
     } catch (error) {
-      logger.apiError(error, url, method);
+      // Only log if it's actually a network error, not a handled HTTP error
+      if (!error.message?.includes('HTTP error!')) {
+        logger.apiError(error, url, method);
+      }
       throw error;
     }
   }
@@ -114,22 +119,7 @@ class ApiService {
   get(endpoint, options = {}) {
     return this.request('GET', endpoint, null, options);
   }  post(endpoint, data, options = {}) {
-
-    const isFormData = data instanceof FormData;
-    const body = isFormData ? data : JSON.stringify(data);
-    
-    // Don't set Content-Type for FormData - let browser set it with boundary
-    const additionalHeaders = isFormData 
-      ? {} 
-      : { 'Content-Type': 'application/json' };
-      
-    return this.request('POST', endpoint, body, {
-      headers: {
-        ...additionalHeaders,
-        ...options.headers
-      },
-      ...options,
-    });
+    return this.request('POST', endpoint, data, options);
   }
 
   put(endpoint, data, options = {}) {
@@ -238,14 +228,23 @@ class ApiService {
   
   getPatientMedications(patientId, signal) {
     return this.get(`/patients/${patientId}/medications/`, { signal });
+  }  createMedication(medicationData, signal) {
+    // Clean up empty strings which might cause backend validation issues
+    const cleanPayload = {};
+    Object.keys(medicationData).forEach(key => {
+      const value = medicationData[key];
+      if (value !== '' && value !== null && value !== undefined) {
+        cleanPayload[key] = value;
+      }
+    });
+    
+    // Ensure required fields
+    if (!cleanPayload.medication_name) {
+      throw new Error('Medication name is required');
+    }
+    
+    return this.post(`/medications/`, cleanPayload, { signal });
   }
-    createMedication(medicationData, signal) {
-    // Use the patient-specific endpoint that has proper authorization
-    const patientId = medicationData.patient_id || 'current';
-    console.log('🏥 Creating medication for patient:', patientId);
-    return this.post(`/patients/${patientId}/medications/`, medicationData, { signal });
-  }
-
   updateMedication(medicationId, medicationData, signal) {
     return this.put(`/medications/${medicationId}/`, medicationData, { signal });
   }

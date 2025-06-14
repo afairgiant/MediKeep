@@ -79,12 +79,10 @@ export const useMedicalData = (config) => {
   }, [loadFilesCounts, apiMethodsConfig, entityName, execute]);
   // Create item
   const createItem = useCallback(async (data) => {
-    debugger; // 🔍 BREAKPOINT: Creating item in hook
     console.log(`🏗️ Creating ${entityName} with data:`, data);
     
     const result = await execute(
       async (signal) => {
-        debugger; // 🔍 BREAKPOINT: About to call API method
         console.log(`📡 Calling API create method for ${entityName}`);
         return await apiMethodsConfig.create(data, signal);
       },
@@ -92,7 +90,6 @@ export const useMedicalData = (config) => {
     );
     
     console.log(`✅ Create ${entityName} result:`, result);
-    debugger; // 🔍 BREAKPOINT: API result received
     
     if (result) {
       setSuccessMessage(`${entityName} created successfully!`);
