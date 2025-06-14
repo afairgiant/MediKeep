@@ -8,11 +8,14 @@ export const apiMethods = {
     update: (id, data, signal) => apiService.put(`/allergies/${id}/`, data, { signal }),
     delete: (id, signal) => apiService.delete(`/allergies/${id}/`, { signal })
   },
-  
-  conditions: {
+    conditions: {
     getAll: (signal) => apiService.get('/conditions/', { signal }),
     getByPatient: (patientId, signal) => apiService.get(`/patients/${patientId}/conditions/`, { signal }),
-    create: (data, signal) => apiService.post('/conditions/', data, { signal }),
+    create: (data, signal) => {
+      debugger; // 🔍 BREAKPOINT: API method create called
+      console.log('🌐 API: Creating condition with data:', data);
+      return apiService.post('/conditions/', data, { signal });
+    },
     update: (id, data, signal) => apiService.put(`/conditions/${id}/`, data, { signal }),
     delete: (id, signal) => apiService.delete(`/conditions/${id}/`, { signal })
   },

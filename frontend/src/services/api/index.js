@@ -32,32 +32,35 @@ class ApiService {
     return headers;
   }
 
-  async handleResponse(response, endpoint, method) {
-    const responseInfo = {
-      status: response.status,
-      statusText: response.statusText,
-      endpoint,
-      method
-    };
-
+  async handleResponse(response, method, url) {
     if (!response.ok) {
-      if (response.status === 401) {
-        logger.warn('Unauthorized request - redirecting to login', responseInfo);
-        if (!endpoint.includes('/login')) {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+      const errorData = await response.text();
+      let errorMessage;
+      let fullErrorData;
+      
+      try {
+        fullErrorData = JSON.parse(errorData);
+        errorMessage = fullErrorData.detail || fullErrorData.message || errorData;
+        
+        // For 422 errors, log the full validation details
+        if (response.status === 422) {
+          console.error('🔍 422 Validation Error Details:', fullErrorData);
+          if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
+            const validationErrors = fullErrorData.detail.map(err => 
+              `${err.loc?.join('.')} - ${err.msg}`
+            ).join('; ');
+            errorMessage = `Validation Error: ${validationErrors}`;
+          }
         }
-      } else {
-        logger.apiError(new Error(`HTTP ${response.status}: ${response.statusText}`), endpoint, method);
+      } catch {
+        errorMessage = errorData || `HTTP error! status: ${response.status} - ${response.statusText}`;
       }
       
-      const error = new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-      error.status = response.status;
-      error.statusText = response.statusText;
-      throw error;
+      logger.apiError('API Error', method, url, response.status, errorMessage);
+      throw new Error(errorMessage);
     }
 
-    logger.debug('API request successful', responseInfo);
+    logger.debug('API request successful', { method, url, status: response.status });
     
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
@@ -66,38 +69,52 @@ class ApiService {
     return response.text();
   }
   // Core request method with logging
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
-    const method = options.method || 'GET';
+  async request(method, url, data = null, options = {}) {
+    const { signal, headers: customHeaders = {} } = options;
     
+    // Get token and validate it exists
+    const token = localStorage.getItem('token');
+    if (!token) {
+      logger.error('No authentication token found');
+      throw new Error('Authentication required. Please log in again.');
+    }
+
     const config = {
-      headers: this.getAuthHeaders(),
-      ...options,
+      method,
+      signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Always include auth token
+        ...customHeaders,
+      },
     };
 
+    logger.debug(`${method} request to ${url}`, {
+      url: this.baseURL + url,
+      hasAuth: !!token,
+      tokenLength: token?.length,
+      authHeader: config.headers.Authorization?.substring(0, 20) + '...'
+    });
+
     // Override Content-Type for FormData
-    if (options.body instanceof FormData) {
+    if (data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
 
-    logger.debug(`${method} request to ${endpoint}`, { 
-      url, 
-      hasAuth: !!config.headers.Authorization 
-    });
-    
     try {
-      const response = await fetch(url, config);
-      return this.handleResponse(response, endpoint, method);
+      const response = await fetch(this.baseURL + url, { ...config, body: data ? JSON.stringify(data) : null });
+      return this.handleResponse(response, url, method);
     } catch (error) {
-      logger.apiError(error, endpoint, method);
+      logger.apiError(error, url, method);
       throw error;
     }
   }
 
   // Generic HTTP methods with signal support
   get(endpoint, options = {}) {
-    return this.request(endpoint, { method: 'GET', ...options });
+    return this.request('GET', endpoint, null, options);
   }  post(endpoint, data, options = {}) {
+
     const isFormData = data instanceof FormData;
     const body = isFormData ? data : JSON.stringify(data);
     
@@ -106,9 +123,7 @@ class ApiService {
       ? {} 
       : { 'Content-Type': 'application/json' };
       
-    return this.request(endpoint, {
-      method: 'POST',
-      body,
+    return this.request('POST', endpoint, body, {
       headers: {
         ...additionalHeaders,
         ...options.headers
@@ -118,15 +133,11 @@ class ApiService {
   }
 
   put(endpoint, data, options = {}) {
-    return this.request(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-      ...options,
-    });
+    return this.request('PUT', endpoint, data, options);
   }
 
   delete(endpoint, options = {}) {
-    return this.request(endpoint, { method: 'DELETE', ...options });
+    return this.request('DELETE', endpoint, null, options);
   }
 
   // Simplified API methods for backward compatibility
@@ -137,12 +148,10 @@ class ApiService {
     formData.append('username', username);
     formData.append('password', password);
     
-    return this.request('/auth/login/', {
-      method: 'POST',
+    return this.request('POST', '/auth/login/', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: formData,
       signal
     });
   }
@@ -230,10 +239,11 @@ class ApiService {
   getPatientMedications(patientId, signal) {
     return this.get(`/patients/${patientId}/medications/`, { signal });
   }
-  
-  createMedication(medicationData, signal) {
-    // Use the original medications endpoint that we know works
-    return this.post('/medications/', medicationData, { signal });
+    createMedication(medicationData, signal) {
+    // Use the patient-specific endpoint that has proper authorization
+    const patientId = medicationData.patient_id || 'current';
+    console.log('🏥 Creating medication for patient:', patientId);
+    return this.post(`/patients/${patientId}/medications/`, medicationData, { signal });
   }
 
   updateMedication(medicationId, medicationData, signal) {
