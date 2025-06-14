@@ -3,7 +3,10 @@ import logger from '../logger';
 // Streamlined API service with proper logging integration
 class ApiService {  
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+    // Always use relative URLs in production for Docker compatibility
+    this.baseURL = process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1';
+    // Fallback URLs for better Docker compatibility
+    this.fallbackURL = '/api/v1';
   }
 
   getAuthHeaders() {
@@ -66,7 +69,7 @@ class ApiService {
       return response.blob();
     }
     return response.text();
-  }  // Core request method with logging
+  }  // Core request method with logging and fallback
   async request(method, url, data = null, options = {}) {
     const { signal, headers: customHeaders = {}, responseType } = options;
     
@@ -88,11 +91,6 @@ class ApiService {
       },
     };
 
-    logger.debug(`${method} request to ${url}`, {
-      url: this.baseURL + url,
-      hasAuth: !!token
-    });
-
     // Handle different data types
     if (data instanceof FormData) {
       delete config.headers['Content-Type']; // Let browser set the boundary
@@ -104,19 +102,39 @@ class ApiService {
       config.body = JSON.stringify(data);
     }
 
-    try {
-      const response = await fetch(this.baseURL + url, config);
-      
-      // Handle blob responses specially
-      if (responseType === 'blob' && response.ok) {
-        return response.blob();
-      }
-      
-      return this.handleResponse(response, url, method);
-    } catch (error) {
-      logger.apiError(error, url, method);
-      throw error;
-    }
+    // Try multiple URLs for Docker compatibility
+    const urls = [this.baseURL + url, this.fallbackURL + url];
+    let lastError = null;
+
+    for (let i = 0; i < urls.length; i++) {
+      const fullUrl = urls[i];
+      try {
+        logger.debug(`${method} request attempt ${i + 1}/${urls.length} to ${fullUrl}`, {
+          url: fullUrl,
+          hasAuth: !!token
+        });
+
+        const response = await fetch(fullUrl, config);
+        
+        // Handle blob responses specially
+        if (responseType === 'blob' && response.ok) {
+          return response.blob();
+        }
+        
+        return this.handleResponse(response, fullUrl, method);
+      } catch (error) {
+        console.warn(`Failed to connect to ${fullUrl}:`, error.message);
+        lastError = error;
+        
+        // Continue to next URL if this one fails and we have more URLs to try
+        if (i < urls.length - 1) {
+          continue;
+        }
+      }    }
+
+    // If all URLs failed, log and throw the last error
+    logger.apiError(lastError, url, method);
+    throw lastError || new Error(`Failed to connect to any API endpoint for ${method} ${url}`);
   }
   // Generic HTTP methods with signal support
   get(endpoint, options = {}) {

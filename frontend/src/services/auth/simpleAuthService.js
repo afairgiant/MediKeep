@@ -9,10 +9,10 @@ class SimpleAuthService {
     this.baseURL = process.env.NODE_ENV === 'development' 
       ? '/api/v1'  // Use proxy in development
       : '/api/v1'; // Use relative path in production
-    this.directBackendURL = 'http://localhost:8000/api/v1'; // Fallback for development
+    this.directBackendURL = process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1'; // Fallback for development
     this.tokenKey = 'token';
     this.userKey = 'user';
-  }  // Make API request with fallback
+  }// Make API request with fallback
   async makeRequest(endpoint, options = {}) {
     const urls = [
       `${this.directBackendURL}${endpoint}`, // Try direct backend first

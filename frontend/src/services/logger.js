@@ -6,7 +6,7 @@
 
 class Logger {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+    this.baseURL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1');
     this.sessionId = this.generateSessionId();
     this.queue = [];
     this.isOnline = navigator.onLine;
