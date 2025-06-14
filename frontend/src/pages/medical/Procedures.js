@@ -291,7 +291,7 @@ const Procedures = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="procedure_date">Procedure Date</label>                  <input
+                    <label htmlFor="procedure_date">Procedure Date *</label>                  <input
                     type="date"
                     id="procedure_date"
                     name="procedure_date"
