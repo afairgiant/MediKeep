@@ -4,9 +4,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.models.models import Base
 from app.core.logging_config import get_logger
+from app.core.config import Settings
 
 # Initialize logger
 logger = get_logger(__name__, "app")
+
+# Initialize settings
+settings = Settings()
 
 
 class DatabaseConfig:
@@ -15,8 +19,12 @@ class DatabaseConfig:
         self.engine_kwargs = self._get_engine_kwargs()
 
     def _get_database_url(self) -> str:
-        """Get database URL from environment or default to SQLite"""
-        return os.getenv("DATABASE_URL", "sqlite:///./medical_records.db")
+        """Get database URL from settings configuration"""
+        return (
+            settings.DATABASE_URL
+            if settings.DATABASE_URL
+            else "sqlite:///./medical_records.db"
+        )
 
     def _get_engine_kwargs(self) -> dict:
         """Get engine configuration based on database type"""
