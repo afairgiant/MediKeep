@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useMedicalData } from './useMedicalData';
-import { apiMethods } from '../config/apiMethods';
+import { apiService } from '../services/api';
 import { useApi } from './useApi';
 
 export const useLabResults = () => {
@@ -8,28 +8,35 @@ export const useLabResults = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   
   const { execute } = useApi();
-  
-  // Use the base medical data hook for standard CRUD operations
+    // Use the base medical data hook for standard CRUD operations
   const baseHook = useMedicalData({
     entityName: 'lab result',
-    apiMethodsConfig: apiMethods.labResults,
+    apiMethodsConfig: {
+      getAll: (signal) => apiService.getLabResults(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientLabResults(patientId, signal),
+      create: (data, signal) => apiService.createLabResult(data, signal),
+      update: (id, data, signal) => apiService.updateLabResult(id, data, signal),
+      delete: (id, signal) => apiService.deleteLabResult(id, signal),
+      getFiles: (labResultId, signal) => apiService.getLabResultFiles(labResultId, signal),
+      uploadFile: (labResultId, file, description, signal) => apiService.uploadLabResultFile(labResultId, file, description, signal),
+      downloadFile: (fileId, signal) => apiService.downloadLabResultFile(fileId, signal),
+      deleteFile: (fileId, signal) => apiService.deleteLabResultFile(fileId, signal)
+    },
     requiresPatient: true,
     loadFilesCounts: true
   });
 
   // File operations - these are specific to lab results
-  const uploadFile = useCallback(async (labResultId, file, description) => {
-    const result = await execute(
-      async () => await apiMethods.labResults.uploadFile(labResultId, file, description),
+  const uploadFile = useCallback(async (labResultId, file, description) => {    const result = await execute(
+      async () => await apiService.uploadLabResultFile(labResultId, file, description),
       { errorMessage: 'Failed to upload file' }
     );
-    
-    if (result) {
+      if (result) {
       baseHook.setSuccessMessage('File uploaded successfully!');
       
       // Refresh files list for the selected lab result
       const files = await execute(
-        async () => await apiMethods.labResults.getFiles(labResultId)
+        async () => await apiService.getLabResultFiles(labResultId)
       );
       if (files) {
         setSelectedFiles(files);
@@ -41,10 +48,9 @@ export const useLabResults = () => {
     }
     return false;
   }, [execute, baseHook]);
-
   const downloadFile = useCallback(async (fileId, fileName) => {
     const blob = await execute(
-      async () => await apiMethods.labResults.downloadFile(fileId),
+      async () => await apiService.downloadLabResultFile(fileId),
       { errorMessage: 'Failed to download file' }
     );
     
@@ -65,19 +71,16 @@ export const useLabResults = () => {
   const deleteFile = useCallback(async (fileId, labResultId) => {
     if (!window.confirm('Are you sure you want to delete this file?')) {
       return false;
-    }
-
-    const result = await execute(
-      async () => await apiMethods.labResults.deleteFile(fileId),
+    }    const result = await execute(
+      async () => await apiService.deleteLabResultFile(fileId),
       { errorMessage: 'Failed to delete file' }
     );
     
     if (result) {
       baseHook.setSuccessMessage('File deleted successfully!');
-      
-      // Refresh files list for the selected lab result
+        // Refresh files list for the selected lab result
       const files = await execute(
-        async () => await apiMethods.labResults.getFiles(labResultId)
+        async () => await apiService.getLabResultFiles(labResultId)
       );
       if (files) {
         setSelectedFiles(files);
@@ -92,10 +95,9 @@ export const useLabResults = () => {
 
   const viewDetails = useCallback(async (labResult) => {
     setSelectedLabResult(labResult);
-    
-    // Load files for this lab result
+      // Load files for this lab result
     const files = await execute(
-      async () => await apiMethods.labResults.getFiles(labResult.id),
+      async () => await apiService.getLabResultFiles(labResult.id),
       { errorMessage: 'Failed to load files' }
     );
     
@@ -108,10 +110,9 @@ export const useLabResults = () => {
     setSelectedLabResult(null);
     setSelectedFiles([]);
   }, []);
-
   const loadFiles = useCallback(async (labResultId) => {
     const files = await execute(
-      async () => await apiMethods.labResults.getFiles(labResultId),
+      async () => await apiService.getLabResultFiles(labResultId),
       { errorMessage: 'Failed to load files' }
     );
     

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
-import { apiMethods } from '../../config/apiMethods';
+import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -21,10 +21,15 @@ const Immunization = () => {
     refreshData,
     clearError,
     setSuccessMessage,
-    setError
-  } = useMedicalData({
+    setError  } = useMedicalData({
     entityName: 'immunization',
-    apiMethodsConfig: apiMethods.immunizations,
+    apiMethodsConfig: {
+      getAll: (signal) => apiService.getImmunizations(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientImmunizations(patientId, signal),
+      create: (data, signal) => apiService.createImmunization(data, signal),
+      update: (id, data, signal) => apiService.updateImmunization(id, data, signal),
+      delete: (id, signal) => apiService.deleteImmunization(id, signal)
+    },
     requiresPatient: true
   });
 

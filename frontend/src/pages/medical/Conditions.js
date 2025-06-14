@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
-import { apiMethods } from '../../config/apiMethods';
+import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -21,10 +21,15 @@ const Conditions = () => {
     refreshData,
     clearError,
     setSuccessMessage,
-    setError
-  } = useMedicalData({
+    setError  } = useMedicalData({
     entityName: 'condition',
-    apiMethodsConfig: apiMethods.conditions,
+    apiMethodsConfig: {
+      getAll: (signal) => apiService.getConditions(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientConditions(patientId, signal),
+      create: (data, signal) => apiService.createCondition(data, signal),
+      update: (id, data, signal) => apiService.updateCondition(id, data, signal),
+      delete: (id, signal) => apiService.deleteCondition(id, signal)
+    },
     requiresPatient: true
   });
   console.log('🔍 CONDITIONS DEBUG:', {

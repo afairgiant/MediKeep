@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useApi } from './useApi';
-import { apiMethods } from '../config/apiMethods';
+import { apiService } from '../services/api';
 
 export const useMedicalData = (config) => {
   const {
@@ -22,10 +22,9 @@ export const useMedicalData = (config) => {
     if (!requiresPatient) return null;
     
     console.log('Fetching current patient...');
-    
-    const result = await execute(
+      const result = await execute(
       async (signal) => {
-        const patient = await apiMethods.patients.getCurrent(signal);
+        const patient = await apiService.getCurrentPatient(signal);
         console.log('Patient API response:', patient);
         return patient;
       },

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
-import { apiMethods } from '../../config/apiMethods';
+import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -21,10 +21,15 @@ const Allergies = () => {
     refreshData,
     clearError,
     setSuccessMessage,
-    setError
-  } = useMedicalData({
+    setError  } = useMedicalData({
     entityName: 'allergy',
-    apiMethodsConfig: apiMethods.allergies,
+    apiMethodsConfig: {
+      getAll: (signal) => apiService.getAllergies(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientAllergies(patientId, signal),
+      create: (data, signal) => apiService.createAllergy(data, signal),
+      update: (id, data, signal) => apiService.updateAllergy(id, data, signal),
+      delete: (id, signal) => apiService.deleteAllergy(id, signal)
+    },
     requiresPatient: true
   });
 
