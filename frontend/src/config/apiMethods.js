@@ -80,8 +80,7 @@ export const apiMethods = {
       return apiService.post(`/lab-results/${labResultId}/files/`, formData, {
         signal
       });
-    },
-    downloadFile: (fileId, signal) => apiService.get(`/lab-result-files/${fileId}/download/`, { 
+    },    downloadFile: (fileId, signal) => apiService.get(`/lab-result-files/${fileId}/download/`, { 
       responseType: 'blob',
       signal 
     }),

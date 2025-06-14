@@ -264,18 +264,25 @@ const LabResults = () => {
       setError(error.message);
     }
   };
-
   const handleDownloadFile = async (fileId, fileName) => {
     try {
-      const blob = await apiService.downloadLabResultFile(fileId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
+      const blob = await apiService.get(`/lab-result-files/${fileId}/download/`, { 
+        responseType: 'blob' 
+      });
+      
+      if (blob instanceof Blob) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error('Invalid response type for file download');
+      }
     } catch (error) {
       console.error('Error downloading file:', error);
       setError(error.message);

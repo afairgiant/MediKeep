@@ -31,7 +31,6 @@ class ApiService {
     
     return headers;
   }
-
   async handleResponse(response, method, url) {
     if (!response.ok) {
       const errorData = await response.text();
@@ -63,11 +62,13 @@ class ApiService {
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return response.json();
+    } else if (contentType && (contentType.includes('application/octet-stream') || contentType.includes('image/') || contentType.includes('application/pdf'))) {
+      return response.blob();
     }
     return response.text();
   }  // Core request method with logging
   async request(method, url, data = null, options = {}) {
-    const { signal, headers: customHeaders = {} } = options;
+    const { signal, headers: customHeaders = {}, responseType } = options;
     
     // Get token and validate it exists
     const token = localStorage.getItem('token');
@@ -105,6 +106,12 @@ class ApiService {
 
     try {
       const response = await fetch(this.baseURL + url, config);
+      
+      // Handle blob responses specially
+      if (responseType === 'blob' && response.ok) {
+        return response.blob();
+      }
+      
       return this.handleResponse(response, url, method);
     } catch (error) {
       logger.apiError(error, url, method);

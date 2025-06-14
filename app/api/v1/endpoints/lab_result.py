@@ -1,5 +1,14 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File, Form
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+    UploadFile,
+    File,
+    Form,
+)
 from sqlalchemy.orm import Session
 from datetime import datetime
 import os
@@ -254,9 +263,22 @@ async def upload_lab_result_file(
     UPLOAD_DIRECTORY = "uploads/lab_result_files"
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
     ALLOWED_EXTENSIONS = {
-        ".pdf", ".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".gif",
-        ".txt", ".csv", ".xml", ".json", ".doc", ".docx", 
-        ".xls", ".xlsx", ".dcm",
+        ".pdf",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".tiff",
+        ".bmp",
+        ".gif",
+        ".txt",
+        ".csv",
+        ".xml",
+        ".json",
+        ".doc",
+        ".docx",
+        ".xls",
+        ".xlsx",
+        ".dcm",
     }
 
     # Check file extension
@@ -290,7 +312,7 @@ async def upload_lab_result_file(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error saving file: {str(e)}",
-        )    # Create file entry in database
+        )  # Create file entry in database
     file_create = LabResultFileCreate(
         lab_result_id=lab_result_id,
         file_name=file.filename,
@@ -311,7 +333,9 @@ async def upload_lab_result_file(
                 os.remove(file_path)
         except Exception:
             pass
-        raise HTTPException(status_code=400, detail=f"Error creating file record: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Error creating file record: {str(e)}"
+        )
 
 
 @router.delete("/{lab_result_id}/files/{file_id}")
