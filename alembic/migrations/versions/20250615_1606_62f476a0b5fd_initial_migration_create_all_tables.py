@@ -1,17 +1,18 @@
-"""Add practitioner fields to lab_results and procedures
+"""Initial migration - create all tables
 
-Revision ID: 05b368fcfb6b
-Revises: 0ebb4ab6ea6a
-Create Date: 2025-06-15 12:05:39.992631
+Revision ID: 62f476a0b5fd
+Revises:
+Create Date: 2025-06-15 16:06:54.944365
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '05b368fcfb6b'
-down_revision = '0ebb4ab6ea6a'
+revision = "62f476a0b5fd"
+down_revision = None
 branch_labels = None
 depends_on = None
 
