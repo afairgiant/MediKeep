@@ -24,14 +24,16 @@ class TrailingSlashMiddleware(BaseHTTPMiddleware):
     """Middleware to handle trailing slash redirects for API routes"""
 
     async def dispatch(self, request: Request, call_next):
-        url_path = str(request.url.path)        # For routes that should NOT have trailing slashes, remove them
+        url_path = str(
+            request.url.path
+        )  # For routes that should NOT have trailing slashes, remove them
         no_slash_routes = [
             "/api/v1/patients/me/",
             "/api/v1/auth/login/",
             "/api/v1/auth/logout/",
-            "/api/v1/health/"
+            "/api/v1/health/",
         ]
-        
+
         if url_path in no_slash_routes:
             redirect_url = str(request.url).replace(url_path, url_path.rstrip("/"))
             return RedirectResponse(

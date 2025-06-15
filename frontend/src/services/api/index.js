@@ -197,9 +197,8 @@ class ApiService {
   getLabResults(signal) {
     return this.get('/lab-results/', { signal });
   }
-
   getPatientLabResults(patientId, signal) {
-    return this.get(`/patients/${patientId}/lab-results/`, { signal });
+    return this.get(`/lab-results/?patient_id=${patientId}`, { signal });
   }
 
   getLabResult(labResultId, signal) {
@@ -243,9 +242,8 @@ class ApiService {
   // Medication methods
   getMedications(signal) {
     return this.get('/medications/', { signal });
-  }
-    getPatientMedications(patientId, signal) {
-    return this.get(`/patients/${patientId}/medications/`, { signal });
+  }    getPatientMedications(patientId, signal) {
+    return this.get(`/medications/?patient_id=${patientId}`, { signal });
   }
 
   createMedication(medicationData, signal) {
@@ -277,9 +275,8 @@ class ApiService {
   getImmunizations(signal) {
     return this.get('/immunizations/', { signal });
   }
-
   getPatientImmunizations(patientId, signal) {
-    return this.get(`/patients/${patientId}/immunizations/`, { signal });
+    return this.get(`/immunizations/?patient_id=${patientId}`, { signal });
   }
 
   createImmunization(immunizationData, signal) {
@@ -319,9 +316,8 @@ class ApiService {
   getAllergies(signal) {
     return this.get('/allergies/', { signal });
   }
-
   getPatientAllergies(patientId, signal) {
-    return this.get(`/patients/${patientId}/allergies/`, { signal });
+    return this.get(`/allergies/?patient_id=${patientId}`, { signal });
   }
 
   getAllergy(allergyId, signal) {
@@ -344,9 +340,8 @@ class ApiService {
   getTreatments(signal) {
     return this.get('/treatments/', { signal });
   }
-
   getPatientTreatments(patientId, signal) {
-    return this.get(`/patients/${patientId}/treatments/`, { signal });
+    return this.get(`/treatments/?patient_id=${patientId}`, { signal });
   }
 
   getTreatment(treatmentId, signal) {
@@ -369,9 +364,8 @@ class ApiService {
   getProcedures(signal) {
     return this.get('/procedures/', { signal });
   }
-
   getPatientProcedures(patientId, signal) {
-    return this.get(`/patients/${patientId}/procedures/`, { signal });
+    return this.get(`/procedures/?patient_id=${patientId}`, { signal });
   }
 
   getProcedure(procedureId, signal) {
@@ -394,9 +388,8 @@ class ApiService {
   getConditions(signal) {
     return this.get('/conditions/', { signal });
   }
-
   getPatientConditions(patientId, signal) {
-    return this.get(`/patients/${patientId}/conditions/`, { signal });
+    return this.get(`/conditions/?patient_id=${patientId}`, { signal });
   }
 
   getCondition(conditionId, signal) {
@@ -419,9 +412,8 @@ class ApiService {
   getEncounters(signal) {
     return this.get('/encounters/', { signal });
   }
-
   getPatientEncounters(patientId, signal) {
-    return this.get(`/patients/${patientId}/encounters/`, { signal });
+    return this.get(`/encounters/?patient_id=${patientId}`, { signal });
   }
 
   getEncounter(encounterId, signal) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './useApi';
 import { apiService } from '../services/api';
 
@@ -14,6 +14,7 @@ export const useMedicalData = (config) => {
   const [currentPatient, setCurrentPatient] = useState(null);
   const [filesCounts, setFilesCounts] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const isInitialized = useRef(false);
   
   const { loading, error, execute, clearError, setError, cleanup } = useApi();
   
@@ -131,7 +132,6 @@ export const useMedicalData = (config) => {
     }
     return false;
   }, [execute, apiMethodsConfig, entityName]);
-
   // Initialize data
   const initializeData = useCallback(async () => {
     console.log('Initializing data...');
@@ -156,7 +156,7 @@ export const useMedicalData = (config) => {
         await loadFilesCountsData(data);
       }
     }
-  }, [currentPatient, requiresPatient, fetchCurrentPatient, fetchData, loadFilesCounts, loadFilesCountsData]);
+  }, [requiresPatient, fetchCurrentPatient, fetchData, loadFilesCounts, loadFilesCountsData]);
 
   // Refresh data
   const refreshData = useCallback(async () => {
