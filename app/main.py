@@ -198,6 +198,10 @@ async def startup_event():
         },
     )
 
+    # Create database tables and default user
+    create_tables()
+    create_default_user()
+
     # Run database migrations
     try:
         import subprocess
@@ -216,8 +220,6 @@ async def startup_event():
     except Exception as e:
         logger.error(f"❌ Failed to run migrations: {e}")
 
-    create_tables()
-    create_default_user()
     await check_sequences_on_startup()
     logger.info(
         "Application startup completed",
