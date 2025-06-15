@@ -367,21 +367,19 @@ class ApiService {
   getPatientProcedures(patientId, signal) {
     return this.get(`/procedures/?patient_id=${patientId}`, { signal });
   }
-
   getProcedure(procedureId, signal) {
-    return this.get(`/procedures/${procedureId}/`, { signal });
+    return this.get(`/procedures/${procedureId}`, { signal });
   }
 
   createProcedure(procedureData, signal) {
     return this.post('/procedures/', procedureData, { signal });
   }
-
   updateProcedure(procedureId, procedureData, signal) {
-    return this.put(`/procedures/${procedureId}/`, procedureData, { signal });
+    return this.put(`/procedures/${procedureId}`, procedureData, { signal });
   }
 
   deleteProcedure(procedureId, signal) {
-    return this.delete(`/procedures/${procedureId}/`, { signal });
+    return this.delete(`/procedures/${procedureId}`, { signal });
   }
 
   // Condition methods
