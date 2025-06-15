@@ -4,9 +4,9 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
-const Procedures = () => {
-  const [procedures, setProcedures] = useState([]);
+const Procedures = () => {  const [procedures, setProcedures] = useState([]);
   const [patientData, setPatientData] = useState(null);
+  const [practitioners, setPractitioners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -21,13 +21,24 @@ const Procedures = () => {
     procedure_date: '',
     status: 'scheduled',
     notes: '',
-    facility: ''
+    facility: '',
+    practitioner_id: ''
   });
   const navigate = useNavigate();
-
   useEffect(() => {
     fetchPatientAndProcedures();
+    fetchPractitioners();
   }, []);
+
+  const fetchPractitioners = async () => {
+    try {
+      const practitionersData = await apiService.getPractitioners();
+      setPractitioners(practitionersData);
+    } catch (error) {
+      console.error('Error fetching practitioners:', error);
+      // Don't set error state for practitioner fetch failures
+    }
+  };
 
   const fetchPatientAndProcedures = async () => {
     try {
@@ -83,7 +94,8 @@ const Procedures = () => {
       procedure_date: '',
       status: 'scheduled',
       notes: '',
-      facility: ''
+      facility: '',
+      practitioner_id: ''
     });
     setEditingProcedure(null);
     setShowAddForm(false);
@@ -94,13 +106,13 @@ const Procedures = () => {
     setShowAddForm(true);
   };  const handleEditProcedure = (procedure) => {
     setFormData({
-      procedure_name: procedure.procedure_name || '',
-      procedure_type: procedure.code || '',
+      procedure_name: procedure.procedure_name || '',      procedure_type: procedure.code || '',
       description: procedure.description || '',
       procedure_date: procedure.date || '',
       status: procedure.status || 'scheduled',
       notes: procedure.notes || '',
-      facility: procedure.facility || ''
+      facility: procedure.facility || '',
+      practitioner_id: procedure.practitioner_id || ''
     });
     setEditingProcedure(procedure);
     setShowAddForm(true);
@@ -116,7 +128,7 @@ const Procedures = () => {
 
     try {
       setError('');
-      setSuccessMessage('');        const procedureData = {
+      setSuccessMessage('');      const procedureData = {
         procedure_name: formData.procedure_name,
         code: formData.procedure_type || null,
         description: formData.description,
@@ -124,6 +136,7 @@ const Procedures = () => {
         status: formData.status,
         notes: formData.notes || null,
         facility: formData.facility || null,
+        practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
         patient_id: patientData.id
       };
 
@@ -317,8 +330,7 @@ const Procedures = () => {
                       <option value="postponed">Postponed</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
-                  </div>
-                  <div className="form-group">
+                  </div>                  <div className="form-group">
                     <label htmlFor="facility">Facility</label>
                     <input
                       type="text"
@@ -328,6 +340,22 @@ const Procedures = () => {
                       onChange={handleInputChange}
                       placeholder="Facility where the procedure was performed"
                     />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="practitioner_id">Performing Practitioner</label>
+                    <select
+                      id="practitioner_id"
+                      name="practitioner_id"
+                      value={formData.practitioner_id}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select practitioner</option>
+                      {practitioners.map(practitioner => (
+                        <option key={practitioner.id} value={practitioner.id}>
+                          {practitioner.name} - {practitioner.specialty}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-group full-width">
                     <label htmlFor="description">Description</label>
@@ -415,11 +443,20 @@ const Procedures = () => {
                           {formatDate(procedure.date)}
                         </span>                      </div>
                     )}
-                    
-                    {procedure.facility && (
+                      {procedure.facility && (
                       <div className="detail-item">
                         <span className="label">Facility:</span>
                         <span className="value">{procedure.facility}</span>
+                      </div>
+                    )}
+                    
+                    {procedure.practitioner_id && (
+                      <div className="detail-item">
+                        <span className="label">Performing Practitioner:</span>
+                        <span className="value">
+                          {practitioners.find(p => p.id === procedure.practitioner_id)?.name || 
+                           `Practitioner ID: ${procedure.practitioner_id}`}
+                        </span>
                       </div>
                     )}
                     
