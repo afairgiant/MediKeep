@@ -8,7 +8,9 @@ from sqlalchemy import pool
 from alembic import context
 
 # Add the project root to Python path so we can import our app modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 # Import your database Base and settings
 from app.models.models import Base
