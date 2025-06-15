@@ -26,17 +26,32 @@ class TrailingSlashMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         url_path = str(request.url.path)
 
-        # For API routes with trailing slash, redirect to version without /
+        # For specific API routes that need trailing slashes, add them
         if (
-            url_path.startswith("/api/v1/")
-            and url_path.endswith("/")
-            and url_path != "/api/v1/"  # Don't redirect the base API route
+            url_path.startswith("/api/v1/patients/")
+            and not url_path.endswith("/")
+            and not url_path.endswith("/me")  # Don't add slash to /patients/me
         ):
-            # Remove trailing slash and redirect
-            redirect_url = str(request.url).replace(url_path, url_path.rstrip("/"))
-            return RedirectResponse(
-                url=redirect_url, status_code=307
-            )  # 307 preserves the HTTP method
+            # Check if this is a patient sub-resource route that needs trailing slash
+            path_parts = url_path.split("/")
+            if (
+                len(path_parts) >= 5 and path_parts[4].isdigit()
+            ):  # /api/v1/patients/{id}/...
+                sub_resource_routes = [
+                    "medications",
+                    "treatments",
+                    "procedures",
+                    "allergies",
+                    "conditions",
+                    "immunizations",
+                    "encounters",
+                    "lab-results",
+                ]
+                if len(path_parts) == 6 and path_parts[5] in sub_resource_routes:
+                    redirect_url = str(request.url).replace(url_path, url_path + "/")
+                    return RedirectResponse(
+                        url=redirect_url, status_code=307
+                    )  # 307 preserves the HTTP method
 
         response = await call_next(request)
         return response
