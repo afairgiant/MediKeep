@@ -54,6 +54,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY run.py .
 
+# Copy Alembic migrations and configuration
+COPY alembic/ ./alembic/
+COPY alembic.ini .
+
 # Copy built React app from frontend stage
 COPY --from=frontend-build /frontend/build ./static
 
