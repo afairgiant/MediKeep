@@ -175,11 +175,10 @@ async def startup_event():
     check_database_connection()
 
     # Create database tables
-    # create_tables()
-
-    # Run database migrations
-    migration_succeess = database_migrations()
-    if not migration_succeess:
+    # create_tables()  # Uncomment if you want to run migrations manually
+    # create_tables()    # Run database migrations
+    migration_success = database_migrations()
+    if not migration_success:
         logger.error("❌ Database migrations failed")
         import sys
 

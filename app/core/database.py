@@ -197,7 +197,7 @@ def database_migrations() -> bool:
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
         result = subprocess.run(
-            ["alembic", "upgrade", "head"],
+            ["python", "-m", "alembic", "-c", "alembic/alembic.ini", "upgrade", "head"],
             cwd=project_root,  # Project root
             capture_output=True,
             text=True,
