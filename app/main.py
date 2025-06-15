@@ -24,9 +24,9 @@ class TrailingSlashMiddleware(BaseHTTPMiddleware):
     """Middleware to handle trailing slash redirects for API routes"""
 
     async def dispatch(self, request: Request, call_next):
-        url_path = str(
-            request.url.path
-        )  # For API routes with trailing slash, redirect to version without /
+        url_path = str(request.url.path)
+
+        # For API routes with trailing slash, redirect to version without /
         if (
             url_path.startswith("/api/v1/")
             and url_path.endswith("/")
@@ -37,31 +37,6 @@ class TrailingSlashMiddleware(BaseHTTPMiddleware):
             return RedirectResponse(
                 url=redirect_url, status_code=307
             )  # 307 preserves the HTTP method
-
-        # For API routes that don't end with /, redirect to version with /
-        if (
-            url_path.startswith("/api/v1/")
-            and not url_path.endswith("/")
-            and not url_path.split("/")[
-                -1
-            ].isdigit()  # Don't redirect ID-based routes like /api/v1/treatments/123
-            and url_path not in ["/api/v1/patients/me"]
-        ):  # Don't redirect specific known routes            # Check if this is a route that should have a trailing slash
-            route_endings = [
-                "/treatments",
-                "/procedures",
-                "/allergies",
-                "/conditions",
-                "/practitioners",
-                "/medications",
-                "/immunizations",
-                "/encounters",
-            ]
-            if any(url_path.endswith(ending) for ending in route_endings):
-                redirect_url = str(request.url).replace(url_path, url_path + "/")
-                return RedirectResponse(
-                    url=redirect_url, status_code=307
-                )  # 307 preserves the HTTP method
 
         response = await call_next(request)
         return response
