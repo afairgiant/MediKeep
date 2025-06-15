@@ -107,3 +107,17 @@ http://localhost:8000
 
 
 ```
+
+
+
+## To do..
+
+1: Revamp the logging system since it currently broken/not working great
+2: Create and setup methods to change user passwords.
+3: Update the admin dashboard to work with the new api setup
+4: Update admin health status with working info
+5: Backup / Restores
+6: Exports
+7: Finish adding individal search & filtering to each page
+8: Whole patient search
+
