@@ -8,7 +8,11 @@ import os
 
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.core.database import create_tables, create_default_user
+from app.core.database import (
+    check_database_connection,
+    create_tables,
+    create_default_user,
+)
 from app.core.logging_middleware import RequestLoggingMiddleware
 from app.core.logging_config import get_logger, LoggingConfig
 from app.scripts.sequence_monitor import SequenceMonitor
@@ -197,6 +201,9 @@ async def startup_event():
             "version": settings.VERSION,
         },
     )
+
+    # Check if database connection is valid
+    check_database_connection()
 
     # Create database tables and default user
     create_tables()
