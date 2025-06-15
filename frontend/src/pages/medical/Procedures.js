@@ -20,7 +20,8 @@ const Procedures = () => {
     description: '',
     procedure_date: '',
     status: 'scheduled',
-    notes: ''
+    notes: '',
+    facility: ''
   });
   const navigate = useNavigate();
 
@@ -54,11 +55,10 @@ const Procedures = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }));
-  };
+    }));  };
   const filteredProcedures = procedures
     .filter(procedure => {
-      const matchesSearch = procedure.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = procedure.procedure_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           procedure.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           procedure.notes?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || procedure.status === statusFilter;
@@ -68,22 +68,22 @@ const Procedures = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'procedure_name':
-          return (a.name || '').localeCompare(b.name || '');
+          return (a.procedure_name || '').localeCompare(b.procedure_name || '');
         case 'status':
           return (a.status || '').localeCompare(b.status || '');
         case 'procedure_date':
         default:
           return new Date(b.date || 0) - new Date(a.date || 0);
       }
-    });
-  const resetForm = () => {
+    });  const resetForm = () => {
     setFormData({
       procedure_name: '',
       procedure_type: '',
       description: '',
       procedure_date: '',
       status: 'scheduled',
-      notes: ''
+      notes: '',
+      facility: ''
     });
     setEditingProcedure(null);
     setShowAddForm(false);
@@ -94,12 +94,13 @@ const Procedures = () => {
     setShowAddForm(true);
   };  const handleEditProcedure = (procedure) => {
     setFormData({
-      procedure_name: procedure.name || '',
+      procedure_name: procedure.procedure_name || '',
       procedure_type: procedure.code || '',
       description: procedure.description || '',
       procedure_date: procedure.date || '',
       status: procedure.status || 'scheduled',
-      notes: procedure.notes || ''
+      notes: procedure.notes || '',
+      facility: procedure.facility || ''
     });
     setEditingProcedure(procedure);
     setShowAddForm(true);
@@ -115,13 +116,14 @@ const Procedures = () => {
 
     try {
       setError('');
-      setSuccessMessage('');      const procedureData = {
-        name: formData.procedure_name,
+      setSuccessMessage('');        const procedureData = {
+        procedure_name: formData.procedure_name,
         code: formData.procedure_type || null,
         description: formData.description,
         date: formData.procedure_date || null,
         status: formData.status,
         notes: formData.notes || null,
+        facility: formData.facility || null,
         patient_id: patientData.id
       };
 
@@ -291,7 +293,8 @@ const Procedures = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="procedure_date">Procedure Date *</label>                  <input
+                    <label htmlFor="procedure_date">Procedure Date *</label>                  
+                    <input
                     type="date"
                     id="procedure_date"
                     name="procedure_date"
@@ -299,7 +302,8 @@ const Procedures = () => {
                     onChange={handleInputChange}
                     required
                   />
-                  </div>                  <div className="form-group">
+                  </div>                  
+                  <div className="form-group">
                     <label htmlFor="status">Status</label>
                     <select
                       id="status"
@@ -314,7 +318,17 @@ const Procedures = () => {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
-
+                  <div className="form-group">
+                    <label htmlFor="facility">Facility</label>
+                    <input
+                      type="text"
+                      id="facility"
+                      name="facility"
+                      value={formData.facility || ''}
+                      onChange={handleInputChange}
+                      placeholder="Facility where the procedure was performed"
+                    />
+                  </div>
                   <div className="form-group full-width">
                     <label htmlFor="description">Description</label>
                     <textarea
@@ -338,7 +352,8 @@ const Procedures = () => {
                       placeholder="Additional notes about the procedure..."
                     />
                   </div>
-                </div>                  <div className="form-actions">
+                </div>                  
+                <div className="form-actions">
                   <button 
                     type="button" 
                     className="cancel-button"
@@ -379,10 +394,9 @@ const Procedures = () => {
             <div className="medical-items-grid">
               {filteredProcedures.map((procedure) => (
                 <div key={procedure.id} className="medical-item-card">
-                  <div className="medical-item-header">                    <div className="item-info">
-                      <h3 className="item-title">
+                  <div className="medical-item-header">                    <div className="item-info">                      <h3 className="item-title">
                         <span className="type-icon">{getProcedureTypeIcon(procedure.code)}</span>
-                        {procedure.name}
+                        {procedure.procedure_name}
                       </h3>
                       {procedure.code && (
                         <div className="item-subtitle">{procedure.code}</div>
@@ -400,6 +414,13 @@ const Procedures = () => {
                         <span className="value">
                           {formatDate(procedure.date)}
                         </span>                      </div>
+                    )}
+                    
+                    {procedure.facility && (
+                      <div className="detail-item">
+                        <span className="label">Facility:</span>
+                        <span className="value">{procedure.facility}</span>
+                      </div>
                     )}
                     
                     {procedure.description && (

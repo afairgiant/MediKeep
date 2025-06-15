@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, validator
 
 
 class ProcedureBase(BaseModel):
-    name: str = Field(
+    procedure_name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the procedure"
     )
     code: Optional[str] = Field(
@@ -16,6 +16,9 @@ class ProcedureBase(BaseModel):
     date: DateType = Field(..., description="Date when the procedure was performed")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     status: str = Field(..., description="Status of the procedure")
+    facility: Optional[str] = Field(
+        None, max_length=300, description="Facility where the procedure was performed"
+    )
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the performing practitioner"
@@ -46,12 +49,13 @@ class ProcedureCreate(ProcedureBase):
 
 
 class ProcedureUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=2, max_length=300)
+    procedure_name: Optional[str] = Field(None, min_length=2, max_length=300)
     code: Optional[str] = Field(None, max_length=50)
     description: Optional[str] = Field(None, max_length=1000)
     date: Optional[DateType] = None
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
+    facility: Optional[str] = Field(None, max_length=300)
     practitioner_id: Optional[int] = Field(None, gt=0)
 
     @validator("date")
@@ -93,7 +97,7 @@ class ProcedureWithRelations(ProcedureResponse):
 
 class ProcedureSummary(BaseModel):
     id: int
-    name: str
+    procedure_name: str
     date: DateType
     status: str
     patient_name: Optional[str] = None

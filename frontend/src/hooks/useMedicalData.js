@@ -10,78 +10,20 @@ export const useMedicalData = (config) => {
     loadFilesCounts = false
   } = config;
 
-  const [items, setItems] = useState([]);  const [currentPatient, setCurrentPatient] = useState(null);
+  const [items, setItems] = useState([]);
+  const [currentPatient, setCurrentPatient] = useState(null);
   const [filesCounts, setFilesCounts] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
   const isInitialized = useRef(false);
   const currentPatientRef = useRef(currentPatient);
+  const abortControllerRef = useRef(null);
   
   // Keep ref in sync with state
   useEffect(() => {
     currentPatientRef.current = currentPatient;
   }, [currentPatient]);
-  
-  const { loading, error, execute, clearError, setError, cleanup } = useApi();
-  
-  // Fetch current patient
-  const fetchCurrentPatient = useCallback(async () => {
-    if (!requiresPatient) return null;
-    
-    console.log('Fetching current patient...');
-      const result = await execute(
-      async (signal) => {
-        const patient = await apiService.getCurrentPatient(signal);
-        console.log('Patient API response:', patient);
-        return patient;
-      },
-      { errorMessage: 'Failed to load patient data' }
-    );
-    
-    console.log('fetchCurrentPatient result:', result);
-    return result;
-  }, [execute, requiresPatient]);
+    const { loading, error, execute, clearError, setError, cleanup } = useApi();
 
-  // Fetch main data
-  const fetchData = useCallback(async (patientId = null) => {
-    const patient = patientId || currentPatient?.id;
-    
-    console.log(`Fetching ${entityName} data for patient:`, patient);
-    
-    return await execute(
-      async (signal) => {
-        if (requiresPatient && patient) {
-          return await apiMethodsConfig.getByPatient(patient, signal);
-        } else if (!requiresPatient) {
-          return await apiMethodsConfig.getAll(signal);
-        }
-        return [];
-      },
-      { errorMessage: `Failed to load ${entityName} data` }
-    );
-  }, [execute, currentPatient?.id, requiresPatient, apiMethodsConfig, entityName]);
-
-  // Load file counts (for entities that support files)
-  const loadFilesCountsData = useCallback(async (itemsList) => {
-    if (!loadFilesCounts || !itemsList?.length || !apiMethodsConfig.getFiles) return;
-
-    const counts = {};
-    
-    for (const item of itemsList) {
-      try {
-        const files = await execute(
-          async (signal) => await apiMethodsConfig.getFiles(item.id, signal)
-        );
-        counts[item.id] = files?.length || 0;
-      } catch (error) {
-        console.warn(`Failed to load file count for ${entityName} ${item.id}:`, error);
-        counts[item.id] = 0;
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    setFilesCounts(counts);
-  }, [loadFilesCounts, apiMethodsConfig, entityName, execute]);
   // Create item
   const createItem = useCallback(async (data) => {
     console.log(`🏗️ Creating ${entityName} with data:`, data);
@@ -136,46 +78,139 @@ export const useMedicalData = (config) => {
       return true;
     }
     return false;
-  }, [execute, apiMethodsConfig, entityName]);  // Initialize data
-  const initializeData = useCallback(async () => {
-    console.log('Initializing data...');
-    let patient = currentPatientRef.current;
-    
-    if (requiresPatient && !patient) {
-      patient = await fetchCurrentPatient();
-      if (patient) {
-        console.log('Setting currentPatient:', patient);
-        setCurrentPatient(patient);
-      } else {
-        console.warn('No patient data received');
-        return;
-      }
-    }
-    
-    const data = await fetchData(patient?.id);
-    if (data) {
-      setItems(data);
-      
-      if (loadFilesCounts && data.length <= 20) {
-        await loadFilesCountsData(data);
-      }
-    }
-  }, [requiresPatient, fetchCurrentPatient, fetchData, loadFilesCounts, loadFilesCountsData]);
+  }, [execute, apiMethodsConfig, entityName]);  // Store stable references to prevent dependency changes
+  const configRef = useRef({
+    entityName,
+    apiMethodsConfig,
+    requiresPatient,
+    loadFilesCounts
+  });
+  
+  // Update config ref when props change
+  useEffect(() => {
+    configRef.current = {
+      entityName,
+      apiMethodsConfig,
+      requiresPatient,
+      loadFilesCounts
+    };
+  }, [entityName, apiMethodsConfig, requiresPatient, loadFilesCounts]);
 
-  // Refresh data
-  const refreshData = useCallback(async () => {
-    const data = await fetchData();
-    if (data) {
-      setItems(data);
+  // Initialize data - run once on mount
+  useEffect(() => {
+    let isMounted = true;
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
+    const initializeData = async () => {
+      if (isInitialized.current || !isMounted) return;
       
-      if (loadFilesCounts && data.length <= 20) {
-        await loadFilesCountsData(data);
+      console.log('Initializing data...');
+      isInitialized.current = true;
+      
+      const config = configRef.current;
+      
+      try {
+        let patient = null;
+        
+        if (config.requiresPatient) {
+          patient = await apiService.getCurrentPatient(abortController.signal);
+          if (patient && isMounted) {
+            console.log('Setting currentPatient:', patient);
+            setCurrentPatient(patient);
+            currentPatientRef.current = patient;
+          } else {
+            console.warn('No patient data received');
+            return;
+          }
+        }
+        
+        if (!isMounted) return;
+        
+        let data = [];
+        if (config.requiresPatient && patient?.id) {
+          data = await config.apiMethodsConfig.getByPatient(patient.id, abortController.signal);
+        } else if (!config.requiresPatient) {
+          data = await config.apiMethodsConfig.getAll(abortController.signal);
+        }
+        
+        if (data && isMounted) {
+          setItems(data);
+          
+          if (config.loadFilesCounts && data.length <= 20 && config.apiMethodsConfig.getFiles) {
+            const counts = {};
+            for (const item of data) {
+              try {
+                const files = await config.apiMethodsConfig.getFiles(item.id, abortController.signal);
+                counts[item.id] = files?.length || 0;
+              } catch (error) {
+                if (error.name !== 'AbortError') {
+                  console.warn(`Failed to load file count for ${config.entityName} ${item.id}:`, error);
+                }
+                counts[item.id] = 0;
+              }
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            if (isMounted) {
+              setFilesCounts(counts);
+            }
+          }
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError' && isMounted) {
+          setError(`Failed to load ${config.entityName} data: ${error.message}`);
+        }
       }
-    }
-  }, [fetchData, loadFilesCounts, loadFilesCountsData]);  useEffect(() => {
+    };
+    
     initializeData();
-    return cleanup;
-  }, [initializeData, cleanup]);
+    
+    return () => {
+      isMounted = false;
+      isInitialized.current = false;
+      abortController.abort();
+      cleanup();
+    };
+  }, [setError, cleanup]); // Only include stable dependencies
+    // Refresh data function that uses execute wrapper
+  const refreshData = useCallback(async () => {
+    const config = configRef.current;
+    const result = await execute(
+      async (signal) => {
+        let data = [];
+        if (config.requiresPatient && currentPatientRef.current?.id) {
+          data = await config.apiMethodsConfig.getByPatient(currentPatientRef.current.id, signal);
+        } else if (!config.requiresPatient) {
+          data = await config.apiMethodsConfig.getAll(signal);
+        }
+        
+        if (data) {
+          setItems(data);
+          
+          if (config.loadFilesCounts && data.length <= 20 && config.apiMethodsConfig.getFiles) {
+            const counts = {};
+            for (const item of data) {
+              try {
+                const files = await config.apiMethodsConfig.getFiles(item.id, signal);
+                counts[item.id] = files?.length || 0;
+              } catch (error) {
+                if (error.name !== 'AbortError') {
+                  console.warn(`Failed to load file count for ${config.entityName} ${item.id}:`, error);
+                }
+                counts[item.id] = 0;
+              }
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            setFilesCounts(counts);
+          }
+        }
+        return data;
+      },
+      { errorMessage: `Failed to refresh ${config.entityName} data` }
+    );
+    return result;
+  }, [execute]);
 
   return {
     // Data

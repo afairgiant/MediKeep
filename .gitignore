@@ -102,3 +102,5 @@ scripts/sequence_monitor.py
 scripts/start-backend.bat
 scripts/start-backend.ps1
 scripts/start-dev.bat
+
+/dev_docker
