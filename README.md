@@ -48,7 +48,7 @@ services:
     #   dockerfile: docker/Dockerfile    
     container_name: medical-records-app
     ports:
-      - "8000:8000"  # Single port serves both React app and FastAPI      
+      - ${APP_PORT:-8005}:8000  # Single port serves both React app and FastAPI      
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -95,6 +95,9 @@ DB_NAME=medical_records
 DB_USER=medapp
 DB_PASSWORD=your_secure_database_password_here
 
+# Application port
+APP_PORT=8005
+
 # Application Security
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
 
@@ -109,13 +112,14 @@ Run the following command to start the services:
 ```ini
 docker compose up -d
 ```
+Note: Do not use ```docker-compose```.
 
 ### 4️⃣ Access the app
 
 Once the containers are up, access the app in your browser at:
 
 ```ini
-http://localhost:8000
+http://localhost:8005
 ```
 
 ### Demo Login
