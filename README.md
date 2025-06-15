@@ -85,6 +85,24 @@ networks:
     driver: bridge
 ```
 
+Create a .env file(or copy the env.example in the docker folder)
+```bash
+# Environment variables for Docker Compose
+# Copy this file to .env and update the values
+
+# Database Configuration
+DB_NAME=medical_records
+DB_USER=medapp
+DB_PASSWORD=your_secure_database_password_here
+
+# Application Security
+SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
+
+# Optional: Override default settings
+# ACCESS_TOKEN_EXPIRE_MINUTES=30
+# ALGORITHM=HS256
+```
+
 ### 3️⃣ Start the Containers
 
 Run the following command to start the services:
