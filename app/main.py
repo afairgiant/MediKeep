@@ -12,6 +12,8 @@ from app.core.database import (
     check_database_connection,
     create_tables,
     create_default_user,
+    check_sequences_on_startup,
+    database_migrations,
 )
 from app.core.logging_middleware import RequestLoggingMiddleware
 from app.core.logging_config import get_logger, LoggingConfig
@@ -157,39 +159,6 @@ else:
         }
 
 
-async def check_sequences_on_startup():
-    """Check and fix sequence synchronization on application startup"""
-    if not getattr(settings, "SEQUENCE_CHECK_ON_STARTUP", False):
-        return
-
-    try:
-        from app.scripts.sequence_monitor import SequenceMonitor
-
-        monitor = SequenceMonitor()
-
-        logger.info("🔍 Checking database sequences on startup...")
-        results = monitor.monitor_all_sequences(
-            auto_fix=getattr(settings, "SEQUENCE_AUTO_FIX", False)
-        )
-
-        if results.get("out_of_sync_tables"):
-            if getattr(settings, "SEQUENCE_AUTO_FIX", False):
-                logger.info(
-                    f"✅ Auto-fixed {len(results.get('fixed_tables', []))} sequence issues"
-                )
-            else:
-                logger.warning(
-                    f"⚠️  Found {len(results['out_of_sync_tables'])} sequence issues"
-                )
-        else:
-            logger.info("✅ All database sequences are synchronized")
-
-    except ImportError:
-        logger.info("SequenceMonitor not available - skipping sequence check")
-    except Exception as e:
-        logger.error(f"❌ Failed to check sequences on startup: {e}")
-
-
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables on startup"""
@@ -205,33 +174,21 @@ async def startup_event():
     # Check if database connection is valid
     check_database_connection()
 
-    # Create database tables and default user
-    create_tables()
-    create_default_user()
+    # Create database tables
+    # create_tables()
 
     # Run database migrations
-    try:
-        import subprocess
+    migration_succeess = database_migrations()
+    if not migration_succeess:
+        logger.error("❌ Database migrations failed")
+        import sys
 
-        logger.info("🔄 Running database migrations...")
-        result = subprocess.run(
-            ["alembic", "upgrade", "head"],
-            cwd=os.path.dirname(os.path.dirname(__file__)),  # Project root
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode == 0:
-            logger.info("✅ Database migrations completed successfully")
-        else:
-            logger.error(f"❌ Migration failed: {result.stderr}")
-    except Exception as e:
-        logger.error(f"❌ Failed to run migrations: {e}")
+        sys.exit(1)
 
+    # Create default user if not exists
+    create_default_user()
     await check_sequences_on_startup()
-    logger.info(
-        "Application startup completed",
-        extra={"category": "app", "event": "application_startup_complete"},
-    )
+    logger.info("Application startup completed")
 
 
 @app.get("/health")
