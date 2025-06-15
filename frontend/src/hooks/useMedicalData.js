@@ -10,11 +10,16 @@ export const useMedicalData = (config) => {
     loadFilesCounts = false
   } = config;
 
-  const [items, setItems] = useState([]);
-  const [currentPatient, setCurrentPatient] = useState(null);
+  const [items, setItems] = useState([]);  const [currentPatient, setCurrentPatient] = useState(null);
   const [filesCounts, setFilesCounts] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
   const isInitialized = useRef(false);
+  const currentPatientRef = useRef(currentPatient);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentPatientRef.current = currentPatient;
+  }, [currentPatient]);
   
   const { loading, error, execute, clearError, setError, cleanup } = useApi();
   
@@ -131,11 +136,10 @@ export const useMedicalData = (config) => {
       return true;
     }
     return false;
-  }, [execute, apiMethodsConfig, entityName]);
-  // Initialize data
+  }, [execute, apiMethodsConfig, entityName]);  // Initialize data
   const initializeData = useCallback(async () => {
     console.log('Initializing data...');
-    let patient = currentPatient;
+    let patient = currentPatientRef.current;
     
     if (requiresPatient && !patient) {
       patient = await fetchCurrentPatient();
@@ -168,11 +172,8 @@ export const useMedicalData = (config) => {
         await loadFilesCountsData(data);
       }
     }
-  }, [fetchData, loadFilesCounts, loadFilesCountsData]);
-
-  useEffect(() => {
+  }, [fetchData, loadFilesCounts, loadFilesCountsData]);  useEffect(() => {
     initializeData();
-    
     return cleanup;
   }, [initializeData, cleanup]);
 
