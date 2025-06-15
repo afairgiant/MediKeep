@@ -186,7 +186,7 @@ async def check_sequences_on_startup() -> None:
         logger.error(f"❌ Failed to check sequences on startup: {e}")
 
 
-def database_migrations():
+def database_migrations() -> bool:
     """Run database migrations using Alembic"""
     try:
         import subprocess
@@ -198,7 +198,7 @@ def database_migrations():
 
         result = subprocess.run(
             ["alembic", "upgrade", "head"],
-            cwd=os.path.dirname(os.path.dirname(__file__)),  # Project root
+            cwd=project_root,  # Project root
             capture_output=True,
             text=True,
         )
