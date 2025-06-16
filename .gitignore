@@ -108,3 +108,4 @@ debug_routes_fixed.py
 test_fixed_endpoints.py
 test_lab_result_files_debug.py
 test_trailing_slash.py
+test_download.py

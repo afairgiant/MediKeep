@@ -280,10 +280,9 @@ const LabResults = () => {
       console.error('Error uploading file:', error);
       setError(error.message);
     }
-  };
-  const handleDownloadFile = async (fileId, fileName) => {
+  };  const handleDownloadFile = async (fileId, fileName) => {
     try {
-      const blob = await apiService.get(`/lab-result-files/${fileId}/download/`, { 
+      const blob = await apiService.get(`/lab-result-files/${fileId}/download`, { 
         responseType: 'blob' 
       });
       
