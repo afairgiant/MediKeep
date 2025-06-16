@@ -215,9 +215,8 @@ class ApiService {
   deleteLabResult(labResultId, signal) {
     return this.delete(`/lab-results/${labResultId}`, { signal });
   }
-
   getLabResultFiles(labResultId, signal) {
-    return this.get(`/lab-results/${labResultId}/files/`, { signal });
+    return this.get(`/lab-results/${labResultId}/files`, { signal });
   }
   uploadLabResultFile(labResultId, file, description = '', signal) {
     const formData = new FormData();
@@ -225,15 +224,15 @@ class ApiService {
     if (description && description.trim()) {
       formData.append('description', description);
     }
-    return this.post(`/lab-results/${labResultId}/files/`, formData, { signal });
+    return this.post(`/lab-results/${labResultId}/files`, formData, { signal });
   }
-
   downloadLabResultFile(fileId, signal) {
-    return this.get(`/lab-result-files/${fileId}/download/`, { 
+    return this.get(`/lab-result-files/${fileId}/download`, { 
       responseType: 'blob',
       signal 
     });
-  }  deleteLabResultFile(fileId, signal) {
+  }
+  deleteLabResultFile(fileId, signal) {
     return this.delete(`/lab-result-files/${fileId}`, { signal });
   }
 

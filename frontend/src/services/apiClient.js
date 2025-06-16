@@ -312,16 +312,14 @@ export const labResultsAPI = {
   getAll: (patientId = null) => {
     const url = patientId ? `/lab-results/?patient_id=${patientId}` : '/lab-results/';
     return apiClient.get(url);
-  },
-  getById: (id) => apiClient.get(`/lab-results/${id}/`),
+  },  getById: (id) => apiClient.get(`/lab-results/${id}`),
   create: (data) => apiClient.post('/lab-results/', data),
-  update: (id, data) => apiClient.patch(`/lab-results/${id}/`, data),
-  delete: (id) => apiClient.delete(`/lab-results/${id}/`),
-  uploadFile: (labResultId, file) => {
-    return apiClient.uploadFile(`/lab-results/${labResultId}/upload-file/`, file);
+  update: (id, data) => apiClient.patch(`/lab-results/${id}`, data),
+  delete: (id) => apiClient.delete(`/lab-results/${id}`),  uploadFile: (labResultId, file) => {
+    return apiClient.uploadFile(`/lab-result-files/upload/${labResultId}`, file);
   },
   downloadFile: (labResultId, fileId) => {
-    return apiClient.downloadFile(`/lab-results/${labResultId}/files/${fileId}/download/`);
+    return apiClient.downloadFile(`/lab-result-files/${fileId}/download`);
   },
 };
 

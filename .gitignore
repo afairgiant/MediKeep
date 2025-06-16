@@ -104,3 +104,7 @@ scripts/start-backend.ps1
 scripts/start-dev.bat
 
 /dev_docker
+debug_routes_fixed.py
+test_fixed_endpoints.py
+test_lab_result_files_debug.py
+test_trailing_slash.py

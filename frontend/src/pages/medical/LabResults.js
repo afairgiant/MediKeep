@@ -261,10 +261,9 @@ const LabResults = () => {
       const formData = new FormData();
       formData.append('file', fileUpload.file);
       if (fileUpload.description && fileUpload.description.trim()) {
-        formData.append('description', fileUpload.description);
-      }
+        formData.append('description', fileUpload.description);      }
       
-      await apiService.post(`/lab-results/${selectedLabResult.id}/files/`, formData);
+      await apiService.post(`/lab-results/${selectedLabResult.id}/files`, formData);
       
       // Refresh files list
       const files = await apiService.getLabResultFiles(selectedLabResult.id);

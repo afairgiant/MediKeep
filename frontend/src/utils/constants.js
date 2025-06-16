@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   MEDICATIONS: {
     BASE: '/api/v1/medications',
     BY_PATIENT: (patientId) => `/api/v1/patients/${patientId}/medications`
-  },
+  },  
   LAB_RESULTS: {
     BASE: '/api/v1/lab-results',
     FILES: (labResultId) => `/api/v1/lab-results/${labResultId}/files`,
