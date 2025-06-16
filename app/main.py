@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
@@ -8,9 +8,19 @@ import os
 
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.core.database import create_tables, create_default_user
+from app.core.database import (
+    check_database_connection,
+    create_tables,
+    create_default_user,
+    check_sequences_on_startup,
+    database_migrations,
+)
 from app.core.logging_middleware import RequestLoggingMiddleware
-from app.core.logging_config import get_logger
+from app.core.logging_config import get_logger, LoggingConfig
+from app.scripts.sequence_monitor import SequenceMonitor
+
+# Initialize logging configuration
+logging_config = LoggingConfig()
 
 # Initialize logger
 logger = get_logger(__name__, "app")
@@ -20,33 +30,48 @@ class TrailingSlashMiddleware(BaseHTTPMiddleware):
     """Middleware to handle trailing slash redirects for API routes"""
 
     async def dispatch(self, request: Request, call_next):
-        url_path = str(request.url.path)
+        url_path = str(
+            request.url.path
+        )  # For routes that should NOT have trailing slashes, remove them
+        no_slash_routes = [
+            "/api/v1/patients/me/",
+            "/api/v1/auth/login/",
+            "/api/v1/auth/logout/",
+            "/api/v1/health/",
+        ]
 
-        # For API routes that don't end with /, redirect to version with /
+        if url_path in no_slash_routes:
+            redirect_url = str(request.url).replace(url_path, url_path.rstrip("/"))
+            return RedirectResponse(
+                url=redirect_url, status_code=307
+            )  # 307 preserves the HTTP method
+
+        # For specific API routes that need trailing slashes, add them
         if (
-            url_path.startswith("/api/v1/")
+            url_path.startswith("/api/v1/patients/")
             and not url_path.endswith("/")
-            and not url_path.split("/")[
-                -1
-            ].isdigit()  # Don't redirect ID-based routes like /api/v1/treatments/123
-            and url_path not in ["/api/v1/patients/me"]
-        ):  # Don't redirect specific known routes
-            # Check if this is a route that should have a trailing slash
-            route_endings = [
-                "/treatments",
-                "/procedures",
-                "/allergies",
-                "/conditions",
-                "/practitioners",
-                "/medications",
-                "/immunizations",
-                "/encounters",
-            ]
-            if any(url_path.endswith(ending) for ending in route_endings):
-                redirect_url = str(request.url).replace(url_path, url_path + "/")
-                return RedirectResponse(
-                    url=redirect_url, status_code=307
-                )  # 307 preserves the HTTP method
+            and not url_path.endswith("/me")  # Don't add slash to /patients/me
+        ):
+            # Check if this is a patient sub-resource route that needs trailing slash
+            path_parts = url_path.split("/")
+            if (
+                len(path_parts) >= 5 and path_parts[4].isdigit()
+            ):  # /api/v1/patients/{id}/...
+                sub_resource_routes = [
+                    "medications",
+                    "treatments",
+                    "procedures",
+                    "allergies",
+                    "conditions",
+                    "immunizations",
+                    "encounters",
+                    "lab-results",
+                ]
+                if len(path_parts) == 6 and path_parts[5] in sub_resource_routes:
+                    redirect_url = str(request.url).replace(url_path, url_path + "/")
+                    return RedirectResponse(
+                        url=redirect_url, status_code=307
+                    )  # 307 preserves the HTTP method
 
         response = await call_next(request)
         return response
@@ -59,11 +84,13 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
 )
 
-# Add trailing slash middleware (should be added early)
+
+# Add logging middleware
+app.add_middleware(RequestLoggingMiddleware)
+
+# Add trailing slash middleware
 app.add_middleware(TrailingSlashMiddleware)
 
-# Add logging middleware (should be added first)
-app.add_middleware(RequestLoggingMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
@@ -79,109 +106,57 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-# Serve static files (React build) in production
-# Try multiple possible static directory locations
+# Serve static files (React build)
+STATIC_DIR = os.environ.get("STATIC_DIR", "static")
+
+# Try multiple possible static directory locations for flexibility
 static_dirs = [
-    os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "static", "static"
-    ),  # Development (nested)
-    "/app/static/static",  # Docker container (nested static directory)
-    "static/static",  # Current directory (Docker workdir is /app) (nested)
-    os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), "static"
-    ),  # Development fallback
-    "/app/static",  # Docker container fallback
+    STATIC_DIR,  # Environment variable or default "static"
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"),  # Development
+    "/app/static",  # Docker container
     "static",  # Current directory fallback
 ]
 
-# Debug: Log all attempted paths and their existence
-logger.info("=== DEBUGGING STATIC FILE PATHS ===")
-for i, dir_path in enumerate(static_dirs):
-    exists = os.path.exists(dir_path)
-    logger.info(f"Static path {i + 1}: {dir_path} - Exists: {exists}")
-    if exists:
-        # List contents if it exists
-        try:
-            contents = os.listdir(dir_path)
-            logger.info(f"Contents of {dir_path}: {contents}")
-        except Exception as e:
-            logger.error(f"Error listing {dir_path}: {e}")
-
-# Also check current working directory
-cwd = os.getcwd()
-logger.info(f"Current working directory: {cwd}")
-logger.info(
-    f"Contents of current directory: {os.listdir(cwd) if os.path.exists(cwd) else 'N/A'}"
-)
-
 static_dir = None
-html_dir = None  # Separate directory for HTML files
-
 for dir_path in static_dirs:
     if os.path.exists(dir_path):
         static_dir = dir_path
-        html_dir = dir_path  # Initially same as static_dir
+        logger.info(f"✅ Found static directory: {static_dir}")
         break
 
 if static_dir:
-    # Check if we found the nested static directory directly
-    if static_dir.endswith("/static/static") or static_dir.endswith("\\static\\static"):
-        # We found the nested directory directly, use it for static assets
-        app.mount("/static", StaticFiles(directory=static_dir), name="static")
-        logger.info(f"✅ Serving static assets from nested directory: {static_dir}")
-        # Set html_dir to the parent directory for index.html
-        html_dir = os.path.dirname(static_dir)
-        logger.info(f"✅ Serving HTML files from parent directory: {html_dir}")
+    # Check for nested static directory (common in React builds)
+    nested_static = os.path.join(static_dir, "static")
+    if os.path.exists(nested_static):
+        # Mount the nested static directory for assets
+        app.mount("/static", StaticFiles(directory=nested_static), name="static")
+        logger.info(f"✅ Serving static assets from: {nested_static}")
+        # Use parent directory for index.html
+        html_dir = static_dir
     else:
-        # Check for nested static directory within the found directory
-        nested_static = os.path.join(static_dir, "static")
-        if (
-            os.path.exists(nested_static)
-            and os.path.exists(os.path.join(nested_static, "css"))
-            and os.path.exists(os.path.join(nested_static, "js"))
-        ):
-            # Use nested directory for static assets (CSS/JS)
-            app.mount("/static", StaticFiles(directory=nested_static), name="static")
-            logger.info(
-                f"✅ Serving static assets from nested directory: {nested_static}"
-            )
-            # Keep HTML files in the current directory
-            html_dir = static_dir
-            logger.info(f"✅ Serving HTML files from: {html_dir}")
-        else:
-            # Use the same directory for both static assets and HTML
-            app.mount("/static", StaticFiles(directory=static_dir), name="static")
-            logger.info(f"✅ Serving static files from: {static_dir}")
-            html_dir = static_dir
-
-    # List what's actually in the static directory
-    try:
-        static_contents = os.listdir(static_dir)
-        logger.info(f"Static directory contents: {static_contents}")
-
-        # Check for specific folders
-        css_path = os.path.join(static_dir, "static", "css")
-        js_path = os.path.join(static_dir, "static", "js")
-        logger.info(f"CSS path exists: {os.path.exists(css_path)} - {css_path}")
-        logger.info(f"JS path exists: {os.path.exists(js_path)} - {js_path}")
-
-        if os.path.exists(css_path):
-            logger.info(f"CSS files: {os.listdir(css_path)}")
-        if os.path.exists(js_path):
-            logger.info(f"JS files: {os.listdir(js_path)}")
-
-    except Exception as e:
-        logger.error(f"Error listing static directory: {e}")
+        # Mount the static directory directly
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+        logger.info(f"✅ Serving static files from: {static_dir}")
+        html_dir = static_dir
 
     @app.get("/")
     async def read_index():
         """Serve React app index.html for root path"""
-        if html_dir:  # Use html_dir instead of static_dir
-            index_path = os.path.join(html_dir, "index.html")
+        index_path = os.path.join(html_dir, "index.html")
+        if os.path.exists(index_path):
             return FileResponse(index_path)
-        return {"error": "Static files not available"}
+        return {"error": "React app index.html not found"}
+
 else:
     logger.warning("❌ No static directory found - React app will not be served")
+
+    @app.get("/")
+    async def api_root():
+        return {
+            "message": "Medical Records API",
+            "docs": "/docs",
+            "status": "React app not configured",
+        }
 
 
 @app.on_event("startup")
@@ -195,12 +170,38 @@ async def startup_event():
             "version": settings.VERSION,
         },
     )
-    create_tables()
+
+    # Skip database operations if in test mode
+    skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
+
+    if skip_migrations:
+        logger.info("⏭️ Skipping database operations (test mode)")
+        logger.info("Application startup completed (test mode)")
+        return
+
+    # Check if database connection is valid
+    db_check_result = check_database_connection()
+
+    if not db_check_result:
+        logger.error("❌ Database connection failed")
+        import sys
+
+        sys.exit(1)
+
+    logger.info("✅ Database connection established")
+
+    # Run database migrations
+    migration_success = database_migrations()
+    if not migration_success:
+        logger.error("❌ Database migrations failed")
+        import sys
+
+        sys.exit(1)
+
+    # Create default user if not exists
     create_default_user()
-    logger.info(
-        "Application startup completed",
-        extra={"category": "app", "event": "application_startup_complete"},
-    )
+    await check_sequences_on_startup()
+    logger.info("Application startup completed")
 
 
 @app.get("/health")
@@ -212,5 +213,42 @@ def health():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
 
 
-# Note: Removed catch-all route that was interfering with API endpoints
-# React routing should be handled by the frontend, not by a catch-all backend route
+def setup_spa_routing():
+    """
+    Setup SPA routing only when React build files exist (production).
+    This avoids conflicts during development.
+    """
+    if not static_dir:
+        logger.info("🔧 Development mode - No static directory, SPA routing disabled")
+        return
+
+    index_path = os.path.join(static_dir, "index.html")
+    if not os.path.exists(index_path):
+        logger.info("🔧 Development mode - No index.html found, SPA routing disabled")
+        return
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """
+        Serve React SPA for non-API routes in production only.
+        This route is only created when React build files exist.
+        """
+        # Block API routes explicitly
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+
+        # Block special FastAPI routes
+        if full_path in ["docs", "redoc", "openapi.json", "health"]:
+            raise HTTPException(status_code=404, detail="Not found")
+
+        # Serve React app for all other routes
+        return FileResponse(index_path)
+
+    logger.info("✅ Production mode - SPA routing enabled for React Router")
+
+
+# Setup SPA routing (only activates if React build exists)
+setup_spa_routing()
+
+# Note: Catch-all route removed to prevent interference with API endpoints
+# For production deployment, React Router should be handled by the frontend build process

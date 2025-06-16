@@ -9,9 +9,8 @@
  * - Integration with backend logging system
  */
 
-class FrontendLogger {
-  constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+class FrontendLogger {  constructor() {
+    this.baseURL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1');
     this.sessionId = this.generateSessionId();
     this.userId = null;
     this.patientId = null;
@@ -337,7 +336,7 @@ class FrontendLogger {
           break;
       }
 
-      const response = await fetch(`${this.baseURL}/api/v1/frontend-logs/${endpoint}`, {
+      const response = await fetch(`${this.baseURL}/frontend-logs/${endpoint}`, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(transformedData)

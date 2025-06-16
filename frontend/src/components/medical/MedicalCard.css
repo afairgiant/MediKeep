@@ -98,6 +98,44 @@
   border-top: 1px solid #f1f3f4;
 }
 
+.medical-card-actions .edit-button,
+.medical-card-actions .delete-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.medical-card-actions .edit-button {
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e9ecef;
+}
+
+.medical-card-actions .edit-button:hover {
+  background-color: #e9ecef;
+  color: #343a40;
+  transform: translateY(-1px);
+}
+
+.medical-card-actions .delete-button {
+  background-color: #f8f9fa;
+  color: #dc3545;
+  border: 1px solid #e9ecef;
+}
+
+.medical-card-actions .delete-button:hover {
+  background-color: #dc3545;
+  color: white;
+  transform: translateY(-1px);
+}
+
 /* Status Badge Styles within Card */
 .medical-card .status-badge {
   flex-shrink: 0;

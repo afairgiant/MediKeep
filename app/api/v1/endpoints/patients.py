@@ -5,6 +5,7 @@ from typing import Any
 from app.api import deps
 from app.crud.patient import patient
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
+from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.core.logging_config import get_logger
 
 router = APIRouter()
@@ -263,3 +264,143 @@ def delete_my_patient_record(
             },
         )
         raise
+
+
+@router.get("/current", response_model=Patient)
+def get_current_patient_record(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get current user's patient record (alias for /me endpoint).
+    """
+    return get_my_patient_record(request, db, user_id)
+
+
+# Patient-specific medical record routes
+# These provide convenient access to medical records via patient ID
+
+
+@router.get("/{patient_id}/medications/")
+def get_patient_medications(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get medications for a specific patient"""
+    from app.crud.medication import medication
+
+    return medication.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.post("/{patient_id}/medications/", response_model=MedicationResponse)
+def create_patient_medication(
+    patient_id: int,
+    medication_in: MedicationCreate,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Create a new medication for a specific patient"""
+    # Debug logging - REMOVE THIS LATER
+    logger.info(
+        f"🔍 CREATE MEDICATION ENDPOINT CALLED: patient_id={patient_id}, user_id={current_user_id}"
+    )
+
+    from app.crud.medication import medication
+
+    # Ensure the medication is associated with the correct patient
+    medication_data = medication_in.dict()
+    medication_data["patient_id"] = patient_id
+
+    # Create the medication record
+    medication_obj = medication.create(
+        db=db, obj_in=MedicationCreate(**medication_data)
+    )
+
+    logger.info(f"✅ MEDICATION CREATED: id={medication_obj.id}")
+    return medication_obj
+
+
+@router.get("/{patient_id}/conditions/")
+def get_patient_conditions(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get conditions for a specific patient"""
+    from app.crud.condition import condition
+
+    return condition.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/{patient_id}/allergies/")
+def get_patient_allergies(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get allergies for a specific patient"""
+    from app.crud.allergy import allergy
+
+    return allergy.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/{patient_id}/immunizations/")
+def get_patient_immunizations(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get immunizations for a specific patient"""
+    from app.crud.immunization import immunization
+
+    return immunization.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/{patient_id}/procedures/")
+def get_patient_procedures(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get procedures for a specific patient"""
+    from app.crud.procedure import procedure
+
+    return procedure.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/{patient_id}/treatments/")
+def get_patient_treatments(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get treatments for a specific patient"""
+    from app.crud.treatment import treatment
+
+    return treatment.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/{patient_id}/lab-results/")
+def get_patient_lab_results(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get lab results for a specific patient"""
+    from app.crud.lab_result import lab_result
+
+    return lab_result.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/{patient_id}/encounters/")
+def get_patient_encounters(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+):
+    """Get encounters for a specific patient"""
+    from app.crud.encounter import encounter
+
+    return encounter.get_by_patient(db=db, patient_id=patient_id)

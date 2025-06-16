@@ -65,6 +65,7 @@ def get_current_user(
         )
         username = payload.get("sub")
         if username is None:
+            security_logger.info("🔍 AUTH: Token missing subject claim")
             log_security_event(
                 security_logger,
                 event="token_invalid_no_subject",
@@ -73,7 +74,12 @@ def get_current_user(
             )
             raise credentials_exception
 
+        security_logger.info(
+            f"🔍 AUTH: Token decoded successfully for user: {username}"
+        )
+
     except JWTError as e:
+        security_logger.info(f"🔍 AUTH: Token decode failed: {str(e)}")
         log_security_event(
             security_logger,
             event="token_decode_failed",

@@ -15,6 +15,8 @@ const MedicalCard = ({
   dateInfo,
   className = '',
   onClick,
+  onEdit,
+  onDelete,
   ...props
 }) => {
   const cardClass = [
@@ -64,8 +66,30 @@ const MedicalCard = ({
         </div>
       )}
 
-      {actions && (
+      {(onEdit || onDelete || actions) && (
         <div className="medical-card-actions">
+          {onEdit && (
+            <button 
+              className="edit-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              ✏️ Edit
+            </button>
+          )}
+          {onDelete && (
+            <button 
+              className="delete-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
+              🗑️ Delete
+            </button>
+          )}
           {actions}
         </div>
       )}

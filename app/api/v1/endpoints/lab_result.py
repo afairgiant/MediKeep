@@ -1,6 +1,19 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import List, Optional
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+    UploadFile,
+    File,
+    Form,
+)
 from sqlalchemy.orm import Session
+from datetime import datetime
+import os
+import uuid
+from pathlib import Path
 
 from app.api import deps
 from app.core.database import get_db
@@ -225,8 +238,12 @@ def get_lab_result_files(lab_result_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/{lab_result_id}/files", response_model=LabResultFileResponse)
-def upload_lab_result_file(
-    lab_result_id: int, file_info: LabResultFileCreate, db: Session = Depends(get_db)
+async def upload_lab_result_file(
+    lab_result_id: int,
+    file: UploadFile = File(...),
+    description: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """
     Upload a new file for a lab result
@@ -236,18 +253,89 @@ def upload_lab_result_file(
     if not db_lab_result:
         raise HTTPException(status_code=404, detail="Lab result not found")
 
-    # Ensure the lab_result_id in the file_info matches the path parameter
-    if file_info.lab_result_id != lab_result_id:
+    # Validate file
+    if not file.filename:
         raise HTTPException(
-            status_code=400,
-            detail="Lab result ID in request body must match the path parameter",
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided"
         )
 
+    # Configuration
+    UPLOAD_DIRECTORY = "uploads/lab_result_files"
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+    ALLOWED_EXTENSIONS = {
+        ".pdf",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".tiff",
+        ".bmp",
+        ".gif",
+        ".txt",
+        ".csv",
+        ".xml",
+        ".json",
+        ".doc",
+        ".docx",
+        ".xls",
+        ".xlsx",
+        ".dcm",
+    }
+
+    # Check file extension
+    file_extension = Path(file.filename).suffix.lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}",
+        )
+
+    # Check file size
+    file_content = await file.read()
+    if len(file_content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024 * 1024)}MB",
+        )
+
+    # Create upload directory if it doesn't exist
+    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+
+    # Generate unique filename
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+
+    # Save file
     try:
-        db_file = lab_result_file.create(db, obj_in=file_info)
+        with open(file_path, "wb") as buffer:
+            buffer.write(file_content)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error saving file: {str(e)}",
+        )  # Create file entry in database
+    file_create = LabResultFileCreate(
+        lab_result_id=lab_result_id,
+        file_name=file.filename,
+        file_path=file_path,
+        file_type=file.content_type,
+        file_size=len(file_content),
+        description=description,
+        uploaded_at=datetime.utcnow(),
+    )
+
+    try:
+        db_file = lab_result_file.create(db, obj_in=file_create)
         return db_file
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error uploading file: {str(e)}")
+        # Clean up the uploaded file if database operation fails
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception:
+            pass
+        raise HTTPException(
+            status_code=400, detail=f"Error creating file record: {str(e)}"
+        )
 
 
 @router.delete("/{lab_result_id}/files/{file_id}")

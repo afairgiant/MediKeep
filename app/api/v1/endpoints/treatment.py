@@ -272,3 +272,23 @@ def get_ongoing_treatments(
     """
     treatments = treatment.get_ongoing(db, patient_id=patient_id)
     return treatments
+
+
+@router.get(
+    "/patients/{patient_id}/treatments/", response_model=List[TreatmentResponse]
+)
+def get_patient_treatments(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all treatments for a specific patient.
+    """
+    treatments = treatment.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
+    return treatments

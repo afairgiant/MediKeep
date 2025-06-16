@@ -136,3 +136,23 @@ def get_recent_procedures(
     """
     procedures = procedure.get_recent(db, patient_id=patient_id, days=days)
     return procedures
+
+
+@router.get(
+    "/patients/{patient_id}/procedures/", response_model=List[ProcedureResponse]
+)
+def get_patient_procedures(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all procedures for a specific patient.
+    """
+    procedures = procedure.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
+    return procedures

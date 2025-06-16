@@ -98,6 +98,18 @@ DB_PASSWORD=your_secure_database_password_here
 # Application port
 APP_PORT=8005
 
+
+Create a .env file(or copy the env.example in the docker folder)
+```bash
+# Environment variables for Docker Compose
+# Copy this file to .env and update the values
+
+# Database Configuration
+DB_NAME=medical_records
+DB_USER=medapp
+DB_PASSWORD=your_secure_database_password_here
+
+
 # Application Security
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
 
@@ -105,6 +117,7 @@ SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
 # ACCESS_TOKEN_EXPIRE_MINUTES=30
 # ALGORITHM=HS256
 ```
+
 ### 3️⃣ Start the Containers
 
 Run the following command to start the services:
@@ -126,5 +139,14 @@ http://localhost:8005
 - Username: `admin`
 - Password: `admin123`
 
+## To Do
 
-```
+1. Revamp the logging system since it currently broken/not working great
+2. Create and setup methods to change user passwords.
+3. Update the admin dashboard to work with the new api setup
+4. Update admin health status with working info
+5. Backup / Restores
+6. Exports
+7. Finish adding individual search & filtering to each page
+8. Whole patient search
+

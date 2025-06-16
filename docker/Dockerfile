@@ -55,11 +55,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY run.py .
 
+# Copy Alembic migrations and configuration
+COPY alembic/ ./alembic/
+
+# Copy entrypoint script
+COPY docker/entrypoint.sh ./entrypoint.sh
+
 # Copy built React app from frontend stage
 COPY --from=frontend-build /frontend/build ./static
 
 # Create directories and set permissions in one layer
 RUN mkdir -p logs uploads/labwork && \
+    chmod +x entrypoint.sh && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
@@ -77,5 +84,5 @@ LABEL maintainer="afairgiant" \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Start the application with better configuration
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Start the application with migrations
+CMD ["./entrypoint.sh"]

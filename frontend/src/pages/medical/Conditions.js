@@ -1,100 +1,112 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
 const Conditions = () => {
   const navigate = useNavigate();
-  const [conditions, setConditions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('onsetDate');
+  
+  // Standardized data management
+  const {
+    items: conditions,
+    currentPatient,
+    loading,
+    error,
+    successMessage,
+    createItem,
+    updateItem,
+    deleteItem,
+    refreshData,
+    clearError,
+    setSuccessMessage,
+    setError  } = useMedicalData({
+    entityName: 'condition',
+    apiMethodsConfig: {
+      getAll: (signal) => apiService.getConditions(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientConditions(patientId, signal),
+      create: (data, signal) => apiService.createCondition(data, signal),
+      update: (id, data, signal) => apiService.updateCondition(id, data, signal),
+      delete: (id, signal) => apiService.deleteCondition(id, signal)
+    },
+    requiresPatient: true
+  });
+  console.log('🔍 CONDITIONS DEBUG:', {
+    conditions,
+    currentPatient,
+    loading,
+    error,
+    hasPatient: !!currentPatient?.id
+  });
+  // Form and UI state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('onset_date');  
   const [showModal, setShowModal] = useState(false);
-  const [editingCondition, setEditingCondition] = useState(null);  const [formData, setFormData] = useState({
+  const [editingCondition, setEditingCondition] = useState(null);
+  const [formData, setFormData] = useState({
     diagnosis: '',
     notes: '',
     status: 'active',
-    onsetDate: '',
-    patient_id: 1 // Default patient ID
+    onsetDate: ''  // Form field name
   });
 
-  useEffect(() => {
-    fetchConditions();
-  }, []);
-  const fetchConditions = async () => {
-    try {
-      setLoading(true);
-      const response = await apiService.getConditions();
-      setConditions(response || []);
-      setError('');
-    } catch (err) {
-      setError('Failed to load conditions. Please try again.');
-      console.error('Error fetching conditions:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleAddCondition = () => {
     setEditingCondition(null);
     setFormData({
       diagnosis: '',
       notes: '',
       status: 'active',
-      onsetDate: '',
-      patient_id: 1
+      onsetDate: ''
     });
     setShowModal(true);
   };
+
   const handleEditCondition = (condition) => {
     setEditingCondition(condition);
     setFormData({
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
       status: condition.status || 'active',
-      onsetDate: condition.onsetDate ? condition.onsetDate.split('T')[0] : '',
-      patient_id: condition.patient_id || 1
+      onsetDate: condition.onset_date ? condition.onset_date.split('T')[0] : '' 
     });
     setShowModal(true);
   };
 
   const handleDeleteCondition = async (conditionId) => {
-    if (window.confirm('Are you sure you want to delete this condition?')) {
-      try {
-        await apiService.deleteCondition(conditionId);
-        await fetchConditions();
-        setSuccessMessage('Condition deleted successfully');
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } catch (err) {
-        setError('Failed to delete condition. Please try again.');
-        console.error('Error deleting condition:', err);
-      }
+    const success = await deleteItem(conditionId);
+    if (success) {
+      await refreshData();
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const conditionData = {
-        ...formData,
-        onsetDate: formData.onsetDate || null
-      };
+    
+    if (!currentPatient?.id) {
+      setError('Patient information not available');
+      return;
+    }
 
-      if (editingCondition) {
-        await apiService.updateCondition(editingCondition.id, conditionData);
-        setSuccessMessage('Condition updated successfully');
-      } else {
-        await apiService.createCondition(conditionData);
-        setSuccessMessage('Condition added successfully');
-      }
+    const conditionData = {
+      diagnosis: formData.diagnosis,
+      notes: formData.notes || null,
+      status: formData.status,
+      onset_date: formData.onsetDate || null,  // Map form field to API field
+      patient_id: currentPatient.id
+    };
 
+    let success;
+    if (editingCondition) {
+      success = await updateItem(editingCondition.id, conditionData);
+    } else {
+      success = await createItem(conditionData);
+    }
+
+    if (success) {
       setShowModal(false);
-      await fetchConditions();
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err) {
-      setError('Failed to save condition. Please try again.');
-      console.error('Error saving condition:', err);
+      await refreshData();
     }
   };
 
@@ -105,6 +117,7 @@ const Conditions = () => {
       [name]: value
     }));
   };
+
   const filteredConditions = conditions
     .filter(condition => {
       const matchesSearch = condition.diagnosis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -119,15 +132,19 @@ const Conditions = () => {
           return (a.diagnosis || '').localeCompare(b.diagnosis || '');
         case 'status':
           return (a.status || '').localeCompare(b.status || '');
-        case 'onsetDate':
-        default:          return new Date(b.onsetDate || 0) - new Date(a.onsetDate || 0);
+        case 'onset_date': 
+        default:
+          return new Date(b.onset_date || 0) - new Date(a.onset_date || 0);  
       }
     });
 
   if (loading) {
     return (
       <div className="medical-page-container">
-        <div className="loading">Loading conditions...</div>
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Loading conditions...</p>
+        </div>
       </div>
     );
   }
@@ -145,7 +162,12 @@ const Conditions = () => {
       </header>
 
       <div className="medical-page-content">
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="error-message">
+            {error}
+            <button onClick={clearError} className="error-close">×</button>
+          </div>
+        )}
         {successMessage && <div className="success-message">{successMessage}</div>}
 
         <div className="medical-page-controls">
@@ -164,7 +186,10 @@ const Conditions = () => {
                 className="search-input"
               />
             </div>
-          </div>        </div>        <div className="filters-container">
+          </div>
+        </div>
+
+        <div className="filters-container">
           <div className="filter-group">
             <label>Status</label>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -178,7 +203,7 @@ const Conditions = () => {
           <div className="filter-group">
             <label>Sort By</label>
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="onsetDate">Onset Date</option>
+              <option value="onset_date">Onset Date</option>
               <option value="diagnosis">Diagnosis</option>
               <option value="status">Status</option>
             </select>
@@ -189,7 +214,8 @@ const Conditions = () => {
           {filteredConditions.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🏥</div>
-              <h3>No Medical Conditions Found</h3>              <p>
+              <h3>No Medical Conditions Found</h3>
+              <p>
                 {searchTerm || statusFilter !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
                   : 'Start by adding your first medical condition.'}
@@ -198,10 +224,12 @@ const Conditions = () => {
                 <button className="add-button" onClick={handleAddCondition}>
                   Add Your First Condition
                 </button>
-              )}</div>
+              )}
+            </div>
           ) : (
             <div className="medical-items-grid">
-              {filteredConditions.map((condition) => (                <div key={condition.id} className="medical-item-card">
+              {filteredConditions.map((condition) => (
+                <div key={condition.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
                       <h3 className="item-title">{condition.diagnosis}</h3>
@@ -214,11 +242,11 @@ const Conditions = () => {
                   </div>
 
                   <div className="medical-item-details">
-                    {condition.onsetDate && (
+                    {condition.onset_date && (
                       <div className="detail-item">
                         <span className="label">Onset Date:</span>
                         <span className="value">
-                          {formatDate(condition.onsetDate)}
+                          {formatDate(condition.onset_date)}
                         </span>
                       </div>
                     )}
@@ -250,7 +278,9 @@ const Conditions = () => {
             </div>
           )}
         </div>
-      </div>{showModal && (
+      </div>
+
+      {showModal && (
         <div className="medical-form-overlay" onClick={() => setShowModal(false)}>
           <div className="medical-form-modal" onClick={(e) => e.stopPropagation()}>
             <div className="form-header">
@@ -262,8 +292,10 @@ const Conditions = () => {
               </button>
             </div>
 
-            <div className="medical-form-content">              <form onSubmit={handleSubmit}>
-                <div className="form-grid">                  <div className="form-group">
+            <div className="medical-form-content">
+              <form onSubmit={handleSubmit}>
+                <div className="form-grid">
+                  <div className="form-group">
                     <label htmlFor="diagnosis">Diagnosis *</label>
                     <input
                       type="text"
@@ -272,8 +304,11 @@ const Conditions = () => {
                       value={formData.diagnosis}
                       onChange={handleInputChange}
                       required
+                      placeholder="e.g., Hypertension, Diabetes Type 2"
                     />
-                  </div>                  <div className="form-row">
+                  </div>
+
+                  <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="status">Status</label>
                       <select
@@ -299,7 +334,9 @@ const Conditions = () => {
                         onChange={handleInputChange}
                       />
                     </div>
-                  </div>                  <div className="form-group">
+                  </div>
+
+                  <div className="form-group">
                     <label htmlFor="notes">Notes</label>
                     <textarea
                       id="notes"

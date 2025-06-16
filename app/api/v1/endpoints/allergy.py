@@ -156,3 +156,21 @@ def check_allergen_conflict(
         db, patient_id=patient_id, allergen=allergen
     )
     return {"patient_id": patient_id, "allergen": allergen, "has_allergy": has_allergy}
+
+
+@router.get("/patients/{patient_id}/allergies/", response_model=List[AllergyResponse])
+def get_patient_allergies(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all allergies for a specific patient.
+    """
+    allergies = allergy.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
+    return allergies

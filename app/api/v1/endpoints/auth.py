@@ -195,6 +195,6 @@ def login(
     )
 
     # Log successful login
-    log_successful_login(db_user.id, form_data.username, user_ip)
+    log_successful_login(getattr(db_user, "id", 0), form_data.username, user_ip)
 
     return {"access_token": access_token, "token_type": "bearer"}

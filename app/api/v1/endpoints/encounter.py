@@ -117,3 +117,23 @@ def get_recent_encounters(
     """
     encounters = encounter.get_recent(db, patient_id=patient_id, days=days)
     return encounters
+
+
+@router.get(
+    "/patients/{patient_id}/encounters/", response_model=List[EncounterResponse]
+)
+def get_patient_encounters(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all encounters for a specific patient.
+    """
+    encounters = encounter.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
+    return encounters

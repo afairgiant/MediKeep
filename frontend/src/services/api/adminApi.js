@@ -2,7 +2,7 @@ import BaseApiService from './baseApi';
 
 class AdminApiService extends BaseApiService {
   constructor() {
-    super('/api/v1/admin');
+    super('/admin');
   }
 
   // Dashboard endpoints

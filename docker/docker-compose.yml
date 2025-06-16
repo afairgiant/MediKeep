@@ -39,6 +39,7 @@ services:
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs

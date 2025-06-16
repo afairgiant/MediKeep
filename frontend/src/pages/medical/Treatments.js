@@ -14,16 +14,18 @@ const Treatments = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [sortBy, setSortBy] = useState('start_date');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortOrder, setSortOrder] = useState('desc');  
   const [formData, setFormData] = useState({
     treatment_name: '',
+    treatment_type: '',
     description: '',
     start_date: '',
     end_date: '',
     status: 'planned',
     dosage: '',
     frequency: '',
-    notes: ''  });
+    notes: ''
+  });
 
   useEffect(() => {
     fetchPatientAndTreatments();
@@ -58,10 +60,10 @@ const Treatments = () => {
       [name]: value
     }));
   };
-
   const resetForm = () => {
     setFormData({
       treatment_name: '',
+      treatment_type: '',
       description: '',
       start_date: '',
       end_date: '',
@@ -78,10 +80,10 @@ const Treatments = () => {
     resetForm();
     setShowAddForm(true);
   };
-
   const handleEditTreatment = (treatment) => {
     setFormData({
       treatment_name: treatment.treatment_name || '',
+      treatment_type: treatment.treatment_type || '',
       description: treatment.description || '',
       start_date: treatment.start_date || '',
       end_date: treatment.end_date || '',
@@ -94,8 +96,25 @@ const Treatments = () => {
     setShowAddForm(true);
   };
 
+  // Add form validation before submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.treatment_name.trim()) {
+      setError('Treatment name is required');
+      return;
+    }
+    
+    if (!formData.treatment_type.trim()) {
+      setError('Treatment type is required');
+      return;
+    }
+    
+    if (!formData.start_date) {
+      setError('Start date is required');
+      return;
+    }
     
     if (!patientData?.id) {
       setError('Patient information not available');
@@ -104,10 +123,9 @@ const Treatments = () => {
 
     try {
       setError('');
-      setSuccessMessage('');
-
-      const treatmentData = {
+      setSuccessMessage('');      const treatmentData = {
         treatment_name: formData.treatment_name,
+        treatment_type: formData.treatment_type,
         description: formData.description,
         start_date: formData.start_date || null,
         end_date: formData.end_date || null,
@@ -280,6 +298,19 @@ const Treatments = () => {
                     </div>
 
                     <div className="form-group">
+                      <label htmlFor="treatment_type">Treatment Type *</label>
+                      <input
+                        type="text"
+                        id="treatment_type"
+                        name="treatment_type"
+                        value={formData.treatment_type}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., Surgery, Medication"
+                      />
+                    </div>
+
+                    <div className="form-group">
                       <label htmlFor="status">Status</label>
                       <select
                         id="status"
@@ -296,7 +327,7 @@ const Treatments = () => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="start_date">Start Date</label>
+                      <label htmlFor="start_date">Start Date *</label>
                       <input
                         type="date"
                         id="start_date"
@@ -385,7 +416,8 @@ const Treatments = () => {
           </div>
         )}
 
-      {getSortedTreatments().length === 0 ? (        <div className="empty-state">
+      {getSortedTreatments().length === 0 ? (        
+        <div className="empty-state">
           <div className="empty-icon">🩹</div>
           <h3>No treatments found</h3>
           <p>Click "Add New Treatment" to get started.</p>
@@ -458,7 +490,8 @@ const Treatments = () => {
                   onClick={() => handleDeleteTreatment(treatment.id)}
                 >
                   🗑️ Delete
-                </button>              </div>
+                </button>              
+                </div>
             </div>
           ))}
           </div>

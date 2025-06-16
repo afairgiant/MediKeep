@@ -14,7 +14,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.1.0"
+    VERSION: str = "0.2.0"
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development    # Database Configuration
@@ -24,6 +24,7 @@ class Settings:  # App Info
         if all([DB_USER, DB_PASS, DB_NAME])
         else "",
     )
+    SEQUENCE_AUTO_FIX: bool = os.getenv("SEQUENCE_AUTO_FIX", "True").lower() == "true"
 
     # Security Configuration
     ALGORITHM: str = "HS256"
@@ -36,13 +37,25 @@ class Settings:  # App Info
 
     # File Storage
     UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", "./uploads"))
-    MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024)))  # 10MB
-
-    # Logging Configuration
+    MAX_FILE_SIZE: int = int(
+        os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024))
+    )  # 10MB    # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
-    ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
+    ENABLE_DEBUG_LOGS: bool = (
+        os.getenv("DEBUG", "False").lower() == "true"
+    )  # Database Sequence Monitoring (configurable for different environments)
+    ENABLE_SEQUENCE_MONITORING: bool = (
+        os.getenv("ENABLE_SEQUENCE_MONITORING", "True").lower() == "true"
+    )
+    SEQUENCE_CHECK_ON_STARTUP: bool = (
+        os.getenv("SEQUENCE_CHECK_ON_STARTUP", "True").lower() == "true"
+    )
+    SEQUENCE_AUTO_FIX: bool = os.getenv("SEQUENCE_AUTO_FIX", "True").lower() == "true"
+    SEQUENCE_MONITOR_INTERVAL_HOURS: int = int(
+        os.getenv("SEQUENCE_MONITOR_INTERVAL_HOURS", "24")
+    )
 
     def __init__(self):
         # Ensure upload directory exists

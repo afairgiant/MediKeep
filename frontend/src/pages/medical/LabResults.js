@@ -15,23 +15,24 @@ const LabResults = () => {
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [selectedLabResult, setSelectedLabResult] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
-  const [currentPatient, setCurrentPatient] = useState(null);
+  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });  const [currentPatient, setCurrentPatient] = useState(null);
+  const [practitioners, setPractitioners] = useState([]);
     // Use useRef to maintain abort controller reference without causing re-renders
   const abortControllerRef = useRef(null);
-  
-  // Form state for creating/editing lab results (simplified schema)
+    // Form state for creating/editing lab results (simplified schema)
   const [formData, setFormData] = useState({
     test_name: '',
     test_code: '',
     test_category: '',
+    test_type: '',
+    facility: '',
     status: 'ordered',
     ordered_date: '',
     completed_date: '',
-    notes: ''
-  });  const navigate = useNavigate();
-  
-  const statusOptions = [
+    notes: '',
+    practitioner_id: ''
+  });const navigate = useNavigate();
+    const statusOptions = [
     'ordered', 'in-progress', 'completed', 'cancelled'
   ];
   const categoryOptions = [
@@ -39,7 +40,9 @@ const LabResults = () => {
     'chemistry', 'hematology', 'immunology', 'genetics',
     'cardiology', 'pulmonology', 'other'
   ];
-  const fetchCurrentPatient = async () => {
+  const testTypeOptions = [
+    'routine', 'urgent', 'stat', 'emergency', 'follow-up', 'screening'
+  ];  const fetchCurrentPatient = async () => {
     try {
       const patient = await apiService.getCurrentPatient();
       setCurrentPatient(patient);
@@ -47,7 +50,17 @@ const LabResults = () => {
       console.error('Error fetching current patient:', error);
       // Don't set error state for patient fetch failures to avoid blocking the page
     }
-  };  const fetchLabResults = useCallback(async () => {
+  };
+
+  const fetchPractitioners = async () => {
+    try {
+      const practitionersData = await apiService.getPractitioners();
+      setPractitioners(practitionersData);
+    } catch (error) {
+      console.error('Error fetching practitioners:', error);
+      // Don't set error state for practitioner fetch failures
+    }
+  };const fetchLabResults = useCallback(async () => {
     // Cancel any existing requests
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -101,9 +114,9 @@ const LabResults = () => {
         setLoading(false);
       }    }
   }, [currentPatient?.id]); // Only depend on patient ID
-
   useEffect(() => {
     fetchCurrentPatient();
+    fetchPractitioners();
     
     // Cleanup function to cancel requests when component unmounts
     return () => {
@@ -135,26 +148,27 @@ const LabResults = () => {
   const handleCreateLabResult = async (e) => {
     e.preventDefault();
     try {
-      setError(null);
-        // Prepare data for submission (simplified schema)
+      setError(null);        // Prepare data for submission (simplified schema)
       const labResultData = {
         ...formData,
         patient_id: currentPatient?.id,
+        practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
         ordered_date: formData.ordered_date || new Date().toISOString(),
         completed_date: formData.completed_date || null,
-      };
-
-      await apiService.createLabResult(labResultData);
+      };await apiService.createLabResult(labResultData);
       
       // Reset form and refresh list
       setFormData({
         test_name: '',
         test_code: '',
         test_category: '',
+        test_type: '',
+        facility: '',
         status: 'ordered',
         ordered_date: '',
         completed_date: '',
-        notes: ''
+        notes: '',
+        practitioner_id: ''
       });
       setShowCreateForm(false);
       fetchLabResults();
@@ -177,15 +191,17 @@ const LabResults = () => {
   };
 
   const handleEditLabResult = (labResult) => {
-    setEditingLabResult(labResult);
-    setFormData({
+    setEditingLabResult(labResult);    setFormData({
       test_name: labResult.test_name || '',
       test_code: labResult.test_code || '',
       test_category: labResult.test_category || '',
+      test_type: labResult.test_type || '',
+      facility: labResult.facility || '',
       status: labResult.status || 'ordered',
       ordered_date: labResult.ordered_date ? labResult.ordered_date.slice(0, 16) : '',
       completed_date: labResult.completed_date ? labResult.completed_date.slice(0, 16) : '',
-      notes: labResult.notes || ''
+      notes: labResult.notes || '',
+      practitioner_id: labResult.practitioner_id || ''
     });
     setShowEditForm(true);
   };
@@ -196,25 +212,27 @@ const LabResults = () => {
 
     try {
       setError(null);
-      
-      // Prepare data for submission
+        // Prepare data for submission
       const labResultData = {
         ...formData,
+        practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
         ordered_date: formData.ordered_date || new Date().toISOString(),
         completed_date: formData.completed_date || null,
       };
 
       await apiService.updateLabResult(editingLabResult.id, labResultData);
-      
-      // Reset form and refresh list
+        // Reset form and refresh list
       setFormData({
         test_name: '',
         test_code: '',
         test_category: '',
+        test_type: '',
+        facility: '',
         status: 'ordered',
         ordered_date: '',
         completed_date: '',
-        notes: ''
+        notes: '',
+        practitioner_id: ''
       });
       setShowEditForm(false);
       setEditingLabResult(null);
@@ -235,22 +253,21 @@ const LabResults = () => {
       console.error('Error fetching lab result details:', error);
       setError(error.message);
     }
-  };
-  const handleFileUpload = async (e) => {
+  };  const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!fileUpload.file || !selectedLabResult) return;
 
     try {
-      await apiService.uploadLabResultFile(
-        selectedLabResult.id, 
-        fileUpload.file, 
-        fileUpload.description
-      );
+      const formData = new FormData();
+      formData.append('file', fileUpload.file);
+      if (fileUpload.description && fileUpload.description.trim()) {
+        formData.append('description', fileUpload.description);      }
+      
+      await apiService.post(`/lab-results/${selectedLabResult.id}/files`, formData);
       
       // Refresh files list
       const files = await apiService.getLabResultFiles(selectedLabResult.id);
-      setSelectedFiles(files);
-      
+      setSelectedFiles(files);      
       // Update the file count for this lab result
       setFilesCounts(prev => ({
         ...prev,
@@ -263,19 +280,25 @@ const LabResults = () => {
       console.error('Error uploading file:', error);
       setError(error.message);
     }
-  };
-
-  const handleDownloadFile = async (fileId, fileName) => {
+  };  const handleDownloadFile = async (fileId, fileName) => {
     try {
-      const blob = await apiService.downloadLabResultFile(fileId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
+      const blob = await apiService.get(`/lab-result-files/${fileId}/download`, { 
+        responseType: 'blob' 
+      });
+      
+      if (blob instanceof Blob) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error('Invalid response type for file download');
+      }
     } catch (error) {
       console.error('Error downloading file:', error);
       setError(error.message);
@@ -469,6 +492,49 @@ const LabResults = () => {
                 </div>
 
                 <div className="form-group">
+                  <label>Test Type</label>
+                  <select
+                    name="test_type"
+                    value={formData.test_type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select type</option>
+                    {testTypeOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Facility</label>
+                  <input
+                    type="text"
+                    name="facility"
+                    value={formData.facility}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Main Hospital Lab"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Ordering Practitioner</label>
+                  <select
+                    name="practitioner_id"
+                    value={formData.practitioner_id}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select practitioner</option>
+                    {practitioners.map(practitioner => (
+                      <option key={practitioner.id} value={practitioner.id}>
+                        {practitioner.name} - {practitioner.specialty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label>Status</label>
                   <select
                     name="status"
@@ -585,6 +651,49 @@ const LabResults = () => {
                 </div>
 
                 <div className="form-group">
+                  <label>Test Type</label>
+                  <select
+                    name="test_type"
+                    value={formData.test_type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select type</option>
+                    {testTypeOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Facility</label>
+                  <input
+                    type="text"
+                    name="facility"
+                    value={formData.facility}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Main Hospital Lab"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Ordering Practitioner</label>
+                  <select
+                    name="practitioner_id"
+                    value={formData.practitioner_id}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select practitioner</option>
+                    {practitioners.map(practitioner => (
+                      <option key={practitioner.id} value={practitioner.id}>
+                        {practitioner.name} - {practitioner.specialty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label>Status</label>
                   <select
                     name="status"
@@ -666,8 +775,7 @@ const LabResults = () => {
                     {result.status}
                   </span>
                 </div>
-                
-                <div className="medical-item-details">
+                  <div className="medical-item-details">
                   <div className="detail-item">
                     <span className="label">Test Code:</span>
                     <span className="value">{result.test_code || 'N/A'}</span>
@@ -676,6 +784,18 @@ const LabResults = () => {
                     <span className="label">Category:</span>
                     <span className="value">{result.test_category || 'N/A'}</span>
                   </div>
+                  {result.test_type && (
+                    <div className="detail-item">
+                      <span className="label">Type:</span>
+                      <span className="value">{result.test_type}</span>
+                    </div>
+                  )}
+                  {result.facility && (
+                    <div className="detail-item">
+                      <span className="label">Facility:</span>
+                      <span className="value">{result.facility}</span>
+                    </div>
+                  )}
                   <div className="detail-item">
                     <span className="label">Ordered:</span>
                     <span className="value">{formatDateTime(result.ordered_date)}</span>
@@ -748,16 +868,33 @@ const LabResults = () => {
                   </div>
                   <div className="detail-item">
                     <strong>Test Code:</strong> {selectedLabResult.test_code || 'N/A'}
-                  </div>
-                  <div className="detail-item">
+                  </div>                  <div className="detail-item">
                     <strong>Category:</strong> {selectedLabResult.test_category || 'N/A'}
                   </div>
+                  {selectedLabResult.test_type && (
+                    <div className="detail-item">
+                      <strong>Test Type:</strong> {selectedLabResult.test_type}
+                    </div>
+                  )}
+                  {selectedLabResult.facility && (
+                    <div className="detail-item">
+                      <strong>Facility:</strong> {selectedLabResult.facility}
+                    </div>
+                  )}
                   <div className="detail-item">
                     <strong>Status:</strong> 
                     <span className={`status-badge ${getStatusClass(selectedLabResult.status)}`}>
                       {selectedLabResult.status}
                     </span>
                   </div>
+                  {selectedLabResult.practitioner_id && (
+                    <div className="detail-item">
+                      <strong>Ordering Practitioner:</strong> {
+                        practitioners.find(p => p.id === selectedLabResult.practitioner_id)?.name || 
+                        `Practitioner ID: ${selectedLabResult.practitioner_id}`
+                      }
+                    </div>
+                  )}
                   <div className="detail-item">
                     <strong>Ordered Date:</strong> {formatDateTime(selectedLabResult.ordered_date)}
                   </div>

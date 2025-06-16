@@ -182,19 +182,18 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
           <div className="status-card">
             <div className="status-icon">⏱️</div>
             <div className="status-content">
-              <h3>System Uptime</h3>
+              <h3>Application Uptime</h3>
               <p className="status-value">{formatUptime(healthData?.system_uptime)}</p>
             </div>
           </div>
-          
-          <div className="status-card">
+            <div className="status-card">
             <div className="status-icon">💾</div>
             <div className="status-content">
               <h3>Last Backup</h3>
               <p className="status-value">
                 {healthData?.last_backup ? 
                   new Date(healthData.last_backup).toLocaleDateString() : 
-                  'Not configured'
+                  'No backups configured'
                 }
               </p>
             </div>
@@ -446,11 +445,16 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
               <div className="health-item">
                 <span className="health-label">Session Management:</span>
                 <span className="health-status healthy">Token-based</span>
-              </div>
-              {systemMetrics?.security?.last_security_scan && (
+              </div>              {systemMetrics?.security?.last_security_scan && (
                 <div className="health-item">
                   <span className="health-label">Last Security Scan:</span>
                   <span className="health-value">{systemMetrics.security.last_security_scan}</span>
+                </div>
+              )}
+              {!systemMetrics?.security?.last_security_scan && systemMetrics?.security && (
+                <div className="health-item">
+                  <span className="health-label">Last Security Scan:</span>
+                  <span className="health-value" style={{color: '#d97706'}}>Not implemented</span>
                 </div>
               )}
             </div>

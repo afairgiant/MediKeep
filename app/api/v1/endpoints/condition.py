@@ -87,6 +87,29 @@ def update_condition(
     return condition_obj
 
 
+@router.put("/{condition_id}/", response_model=ConditionResponse)
+def update_condition_with_slash(
+    *,
+    db: Session = Depends(deps.get_db),
+    condition_id: int,
+    condition_in: ConditionUpdate,
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Update a condition (with trailing slash for compatibility).
+
+    TODO: TEMPORARY FIX - Remove this duplicate route after investigating why
+    the frontend is adding trailing slashes to conditions URLs but not to
+    procedures URLs. The root cause needs to be identified and fixed in the
+    frontend URL construction or middleware configuration.
+    """
+    condition_obj = condition.get(db=db, id=condition_id)
+    if not condition_obj:
+        raise HTTPException(status_code=404, detail="Condition not found")
+    condition_obj = condition.update(db=db, db_obj=condition_obj, obj_in=condition_in)
+    return condition_obj
+
+
 @router.delete("/{condition_id}")
 def delete_condition(
     *,
@@ -115,4 +138,24 @@ def get_active_conditions(
     Get all active conditions for a patient.
     """
     conditions = condition.get_active_conditions(db, patient_id=patient_id)
+    return conditions
+
+
+@router.get(
+    "/patients/{patient_id}/conditions/", response_model=List[ConditionResponse]
+)
+def get_patient_conditions(
+    *,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    skip: int = 0,
+    limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get all conditions for a specific patient.
+    """
+    conditions = condition.get_by_patient(
+        db, patient_id=patient_id, skip=skip, limit=limit
+    )
     return conditions

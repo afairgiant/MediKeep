@@ -1,15 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
 
 const Allergies = () => {
-  const [allergies, setAllergies] = useState([]);
-  const [patientData, setPatientData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
+  
+  // Standardized data management
+  const {
+    items: allergies,
+    currentPatient,
+    loading,
+    error,
+    successMessage,
+    createItem,
+    updateItem,
+    deleteItem,
+    refreshData,
+    clearError,
+    setSuccessMessage,
+    setError  } = useMedicalData({
+    entityName: 'allergy',
+    apiMethodsConfig: {
+      getAll: (signal) => apiService.getAllergies(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientAllergies(patientId, signal),
+      create: (data, signal) => apiService.createAllergy(data, signal),
+      update: (id, data, signal) => apiService.updateAllergy(id, data, signal),
+      delete: (id, signal) => apiService.deleteAllergy(id, signal)
+    },
+    requiresPatient: true
+  });
+
+  // Form state
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAllergy, setEditingAllergy] = useState(null);
   const [sortBy, setSortBy] = useState('severity');
@@ -22,40 +46,10 @@ const Allergies = () => {
     status: 'active',
     notes: ''
   });
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchPatientAndAllergies();
-  }, []);
-
-  const fetchPatientAndAllergies = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Get patient data first
-      const patient = await apiService.getCurrentPatient();
-      setPatientData(patient);
-      
-      // Then get allergies for this patient
-      if (patient && patient.id) {
-        const allergyData = await apiService.getPatientAllergies(patient.id);
-        setAllergies(allergyData);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setError(`Failed to load allergy data: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {
@@ -92,60 +86,35 @@ const Allergies = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!patientData?.id) {
+    if (!currentPatient?.id) {
       setError('Patient information not available');
       return;
     }
 
-    try {
-      setError('');
-      setSuccessMessage('');
+    const allergyData = {
+      ...formData,
+      onset_date: formData.onset_date || null,
+      notes: formData.notes || null,
+      patient_id: currentPatient.id
+    };
 
-      const allergyData = {
-        allergen: formData.allergen,
-        severity: formData.severity,
-        reaction: formData.reaction,
-        onset_date: formData.onset_date || null,
-        status: formData.status,
-        notes: formData.notes || null,
-        patient_id: patientData.id
-      };
+    let success;
+    if (editingAllergy) {
+      success = await updateItem(editingAllergy.id, allergyData);
+    } else {
+      success = await createItem(allergyData);
+    }
 
-      if (editingAllergy) {
-        await apiService.updateAllergy(editingAllergy.id, allergyData);
-        setSuccessMessage('Allergy updated successfully!');
-      } else {
-        await apiService.createAllergy(allergyData);
-        setSuccessMessage('Allergy added successfully!');
-      }
-
+    if (success) {
       resetForm();
-      await fetchPatientAndAllergies();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      console.error('Error saving allergy:', error);
-      setError(error.message || 'Failed to save allergy');
+      await refreshData();
     }
   };
 
   const handleDeleteAllergy = async (allergyId) => {
-    if (!window.confirm('Are you sure you want to delete this allergy record?')) {
-      return;
-    }
-
-    try {
-      setError('');
-      await apiService.deleteAllergy(allergyId);
-      setSuccessMessage('Allergy deleted successfully!');
-      await fetchPatientAndAllergies();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      console.error('Error deleting allergy:', error);
-      setError(error.message || 'Failed to delete allergy');
+    const success = await deleteItem(allergyId);
+    if (success) {
+      await refreshData();
     }
   };
 
@@ -182,7 +151,8 @@ const Allergies = () => {
     } else {
       setSortBy(newSortBy);
       setSortOrder('desc');
-    }  };
+    }
+  };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {
@@ -193,6 +163,7 @@ const Allergies = () => {
       default: return '❓';
     }
   };
+
   if (loading) {
     return (
       <div className="medical-page-container">
@@ -214,8 +185,15 @@ const Allergies = () => {
           ← Back to Dashboard
         </button>
         <h1>⚠️ Allergies</h1>
-      </header>      <div className="medical-page-content">
-        {error && <div className="error-message">{error}</div>}
+      </header>
+
+      <div className="medical-page-content">
+        {error && (
+          <div className="error-message">
+            {error}
+            <button onClick={clearError} className="error-close">×</button>
+          </div>
+        )}
         {successMessage && <div className="success-message">{successMessage}</div>}
 
         <div className="medical-page-controls">
@@ -247,7 +225,9 @@ const Allergies = () => {
               </button>
             </div>
           </div>
-        </div>        {showAddForm && (
+        </div>
+
+        {showAddForm && (
           <div className="medical-form-overlay" onClick={() => setShowAddForm(false)}>
             <div className="medical-form-modal" onClick={(e) => e.stopPropagation()}>
               <div className="form-header">
@@ -362,7 +342,9 @@ const Allergies = () => {
               </div>
             </div>
           </div>
-        )}<div className="medical-items-list">
+        )}
+
+        <div className="medical-items-list">
           {getSortedAllergies().length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">⚠️</div>

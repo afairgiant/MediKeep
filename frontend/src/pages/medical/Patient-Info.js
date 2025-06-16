@@ -5,8 +5,7 @@ import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import '../../styles/pages/PatientInfo.css';
 
-const PatientInfo = () => {
-  const [patientData, setPatientData] = useState(null);
+const PatientInfo = () => {  const [patientData, setPatientData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [patientExists, setPatientExists] = useState(true);
@@ -41,10 +40,9 @@ const PatientInfo = () => {
   const fetchPatientData = async () => {
     try {
       setLoading(true);
-      setError('');
-      const data = await apiService.getCurrentPatient();
+      setError('');      const data = await apiService.getCurrentPatient();
       setPatientData(data);
-      setPatientExists(true);      
+      setPatientExists(true);
       setFormData({
         first_name: data.first_name || '',
         last_name: data.last_name || '',
@@ -123,14 +121,13 @@ const PatientInfo = () => {
       setSaving(true);
       setError('');
       setSuccessMessage('');
-      
-      let updatedData;
+        let updatedData;
       if (isCreating || !patientExists) {
         updatedData = await apiService.createCurrentPatient(formData);
         setPatientExists(true);
         setIsCreating(false);
-        setSuccessMessage('Patient information created successfully!');
-      } else {
+        setSuccessMessage('Patient information created successfully!');      } else {
+        // Use the correct API method for updating current patient
         updatedData = await apiService.updateCurrentPatient(formData);
         setIsEditing(false);
         setSuccessMessage('Patient information updated successfully!');

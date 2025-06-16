@@ -101,6 +101,14 @@ const Medication = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Check authentication first
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Authentication required. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    
     if (!patientData?.id) {
       setError('Patient information not available');
       return;
@@ -110,27 +118,72 @@ const Medication = () => {
       setError('');
       setSuccessMessage('');
 
+      // Debug auth and patient data
+      console.log('🔐 Auth token length:', token.length);
+      console.log('🏥 Patient data:', patientData);      // Clean and validate medication data
       const medicationData = {
-        ...formData,
+        medication_name: formData.medication_name?.trim() || '',
+        dosage: formData.dosage?.trim() || '',
+        frequency: formData.frequency?.trim() || '',
+        route: formData.route?.trim() || '',
+        indication: formData.indication?.trim() || '',
+        status: formData.status || 'active',
         patient_id: patientData.id
       };
 
+      // Only include dates if they have values
+      if (formData.effectivePeriod_start) {
+        medicationData.effectivePeriod_start = formData.effectivePeriod_start;
+      }
+      if (formData.effectivePeriod_end) {
+        medicationData.effectivePeriod_end = formData.effectivePeriod_end;
+      }
+      if (formData.practitioner_id) {
+        medicationData.practitioner_id = formData.practitioner_id;
+      }
+
+      console.log('🚀 Final medication data:', medicationData);
+      console.log('🔍 Data type check:', typeof medicationData);
+      console.log('🔍 Is object?', medicationData && typeof medicationData === 'object');
+      console.log('🔍 JSON stringify test:', JSON.stringify(medicationData));
+
+      console.log('🚀 Submitting medication data:', medicationData);
+      console.log('🔍 Form data breakdown:', {
+        medication_name: formData.medication_name,
+        dosage: formData.dosage,
+        frequency: formData.frequency,
+        route: formData.route,
+        indication: formData.indication,
+        effectivePeriod_start: formData.effectivePeriod_start,
+        effectivePeriod_end: formData.effectivePeriod_end,
+        status: formData.status,
+        practitioner_id: formData.practitioner_id,
+        patient_id: patientData.id
+      });
+
       if (editingMedication) {
+        console.log('✏️ Updating medication:', editingMedication.id);
         await apiService.updateMedication(editingMedication.id, medicationData);
         setSuccessMessage('Medication updated successfully!');
       } else {
-        await apiService.createMedication(medicationData);
+        console.log('📝 Creating new medication...');
+        const result = await apiService.createMedication(medicationData);
+        console.log('✅ Create result:', result);
         setSuccessMessage('Medication added successfully!');
       }
 
       resetForm();
       await fetchPatientAndMedications();
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Error saving medication:', error);
-      setError(error.message || 'Failed to save medication');
+      console.error('❌ Error saving medication:', error);
+      if (error.message?.includes('Authentication') || error.message?.includes('401') || error.message?.includes('403')) {
+        setError('Authentication failed. Please log in again.');
+        navigate('/login');
+      } else {
+        setError(error.response?.data?.detail || error.message || 'Failed to save medication');
+      }
     }
   };
 

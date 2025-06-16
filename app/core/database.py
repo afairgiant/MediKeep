@@ -1,12 +1,17 @@
 import os
+from typing import Generator
 from sqlalchemy import create_engine, text, event
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 from app.models.models import Base
 from app.core.logging_config import get_logger
+from app.core.config import Settings
 
 # Initialize logger
 logger = get_logger(__name__, "app")
+
+# Initialize settings
+settings = Settings()
 
 
 class DatabaseConfig:
@@ -15,8 +20,12 @@ class DatabaseConfig:
         self.engine_kwargs = self._get_engine_kwargs()
 
     def _get_database_url(self) -> str:
-        """Get database URL from environment or default to SQLite"""
-        return os.getenv("DATABASE_URL", "sqlite:///./medical_records.db")
+        """Get database URL from settings configuration"""
+        if not settings.DATABASE_URL:
+            raise ValueError(
+                "DATABASE_URL is not set in the settings. Please configure it."
+            )
+        return settings.DATABASE_URL
 
     def _get_engine_kwargs(self) -> dict:
         """Get engine configuration based on database type"""
@@ -71,7 +80,7 @@ if db_config.database_url.startswith("sqlite"):
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def create_tables():
+def create_tables() -> None:
     """Create all tables in the database"""
     try:
         Base.metadata.create_all(bind=engine)
@@ -96,7 +105,7 @@ def drop_tables():
     Base.metadata.drop_all(bind=engine)
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     """Get a new database session"""
     db = SessionLocal()
     try:
@@ -142,3 +151,87 @@ def create_default_user():
             print("ℹ️  Default admin user already exists.")
     finally:
         db.close()
+
+
+async def check_sequences_on_startup() -> None:
+    """Check and fix sequence synchronization on application startup"""
+    if not getattr(settings, "SEQUENCE_CHECK_ON_STARTUP", False):
+        return
+
+    try:
+        from app.scripts.sequence_monitor import SequenceMonitor
+
+        monitor = SequenceMonitor()
+
+        logger.info("🔍 Checking database sequences on startup...")
+        results = monitor.monitor_all_sequences(
+            auto_fix=getattr(settings, "SEQUENCE_AUTO_FIX", False)
+        )
+
+        if results.get("out_of_sync_tables"):
+            if getattr(settings, "SEQUENCE_AUTO_FIX", False):
+                logger.info(
+                    f"✅ Auto-fixed {len(results.get('fixed_tables', []))} sequence issues"
+                )
+            else:
+                logger.warning(
+                    f"⚠️  Found {len(results['out_of_sync_tables'])} sequence issues"
+                )
+        else:
+            logger.info("✅ All database sequences are synchronized")
+
+    except ImportError:
+        logger.info("SequenceMonitor not available - skipping sequence check")
+    except Exception as e:
+        logger.error(f"❌ Failed to check sequences on startup: {e}")
+
+
+def database_migrations() -> bool:
+    """Run database migrations using Alembic"""
+    try:
+        import subprocess
+        import sys
+
+        logger.info("🔄 Running database migrations...")
+
+        # Get project root directory (go up 3 levels from app/core/database.py)
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+        # Use the current Python executable (from virtual environment)
+        python_executable = sys.executable
+
+        result = subprocess.run(
+            [
+                python_executable,
+                "-m",
+                "alembic",
+                "-c",
+                "alembic/alembic.ini",
+                "upgrade",
+                "head",
+            ],
+            cwd=project_root,  # Project root
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            logger.info("✅ Database migrations completed successfully")
+            if result.stdout:
+                logger.debug(f"Migration output: {result.stdout}")
+            return True
+        else:
+            logger.error(f"❌ Migration failed with return code {result.returncode}")
+            logger.error(f"Migration stderr: {result.stderr}")
+            if result.stdout:
+                logger.error(f"Migration stdout: {result.stdout}")
+            return False
+    except FileNotFoundError as e:
+        logger.error(f"❌ Alembic not found. Make sure it's installed. Error: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Failed to run migrations: {e}")
+        import traceback
+
+        logger.error(f"Full traceback: {traceback.format_exc()}")
+        return False
