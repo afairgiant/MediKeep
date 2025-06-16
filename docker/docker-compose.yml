@@ -31,7 +31,7 @@ services:
     #   dockerfile: docker/Dockerfile    
     container_name: medical-records-app
     ports:
-      - "8000:8000"  # Single port serves both React app and FastAPI      
+      - ${APP_PORT:-8005}:8000  # Single port serves both React app and FastAPI      
     environment:
       DB_HOST: postgres
       DB_PORT: 5432

@@ -5,6 +5,7 @@ FROM node:18-alpine AS frontend-build
 
 # Set NODE_ENV for optimization
 ENV NODE_ENV=production
+ENV REACT_APP_API_URL=""
 
 WORKDIR /frontend
 
