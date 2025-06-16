@@ -200,9 +200,8 @@ class ApiService {
   getPatientLabResults(patientId, signal) {
     return this.get(`/lab-results/?patient_id=${patientId}`, { signal });
   }
-
   getLabResult(labResultId, signal) {
-    return this.get(`/lab-results/${labResultId}/`, { signal });
+    return this.get(`/lab-results/${labResultId}`, { signal });
   }
 
   createLabResult(labResultData, signal) {
@@ -210,11 +209,11 @@ class ApiService {
   }
 
   updateLabResult(labResultId, labResultData, signal) {
-    return this.put(`/lab-results/${labResultId}/`, labResultData, { signal });
+    return this.put(`/lab-results/${labResultId}`, labResultData, { signal });
   }
 
   deleteLabResult(labResultId, signal) {
-    return this.delete(`/lab-results/${labResultId}/`, { signal });
+    return this.delete(`/lab-results/${labResultId}`, { signal });
   }
 
   getLabResultFiles(labResultId, signal) {
@@ -234,9 +233,8 @@ class ApiService {
       responseType: 'blob',
       signal 
     });
-  }
-  deleteLabResultFile(fileId, signal) {
-    return this.delete(`/lab-result-files/${fileId}/`, { signal });
+  }  deleteLabResultFile(fileId, signal) {
+    return this.delete(`/lab-result-files/${fileId}`, { signal });
   }
 
   // Medication methods
@@ -264,11 +262,11 @@ class ApiService {
     return this.post(`/medications/`, cleanPayload, { signal });
   }
   updateMedication(medicationId, medicationData, signal) {
-    return this.put(`/medications/${medicationId}/`, medicationData, { signal });
+    return this.put(`/medications/${medicationId}`, medicationData, { signal });
   }
 
   deleteMedication(medicationId, signal) {
-    return this.delete(`/medications/${medicationId}/`, { signal });
+    return this.delete(`/medications/${medicationId}`, { signal });
   }
 
   // Immunization methods
@@ -282,13 +280,12 @@ class ApiService {
   createImmunization(immunizationData, signal) {
     return this.post('/immunizations/', immunizationData, { signal });
   }
-
   updateImmunization(immunizationId, immunizationData, signal) {
-    return this.put(`/immunizations/${immunizationId}/`, immunizationData, { signal });
+    return this.put(`/immunizations/${immunizationId}`, immunizationData, { signal });
   }
 
   deleteImmunization(immunizationId, signal) {
-    return this.delete(`/immunizations/${immunizationId}/`, { signal });
+    return this.delete(`/immunizations/${immunizationId}`, { signal });
   }
 
   // Practitioner methods
@@ -297,7 +294,7 @@ class ApiService {
   }
 
   getPractitioner(practitionerId, signal) {
-    return this.get(`/practitioners/${practitionerId}/`, { signal });
+    return this.get(`/practitioners/${practitionerId}`, { signal });
   }
 
   createPractitioner(practitionerData, signal) {
@@ -305,11 +302,11 @@ class ApiService {
   }
 
   updatePractitioner(practitionerId, practitionerData, signal) {
-    return this.put(`/practitioners/${practitionerId}/`, practitionerData, { signal });
+    return this.put(`/practitioners/${practitionerId}`, practitionerData, { signal });
   }
 
   deletePractitioner(practitionerId, signal) {
-    return this.delete(`/practitioners/${practitionerId}/`, { signal });
+    return this.delete(`/practitioners/${practitionerId}`, { signal });
   }
 
   // Allergy methods
@@ -319,9 +316,8 @@ class ApiService {
   getPatientAllergies(patientId, signal) {
     return this.get(`/allergies/?patient_id=${patientId}`, { signal });
   }
-
   getAllergy(allergyId, signal) {
-    return this.get(`/allergies/${allergyId}/`, { signal });
+    return this.get(`/allergies/${allergyId}`, { signal });
   }
 
   createAllergy(allergyData, signal) {
@@ -329,11 +325,11 @@ class ApiService {
   }
 
   updateAllergy(allergyId, allergyData, signal) {
-    return this.put(`/allergies/${allergyId}/`, allergyData, { signal });
+    return this.put(`/allergies/${allergyId}`, allergyData, { signal });
   }
 
   deleteAllergy(allergyId, signal) {
-    return this.delete(`/allergies/${allergyId}/`, { signal });
+    return this.delete(`/allergies/${allergyId}`, { signal });
   }
 
   // Treatment methods
@@ -343,9 +339,8 @@ class ApiService {
   getPatientTreatments(patientId, signal) {
     return this.get(`/treatments/?patient_id=${patientId}`, { signal });
   }
-
   getTreatment(treatmentId, signal) {
-    return this.get(`/treatments/${treatmentId}/`, { signal });
+    return this.get(`/treatments/${treatmentId}`, { signal });
   }
 
   createTreatment(treatmentData, signal) {
@@ -353,11 +348,11 @@ class ApiService {
   }
 
   updateTreatment(treatmentId, treatmentData, signal) {
-    return this.put(`/treatments/${treatmentId}/`, treatmentData, { signal });
+    return this.put(`/treatments/${treatmentId}`, treatmentData, { signal });
   }
 
   deleteTreatment(treatmentId, signal) {
-    return this.delete(`/treatments/${treatmentId}/`, { signal });
+    return this.delete(`/treatments/${treatmentId}`, { signal });
   }
 
   // Procedure methods
@@ -389,9 +384,8 @@ class ApiService {
   getPatientConditions(patientId, signal) {
     return this.get(`/conditions/?patient_id=${patientId}`, { signal });
   }
-
   getCondition(conditionId, signal) {
-    return this.get(`/conditions/${conditionId}/`, { signal });
+    return this.get(`/conditions/${conditionId}`, { signal });
   }
 
   createCondition(conditionData, signal) {
@@ -399,11 +393,11 @@ class ApiService {
   }
 
   updateCondition(conditionId, conditionData, signal) {
-    return this.put(`/conditions/${conditionId}/`, conditionData, { signal });
+    return this.put(`/conditions/${conditionId}`, conditionData, { signal });
   }
 
   deleteCondition(conditionId, signal) {
-    return this.delete(`/conditions/${conditionId}/`, { signal });
+    return this.delete(`/conditions/${conditionId}`, { signal });
   }
 
   // Encounter methods
@@ -413,9 +407,8 @@ class ApiService {
   getPatientEncounters(patientId, signal) {
     return this.get(`/encounters/?patient_id=${patientId}`, { signal });
   }
-
   getEncounter(encounterId, signal) {
-    return this.get(`/encounters/${encounterId}/`, { signal });
+    return this.get(`/encounters/${encounterId}`, { signal });
   }
 
   createEncounter(encounterData, signal) {
@@ -423,11 +416,11 @@ class ApiService {
   }
 
   updateEncounter(encounterId, encounterData, signal) {
-    return this.put(`/encounters/${encounterId}/`, encounterData, { signal });
+    return this.put(`/encounters/${encounterId}`, encounterData, { signal });
   }
 
   deleteEncounter(encounterId, signal) {
-    return this.delete(`/encounters/${encounterId}/`, { signal });
+    return this.delete(`/encounters/${encounterId}`, { signal });
   }
 }
 
