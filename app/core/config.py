@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from annotated_types import T
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -25,8 +24,10 @@ class Settings:  # App Info
         if all([DB_USER, DB_PASS, DB_NAME])
         else "",
     )
-    SEQUENCE_AUTO_FIX: bool = True  # Always enabled for data integrity
-    SEQUENCE_CHECK_ON_STARTUP: bool = True  # Always enabled for data integrity
+    SEQUENCE_AUTO_FIX: bool = os.getenv("SEQUENCE_AUTO_FIX", "True").lower() == "true"
+    SEQUENCE_CHECK_ON_STARTUP: bool = (
+        os.getenv("SEQUENCE_CHECK_ON_STARTUP", "True").lower() == "true"
+    )
 
     # Security Configuration
     ALGORITHM: str = "HS256"
@@ -45,13 +46,19 @@ class Settings:  # App Info
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
-    ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
-
-    # Database Sequence Monitoring (always enabled for data integrity)
-    ENABLE_SEQUENCE_MONITORING: bool = True
-    SEQUENCE_CHECK_ON_STARTUP: bool = True
-    SEQUENCE_AUTO_FIX: bool = True
-    SEQUENCE_MONITOR_INTERVAL_HOURS: int = 24
+    ENABLE_DEBUG_LOGS: bool = (
+        os.getenv("DEBUG", "False").lower() == "true"
+    )  # Database Sequence Monitoring (configurable for different environments)
+    ENABLE_SEQUENCE_MONITORING: bool = (
+        os.getenv("ENABLE_SEQUENCE_MONITORING", "True").lower() == "true"
+    )
+    SEQUENCE_CHECK_ON_STARTUP: bool = (
+        os.getenv("SEQUENCE_CHECK_ON_STARTUP", "True").lower() == "true"
+    )
+    SEQUENCE_AUTO_FIX: bool = os.getenv("SEQUENCE_AUTO_FIX", "True").lower() == "true"
+    SEQUENCE_MONITOR_INTERVAL_HOURS: int = int(
+        os.getenv("SEQUENCE_MONITOR_INTERVAL_HOURS", "24")
+    )
 
     def __init__(self):
         # Ensure upload directory exists
