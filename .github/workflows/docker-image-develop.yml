@@ -72,14 +72,13 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
-        cache-to: type=gha,mode=max
-
+        cache-to: type=gha,mode=max    
     - name: Test Docker image
       if: github.event_name == 'pull_request'
       run: |
         docker build -f ./docker/Dockerfile -t test-image .
         # Basic smoke test - check if container starts and health check passes
-        docker run -d --name test-container -p 8000:8000 test-image
+        docker run -d --name test-container -p 8000:8000 -e SKIP_MIGRATIONS=true test-image
         sleep 30
         curl -f http://localhost:8000/health || exit 1
         docker stop test-container

@@ -3,14 +3,19 @@ set -e
 
 echo "Starting Medical Records Management System..."
 
-# Wait for database to be ready (if using external database)
-echo "Checking database connection..."
+# Check if running in test environment (no database required)
+if [ "$SKIP_MIGRATIONS" = "true" ]; then
+    echo "Skipping database migrations (test environment)"
+else
+    # Wait for database to be ready (if using external database)
+    echo "Checking database connection..."
 
-# Run Alembic migrations
-echo "Running database migrations..."
-cd /app && python -m alembic -c alembic/alembic.ini upgrade head
+    # Run Alembic migrations
+    echo "Running database migrations..."
+    cd /app && python -m alembic -c alembic/alembic.ini upgrade head
 
-echo "Migrations completed successfully."
+    echo "Migrations completed successfully."
+fi
 
 # Start the FastAPI application
 echo "Starting FastAPI server..."
