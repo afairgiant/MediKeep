@@ -190,18 +190,31 @@ def database_migrations() -> bool:
     """Run database migrations using Alembic"""
     try:
         import subprocess
+        import sys
 
         logger.info("🔄 Running database migrations...")
 
         # Get project root directory (go up 3 levels from app/core/database.py)
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
+        # Use the current Python executable (from virtual environment)
+        python_executable = sys.executable
+
         result = subprocess.run(
-            ["python", "-m", "alembic", "-c", "alembic/alembic.ini", "upgrade", "head"],
+            [
+                python_executable,
+                "-m",
+                "alembic",
+                "-c",
+                "alembic/alembic.ini",
+                "upgrade",
+                "head",
+            ],
             cwd=project_root,  # Project root
             capture_output=True,
             text=True,
         )
+
         if result.returncode == 0:
             logger.info("✅ Database migrations completed successfully")
             if result.stdout:
@@ -213,9 +226,12 @@ def database_migrations() -> bool:
             if result.stdout:
                 logger.error(f"Migration stdout: {result.stdout}")
             return False
-    except FileNotFoundError:
-        logger.error("❌ Alembic not found. Make sure it's installed.")
+    except FileNotFoundError as e:
+        logger.error(f"❌ Alembic not found. Make sure it's installed. Error: {e}")
         return False
     except Exception as e:
         logger.error(f"❌ Failed to run migrations: {e}")
+        import traceback
+
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         return False
