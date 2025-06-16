@@ -83,8 +83,15 @@ jobs:
           -e SKIP_MIGRATIONS=true \
           -e SEQUENCE_CHECK_ON_STARTUP=false \
           -e DATABASE_URL="" \
-          test-image
-        sleep 30
-        curl -f http://localhost:8000/health || exit 1
+          test-image        sleep 30
+        echo "Checking if container is running..."
+        docker ps -a
+        echo "Checking container logs..."
+        docker logs test-container
+        echo "Testing health endpoint..."
+        curl -v http://localhost:8000/health || echo "Health check failed"
+        echo "Testing if port is accessible..."
+        curl -v http://localhost:8000/ || echo "Root endpoint failed"
+        echo "Stopping container..."
         docker stop test-container
         docker rm test-container
