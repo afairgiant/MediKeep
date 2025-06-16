@@ -97,9 +97,9 @@ def update_condition_with_slash(
 ) -> Any:
     """
     Update a condition (with trailing slash for compatibility).
-    
+
     TODO: TEMPORARY FIX - Remove this duplicate route after investigating why
-    the frontend is adding trailing slashes to conditions URLs but not to 
+    the frontend is adding trailing slashes to conditions URLs but not to
     procedures URLs. The root cause needs to be identified and fixed in the
     frontend URL construction or middleware configuration.
     """

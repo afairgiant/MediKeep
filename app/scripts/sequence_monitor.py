@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, List, Any, Optional
-from sqlalchemy import text, inspect
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -94,43 +94,35 @@ class SequenceMonitor:
             sequence_name: Name of the sequence
 
         Returns:
-            Dictionary with sync status and values
-        """
+            Dictionary with sync status and values"""
         db = self.get_database_session()
 
         try:
-            # Get current sequence value - use a fresh transaction for each query
+            # Get current sequence value - avoid using currval() which requires the sequence
+            # to have been used in the current session, causing error logs during startup
             current_sequence_value = None
             try:
-                # Try to get current value first
-                seq_query = text(f"SELECT currval('{sequence_name}') as current_value")
+                # Use last_value and is_called to determine the effective current value
+                seq_query = text(f"SELECT last_value, is_called FROM {sequence_name}")
                 seq_result = db.execute(seq_query).fetchone()
-                current_sequence_value = seq_result.current_value if seq_result else 0
+                if seq_result:
+                    # If is_called is False, the sequence hasn't been used yet
+                    # so the effective current value is 0 (next would be start_value)
+                    current_sequence_value = (
+                        seq_result.last_value if seq_result.is_called else 0
+                    )
+                else:
+                    current_sequence_value = 1
             except SQLAlchemyError:
-                # If currval fails (sequence not used in this session), get last_value
+                # If that fails, try just getting last_value
                 try:
                     db.rollback()  # Clear the failed transaction
                     seq_query = text(f"SELECT last_value FROM {sequence_name}")
                     seq_result = db.execute(seq_query).fetchone()
                     current_sequence_value = seq_result.last_value if seq_result else 1
                 except SQLAlchemyError:
-                    # If that also fails, try to get sequence info
-                    try:
-                        db.rollback()  # Clear the failed transaction
-                        seq_query = text(
-                            f"SELECT last_value, is_called FROM {sequence_name}"
-                        )
-                        seq_result = db.execute(seq_query).fetchone()
-                        if seq_result:
-                            # If is_called is False, the sequence hasn't been used yet
-                            current_sequence_value = (
-                                seq_result.last_value if seq_result.is_called else 0
-                            )
-                        else:
-                            current_sequence_value = 1
-                    except SQLAlchemyError:
-                        db.rollback()  # Clear any failed transaction
-                        current_sequence_value = 1
+                    db.rollback()  # Clear any failed transaction
+                    current_sequence_value = 1
 
             # Get maximum value in table
             max_query = text(
@@ -294,7 +286,7 @@ class SequenceMonitor:
             fixed_count = len(fixed_tables)
             error_count = len(error_tables)
 
-            logger.info(f"📊 Sequence Monitor Summary:")
+            logger.info("📊 Sequence Monitor Summary:")
             logger.info(f"   Total tables: {total_tables}")
             logger.info(f"   Synced: {synced_count}")
             logger.info(f"   Out of sync: {out_of_sync_count}")
