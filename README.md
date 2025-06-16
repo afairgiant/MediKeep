@@ -2,6 +2,8 @@
 
 A medical records management system with React frontend and FastAPI backend.
 
+## STILL VERY MUCH SO A WORK IN PROGRESS! EXPECT BREAKING CHANGES OFTEN!
+
 ## Quick Start
 
 ### 1️⃣ Install Docker & Docker Compose
@@ -46,14 +48,13 @@ services:
     #   dockerfile: docker/Dockerfile    
     container_name: medical-records-app
     ports:
-      - "8000:8000"  # Single port serves both React app and FastAPI      
+      - ${APP_PORT:-8005}:8000  # Single port serves both React app and FastAPI      
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      DATABASE_URL: postgresql://${DB_USER:-medapp}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-medical_records}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
     volumes:
       - app_uploads:/app/uploads
@@ -84,6 +85,19 @@ networks:
   medical-records-network:
     driver: bridge
 ```
+Create a .env file(or copy the env.example in the docker folder)
+```bash
+# Environment variables for Docker Compose
+# Copy this file to .env and update the values
+
+# Database Configuration
+DB_NAME=medical_records
+DB_USER=medapp
+DB_PASSWORD=your_secure_database_password_here
+
+# Application port
+APP_PORT=8005
+
 
 Create a .env file(or copy the env.example in the docker folder)
 ```bash
@@ -94,6 +108,7 @@ Create a .env file(or copy the env.example in the docker folder)
 DB_NAME=medical_records
 DB_USER=medapp
 DB_PASSWORD=your_secure_database_password_here
+
 
 # Application Security
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
@@ -110,13 +125,14 @@ Run the following command to start the services:
 ```ini
 docker compose up -d
 ```
+Note: Do not use ```docker-compose```.
 
 ### 4️⃣ Access the app
 
 Once the containers are up, access the app in your browser at:
 
 ```ini
-http://localhost:8000
+http://localhost:8005
 ```
 
 ### Demo Login
