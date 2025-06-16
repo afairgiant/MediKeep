@@ -25,9 +25,6 @@ class Settings:  # App Info
         else "",
     )
     SEQUENCE_AUTO_FIX: bool = os.getenv("SEQUENCE_AUTO_FIX", "True").lower() == "true"
-    SEQUENCE_CHECK_ON_STARTUP: bool = (
-        os.getenv("SEQUENCE_CHECK_ON_STARTUP", "True").lower() == "true"
-    )
 
     # Security Configuration
     ALGORITHM: str = "HS256"

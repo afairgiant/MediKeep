@@ -171,6 +171,14 @@ async def startup_event():
         },
     )
 
+    # Skip database operations if in test mode
+    skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
+
+    if skip_migrations:
+        logger.info("⏭️ Skipping database operations (test mode)")
+        logger.info("Application startup completed (test mode)")
+        return
+
     # Check if database connection is valid
     db_check_result = check_database_connection()
 
