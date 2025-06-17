@@ -14,12 +14,14 @@ const LabResults = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [selectedLabResult, setSelectedLabResult] = useState(null);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });  const [currentPatient, setCurrentPatient] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
+  const [currentPatient, setCurrentPatient] = useState(null);
   const [practitioners, setPractitioners] = useState([]);
-    // Use useRef to maintain abort controller reference without causing re-renders
+  
+  // Use useRef to maintain abort controller reference without causing re-renders
   const abortControllerRef = useRef(null);
-    // Form state for creating/editing lab results (simplified schema)
+  
+  // Form state for creating/editing lab results (simplified schema)
   const [formData, setFormData] = useState({
     test_name: '',
     test_code: '',
@@ -27,12 +29,15 @@ const LabResults = () => {
     test_type: '',
     facility: '',
     status: 'ordered',
+    labs_result: '',
     ordered_date: '',
     completed_date: '',
     notes: '',
     practitioner_id: ''
-  });const navigate = useNavigate();
-    const statusOptions = [
+  });
+    const navigate = useNavigate();
+  
+  const statusOptions = [
     'ordered', 'in-progress', 'completed', 'cancelled'
   ];
   const categoryOptions = [
@@ -42,7 +47,10 @@ const LabResults = () => {
   ];
   const testTypeOptions = [
     'routine', 'urgent', 'stat', 'emergency', 'follow-up', 'screening'
-  ];  const fetchCurrentPatient = async () => {
+  ];
+  const labsResultOptions = [
+    'normal', 'abnormal', 'critical', 'high', 'low', 'borderline', 'inconclusive'
+  ];const fetchCurrentPatient = async () => {
     try {
       const patient = await apiService.getCurrentPatient();
       setCurrentPatient(patient);
@@ -155,7 +163,7 @@ const LabResults = () => {
         practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
         ordered_date: formData.ordered_date || new Date().toISOString(),
         completed_date: formData.completed_date || null,
-      };await apiService.createLabResult(labResultData);
+      };      await apiService.createLabResult(labResultData);
       
       // Reset form and refresh list
       setFormData({
@@ -165,6 +173,7 @@ const LabResults = () => {
         test_type: '',
         facility: '',
         status: 'ordered',
+        labs_result: '',
         ordered_date: '',
         completed_date: '',
         notes: '',
@@ -189,15 +198,16 @@ const LabResults = () => {
       }
     }
   };
-
   const handleEditLabResult = (labResult) => {
-    setEditingLabResult(labResult);    setFormData({
+    setEditingLabResult(labResult);
+    setFormData({
       test_name: labResult.test_name || '',
       test_code: labResult.test_code || '',
       test_category: labResult.test_category || '',
       test_type: labResult.test_type || '',
       facility: labResult.facility || '',
       status: labResult.status || 'ordered',
+      labs_result: labResult.labs_result || '',
       ordered_date: labResult.ordered_date ? labResult.ordered_date.slice(0, 16) : '',
       completed_date: labResult.completed_date ? labResult.completed_date.slice(0, 16) : '',
       notes: labResult.notes || '',
@@ -218,10 +228,9 @@ const LabResults = () => {
         practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
         ordered_date: formData.ordered_date || new Date().toISOString(),
         completed_date: formData.completed_date || null,
-      };
-
-      await apiService.updateLabResult(editingLabResult.id, labResultData);
-        // Reset form and refresh list
+      };      await apiService.updateLabResult(editingLabResult.id, labResultData);
+      
+      // Reset form and refresh list
       setFormData({
         test_name: '',
         test_code: '',
@@ -229,6 +238,7 @@ const LabResults = () => {
         test_type: '',
         facility: '',
         status: 'ordered',
+        labs_result: '',
         ordered_date: '',
         completed_date: '',
         notes: '',
@@ -551,6 +561,22 @@ const LabResults = () => {
                 </div>
 
                 <div className="form-group">
+                  <label>Lab Result</label>
+                  <select
+                    name="labs_result"
+                    value={formData.labs_result}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select result...</option>
+                    {labsResultOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label>Ordered Date</label>
                   <input
                     type="datetime-local"
@@ -702,6 +728,22 @@ const LabResults = () => {
                     required
                   >
                     {statusOptions.map(option => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Lab Result</label>
+                  <select
+                    name="labs_result"
+                    value={formData.labs_result}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select result...</option>
+                    {labsResultOptions.map(option => (
                       <option key={option} value={option}>
                         {option.charAt(0).toUpperCase() + option.slice(1)}
                       </option>
@@ -887,6 +929,14 @@ const LabResults = () => {
                       {selectedLabResult.status}
                     </span>
                   </div>
+                  {selectedLabResult.labs_result && (
+                    <div className="detail-item">
+                      <strong>Lab Result:</strong> 
+                      <span className={`result-badge result-${selectedLabResult.labs_result.toLowerCase()}`}>
+                        {selectedLabResult.labs_result.charAt(0).toUpperCase() + selectedLabResult.labs_result.slice(1)}
+                      </span>
+                    </div>
+                  )}
                   {selectedLabResult.practitioner_id && (
                     <div className="detail-item">
                       <strong>Ordering Practitioner:</strong> {
@@ -949,8 +999,10 @@ const LabResults = () => {
                           {file.description && (
                             <span className="file-description">{file.description}</span>
                           )}
-                        </div>
-                        <div className="file-actions">                          <button 
+                        </div>                        
+                        
+                        <div className="file-actions">
+                          <button 
                             className="view-button"
                             onClick={() => handleDownloadFile(file.id, file.file_name)}
                           >

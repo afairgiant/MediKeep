@@ -12,6 +12,7 @@ class LabResultBase(BaseModel):
     test_type: Optional[str] = None
     facility: Optional[str] = None
     status: Optional[str] = "ordered"
+    labs_result: Optional[str] = None
     ordered_date: datetime
     completed_date: Optional[datetime] = None
     notes: Optional[str] = None
@@ -86,6 +87,22 @@ class LabResultBase(BaseModel):
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower() if v else "ordered"
 
+    @validator("labs_result")
+    def validate_labs_result(cls, v):
+        """Validate lab result interpretation"""
+        valid_results = [
+            "normal",
+            "abnormal",
+            "critical",
+            "high",
+            "low",
+            "borderline",
+            "inconclusive",
+        ]
+        if v and v.lower() not in valid_results:
+            raise ValueError(f"Labs result must be one of: {', '.join(valid_results)}")
+        return v.lower() if v else None
+
     @validator("notes")
     def validate_notes(cls, v):
         """Validate notes"""
@@ -125,6 +142,7 @@ class LabResultUpdate(BaseModel):
     test_type: Optional[str] = None
     facility: Optional[str] = None
     status: Optional[str] = None
+    labs_result: Optional[str] = None
     ordered_date: Optional[datetime] = None
     completed_date: Optional[datetime] = None
     notes: Optional[str] = None
@@ -154,6 +172,25 @@ class LabResultUpdate(BaseModel):
             valid_statuses = ["ordered", "in-progress", "completed", "cancelled"]
             if v.lower() not in valid_statuses:
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+            return v.lower()
+        return v
+
+    @validator("labs_result")
+    def validate_labs_result(cls, v):
+        if v is not None:
+            valid_results = [
+                "normal",
+                "abnormal",
+                "critical",
+                "high",
+                "low",
+                "borderline",
+                "inconclusive",
+            ]
+            if v.lower() not in valid_results:
+                raise ValueError(
+                    f"Labs result must be one of: {', '.join(valid_results)}"
+                )
             return v.lower()
         return v
 
