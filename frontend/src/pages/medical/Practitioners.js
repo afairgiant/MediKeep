@@ -20,6 +20,9 @@ const Practitioners = () => {
     name: '',
     specialty: '',
     practice: '',
+    phone_number: '',
+    website: '',
+    rating: '',
   });
 
   // Common specialties for the filter dropdown
@@ -59,13 +62,15 @@ const Practitioners = () => {
       setLoading(false);
     }
   };
-
   const handleAddPractitioner = () => {
     setEditingPractitioner(null);
     setFormData({
       name: '',
       specialty: '',
       practice: '',
+      phone_number: '',
+      website: '',
+      rating: '',
     });
     setShowModal(true);
   };
@@ -76,6 +81,9 @@ const Practitioners = () => {
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
       practice: practitioner.practice || '',
+      phone_number: practitioner.phone_number || '',
+      website: practitioner.website || '',
+      rating: practitioner.rating || '',
     });
     setShowModal(true);
   };
@@ -279,8 +287,7 @@ const Practitioners = () => {
                     color={getSpecialtyColor(practitioner.specialty)}
                   />
                 </div>
-              </div>
-
+              </div>{' '}
               <div className="practitioner-details">
                 <div className="detail-item">
                   <span className="detail-label">Specialty</span>
@@ -290,6 +297,50 @@ const Practitioners = () => {
                   <span className="detail-label">Practice</span>
                   <span className="detail-value">{practitioner.practice}</span>
                 </div>
+                {practitioner.phone_number && (
+                  <div className="detail-item">
+                    <span className="detail-label">Phone</span>
+                    <span className="detail-value">
+                      {practitioner.phone_number}
+                    </span>
+                  </div>
+                )}
+                {practitioner.website && (
+                  <div className="detail-item">
+                    <span className="detail-label">Website</span>
+                    <span className="detail-value">
+                      <a
+                        href={practitioner.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="website-link"
+                      >
+                        Visit Website ↗
+                      </a>
+                    </span>
+                  </div>
+                )}
+                {practitioner.rating !== null &&
+                  practitioner.rating !== undefined && (
+                    <div className="detail-item">
+                      <span className="detail-label">Rating</span>
+                      <span className="detail-value">
+                        <div className="rating-display">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <span
+                              key={star}
+                              className={`star ${star <= practitioner.rating ? 'filled' : 'empty'}`}
+                            >
+                              ⭐
+                            </span>
+                          ))}
+                          <span className="rating-number">
+                            ({practitioner.rating}/5)
+                          </span>
+                        </div>
+                      </span>
+                    </div>
+                  )}
                 {practitioner.id && (
                   <div className="detail-item">
                     <span className="detail-label">ID</span>
@@ -329,7 +380,6 @@ const Practitioners = () => {
                   placeholder="Dr. John Smith"
                 />
               </div>
-
               <div className="form-group">
                 <label htmlFor="specialty">Specialty *</label>
                 <input
@@ -347,8 +397,7 @@ const Practitioners = () => {
                     <option key={specialty} value={specialty} />
                   ))}
                 </datalist>
-              </div>
-
+              </div>{' '}
               <div className="form-group">
                 <label htmlFor="practice">Practice/Hospital *</label>
                 <input
@@ -361,7 +410,42 @@ const Practitioners = () => {
                   placeholder="e.g., City General Hospital, Private Practice"
                 />
               </div>
-
+              <div className="form-group">
+                <label htmlFor="phone_number">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone_number"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleInputChange}
+                  placeholder="e.g., (555) 123-4567"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="website">Website</label>
+                <input
+                  type="url"
+                  id="website"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  placeholder="e.g., https://www.example.com"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="rating">Rating (0-5 stars)</label>
+                <input
+                  type="number"
+                  id="rating"
+                  name="rating"
+                  value={formData.rating}
+                  onChange={handleInputChange}
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  placeholder="e.g., 4.5"
+                />
+              </div>
               <div className="form-actions">
                 <button
                   type="button"

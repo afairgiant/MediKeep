@@ -1,5 +1,6 @@
 from pydantic import BaseModel, validator
 from typing import Optional
+import re
 
 
 class PractitionerBase(BaseModel):
@@ -13,6 +14,9 @@ class PractitionerBase(BaseModel):
     name: str
     specialty: str
     practice: str
+    phone_number: Optional[str] = None
+    website: Optional[str] = None
+    rating: Optional[float] = None
 
     @validator("name")
     def validate_name(cls, v):
@@ -74,6 +78,94 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practice must be less than 100 characters")
         return v.strip()
 
+    @validator("phone_number")
+    def validate_phone_number(cls, v):
+        """
+        Validate phone number field.
+
+        Args:
+            v: The phone number value to validate
+
+        Returns:
+            Cleaned phone number
+
+        Raises:
+            ValueError: If phone number format is invalid
+        """
+        if v is None or v.strip() == "":
+            return None
+        
+        # Remove all non-digit characters for validation
+        digits_only = re.sub(r'[^\d]', '', v)
+        
+        # Check if it's a reasonable phone number length (10-15 digits)
+        if len(digits_only) < 10 or len(digits_only) > 15:
+            raise ValueError("Phone number must be between 10-15 digits")
+        
+        return v.strip()
+
+    @validator("website")
+    def validate_website(cls, v):
+        """
+        Validate website URL field.
+
+        Args:
+            v: The website URL value to validate
+
+        Returns:
+            Cleaned website URL
+
+        Raises:
+            ValueError: If website URL format is invalid
+        """
+        if v is None or v.strip() == "":
+            return None
+        
+        # Basic URL validation
+        url_pattern = re.compile(
+            r'^https?://'  # http:// or https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+            r'localhost|'  # localhost...
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+            r'(?::\d+)?'  # optional port
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        
+        cleaned_url = v.strip()
+        
+        # Add https:// if no protocol specified
+        if not cleaned_url.startswith(('http://', 'https://')):
+            cleaned_url = 'https://' + cleaned_url
+        
+        if not url_pattern.match(cleaned_url):
+            raise ValueError("Please enter a valid website URL")
+        
+        return cleaned_url
+
+    @validator("rating")
+    def validate_rating(cls, v):
+        """
+        Validate rating field.
+
+        Args:
+            v: The rating value to validate
+
+        Returns:
+            Validated rating
+
+        Raises:
+            ValueError: If rating is not between 0 and 5
+        """
+        if v is None:
+            return None
+        
+        if not isinstance(v, (int, float)):
+            raise ValueError("Rating must be a number")
+        
+        if v < 0 or v > 5:
+            raise ValueError("Rating must be between 0 and 5")
+        
+        return round(float(v), 1)  # Round to 1 decimal place
+
 
 class PractitionerCreate(PractitionerBase):
     """
@@ -99,7 +191,7 @@ class PractitionerUpdate(BaseModel):
     All fields are optional, so practitioners can be updated partially.
 
     Example:
-        update_data = PractitionerUpdate(
+        update_data = PractitionerUpdate(        update_data = PractitionerUpdate(
             specialty="Internal Medicine"
         )
     """
@@ -107,6 +199,9 @@ class PractitionerUpdate(BaseModel):
     name: Optional[str] = None
     specialty: Optional[str] = None
     practice: Optional[str] = None
+    phone_number: Optional[str] = None
+    website: Optional[str] = None
+    rating: Optional[float] = None
 
     @validator("name")
     def validate_name(cls, v):
@@ -140,6 +235,61 @@ class PractitionerUpdate(BaseModel):
                 raise ValueError("Practice must be less than 100 characters")
             return v.strip()
         return v
+
+    @validator("phone_number")
+    def validate_phone_number_update(cls, v):
+        """Validate phone number if provided."""
+        if v is None or v.strip() == "":
+            return None
+        
+        # Remove all non-digit characters for validation
+        digits_only = re.sub(r'[^\d]', '', v)
+        
+        # Check if it's a reasonable phone number length (10-15 digits)
+        if len(digits_only) < 10 or len(digits_only) > 15:
+            raise ValueError("Phone number must be between 10-15 digits")
+        
+        return v.strip()
+
+    @validator("website")
+    def validate_website_update(cls, v):
+        """Validate website URL if provided."""
+        if v is None or v.strip() == "":
+            return None
+        
+        # Basic URL validation
+        url_pattern = re.compile(
+            r'^https?://'  # http:// or https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+            r'localhost|'  # localhost...
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+            r'(?::\d+)?'  # optional port
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        
+        cleaned_url = v.strip()
+        
+        # Add https:// if no protocol specified
+        if not cleaned_url.startswith(('http://', 'https://')):
+            cleaned_url = 'https://' + cleaned_url
+        
+        if not url_pattern.match(cleaned_url):
+            raise ValueError("Please enter a valid website URL")
+        
+        return cleaned_url
+
+    @validator("rating")
+    def validate_rating_update(cls, v):
+        """Validate rating if provided."""
+        if v is None:
+            return None
+        
+        if not isinstance(v, (int, float)):
+            raise ValueError("Rating must be a number")
+        
+        if v < 0 or v > 5:
+            raise ValueError("Rating must be between 0 and 5")
+        
+        return round(float(v), 1)  # Round to 1 decimal place
 
 
 class Practitioner(PractitionerBase):

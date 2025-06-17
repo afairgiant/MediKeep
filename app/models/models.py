@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text, Float
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 
@@ -60,7 +60,12 @@ class Practitioner(Base):
 
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
-    practice = Column(String, nullable=False)  # Table Relationships
+    practice = Column(String, nullable=False)
+    phone_number = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    rating = Column(Float, nullable=True)  # Rating from 0.0 to 5.0
+
+    # Table Relationships
     patients = relationship("Patient", back_populates="practitioner")
     medications = relationship("Medication", back_populates="practitioner")
     encounters = relationship("Encounter", back_populates="practitioner")

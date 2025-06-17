@@ -2,6 +2,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.api import deps
 from app.core.config import settings
@@ -10,7 +11,7 @@ from app.crud.patient import patient
 from app.schemas.user import User, UserCreate, Token
 from app.schemas.patient import PatientCreate
 from app.core.security import create_access_token
-from app.core.logging_config import get_logger, log_security_event
+from app.core.logging_config import get_logger
 from datetime import date
 
 
@@ -33,10 +34,8 @@ def register(
 
     Creates a new user account with username and password.
     The password will be automatically hashed for security.
-    A basic patient record is automatically created for the user.
-    """
+    A basic patient record is automatically created for the user.    """
     user_ip = request.client.host if request.client else "unknown"
-    user_agent = request.headers.get("user-agent", "unknown")
 
     # Log registration attempt using security audit system
     logger.info(
@@ -47,15 +46,50 @@ def register(
             "username": user_in.username,
             "ip": user_ip,
         },
-    )
-
+    )    
     # Check if username already exists
     existing_user = user.get_by_username(db, username=user_in.username)
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
 
-    # Create new user
-    new_user = user.create(db, obj_in=user_in)
+    # Check if email already exists
+    existing_email = user.get_by_email(db, email=user_in.email)
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already registered")    # Create new user with proper error handling
+    try:
+        new_user = user.create(db, obj_in=user_in)
+    except IntegrityError as e:
+        # Handle database integrity errors more specifically
+        error_message = str(e.orig).lower()
+        if "users_username_key" in error_message or "username" in error_message:
+            raise HTTPException(status_code=400, detail="Username already registered")
+        elif "users_email_key" in error_message or "email" in error_message:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        else:
+            # Log the specific integrity error for debugging
+            logger.error(
+                f"Database integrity error during user creation: {e}",
+                extra={
+                    "category": "error",
+                    "event": "user_creation_integrity_error",
+                    "username": user_in.username,
+                    "email": user_in.email,
+                    "error": str(e),
+                },
+            )
+            raise HTTPException(status_code=400, detail="User with this information already exists")
+    except Exception as e:
+        # Handle other unexpected errors
+        logger.error(
+            f"Unexpected error during user creation: {e}",
+            extra={
+                "category": "error",
+                "event": "user_creation_error",
+                "username": user_in.username,
+                "error": str(e),
+            },
+        )
+        raise HTTPException(status_code=500, detail="Failed to create user account")
 
     # Create a basic patient record for the new user
     # Use placeholder values that can be updated later by the user
