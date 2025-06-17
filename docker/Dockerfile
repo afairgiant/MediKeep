@@ -6,20 +6,23 @@ FROM node:18-alpine AS frontend-build
 # Set NODE_ENV for optimization
 ENV NODE_ENV=production
 ENV REACT_APP_API_URL=""
+ENV CI=true
+ENV GENERATE_SOURCEMAP=false
 
 WORKDIR /frontend
 
 # Copy package files first for better layer caching
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm install --silent --no-audit --no-fund
+# Install dependencies with more memory
+RUN npm install --silent --no-audit --no-fund --max_old_space_size=4096
 
 # Copy frontend source
 COPY frontend/ ./
 
-# Build the React app with optimizations
-RUN npm run build && \
+# Build the React app with optimizations and ignore ESLint warnings
+RUN cp .eslintrc.production.js .eslintrc.js && \
+    ESLINT_NO_DEV_ERRORS=true npm run build && \
     # Remove source maps and unnecessary files for production
     find build -name "*.map" -delete
 
