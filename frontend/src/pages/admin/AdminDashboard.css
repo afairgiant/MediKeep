@@ -38,7 +38,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
@@ -269,15 +271,15 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard-content {
     grid-template-columns: 1fr;
   }
-  
+
   .stat-card {
     padding: 20px;
   }
-  
+
   .dashboard-card {
     padding: 20px;
   }

@@ -13,11 +13,11 @@ const Modal = ({
   size = 'medium',
   showCloseButton = true,
   closeOnOverlayClick = true,
-  className = ''
+  className = '',
 }) => {
   // Handle escape key
   useEffect(() => {
-    const handleEscape = (e) => {
+    const handleEscape = e => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
@@ -36,7 +36,7 @@ const Modal = ({
 
   if (!isOpen) return null;
 
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = e => {
     if (e.target === e.currentTarget && closeOnOverlayClick) {
       onClose();
     }
@@ -49,7 +49,7 @@ const Modal = ({
           <div className="modal-header">
             {title && <h2 className="modal-title">{title}</h2>}
             {showCloseButton && (
-              <button 
+              <button
                 className="modal-close-btn"
                 onClick={onClose}
                 aria-label="Close modal"
@@ -59,10 +59,8 @@ const Modal = ({
             )}
           </div>
         )}
-        
-        <div className="modal-body">
-          {children}
-        </div>
+
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );

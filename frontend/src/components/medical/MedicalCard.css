@@ -186,22 +186,22 @@
   .medical-card {
     padding: 1rem;
   }
-  
+
   .medical-card-header {
     flex-direction: column;
     gap: 0.75rem;
     align-items: flex-start;
   }
-  
+
   .medical-card .status-badge {
     margin-left: 0;
   }
-  
+
   .medical-card-actions {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .medical-card-dates {
     flex-direction: column;
     gap: 0.5rem;

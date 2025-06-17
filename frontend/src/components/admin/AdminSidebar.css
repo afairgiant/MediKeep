@@ -136,12 +136,12 @@
   .admin-sidebar {
     transform: translateX(-100%);
   }
-  
+
   .admin-sidebar.open {
     transform: translateX(0);
     width: 280px;
   }
-  
+
   .admin-sidebar.closed {
     transform: translateX(-100%);
   }

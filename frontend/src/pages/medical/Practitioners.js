@@ -19,7 +19,7 @@ const Practitioners = () => {
   const [formData, setFormData] = useState({
     name: '',
     specialty: '',
-    practice: ''
+    practice: '',
   });
 
   // Common specialties for the filter dropdown
@@ -39,7 +39,7 @@ const Practitioners = () => {
     'Pediatrics',
     'Psychiatry',
     'Radiology',
-    'Urology'
+    'Urology',
   ];
 
   useEffect(() => {
@@ -65,23 +65,27 @@ const Practitioners = () => {
     setFormData({
       name: '',
       specialty: '',
-      practice: ''
+      practice: '',
     });
     setShowModal(true);
   };
 
-  const handleEditPractitioner = (practitioner) => {
+  const handleEditPractitioner = practitioner => {
     setEditingPractitioner(practitioner);
     setFormData({
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
-      practice: practitioner.practice || ''
+      practice: practitioner.practice || '',
     });
     setShowModal(true);
   };
 
-  const handleDeletePractitioner = async (practitionerId) => {
-    if (window.confirm('Are you sure you want to delete this practitioner? This action cannot be undone.')) {
+  const handleDeletePractitioner = async practitionerId => {
+    if (
+      window.confirm(
+        'Are you sure you want to delete this practitioner? This action cannot be undone.'
+      )
+    ) {
       try {
         await apiService.deletePractitioner(practitionerId);
         await fetchPractitioners();
@@ -94,7 +98,7 @@ const Practitioners = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
       if (editingPractitioner) {
@@ -114,24 +118,30 @@ const Practitioners = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Get unique specialties from practitioners for filter
-  const availableSpecialties = [...new Set(practitioners.map(p => p.specialty).filter(Boolean))].sort();
+  const availableSpecialties = [
+    ...new Set(practitioners.map(p => p.specialty).filter(Boolean)),
+  ].sort();
 
   const filteredPractitioners = practitioners
     .filter(practitioner => {
-      const matchesSearch = practitioner.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          practitioner.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          practitioner.practice?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSpecialty = specialtyFilter === 'all' || practitioner.specialty === specialtyFilter;
-      
+      const matchesSearch =
+        practitioner.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        practitioner.specialty
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        practitioner.practice?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSpecialty =
+        specialtyFilter === 'all' || practitioner.specialty === specialtyFilter;
+
       return matchesSearch && matchesSpecialty;
     })
     .sort((a, b) => {
@@ -146,20 +156,20 @@ const Practitioners = () => {
       }
     });
 
-  const getSpecialtyColor = (specialty) => {
+  const getSpecialtyColor = specialty => {
     // Color coding for different specialties
     const specialtyColors = {
-      'Cardiology': 'error',
+      Cardiology: 'error',
       'Emergency Medicine': 'error',
       'Family Medicine': 'success',
       'Internal Medicine': 'success',
-      'Pediatrics': 'info',
-      'Surgery': 'warning',
+      Pediatrics: 'info',
+      Surgery: 'warning',
       'General Surgery': 'warning',
-      'Psychiatry': 'info',
-      'Neurology': 'warning'
+      Psychiatry: 'info',
+      Neurology: 'warning',
     };
-    
+
     return specialtyColors[specialty] || 'info';
   };
 
@@ -175,15 +185,15 @@ const Practitioners = () => {
   return (
     <div className="practitioners-page">
       <div className="practitioners-header">
-        <button
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1 className="practitioners-title">👩‍⚕️ Healthcare Practitioners</h1>
         <div className="practitioners-actions">
-          <button className="add-practitioner-btn" onClick={handleAddPractitioner}>
+          <button
+            className="add-practitioner-btn"
+            onClick={handleAddPractitioner}
+          >
             <span>+</span>
             Add Practitioner
           </button>
@@ -193,28 +203,35 @@ const Practitioners = () => {
               type="text"
               placeholder="Search practitioners..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
-      {successMessage && <div className="success-message">{successMessage}</div>}
+      {successMessage && (
+        <div className="success-message">{successMessage}</div>
+      )}
 
       <div className="practitioners-filters">
         <div className="filter-group">
           <label>Specialty</label>
-          <select value={specialtyFilter} onChange={(e) => setSpecialtyFilter(e.target.value)}>
+          <select
+            value={specialtyFilter}
+            onChange={e => setSpecialtyFilter(e.target.value)}
+          >
             <option value="all">All Specialties</option>
             {availableSpecialties.map(specialty => (
-              <option key={specialty} value={specialty}>{specialty}</option>
+              <option key={specialty} value={specialty}>
+                {specialty}
+              </option>
             ))}
           </select>
         </div>
         <div className="filter-group">
           <label>Sort By</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
             <option value="name">Name</option>
             <option value="specialty">Specialty</option>
             <option value="practice">Practice</option>
@@ -232,14 +249,17 @@ const Practitioners = () => {
               : 'Start by adding your first healthcare practitioner.'}
           </p>
           {!searchTerm && specialtyFilter === 'all' && (
-            <button className="add-practitioner-btn" onClick={handleAddPractitioner}>
+            <button
+              className="add-practitioner-btn"
+              onClick={handleAddPractitioner}
+            >
               Add Your First Practitioner
             </button>
           )}
         </div>
       ) : (
         <div className="practitioners-grid">
-          {filteredPractitioners.map((practitioner) => (
+          {filteredPractitioners.map(practitioner => (
             <MedicalCard
               key={practitioner.id}
               className="practitioner-card"
@@ -249,12 +269,14 @@ const Practitioners = () => {
               <div className="practitioner-card-header">
                 <div>
                   <h3 className="practitioner-name">{practitioner.name}</h3>
-                  <p className="practitioner-practice">{practitioner.practice}</p>
+                  <p className="practitioner-practice">
+                    {practitioner.practice}
+                  </p>
                 </div>
                 <div className="practitioner-badge">
-                  <StatusBadge 
-                    status={practitioner.specialty} 
-                    color={getSpecialtyColor(practitioner.specialty)} 
+                  <StatusBadge
+                    status={practitioner.specialty}
+                    color={getSpecialtyColor(practitioner.specialty)}
                   />
                 </div>
               </div>
@@ -282,10 +304,12 @@ const Practitioners = () => {
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title">
-                {editingPractitioner ? 'Edit Practitioner' : 'Add New Practitioner'}
+                {editingPractitioner
+                  ? 'Edit Practitioner'
+                  : 'Add New Practitioner'}
               </h2>
               <button className="close-btn" onClick={() => setShowModal(false)}>
                 ×
@@ -339,11 +363,17 @@ const Practitioners = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingPractitioner ? 'Update Practitioner' : 'Add Practitioner'}
+                  {editingPractitioner
+                    ? 'Update Practitioner'
+                    : 'Add Practitioner'}
                 </button>
               </div>
             </form>

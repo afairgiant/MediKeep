@@ -6,13 +6,13 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
     timestamp: new Date().toISOString(),
     user: user?.username,
     hasOnLogout: typeof onLogout === 'function',
-    hasOnToggleSidebar: typeof onToggleSidebar === 'function'
+    hasOnToggleSidebar: typeof onToggleSidebar === 'function',
   });
 
   const handleLogout = () => {
     console.log('🚪 AdminHeader logout button clicked:', {
       timestamp: new Date().toISOString(),
-      user: user?.username
+      user: user?.username,
     });
     if (onLogout) {
       onLogout();
@@ -31,44 +31,44 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
   };
 
   return (
-    <header className="admin-header">      <div className="header-left">
+    <header className="admin-header">
+      {' '}
+      <div className="header-left">
         <button className="sidebar-toggle-btn" onClick={handleToggleSidebar}>
           ☰
         </button>
         <h1>Medical Records Admin</h1>
-        <button 
+        <button
           className="back-to-dashboard-btn"
-          onClick={() => window.location.href = '/dashboard'}
+          onClick={() => (window.location.href = '/dashboard')}
           title="Return to Normal Dashboard"
         >
           ← Dashboard
         </button>
       </div>
-
       <div className="header-center">
         <div className="search-bar">
-          <input 
-            type="text" 
-            placeholder="Search records, users, or data..." 
+          <input
+            type="text"
+            placeholder="Search records, users, or data..."
             className="global-search"
           />
           <button className="search-btn">🔍</button>
         </div>
       </div>
-
       <div className="header-right">
         <div className="admin-user-info">
           <span className="user-role">Admin</span>
           <span className="user-name">{user?.username || 'Administrator'}</span>
           <div className="user-avatar">👤</div>
         </div>
-        
+
         <div className="header-actions">
           <button className="notification-btn" title="Notifications">
             🔔
             <span className="notification-badge">3</span>
           </button>
-          
+
           <button className="logout-btn" onClick={handleLogout} title="Logout">
             🚪 Logout
           </button>

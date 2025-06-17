@@ -131,7 +131,7 @@
     left: 0.5rem;
     max-width: none;
   }
-  
+
   .notification {
     padding: var(--spacing-md, 1rem);
   }

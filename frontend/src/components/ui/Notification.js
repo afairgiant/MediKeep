@@ -5,13 +5,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './Notification.css';
 
-const Notification = ({ 
-  message, 
-  type = 'info', 
-  duration = 5000, 
+const Notification = ({
+  message,
+  type = 'info',
+  duration = 5000,
   onClose,
   position = 'top-right',
-  showIcon = true 
+  showIcon = true,
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
@@ -29,7 +29,7 @@ const Notification = ({
       const timer = setTimeout(() => {
         handleClose();
       }, duration);
-      
+
       return () => clearTimeout(timer);
     }
   }, [duration, handleClose]);
@@ -51,13 +51,13 @@ const Notification = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`notification notification-${type} notification-${position} ${isExiting ? 'notification-exit' : ''}`}>
+    <div
+      className={`notification notification-${type} notification-${position} ${isExiting ? 'notification-exit' : ''}`}
+    >
       <div className="notification-content">
-        {showIcon && (
-          <span className="notification-icon">{getIcon()}</span>
-        )}
+        {showIcon && <span className="notification-icon">{getIcon()}</span>}
         <span className="notification-message">{message}</span>
-        <button 
+        <button
           className="notification-close"
           onClick={handleClose}
           aria-label="Close notification"
@@ -73,7 +73,7 @@ const Notification = ({
 export const NotificationContainer = ({ notifications = [], onRemove }) => {
   return (
     <div className="notification-container">
-      {notifications.map((notification) => (
+      {notifications.map(notification => (
         <Notification
           key={notification.id}
           {...notification}

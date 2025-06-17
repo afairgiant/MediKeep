@@ -5,12 +5,12 @@ import './Header.css';
 /**
  * Common page header component with navigation
  */
-const Header = ({ 
-  title, 
-  showBackButton = false, 
+const Header = ({
+  title,
+  showBackButton = false,
   backPath = '/dashboard',
   actions = null,
-  subtitle = null 
+  subtitle = null,
 }) => {
   const navigate = useNavigate();
 
@@ -22,11 +22,7 @@ const Header = ({
     <header className="page-header">
       <div className="header-left">
         {showBackButton && (
-          <button 
-            className="back-button"
-            onClick={handleBack}
-            type="button"
-          >
+          <button className="back-button" onClick={handleBack} type="button">
             ← Back to Dashboard
           </button>
         )}
@@ -35,12 +31,8 @@ const Header = ({
           {subtitle && <p className="page-subtitle">{subtitle}</p>}
         </div>
       </div>
-      
-      {actions && (
-        <div className="header-actions">
-          {actions}
-        </div>
-      )}
+
+      {actions && <div className="header-actions">{actions}</div>}
     </header>
   );
 };

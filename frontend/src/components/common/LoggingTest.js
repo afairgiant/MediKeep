@@ -9,13 +9,13 @@ const LoggingTest = () => {
     // Initialize frontend logging for this component
     logger.info('LoggingTest component mounted', {
       component: 'LoggingTest',
-      category: 'component'
+      category: 'component',
     });
 
     return () => {
       logger.info('LoggingTest component unmounted', {
         component: 'LoggingTest',
-        category: 'component'
+        category: 'component',
       });
     };
   }, []);
@@ -28,31 +28,30 @@ const LoggingTest = () => {
     logger.info('User triggered general logging test', {
       component: 'LoggingTest',
       action: 'test_general_logging',
-      category: 'user_action'
+      category: 'user_action',
     });
     addLog('✅ General event logged', 'success');
   };
   const testUserActionLogging = () => {
-    logger.userAction(
-      'button_click',
-      'LoggingTest',
-      {
-        testType: 'user_action_logging',
-        buttonLocation: 'logging_test_page'
-      }
-    );
+    logger.userAction('button_click', 'LoggingTest', {
+      testType: 'user_action_logging',
+      buttonLocation: 'logging_test_page',
+    });
     addLog('✅ User action logged', 'success');
   };
 
-  const testErrorLogging = () => {    setErrorCount(prev => prev + 1);
-    
-    const testError = new Error(`Test error #${errorCount + 1} - This is a simulated error for testing`);
+  const testErrorLogging = () => {
+    setErrorCount(prev => prev + 1);
+
+    const testError = new Error(
+      `Test error #${errorCount + 1} - This is a simulated error for testing`
+    );
     logger.error('Simulated test error', {
       component: 'LoggingTest',
       category: 'test_error',
       stack: testError.stack,
       errorCount: errorCount + 1,
-      testType: 'simulated_error'
+      testType: 'simulated_error',
     });
     addLog(`❌ Test error #${errorCount + 1} logged`, 'error');
   };
@@ -60,15 +59,15 @@ const LoggingTest = () => {
   const testAPIErrorLogging = () => {
     const mockAPIError = {
       message: 'Mock API Error: Network timeout',
-      status: 500
+      status: 500,
     };
-    
+
     logger.error('API Error', {
       component: 'LoggingTest',
       category: 'api_error',
       error: mockAPIError,
       endpoint: '/api/v1/test-endpoint',
-      method: 'POST'
+      method: 'POST',
     });
     addLog('🌐 API error logged', 'warning');
   };
@@ -79,15 +78,19 @@ const LoggingTest = () => {
       message: 'Test performance metrics',
       metrics: {
         loadTime: Math.round(performance.now()),
-        memoryUsage: performance.memory ? performance.memory.usedJSHeapSize : null,
-        connectionType: navigator.connection ? navigator.connection.effectiveType : 'unknown'
+        memoryUsage: performance.memory
+          ? performance.memory.usedJSHeapSize
+          : null,
+        connectionType: navigator.connection
+          ? navigator.connection.effectiveType
+          : 'unknown',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     logger.info('Performance metrics', {
       component: 'LoggingTest',
       category: 'performance',
-      ...performanceData
+      ...performanceData,
     });
 
     logger.logPerformance(performanceData);
@@ -107,8 +110,10 @@ const LoggingTest = () => {
   return (
     <div className="logging-test">
       <h2>🧪 Frontend Logging Test Suite</h2>
-      <p>This page tests the frontend logging integration with the backend API.</p>
-      
+      <p>
+        This page tests the frontend logging integration with the backend API.
+      </p>
+
       <div className="test-controls">
         <h3>Test Different Log Types:</h3>
         <div className="button-grid">
@@ -131,7 +136,7 @@ const LoggingTest = () => {
             💥 Trigger JS Error (Error Boundary)
           </button>
         </div>
-        
+
         <div className="utility-buttons">
           <button onClick={clearLogs} className="btn btn-light">
             🧹 Clear Local Logs
@@ -143,7 +148,9 @@ const LoggingTest = () => {
         <h3>Local Log Display:</h3>
         <div className="log-container">
           {logs.length === 0 ? (
-            <p className="no-logs">No logs yet. Click the buttons above to test logging.</p>
+            <p className="no-logs">
+              No logs yet. Click the buttons above to test logging.
+            </p>
           ) : (
             logs.map((log, index) => (
               <div key={index} className={`log-entry log-${log.type}`}>
@@ -160,8 +167,13 @@ const LoggingTest = () => {
         <ol>
           <li>Click each button to test different types of logging</li>
           <li>Check the browser console for frontend logs</li>
-          <li>Check the backend logs at <code>logs/app.log</code> for backend logging</li>
-          <li>The "Trigger JS Error" button will test the Error Boundary component</li>
+          <li>
+            Check the backend logs at <code>logs/app.log</code> for backend
+            logging
+          </li>
+          <li>
+            The "Trigger JS Error" button will test the Error Boundary component
+          </li>
           <li>User actions are only logged when authenticated</li>
         </ol>
       </div>

@@ -7,7 +7,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     timestamp: new Date().toISOString(),
     isOpen,
     currentPath,
-    hasOnToggle: typeof onToggle === 'function'
+    hasOnToggle: typeof onToggle === 'function',
   });
 
   const models = [
@@ -34,11 +34,11 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     }
   };
 
-  const handleLinkClick = (path) => {
+  const handleLinkClick = path => {
     console.log('🔗 AdminSidebar link clicked:', {
       timestamp: new Date().toISOString(),
       path,
-      currentPath
+      currentPath,
     });
   };
 
@@ -54,8 +54,8 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
       <nav className="sidebar-nav">
         <div className="nav-section">
           <h3>Dashboard</h3>
-          <Link 
-            to="/admin" 
+          <Link
+            to="/admin"
             className={`nav-item ${currentPath === '/admin' ? 'active' : ''}`}
             onClick={() => handleLinkClick('/admin')}
           >
@@ -81,16 +81,16 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
 
         <div className="nav-section">
           <h3>Tools</h3>
-          <Link 
-            to="/admin/bulk-operations" 
+          <Link
+            to="/admin/bulk-operations"
             className={`nav-item ${currentPath.includes('/admin/bulk-operations') ? 'active' : ''}`}
             onClick={() => handleLinkClick('/admin/bulk-operations')}
           >
             <span className="nav-icon">⚡</span>
             <span className="nav-text">Bulk Operations</span>
           </Link>
-          <Link 
-            to="/admin/system-health" 
+          <Link
+            to="/admin/system-health"
             className={`nav-item ${currentPath.includes('/admin/system-health') ? 'active' : ''}`}
             onClick={() => handleLinkClick('/admin/system-health')}
           >

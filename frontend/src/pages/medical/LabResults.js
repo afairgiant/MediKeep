@@ -14,7 +14,10 @@ const LabResults = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [selectedLabResult, setSelectedLabResult] = useState(null);
-  const [selectedFiles, setSelectedFiles] = useState([]);  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
+  const [pendingFiles, setPendingFiles] = useState([]); // Files to be uploaded after lab result creation/update
+  const [filesToDelete, setFilesToDelete] = useState([]); // Files to be deleted during edit
   const [currentPatient, setCurrentPatient] = useState(null);
   const [practitioners, setPractitioners] = useState([]);
   
@@ -153,17 +156,76 @@ const LabResults = () => {
     }));
   };
 
+  // Helper functions for file management during create/edit
+  const handleAddPendingFile = (file, description = '') => {
+    setPendingFiles(prev => [...prev, { file, description, id: Date.now() }]);
+  };
+
+  const handleRemovePendingFile = (fileId) => {
+    setPendingFiles(prev => prev.filter(f => f.id !== fileId));
+  };
+
+  const handleMarkFileForDeletion = (fileId) => {
+    setFilesToDelete(prev => [...prev, fileId]);
+  };
+
+  const handleUnmarkFileForDeletion = (fileId) => {
+    setFilesToDelete(prev => prev.filter(id => id !== fileId));
+  };
+
+  const uploadPendingFiles = async (labResultId) => {
+    const uploadPromises = pendingFiles.map(async (pendingFile) => {
+      try {
+        await apiService.uploadLabResultFile(labResultId, pendingFile.file, pendingFile.description);
+      } catch (error) {
+        console.error(`Failed to upload file: ${pendingFile.file.name}`, error);
+        throw error;
+      }
+    });
+    
+    await Promise.all(uploadPromises);
+    setPendingFiles([]); // Clear pending files after successful upload
+  };
+
+  const deleteMarkedFiles = async () => {
+    const deletePromises = filesToDelete.map(async (fileId) => {
+      try {
+        await apiService.deleteLabResultFile(fileId);
+      } catch (error) {
+        console.error(`Failed to delete file: ${fileId}`, error);
+        throw error;
+      }
+    });
+    
+    await Promise.all(deletePromises);
+    setFilesToDelete([]); // Clear marked files after successful deletion
+  };
+
+  const clearPendingFiles = () => {
+    setPendingFiles([]);
+    setFilesToDelete([]);
+  };
+
   const handleCreateLabResult = async (e) => {
     e.preventDefault();
     try {
-      setError(null);        // Prepare data for submission (simplified schema)
+      setError(null);
+      
+      // Prepare data for submission (simplified schema)
       const labResultData = {
         ...formData,
         patient_id: currentPatient?.id,
         practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
         ordered_date: formData.ordered_date || new Date().toISOString(),
         completed_date: formData.completed_date || null,
-      };      await apiService.createLabResult(labResultData);
+      };
+
+      const createdLabResult = await apiService.createLabResult(labResultData);
+      
+      // Upload any pending files
+      if (pendingFiles.length > 0) {
+        await uploadPendingFiles(createdLabResult.id);
+      }
       
       // Reset form and refresh list
       setFormData({
@@ -179,6 +241,7 @@ const LabResults = () => {
         notes: '',
         practitioner_id: ''
       });
+      setPendingFiles([]); // Clear pending files
       setShowCreateForm(false);
       fetchLabResults();
     } catch (error) {
@@ -197,8 +260,7 @@ const LabResults = () => {
         setError(error.message);
       }
     }
-  };
-  const handleEditLabResult = (labResult) => {
+  };  const handleEditLabResult = async (labResult) => {
     setEditingLabResult(labResult);
     setFormData({
       test_name: labResult.test_name || '',
@@ -213,22 +275,46 @@ const LabResults = () => {
       notes: labResult.notes || '',
       practitioner_id: labResult.practitioner_id || ''
     });
+    
+    // Load existing files for this lab result
+    try {
+      const files = await apiService.getLabResultFiles(labResult.id);
+      setSelectedFiles(files);
+    } catch (error) {
+      console.error('Error loading files:', error);
+      setSelectedFiles([]);
+    }
+    
+    // Clear any pending files and files marked for deletion
+    setPendingFiles([]);
+    setFilesToDelete([]);
     setShowEditForm(true);
   };
-
   const handleUpdateLabResult = async (e) => {
     e.preventDefault();
     if (!editingLabResult) return;
 
     try {
       setError(null);
-        // Prepare data for submission
+      
+      // Delete marked files first
+      if (filesToDelete.length > 0) {
+        await deleteMarkedFiles();
+      }      // Prepare data for submission
       const labResultData = {
         ...formData,
         practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
-        ordered_date: formData.ordered_date || new Date().toISOString(),
-        completed_date: formData.completed_date || null,
-      };      await apiService.updateLabResult(editingLabResult.id, labResultData);
+        ordered_date: formData.ordered_date ? new Date(formData.ordered_date).toISOString() : new Date().toISOString(),
+        completed_date: formData.completed_date ? new Date(formData.completed_date).toISOString() : null,
+      };
+
+      console.log('Updating lab result with data:', labResultData);
+      await apiService.updateLabResult(editingLabResult.id, labResultData);
+      
+      // Upload any pending files
+      if (pendingFiles.length > 0) {
+        await uploadPendingFiles(editingLabResult.id);
+      }
       
       // Reset form and refresh list
       setFormData({
@@ -244,6 +330,8 @@ const LabResults = () => {
         notes: '',
         practitioner_id: ''
       });
+      setPendingFiles([]); // Clear pending files
+      setFilesToDelete([]); // Clear files to delete
       setShowEditForm(false);
       setEditingLabResult(null);
       fetchLabResults();
@@ -451,10 +539,12 @@ const LabResults = () => {
         <div className="medical-form-overlay">
           <div className="medical-form-modal">
             <div className="form-header">
-              <h3>Add New Lab Result</h3>
-              <button 
+              <h3>Add New Lab Result</h3>              <button 
                 className="close-button"
-                onClick={() => setShowCreateForm(false)}
+                onClick={() => {
+                  setShowCreateForm(false);
+                  clearPendingFiles();
+                }}
               >
                 ×
               </button>
@@ -606,8 +696,65 @@ const LabResults = () => {
                     rows="3"
                   />
                 </div>
-              </div>                <div className="form-actions">
-                  <button type="button" className="cancel-button" onClick={() => setShowCreateForm(false)}>
+              </div>                {/* File Upload Section */}
+              <div className="file-upload-section">
+                <h4>Attach Files</h4>
+                <div className="file-upload-controls">
+                  <input
+                    type="file"
+                    id="create-file-input"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif,.txt,.csv,.xml,.json,.doc,.docx,.xls,.xlsx"
+                    onChange={(e) => {
+                      Array.from(e.target.files).forEach(file => {
+                        handleAddPendingFile(file, '');
+                      });
+                      e.target.value = ''; // Reset input
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="create-file-input" className="file-upload-button">
+                    Add Files
+                  </label>
+                </div>
+                
+                {/* Pending Files Display */}
+                {pendingFiles.length > 0 && (
+                  <div className="pending-files">
+                    <h5>Files to Upload:</h5>
+                    {pendingFiles.map(pendingFile => (
+                      <div key={pendingFile.id} className="pending-file-item">
+                        <span className="file-name">{pendingFile.file.name}</span>
+                        <span className="file-size">{(pendingFile.file.size / 1024).toFixed(1)} KB</span>
+                        <input
+                          type="text"
+                          placeholder="Description (optional)"
+                          value={pendingFile.description}
+                          onChange={(e) => {
+                            setPendingFiles(prev => prev.map(f => 
+                              f.id === pendingFile.id 
+                                ? { ...f, description: e.target.value }
+                                : f
+                            ));
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="remove-file-button"
+                          onClick={() => handleRemovePendingFile(pendingFile.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-actions">                  <button type="button" className="cancel-button" onClick={() => {
+                    setShowCreateForm(false);
+                    setPendingFiles([]);
+                  }}>
                     Cancel
                   </button>
                   <button type="submit" className="save-button">
@@ -623,12 +770,12 @@ const LabResults = () => {
         <div className="medical-form-overlay">
           <div className="medical-form-modal">
             <div className="form-header">
-              <h3>Edit Lab Result</h3>
-              <button 
+              <h3>Edit Lab Result</h3>              <button 
                 className="close-button"
                 onClick={() => {
                   setShowEditForm(false);
                   setEditingLabResult(null);
+                  clearPendingFiles();
                 }}
               >
                 ×
@@ -781,13 +928,117 @@ const LabResults = () => {
                     rows="3"
                   />
                 </div>
-              </div>              <div className="form-actions">
+              </div>              {/* File Upload Section for Edit */}
+              <div className="file-upload-section">
+                <h4>Manage Files</h4>
+                
+                {/* Existing Files */}
+                {selectedFiles.length > 0 && (
+                  <div className="existing-files">
+                    <h5>Current Files:</h5>
+                    {selectedFiles.map(file => (
+                      <div 
+                        key={file.id} 
+                        className={`existing-file-item ${filesToDelete.includes(file.id) ? 'marked-for-deletion' : ''}`}
+                      >
+                        <span className="file-name">{file.file_name}</span>
+                        <span className="file-size">{(file.file_size / 1024).toFixed(1)} KB</span>
+                        {file.description && (
+                          <span className="file-description">{file.description}</span>
+                        )}
+                        <div className="file-actions">
+                          <button
+                            type="button"
+                            className="download-button"
+                            onClick={() => handleDownloadFile(file.id, file.file_name)}
+                          >
+                            Download
+                          </button>
+                          {filesToDelete.includes(file.id) ? (
+                            <button
+                              type="button"
+                              className="restore-button"
+                              onClick={() => handleUnmarkFileForDeletion(file.id)}
+                            >
+                              Restore
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="delete-button"
+                              onClick={() => handleMarkFileForDeletion(file.id)}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Add New Files */}
+                <div className="file-upload-controls">
+                  <input
+                    type="file"
+                    id="edit-file-input"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif,.txt,.csv,.xml,.json,.doc,.docx,.xls,.xlsx"
+                    onChange={(e) => {
+                      Array.from(e.target.files).forEach(file => {
+                        handleAddPendingFile(file, '');
+                      });
+                      e.target.value = ''; // Reset input
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="edit-file-input" className="file-upload-button">
+                    Add New Files
+                  </label>
+                </div>
+                
+                {/* Pending Files Display */}
+                {pendingFiles.length > 0 && (
+                  <div className="pending-files">
+                    <h5>Files to Upload:</h5>
+                    {pendingFiles.map(pendingFile => (
+                      <div key={pendingFile.id} className="pending-file-item">
+                        <span className="file-name">{pendingFile.file.name}</span>
+                        <span className="file-size">{(pendingFile.file.size / 1024).toFixed(1)} KB</span>
+                        <input
+                          type="text"
+                          placeholder="Description (optional)"
+                          value={pendingFile.description}
+                          onChange={(e) => {
+                            setPendingFiles(prev => prev.map(f => 
+                              f.id === pendingFile.id 
+                                ? { ...f, description: e.target.value }
+                                : f
+                            ));
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="remove-file-button"
+                          onClick={() => handleRemovePendingFile(pendingFile.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-actions">                
                 <button 
                   type="button" 
                   className="cancel-button"
                   onClick={() => {
                     setShowEditForm(false);
                     setEditingLabResult(null);
+                    setPendingFiles([]);
+                    setFilesToDelete([]);
                   }}
                 >
                   Cancel

@@ -10,7 +10,7 @@ const initialState = {
   isLoading: true,
   error: null,
   tokenExpiry: null,
-  lastActivity: Date.now()
+  lastActivity: Date.now(),
 };
 
 // Auth Actions
@@ -22,7 +22,7 @@ const AUTH_ACTIONS = {
   TOKEN_REFRESH: 'TOKEN_REFRESH',
   UPDATE_ACTIVITY: 'UPDATE_ACTIVITY',
   SET_ERROR: 'SET_ERROR',
-  CLEAR_ERROR: 'CLEAR_ERROR'
+  CLEAR_ERROR: 'CLEAR_ERROR',
 };
 
 // Auth Reducer
@@ -31,9 +31,9 @@ function authReducer(state, action) {
     case AUTH_ACTIONS.SET_LOADING:
       return {
         ...state,
-        isLoading: action.payload
+        isLoading: action.payload,
       };
-    
+
     case AUTH_ACTIONS.LOGIN_SUCCESS:
       return {
         ...state,
@@ -43,9 +43,9 @@ function authReducer(state, action) {
         isLoading: false,
         error: null,
         tokenExpiry: action.payload.tokenExpiry,
-        lastActivity: Date.now()
+        lastActivity: Date.now(),
       };
-    
+
     case AUTH_ACTIONS.LOGIN_FAILURE:
       return {
         ...state,
@@ -54,42 +54,42 @@ function authReducer(state, action) {
         isAuthenticated: false,
         isLoading: false,
         error: action.payload,
-        tokenExpiry: null
+        tokenExpiry: null,
       };
-    
+
     case AUTH_ACTIONS.LOGOUT:
       return {
         ...initialState,
-        isLoading: false
+        isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.TOKEN_REFRESH:
       return {
         ...state,
         token: action.payload.token,
         tokenExpiry: action.payload.tokenExpiry,
-        lastActivity: Date.now()
+        lastActivity: Date.now(),
       };
-    
+
     case AUTH_ACTIONS.UPDATE_ACTIVITY:
       return {
         ...state,
-        lastActivity: Date.now()
+        lastActivity: Date.now(),
       };
-    
+
     case AUTH_ACTIONS.SET_ERROR:
       return {
         ...state,
         error: action.payload,
-        isLoading: false
+        isLoading: false,
       };
-    
+
     case AUTH_ACTIONS.CLEAR_ERROR:
       return {
         ...state,
-        error: null
+        error: null,
       };
-    
+
     default:
       return state;
   }
@@ -103,7 +103,7 @@ export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Check if token is expired
-  const isTokenExpired = (tokenExpiry) => {
+  const isTokenExpired = tokenExpiry => {
     if (!tokenExpiry) return true;
     return Date.now() >= tokenExpiry;
   };
@@ -113,14 +113,14 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
-        
+
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
         const storedExpiry = localStorage.getItem('tokenExpiry');
-        
+
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
-          
+
           if (!isTokenExpired(tokenExpiry)) {
             // Token is still valid, verify with server
             try {
@@ -130,8 +130,8 @@ export function AuthProvider({ children }) {
                 payload: {
                   user,
                   token: storedToken,
-                  tokenExpiry
-                }
+                  tokenExpiry,
+                },
               });
             } catch (error) {
               // Token invalid on server, clear local storage
@@ -147,8 +147,8 @@ export function AuthProvider({ children }) {
                   type: AUTH_ACTIONS.TOKEN_REFRESH,
                   payload: {
                     token: refreshResult.token,
-                    tokenExpiry: refreshResult.tokenExpiry
-                  }
+                    tokenExpiry: refreshResult.tokenExpiry,
+                  },
                 });
               } else {
                 clearAuthData();
@@ -186,8 +186,8 @@ export function AuthProvider({ children }) {
               type: AUTH_ACTIONS.TOKEN_REFRESH,
               payload: {
                 token: refreshResult.token,
-                tokenExpiry: refreshResult.tokenExpiry
-              }
+                tokenExpiry: refreshResult.tokenExpiry,
+              },
             });
             updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
           } else {
@@ -234,32 +234,32 @@ export function AuthProvider({ children }) {
     localStorage.setItem('tokenExpiry', tokenExpiry.toString());
   };
 
-  const updateStoredUser = (user) => {
+  const updateStoredUser = user => {
     localStorage.setItem('user', JSON.stringify(user));
   };
 
   // Auth Actions
-  const login = async (credentials) => {
+  const login = async credentials => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
       const result = await authService.login(credentials);
-      
+
       if (result.success) {
-        const tokenExpiry = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
-        
+        const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
         // Store in localStorage
         updateStoredToken(result.token, tokenExpiry);
         updateStoredUser(result.user);
-        
+
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
           payload: {
             user: result.user,
             token: result.token,
-            tokenExpiry
-          }
+            tokenExpiry,
+          },
         });
 
         toast.success('Login successful!');
@@ -267,7 +267,7 @@ export function AuthProvider({ children }) {
       } else {
         dispatch({
           type: AUTH_ACTIONS.LOGIN_FAILURE,
-          payload: result.error || 'Login failed'
+          payload: result.error || 'Login failed',
         });
         return { success: false, error: result.error };
       }
@@ -275,7 +275,7 @@ export function AuthProvider({ children }) {
       const errorMessage = error.message || 'Login failed';
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: errorMessage
+        payload: errorMessage,
       });
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
@@ -306,12 +306,12 @@ export function AuthProvider({ children }) {
   };
 
   // Check if user has specific role
-  const hasRole = (role) => {
+  const hasRole = role => {
     return state.user?.role === role || state.user?.roles?.includes(role);
   };
 
   // Check if user has any of the specified roles
-  const hasAnyRole = (roles) => {
+  const hasAnyRole = roles => {
     if (!state.user) return false;
     if (state.user.role && roles.includes(state.user.role)) return true;
     if (state.user.roles) {
@@ -327,22 +327,20 @@ export function AuthProvider({ children }) {
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
     error: state.error,
-    
+
     // Actions
     login,
     logout,
     updateActivity,
     clearError,
-    
+
     // Utilities
     hasRole,
-    hasAnyRole
+    hasAnyRole,
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

@@ -8,7 +8,8 @@ const DashboardCard = ({ title, description, link, size = 'normal' }) => {
     navigate(link);
   };
 
-  const cardClass = size === 'small' ? 'dashboard-card dashboard-card-small' : 'dashboard-card';
+  const cardClass =
+    size === 'small' ? 'dashboard-card dashboard-card-small' : 'dashboard-card';
 
   return (
     <div className={cardClass}>

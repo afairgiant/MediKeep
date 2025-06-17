@@ -99,9 +99,9 @@ class LabResultBase(BaseModel):
             "borderline",
             "inconclusive",
         ]
-        if v and v.lower() not in valid_results:
+        if v and v.strip() and v.lower() not in valid_results:
             raise ValueError(f"Labs result must be one of: {', '.join(valid_results)}")
-        return v.lower() if v else None
+        return v.lower() if v and v.strip() else None
 
     @validator("notes")
     def validate_notes(cls, v):
@@ -173,11 +173,10 @@ class LabResultUpdate(BaseModel):
             if v.lower() not in valid_statuses:
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
             return v.lower()
-        return v
+        return v @ validator("labs_result")
 
-    @validator("labs_result")
     def validate_labs_result(cls, v):
-        if v is not None:
+        if v is not None and v.strip():
             valid_results = [
                 "normal",
                 "abnormal",

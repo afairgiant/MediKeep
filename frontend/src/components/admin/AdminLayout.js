@@ -9,7 +9,7 @@ import './AdminLayout.css';
 const AdminLayout = ({ children }) => {
   // Add component debugging
   useComponentDebug('AdminLayout');
-  
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,13 +17,13 @@ const AdminLayout = ({ children }) => {
   const [adminVerified, setAdminVerified] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Debug tracking
   const renderCount = useRef(0);
   const lastCheck = useRef(null);
   const mountTime = useRef(Date.now());
   const debugListenersAdded = useRef(false);
-  
+
   renderCount.current += 1;
 
   // Add debug listeners on first render
@@ -44,22 +44,23 @@ const AdminLayout = ({ children }) => {
     error,
     tokenExists: !!localStorage.getItem('token'),
     timeSinceMount: Date.now() - mountTime.current,
-    lastCheckTime: lastCheck.current ? Date.now() - lastCheck.current : 'never'
-  });const checkAdminAccess = useCallback(async () => {
+    lastCheckTime: lastCheck.current ? Date.now() - lastCheck.current : 'never',
+  });
+  const checkAdminAccess = useCallback(async () => {
     const checkId = Date.now();
     lastCheck.current = checkId;
-    
+
     console.log(`🔐 checkAdminAccess called #${checkId}:`, {
       timestamp: new Date().toISOString(),
       currentUser: user?.username,
       adminVerified,
-      pathname: location.pathname
+      pathname: location.pathname,
     });
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = localStorage.getItem('token');
       if (!token) {
         console.log(`❌ No token found #${checkId}, redirecting to login`);
@@ -70,16 +71,16 @@ const AdminLayout = ({ children }) => {
       // Decode token to check role and expiration
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Date.now() / 1000;
-      
+
       console.log(`🎫 Token decoded #${checkId}:`, {
         username: payload.sub,
         role: payload.role,
         exp: payload.exp,
         currentTime,
         timeToExpiry: payload.exp - currentTime,
-        isExpired: payload.exp < currentTime
+        isExpired: payload.exp < currentTime,
       });
-      
+
       if (payload.exp < currentTime) {
         console.log(`⏰ Token expired #${checkId}, redirecting to login`);
         localStorage.removeItem('token');
@@ -89,19 +90,24 @@ const AdminLayout = ({ children }) => {
 
       // Check if user has admin role
       const userRole = payload.role || '';
-      if (userRole.toLowerCase() !== 'admin' && userRole.toLowerCase() !== 'administrator') {
-        console.log(`🚫 User is not admin #${checkId}, role: ${userRole}, redirecting to dashboard`);
+      if (
+        userRole.toLowerCase() !== 'admin' &&
+        userRole.toLowerCase() !== 'administrator'
+      ) {
+        console.log(
+          `🚫 User is not admin #${checkId}, role: ${userRole}, redirecting to dashboard`
+        );
         navigate('/dashboard');
         return;
       }
 
       // Set user data immediately after role check
-      const userData = { 
-        username: payload.sub, 
+      const userData = {
+        username: payload.sub,
         role: userRole,
-        fullName: payload.full_name || payload.sub 
+        fullName: payload.full_name || payload.sub,
       };
-      
+
       console.log(`✅ Admin access granted #${checkId}:`, userData);
       setUser(userData);
       setAdminVerified(true); // Mark as verified
@@ -112,11 +118,13 @@ const AdminLayout = ({ children }) => {
         await adminApiService.testAdminAccess();
         console.log(`✅ Admin access verified with backend #${checkId}`);
       } catch (apiError) {
-        console.warn(`⚠️ Admin access test failed #${checkId}, but proceeding anyway:`, apiError);
+        console.warn(
+          `⚠️ Admin access test failed #${checkId}, but proceeding anyway:`,
+          apiError
+        );
         // Don't fail the whole auth check if backend test fails
         // User already passed token validation and role check
       }
-      
     } catch (error) {
       console.error(`💥 Auth check failed #${checkId}:`, error);
       setError('Authentication failed. Please try logging in again.');
@@ -125,7 +133,8 @@ const AdminLayout = ({ children }) => {
       setLoading(false);
       console.log(`🏁 checkAdminAccess completed #${checkId}`);
     }
-  }, [navigate, user?.username, adminVerified, location.pathname]);  useEffect(() => {
+  }, [navigate, user?.username, adminVerified, location.pathname]);
+  useEffect(() => {
     const effectId = Date.now();
     console.log(`🎯 useEffect triggered #${effectId}:`, {
       timestamp: new Date().toISOString(),
@@ -135,17 +144,19 @@ const AdminLayout = ({ children }) => {
       dependencies: {
         checkAdminAccess: typeof checkAdminAccess,
         user: user?.username,
-        adminVerified
-      }
+        adminVerified,
+      },
     });
-    
+
     // Only check admin access once when component first mounts
     // Don't re-check on every navigation within admin area
     if (!user && !adminVerified) {
       console.log(`🚀 Triggering checkAdminAccess from useEffect #${effectId}`);
       checkAdminAccess();
     } else {
-      console.log(`⏭️ Skipping checkAdminAccess #${effectId} - already verified`);
+      console.log(
+        `⏭️ Skipping checkAdminAccess #${effectId} - already verified`
+      );
     }
   }, [checkAdminAccess, user, adminVerified]);
 
@@ -153,15 +164,16 @@ const AdminLayout = ({ children }) => {
     console.log('🚪 handleLogout called:', {
       timestamp: new Date().toISOString(),
       currentUser: user?.username,
-      pathname: location.pathname
+      pathname: location.pathname,
     });
     localStorage.removeItem('token');
     navigate('/login');
-  };  const toggleSidebar = () => {
+  };
+  const toggleSidebar = () => {
     console.log('📱 toggleSidebar called:', {
       timestamp: new Date().toISOString(),
       currentState: sidebarOpen,
-      newState: !sidebarOpen
+      newState: !sidebarOpen,
     });
     setSidebarOpen(!sidebarOpen);
   };
@@ -187,7 +199,10 @@ const AdminLayout = ({ children }) => {
         <div className="error-container">
           <h2>Access Error</h2>
           <p>{error}</p>
-          <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="btn btn-primary"
+          >
             Return to Dashboard
           </button>
         </div>
@@ -198,22 +213,22 @@ const AdminLayout = ({ children }) => {
   console.log('✅ Rendering admin layout normally');
   return (
     <div className="admin-layout">
-      <AdminSidebar 
-        isOpen={sidebarOpen} 
+      <AdminSidebar
+        isOpen={sidebarOpen}
         onToggle={toggleSidebar}
         currentPath={location.pathname}
       />
-      
-      <div className={`admin-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <AdminHeader 
+
+      <div
+        className={`admin-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
+      >
+        <AdminHeader
           user={user}
           onLogout={handleLogout}
           onToggleSidebar={toggleSidebar}
         />
-        
-        <main className="admin-content">
-          {children}
-        </main>
+
+        <main className="admin-content">{children}</main>
       </div>
     </div>
   );

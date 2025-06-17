@@ -22,13 +22,15 @@ const FormInput = ({
 }) => {
   const inputId = `input-${name}`;
   const hasError = !!error;
-  
+
   const inputClass = [
     'form-input',
     hasError ? 'form-input-error' : '',
     disabled ? 'form-input-disabled' : '',
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="form-group">
@@ -38,7 +40,7 @@ const FormInput = ({
           {required && <span className="form-required">*</span>}
         </label>
       )}
-      
+
       <input
         id={inputId}
         name={name}
@@ -50,16 +52,22 @@ const FormInput = ({
         placeholder={placeholder}
         className={inputClass}
         aria-invalid={hasError}
-        aria-describedby={hasError ? `${inputId}-error` : helpText ? `${inputId}-help` : undefined}
+        aria-describedby={
+          hasError
+            ? `${inputId}-error`
+            : helpText
+              ? `${inputId}-help`
+              : undefined
+        }
         {...props}
       />
-      
+
       {helpText && !hasError && (
         <div id={`${inputId}-help`} className="form-help-text">
           {helpText}
         </div>
       )}
-      
+
       {hasError && (
         <div id={`${inputId}-error`} className="form-error-text">
           {error}

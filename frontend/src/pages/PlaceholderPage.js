@@ -7,17 +7,27 @@ const PlaceholderPage = () => {
   const navigate = useNavigate();
 
   const getSectionTitle = () => {
-    switch(section) {
-      case 'patients': return 'Patient Information';
-      case 'lab-results': return 'Lab Results';
-      case 'medications': return 'Medications';
-      case 'immunizations': return 'Immunizations';
-      case 'procedures': return 'Procedures';
-      case 'allergies': return 'Allergies';
-      case 'conditions': return 'Conditions';
-      case 'treatments': return 'Treatments';
-      case 'visits': return 'Visit History';
-      default: return 'Medical Records';
+    switch (section) {
+      case 'patients':
+        return 'Patient Information';
+      case 'lab-results':
+        return 'Lab Results';
+      case 'medications':
+        return 'Medications';
+      case 'immunizations':
+        return 'Immunizations';
+      case 'procedures':
+        return 'Procedures';
+      case 'allergies':
+        return 'Allergies';
+      case 'conditions':
+        return 'Conditions';
+      case 'treatments':
+        return 'Treatments';
+      case 'visits':
+        return 'Visit History';
+      default:
+        return 'Medical Records';
     }
   };
 
@@ -27,10 +37,7 @@ const PlaceholderPage = () => {
         <h1>🚧 {getSectionTitle()}</h1>
         <p>This section is currently under development.</p>
         <p>Check back soon for updates!</p>
-        <button 
-          onClick={() => navigate('/dashboard')}
-          className="back-button"
-        >
+        <button onClick={() => navigate('/dashboard')} className="back-button">
           ← Back to Dashboard
         </button>
       </div>

@@ -12,7 +12,7 @@ const initialState = {
   isAuthenticated: false,
   loading: true,
   error: null,
-  notifications: []
+  notifications: [],
 };
 
 // Action types
@@ -24,7 +24,7 @@ export const ACTION_TYPES = {
   CLEAR_ERROR: 'CLEAR_ERROR',
   ADD_NOTIFICATION: 'ADD_NOTIFICATION',
   REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION',
-  LOGOUT: 'LOGOUT'
+  LOGOUT: 'LOGOUT',
 };
 
 // Reducer
@@ -32,42 +32,42 @@ const appReducer = (state, action) => {
   switch (action.type) {
     case ACTION_TYPES.SET_LOADING:
       return { ...state, loading: action.payload };
-      
+
     case ACTION_TYPES.SET_USER:
-      return { 
-        ...state, 
-        user: action.payload, 
+      return {
+        ...state,
+        user: action.payload,
         isAuthenticated: !!action.payload,
-        loading: false 
+        loading: false,
       };
-      
+
     case ACTION_TYPES.SET_PATIENT:
       return { ...state, patient: action.payload };
-      
+
     case ACTION_TYPES.SET_ERROR:
       return { ...state, error: action.payload, loading: false };
-      
+
     case ACTION_TYPES.CLEAR_ERROR:
       return { ...state, error: null };
-      
+
     case ACTION_TYPES.ADD_NOTIFICATION:
-      return { 
-        ...state, 
-        notifications: [...state.notifications, action.payload] 
+      return {
+        ...state,
+        notifications: [...state.notifications, action.payload],
       };
-      
+
     case ACTION_TYPES.REMOVE_NOTIFICATION:
-      return { 
-        ...state, 
-        notifications: state.notifications.filter(n => n.id !== action.payload) 
+      return {
+        ...state,
+        notifications: state.notifications.filter(n => n.id !== action.payload),
       };
-      
+
     case ACTION_TYPES.LOGOUT:
-      return { 
-        ...initialState, 
-        loading: false 
+      return {
+        ...initialState,
+        loading: false,
       };
-      
+
     default:
       return state;
   }
@@ -84,7 +84,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const initializeApp = async () => {
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         dispatch({ type: ACTION_TYPES.SET_LOADING, payload: false });
         return;
@@ -107,19 +107,19 @@ export const AppProvider = ({ children }) => {
 
   // Action creators
   const actions = {
-    setLoading: (loading) => {
+    setLoading: loading => {
       dispatch({ type: ACTION_TYPES.SET_LOADING, payload: loading });
     },
 
-    setUser: (user) => {
+    setUser: user => {
       dispatch({ type: ACTION_TYPES.SET_USER, payload: user });
     },
 
-    setPatient: (patient) => {
+    setPatient: patient => {
       dispatch({ type: ACTION_TYPES.SET_PATIENT, payload: patient });
     },
 
-    setError: (error) => {
+    setError: error => {
       dispatch({ type: ACTION_TYPES.SET_ERROR, payload: error });
     },
 
@@ -127,11 +127,11 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ACTION_TYPES.CLEAR_ERROR });
     },
 
-    addNotification: (notification) => {
+    addNotification: notification => {
       const id = Date.now().toString();
-      dispatch({ 
-        type: ACTION_TYPES.ADD_NOTIFICATION, 
-        payload: { id, ...notification } 
+      dispatch({
+        type: ACTION_TYPES.ADD_NOTIFICATION,
+        payload: { id, ...notification },
       });
 
       // Auto-remove notification after 5 seconds
@@ -140,35 +140,31 @@ export const AppProvider = ({ children }) => {
       }, 5000);
     },
 
-    removeNotification: (id) => {
+    removeNotification: id => {
       dispatch({ type: ACTION_TYPES.REMOVE_NOTIFICATION, payload: id });
     },
 
     logout: () => {
       localStorage.removeItem('token');
       dispatch({ type: ACTION_TYPES.LOGOUT });
-    }
+    },
   };
 
   const value = {
     ...state,
-    ...actions
+    ...actions,
   };
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 // Custom hook to use the context
 export const useApp = () => {
   const context = useContext(AppContext);
-  
+
   if (!context) {
     throw new Error('useApp must be used within an AppProvider');
   }
-  
+
   return context;
 };

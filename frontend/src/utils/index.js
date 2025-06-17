@@ -24,5 +24,5 @@ export {
   debounce as debounceFunction,
   generateId as createUniqueId,
   sortByProperty as sortArrayByProperty,
-  filterBySearch as searchInArray
+  filterBySearch as searchInArray,
 } from './helpers';

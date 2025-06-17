@@ -5,7 +5,8 @@ import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import '../../styles/pages/PatientInfo.css';
 
-const PatientInfo = () => {  const [patientData, setPatientData] = useState(null);
+const PatientInfo = () => {
+  const [patientData, setPatientData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [patientExists, setPatientExists] = useState(true);
@@ -15,7 +16,7 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
     last_name: '',
     birthDate: '',
     gender: '',
-    address: ''
+    address: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,7 +41,8 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
   const fetchPatientData = async () => {
     try {
       setLoading(true);
-      setError('');      const data = await apiService.getCurrentPatient();
+      setError('');
+      const data = await apiService.getCurrentPatient();
       setPatientData(data);
       setPatientExists(true);
       setFormData({
@@ -52,18 +54,21 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
         bloodType: data.bloodType || '',
         height: data.height || '',
         weight: data.weight || '',
-        physician_id: data.physician_id || ''
+        physician_id: data.physician_id || '',
       });
     } catch (error) {
       console.error('Error fetching patient data:', error);
-      if (error.message.includes('Patient record not found') || error.message.includes('404')) {
+      if (
+        error.message.includes('Patient record not found') ||
+        error.message.includes('404')
+      ) {
         setPatientExists(false);
         setFormData({
           first_name: '',
           last_name: '',
           birthDate: '',
           gender: '',
-          address: ''
+          address: '',
         });
       } else {
         setError('Failed to load patient information. Please try again.');
@@ -73,13 +78,14 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-  };  const handleEdit = () => {
+  };
+  const handleEdit = () => {
     setIsEditing(true);
     setError('');
     setSuccessMessage('');
@@ -97,7 +103,7 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
         bloodType: patientData.bloodType || '',
         height: patientData.height || '',
         weight: patientData.weight || '',
-        physician_id: patientData.physician_id || ''
+        physician_id: patientData.physician_id || '',
       });
     } else {
       setFormData({
@@ -109,7 +115,7 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
         bloodType: '',
         height: '',
         weight: '',
-        physician_id: ''
+        physician_id: '',
       });
     }
     setError('');
@@ -121,41 +127,51 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
       setSaving(true);
       setError('');
       setSuccessMessage('');
-        let updatedData;
+      let updatedData;
       if (isCreating || !patientExists) {
         updatedData = await apiService.createCurrentPatient(formData);
         setPatientExists(true);
         setIsCreating(false);
-        setSuccessMessage('Patient information created successfully!');      } else {
+        setSuccessMessage('Patient information created successfully!');
+      } else {
         // Use the correct API method for updating current patient
         updatedData = await apiService.updateCurrentPatient(formData);
         setIsEditing(false);
         setSuccessMessage('Patient information updated successfully!');
       }
-      
+
       setPatientData(updatedData);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error saving patient data:', error);
-      setError(error.message || 'Failed to save patient information. Please try again.');
-    } finally {    setSaving(false);
+      setError(
+        error.message || 'Failed to save patient information. Please try again.'
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
-  const getGenderDisplay = (gender) => {
+  const getGenderDisplay = gender => {
     switch (gender?.toUpperCase()) {
-      case 'M': return 'Male';
-      case 'F': return 'Female';
-      case 'OTHER': return 'Other';
-      default: return 'Not specified';
+      case 'M':
+        return 'Male';
+      case 'F':
+        return 'Female';
+      case 'OTHER':
+        return 'Other';
+      default:
+        return 'Not specified';
     }
   };
-  const getPractitionerDisplay = (physicianId) => {
+  const getPractitionerDisplay = physicianId => {
     if (!physicianId) return 'Not assigned';
-    
-    const practitioner = practitioners.find(p => p.id === parseInt(physicianId));
+
+    const practitioner = practitioners.find(
+      p => p.id === parseInt(physicianId)
+    );
     if (practitioner) {
       return `${practitioner.name} (${practitioner.specialty})`;
     }
@@ -176,10 +192,7 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
   return (
     <div className="patient-info-container">
       <header className="patient-info-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>📋 Patient Information</h1>
@@ -187,16 +200,15 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
 
       <div className="patient-info-content">
         {error && <div className="error-message">{error}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}
 
         <div className="patient-card">
           <div className="card-header">
             <h2>Personal Information</h2>
             {!isEditing && (
-              <button 
-                className="edit-button"
-                onClick={handleEdit}
-              >
+              <button className="edit-button" onClick={handleEdit}>
                 ✏️ Edit
               </button>
             )}
@@ -230,7 +242,6 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                   />
                 </div>
               </div>
-
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="birthDate">Birth Date *</label>
@@ -243,7 +254,8 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                     required
                     disabled={saving}
                   />
-                </div>                <div className="form-group">
+                </div>{' '}
+                <div className="form-group">
                   <label htmlFor="gender">Gender</label>
                   <select
                     id="gender"
@@ -258,7 +270,8 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                     <option value="OTHER">Other</option>
                   </select>
                 </div>
-              </div>              <div className="form-group">
+              </div>{' '}
+              <div className="form-group">
                 <label htmlFor="address">Address</label>
                 <textarea
                   id="address"
@@ -269,7 +282,6 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                   rows="3"
                 />
               </div>
-
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="bloodType">Blood Type</label>
@@ -306,7 +318,6 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                   />
                 </div>
               </div>
-
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="weight">Weight (lbs)</label>
@@ -320,7 +331,8 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                     min="1"
                     max="1000"
                     placeholder="e.g., 150"
-                  />                </div>
+                  />{' '}
+                </div>
                 <div className="form-group">
                   <label htmlFor="physician_id">Primary Care Physician</label>
                   <select
@@ -328,9 +340,13 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                     name="physician_id"
                     value={formData.physician_id}
                     onChange={handleInputChange}
-                    disabled={saving}                  >
+                    disabled={saving}
+                  >
                     <option value="">Select Physician (Optional)</option>
-                    {console.log('Rendering practitioners dropdown, practitioners:', practitioners)}
+                    {console.log(
+                      'Rendering practitioners dropdown, practitioners:',
+                      practitioners
+                    )}
                     {practitioners.map(practitioner => (
                       <option key={practitioner.id} value={practitioner.id}>
                         {practitioner.name} - {practitioner.specialty}
@@ -339,7 +355,6 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                   </select>
                 </div>
               </div>
-
               <div className="form-actions">
                 <button
                   type="button"
@@ -371,20 +386,26 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                   <span>{patientData?.last_name || 'Not provided'}</span>
                 </div>
               </div>
-
-              <div className="detail-row">                <div className="detail-group">
+              <div className="detail-row">
+                {' '}
+                <div className="detail-group">
                   <label>Birth Date:</label>
-                  <span>{formatDate(patientData?.birthDate, DATE_FORMATS.DISPLAY_LONG)}</span>
+                  <span>
+                    {formatDate(
+                      patientData?.birthDate,
+                      DATE_FORMATS.DISPLAY_LONG
+                    )}
+                  </span>
                 </div>
                 <div className="detail-group">
                   <label>Gender:</label>
                   <span>{getGenderDisplay(patientData?.gender)}</span>
                 </div>
-              </div>              <div className="detail-group full-width">
+              </div>{' '}
+              <div className="detail-group full-width">
                 <label>Address:</label>
                 <span>{patientData?.address || 'Not provided'}</span>
               </div>
-
               <div className="detail-row">
                 <div className="detail-group">
                   <label>Blood Type:</label>
@@ -392,19 +413,30 @@ const PatientInfo = () => {  const [patientData, setPatientData] = useState(null
                 </div>
                 <div className="detail-group">
                   <label>Height:</label>
-                  <span>{patientData?.height ? `${patientData.height} inches` : 'Not provided'}</span>
+                  <span>
+                    {patientData?.height
+                      ? `${patientData.height} inches`
+                      : 'Not provided'}
+                  </span>
                 </div>
               </div>
-
-              <div className="detail-row">                <div className="detail-group">
+              <div className="detail-row">
+                {' '}
+                <div className="detail-group">
                   <label>Weight:</label>
-                  <span>{patientData?.weight ? `${patientData.weight} lbs` : 'Not provided'}</span>
-                </div>                <div className="detail-group">
+                  <span>
+                    {patientData?.weight
+                      ? `${patientData.weight} lbs`
+                      : 'Not provided'}
+                  </span>
+                </div>{' '}
+                <div className="detail-group">
                   <label>Primary Care Physician:</label>
-                  <span>{getPractitionerDisplay(patientData?.physician_id)}</span>
+                  <span>
+                    {getPractitionerDisplay(patientData?.physician_id)}
+                  </span>
                 </div>
               </div>
-
               {patientData?.id && (
                 <div className="detail-group">
                   <label>Patient ID:</label>

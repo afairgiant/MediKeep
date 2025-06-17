@@ -22,8 +22,10 @@ const MedicalCard = ({
   const cardClass = [
     'medical-card',
     onClick && 'medical-card-clickable',
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={cardClass} onClick={onClick} {...props}>
@@ -32,19 +34,17 @@ const MedicalCard = ({
           <h3 className="card-title">{title}</h3>
           {subtitle && <p className="card-subtitle">{subtitle}</p>}
         </div>
-        
+
         {status && (
-          <span className={`status-badge status-${getStatusClass(status, statusType)}`}>
+          <span
+            className={`status-badge status-${getStatusClass(status, statusType)}`}
+          >
             {status}
           </span>
         )}
       </div>
 
-      {children && (
-        <div className="medical-card-body">
-          {children}
-        </div>
-      )}
+      {children && <div className="medical-card-body">{children}</div>}
 
       {dateInfo && (
         <div className="medical-card-dates">
@@ -69,9 +69,9 @@ const MedicalCard = ({
       {(onEdit || onDelete || actions) && (
         <div className="medical-card-actions">
           {onEdit && (
-            <button 
+            <button
               className="edit-button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onEdit();
               }}
@@ -80,9 +80,9 @@ const MedicalCard = ({
             </button>
           )}
           {onDelete && (
-            <button 
+            <button
               className="delete-button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onDelete();
               }}
@@ -100,30 +100,41 @@ const MedicalCard = ({
 // Helper function to get status class
 const getStatusClass = (status, type) => {
   if (!status) return 'unknown';
-  
+
   const statusLower = status.toLowerCase();
-  
+
   if (type === 'medication') {
     switch (statusLower) {
-      case 'active': return 'active';
-      case 'stopped': return 'stopped';
-      case 'on-hold': return 'on-hold';
-      case 'completed': return 'completed';
-      case 'cancelled': return 'cancelled';
-      default: return 'unknown';
+      case 'active':
+        return 'active';
+      case 'stopped':
+        return 'stopped';
+      case 'on-hold':
+        return 'on-hold';
+      case 'completed':
+        return 'completed';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return 'unknown';
     }
   }
-  
+
   if (type === 'lab-result') {
     switch (statusLower) {
-      case 'completed': return 'completed';
-      case 'in-progress': return 'in-progress';
-      case 'ordered': return 'ordered';
-      case 'cancelled': return 'cancelled';
-      default: return 'unknown';
+      case 'completed':
+        return 'completed';
+      case 'in-progress':
+        return 'in-progress';
+      case 'ordered':
+        return 'ordered';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return 'unknown';
     }
   }
-  
+
   return statusLower;
 };
 

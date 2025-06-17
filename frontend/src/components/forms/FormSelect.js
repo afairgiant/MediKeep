@@ -22,13 +22,15 @@ const FormSelect = ({
 }) => {
   const selectId = `select-${name}`;
   const hasError = !!error;
-  
+
   const selectClass = [
     'form-select',
     hasError ? 'form-select-error' : '',
     disabled ? 'form-select-disabled' : '',
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="form-group">
@@ -38,7 +40,7 @@ const FormSelect = ({
           {required && <span className="form-required">*</span>}
         </label>
       )}
-      
+
       <select
         id={selectId}
         name={name}
@@ -48,7 +50,13 @@ const FormSelect = ({
         disabled={disabled}
         className={selectClass}
         aria-invalid={hasError}
-        aria-describedby={hasError ? `${selectId}-error` : helpText ? `${selectId}-help` : undefined}
+        aria-describedby={
+          hasError
+            ? `${selectId}-error`
+            : helpText
+              ? `${selectId}-help`
+              : undefined
+        }
         {...props}
       >
         {placeholder && (
@@ -57,8 +65,8 @@ const FormSelect = ({
           </option>
         )}
         {options.map((option, index) => (
-          <option 
-            key={option.value || index} 
+          <option
+            key={option.value || index}
             value={option.value}
             disabled={option.disabled}
           >
@@ -66,13 +74,13 @@ const FormSelect = ({
           </option>
         ))}
       </select>
-      
+
       {helpText && !hasError && (
         <div id={`${selectId}-help`} className="form-help-text">
           {helpText}
         </div>
       )}
-      
+
       {hasError && (
         <div id={`${selectId}-error`} className="form-error-text">
           {error}

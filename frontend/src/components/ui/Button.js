@@ -21,15 +21,17 @@ const Button = ({
   const sizeClass = `btn-${size}`;
   const disabledClass = disabled || loading ? 'btn-disabled' : '';
   const loadingClass = loading ? 'btn-loading' : '';
-  
+
   const buttonClass = [
     baseClass,
     variantClass,
     sizeClass,
     disabledClass,
     loadingClass,
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <button

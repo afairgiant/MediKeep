@@ -157,19 +157,205 @@
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(-20px); 
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+/* File Upload Section for Create/Edit Forms */
+.file-upload-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.file-upload-section h4,
+.file-upload-section h5 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.file-upload-controls {
+  margin-bottom: 1rem;
+}
+
+.file-upload-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  border: none;
+}
+
+.file-upload-button:hover {
+  background: #0056b3;
+}
+
+/* Pending Files */
+.pending-files {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.pending-file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pending-file-item .file-name {
+  font-weight: 500;
+  color: #333;
+  min-width: 150px;
+}
+
+.pending-file-item .file-size {
+  color: #6c757d;
+  font-size: 0.85rem;
+  min-width: 80px;
+}
+
+.pending-file-item input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+
+.remove-file-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.remove-file-button:hover {
+  background: #c82333;
+}
+
+/* Existing Files in Edit Form */
+.existing-files {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.existing-file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  transition: all 0.3s ease;
+}
+
+.existing-file-item.marked-for-deletion {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  opacity: 0.7;
+}
+
+.existing-file-item .file-name {
+  font-weight: 500;
+  color: #333;
+  min-width: 150px;
+}
+
+.existing-file-item .file-size {
+  color: #6c757d;
+  font-size: 0.85rem;
+  min-width: 80px;
+}
+
+.existing-file-item .file-description {
+  color: #495057;
+  font-style: italic;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.existing-file-item .file-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.download-button,
+.restore-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.download-button:hover {
+  background: #218838;
+}
+
+.restore-button {
+  background: #ffc107;
+  color: #212529;
+}
+
+.restore-button:hover {
+  background: #e0a800;
+}
+
+.delete-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+  background: #c82333;
 }
 
 /* Responsive Design */
@@ -178,18 +364,34 @@
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .file-item {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
   }
-  
+
   .file-actions {
     justify-content: center;
   }
-  
+
   .details-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pending-file-item,
+  .existing-file-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .pending-file-item input[type="text"] {
+    min-width: auto;
+  }
+
+  .existing-file-item .file-actions {
+    margin-left: 0;
+    justify-content: center;
   }
 }

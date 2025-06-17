@@ -118,7 +118,8 @@
   font-size: 0.875rem;
 }
 
-.pk-badge, .fk-badge {
+.pk-badge,
+.fk-badge {
   font-size: 0.625rem;
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
@@ -146,7 +147,9 @@
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
+    monospace;
   font-size: 0.875rem;
   line-height: 1.5;
   color: #374151;
@@ -156,7 +159,8 @@
   word-break: break-word;
 }
 
-.field-value.datetime, .field-value.date {
+.field-value.datetime,
+.field-value.date {
   color: #059669;
 }
 
@@ -242,7 +246,7 @@
   .details-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .field-group {
     padding: 1rem;
   }
@@ -252,7 +256,7 @@
   .model-view {
     padding: 3rem;
   }
-  
+
   .model-view-header {
     margin-bottom: 3rem;
   }
