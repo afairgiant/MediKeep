@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/sh
 set -e
 
 echo "Starting Medical Records Management System..."
