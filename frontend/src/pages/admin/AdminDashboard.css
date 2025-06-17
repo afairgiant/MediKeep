@@ -10,8 +10,10 @@
   --admin-light: #f8fafc;
   --admin-dark: #1e293b;
   --admin-border: #e2e8f0;
-  --admin-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --admin-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --admin-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --admin-shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --admin-radius: 12px;
   --admin-radius-lg: 16px;
 }
@@ -105,8 +107,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .view-tabs {
@@ -176,14 +182,22 @@
   background: var(--card-color, var(--admin-primary));
 }
 
-.stat-card-modern.primary { --card-color: var(--admin-primary); }
-.stat-card-modern.success { --card-color: var(--admin-success); }
-.stat-card-modern.warning { --card-color: var(--admin-warning); }
-.stat-card-modern.info { --card-color: var(--admin-info); }
+.stat-card-modern.primary {
+  --card-color: var(--admin-primary);
+}
+.stat-card-modern.success {
+  --card-color: var(--admin-success);
+}
+.stat-card-modern.warning {
+  --card-color: var(--admin-warning);
+}
+.stat-card-modern.info {
+  --card-color: var(--admin-info);
+}
 
 .stat-card-modern .stat-icon {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--card-color), rgba(0,0,0,0.1));
+  background: linear-gradient(135deg, var(--card-color), rgba(0, 0, 0, 0.1));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -519,18 +533,30 @@
   border-color: var(--btn-color, var(--admin-primary));
 }
 
-.action-btn-modern.primary { --btn-color: var(--admin-primary); }
-.action-btn-modern.success { --btn-color: var(--admin-success); }
-.action-btn-modern.warning { --btn-color: var(--admin-warning); }
-.action-btn-modern.info { --btn-color: var(--admin-info); }
-.action-btn-modern.secondary { --btn-color: var(--admin-secondary); }
-.action-btn-modern.tertiary { --btn-color: #8b5cf6; }
+.action-btn-modern.primary {
+  --btn-color: var(--admin-primary);
+}
+.action-btn-modern.success {
+  --btn-color: var(--admin-success);
+}
+.action-btn-modern.warning {
+  --btn-color: var(--admin-warning);
+}
+.action-btn-modern.info {
+  --btn-color: var(--admin-info);
+}
+.action-btn-modern.secondary {
+  --btn-color: var(--admin-secondary);
+}
+.action-btn-modern.tertiary {
+  --btn-color: #8b5cf6;
+}
 
 .action-icon {
   width: 48px;
   height: 48px;
   border-radius: var(--admin-radius);
-  background: linear-gradient(135deg, var(--btn-color), rgba(0,0,0,0.1));
+  background: linear-gradient(135deg, var(--btn-color), rgba(0, 0, 0, 0.1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -629,16 +655,25 @@
   opacity: 0.9;
 }
 
+/* Admin Page Loading - Centered within admin content area */
+.admin-page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px); /* Account for header and padding */
+  width: 100%;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .charts-section {
     grid-template-columns: 1fr;
   }
-  
+
   .overview-section {
     grid-template-columns: 1fr;
   }
-  
+
   .quick-stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
@@ -648,29 +683,29 @@
   .admin-dashboard-modern {
     padding: 16px;
   }
-  
+
   .header-content {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
   }
-  
+
   .header-actions {
     justify-content: space-between;
   }
-  
+
   .quick-stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .actions-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .health-metrics {
     grid-template-columns: 1fr;
   }
-  
+
   .view-tabs {
     order: -1;
   }
@@ -680,19 +715,19 @@
   .header-title h1 {
     font-size: 1.75rem;
   }
-  
+
   .stat-card-modern {
     padding: 20px;
   }
-  
+
   .stat-value {
     font-size: 2rem;
   }
-  
+
   .action-btn-modern {
     padding: 16px;
   }
-  
+
   .dashboard-card-modern {
     padding: 20px;
   }

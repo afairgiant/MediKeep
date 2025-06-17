@@ -258,11 +258,12 @@ const ModelEdit = () => {
         );
     }
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading model for editing..." />
+        </div>
       </AdminLayout>
     );
   }

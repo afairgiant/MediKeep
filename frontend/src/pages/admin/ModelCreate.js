@@ -325,11 +325,12 @@ const ModelCreate = () => {
         );
     }
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading model creation form..." />
+        </div>
       </AdminLayout>
     );
   }

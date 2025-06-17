@@ -115,3 +115,4 @@ docs/AUTH_SYSTEM_DOCUMENTATION.md
 docs/IMPLEMENTATION_CHECKLIST.md
 docker/dev/dev-docker-compose.yml
 
+/logs

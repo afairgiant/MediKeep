@@ -241,6 +241,15 @@
   background-color: #4b5563;
 }
 
+/* Admin Page Loading - Centered within admin content area */
+.admin-page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px); /* Account for header and padding */
+  width: 100%;
+}
+
 /* Responsive design */
 @media (min-width: 768px) {
   .details-grid {

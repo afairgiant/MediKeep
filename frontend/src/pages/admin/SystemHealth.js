@@ -111,11 +111,12 @@ const SystemHealth = () => {
     if (percentage < 85) return 'warning';
     return 'error';
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading system health..." />
+        </div>
       </AdminLayout>
     );
   }

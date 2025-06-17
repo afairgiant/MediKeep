@@ -85,11 +85,12 @@ const ModelView = () => {
   const handleBack = () => {
     navigate(`/admin/models/${modelName}`);
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading model details..." />
+        </div>
       </AdminLayout>
     );
   }

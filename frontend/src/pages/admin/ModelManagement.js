@@ -197,11 +197,12 @@ const ModelManagement = () => {
 
     return displayFields;
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading models..." />
+        </div>
       </AdminLayout>
     );
   }
