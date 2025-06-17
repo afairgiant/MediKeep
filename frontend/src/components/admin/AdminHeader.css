@@ -15,6 +15,9 @@
   display: flex;
   align-items: center;
   gap: 15px;
+  height: 100%;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle-btn {
@@ -35,27 +38,39 @@
 
 .header-left h1 {
   margin: 0;
+  padding: 0;
   font-size: 1.5rem;
   font-weight: 600;
   color: #111827;
+  line-height: 1.2;
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .back-to-dashboard-btn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 8px 16px;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-left: 20px;
+  white-space: nowrap;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .back-to-dashboard-btn:hover {
-  background: #2563eb;
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #334155;
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-center {

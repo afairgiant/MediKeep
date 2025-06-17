@@ -29,7 +29,6 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
       console.error('❌ onToggleSidebar function not provided to AdminHeader');
     }
   };
-
   return (
     <header className="admin-header">
       {' '}
@@ -38,13 +37,6 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           ☰
         </button>
         <h1>Medical Records Admin</h1>
-        <button
-          className="back-to-dashboard-btn"
-          onClick={() => (window.location.href = '/dashboard')}
-          title="Return to Normal Dashboard"
-        >
-          ← Dashboard
-        </button>
       </div>
       <div className="header-center">
         <div className="search-bar">
@@ -55,8 +47,16 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           />
           <button className="search-btn">🔍</button>
         </div>
-      </div>
+      </div>{' '}
       <div className="header-right">
+        <button
+          className="back-to-dashboard-btn"
+          onClick={() => (window.location.href = '/dashboard')}
+          title="Return to Normal Dashboard"
+        >
+          ← Home
+        </button>
+
         <div className="admin-user-info">
           <span className="user-role">Admin</span>
           <span className="user-name">{user?.username || 'Administrator'}</span>
