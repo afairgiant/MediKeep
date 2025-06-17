@@ -1,10 +1,13 @@
 import logger from '../logger';
 
 // Streamlined API service with proper logging integration
-class ApiService {  
+class ApiService {
   constructor() {
     // Always use relative URLs in production for Docker compatibility
-    this.baseURL = process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1';
+    this.baseURL =
+      process.env.NODE_ENV === 'production'
+        ? '/api/v1'
+        : 'http://localhost:8000/api/v1';
     // Fallback URLs for better Docker compatibility
     this.fallbackURL = '/api/v1';
   }
@@ -12,26 +15,26 @@ class ApiService {
   getAuthHeaders() {
     const token = localStorage.getItem('token');
     const headers = { 'Content-Type': 'application/json' };
-    
+
     if (token) {
       try {
         // Check if token is expired
         const payload = JSON.parse(atob(token.split('.')[1]));
         const currentTime = Date.now() / 1000;
-        
+
         if (payload.exp < currentTime) {
           logger.warn('Token expired, removing from storage');
           localStorage.removeItem('token');
           return headers;
         }
-        
+
         headers['Authorization'] = `Bearer ${token}`;
       } catch (e) {
         logger.error('Invalid token format', { error: e.message });
         localStorage.removeItem('token');
       }
     }
-    
+
     return headers;
   }
   async handleResponse(response, method, url) {
@@ -39,40 +42,52 @@ class ApiService {
       const errorData = await response.text();
       let errorMessage;
       let fullErrorData;
-      
+
       try {
         fullErrorData = JSON.parse(errorData);
-        errorMessage = fullErrorData.detail || fullErrorData.message || errorData;        // For 422 errors, log the full validation details
+        errorMessage =
+          fullErrorData.detail || fullErrorData.message || errorData; // For 422 errors, log the full validation details
         if (response.status === 422) {
           console.error('Validation Error Details:', fullErrorData);
           if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
-            const validationErrors = fullErrorData.detail.map(err => 
-              `${err.loc?.join('.')} - ${err.msg}`
-            ).join('; ');
+            const validationErrors = fullErrorData.detail
+              .map(err => `${err.loc?.join('.')} - ${err.msg}`)
+              .join('; ');
             errorMessage = `Validation Error: ${validationErrors}`;
           }
         }
       } catch {
-        errorMessage = errorData || `HTTP error! status: ${response.status} - ${response.statusText}`;
+        errorMessage =
+          errorData ||
+          `HTTP error! status: ${response.status} - ${response.statusText}`;
       }
-      
+
       logger.apiError('API Error', method, url, response.status, errorMessage);
       throw new Error(errorMessage);
     }
 
-    logger.debug('API request successful', { method, url, status: response.status });
-    
+    logger.debug('API request successful', {
+      method,
+      url,
+      status: response.status,
+    });
+
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return response.json();
-    } else if (contentType && (contentType.includes('application/octet-stream') || contentType.includes('image/') || contentType.includes('application/pdf'))) {
+    } else if (
+      contentType &&
+      (contentType.includes('application/octet-stream') ||
+        contentType.includes('image/') ||
+        contentType.includes('application/pdf'))
+    ) {
       return response.blob();
     }
     return response.text();
-  }  // Core request method with logging and fallback
+  } // Core request method with logging and fallback
   async request(method, url, data = null, options = {}) {
     const { signal, headers: customHeaders = {}, responseType } = options;
-    
+
     // Get token and validate it exists
     const token = localStorage.getItem('token');
     if (!token) {
@@ -85,8 +100,8 @@ class ApiService {
       signal,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`, // Always include auth token
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`, // Always include auth token
         ...customHeaders,
       },
     };
@@ -109,32 +124,39 @@ class ApiService {
     for (let i = 0; i < urls.length; i++) {
       const fullUrl = urls[i];
       try {
-        logger.debug(`${method} request attempt ${i + 1}/${urls.length} to ${fullUrl}`, {
-          url: fullUrl,
-          hasAuth: !!token
-        });
+        logger.debug(
+          `${method} request attempt ${i + 1}/${urls.length} to ${fullUrl}`,
+          {
+            url: fullUrl,
+            hasAuth: !!token,
+          }
+        );
 
         const response = await fetch(fullUrl, config);
-        
+
         // Handle blob responses specially
         if (responseType === 'blob' && response.ok) {
           return response.blob();
         }
-        
+
         return this.handleResponse(response, fullUrl, method);
       } catch (error) {
         console.warn(`Failed to connect to ${fullUrl}:`, error.message);
         lastError = error;
-        
+
         // Continue to next URL if this one fails and we have more URLs to try
         if (i < urls.length - 1) {
           continue;
         }
-      }    }
+      }
+    }
 
     // If all URLs failed, log and throw the last error
     logger.apiError(lastError, url, method);
-    throw lastError || new Error(`Failed to connect to any API endpoint for ${method} ${url}`);
+    throw (
+      lastError ||
+      new Error(`Failed to connect to any API endpoint for ${method} ${url}`)
+    );
   }
   // Generic HTTP methods with signal support
   get(endpoint, options = {}) {
@@ -159,22 +181,26 @@ class ApiService {
     const formData = new URLSearchParams();
     formData.append('username', username);
     formData.append('password', password);
-    
+
     return this.request('POST', '/auth/login/', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      signal
+      signal,
     });
   }
 
   register(username, password, email, fullName, signal) {
-    return this.post('/auth/register/', { 
-      username, 
-      password, 
-      email, 
-      full_name: fullName 
-    }, { signal });
+    return this.post(
+      '/auth/register/',
+      {
+        username,
+        password,
+        email,
+        full_name: fullName,
+      },
+      { signal }
+    );
   }
   // Patient methods
   getCurrentPatient(signal) {
@@ -227,9 +253,9 @@ class ApiService {
     return this.post(`/lab-results/${labResultId}/files`, formData, { signal });
   }
   downloadLabResultFile(fileId, signal) {
-    return this.get(`/lab-result-files/${fileId}/download`, { 
+    return this.get(`/lab-result-files/${fileId}/download`, {
       responseType: 'blob',
-      signal 
+      signal,
     });
   }
   deleteLabResultFile(fileId, signal) {
@@ -239,7 +265,8 @@ class ApiService {
   // Medication methods
   getMedications(signal) {
     return this.get('/medications/', { signal });
-  }    getPatientMedications(patientId, signal) {
+  }
+  getPatientMedications(patientId, signal) {
     return this.get(`/medications/?patient_id=${patientId}`, { signal });
   }
 
@@ -252,12 +279,12 @@ class ApiService {
         cleanPayload[key] = value;
       }
     });
-    
+
     // Ensure required fields
     if (!cleanPayload.medication_name) {
       throw new Error('Medication name is required');
     }
-    
+
     return this.post(`/medications/`, cleanPayload, { signal });
   }
   updateMedication(medicationId, medicationData, signal) {
@@ -280,7 +307,9 @@ class ApiService {
     return this.post('/immunizations/', immunizationData, { signal });
   }
   updateImmunization(immunizationId, immunizationData, signal) {
-    return this.put(`/immunizations/${immunizationId}`, immunizationData, { signal });
+    return this.put(`/immunizations/${immunizationId}`, immunizationData, {
+      signal,
+    });
   }
 
   deleteImmunization(immunizationId, signal) {
@@ -301,7 +330,9 @@ class ApiService {
   }
 
   updatePractitioner(practitionerId, practitionerData, signal) {
-    return this.put(`/practitioners/${practitionerId}`, practitionerData, { signal });
+    return this.put(`/practitioners/${practitionerId}`, practitionerData, {
+      signal,
+    });
   }
 
   deletePractitioner(practitionerId, signal) {

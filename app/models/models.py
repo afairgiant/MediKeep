@@ -1,4 +1,3 @@
-from os import name
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
@@ -137,6 +136,9 @@ class LabResult(Base):
     status = Column(
         String, nullable=False, default="ordered"
     )  # 'ordered', 'completed', 'cancelled'
+    labs_result = Column(
+        String, nullable=True
+    )  # Lab result interpretation: 'normal', 'abnormal', etc.
     ordered_date = Column(DateTime, nullable=False)  # When the test was ordered
     completed_date = Column(DateTime, nullable=True)  # When results were received
 

@@ -8,7 +8,7 @@ import './ModelView.css';
 const ModelView = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
-  
+
   const [record, setRecord] = useState(null);
   const [metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,12 +23,11 @@ const ModelView = () => {
         // Load metadata and record in parallel
         const [metadataResult, recordResult] = await Promise.all([
           adminApiService.getModelMetadata(modelName),
-          adminApiService.getModelRecord(modelName, recordId)
+          adminApiService.getModelRecord(modelName, recordId),
         ]);
 
         setMetadata(metadataResult);
         setRecord(recordResult);
-        
       } catch (err) {
         console.error('Error loading record:', err);
         setError(err.message || 'Failed to load record');
@@ -120,18 +119,12 @@ const ModelView = () => {
             <h1>View {metadata?.display_name || modelName}</h1>
             <p>Record ID: {recordId}</p>
           </div>
-          
+
           <div className="view-actions">
-            <button 
-              onClick={handleEdit}
-              className="btn btn-primary"
-            >
+            <button onClick={handleEdit} className="btn btn-primary">
               ✏️ Edit
             </button>
-            <button 
-              onClick={handleDelete}
-              className="btn btn-danger"
-            >
+            <button onClick={handleDelete} className="btn btn-danger">
               🗑️ Delete
             </button>
           </div>
@@ -163,9 +156,7 @@ const ModelView = () => {
           <div className="raw-data-section">
             <details>
               <summary>Raw Data (JSON)</summary>
-              <pre className="raw-json">
-                {JSON.stringify(record, null, 2)}
-              </pre>
+              <pre className="raw-json">{JSON.stringify(record, null, 2)}</pre>
             </details>
           </div>
         </div>

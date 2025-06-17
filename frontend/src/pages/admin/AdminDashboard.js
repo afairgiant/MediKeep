@@ -46,6 +46,7 @@ const AdminDashboard = () => {  const [stats, setStats] = useState(null);
         setError(null);
       }
 
+
       console.log('🔄 Loading comprehensive dashboard data...');
 
       // Load all data in parallel for better performance
@@ -59,9 +60,9 @@ const AdminDashboard = () => {  const [stats, setStats] = useState(null);
       setRecentActivity(activityData);
       setSystemHealth(healthData);
       setLastRefresh(new Date());
-      
-      console.log('✅ Dashboard data loaded successfully');
+   
 
+      console.log('✅ All dashboard data loaded successfully');
     } catch (err) {
       console.error('❌ Error loading dashboard data:', err);
       if (!silent) setError('Failed to load dashboard data');
@@ -243,15 +244,18 @@ const AdminDashboard = () => {  const [stats, setStats] = useState(null);
           <div className="stat-card-modern info">
             <div className="stat-icon">💊</div>
             <div className="stat-content">
+
               <div className="stat-value">{stats?.total_medications || 0}</div>
               <div className="stat-label">Medications</div>
               <div className="stat-change positive">
                 {stats?.active_medications || 0} active prescriptions
               </div>
+
             </div>
             <div className="stat-trend">💊</div>
           </div>
         </div>
+
 
         {/* Main Dashboard Content */}
         <div className="dashboard-content-modern">
@@ -301,6 +305,7 @@ const AdminDashboard = () => {  const [stats, setStats] = useState(null);
               </div>
             </div>
           )}
+
 
           {/* Overview Content */}
           {activeTab === 'overview' && (
@@ -386,6 +391,7 @@ const AdminDashboard = () => {  const [stats, setStats] = useState(null);
                         <div className="activity-status">
                           <span className="status-badge success">✓</span>
                         </div>
+
                       </div>
                     ))
                   ) : (
@@ -399,6 +405,7 @@ const AdminDashboard = () => {  const [stats, setStats] = useState(null);
 
             </div>
           )}
+
 
           {/* Quick Actions Panel */}
           <div className="quick-actions-modern">

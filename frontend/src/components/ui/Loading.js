@@ -5,25 +5,27 @@
 import React from 'react';
 import './Loading.css';
 
-const Loading = ({ 
-  variant = 'spinner', 
-  size = 'medium', 
+const Loading = ({
+  variant = 'spinner',
+  size = 'medium',
   message = 'Loading...',
   fullScreen = false,
-  className = ''
+  className = '',
 }) => {
   const baseClass = 'loading';
   const variantClass = `loading-${variant}`;
   const sizeClass = `loading-${size}`;
   const fullScreenClass = fullScreen ? 'loading-fullscreen' : '';
-  
+
   const loadingClass = [
     baseClass,
     variantClass,
     sizeClass,
     fullScreenClass,
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const renderSpinner = () => (
     <div className="spinner">

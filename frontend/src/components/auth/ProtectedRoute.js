@@ -8,13 +8,13 @@ import { toast } from 'react-toastify';
  * Enhanced Protected Route Component
  * Provides comprehensive authentication and authorization protection
  */
-function ProtectedRoute({ 
-  children, 
+function ProtectedRoute({
+  children,
   requiredRole = null,
   requiredRoles = [],
   adminOnly = false,
   redirectTo = '/login',
-  fallback = null
+  fallback = null,
 }) {
   const { isAuthenticated, isLoading, user, hasRole, hasAnyRole } = useAuth();
   const location = useLocation();
@@ -27,13 +27,7 @@ function ProtectedRoute({
   // Not authenticated - redirect to login
   if (!isAuthenticated) {
     toast.warn('Please log in to access this page');
-    return (
-      <Navigate 
-        to={redirectTo} 
-        state={{ from: location }} 
-        replace 
-      />
-    );
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   // Check admin-only access
@@ -50,7 +44,9 @@ function ProtectedRoute({
 
   // Check multiple roles requirement (user must have at least one)
   if (requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
-    toast.error(`Access denied: One of these roles required: ${requiredRoles.join(', ')}`);
+    toast.error(
+      `Access denied: One of these roles required: ${requiredRoles.join(', ')}`
+    );
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -76,11 +72,7 @@ export function AdminRoute({ children, ...props }) {
  */
 export function RoleRoute({ role, roles, children, ...props }) {
   return (
-    <ProtectedRoute 
-      requiredRole={role}
-      requiredRoles={roles || []}
-      {...props}
-    >
+    <ProtectedRoute requiredRole={role} requiredRoles={roles || []} {...props}>
       {children}
     </ProtectedRoute>
   );

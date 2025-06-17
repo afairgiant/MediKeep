@@ -23,7 +23,7 @@ const Medication = () => {
     effectivePeriod_start: '',
     effectivePeriod_end: '',
     status: 'active',
-    practitioner_id: null
+    practitioner_id: null,
   });
   const navigate = useNavigate();
 
@@ -35,14 +35,16 @@ const Medication = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       // Get patient data first
       const patient = await apiService.getCurrentPatient();
       setPatientData(patient);
-      
+
       // Then get medications for this patient
       if (patient && patient.id) {
-        const medicationData = await apiService.getPatientMedications(patient.id);
+        const medicationData = await apiService.getPatientMedications(
+          patient.id
+        );
         setMedications(medicationData);
       }
     } catch (error) {
@@ -53,11 +55,11 @@ const Medication = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -71,7 +73,7 @@ const Medication = () => {
       effectivePeriod_start: '',
       effectivePeriod_end: '',
       status: 'active',
-      practitioner_id: null
+      practitioner_id: null,
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -82,7 +84,7 @@ const Medication = () => {
     setShowAddForm(true);
   };
 
-  const handleEditMedication = (medication) => {
+  const handleEditMedication = medication => {
     setFormData({
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
@@ -92,15 +94,15 @@ const Medication = () => {
       effectivePeriod_start: medication.effectivePeriod_start || '',
       effectivePeriod_end: medication.effectivePeriod_end || '',
       status: medication.status || 'active',
-      practitioner_id: medication.practitioner_id || null
+      practitioner_id: medication.practitioner_id || null,
     });
     setEditingMedication(medication);
     setShowAddForm(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     // Check authentication first
     const token = localStorage.getItem('token');
     if (!token) {
@@ -108,7 +110,7 @@ const Medication = () => {
       navigate('/login');
       return;
     }
-    
+
     if (!patientData?.id) {
       setError('Patient information not available');
       return;
@@ -120,7 +122,7 @@ const Medication = () => {
 
       // Debug auth and patient data
       console.log('🔐 Auth token length:', token.length);
-      console.log('🏥 Patient data:', patientData);      // Clean and validate medication data
+      console.log('🏥 Patient data:', patientData); // Clean and validate medication data
       const medicationData = {
         medication_name: formData.medication_name?.trim() || '',
         dosage: formData.dosage?.trim() || '',
@@ -128,7 +130,7 @@ const Medication = () => {
         route: formData.route?.trim() || '',
         indication: formData.indication?.trim() || '',
         status: formData.status || 'active',
-        patient_id: patientData.id
+        patient_id: patientData.id,
       };
 
       // Only include dates if they have values
@@ -144,7 +146,10 @@ const Medication = () => {
 
       console.log('🚀 Final medication data:', medicationData);
       console.log('🔍 Data type check:', typeof medicationData);
-      console.log('🔍 Is object?', medicationData && typeof medicationData === 'object');
+      console.log(
+        '🔍 Is object?',
+        medicationData && typeof medicationData === 'object'
+      );
       console.log('🔍 JSON stringify test:', JSON.stringify(medicationData));
 
       console.log('🚀 Submitting medication data:', medicationData);
@@ -158,7 +163,7 @@ const Medication = () => {
         effectivePeriod_end: formData.effectivePeriod_end,
         status: formData.status,
         practitioner_id: formData.practitioner_id,
-        patient_id: patientData.id
+        patient_id: patientData.id,
       });
 
       if (editingMedication) {
@@ -174,20 +179,28 @@ const Medication = () => {
 
       resetForm();
       await fetchPatientAndMedications();
-      
+
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('❌ Error saving medication:', error);
-      if (error.message?.includes('Authentication') || error.message?.includes('401') || error.message?.includes('403')) {
+      if (
+        error.message?.includes('Authentication') ||
+        error.message?.includes('401') ||
+        error.message?.includes('403')
+      ) {
         setError('Authentication failed. Please log in again.');
         navigate('/login');
       } else {
-        setError(error.response?.data?.detail || error.message || 'Failed to save medication');
+        setError(
+          error.response?.data?.detail ||
+            error.message ||
+            'Failed to save medication'
+        );
       }
     }
   };
 
-  const handleDeleteMedication = async (medicationId) => {
+  const handleDeleteMedication = async medicationId => {
     if (!window.confirm('Are you sure you want to delete this medication?')) {
       return;
     }
@@ -197,7 +210,7 @@ const Medication = () => {
       await apiService.deleteMedication(medicationId);
       setSuccessMessage('Medication deleted successfully!');
       await fetchPatientAndMedications();
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
@@ -212,49 +225,56 @@ const Medication = () => {
       if (sortBy === 'active') {
         const aIsActive = a.status === 'active';
         const bIsActive = b.status === 'active';
-        
+
         if (aIsActive && !bIsActive) return -1;
         if (!aIsActive && bIsActive) return 1;
-        
+
         // If both have same active status, sort by medication name
         return a.medication_name.localeCompare(b.medication_name);
       }
-      
+
       // Sort by other fields
       if (sortBy === 'name') {
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? a.medication_name.localeCompare(b.medication_name)
           : b.medication_name.localeCompare(a.medication_name);
       }
-      
+
       if (sortBy === 'start_date') {
         const aDate = new Date(a.effectivePeriod_start || 0);
         const bDate = new Date(b.effectivePeriod_start || 0);
         return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
       }
-      
+
       return 0;
     });
-    
+
     return sorted;
   };
 
-  const handleSortChange = (newSortBy) => {
+  const handleSortChange = newSortBy => {
     if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');    } else {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
       setSortBy(newSortBy);
       setSortOrder('asc');
     }
   };
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadgeClass = status => {
     switch (status?.toLowerCase()) {
-      case 'active': return 'status-active';
-      case 'stopped': return 'status-stopped';
-      case 'on-hold': return 'status-on-hold';
-      case 'completed': return 'status-completed';
-      case 'cancelled': return 'status-cancelled';
-      default: return 'status-unknown';
+      case 'active':
+        return 'status-active';
+      case 'stopped':
+        return 'status-stopped';
+      case 'on-hold':
+        return 'status-on-hold';
+      case 'completed':
+        return 'status-completed';
+      case 'cancelled':
+        return 'status-cancelled';
+      default:
+        return 'status-unknown';
     }
   };
 
@@ -272,10 +292,7 @@ const Medication = () => {
   return (
     <div className="medication-container">
       <header className="medication-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>💊 Medications</h1>
@@ -283,33 +300,34 @@ const Medication = () => {
 
       <div className="medication-content">
         {error && <div className="error-message">{error}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}
 
         <div className="medication-controls">
           <div className="controls-left">
-            <button 
-              className="add-button"
-              onClick={handleAddMedication}
-            >
+            <button className="add-button" onClick={handleAddMedication}>
               + Add New Medication
             </button>
           </div>
-          
+
           <div className="controls-right">
             <div className="sort-controls">
               <label>Sort by:</label>
-              <select 
-                value={sortBy} 
-                onChange={(e) => handleSortChange(e.target.value)}
+              <select
+                value={sortBy}
+                onChange={e => handleSortChange(e.target.value)}
               >
                 <option value="active">Status (Active First)</option>
                 <option value="name">Medication Name</option>
                 <option value="start_date">Start Date</option>
               </select>
               {sortBy !== 'active' && (
-                <button 
+                <button
                   className="sort-order-button"
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  onClick={() =>
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                  }
                 >
                   {sortOrder === 'asc' ? '↑' : '↓'}
                 </button>
@@ -322,15 +340,14 @@ const Medication = () => {
           <div className="medication-form-overlay">
             <div className="medication-form-modal">
               <div className="form-header">
-                <h3>{editingMedication ? 'Edit Medication' : 'Add New Medication'}</h3>
-                <button 
-                  className="close-button"
-                  onClick={resetForm}
-                >
+                <h3>
+                  {editingMedication ? 'Edit Medication' : 'Add New Medication'}
+                </h3>
+                <button className="close-button" onClick={resetForm}>
                   ×
                 </button>
               </div>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="form-grid">
                   <div className="form-group">
@@ -441,17 +458,14 @@ const Medication = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="cancel-button"
                     onClick={resetForm}
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    className="save-button"
-                  >
+                  <button type="submit" className="save-button">
                     {editingMedication ? 'Update Medication' : 'Add Medication'}
                   </button>
                 </div>
@@ -469,15 +483,19 @@ const Medication = () => {
             </div>
           ) : (
             <div className="medications-grid">
-              {getSortedMedications().map((medication) => (
+              {getSortedMedications().map(medication => (
                 <div key={medication.id} className="medication-card">
                   <div className="medication-header">
-                    <h3 className="medication-name">{medication.medication_name}</h3>
-                    <span className={`status-badge ${getStatusBadgeClass(medication.status)}`}>
+                    <h3 className="medication-name">
+                      {medication.medication_name}
+                    </h3>
+                    <span
+                      className={`status-badge ${getStatusBadgeClass(medication.status)}`}
+                    >
                       {medication.status || 'Unknown'}
                     </span>
                   </div>
-                  
+
                   <div className="medication-details">
                     {medication.dosage && (
                       <div className="detail-item">
@@ -485,49 +503,53 @@ const Medication = () => {
                         <span className="value">{medication.dosage}</span>
                       </div>
                     )}
-                    
+
                     {medication.frequency && (
                       <div className="detail-item">
                         <span className="label">Frequency:</span>
                         <span className="value">{medication.frequency}</span>
                       </div>
                     )}
-                    
+
                     {medication.route && (
                       <div className="detail-item">
                         <span className="label">Route:</span>
                         <span className="value">{medication.route}</span>
                       </div>
                     )}
-                    
+
                     {medication.indication && (
                       <div className="detail-item">
                         <span className="label">Indication:</span>
                         <span className="value">{medication.indication}</span>
                       </div>
                     )}
-                    
+
                     <div className="detail-item">
                       <span className="label">Start Date:</span>
-                      <span className="value">{formatDate(medication.effectivePeriod_start)}</span>
+                      <span className="value">
+                        {formatDate(medication.effectivePeriod_start)}
+                      </span>
                     </div>
-                    
+
                     {medication.effectivePeriod_end && (
                       <div className="detail-item">
                         <span className="label">End Date:</span>
-                        <span className="value">{formatDate(medication.effectivePeriod_end)}</span>
+                        <span className="value">
+                          {formatDate(medication.effectivePeriod_end)}
+                        </span>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="medication-actions">
-                    <button 
+                    <button
                       className="edit-button"
                       onClick={() => handleEditMedication(medication)}
                     >
                       ✏️ Edit
                     </button>
-                    <button 
+                    <button
                       className="delete-button"
                       onClick={() => handleDeleteMedication(medication.id)}
                     >
@@ -545,4 +567,3 @@ const Medication = () => {
 };
 
 export default Medication;
-

@@ -63,13 +63,13 @@
 }
 
 /* Input variants */
-.form-input[type="textarea"] {
+.form-input[type='textarea'] {
   resize: vertical;
   min-height: 80px;
 }
 
-.form-input[type="date"],
-.form-input[type="datetime-local"],
-.form-input[type="time"] {
+.form-input[type='date'],
+.form-input[type='datetime-local'],
+.form-input[type='time'] {
   min-width: 150px;
 }

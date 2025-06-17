@@ -8,7 +8,7 @@ import '../../styles/pages/Login.css';
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateUser, setShowCreateUser] = useState(false);
@@ -16,10 +16,11 @@ const Login = () => {
     username: '',
     password: '',
     email: '',
-    fullName: ''
-  });  const [isCreatingUser, setIsCreatingUser] = useState(false);
+    fullName: '',
+  });
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [createUserError, setCreateUserError] = useState('');
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { login, error, clearError, isAuthenticated } = useAuth();
@@ -32,22 +33,22 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     clearError(); // Clear any existing errors
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
-  const handleCreateUserChange = (e) => {
+  const handleCreateUserChange = e => {
     setCreateUserError(''); // Clear errors when user types
     setCreateUserData({
       ...createUserData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -60,12 +61,13 @@ const Login = () => {
         toast.error(result.error || 'Login failed');
       }
     } catch (error) {
-      toast.error(error.message || 'Login failed');    } finally {
+      toast.error(error.message || 'Login failed');
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCreateUser = async (e) => {
+  const handleCreateUser = async e => {
     e.preventDefault();
     setIsCreatingUser(true);
     setCreateUserError('');
@@ -80,7 +82,9 @@ const Login = () => {
     const hasLetter = /[a-zA-Z]/.test(createUserData.password);
     const hasNumber = /\d/.test(createUserData.password);
     if (!hasLetter || !hasNumber) {
-      setCreateUserError('Password must contain at least one letter and one number');
+      setCreateUserError(
+        'Password must contain at least one letter and one number'
+      );
       setIsCreatingUser(false);
       return;
     }
@@ -89,21 +93,23 @@ const Login = () => {
       setCreateUserError('Username must be at least 3 characters long');
       setIsCreatingUser(false);
       return;
-    }    try {      // Create the user using the simple auth service
+    }
+    try {
+      // Create the user using the simple auth service
       const registerResult = await authService.register({
         username: createUserData.username,
         password: createUserData.password,
         email: createUserData.email,
-        full_name: createUserData.fullName
+        full_name: createUserData.fullName,
       });
 
       if (registerResult.success) {
         toast.success('Account created successfully! Logging you in...');
-        
+
         // Automatically log them in after successful registration
         const loginResult = await login({
           username: createUserData.username,
-          password: createUserData.password
+          password: createUserData.password,
         });
 
         if (loginResult.success) {
@@ -111,23 +117,31 @@ const Login = () => {
           const from = location.state?.from?.pathname || '/dashboard';
           navigate(from, { replace: true });
         } else {
-          toast.error('Account created but login failed. Please try logging in manually.');
+          toast.error(
+            'Account created but login failed. Please try logging in manually.'
+          );
           setShowCreateUser(false);
-        }      } else {
+        }
+      } else {
         // Handle different error types
         let errorMessage = 'Failed to create account';
-        
+
         if (typeof registerResult.error === 'string') {
           errorMessage = registerResult.error;
-        } else if (registerResult.error && typeof registerResult.error === 'object') {
+        } else if (
+          registerResult.error &&
+          typeof registerResult.error === 'object'
+        ) {
           // Handle validation error objects
           if (Array.isArray(registerResult.error.detail)) {
-            const validationErrors = registerResult.error.detail.map(err => {
-              if (typeof err === 'object' && err.msg) {
-                return `${err.loc?.join('.')} - ${err.msg}`;
-              }
-              return String(err);
-            }).join('; ');
+            const validationErrors = registerResult.error.detail
+              .map(err => {
+                if (typeof err === 'object' && err.msg) {
+                  return `${err.loc?.join('.')} - ${err.msg}`;
+                }
+                return String(err);
+              })
+              .join('; ');
             errorMessage = `Validation Error: ${validationErrors}`;
           } else if (registerResult.error.detail) {
             errorMessage = String(registerResult.error.detail);
@@ -135,25 +149,26 @@ const Login = () => {
             errorMessage = JSON.stringify(registerResult.error);
           }
         }
-        
+
         setCreateUserError(errorMessage);
-      }    } catch (error) {
+      }
+    } catch (error) {
       console.error('Error creating user:', error);
-      
+
       // Handle different error formats
       let errorMessage = 'Failed to create user. Please try again.';
-      
+
       if (error.detail && Array.isArray(error.detail)) {
         // Handle validation errors array
-        errorMessage = error.detail.map(error => 
-          `${error.loc?.join('.')} - ${error.msg}`
-        ).join('; ');
+        errorMessage = error.detail
+          .map(error => `${error.loc?.join('.')} - ${error.msg}`)
+          .join('; ');
       } else if (error.message) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
         errorMessage = error;
       }
-      
+
       setCreateUserError(errorMessage);
     } finally {
       setIsCreatingUser(false);
@@ -167,7 +182,7 @@ const Login = () => {
       username: '',
       password: '',
       email: '',
-      fullName: ''
+      fullName: '',
     });
   };
 
@@ -180,9 +195,9 @@ const Login = () => {
       <div className="login-form">
         <h1>🏥 Medical Records System</h1>
         <h2>Login</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username:</label>
@@ -196,7 +211,7 @@ const Login = () => {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Password:</label>
             <input
@@ -209,15 +224,15 @@ const Login = () => {
               disabled={isLoading}
             />
           </div>
-          
+
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         <div className="login-actions">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="create-user-btn"
             onClick={openCreateUserModal}
             disabled={isLoading}
@@ -230,7 +245,7 @@ const Login = () => {
       {/* Create User Modal */}
       {showCreateUser && (
         <div className="modal-overlay" onClick={closeCreateUserModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create New User Account</h2>
               <button className="close-btn" onClick={closeCreateUserModal}>
@@ -239,8 +254,9 @@ const Login = () => {
             </div>
 
             <form onSubmit={handleCreateUser}>
-              {createUserError && <div className="error-message">{createUserError}</div>}
-              
+              {createUserError && (
+                <div className="error-message">{createUserError}</div>
+              )}
               <div className="form-group">
                 <label htmlFor="create-username">Username *</label>
                 <input
@@ -253,7 +269,8 @@ const Login = () => {
                   disabled={isCreatingUser}
                   placeholder="Enter username"
                 />
-              </div>              <div className="form-group">
+              </div>{' '}
+              <div className="form-group">
                 <label htmlFor="create-password">Password *</label>
                 <input
                   type="password"
@@ -267,18 +284,23 @@ const Login = () => {
                   minLength={6}
                 />
                 <div className="password-requirements">
-                  <div className={`requirement ${createUserData.password.length >= 6 ? 'valid' : ''}`}>
+                  <div
+                    className={`requirement ${createUserData.password.length >= 6 ? 'valid' : ''}`}
+                  >
                     ✓ At least 6 characters
                   </div>
-                  <div className={`requirement ${/[a-zA-Z]/.test(createUserData.password) ? 'valid' : ''}`}>
+                  <div
+                    className={`requirement ${/[a-zA-Z]/.test(createUserData.password) ? 'valid' : ''}`}
+                  >
                     ✓ Contains at least one letter
                   </div>
-                  <div className={`requirement ${/[0-9]/.test(createUserData.password) ? 'valid' : ''}`}>
+                  <div
+                    className={`requirement ${/[0-9]/.test(createUserData.password) ? 'valid' : ''}`}
+                  >
                     ✓ Contains at least one number
                   </div>
                 </div>
               </div>
-
               <div className="form-group">
                 <label htmlFor="create-email">Email *</label>
                 <input
@@ -292,7 +314,6 @@ const Login = () => {
                   placeholder="Enter email address"
                 />
               </div>
-
               <div className="form-group">
                 <label htmlFor="create-fullname">Full Name *</label>
                 <input
@@ -306,18 +327,17 @@ const Login = () => {
                   placeholder="Enter full name"
                 />
               </div>
-
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={closeCreateUserModal}
                   disabled={isCreatingUser}
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary"
                   disabled={isCreatingUser}
                 >
@@ -327,7 +347,10 @@ const Login = () => {
             </form>
 
             <div className="create-user-info">
-              <p><strong>Note:</strong> A patient record will be automatically created for this user with default role "user".</p>
+              <p>
+                <strong>Note:</strong> A patient record will be automatically
+                created for this user with default role "user".
+              </p>
             </div>
           </div>
         </div>

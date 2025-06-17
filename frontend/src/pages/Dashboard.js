@@ -20,19 +20,21 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       console.log('🔍 Checking admin status...');
       console.log('Token exists:', !!token);
-      
+
       if (token) {
         // Decode JWT token to check role
         const payload = JSON.parse(atob(token.split('.')[1]));
         console.log('JWT payload:', payload);
-        
+
         // Check if user has admin role (this should also be verified on backend)
         const userRole = payload.role || '';
-        const adminCheck = userRole.toLowerCase() === 'admin' || userRole.toLowerCase() === 'administrator';
-        
+        const adminCheck =
+          userRole.toLowerCase() === 'admin' ||
+          userRole.toLowerCase() === 'administrator';
+
         console.log('User role:', userRole);
         console.log('Is admin:', adminCheck);
-        
+
         setIsAdmin(adminCheck);
       } else {
         setIsAdmin(false);
@@ -70,56 +72,57 @@ const Dashboard = () => {
 
   const dashboardItems = [
     {
-      title: "📋 Patient Information",
-      description: "View and update your personal details",
-      link: "/patients/me"
+      title: '📋 Patient Information',
+      description: 'View and update your personal details',
+      link: '/patients/me',
     },
     {
-      title: "🧪 Lab Results",
-      description: "Access your laboratory test results",
-      link: "/lab-results"
+      title: '🧪 Lab Results',
+      description: 'Access your laboratory test results',
+      link: '/lab-results',
     },
     {
-      title: "💊 Medications",
-      description: "Track your current medications",
-      link: "/medications"
+      title: '💊 Medications',
+      description: 'Track your current medications',
+      link: '/medications',
     },
     {
-      title: "💉 Immunizations",
-      description: "Check your immunization records",
-      link: "/immunizations"
+      title: '💉 Immunizations',
+      description: 'Check your immunization records',
+      link: '/immunizations',
     },
     {
-      title: "Procedures",
-      description: "Review your Procedures",
-      link: "/procedures"
+      title: 'Procedures',
+      description: 'Review your Procedures',
+      link: '/procedures',
     },
     {
-      title: "Allergies",
-      description: "Review your allergies",
-      link: "/allergies"
+      title: 'Allergies',
+      description: 'Review your allergies',
+      link: '/allergies',
     },
     {
-      title: "Conditions",
-      description: "Review your medical conditions",
-      link: "/conditions"
+      title: 'Conditions',
+      description: 'Review your medical conditions',
+      link: '/conditions',
     },
     {
-      title: "Treatments",
-      description: "Review your treatments",
-      link: "/treatments"
-    },    {
-      title: "Visit History",
-      description: "Review your visits",
-      link: "/visits"
-    }
-  ];  // Smaller secondary items for additional features
+      title: 'Treatments',
+      description: 'Review your treatments',
+      link: '/treatments',
+    },
+    {
+      title: 'Visit History',
+      description: 'Review your visits',
+      link: '/visits',
+    },
+  ]; // Smaller secondary items for additional features
   const secondaryItems = [
     {
-      title: "👨‍⚕️ Doctors",
-      description: "View practitioner information",
-      link: "/practitioners"
-    }
+      title: '👨‍⚕️ Doctors',
+      description: 'View practitioner information',
+      link: '/practitioners',
+    },
   ];
   // Add admin dashboard link if user is admin
   if (isAdmin) {
@@ -133,7 +136,6 @@ const Dashboard = () => {
   console.log('🔍 Dashboard render state:');
   console.log('isAdmin:', isAdmin);
   console.log('secondaryItems:', secondaryItems);
-
 
   if (loading) {
     return (
@@ -157,9 +159,12 @@ const Dashboard = () => {
       <main>
         <div className="welcome-section">
           <h2>Welcome to your Medical Records System</h2>
-          <p>Manage your personal health information securely and efficiently.</p>
+          <p>
+            Manage your personal health information securely and efficiently.
+          </p>
           {user && <p>Hello, {user.name}!</p>}
-        </div>        <div className="dashboard-grid">
+        </div>{' '}
+        <div className="dashboard-grid">
           {dashboardItems.map((item, index) => (
             <DashboardCard
               key={index}

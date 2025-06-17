@@ -12,10 +12,10 @@ import { DATE_FORMATS } from './constants';
  */
 export const formatDate = (date, format = DATE_FORMATS.DISPLAY) => {
   if (!date) return 'N/A';
-  
+
   try {
     let dateObj;
-    
+
     // Handle timezone issues for date-only strings (YYYY-MM-DD format)
     if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
       // Parse as local date to avoid timezone conversion
@@ -24,20 +24,20 @@ export const formatDate = (date, format = DATE_FORMATS.DISPLAY) => {
     } else {
       dateObj = new Date(date);
     }
-    
+
     if (isNaN(dateObj.getTime())) return 'Invalid Date';
-      // Simple date formatting
+    // Simple date formatting
     const options = {
       year: 'numeric',
       month: format.includes('MMMM') ? 'long' : 'short',
-      day: '2-digit'
+      day: '2-digit',
     };
-    
+
     if (format.includes('HH:mm')) {
       options.hour = '2-digit';
       options.minute = '2-digit';
     }
-    
+
     return dateObj.toLocaleDateString('en-US', options);
   } catch (error) {
     console.error('Date formatting error:', error);
@@ -50,7 +50,7 @@ export const formatDate = (date, format = DATE_FORMATS.DISPLAY) => {
  * @param {string|Date} date - Date to format
  * @returns {string} - Formatted date and time
  */
-export const formatDateTime = (date) => {
+export const formatDateTime = date => {
   if (!date) return 'N/A';
   return new Date(date).toLocaleString();
 };
@@ -78,7 +78,7 @@ export const debounce = (func, wait) => {
  * @param {string} email - Email to validate
  * @returns {boolean} - Is valid email
  */
-export const isValidEmail = (email) => {
+export const isValidEmail = email => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
@@ -88,7 +88,7 @@ export const isValidEmail = (email) => {
  * @param {string} phone - Phone number to validate
  * @returns {boolean} - Is valid phone number
  */
-export const isValidPhone = (phone) => {
+export const isValidPhone = phone => {
   const phoneRegex = /^\+?[\d\s\-()]{10,}$/;
   return phoneRegex.test(phone);
 };
@@ -106,7 +106,7 @@ export const generateId = () => {
  * @param {string} str - String to capitalize
  * @returns {string} - Capitalized string
  */
-export const capitalizeWords = (str) => {
+export const capitalizeWords = str => {
   if (!str) return '';
   return str.replace(/\b\w/g, l => l.toUpperCase());
 };
@@ -116,13 +116,13 @@ export const capitalizeWords = (str) => {
  * @param {number} bytes - File size in bytes
  * @returns {string} - Formatted file size
  */
-export const formatFileSize = (bytes) => {
+export const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
@@ -131,8 +131,8 @@ export const formatFileSize = (bytes) => {
  * @param {string} filename - File name
  * @returns {string} - File extension
  */
-export const getFileExtension = (filename) => {
-  return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2);
+export const getFileExtension = filename => {
+  return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
 };
 
 /**
@@ -156,7 +156,7 @@ export const sortByProperty = (array, property, order = 'asc') => {
   return [...array].sort((a, b) => {
     const aVal = a[property];
     const bVal = b[property];
-    
+
     if (order === 'desc') {
       return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
     }
@@ -173,7 +173,7 @@ export const sortByProperty = (array, property, order = 'asc') => {
  */
 export const filterBySearch = (array, searchTerm, searchFields) => {
   if (!searchTerm) return array;
-  
+
   const term = searchTerm.toLowerCase();
   return array.filter(item =>
     searchFields.some(field => {
@@ -188,6 +188,6 @@ export const filterBySearch = (array, searchTerm, searchFields) => {
  * @param {Object} obj - Object to clone
  * @returns {Object} - Cloned object
  */
-export const deepClone = (obj) => {
+export const deepClone = obj => {
   return JSON.parse(JSON.stringify(obj));
 };

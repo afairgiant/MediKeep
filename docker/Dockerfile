@@ -6,20 +6,23 @@ FROM node:18-alpine AS frontend-build
 # Set NODE_ENV for optimization
 ENV NODE_ENV=production
 ENV REACT_APP_API_URL=""
+ENV CI=true
+ENV GENERATE_SOURCEMAP=false
 
 WORKDIR /frontend
 
 # Copy package files first for better layer caching
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm install --silent --no-audit --no-fund
+# Install dependencies with more memory
+RUN npm install --silent --no-audit --no-fund --max_old_space_size=4096
 
 # Copy frontend source
 COPY frontend/ ./
 
-# Build the React app with optimizations
-RUN npm run build && \
+# Build the React app with optimizations and ignore ESLint warnings
+RUN cp .eslintrc.production.js .eslintrc.js && \
+    ESLINT_NO_DEV_ERRORS=true npm run build && \
     # Remove source maps and unnecessary files for production
     find build -name "*.map" -delete
 
@@ -36,6 +39,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Install system dependencies in a single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    bash \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -58,15 +62,15 @@ COPY run.py .
 # Copy Alembic migrations and configuration
 COPY alembic/ ./alembic/
 
-# Copy entrypoint script
-COPY docker/entrypoint.sh ./entrypoint.sh
-
 # Copy built React app from frontend stage
 COPY --from=frontend-build /frontend/build ./static
 
-# Create directories and set permissions in one layer
+# Copy entrypoint script and set proper permissions
+COPY docker/entrypoint.sh /app/entrypoint.sh
+
+# Create directories and set all permissions in one layer
 RUN mkdir -p logs uploads/labwork && \
-    chmod +x entrypoint.sh && \
+    chmod +x /app/entrypoint.sh && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
@@ -84,5 +88,5 @@ LABEL maintainer="afairgiant" \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Start the application with migrations
-CMD ["./entrypoint.sh"]
+# Start the application with migrations (using absolute path)
+CMD ["/app/entrypoint.sh"]

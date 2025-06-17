@@ -1,6 +1,6 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-module.exports = function(app) {
+module.exports = function (app) {
   // Proxy all /api requests - this is the main one for your app
   app.use(
     '/api',
@@ -20,8 +20,8 @@ module.exports = function(app) {
         res.writeHead(500, {
           'Content-Type': 'application/json',
         });
-        res.end(JSON.stringify({detail: 'Proxy error: ' + err.message}));
-      }
+        res.end(JSON.stringify({ detail: 'Proxy error: ' + err.message }));
+      },
     })
   );
 
@@ -31,7 +31,7 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:8000',
       changeOrigin: true,
-      secure: false
+      secure: false,
     })
   );
 
@@ -41,7 +41,7 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:8000',
       changeOrigin: true,
-      secure: false
+      secure: false,
     })
   );
 
@@ -51,7 +51,7 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:8000',
       changeOrigin: true,
-      secure: false
+      secure: false,
     })
   );
 };

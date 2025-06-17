@@ -209,6 +209,16 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
                 choices = ["active", "inactive", "completed", "cancelled"]
         elif column.name == "severity":
             choices = ["mild", "moderate", "severe", "life-threatening"]
+        elif column.name == "labs_result":
+            choices = [
+                "normal",
+                "abnormal",
+                "critical",
+                "high",
+                "low",
+                "borderline",
+                "inconclusive",
+            ]
         elif column.name == "gender":
             choices = ["M", "F", "OTHER", "U"]
         elif column.name == "role":

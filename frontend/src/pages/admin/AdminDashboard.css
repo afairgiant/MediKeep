@@ -154,6 +154,7 @@
   border: 1px solid var(--admin-border);
   display: flex;
   align-items: center;
+
   gap: 20px;
   position: relative;
   overflow: hidden;
@@ -754,15 +755,15 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard-content {
     grid-template-columns: 1fr;
   }
-  
+
   .stat-card {
     padding: 20px;
   }
-  
+
   .dashboard-card {
     padding: 20px;
   }

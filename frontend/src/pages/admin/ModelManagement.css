@@ -247,7 +247,7 @@
   .model-table-container {
     overflow-x: auto;
   }
-  
+
   .model-table {
     min-width: 800px;
   }
@@ -259,35 +259,35 @@
     gap: 15px;
     align-items: stretch;
   }
-  
+
   .model-controls {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
   }
-  
+
   .search-section {
     max-width: none;
   }
-  
+
   .bulk-actions {
     flex-direction: column;
     gap: 10px;
     align-items: stretch;
     text-align: center;
   }
-  
+
   .model-table th,
   .model-table td {
     padding: 8px 10px;
     font-size: 0.8rem;
   }
-  
+
   .record-actions {
     flex-direction: column;
     gap: 3px;
   }
-  
+
   .btn-sm {
     padding: 4px 8px;
     font-size: 0.7rem;

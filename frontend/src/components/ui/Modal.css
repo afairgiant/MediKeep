@@ -110,24 +110,24 @@
   .modal-overlay {
     padding: 0.5rem;
   }
-  
+
   .modal-content {
     max-height: 95vh;
   }
-  
+
   .modal-header {
     padding: 1rem 1rem 0 1rem;
     margin-bottom: 1rem;
   }
-  
+
   .modal-title {
     font-size: 1.25rem;
   }
-  
+
   .modal-body {
     padding: 0 1rem 1rem 1rem;
   }
-  
+
   .modal-small,
   .modal-medium,
   .modal-large,
