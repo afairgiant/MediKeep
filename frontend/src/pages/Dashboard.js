@@ -124,15 +124,14 @@ const Dashboard = () => {
       link: '/practitioners',
     },
   ];
-  // TODO: TEMP DISABLE ADMIN DASHBOARD LINK
   // Add admin dashboard link if user is admin
-  // if (isAdmin) {
-  //   secondaryItems.unshift({
-  //     title: "⚙️ Admin Dashboard",
-  //     description: "System administration and management",
-  //     link: "/admin"
-  //   });
-  // }
+  if (isAdmin) {
+    secondaryItems.unshift({
+      title: "⚙️ Admin Dashboard",
+      description: "System administration and management",
+      link: "/admin"
+    });
+  }
 
   console.log('🔍 Dashboard render state:');
   console.log('isAdmin:', isAdmin);
