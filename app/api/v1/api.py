@@ -14,6 +14,7 @@ from app.api.v1.endpoints import (
     allergy,
     practitioner,
     medication,
+    vitals,
     frontend_logs,
 )
 from app.api.v1 import admin
@@ -40,6 +41,7 @@ api_router.include_router(
 api_router.include_router(procedure.router, prefix="/procedures", tags=["procedures"])
 api_router.include_router(treatment.router, prefix="/treatments", tags=["treatments"])
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])
+api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])
 
 # Healthcare provider endpoints
 api_router.include_router(

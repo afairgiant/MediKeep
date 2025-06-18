@@ -1,0 +1,225 @@
+/**
+ * VitalsChart Component Styles
+ */
+
+.vitals-chart {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.vitals-chart.loading,
+.vitals-chart.error,
+.vitals-chart.empty {
+  text-align: center;
+  padding: 60px 24px;
+}
+
+.loading-spinner {
+  color: #4299e1;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: #e53e3e;
+}
+
+.error-message p {
+  margin-bottom: 16px;
+}
+
+.retry-btn {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background-color: #3182ce;
+}
+
+.empty-message {
+  color: #718096;
+}
+
+.empty-message p {
+  margin-bottom: 8px;
+}
+
+.empty-subtitle {
+  font-size: 0.9rem;
+  color: #a0aec0;
+}
+
+.chart-controls {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.time-range-selector {
+  min-width: 200px;
+}
+
+.time-range-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 0.9rem;
+  color: #2d3748;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.time-range-select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.metrics-selector {
+  flex: 1;
+  min-width: 300px;
+}
+
+.control-label {
+  display: block;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.metric-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.metric-checkbox:hover {
+  background-color: #edf2f7;
+}
+
+.metric-checkbox input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.metric-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  margin: 24px 0;
+}
+
+.chart-info {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.chart-info p {
+  color: #718096;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .chart-container {
+    height: 350px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vitals-chart {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
+  .metric-checkbox {
+    padding: 6px;
+    font-size: 0.85rem;
+  }
+
+  .chart-controls {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chart-container {
+    height: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vitals-chart {
+    padding: 12px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .metric-checkbox {
+    padding: 8px 4px;
+  }
+}

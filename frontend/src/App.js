@@ -28,6 +28,7 @@ import Treatments from './pages/medical/Treatments';
 import Procedures from './pages/medical/Procedures';
 import Conditions from './pages/medical/Conditions';
 import Visits from './pages/medical/Visits';
+import Vitals from './pages/medical/Vitals';
 import Practitioners from './pages/medical/Practitioners';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -114,7 +115,6 @@ function App() {
                   </PublicRoute>
                 }
               />
-
               {/* Protected Routes */}
               <Route
                 path="/dashboard"
@@ -124,7 +124,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               {/* Medical Records Routes */}
               <Route
                 path="/patients/me"
@@ -197,12 +196,20 @@ function App() {
                     <Treatments />
                   </ProtectedRoute>
                 }
-              />
+              />{' '}
               <Route
                 path="/visits"
                 element={
                   <ProtectedRoute>
                     <Visits />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vitals"
+                element={
+                  <ProtectedRoute>
+                    <Vitals />
                   </ProtectedRoute>
                 }
               />
@@ -214,7 +221,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               {/* Admin Routes - Require Admin Role */}
               <Route
                 path="/admin"
@@ -272,10 +278,8 @@ function App() {
                   </AdminRoute>
                 }
               />
-
               {/* Development/Testing Routes */}
               <Route path="/logging-test" element={<LoggingTest />} />
-
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>

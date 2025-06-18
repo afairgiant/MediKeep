@@ -10,6 +10,7 @@ from .immunization import immunization
 from .procedure import procedure
 from .treatment import treatment
 from .allergy import allergy
+from .vitals import vitals
 
 __all__ = [
     "user",
@@ -24,4 +25,5 @@ __all__ = [
     "procedure",
     "treatment",
     "allergy",
+    "vitals",
 ]

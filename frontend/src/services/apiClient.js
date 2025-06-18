@@ -2,7 +2,7 @@
  * Enhanced API Client with Authentication Integration
  * Provides centralized API communication with automatic token handling
  */
-import { authService } from './auth/enhancedAuthService';
+import { authService } from './auth/simpleAuthService';
 import { toast } from 'react-toastify';
 
 class APIClient {

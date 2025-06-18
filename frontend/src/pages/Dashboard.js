@@ -87,6 +87,11 @@ const Dashboard = () => {
       link: '/medications',
     },
     {
+      title: '🩺 Vital Signs',
+      description: 'Record and view your vital signs',
+      link: '/vitals',
+    },
+    {
       title: '💉 Immunizations',
       description: 'Check your immunization records',
       link: '/immunizations',
@@ -127,9 +132,9 @@ const Dashboard = () => {
   // Add admin dashboard link if user is admin
   if (isAdmin) {
     secondaryItems.unshift({
-      title: "⚙️ Admin Dashboard",
-      description: "System administration and management",
-      link: "/admin"
+      title: '⚙️ Admin Dashboard',
+      description: 'System administration and management',
+      link: '/admin',
     });
   }
 
