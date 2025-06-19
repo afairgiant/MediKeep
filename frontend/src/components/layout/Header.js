@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggle from '../ui/ThemeToggle';
 import './Header.css';
 
 /**
@@ -11,6 +12,7 @@ const Header = ({
   backPath = '/dashboard',
   actions = null,
   subtitle = null,
+  showThemeToggle = true,
 }) => {
   const navigate = useNavigate();
 
@@ -32,7 +34,10 @@ const Header = ({
         </div>
       </div>
 
-      {actions && <div className="header-actions">{actions}</div>}
+      <div className="header-actions">
+        {actions}
+        {showThemeToggle && <ThemeToggle />}
+      </div>
     </header>
   );
 };

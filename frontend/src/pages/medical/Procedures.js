@@ -268,11 +268,13 @@ const Procedures = () => {
           </div>
         </div>
         <div className="filters-container">
+          {' '}
           <div className="filter-group">
             <label>Status</label>
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
+              className="filter-select"
             >
               <option value="all">All Statuses</option>
               <option value="scheduled">Scheduled</option>
@@ -284,7 +286,11 @@ const Procedures = () => {
           </div>
           <div className="filter-group">
             <label>Sort By</label>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="filter-select"
+            >
               <option value="procedure_date">Procedure Date</option>
               <option value="procedure_name">Procedure Name</option>
               <option value="status">Status</option>

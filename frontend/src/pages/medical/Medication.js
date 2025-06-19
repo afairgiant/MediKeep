@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
-import '../../styles/pages/Medication.css';
+import '../../styles/shared/MedicalPageShared.css';
 
 const Medication = () => {
   const [medications, setMedications] = useState([]);
@@ -277,10 +277,9 @@ const Medication = () => {
         return 'status-unknown';
     }
   };
-
   if (loading) {
     return (
-      <div className="medication-container">
+      <div className="medical-page-container">
         <div className="loading">
           <div className="spinner"></div>
           <p>Loading medications...</p>
@@ -288,23 +287,21 @@ const Medication = () => {
       </div>
     );
   }
-
   return (
-    <div className="medication-container">
-      <header className="medication-header">
+    <div className="medical-page-container">
+      <header className="medical-page-header">
         <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>💊 Medications</h1>
       </header>
 
-      <div className="medication-content">
+      <div className="medical-page-content">
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
-
-        <div className="medication-controls">
+        )}{' '}
+        <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddMedication}>
               + Add New Medication
@@ -335,10 +332,10 @@ const Medication = () => {
             </div>
           </div>
         </div>
-
         {showAddForm && (
-          <div className="medication-form-overlay">
-            <div className="medication-form-modal">
+          <div className="medical-form-overlay">
+            <div className="medical-form-modal">
+              {' '}
               <div className="form-header">
                 <h3>
                   {editingMedication ? 'Edit Medication' : 'Add New Medication'}
@@ -347,134 +344,135 @@ const Medication = () => {
                   ×
                 </button>
               </div>
+              <div className="medical-form-content">
+                <form onSubmit={handleSubmit}>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="medication_name">Medication Name *</label>
+                      <input
+                        type="text"
+                        id="medication_name"
+                        name="medication_name"
+                        value={formData.medication_name}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="medication_name">Medication Name *</label>
-                    <input
-                      type="text"
-                      id="medication_name"
-                      name="medication_name"
-                      value={formData.medication_name}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                    <div className="form-group">
+                      <label htmlFor="dosage">Dosage</label>
+                      <input
+                        type="text"
+                        id="dosage"
+                        name="dosage"
+                        value={formData.dosage}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 10mg, 1 tablet"
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label htmlFor="dosage">Dosage</label>
-                    <input
-                      type="text"
-                      id="dosage"
-                      name="dosage"
-                      value={formData.dosage}
-                      onChange={handleInputChange}
-                      placeholder="e.g., 10mg, 1 tablet"
-                    />
-                  </div>
+                    <div className="form-group">
+                      <label htmlFor="frequency">Frequency</label>
+                      <input
+                        type="text"
+                        id="frequency"
+                        name="frequency"
+                        value={formData.frequency}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Once daily, Twice daily"
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label htmlFor="frequency">Frequency</label>
-                    <input
-                      type="text"
-                      id="frequency"
-                      name="frequency"
-                      value={formData.frequency}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Once daily, Twice daily"
-                    />
-                  </div>
+                    <div className="form-group">
+                      <label htmlFor="route">Route</label>
+                      <select
+                        id="route"
+                        name="route"
+                        value={formData.route}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Select Route</option>
+                        <option value="oral">Oral</option>
+                        <option value="injection">Injection</option>
+                        <option value="topical">Topical</option>
+                        <option value="intravenous">Intravenous</option>
+                        <option value="intramuscular">Intramuscular</option>
+                        <option value="subcutaneous">Subcutaneous</option>
+                        <option value="inhalation">Inhalation</option>
+                        <option value="nasal">Nasal</option>
+                        <option value="rectal">Rectal</option>
+                        <option value="sublingual">Sublingual</option>
+                      </select>
+                    </div>
 
-                  <div className="form-group">
-                    <label htmlFor="route">Route</label>
-                    <select
-                      id="route"
-                      name="route"
-                      value={formData.route}
-                      onChange={handleInputChange}
+                    <div className="form-group">
+                      <label htmlFor="indication">Indication</label>
+                      <input
+                        type="text"
+                        id="indication"
+                        name="indication"
+                        value={formData.indication}
+                        onChange={handleInputChange}
+                        placeholder="What is this medication for?"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="status">Status</label>
+                      <select
+                        id="status"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleInputChange}
+                      >
+                        <option value="active">Active</option>
+                        <option value="stopped">Stopped</option>
+                        <option value="on-hold">On Hold</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="effectivePeriod_start">Start Date</label>
+                      <input
+                        type="date"
+                        id="effectivePeriod_start"
+                        name="effectivePeriod_start"
+                        value={formData.effectivePeriod_start}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="effectivePeriod_end">End Date</label>
+                      <input
+                        type="date"
+                        id="effectivePeriod_end"
+                        name="effectivePeriod_end"
+                        value={formData.effectivePeriod_end}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>{' '}
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="cancel-button"
+                      onClick={resetForm}
                     >
-                      <option value="">Select Route</option>
-                      <option value="oral">Oral</option>
-                      <option value="injection">Injection</option>
-                      <option value="topical">Topical</option>
-                      <option value="intravenous">Intravenous</option>
-                      <option value="intramuscular">Intramuscular</option>
-                      <option value="subcutaneous">Subcutaneous</option>
-                      <option value="inhalation">Inhalation</option>
-                      <option value="nasal">Nasal</option>
-                      <option value="rectal">Rectal</option>
-                      <option value="sublingual">Sublingual</option>
-                    </select>
+                      Cancel
+                    </button>
+                    <button type="submit" className="save-button">
+                      {editingMedication
+                        ? 'Update Medication'
+                        : 'Add Medication'}
+                    </button>
                   </div>
-
-                  <div className="form-group">
-                    <label htmlFor="indication">Indication</label>
-                    <input
-                      type="text"
-                      id="indication"
-                      name="indication"
-                      value={formData.indication}
-                      onChange={handleInputChange}
-                      placeholder="What is this medication for?"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="status">Status</label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      <option value="active">Active</option>
-                      <option value="stopped">Stopped</option>
-                      <option value="on-hold">On Hold</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="effectivePeriod_start">Start Date</label>
-                    <input
-                      type="date"
-                      id="effectivePeriod_start"
-                      name="effectivePeriod_start"
-                      value={formData.effectivePeriod_start}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="effectivePeriod_end">End Date</label>
-                    <input
-                      type="date"
-                      id="effectivePeriod_end"
-                      name="effectivePeriod_end"
-                      value={formData.effectivePeriod_end}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={resetForm}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="save-button">
-                    {editingMedication ? 'Update Medication' : 'Add Medication'}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         )}
-
-        <div className="medications-list">
+        <div className="medical-items-list">
           {getSortedMedications().length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">💊</div>
@@ -482,13 +480,11 @@ const Medication = () => {
               <p>Click "Add New Medication" to get started.</p>
             </div>
           ) : (
-            <div className="medications-grid">
+            <div className="medical-items-grid">
               {getSortedMedications().map(medication => (
-                <div key={medication.id} className="medication-card">
-                  <div className="medication-header">
-                    <h3 className="medication-name">
-                      {medication.medication_name}
-                    </h3>
+                <div key={medication.id} className="medical-item-card">
+                  <div className="medical-item-header">
+                    <h3 className="item-title">{medication.medication_name}</h3>
                     <span
                       className={`status-badge ${getStatusBadgeClass(medication.status)}`}
                     >
@@ -496,7 +492,7 @@ const Medication = () => {
                     </span>
                   </div>
 
-                  <div className="medication-details">
+                  <div className="medical-item-details">
                     {medication.dosage && (
                       <div className="detail-item">
                         <span className="label">Dosage:</span>
@@ -542,7 +538,7 @@ const Medication = () => {
                     )}
                   </div>
 
-                  <div className="medication-actions">
+                  <div className="medical-item-actions">
                     <button
                       className="edit-button"
                       onClick={() => handleEditMedication(medication)}

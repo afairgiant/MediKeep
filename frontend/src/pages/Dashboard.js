@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardCard } from '../components';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { apiService } from '../services/api';
 import '../styles/pages/Dashboard.css';
 
@@ -149,12 +150,12 @@ const Dashboard = () => {
       </div>
     );
   }
-
   return (
     <div className="dashboard-container">
       <header>
         <h1>🏥 Medical Records Dashboard</h1>
         <nav>
+          <ThemeToggle />
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>

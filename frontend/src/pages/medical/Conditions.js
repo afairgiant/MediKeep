@@ -175,7 +175,6 @@ const Conditions = () => {
         {successMessage && (
           <div className="success-message">{successMessage}</div>
         )}
-
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddCondition}>
@@ -193,14 +192,14 @@ const Conditions = () => {
               />
             </div>
           </div>
-        </div>
-
+        </div>{' '}
         <div className="filters-container">
           <div className="filter-group">
             <label>Status</label>
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
+              className="filter-select"
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
@@ -211,14 +210,17 @@ const Conditions = () => {
           </div>
           <div className="filter-group">
             <label>Sort By</label>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="filter-select"
+            >
               <option value="onset_date">Onset Date</option>
               <option value="diagnosis">Diagnosis</option>
               <option value="status">Status</option>
             </select>
           </div>
         </div>
-
         <div className="medical-items-list">
           {filteredConditions.length === 0 ? (
             <div className="empty-state">
