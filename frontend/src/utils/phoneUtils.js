@@ -5,11 +5,11 @@
 /**
  * Format a phone number for display
  * Converts digits-only format to user-friendly display format
- * 
+ *
  * @param {string|null} phoneNumber - The phone number (digits only from database)
  * @returns {string} - Formatted phone number for display
  */
-export const formatPhoneNumber = (phoneNumber) => {
+export const formatPhoneNumber = phoneNumber => {
   // Return empty string if no phone number
   if (!phoneNumber || phoneNumber.trim() === '') {
     return '';
@@ -46,24 +46,24 @@ export const formatPhoneNumber = (phoneNumber) => {
 /**
  * Clean phone number input for form submission
  * Removes all non-digit characters for database storage
- * 
+ *
  * @param {string} phoneNumber - The phone number input from user
  * @returns {string} - Cleaned phone number (digits only)
  */
-export const cleanPhoneNumber = (phoneNumber) => {
+export const cleanPhoneNumber = phoneNumber => {
   if (!phoneNumber) return '';
   return phoneNumber.replace(/\D/g, '');
 };
 
 /**
  * Validate phone number format
- * 
+ *
  * @param {string} phoneNumber - The phone number to validate
  * @returns {boolean} - True if valid, false otherwise
  */
-export const isValidPhoneNumber = (phoneNumber) => {
+export const isValidPhoneNumber = phoneNumber => {
   if (!phoneNumber) return true; // Allow empty phone numbers
-  
+
   const digits = cleanPhoneNumber(phoneNumber);
   return digits.length >= 10 && digits.length <= 15;
 };
@@ -71,13 +71,13 @@ export const isValidPhoneNumber = (phoneNumber) => {
 /**
  * Format phone number as user types (for input fields)
  * Provides real-time formatting as the user enters the number
- * 
+ *
  * @param {string} value - Current input value
  * @returns {string} - Formatted value for display in input
  */
-export const formatPhoneInput = (value) => {
+export const formatPhoneInput = value => {
   const digits = cleanPhoneNumber(value);
-  
+
   if (digits.length <= 3) {
     return digits;
   } else if (digits.length <= 6) {

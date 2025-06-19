@@ -81,7 +81,8 @@ const Practitioners = () => {
   };
 
   const handleEditPractitioner = practitioner => {
-    setEditingPractitioner(practitioner);    setFormData({
+    setEditingPractitioner(practitioner);
+    setFormData({
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
       practice: practitioner.practice || '',
@@ -115,11 +116,14 @@ const Practitioners = () => {
       // Clean the phone number before sending to API (remove formatting)
       const dataToSubmit = {
         ...formData,
-        phone_number: cleanPhoneNumber(formData.phone_number) || null
+        phone_number: cleanPhoneNumber(formData.phone_number) || null,
       };
-      
+
       if (editingPractitioner) {
-        await apiService.updatePractitioner(editingPractitioner.id, dataToSubmit);
+        await apiService.updatePractitioner(
+          editingPractitioner.id,
+          dataToSubmit
+        );
         setSuccessMessage('Practitioner updated successfully');
       } else {
         await apiService.createPractitioner(dataToSubmit);
@@ -136,7 +140,7 @@ const Practitioners = () => {
   };
   const handleInputChange = e => {
     const { name, value } = e.target;
-    
+
     if (name === 'phone_number') {
       // Format phone number as user types
       const formattedValue = formatPhoneInput(value);
@@ -314,7 +318,8 @@ const Practitioners = () => {
                 <div className="detail-item">
                   <span className="detail-label">Practice</span>
                   <span className="detail-value">{practitioner.practice}</span>
-                </div>                {practitioner.phone_number && (
+                </div>{' '}
+                {practitioner.phone_number && (
                   <div className="detail-item">
                     <span className="detail-label">Phone</span>
                     <span className="detail-value">

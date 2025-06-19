@@ -16,6 +16,12 @@ const Medication = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [sortBy, setSortBy] = useState('active');
   const [sortOrder, setSortOrder] = useState('desc');
+
+  // Filtering state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [routeFilter, setRouteFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState('all'); // all, current, past, future
   const [formData, setFormData] = useState({
     medication_name: '',
     dosage: '',
@@ -220,7 +226,6 @@ const Medication = () => {
       setError(error.message || 'Failed to delete medication');
     }
   };
-
   const getSortedMedications = () => {
     const sorted = [...medications].sort((a, b) => {
       // First sort by active status (active first)
@@ -252,6 +257,117 @@ const Medication = () => {
     });
 
     return sorted;
+  };
+
+  const getFilteredAndSortedMedications = () => {
+    let filtered = medications;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(
+        med =>
+          med.medication_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          med.indication?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          med.dosage?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(med => med.status === statusFilter);
+    }
+
+    // Apply route filter
+    if (routeFilter !== 'all') {
+      filtered = filtered.filter(med => med.route === routeFilter);
+    }
+
+    // Apply date range filter
+    if (dateRangeFilter !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      filtered = filtered.filter(med => {
+        const startDate = med.effectivePeriod_start
+          ? new Date(med.effectivePeriod_start)
+          : null;
+        const endDate = med.effectivePeriod_end
+          ? new Date(med.effectivePeriod_end)
+          : null;
+
+        switch (dateRangeFilter) {
+          case 'current':
+            // Currently active medications (started and not yet ended)
+            return (
+              (!startDate || startDate <= today) &&
+              (!endDate || endDate >= today)
+            );
+          case 'past':
+            // Medications that have ended
+            return endDate && endDate < today;
+          case 'future':
+            // Medications that haven't started yet
+            return startDate && startDate > today;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting to filtered results
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === 'active') {
+        const aIsActive = a.status === 'active';
+        const bIsActive = b.status === 'active';
+
+        if (aIsActive && !bIsActive) return -1;
+        if (!aIsActive && bIsActive) return 1;
+
+        return a.medication_name.localeCompare(b.medication_name);
+      }
+
+      if (sortBy === 'name') {
+        return sortOrder === 'asc'
+          ? a.medication_name.localeCompare(b.medication_name)
+          : b.medication_name.localeCompare(a.medication_name);
+      }
+
+      if (sortBy === 'start_date') {
+        const aDate = new Date(a.effectivePeriod_start || 0);
+        const bDate = new Date(b.effectivePeriod_start || 0);
+        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+      }
+
+      return 0;
+    });
+
+    return sorted;
+  };
+  // Get unique values for filter dropdowns
+  const getUniqueStatuses = () => {
+    const statuses = [
+      ...new Set(medications.map(med => med.status).filter(Boolean)),
+    ];
+    return statuses.sort();
+  };
+
+  const getUniqueRoutes = () => {
+    const routes = [
+      ...new Set(medications.map(med => med.route).filter(Boolean)),
+    ];
+    return routes.sort();
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = () => {
+    return (
+      searchTerm.trim() !== '' ||
+      statusFilter !== 'all' ||
+      routeFilter !== 'all' ||
+      dateRangeFilter !== 'all'
+    );
   };
 
   const handleSortChange = newSortBy => {
@@ -352,8 +468,96 @@ const Medication = () => {
                 >
                   {sortOrder === 'asc' ? '↑' : '↓'}
                 </button>
-              )}
+              )}{' '}
             </div>
+          </div>
+        </div>
+        {/* Filtering Section */}
+        <div className="medical-page-filters">
+          <div className="filters-row">
+            <div className="filter-group">
+              <label htmlFor="search">🔍 Search:</label>
+              <input
+                type="text"
+                id="search"
+                placeholder="Search medications, indications, or dosages..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="status-filter">Status:</label>
+              <select
+                id="status-filter"
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Statuses</option>
+                {getUniqueStatuses().map(status => (
+                  <option key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="route-filter">Route:</label>
+              <select
+                id="route-filter"
+                value={routeFilter}
+                onChange={e => setRouteFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Routes</option>
+                {getUniqueRoutes().map(route => (
+                  <option key={route} value={route}>
+                    {route.charAt(0).toUpperCase() + route.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="date-filter">Time Period:</label>
+              <select
+                id="date-filter"
+                value={dateRangeFilter}
+                onChange={e => setDateRangeFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Time Periods</option>
+                <option value="current">Currently Active</option>
+                <option value="past">Past Medications</option>
+                <option value="future">Future Medications</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <button
+                className="clear-filters-btn"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                  setRouteFilter('all');
+                  setDateRangeFilter('all');
+                }}
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+          <div className="filter-summary">
+            {hasActiveFilters() && (
+              <span className="active-filters-indicator">
+                🔍 Filters Active •{' '}
+              </span>
+            )}
+            {getFilteredAndSortedMedications().length} of {medications.length}{' '}
+            medications shown
           </div>
         </div>
         {showAddForm && (
@@ -497,15 +701,38 @@ const Medication = () => {
           </div>
         )}{' '}
         <div className="medical-items-list">
-          {getSortedMedications().length === 0 ? (
+          {getFilteredAndSortedMedications().length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">💊</div>
-              <h3>No medications found</h3>
-              <p>Click "Add New Medication" to get started.</p>
+              {medications.length === 0 ? (
+                <>
+                  <h3>No medications found</h3>
+                  <p>Click "Add New Medication" to get started.</p>
+                </>
+              ) : (
+                <>
+                  <h3>No medications match your filters</h3>
+                  <p>
+                    Try adjusting your search criteria or clear the filters to
+                    see all medications.
+                  </p>
+                  <button
+                    className="secondary-button"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setStatusFilter('all');
+                      setRouteFilter('all');
+                      setDateRangeFilter('all');
+                    }}
+                  >
+                    Clear All Filters
+                  </button>
+                </>
+              )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedMedications().map(medication => (
+              {getFilteredAndSortedMedications().map(medication => (
                 <div key={medication.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">{medication.medication_name}</h3>
@@ -601,9 +828,9 @@ const Medication = () => {
                     <th>Status</th>
                     <th className="no-print">Actions</th>
                   </tr>
-                </thead>
+                </thead>{' '}
                 <tbody>
-                  {getSortedMedications().map(medication => (
+                  {getFilteredAndSortedMedications().map(medication => (
                     <tr key={medication.id}>
                       <td className="medication-name">
                         {medication.medication_name}

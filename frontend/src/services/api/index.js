@@ -84,12 +84,13 @@ class ApiService {
       return response.blob();
     }
     return response.text();
-  }  // Core request method with logging and fallback
+  } // Core request method with logging and fallback
   async request(method, url, data = null, options = {}) {
     const { signal, headers: customHeaders = {}, responseType } = options;
 
     // Get token but don't fail if it doesn't exist - let backend handle authentication
-    const token = localStorage.getItem('token');    const config = {
+    const token = localStorage.getItem('token');
+    const config = {
       method,
       signal,
       headers: {
