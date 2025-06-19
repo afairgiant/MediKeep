@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Medication = () => {
   const [medications, setMedications] = useState([]);
@@ -12,6 +13,7 @@ const Medication = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMedication, setEditingMedication] = useState(null);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [sortBy, setSortBy] = useState('active');
   const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
@@ -308,7 +310,29 @@ const Medication = () => {
             </button>
           </div>
 
+          <div className="controls-center">
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                onClick={() => setViewMode('cards')}
+              >
+                📋 Cards
+              </button>
+              <button
+                className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+              >
+                📊 Table
+              </button>
+            </div>
+          </div>
+
           <div className="controls-right">
+            {viewMode === 'table' && (
+              <button className="print-button" onClick={() => window.print()}>
+                🖨️ Print
+              </button>
+            )}
             <div className="sort-controls">
               <label>Sort by:</label>
               <select
@@ -471,7 +495,7 @@ const Medication = () => {
               </div>
             </div>
           </div>
-        )}
+        )}{' '}
         <div className="medical-items-list">
           {getSortedMedications().length === 0 ? (
             <div className="empty-state">
@@ -479,7 +503,7 @@ const Medication = () => {
               <h3>No medications found</h3>
               <p>Click "Add New Medication" to get started.</p>
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
               {getSortedMedications().map(medication => (
                 <div key={medication.id} className="medical-item-card">
@@ -554,6 +578,77 @@ const Medication = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div className="medications-table-container">
+              <div className="print-header">
+                <h2>
+                  Medication List - {patientData?.first_name}{' '}
+                  {patientData?.last_name}
+                </h2>
+                <p>Generated on: {new Date().toLocaleDateString()}</p>
+              </div>
+              <table className="medications-table">
+                <thead>
+                  <tr>
+                    <th>Medication Name</th>
+                    <th>Dosage</th>
+                    <th>Frequency</th>
+                    <th>Route</th>
+                    <th>Indication</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th className="no-print">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getSortedMedications().map(medication => (
+                    <tr key={medication.id}>
+                      <td className="medication-name">
+                        {medication.medication_name}
+                      </td>
+                      <td>{medication.dosage || '-'}</td>
+                      <td>{medication.frequency || '-'}</td>
+                      <td>{medication.route || '-'}</td>
+                      <td>{medication.indication || '-'}</td>
+                      <td>{formatDate(medication.effectivePeriod_start)}</td>
+                      <td>
+                        {medication.effectivePeriod_end
+                          ? formatDate(medication.effectivePeriod_end)
+                          : '-'}
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge-small ${getStatusBadgeClass(medication.status)}`}
+                        >
+                          {medication.status || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="no-print">
+                        <div className="table-actions">
+                          <button
+                            className="edit-button-small"
+                            onClick={() => handleEditMedication(medication)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="delete-button-small"
+                            onClick={() =>
+                              handleDeleteMedication(medication.id)
+                            }
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

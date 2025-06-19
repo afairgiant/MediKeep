@@ -1,0 +1,317 @@
+/* Medication Table View Styles */
+
+/* Updated Controls Layout */
+.medical-page-controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.controls-left {
+  justify-self: start;
+}
+
+.controls-center {
+  justify-self: center;
+}
+
+.controls-right {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* View Toggle Controls */
+.view-toggle {
+  display: flex;
+  background: var(--color-bg-primary, white);
+  border: 2px solid var(--color-border-light, #e9ecef);
+  border-radius: var(--border-radius-md, 5px);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.view-toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-text-secondary, #6c757d);
+  transition: var(--transition-all, all 0.3s ease);
+  border-right: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.view-toggle-btn:last-child {
+  border-right: none;
+}
+
+.view-toggle-btn:hover {
+  background: var(--color-bg-secondary, #f8f9fa);
+  color: var(--color-text-primary, #333);
+}
+
+.view-toggle-btn.active {
+  background: var(--color-primary, #667eea);
+  color: var(--color-text-light, white);
+}
+
+.print-button {
+  background: var(--color-info, #17a2b8);
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(23, 162, 184, 0.3));
+}
+
+.print-button:hover {
+  background: var(--color-info-dark, #138496);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 2px 8px rgba(23, 162, 184, 0.4));
+}
+
+/* Table Layout for Medications */
+.medications-table-container {
+  background: var(--color-bg-primary, white);
+  border-radius: var(--border-radius-lg, 8px);
+  box-shadow: var(--shadow-lg, 0 5px 15px rgba(0, 0, 0, 0.08));
+  overflow: hidden;
+  border: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.print-header {
+  padding: 1.5rem 2rem;
+  background: var(--color-bg-secondary, #f8f9fa);
+  border-bottom: 2px solid var(--color-border-light, #e9ecef);
+  text-align: center;
+}
+
+.print-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary, #333);
+  font-size: 1.5rem;
+}
+
+.print-header p {
+  margin: 0;
+  color: var(--color-text-secondary, #6c757d);
+  font-size: 0.9rem;
+}
+
+.medications-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.medications-table th {
+  background: var(--color-primary, #667eea);
+  color: var(--color-text-light, white);
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-primary-dark, #5a6fd8);
+  white-space: nowrap;
+}
+
+.medications-table th:first-child {
+  padding-left: 1.5rem;
+}
+
+.medications-table th:last-child {
+  padding-right: 1.5rem;
+}
+
+.medications-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--color-border-light, #e9ecef);
+  vertical-align: top;
+  word-wrap: break-word;
+  max-width: 200px;
+}
+
+.medications-table td:first-child {
+  padding-left: 1.5rem;
+}
+
+.medications-table td:last-child {
+  padding-right: 1.5rem;
+}
+
+.medications-table tbody tr:hover {
+  background: var(--color-bg-secondary, #f8f9fa);
+}
+
+.medications-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.medication-name {
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  min-width: 150px;
+}
+
+.status-badge-small {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm, 3px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.edit-button-small,
+.delete-button-small {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--border-radius-sm, 3px);
+  transition: var(--transition-all, all 0.2s ease);
+  font-size: 1rem;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-button-small:hover {
+  background: var(--color-warning-light, rgba(255, 193, 7, 0.1));
+}
+
+.delete-button-small:hover {
+  background: var(--color-danger-light, rgba(220, 53, 69, 0.1));
+}
+
+/* Responsive Table */
+@media screen and (max-width: 1200px) {
+  .medications-table {
+    font-size: 0.8rem;
+  }
+
+  .medications-table th,
+  .medications-table td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .medications-table th:first-child,
+  .medications-table td:first-child {
+    padding-left: 0.75rem;
+  }
+
+  .medications-table th:last-child,
+  .medications-table td:last-child {
+    padding-right: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .medical-page-controls {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .controls-left,
+  .controls-center,
+  .controls-right {
+    justify-self: center;
+  }
+
+  .medications-table-container {
+    overflow-x: auto;
+  }
+
+  .medications-table {
+    min-width: 800px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .medical-page-header,
+  .medical-page-controls,
+  .no-print {
+    display: none !important;
+  }
+
+  .medical-page-container {
+    background: white !important;
+  }
+
+  .medical-page-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .medications-table-container {
+    box-shadow: none !important;
+    border: 1px solid #333 !important;
+    break-inside: avoid;
+  }
+
+  .print-header {
+    background: white !important;
+    border-bottom: 2px solid #333 !important;
+  }
+
+  .print-header h2 {
+    color: #333 !important;
+  }
+
+  .print-header p {
+    color: #666 !important;
+  }
+
+  .medications-table th {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #333 !important;
+  }
+
+  .medications-table td {
+    border: 1px solid #333 !important;
+    font-size: 12px !important;
+  }
+
+  .medications-table {
+    page-break-inside: auto;
+  }
+
+  .medications-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .medications-table thead {
+    display: table-header-group;
+  }
+
+  .status-badge-small {
+    border: 1px solid #333 !important;
+    background: white !important;
+    color: #333 !important;
+  }
+
+  .medication-name {
+    font-weight: bold !important;
+  }
+}
