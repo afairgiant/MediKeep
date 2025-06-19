@@ -126,7 +126,6 @@ const AdminDashboard = () => {
       },
     ],
   };
-
   const recordsDistributionData = {
     labels: [
       'Patients',
@@ -134,6 +133,7 @@ const AdminDashboard = () => {
       'Medications',
       'Procedures',
       'Allergies',
+      'Vitals',
     ],
     datasets: [
       {
@@ -143,6 +143,7 @@ const AdminDashboard = () => {
           stats?.total_medications || 0,
           stats?.total_procedures || 0,
           stats?.total_allergies || 0,
+          stats?.total_vitals || 0,
         ],
         backgroundColor: [
           '#3b82f6',
@@ -150,6 +151,7 @@ const AdminDashboard = () => {
           '#f59e0b',
           '#ef4444',
           '#8b5cf6',
+          '#06b6d4',
         ],
         borderWidth: 0,
       },
@@ -244,7 +246,6 @@ const AdminDashboard = () => {
             </div>
             <div className="stat-trend">📈</div>
           </div>
-
           <div className="stat-card-modern success">
             <div className="stat-icon">🏥</div>
             <div className="stat-content">
@@ -256,7 +257,6 @@ const AdminDashboard = () => {
             </div>
             <div className="stat-trend">📊</div>
           </div>
-
           <div className="stat-card-modern warning">
             <div className="stat-icon">🧪</div>
             <div className="stat-content">
@@ -267,8 +267,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="stat-trend">⏳</div>
-          </div>
-
+          </div>{' '}
           <div className="stat-card-modern info">
             <div className="stat-icon">💊</div>
             <div className="stat-content">
@@ -279,6 +278,15 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="stat-trend">💊</div>
+          </div>
+          <div className="stat-card-modern secondary">
+            <div className="stat-icon">📊</div>
+            <div className="stat-content">
+              <div className="stat-value">{stats?.total_vitals || 0}</div>
+              <div className="stat-label">Vital Signs</div>
+              <div className="stat-change neutral">Recent measurements</div>
+            </div>
+            <div className="stat-trend">❤️</div>
           </div>
         </div>
 

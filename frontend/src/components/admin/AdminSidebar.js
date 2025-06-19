@@ -9,7 +9,6 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     currentPath,
     hasOnToggle: typeof onToggle === 'function',
   });
-
   const models = [
     { name: 'user', display: 'Users', icon: '👥' },
     { name: 'patient', display: 'Patients', icon: '🏥' },
@@ -17,12 +16,13 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     { name: 'medication', display: 'Medications', icon: '💊' },
     { name: 'lab_result', display: 'Lab Results', icon: '🧪' },
     { name: 'lab_result_file', display: 'Lab Files', icon: '📄' },
-    { name: 'condition', display: 'Conditions', icon: '🩺' },
+    { name: 'vitals', display: 'Vital Signs', icon: '🩺' },
+    { name: 'condition', display: 'Conditions', icon: '📋' },
     { name: 'allergy', display: 'Allergies', icon: '⚠️' },
     { name: 'immunization', display: 'Immunizations', icon: '💉' },
     { name: 'procedure', display: 'Procedures', icon: '🔬' },
     { name: 'treatment', display: 'Treatments', icon: '🩹' },
-    { name: 'encounter', display: 'Encounters', icon: '📋' },
+    { name: 'encounter', display: 'Encounters', icon: '�' },
   ];
 
   const handleToggle = () => {

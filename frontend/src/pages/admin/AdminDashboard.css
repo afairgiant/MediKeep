@@ -194,6 +194,9 @@
 .stat-card-modern.info {
   --card-color: var(--admin-info);
 }
+.stat-card-modern.secondary {
+  --card-color: var(--admin-secondary);
+}
 
 .stat-card-modern .stat-icon {
   font-size: 2.5rem;

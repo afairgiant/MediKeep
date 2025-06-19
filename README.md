@@ -2,7 +2,7 @@
 
 A medical records management system with React frontend and FastAPI backend.
 
-## STILL VERY MUCH SO A WORK IN PROGRESS! EXPECT BREAKING CHANGES OFTEN!
+## STILL VERY MUCH SO A WORK IN PROGRESS!
 
 ## Quick Start
 
@@ -15,10 +15,8 @@ Ensure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compos
 Create a `docker-compose.yml` file with content:
 
 ```yaml
-
-services:  
-
-# PostgreSQL Database Service
+services:
+  # PostgreSQL Database Service
   postgres:
     image: postgres:15.8-alpine
     container_name: medical-records-db
@@ -27,12 +25,16 @@ services:
       POSTGRES_USER: ${DB_USER:-medapp}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - postgres_data-prod:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "5432:5432"    
+      - '5432:5432'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}"]
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,10 +47,10 @@ services:
     image: ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest
     # build:
     #   context: ..
-    #   dockerfile: docker/Dockerfile    
+    #   dockerfile: docker/Dockerfile
     container_name: medical-records-app
     ports:
-      - ${APP_PORT:-8005}:8000  # Single port serves both React app and FastAPI      
+      - ${APP_PORT:-8005}:8000 # Single port serves both React app and FastAPI
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -63,7 +65,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -73,7 +75,7 @@ services:
 
 # Named volumes for data persistence
 volumes:
-  postgres_data-prod:
+  postgres_data:
     driver: local
   app_uploads:
     driver: local
@@ -111,7 +113,8 @@ Run the following command to start the services:
 ```ini
 docker compose up -d
 ```
-Note: Do not use ```docker-compose```.
+
+Note: Do not use `docker-compose`.
 
 ### 4️⃣ Access the app
 
@@ -122,6 +125,7 @@ http://localhost:8005
 ```
 
 ### Demo Login
+
 - Username: `admin`
 - Password: `admin123`
 
@@ -135,4 +139,3 @@ http://localhost:8005
 6. Exports
 7. Finish adding individual search & filtering to each page
 8. Whole patient search
-

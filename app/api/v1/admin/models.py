@@ -21,6 +21,7 @@ from app.models.models import (
     Medication,
     LabResult,
     LabResultFile,
+    Vitals,
     Condition,
     Allergy,
     Immunization,
@@ -35,6 +36,7 @@ from app.crud import (
     medication,
     lab_result,
     lab_result_file,
+    vitals,
     condition,
     allergy,
     immunization,
@@ -48,6 +50,7 @@ from app.schemas.practitioner import PractitionerCreate
 from app.schemas.medication import MedicationCreate
 from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
+from app.schemas.vitals import VitalsCreate
 from app.schemas.condition import ConditionCreate
 from app.schemas.allergy import AllergyCreate
 from app.schemas.immunization import ImmunizationCreate
@@ -75,11 +78,15 @@ MODEL_REGISTRY = {
         "model": LabResult,
         "crud": lab_result,
         "create_schema": LabResultCreate,
-    },
-    "lab_result_file": {
+    },    "lab_result_file": {
         "model": LabResultFile,
         "crud": lab_result_file,
         "create_schema": LabResultFileCreate,
+    },
+    "vitals": {
+        "model": Vitals,
+        "crud": vitals,
+        "create_schema": VitalsCreate,
     },
     "condition": {
         "model": Condition,

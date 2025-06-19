@@ -19,6 +19,7 @@ from app.models.models import (
     Practitioner,
     Medication,
     LabResult,
+    Vitals,
     Condition,
     Allergy,
     Immunization,
@@ -38,6 +39,7 @@ class DashboardStats(BaseModel):
     total_practitioners: int
     total_medications: int
     total_lab_results: int
+    total_vitals: int
     total_conditions: int
     total_allergies: int
     total_immunizations: int
@@ -86,15 +88,14 @@ def get_dashboard_stats(
                 result = query.count()
                 return result if result is not None else 0
             except Exception:
-                return 0
-
-        # Get counts for all models with error handling
+                return 0        # Get counts for all models with error handling
         stats = DashboardStats(
             total_users=safe_count(db.query(User)),
             total_patients=safe_count(db.query(Patient)),
             total_practitioners=safe_count(db.query(Practitioner)),
             total_medications=safe_count(db.query(Medication)),
             total_lab_results=safe_count(db.query(LabResult)),
+            total_vitals=safe_count(db.query(Vitals)),
             total_conditions=safe_count(db.query(Condition)),
             total_allergies=safe_count(db.query(Allergy)),
             total_immunizations=safe_count(db.query(Immunization)),
@@ -217,22 +218,21 @@ def get_system_health(
         except Exception as e:
             database_status = "error"
             database_connection_test = False
-            print(f"Database connection test failed: {e}")
-
-        # Calculate total records across all models with error handling
+            print(f"Database connection test failed: {e}")        # Calculate total records across all models with error handling
         total_records = (
             safe_count(db.query(User))
             + safe_count(db.query(Patient))
             + safe_count(db.query(Practitioner))
             + safe_count(db.query(Medication))
             + safe_count(db.query(LabResult))
+            + safe_count(db.query(Vitals))
             + safe_count(db.query(Condition))
             + safe_count(db.query(Allergy))
             + safe_count(db.query(Immunization))
             + safe_count(db.query(Procedure))
             + safe_count(db.query(Treatment))
             + safe_count(db.query(Encounter))
-        )  # Calculate application uptime using startup time
+        )# Calculate application uptime using startup time
         try:
             # Try to get process startup time as a fallback
             import os
