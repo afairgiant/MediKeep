@@ -13,6 +13,7 @@ from sqlalchemy import desc, text
 from pydantic import BaseModel
 
 from app.api import deps
+from app.models.activity_log import get_utc_now
 from app.models.models import (
     User,
     Patient,
@@ -27,6 +28,7 @@ from app.models.models import (
     Treatment,
     Encounter,
 )
+from app.models.activity_log import ActivityLog
 
 router = APIRouter()
 
@@ -133,49 +135,159 @@ def get_recent_activity(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
-    """Get recent activity across all models"""
-
-    recent_activities = []
+    """Get recent activity with historical preservation - uses ActivityLog as primary source"""
 
     try:
-        # Recent users (simplified - in real app you'd have an audit log)
-        recent_users = db.query(User).order_by(desc(User.id)).limit(5).all()
-        for user in recent_users:
+        # First try to get activities from the ActivityLog table (preserves history even after deletions)
+        activity_logs = (
+            db.query(ActivityLog)
+            .order_by(desc(ActivityLog.timestamp))
+            .limit(limit)
+            .all()
+        )
+        
+        recent_activities = []
+        
+        if activity_logs:
+            # Use real activity log data - this preserves deleted records
+            for log in activity_logs:
+                # Map entity_type to model_name for consistency
+                model_name_mapping = {
+                    'medication': 'Medication',
+                    'patient': 'Patient', 
+                    'user': 'User',
+                    'lab_result': 'LabResult',
+                    'procedure': 'Procedure',
+                    'allergy': 'Allergy',
+                    'condition': 'Condition',
+                    'immunization': 'Immunization',                    'vitals': 'Vitals',
+                }
+                entity_type = getattr(log, 'entity_type', None)
+                model_name = model_name_mapping.get(entity_type or '', entity_type.title() if entity_type else "Unknown")
+                
+                # Get the raw description and action
+                raw_description = getattr(log, 'description', 'No description')
+                action = getattr(log, 'action', 'unknown')
+                
+                # Fix malformed descriptions that don't match the action
+                if raw_description and ("delete" in raw_description.lower() and action != "deleted"):
+                    # This is a malformed description, regenerate it
+                    entity_id = getattr(log, 'entity_id', None)
+                    if entity_type == "medication" and entity_id:
+                        # Try to get the medication details if it still exists
+                        medication = db.query(Medication).filter(Medication.id == entity_id).first()
+                        if medication:
+                            patient_name = "Unknown Patient"
+                            if hasattr(medication, 'patient') and medication.patient:
+                                patient_name = f"{getattr(medication.patient, 'first_name', '')} {getattr(medication.patient, 'last_name', '')}".strip()
+                            
+                            if action == "created":
+                                description = f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}"
+                            elif action == "updated":
+                                description = f"Updated medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}"
+                            else:
+                                description = f"Medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}"
+                        else:
+                            # Medication was deleted, use generic description
+                            if action == "created":
+                                description = f"Created {entity_type}: {raw_description.split(':')[-1].strip() if ':' in raw_description else 'Unknown'}"
+                            elif action == "updated":
+                                description = f"Updated {entity_type}: {raw_description.split(':')[-1].strip() if ':' in raw_description else 'Unknown'}"
+                            else:
+                                description = raw_description
+                    else:
+                        # Generic fix for other entity types
+                        if action == "created":
+                            description = f"Created {entity_type or 'record'}"
+                        elif action == "updated":
+                            description = f"Updated {entity_type or 'record'}"
+                        elif action == "deleted":
+                            description = f"Deleted {entity_type or 'record'}"
+                        else:
+                            description = raw_description
+                else:
+                    # Description is already correct
+                    description = raw_description
+                
+                # Create RecentActivity from ActivityLog - this includes all actions including deletions
+                recent_activities.append(
+                    RecentActivity(
+                        id=getattr(log, 'entity_id', None) or getattr(log, 'id', 0),
+                        model_name=model_name,
+                        action=getattr(log, 'action', 'unknown'),
+                        description=getattr(log, 'description', 'No description'),
+                        timestamp=getattr(log, 'timestamp', get_utc_now()),
+                        user_info=getattr(log.user, 'username', None) if getattr(log, 'user', None) else None,
+                    )
+                )
+                
+            return recent_activities
+        
+        # Fallback to old method only if no activity logs exist
+        base_time = get_utc_now()
+        
+        # Recent medications (fallback method)
+        recent_medications = db.query(Medication).order_by(desc(Medication.id)).limit(5).all()
+        for i, medication in enumerate(recent_medications):
+            patient_name = "Unknown Patient"
+            if hasattr(medication, 'patient') and medication.patient:
+                patient_name = f"{getattr(medication.patient, 'first_name', '')} {getattr(medication.patient, 'last_name', '')}".strip()
+            
+            timestamp = base_time - timedelta(minutes=15 + i * 5)
             recent_activities.append(
                 RecentActivity(
-                    id=getattr(user, "id"),
-                    model_name="User",
+                    id=getattr(medication, "id"),
+                    model_name="Medication",
                     action="created",
-                    description=f"New user registered: {getattr(user, 'full_name', 'Unknown')}",
-                    timestamp=datetime.utcnow() - timedelta(days=1),  # Placeholder
-                    user_info=getattr(user, "username", None),
+                    description=f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}",
+                    timestamp=timestamp,
+                    user_info=None,
                 )
             )
-
-        # Recent patients
-        recent_patients = db.query(Patient).order_by(desc(Patient.id)).limit(5).all()
-        for patient in recent_patients:
+            timestamp = base_time - timedelta(minutes=15 + i * 5)
             recent_activities.append(
                 RecentActivity(
-                    id=getattr(patient, "id"),
-                    model_name="Patient",
+                    id=getattr(medication, "id"),
+                    model_name="Medication",
                     action="created",
-                    description=f"New patient: {getattr(patient, 'first_name', '')} {getattr(patient, 'last_name', '')}",
-                    timestamp=datetime.utcnow() - timedelta(hours=2),  # Placeholder
+                    description=f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}",
+                    timestamp=timestamp,
+                    user_info=None,
+                )
+            )        # Recent procedures
+        recent_procedures = db.query(Procedure).order_by(desc(Procedure.id)).limit(3).all()
+        for i, procedure in enumerate(recent_procedures):
+            patient_name = "Unknown Patient"
+            if hasattr(procedure, 'patient') and procedure.patient:
+                patient_name = f"{getattr(procedure.patient, 'first_name', '')} {getattr(procedure.patient, 'last_name', '')}".strip()
+            
+            timestamp = base_time - timedelta(hours=3 + i)
+            recent_activities.append(
+                RecentActivity(
+                    id=getattr(procedure, "id"),
+                    model_name="Procedure",
+                    action="created",
+                    description=f"Procedure: {getattr(procedure, 'procedure_name', 'Unknown')} for {patient_name}",
+                    timestamp=timestamp,
                     user_info=None,
                 )
             )
 
-        # Recent lab results
-        recent_labs = db.query(LabResult).order_by(desc(LabResult.id)).limit(5).all()
-        for lab in recent_labs:
+        # Recent allergies
+        recent_allergies = db.query(Allergy).order_by(desc(Allergy.id)).limit(3).all()
+        for i, allergy in enumerate(recent_allergies):
+            patient_name = "Unknown Patient"
+            if hasattr(allergy, 'patient') and allergy.patient:
+                patient_name = f"{getattr(allergy.patient, 'first_name', '')} {getattr(allergy.patient, 'last_name', '')}".strip()
+            
+            timestamp = base_time - timedelta(hours=4 + i)
             recent_activities.append(
                 RecentActivity(
-                    id=getattr(lab, "id"),
-                    model_name="LabResult",
+                    id=getattr(allergy, "id"),
+                    model_name="Allergy",
                     action="created",
-                    description=f"Lab result: {getattr(lab, 'test_name', 'Unknown')}",
-                    timestamp=datetime.utcnow() - timedelta(hours=3),  # Placeholder
+                    description=f"Allergy recorded: {getattr(allergy, 'allergen', 'Unknown')} for {patient_name}",
+                    timestamp=timestamp,
                     user_info=None,
                 )
             )
@@ -188,6 +300,75 @@ def get_recent_activity(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching recent activity: {str(e)}",
+        )
+
+
+@router.get("/recent-activity-enhanced", response_model=List[RecentActivity])
+def get_recent_activity_enhanced(
+    limit: int = 20,
+    action_filter: Optional[str] = None,  # Filter by action: 'created', 'updated', 'deleted', etc.
+    entity_filter: Optional[str] = None,  # Filter by entity type: 'medication', 'patient', etc.
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """
+    Get recent activity from the ActivityLog table with support for all actions including deletions.
+    This endpoint provides real activity tracking including create, update, delete, and view operations.
+    """
+
+    try:
+        # Build query for ActivityLog
+        query = db.query(ActivityLog).order_by(desc(ActivityLog.timestamp))
+        
+        # Apply filters if provided
+        if action_filter:
+            query = query.filter(ActivityLog.action == action_filter)
+        if entity_filter:
+            query = query.filter(ActivityLog.entity_type == entity_filter)
+        
+        # Execute query
+        activity_logs = query.limit(limit).all()
+        
+        recent_activities = []
+        
+        for log in activity_logs:
+            # Map entity_type to model_name for consistency with existing UI
+            model_name_mapping = {
+                'medication': 'Medication',
+                'patient': 'Patient', 
+                'user': 'User',
+                'lab_result': 'LabResult',
+                'procedure': 'Procedure',
+                'allergy': 'Allergy',
+                'condition': 'Condition',
+                'immunization': 'Immunization',
+                'vitals': 'Vitals',
+            }
+            
+            entity_type = getattr(log, 'entity_type', None)
+            if entity_type:
+                model_name = model_name_mapping.get(entity_type, entity_type.title())
+            else:
+                model_name = "Unknown"
+            
+            # Create RecentActivity from ActivityLog
+            recent_activities.append(
+                RecentActivity(
+                    id=getattr(log, 'entity_id', None) or getattr(log, 'id', 0),
+                    model_name=model_name or "Unknown",
+                    action=getattr(log, 'action', 'unknown'),
+                    description=getattr(log, 'description', 'No description'),
+                    timestamp=getattr(log, 'timestamp', get_utc_now()),
+                    user_info=getattr(log.user, 'username', None) if getattr(log, 'user', None) else None,
+                )
+            )
+        
+        return recent_activities
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching enhanced recent activity: {str(e)}",
         )
 
 
@@ -344,7 +525,7 @@ def get_system_metrics(
 
     try:
         metrics = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": get_utc_now().isoformat(),
             "database": {
                 "connection_pool_size": "Available",
                 "active_connections": 1,  # Placeholder
@@ -405,10 +586,9 @@ def get_system_metrics(
 @router.get("/health-check")
 def quick_health_check():
     """Quick health check endpoint for monitoring services"""
-
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": get_utc_now().isoformat(),
         "service": "medical_records_api",
         "version": "2.0",
         "uptime": "operational",
@@ -424,8 +604,7 @@ async def test_admin_access(
     Used for debugging and monitoring purposes.
     """
     return {
-        "message": "Admin access verified",
-        "user": current_user.username,
+        "message": "Admin access verified",        "user": current_user.username,
         "role": current_user.role,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": get_utc_now().isoformat(),
     }

@@ -57,7 +57,6 @@ const AdminDashboard = () => {
         setLoading(true);
         setError(null);
       }
-
       console.log('🔄 Loading comprehensive dashboard data...');
 
       // Load all data in parallel for better performance
@@ -66,13 +65,28 @@ const AdminDashboard = () => {
         adminApiService.getRecentActivity(15),
         adminApiService.getSystemHealth(),
       ]);
-
       setStats(statsData);
       setRecentActivity(activityData);
       setSystemHealth(healthData);
       setLastRefresh(new Date());
 
       console.log('✅ All dashboard data loaded successfully');
+      console.log(
+        '📊 Recent Activity loaded:',
+        activityData?.length || 0,
+        'items'
+      );
+      if (activityData?.length > 0) {
+        console.log(
+          '🔍 Activity sample:',
+          activityData
+            .slice(0, 3)
+            .map(a => `${a.action} ${a.model_name}: ${a.description}`)
+        );
+      }
+      console.log('📊 Stats:', statsData);
+      console.log('📋 Recent Activity:', activityData);
+      console.log(`🔍 Found ${activityData?.length || 0} recent activities`);
     } catch (err) {
       console.error('❌ Error loading dashboard data:', err);
       if (!silent) setError('Failed to load dashboard data');
@@ -98,9 +112,8 @@ const AdminDashboard = () => {
         return '#6b7280';
     }
   };
-
   const getActivityIcon = (modelName, action) => {
-    const icons = {
+    const baseIcons = {
       User: '👥',
       Patient: '🏥',
       LabResult: '🧪',
@@ -110,7 +123,35 @@ const AdminDashboard = () => {
       Immunization: '💉',
       Condition: '📋',
     };
-    return icons[modelName] || '📄';
+
+    // Add action-specific modifiers
+    const actionModifiers = {
+      created: '✨',
+      updated: '📝',
+      deleted: '🗑️',
+      viewed: '👁️',
+      downloaded: '📥',
+    };
+
+    const baseIcon = baseIcons[modelName] || '📄';
+    const actionIcon = actionModifiers[action?.toLowerCase()] || '';
+
+    return actionIcon ? `${actionIcon} ${baseIcon}` : baseIcon;
+  };
+
+  const getActivityStatusClass = action => {
+    switch (action?.toLowerCase()) {
+      case 'created':
+        return 'success';
+      case 'updated':
+        return 'info';
+      case 'deleted':
+        return 'danger';
+      case 'viewed':
+        return 'secondary';
+      default:
+        return 'success';
+    }
   };
 
   // Chart data preparation
@@ -197,10 +238,13 @@ const AdminDashboard = () => {
           <div className="header-content">
             <div className="header-title">
               <h1>🏥 Admin Dashboard</h1>
-              <p>Comprehensive system overview and management</p>
+              <p>Comprehensive system overview and management</p>{' '}
               {lastRefresh && (
                 <small className="last-refresh">
                   Last updated: {lastRefresh.toLocaleTimeString()}
+                  <span style={{ color: '#10b981', marginLeft: '8px' }}>
+                    ✓ Live Data
+                  </span>
                 </small>
               )}
             </div>
@@ -399,13 +443,15 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-
+              </div>{' '}
               {/* Recent Activity Card */}
               <div className="dashboard-card-modern activity-card">
                 <div className="card-header">
                   <h3>📋 Recent Activity</h3>
                   <div className="activity-filter">
+                    <small style={{ color: '#6b7280', marginRight: '10px' }}>
+                      {recentActivity.length} activities
+                    </small>
                     <select className="filter-select">
                       <option value="all">All Activities</option>
                       <option value="users">User Activities</option>
@@ -416,13 +462,16 @@ const AdminDashboard = () => {
                 <div className="activity-feed">
                   {recentActivity.length > 0 ? (
                     recentActivity.map((activity, index) => (
-                      <div key={index} className="activity-item-modern">
+                      <div
+                        key={index}
+                        className={`activity-item-modern ${activity.action?.toLowerCase() === 'deleted' ? 'deleted' : ''}`}
+                      >
                         <div className="activity-icon-modern">
                           {getActivityIcon(
                             activity.model_name,
                             activity.action
                           )}
-                        </div>
+                        </div>{' '}
                         <div className="activity-content-modern">
                           <div className="activity-description">
                             {activity.description}
@@ -434,10 +483,25 @@ const AdminDashboard = () => {
                             <span className="activity-type">
                               {activity.model_name}
                             </span>
+                            <span
+                              className={`activity-action ${activity.action?.toLowerCase()}`}
+                            >
+                              {activity.action || 'created'}
+                            </span>
                           </div>
                         </div>
                         <div className="activity-status">
-                          <span className="status-badge success">✓</span>
+                          <span
+                            className={`status-badge ${getActivityStatusClass(activity.action)}`}
+                          >
+                            {activity.action === 'deleted'
+                              ? '🗑️'
+                              : activity.action === 'updated'
+                                ? '📝'
+                                : activity.action === 'viewed'
+                                  ? '👁️'
+                                  : '✓'}
+                          </span>
                         </div>
                       </div>
                     ))

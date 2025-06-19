@@ -1,6 +1,11 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text, Float
 from sqlalchemy.orm import relationship, declarative_base
-from datetime import datetime
+from datetime import datetime, timezone
+
+# Timezone-aware datetime function to replace deprecated datetime.utcnow()
+def get_utc_now():
+    """Get the current UTC datetime with timezone awareness."""
+    return datetime.now(timezone.utc)
 
 Base = declarative_base()
 
@@ -13,12 +18,10 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
     full_name = Column(String, nullable=False)  # Role-based access control
-    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'
-
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'    # Timestamps
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
     patient = relationship("Patient", back_populates="user", uselist=False)
@@ -328,12 +331,10 @@ class Vitals(Base):
     # Optional notes and metadata
     notes = Column(Text, nullable=True)  # Additional notes about the readings
     location = Column(String, nullable=True)  # Where readings were taken (home, clinic, etc.)
-    device_used = Column(String, nullable=True)  # Device used for measurement
-
-    # Audit fields
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    device_used = Column(String, nullable=True)  # Device used for measurement    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
     # Table Relationships

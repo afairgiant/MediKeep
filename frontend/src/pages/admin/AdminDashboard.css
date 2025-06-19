@@ -482,6 +482,21 @@
   color: white;
 }
 
+.status-badge.danger {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.status-badge.info {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.status-badge.secondary {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
 .no-activity-modern {
   text-align: center;
   padding: 40px 20px;
@@ -805,4 +820,40 @@
   .dashboard-card {
     padding: 20px;
   }
+}
+
+/* Activity action type styling */
+.activity-action {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.activity-action.created {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.activity-action.updated {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.activity-action.deleted {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.activity-action.viewed {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Enhance activity items for deleted items */
+.activity-item-modern.deleted {
+  border-left: 3px solid #dc2626;
+  background-color: #fef7f7;
 }

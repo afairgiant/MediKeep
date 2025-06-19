@@ -14,6 +14,7 @@ from datetime import datetime
 
 from app.api import deps
 from app.core.datetime_utils import convert_datetime_fields, convert_date_fields
+from app.models.activity_log import get_utc_now
 from app.models.models import (
     User,
     Patient,
@@ -57,6 +58,7 @@ from app.schemas.immunization import ImmunizationCreate
 from app.schemas.procedure import ProcedureCreate
 from app.schemas.treatment import TreatmentCreate
 from app.schemas.encounter import EncounterCreate
+from app.models.activity_log import ActivityLog
 
 router = APIRouter()
 
@@ -438,8 +440,7 @@ def delete_model_record(
                     .filter(
                         User.role.in_(
                             ["admin", "Admin", "administrator", "Administrator"]
-                        )
-                    )
+                        )                    )
                     .count()
                 )
                 if admin_users <= 1:
@@ -447,6 +448,18 @@ def delete_model_record(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Cannot delete the last remaining admin user in the system",
                     )
+
+        # Log the deletion BEFORE actually deleting (to preserve record details)
+        description = get_record_description(record, model_name, "deleted")
+        log_activity(
+            db=db,
+            user_id=getattr(current_user, 'id', None),
+            action="deleted",
+            entity_type=model_name,
+            entity_id=record_id,
+            description=description,
+            patient_id=getattr(record, 'patient_id', None) if hasattr(record, 'patient_id') else None,
+        )
 
         # Delete the record
         crud_instance.delete(db, id=record_id)
@@ -530,10 +543,18 @@ def update_model_record(
         if model_name in datetime_field_map:
             update_data = convert_datetime_fields(
                 update_data, datetime_field_map[model_name]
-            )
-
-        # Update the record using CRUD update method
-        updated_record = crud_instance.update(db, db_obj=record, obj_in=update_data)
+            )        # Update the record using CRUD update method
+        updated_record = crud_instance.update(db, db_obj=record, obj_in=update_data)        # Log the update activity
+        description = get_record_description(updated_record, model_name, "updated")
+        log_activity(
+            db=db,
+            user_id=getattr(current_user, 'id', None),
+            action="updated",
+            entity_type=model_name,
+            entity_id=record_id,
+            description=description,
+            patient_id=getattr(updated_record, 'patient_id', None) if hasattr(updated_record, 'patient_id') else None,
+        )
 
         # Convert to dictionary for JSON response
         result = {}
@@ -614,10 +635,18 @@ def create_model_record(
                 create_data, datetime_field_map[model_name]
             )  # Create Pydantic schema object from the processed data
         create_schema = model_info["create_schema"]
-        create_obj = create_schema(**create_data)
-
-        # Create the record using CRUD create method
-        created_record = crud_instance.create(db, obj_in=create_obj)
+        create_obj = create_schema(**create_data)        # Create the record using CRUD create method
+        created_record = crud_instance.create(db, obj_in=create_obj)        # Log the creation activity
+        description = get_record_description(created_record, model_name, "created")
+        log_activity(
+            db=db,
+            user_id=getattr(current_user, 'id', None),
+            action="created",
+            entity_type=model_name,
+            entity_id=getattr(created_record, 'id', 0),
+            description=description,
+            patient_id=getattr(created_record, 'patient_id', None) if hasattr(created_record, 'patient_id') else None,
+        )
 
         # Convert to dictionary for JSON response
         result = {}
@@ -636,3 +665,87 @@ def create_model_record(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error creating {model_name} record: {str(e)}",
         )
+
+
+def log_activity(
+    db: Session,
+    user_id: Optional[int],
+    action: str,
+    entity_type: str,
+    entity_id: int,
+    description: str,
+    patient_id: Optional[int] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+):
+    """
+    Log an activity to the activity log table.
+    This preserves historical information even after records are deleted.
+    """
+    try:
+        activity_log = ActivityLog(            user_id=user_id,
+            patient_id=patient_id,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            description=description,
+            event_metadata=metadata,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        print(f"Error logging activity: {e}")
+        # Don't fail the main operation if logging fails
+        db.rollback()
+
+
+def get_record_description(record, model_name: str, action: str = "created") -> str:
+    """
+    Generate a human-readable description for a record with action context.
+    This captures the essential information and action performed.
+    """
+    # Action prefixes
+    action_prefixes = {
+        "created": "New",
+        "updated": "Updated", 
+        "deleted": "Deleted",
+        "viewed": "Viewed"
+    }
+    
+    prefix = action_prefixes.get(action, action.title())
+    
+    if model_name == "medication":
+        patient_name = "Unknown Patient"
+        if hasattr(record, 'patient') and record.patient:
+            patient_name = f"{getattr(record.patient, 'first_name', '')} {getattr(record.patient, 'last_name', '')}".strip()
+        medication_name = getattr(record, 'medication_name', 'Unknown')
+        return f"{prefix} medication: {medication_name} for {patient_name}"
+    
+    elif model_name == "patient":
+        patient_name = f"{getattr(record, 'first_name', '')} {getattr(record, 'last_name', '')}".strip()
+        return f"{prefix} patient: {patient_name}"
+    
+    elif model_name == "user":
+        user_name = getattr(record, 'full_name', getattr(record, 'username', 'Unknown'))
+        return f"{prefix} user: {user_name}"
+    
+    elif model_name == "lab_result":
+        test_name = getattr(record, 'test_name', 'Unknown')
+        return f"{prefix} lab result: {test_name}"
+    
+    elif model_name == "procedure":
+        procedure_name = getattr(record, 'procedure_name', 'Unknown')
+        return f"{prefix} procedure: {procedure_name}"
+    
+    elif model_name == "allergy":
+        allergen = getattr(record, 'allergen', 'Unknown')
+        return f"{prefix} allergy: {allergen}"
+    
+    elif model_name == "condition":
+        condition_name = getattr(record, 'condition_name', 'Unknown')
+        return f"{prefix} condition: {condition_name}"
+    
+    else:
+        # Generic fallback
+        name_field = getattr(record, 'name', None) or getattr(record, 'title', None) or f"ID {getattr(record, 'id', 'Unknown')}"
+        return f"{prefix} {model_name}: {name_field}"

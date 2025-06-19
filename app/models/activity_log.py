@@ -1,8 +1,13 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, Index
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from app.models.models import Base
+
+# Timezone-aware datetime function to replace deprecated datetime.utcnow()
+def get_utc_now():
+    """Get the current UTC datetime with timezone awareness."""
+    return datetime.now(timezone.utc)
 
 
 class ActivityLog(Base):
@@ -27,9 +32,8 @@ class ActivityLog(Base):
     description = Column(Text, nullable=False)
       # Technical details (JSON for flexibility)
     event_metadata = Column(JSON, nullable=True)  # Store additional context like IP, changes made, etc.
-    
-    # Timestamps
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+      # Timestamps
+    timestamp = Column(DateTime, default=get_utc_now, nullable=False)
     
     # Client information
     ip_address = Column(String, nullable=True)
@@ -96,14 +100,13 @@ class ActivityLog(Base):
         """
         return cls(            action=action,
             entity_type=entity_type,
-            description=description,
-            user_id=user_id,
+            description=description,            user_id=user_id,
             patient_id=patient_id,
             entity_id=entity_id,
             event_metadata=metadata or {},
             ip_address=ip_address,
             user_agent=user_agent,
-            timestamp=datetime.utcnow(),
+            timestamp=get_utc_now(),
         )
 
 
