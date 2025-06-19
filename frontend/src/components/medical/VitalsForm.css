@@ -1,0 +1,290 @@
+/**
+ * VitalsForm Component Styles
+ */
+
+.vitals-form {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.vitals-form h3 {
+  margin: 0 0 24px 0;
+  color: #1a365d;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.warnings {
+  background-color: #fef3cd;
+  border: 1px solid #faebcc;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.warning-message {
+  color: #856404;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.warning-message:last-child {
+  margin-bottom: 0;
+}
+
+.form-section {
+  margin-bottom: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 20px;
+  background-color: #f8fafc;
+}
+
+.form-section h4 {
+  margin: 0 0 16px 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #4299e1;
+  padding-bottom: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #2d3748;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.required {
+  color: #e53e3e;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-group input.error,
+.form-group textarea.error {
+  border-color: #e53e3e;
+}
+
+.form-group input.error:focus,
+.form-group textarea.error:focus {
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.error-text {
+  color: #e53e3e;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.category-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.category-display label {
+  margin-bottom: 4px;
+}
+
+.bp-category,
+.bmi-display {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* Blood Pressure Categories */
+.bp-category.normal {
+  background-color: #c6f6d5;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+}
+
+.bp-category.elevated {
+  background-color: #fef5e7;
+  color: #744210;
+  border: 1px solid #f6d55c;
+}
+
+.bp-category.stage-1-hypertension {
+  background-color: #fed7cc;
+  color: #9c4221;
+  border: 1px solid #fd9853;
+}
+
+.bp-category.stage-2-hypertension,
+.bp-category.hypertensive-crisis {
+  background-color: #fed7d7;
+  color: #822727;
+  border: 1px solid #fc8181;
+}
+
+/* BMI Display */
+.bmi-display {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bmi-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.bmi-category {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.bmi-category.underweight {
+  background-color: #bee3f8;
+  color: #2c5282;
+}
+
+.bmi-category.normal-weight {
+  background-color: #c6f6d5;
+  color: #22543d;
+}
+
+.bmi-category.overweight {
+  background-color: #fef5e7;
+  color: #744210;
+}
+
+.bmi-category.obese {
+  background-color: #fed7cc;
+  color: #9c4221;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background-color: #4299e1;
+  color: white;
+  border-color: #4299e1;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #3182ce;
+  border-color: #3182ce;
+}
+
+.btn-primary:disabled {
+  background-color: #a0aec0;
+  border-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #4a5568;
+  border-color: #cbd5e0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f7fafc;
+  border-color: #a0aec0;
+}
+
+.btn-secondary:disabled {
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vitals-form {
+    padding: 16px;
+    margin: 0 8px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section {
+    padding: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .vitals-form h3 {
+    font-size: 1.25rem;
+  }
+
+  .form-section h4 {
+    font-size: 1rem;
+  }
+}

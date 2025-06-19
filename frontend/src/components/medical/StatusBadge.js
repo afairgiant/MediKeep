@@ -7,31 +7,42 @@ import './StatusBadge.css';
 const StatusBadge = ({ status, type = 'general' }) => {
   const getStatusClass = (status, type) => {
     if (!status) return 'status-unknown';
-    
+
     const statusLower = status.toLowerCase();
-    
+
     // Medical-specific status classes
     if (type === 'medication') {
       switch (statusLower) {
-        case 'active': return 'status-active';
-        case 'stopped': return 'status-stopped';
-        case 'on-hold': return 'status-on-hold';
-        case 'completed': return 'status-completed';
-        case 'cancelled': return 'status-cancelled';
-        default: return 'status-unknown';
+        case 'active':
+          return 'status-active';
+        case 'stopped':
+          return 'status-stopped';
+        case 'on-hold':
+          return 'status-on-hold';
+        case 'completed':
+          return 'status-completed';
+        case 'cancelled':
+          return 'status-cancelled';
+        default:
+          return 'status-unknown';
       }
     }
-    
+
     if (type === 'lab-result') {
       switch (statusLower) {
-        case 'completed': return 'status-completed';
-        case 'in-progress': return 'status-in-progress';
-        case 'ordered': return 'status-ordered';
-        case 'cancelled': return 'status-cancelled';
-        default: return 'status-unknown';
+        case 'completed':
+          return 'status-completed';
+        case 'in-progress':
+          return 'status-in-progress';
+        case 'ordered':
+          return 'status-ordered';
+        case 'cancelled':
+          return 'status-cancelled';
+        default:
+          return 'status-unknown';
       }
     }
-    
+
     // General status classes
     switch (statusLower) {
       case 'active':
@@ -56,11 +67,7 @@ const StatusBadge = ({ status, type = 'general' }) => {
 
   const statusClass = getStatusClass(status, type);
 
-  return (
-    <span className={`status-badge ${statusClass}`}>
-      {status}
-    </span>
-  );
+  return <span className={`status-badge ${statusClass}`}>{status}</span>;
 };
 
 export default StatusBadge;

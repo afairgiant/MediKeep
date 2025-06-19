@@ -5,9 +5,18 @@ This module provides utilities for handling datetime conversions and validations
 across the Medical Records Management System.
 """
 
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional, Union, Any
 import re
+
+
+def get_utc_now() -> datetime:
+    """
+    Get the current UTC datetime with timezone awareness.
+    
+    This replaces the deprecated datetime.utcnow() with a timezone-aware alternative.
+    """
+    return datetime.now(timezone.utc)
 
 
 def parse_datetime_string(datetime_str: str) -> datetime:

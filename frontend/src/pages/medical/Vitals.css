@@ -1,0 +1,293 @@
+/**
+ * Vitals Page Styles
+ * Uses MedicalPageShared.css for consistent header styling
+ */
+
+/* Override any specific vitals page styles here */
+.add-vitals-btn {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.add-vitals-btn:hover {
+  background-color: #3182ce;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+}
+
+.stats-overview {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.stats-overview h3 {
+  margin: 0 0 20px 0;
+  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  color: #718096;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  color: #2d3748;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-category {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Blood Pressure Categories for Stats */
+.stat-category.normal {
+  background-color: #c6f6d5;
+  color: #22543d;
+}
+
+.stat-category.elevated {
+  background-color: #fef5e7;
+  color: #744210;
+}
+
+.stat-category.stage-1-hypertension {
+  background-color: #fed7cc;
+  color: #9c4221;
+}
+
+.stat-category.stage-2-hypertension,
+.stat-category.hypertensive-crisis {
+  background-color: #fed7d7;
+  color: #822727;
+}
+
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.form-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.content-tabs {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.tab-buttons {
+  display: flex;
+  background-color: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  color: #718096;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  font-size: 0.9rem;
+}
+
+.tab-button:hover {
+  background-color: #edf2f7;
+  color: #4a5568;
+}
+
+.tab-button.active {
+  color: #4299e1;
+  background-color: white;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #4299e1;
+}
+
+.tab-content {
+  padding: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .vitals-page {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .page-header {
+    margin-bottom: 24px;
+  }
+
+  .stats-overview {
+    margin-bottom: 24px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .add-vitals-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .tab-buttons {
+    flex-direction: column;
+  }
+
+  .tab-button {
+    padding: 12px 16px;
+  }
+
+  .tab-content {
+    padding: 16px;
+  }
+
+  .form-overlay {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .vitals-page {
+    padding: 12px;
+  }
+
+  .header-content h1 {
+    font-size: 1.75rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-overview {
+    padding: 16px;
+  }
+
+  .stats-overview h3 {
+    font-size: 1.1rem;
+  }
+
+  .page-header {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-overlay {
+    padding: 5px;
+  }
+
+  .form-container {
+    border-radius: 8px;
+    max-height: 95vh;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+}

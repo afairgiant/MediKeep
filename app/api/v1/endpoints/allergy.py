@@ -10,6 +10,8 @@ from app.schemas.allergy import (
     AllergyResponse,
     AllergyWithRelations,
 )
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -25,6 +27,26 @@ def create_allergy(
     Create new allergy record.
     """
     allergy_obj = allergy.create(db=db, obj_in=allergy_in)
+    
+    # Log the creation activity
+    try:
+        description = f"New allergy: {getattr(allergy_obj, 'allergen', 'Unknown allergen')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(allergy_obj, 'patient_id', None),
+            action="created",
+            entity_type="allergy",
+            entity_id=getattr(allergy_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging allergy creation activity: {e}")
+    
     return allergy_obj
 
 
@@ -92,7 +114,28 @@ def update_allergy(
     allergy_obj = allergy.get(db=db, id=allergy_id)
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
+    
     allergy_obj = allergy.update(db=db, db_obj=allergy_obj, obj_in=allergy_in)
+    
+    # Log the update activity
+    try:
+        description = f"Updated allergy: {getattr(allergy_obj, 'allergen', 'Unknown allergen')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(allergy_obj, 'patient_id', None),
+            action="updated",
+            entity_type="allergy",
+            entity_id=getattr(allergy_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging allergy update activity: {e}")
+    
     return allergy_obj
 
 
@@ -102,13 +145,33 @@ def delete_allergy(
     db: Session = Depends(deps.get_db),
     allergy_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
+    ) -> Any:
     """
     Delete an allergy record.
     """
     allergy_obj = allergy.get(db=db, id=allergy_id)
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
+    
+    # Log the deletion activity BEFORE deleting
+    try:
+        description = f"Deleted allergy: {getattr(allergy_obj, 'allergen', 'Unknown allergen')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(allergy_obj, 'patient_id', None),
+            action="deleted",
+            entity_type="allergy",
+            entity_id=getattr(allergy_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging allergy deletion activity: {e}")
+    
     allergy.delete(db=db, id=allergy_id)
     return {"message": "Allergy deleted successfully"}
 

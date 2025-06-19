@@ -2,7 +2,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .logging-test h2 {
@@ -56,7 +57,7 @@
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
@@ -242,11 +243,11 @@
   .logging-test {
     padding: 10px;
   }
-  
+
   .button-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .utility-buttons {
     flex-direction: column;
   }

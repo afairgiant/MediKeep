@@ -4,7 +4,8 @@ import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
 import './SystemHealth.css';
 
-const SystemHealth = () => {  const [healthData, setHealthData] = useState(null);
+const SystemHealth = () => {
+  const [healthData, setHealthData] = useState(null);
   const [systemMetrics, setSystemMetrics] = useState(null);
   const [detailedStats, setDetailedStats] = useState(null);
   const [storageHealth, setStorageHealth] = useState(null);
@@ -30,9 +31,9 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
       }
       setError(null);
 
-      console.log('🔍 Loading comprehensive system health data...');      // Load core system health
+      console.log('🔍 Loading comprehensive system health data...'); // Load core system health
       const health = await adminApiService.getSystemHealth();
-      setHealthData(health);      // Load system metrics
+      setHealthData(health); // Load system metrics
       try {
         const metricsData = await adminApiService.getSystemMetrics();
         setSystemMetrics(metricsData);
@@ -46,7 +47,7 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
         setDetailedStats(stats);
       } catch (statsError) {
         console.warn('Failed to load detailed stats:', statsError);
-      }      // Check storage health (lab result files)
+      } // Check storage health (lab result files)
       try {
         const storageData = await adminApiService.getStorageHealth();
         setStorageHealth(storageData);
@@ -64,7 +65,6 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
 
       setLastRefresh(new Date());
       console.log('✅ System health data loaded successfully');
-
     } catch (err) {
       console.error('❌ Error loading system health:', err);
       setError('Failed to load system health data');
@@ -78,12 +78,12 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
     loadSystemHealth(true);
   };
 
-  const formatUptime = (uptimeString) => {
+  const formatUptime = uptimeString => {
     if (!uptimeString) return 'Unknown';
     return uptimeString;
   };
 
-  const formatBytes = (bytes) => {
+  const formatBytes = bytes => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -91,7 +91,7 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getHealthStatusColor = (status) => {
+  const getHealthStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'healthy':
       case 'ok':
@@ -106,16 +106,17 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
     }
   };
 
-  const getStorageUsageColor = (percentage) => {
+  const getStorageUsageColor = percentage => {
     if (percentage < 70) return 'healthy';
     if (percentage < 85) return 'warning';
     return 'error';
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading system health..." />
+        </div>
       </AdminLayout>
     );
   }
@@ -142,14 +143,14 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
             <h1>🔍 System Health Monitor</h1>
             <p>Real-time system status and performance metrics</p>
           </div>
-          
+
           <div className="health-actions">
             <div className="last-refresh">
               {lastRefresh && (
                 <span>Last updated: {lastRefresh.toLocaleTimeString()}</span>
               )}
             </div>
-            <button 
+            <button
               onClick={handleRefresh}
               className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
               disabled={refreshing}
@@ -165,61 +166,76 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
             <div className="status-icon">💚</div>
             <div className="status-content">
               <h3>Overall Status</h3>
-              <p className={`status-value ${getHealthStatusColor(healthData?.database_status)}`}>
-                {healthData?.database_status === 'healthy' ? 'All Systems Operational' : 'Issues Detected'}
+              <p
+                className={`status-value ${getHealthStatusColor(healthData?.database_status)}`}
+              >
+                {healthData?.database_status === 'healthy'
+                  ? 'All Systems Operational'
+                  : 'Issues Detected'}
               </p>
             </div>
           </div>
-          
+
           <div className="status-card">
             <div className="status-icon">📊</div>
             <div className="status-content">
               <h3>Total Records</h3>
-              <p className="status-value">{healthData?.total_records?.toLocaleString() || 0}</p>
+              <p className="status-value">
+                {healthData?.total_records?.toLocaleString() || 0}
+              </p>
             </div>
           </div>
-          
+
           <div className="status-card">
             <div className="status-icon">⏱️</div>
             <div className="status-content">
               <h3>Application Uptime</h3>
-              <p className="status-value">{formatUptime(healthData?.system_uptime)}</p>
+              <p className="status-value">
+                {formatUptime(healthData?.system_uptime)}
+              </p>
             </div>
           </div>
-            <div className="status-card">
+          <div className="status-card">
             <div className="status-icon">💾</div>
             <div className="status-content">
               <h3>Last Backup</h3>
               <p className="status-value">
-                {healthData?.last_backup ? 
-                  new Date(healthData.last_backup).toLocaleDateString() : 
-                  'No backups configured'
-                }
+                {healthData?.last_backup
+                  ? new Date(healthData.last_backup).toLocaleDateString()
+                  : 'No backups configured'}
               </p>
             </div>
           </div>
         </div>
 
         {/* Detailed Health Checks */}
-        <div className="health-details">          {/* Database Health */}
+        <div className="health-details">
+          {' '}
+          {/* Database Health */}
           <div className="health-section">
             <h2>🗄️ Database Health</h2>
             <div className="health-items">
               <div className="health-item">
                 <span className="health-label">Connection Status:</span>
-                <span className={`health-status ${getHealthStatusColor(healthData?.database_status)}`}>
+                <span
+                  className={`health-status ${getHealthStatusColor(healthData?.database_status)}`}
+                >
                   {healthData?.database_status || 'Unknown'}
                 </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Connection Test:</span>
-                <span className={`health-status ${healthData?.database_connection_test ? 'healthy' : 'error'}`}>
+                <span
+                  className={`health-status ${healthData?.database_connection_test ? 'healthy' : 'error'}`}
+                >
                   {healthData?.database_connection_test ? 'Passed' : 'Failed'}
                 </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Total Records:</span>
-                <span className="health-value">{healthData?.total_records?.toLocaleString() || 0}</span>
+                <span className="health-value">
+                  {healthData?.total_records?.toLocaleString() || 0}
+                </span>
               </div>
               {healthData?.disk_usage && (
                 <div className="health-item">
@@ -231,11 +247,15 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                 <>
                   <div className="health-item">
                     <span className="health-label">Query Performance:</span>
-                    <span className="health-value">{systemMetrics.database.query_performance}</span>
+                    <span className="health-value">
+                      {systemMetrics.database.query_performance}
+                    </span>
                   </div>
                   <div className="health-item">
                     <span className="health-label">Active Connections:</span>
-                    <span className="health-value">{systemMetrics.database.active_connections}</span>
+                    <span className="health-value">
+                      {systemMetrics.database.active_connections}
+                    </span>
                   </div>
                 </>
               )}
@@ -243,25 +263,28 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                 <>
                   <div className="health-item">
                     <span className="health-label">Active Users:</span>
-                    <span className="health-value">{detailedStats.total_users}</span>
+                    <span className="health-value">
+                      {detailedStats.total_users}
+                    </span>
                   </div>
                   <div className="health-item">
                     <span className="health-label">Patient Records:</span>
-                    <span className="health-value">{detailedStats.total_patients}</span>
+                    <span className="health-value">
+                      {detailedStats.total_patients}
+                    </span>
                   </div>
                   <div className="health-item">
                     <span className="health-label">Medical Records:</span>
                     <span className="health-value">
-                      {(detailedStats.total_medications || 0) + 
-                       (detailedStats.total_lab_results || 0) + 
-                       (detailedStats.total_conditions || 0)}
+                      {(detailedStats.total_medications || 0) +
+                        (detailedStats.total_lab_results || 0) +
+                        (detailedStats.total_conditions || 0)}
                     </span>
                   </div>
                 </>
               )}
             </div>
           </div>
-
           {/* Storage Health */}
           {storageHealth && (
             <div className="health-section">
@@ -269,17 +292,23 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
               <div className="health-items">
                 <div className="health-item">
                   <span className="health-label">Status:</span>
-                  <span className={`health-status ${getHealthStatusColor(storageHealth.status)}`}>
+                  <span
+                    className={`health-status ${getHealthStatusColor(storageHealth.status)}`}
+                  >
                     {storageHealth.status}
                   </span>
                 </div>
                 <div className="health-item">
                   <span className="health-label">Upload Directory:</span>
-                  <span className="health-value">{storageHealth.upload_directory}</span>
+                  <span className="health-value">
+                    {storageHealth.upload_directory}
+                  </span>
                 </div>
                 <div className="health-item">
                   <span className="health-label">Write Permission:</span>
-                  <span className={`health-status ${storageHealth.write_permission ? 'healthy' : 'error'}`}>
+                  <span
+                    className={`health-status ${storageHealth.write_permission ? 'healthy' : 'error'}`}
+                  >
                     {storageHealth.write_permission ? 'Granted' : 'Denied'}
                   </span>
                 </div>
@@ -287,20 +316,26 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                   <>
                     <div className="health-item">
                       <span className="health-label">Disk Usage:</span>
-                      <span className={`health-value ${getStorageUsageColor(storageHealth.disk_space.usage_percent)}`}>
-                        {storageHealth.disk_space.usage_percent}% 
-                        ({storageHealth.disk_space.used_gb}GB / {storageHealth.disk_space.total_gb}GB)
+                      <span
+                        className={`health-value ${getStorageUsageColor(storageHealth.disk_space.usage_percent)}`}
+                      >
+                        {storageHealth.disk_space.usage_percent}% (
+                        {storageHealth.disk_space.used_gb}GB /{' '}
+                        {storageHealth.disk_space.total_gb}GB)
                       </span>
                     </div>
                     <div className="health-item">
                       <span className="health-label">Free Space:</span>
-                      <span className="health-value">{storageHealth.disk_space.free_gb}GB</span>
+                      <span className="health-value">
+                        {storageHealth.disk_space.free_gb}GB
+                      </span>
                     </div>
                   </>
                 )}
               </div>
             </div>
-          )}          {/* Application Services */}
+          )}{' '}
+          {/* Application Services */}
           <div className="health-section">
             <h2>🔧 Application Services</h2>
             <div className="health-items">
@@ -315,7 +350,9 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
               {frontendLogHealth && (
                 <div className="health-item">
                   <span className="health-label">Frontend Logging:</span>
-                  <span className={`health-status ${getHealthStatusColor(frontendLogHealth.status)}`}>
+                  <span
+                    className={`health-status ${getHealthStatusColor(frontendLogHealth.status)}`}
+                  >
                     {frontendLogHealth.status}
                   </span>
                 </div>
@@ -328,21 +365,26 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                 <>
                   <div className="health-item">
                     <span className="health-label">Memory Usage:</span>
-                    <span className="health-value">{systemMetrics.application.memory_usage}</span>
+                    <span className="health-value">
+                      {systemMetrics.application.memory_usage}
+                    </span>
                   </div>
                   <div className="health-item">
                     <span className="health-label">CPU Usage:</span>
-                    <span className="health-value">{systemMetrics.application.cpu_usage}</span>
+                    <span className="health-value">
+                      {systemMetrics.application.cpu_usage}
+                    </span>
                   </div>
                   <div className="health-item">
                     <span className="health-label">Response Time:</span>
-                    <span className="health-value">{systemMetrics.application.response_time}</span>
+                    <span className="health-value">
+                      {systemMetrics.application.response_time}
+                    </span>
                   </div>
                 </>
               )}
             </div>
           </div>
-
           {/* Application Performance */}
           {systemMetrics && (
             <div className="health-section">
@@ -352,19 +394,25 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                   <>
                     <div className="health-item">
                       <span className="health-label">Memory Status:</span>
-                      <span className={`health-status ${systemMetrics.application.memory_usage === 'Normal' ? 'healthy' : 'warning'}`}>
+                      <span
+                        className={`health-status ${systemMetrics.application.memory_usage === 'Normal' ? 'healthy' : 'warning'}`}
+                      >
                         {systemMetrics.application.memory_usage}
                       </span>
                     </div>
                     <div className="health-item">
                       <span className="health-label">CPU Load:</span>
-                      <span className={`health-status ${systemMetrics.application.cpu_usage === 'Low' ? 'healthy' : 'warning'}`}>
+                      <span
+                        className={`health-status ${systemMetrics.application.cpu_usage === 'Low' ? 'healthy' : 'warning'}`}
+                      >
                         {systemMetrics.application.cpu_usage}
                       </span>
                     </div>
                     <div className="health-item">
                       <span className="health-label">Avg Response Time:</span>
-                      <span className="health-value">{systemMetrics.application.response_time}</span>
+                      <span className="health-value">
+                        {systemMetrics.application.response_time}
+                      </span>
                     </div>
                   </>
                 )}
@@ -372,49 +420,61 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                   <>
                     <div className="health-item">
                       <span className="health-label">Database File Size:</span>
-                      <span className="health-value">{systemMetrics.storage.database_size || 'Unknown'}</span>
+                      <span className="health-value">
+                        {systemMetrics.storage.database_size || 'Unknown'}
+                      </span>
                     </div>
                     <div className="health-item">
                       <span className="health-label">Upload Directory:</span>
-                      <span className="health-value">{systemMetrics.storage.upload_directory_size || 'Unknown'}</span>
+                      <span className="health-value">
+                        {systemMetrics.storage.upload_directory_size ||
+                          'Unknown'}
+                      </span>
                     </div>
                     <div className="health-item">
                       <span className="health-label">Storage Status:</span>
-                      <span className="health-status healthy">{systemMetrics.storage.available_space}</span>
+                      <span className="health-status healthy">
+                        {systemMetrics.storage.available_space}
+                      </span>
                     </div>
                   </>
                 )}
                 <div className="health-item">
                   <span className="health-label">Last Check:</span>
                   <span className="health-value">
-                    {systemMetrics.timestamp ? 
-                      new Date(systemMetrics.timestamp).toLocaleString() : 
-                      'Unknown'
-                    }
+                    {systemMetrics.timestamp
+                      ? new Date(systemMetrics.timestamp).toLocaleString()
+                      : 'Unknown'}
                   </span>
                 </div>
               </div>
             </div>
           )}
-
           {/* Performance Metrics */}
           {detailedStats && (
             <div className="health-section">
               <h2>📈 Performance Metrics</h2>
               <div className="health-items">
                 <div className="health-item">
-                  <span className="health-label">Recent Registrations (30 days):</span>
-                  <span className="health-value">{detailedStats.recent_registrations || 0}</span>
+                  <span className="health-label">
+                    Recent Registrations (30 days):
+                  </span>
+                  <span className="health-value">
+                    {detailedStats.recent_registrations || 0}
+                  </span>
                 </div>
                 <div className="health-item">
                   <span className="health-label">Active Medications:</span>
                   <span className="health-value">
-                    {detailedStats.active_medications || 0} / {detailedStats.total_medications || 0}
+                    {detailedStats.active_medications || 0} /{' '}
+                    {detailedStats.total_medications || 0}
                   </span>
                 </div>
                 <div className="health-item">
                   <span className="health-label">Pending Lab Results:</span>
-                  <span className="health-value">{detailedStats.pending_lab_results || 0}</span>
+                  <span className="health-value">
+                    {detailedStats.pending_lab_results || 0}
+                  </span>
                 </div>
                 <div className="health-item">
                   <span className="health-label">System Load:</span>
@@ -422,41 +482,53 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
                 </div>
               </div>
             </div>
-          )}          {/* Security Status */}
+          )}{' '}
+          {/* Security Status */}
           <div className="health-section">
             <h2>🔒 Security Status</h2>
             <div className="health-items">
               <div className="health-item">
                 <span className="health-label">Authentication:</span>
                 <span className="health-status healthy">
-                  {systemMetrics?.security?.authentication_method || 'JWT Secure'}
+                  {systemMetrics?.security?.authentication_method ||
+                    'JWT Secure'}
                 </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Authorization:</span>
-                <span className="health-status healthy">Role-based Access Control</span>
+                <span className="health-status healthy">
+                  Role-based Access Control
+                </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Data Encryption:</span>
                 <span className="health-status healthy">
-                  {systemMetrics?.security?.ssl_enabled ? 'HTTPS Enabled' : 'HTTPS Required'}
+                  {systemMetrics?.security?.ssl_enabled
+                    ? 'HTTPS Enabled'
+                    : 'HTTPS Required'}
                 </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Session Management:</span>
                 <span className="health-status healthy">Token-based</span>
-              </div>              {systemMetrics?.security?.last_security_scan && (
+              </div>{' '}
+              {systemMetrics?.security?.last_security_scan && (
                 <div className="health-item">
                   <span className="health-label">Last Security Scan:</span>
-                  <span className="health-value">{systemMetrics.security.last_security_scan}</span>
+                  <span className="health-value">
+                    {systemMetrics.security.last_security_scan}
+                  </span>
                 </div>
               )}
-              {!systemMetrics?.security?.last_security_scan && systemMetrics?.security && (
-                <div className="health-item">
-                  <span className="health-label">Last Security Scan:</span>
-                  <span className="health-value" style={{color: '#d97706'}}>Not implemented</span>
-                </div>
-              )}
+              {!systemMetrics?.security?.last_security_scan &&
+                systemMetrics?.security && (
+                  <div className="health-item">
+                    <span className="health-label">Last Security Scan:</span>
+                    <span className="health-value" style={{ color: '#d97706' }}>
+                      Not implemented
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
         </div>
@@ -465,30 +537,30 @@ const SystemHealth = () => {  const [healthData, setHealthData] = useState(null)
         <div className="health-actions-section">
           <h2>🚀 Quick Actions</h2>
           <div className="action-buttons">
-            <button 
+            <button
               className="action-btn"
-              onClick={() => window.location.href = '/admin/models/user'}
+              onClick={() => (window.location.href = '/admin/models/user')}
             >
               <span className="action-icon">👥</span>
               Manage Users
             </button>
-            <button 
+            <button
               className="action-btn"
-              onClick={() => window.location.href = '/admin/bulk-operations'}
+              onClick={() => (window.location.href = '/admin/bulk-operations')}
             >
               <span className="action-icon">⚡</span>
               Bulk Operations
             </button>
-            <button 
+            <button
               className="action-btn"
-              onClick={() => window.location.href = '/admin'}
+              onClick={() => (window.location.href = '/admin')}
             >
               <span className="action-icon">📊</span>
               Admin Dashboard
             </button>
-            <button 
+            <button
               className="action-btn"
-              onClick={() => window.location.href = '/logging-test'}
+              onClick={() => (window.location.href = '/logging-test')}
             >
               <span className="action-icon">🔍</span>
               Test Logging

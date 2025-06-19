@@ -10,6 +10,8 @@ from app.schemas.encounter import (
     EncounterResponse,
     EncounterWithRelations,
 )
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -25,6 +27,26 @@ def create_encounter(
     Create new encounter.
     """
     encounter_obj = encounter.create(db=db, obj_in=encounter_in)
+
+    # Log the creation activity
+    try:
+        description = f"New encounter: {getattr(encounter_obj, 'reason', 'Unknown encounter')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(encounter_obj, 'patient_id', None),
+            action="created",
+            entity_type="encounter",
+            entity_id=getattr(encounter_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+
     return encounter_obj
 
 
@@ -84,6 +106,26 @@ def update_encounter(
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
     encounter_obj = encounter.update(db=db, db_obj=encounter_obj, obj_in=encounter_in)
+    
+    # Log the update activity
+    try:
+        description = f"Updated encounter: {getattr(encounter_obj, 'reason', 'Unknown encounter')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(encounter_obj, 'patient_id', None),
+            action="updated",
+            entity_type="encounter",
+            entity_id=getattr(encounter_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+    
     return encounter_obj
 
 
@@ -100,7 +142,32 @@ def delete_encounter(
     encounter_obj = encounter.get(db=db, id=encounter_id)
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
+    
+    # Store name before deletion for logging
+    encounter_name = getattr(encounter_obj, 'reason', 'Unknown encounter')
+    encounter_patient_id = getattr(encounter_obj, 'patient_id', None)
+    
     encounter.delete(db=db, id=encounter_id)
+    
+    # Log the delete activity
+    try:
+        description = f"Deleted encounter: {encounter_name}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=encounter_patient_id,
+            action="deleted",
+            entity_type="encounter",
+            entity_id=encounter_id,
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+    
     return {"message": "Encounter deleted successfully"}
 
 

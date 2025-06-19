@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Auth Debug</title>
+  </head>
+  <body>
+    <h1>Authentication Debug</h1>
+    <div id="output"></div>
+
+    <script>
+      function log(message) {
+        document.getElementById('output').innerHTML += '<p>' + message + '</p>';
+      }
+
+      // Check localStorage for auth data
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+
+      log('Token in localStorage: ' + (token ? 'Found' : 'Not found'));
+      log('User in localStorage: ' + (user ? 'Found' : 'Not found'));
+
+      if (token) {
+        // Try to parse the token
+        try {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            log('Token payload: ' + JSON.stringify(payload, null, 2));
+
+            const now = Math.floor(Date.now() / 1000);
+            log('Current time: ' + now);
+            log('Token expires: ' + payload.exp);
+            log('Token valid: ' + (payload.exp > now));
+          } else {
+            log('Invalid token format');
+          }
+        } catch (e) {
+          log('Error parsing token: ' + e.message);
+        }
+      }
+
+      // Test API call
+      if (token) {
+        fetch('/api/v1/vitals/patient/1', {
+          headers: {
+            Authorization: 'Bearer ' + token,
+          },
+        })
+          .then(response => {
+            log('API call status: ' + response.status);
+            return response.text();
+          })
+          .then(text => {
+            log('API response: ' + text);
+          })
+          .catch(error => {
+            log('API error: ' + error.message);
+          });
+      }
+    </script>
+  </body>
+</html>

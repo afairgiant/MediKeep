@@ -2,7 +2,13 @@
  * Modern Authentication Hook
  * Centralized authentication state management with automatic token handling
  */
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Auth Context
@@ -32,13 +38,13 @@ class TokenManager {
 
   static isTokenValid(token) {
     if (!token) return false;
-    
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Math.floor(Date.now() / 1000);
-      
+
       // Check if token is expired (with 30 second buffer)
-      return payload.exp > (currentTime + 30);
+      return payload.exp > currentTime + 30;
     } catch (error) {
       console.error('Invalid token format:', error);
       return false;
@@ -47,7 +53,7 @@ class TokenManager {
 
   static getTokenPayload(token) {
     if (!token) return null;
-    
+
     try {
       return JSON.parse(atob(token.split('.')[1]));
     } catch (error) {
@@ -64,11 +70,11 @@ class TokenManager {
   static isTokenExpiringSoon(token, bufferMinutes = 5) {
     const payload = this.getTokenPayload(token);
     if (!payload) return true;
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     const bufferSeconds = bufferMinutes * 60;
-    
-    return payload.exp < (currentTime + bufferSeconds);
+
+    return payload.exp < currentTime + bufferSeconds;
   }
 }
 
@@ -85,9 +91,9 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      
+
       const storedToken = TokenManager.getToken();
-      
+
       if (!storedToken || !TokenManager.isTokenValid(storedToken)) {
         // No valid token, clear everything
         TokenManager.removeToken();
@@ -104,15 +110,17 @@ export function AuthProvider({ children }) {
           username: payload.sub,
           role: payload.role || 'user',
           fullName: payload.full_name || payload.sub,
-          isAdmin: ['admin', 'administrator'].includes((payload.role || '').toLowerCase())
+          isAdmin: ['admin', 'administrator'].includes(
+            (payload.role || '').toLowerCase()
+          ),
         };
-        
+
         setToken(storedToken);
         setUser(userData);
-        
+
         // Store user data
         localStorage.setItem(USER_KEY, JSON.stringify(userData));
-        
+
         // Check if token is expiring soon
         if (TokenManager.isTokenExpiringSoon(storedToken)) {
           console.warn('🔑 Token expires soon, consider implementing refresh');
@@ -129,51 +137,54 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Login function
-  const login = useCallback(async (username, password) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const login = useCallback(
+    async (username, password) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
+        const formData = new URLSearchParams();
+        formData.append('username', username);
+        formData.append('password', password);
 
-      const response = await fetch('/api/v1/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData,
-      });
+        const response = await fetch('/api/v1/auth/login/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData,
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Login failed');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || 'Login failed');
+        }
+
+        const data = await response.json();
+
+        if (!data.access_token) {
+          throw new Error('No access token received');
+        }
+
+        // Validate token
+        if (!TokenManager.isTokenValid(data.access_token)) {
+          throw new Error('Received invalid token');
+        }
+
+        // Store token and initialize user
+        TokenManager.setToken(data.access_token);
+        await initializeAuth();
+
+        return { success: true };
+      } catch (error) {
+        setError(error.message);
+        throw error;
+      } finally {
+        setLoading(false);
       }
-
-      const data = await response.json();
-      
-      if (!data.access_token) {
-        throw new Error('No access token received');
-      }
-
-      // Validate token
-      if (!TokenManager.isTokenValid(data.access_token)) {
-        throw new Error('Received invalid token');
-      }
-
-      // Store token and initialize user
-      TokenManager.setToken(data.access_token);
-      await initializeAuth();
-      
-      return { success: true };
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [initializeAuth]);
+    },
+    [initializeAuth]
+  );
 
   // Logout function
   const logout = useCallback(() => {
@@ -198,28 +209,31 @@ export function AuthProvider({ children }) {
   // Get auth headers for API requests
   const getAuthHeaders = useCallback(() => {
     const currentToken = token || TokenManager.getToken();
-    
+
     if (currentToken && TokenManager.isTokenValid(currentToken)) {
       return {
-        'Authorization': `Bearer ${currentToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${currentToken}`,
+        'Content-Type': 'application/json',
       };
     }
-    
+
     return {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
   }, [token]);
 
   // Handle authentication errors
-  const handleAuthError = useCallback((error, response) => {
-    if (response?.status === 401) {
-      console.warn('Authentication failed, logging out');
-      logout();
-      return true;
-    }
-    return false;
-  }, [logout]);
+  const handleAuthError = useCallback(
+    (error, response) => {
+      if (response?.status === 401) {
+        console.warn('Authentication failed, logging out');
+        logout();
+        return true;
+      }
+      return false;
+    },
+    [logout]
+  );
 
   // Initialize on mount
   useEffect(() => {
@@ -239,7 +253,7 @@ export function AuthProvider({ children }) {
 
     // Check every minute
     const interval = setInterval(checkTokenExpiration, 60000);
-    
+
     return () => clearInterval(interval);
   }, [token, logout]);
 
@@ -254,14 +268,10 @@ export function AuthProvider({ children }) {
     isAdmin,
     getAuthHeaders,
     handleAuthError,
-    initializeAuth
+    initializeAuth,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // Hook to use auth context

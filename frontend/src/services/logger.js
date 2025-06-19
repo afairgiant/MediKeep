@@ -1,12 +1,16 @@
 /**
  * Simplified Frontend Logger for Medical Records System
- * 
+ *
  * Streamlined logging with focus on reliability and simplicity
  */
 
 class Logger {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1');
+    this.baseURL =
+      process.env.REACT_APP_API_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? '/api/v1'
+        : 'http://localhost:8000/api/v1');
     this.sessionId = this.generateSessionId();
     this.queue = [];
     this.isOnline = navigator.onLine;
@@ -23,7 +27,7 @@ class Logger {
       this.isOnline = true;
       this.flushQueue();
     });
-    
+
     window.addEventListener('offline', () => {
       this.isOnline = false;
     });
@@ -31,23 +35,23 @@ class Logger {
 
   setupGlobalHandlers() {
     // JavaScript errors
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       this.error('JavaScript Error', {
         message: event.message,
         filename: event.filename,
         lineno: event.lineno,
         colno: event.colno,
         stack: event.error?.stack,
-        type: 'javascript_error'
+        type: 'javascript_error',
       });
     });
 
     // Unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener('unhandledrejection', event => {
       this.error('Unhandled Promise Rejection', {
         reason: event.reason?.message || String(event.reason),
         stack: event.reason?.stack,
-        type: 'unhandled_promise_rejection'
+        type: 'unhandled_promise_rejection',
       });
     });
   }
@@ -62,11 +66,12 @@ class Logger {
       session_id: this.sessionId,
       url: window.location.href,
       user_agent: navigator.userAgent,
-      ...data
+      ...data,
     };
 
     // Always console log for immediate feedback
-    const consoleMethod = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
+    const consoleMethod =
+      level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
     console[consoleMethod](`[${level.toUpperCase()}] ${message}`, data);
 
     // Send to backend if online
@@ -104,7 +109,7 @@ class Logger {
       statusText: error.statusText,
       endpoint,
       method,
-      stack: error.stack
+      stack: error.stack,
     });
   }
 
@@ -113,7 +118,7 @@ class Logger {
       category: 'user_action',
       action,
       component,
-      ...data
+      ...data,
     });
   }
 
@@ -124,10 +129,11 @@ class Logger {
 
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
-      }      await fetch(`${this.baseURL}/frontend-logs/log`, {
+      }
+      await fetch(`${this.baseURL}/frontend-logs/log`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(logEntry)
+        body: JSON.stringify(logEntry),
       });
     } catch (error) {
       // Fail silently - don't create logging loops
@@ -139,7 +145,7 @@ class Logger {
     if (this.queue.length > 0) {
       const queueCopy = [...this.queue];
       this.queue = [];
-      
+
       queueCopy.forEach(entry => {
         this.sendToBackend(entry);
       });

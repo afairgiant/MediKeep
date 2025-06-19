@@ -10,3 +10,4 @@ from .immunization import *
 from .procedure import *
 from .treatment import *
 from .allergy import *
+from .vitals import *

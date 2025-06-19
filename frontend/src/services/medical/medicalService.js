@@ -7,7 +7,7 @@ import { apiService } from '../api';
 class MedicalService {
   /**
    * Get patient medications
-   * @param {number} patientId 
+   * @param {number} patientId
    * @returns {Promise<Array>}
    */
   async getMedications(patientId) {
@@ -16,7 +16,7 @@ class MedicalService {
 
   /**
    * Create new medication
-   * @param {Object} medicationData 
+   * @param {Object} medicationData
    * @returns {Promise<Object>}
    */
   async createMedication(medicationData) {
@@ -25,8 +25,8 @@ class MedicalService {
 
   /**
    * Update medication
-   * @param {number} medicationId 
-   * @param {Object} medicationData 
+   * @param {number} medicationId
+   * @param {Object} medicationData
    * @returns {Promise<Object>}
    */
   async updateMedication(medicationId, medicationData) {
@@ -35,7 +35,7 @@ class MedicalService {
 
   /**
    * Delete medication
-   * @param {number} medicationId 
+   * @param {number} medicationId
    * @returns {Promise<void>}
    */
   async deleteMedication(medicationId) {
@@ -44,7 +44,7 @@ class MedicalService {
 
   /**
    * Get lab results for patient
-   * @param {number} patientId 
+   * @param {number} patientId
    * @returns {Promise<Array>}
    */
   async getLabResults(patientId) {
@@ -53,7 +53,7 @@ class MedicalService {
 
   /**
    * Create new lab result
-   * @param {Object} labResultData 
+   * @param {Object} labResultData
    * @returns {Promise<Object>}
    */
   async createLabResult(labResultData) {
@@ -62,8 +62,8 @@ class MedicalService {
 
   /**
    * Update lab result
-   * @param {number} labResultId 
-   * @param {Object} labResultData 
+   * @param {number} labResultId
+   * @param {Object} labResultData
    * @returns {Promise<Object>}
    */
   async updateLabResult(labResultId, labResultData) {
@@ -72,7 +72,7 @@ class MedicalService {
 
   /**
    * Delete lab result
-   * @param {number} labResultId 
+   * @param {number} labResultId
    * @returns {Promise<void>}
    */
   async deleteLabResult(labResultId) {
@@ -81,9 +81,9 @@ class MedicalService {
 
   /**
    * Upload file for lab result
-   * @param {number} labResultId 
-   * @param {File} file 
-   * @param {string} description 
+   * @param {number} labResultId
+   * @param {File} file
+   * @param {string} description
    * @returns {Promise<Object>}
    */
   async uploadLabResultFile(labResultId, file, description = '') {
@@ -92,7 +92,7 @@ class MedicalService {
 
   /**
    * Get files for lab result
-   * @param {number} labResultId 
+   * @param {number} labResultId
    * @returns {Promise<Array>}
    */
   async getLabResultFiles(labResultId) {
@@ -101,7 +101,7 @@ class MedicalService {
 
   /**
    * Download lab result file
-   * @param {number} fileId 
+   * @param {number} fileId
    * @returns {Promise<Blob>}
    */
   async downloadLabResultFile(fileId) {
@@ -110,7 +110,7 @@ class MedicalService {
 
   /**
    * Delete lab result file
-   * @param {number} fileId 
+   * @param {number} fileId
    * @returns {Promise<void>}
    */
   async deleteLabResultFile(fileId) {
@@ -127,7 +127,7 @@ class MedicalService {
 
   /**
    * Update patient information
-   * @param {Object} patientData 
+   * @param {Object} patientData
    * @returns {Promise<Object>}
    */
   async updatePatientInfo(patientData) {
@@ -136,7 +136,7 @@ class MedicalService {
 
   /**
    * Create patient record
-   * @param {Object} patientData 
+   * @param {Object} patientData
    * @returns {Promise<Object>}
    */
   async createPatientInfo(patientData) {
@@ -149,6 +149,52 @@ class MedicalService {
    */
   async getRecentActivity() {
     return await apiService.getRecentActivity();
+  }
+
+  /**
+   * Get vitals for patient
+   * @param {number} patientId
+   * @returns {Promise<Array>}
+   */
+  async getVitals(patientId) {
+    return await apiService.getPatientVitals(patientId);
+  }
+
+  /**
+   * Create new vitals record
+   * @param {Object} vitalsData
+   * @returns {Promise<Object>}
+   */
+  async createVitals(vitalsData) {
+    return await apiService.createVitals(vitalsData);
+  }
+
+  /**
+   * Update vitals record
+   * @param {number} vitalsId
+   * @param {Object} vitalsData
+   * @returns {Promise<Object>}
+   */
+  async updateVitals(vitalsId, vitalsData) {
+    return await apiService.updateVitals(vitalsId, vitalsData);
+  }
+
+  /**
+   * Delete vitals record
+   * @param {number} vitalsId
+   * @returns {Promise<void>}
+   */
+  async deleteVitals(vitalsId) {
+    return await apiService.deleteVitals(vitalsId);
+  }
+
+  /**
+   * Get vitals statistics for patient
+   * @param {number} patientId
+   * @returns {Promise<Object>}
+   */
+  async getVitalsStats(patientId) {
+    return await apiService.getPatientVitalsStats(patientId);
   }
 }
 

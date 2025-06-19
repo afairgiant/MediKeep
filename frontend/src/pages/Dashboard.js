@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardCard } from '../components';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { apiService } from '../services/api';
 import '../styles/pages/Dashboard.css';
 
@@ -20,19 +21,21 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       console.log('🔍 Checking admin status...');
       console.log('Token exists:', !!token);
-      
+
       if (token) {
         // Decode JWT token to check role
         const payload = JSON.parse(atob(token.split('.')[1]));
         console.log('JWT payload:', payload);
-        
+
         // Check if user has admin role (this should also be verified on backend)
         const userRole = payload.role || '';
-        const adminCheck = userRole.toLowerCase() === 'admin' || userRole.toLowerCase() === 'administrator';
-        
+        const adminCheck =
+          userRole.toLowerCase() === 'admin' ||
+          userRole.toLowerCase() === 'administrator';
+
         console.log('User role:', userRole);
         console.log('Is admin:', adminCheck);
-        
+
         setIsAdmin(adminCheck);
       } else {
         setIsAdmin(false);
@@ -70,71 +73,75 @@ const Dashboard = () => {
 
   const dashboardItems = [
     {
-      title: "📋 Patient Information",
-      description: "View and update your personal details",
-      link: "/patients/me"
+      title: '📋 Patient Information',
+      description: 'View and update your personal details',
+      link: '/patients/me',
     },
     {
-      title: "🧪 Lab Results",
-      description: "Access your laboratory test results",
-      link: "/lab-results"
+      title: '🧪 Lab Results',
+      description: 'Access your laboratory test results',
+      link: '/lab-results',
     },
     {
-      title: "💊 Medications",
-      description: "Track your current medications",
-      link: "/medications"
+      title: '💊 Medications',
+      description: 'Track your current medications',
+      link: '/medications',
     },
     {
-      title: "💉 Immunizations",
-      description: "Check your immunization records",
-      link: "/immunizations"
+      title: '🩺 Vital Signs',
+      description: 'Record and view your vital signs',
+      link: '/vitals',
     },
     {
-      title: "Procedures",
-      description: "Review your Procedures",
-      link: "/procedures"
+      title: '💉 Immunizations',
+      description: 'Check your immunization records',
+      link: '/immunizations',
     },
     {
-      title: "Allergies",
-      description: "Review your allergies",
-      link: "/allergies"
+      title: 'Procedures',
+      description: 'Review your Procedures',
+      link: '/procedures',
     },
     {
-      title: "Conditions",
-      description: "Review your medical conditions",
-      link: "/conditions"
+      title: 'Allergies',
+      description: 'Review your allergies',
+      link: '/allergies',
     },
     {
-      title: "Treatments",
-      description: "Review your treatments",
-      link: "/treatments"
-    },    {
-      title: "Visit History",
-      description: "Review your visits",
-      link: "/visits"
-    }
-  ];  // Smaller secondary items for additional features
+      title: 'Conditions',
+      description: 'Review your medical conditions',
+      link: '/conditions',
+    },
+    {
+      title: 'Treatments',
+      description: 'Review your treatments',
+      link: '/treatments',
+    },
+    {
+      title: 'Visit History',
+      description: 'Review your visits',
+      link: '/visits',
+    },
+  ]; // Smaller secondary items for additional features
   const secondaryItems = [
     {
-      title: "👨‍⚕️ Doctors",
-      description: "View practitioner information",
-      link: "/practitioners"
-    }
+      title: '👨‍⚕️ Doctors',
+      description: 'View practitioner information',
+      link: '/practitioners',
+    },
   ];
-  // TODO: TEMP DISABLE ADMIN DASHBOARD LINK
   // Add admin dashboard link if user is admin
-  // if (isAdmin) {
-  //   secondaryItems.unshift({
-  //     title: "⚙️ Admin Dashboard",
-  //     description: "System administration and management",
-  //     link: "/admin"
-  //   });
-  // }
+  if (isAdmin) {
+    secondaryItems.unshift({
+      title: '⚙️ Admin Dashboard',
+      description: 'System administration and management',
+      link: '/admin',
+    });
+  }
 
   console.log('🔍 Dashboard render state:');
   console.log('isAdmin:', isAdmin);
   console.log('secondaryItems:', secondaryItems);
-
 
   if (loading) {
     return (
@@ -143,12 +150,12 @@ const Dashboard = () => {
       </div>
     );
   }
-
   return (
     <div className="dashboard-container">
       <header>
         <h1>🏥 Medical Records Dashboard</h1>
         <nav>
+          <ThemeToggle />
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>
@@ -158,9 +165,12 @@ const Dashboard = () => {
       <main>
         <div className="welcome-section">
           <h2>Welcome to your Medical Records System</h2>
-          <p>Manage your personal health information securely and efficiently.</p>
+          <p>
+            Manage your personal health information securely and efficiently.
+          </p>
           {user && <p>Hello, {user.name}!</p>}
-        </div>        <div className="dashboard-grid">
+        </div>{' '}
+        <div className="dashboard-grid">
           {dashboardItems.map((item, index) => (
             <DashboardCard
               key={index}
@@ -169,7 +179,6 @@ const Dashboard = () => {
               link={item.link}
             />
           ))}
-
           {/* Secondary/smaller items section */}
           <div className="secondary-items">
             <h3>Additional Resources</h3>
@@ -184,18 +193,32 @@ const Dashboard = () => {
                 />
               ))}
             </div>
-          </div>
-
+          </div>{' '}
           <div className="recent-activity">
-            <h3>Recent Activity</h3>
+            <h3>Recent Medical Activity</h3>
             {recentActivity.length > 0 ? (
               <ul>
                 {recentActivity.map((activity, index) => (
-                  <li key={index}>{activity.description}</li>
+                  <li key={index} className="activity-item">
+                    <div className="activity-content">
+                      <span className="activity-description">
+                        {activity.description}
+                      </span>
+                      <span className="activity-time">
+                        {new Date(activity.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </li>
                 ))}
               </ul>
             ) : (
-              <p>No recent activity to display.</p>
+              <div className="no-activity">
+                <p>No recent medical activity to display.</p>
+                <p>
+                  Start by adding medications, lab results, or other medical
+                  information.
+                </p>
+              </div>
             )}
           </div>
         </div>

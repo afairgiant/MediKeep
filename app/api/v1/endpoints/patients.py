@@ -1,18 +1,32 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy.orm import Session
-from typing import Any
+from typing import Any, List
+from datetime import datetime
+from sqlalchemy import desc
 
 from app.api import deps
 from app.crud.patient import patient
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.core.logging_config import get_logger
+from app.models.activity_log import ActivityLog
+from pydantic import BaseModel
 
 router = APIRouter()
 
 # Initialize loggers
 logger = get_logger(__name__, "app")
 medical_logger = get_logger(__name__, "medical")
+
+
+class UserRecentActivity(BaseModel):
+    """Recent activity item schema for regular users"""
+
+    id: int
+    type: str
+    action: str
+    description: str
+    timestamp: datetime
 
 
 @router.get("/me", response_model=Patient)
@@ -404,3 +418,217 @@ def get_patient_encounters(
     from app.crud.encounter import encounter
 
     return encounter.get_by_patient(db=db, patient_id=patient_id)
+
+
+@router.get("/me/recent-activity", response_model=List[UserRecentActivity])
+def get_my_recent_activity(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    user_id: int = Depends(deps.get_current_user_id),
+    limit: int = Query(10, le=100),
+) -> Any:
+    """
+    Get recent medical-related activities for the current user.
+
+    Returns a list of recent activities, including:
+    - medication updates
+    - lab results
+    - immunizations
+    - allergies
+    - conditions
+    - procedures
+    - treatments
+    - encounters
+
+    Each activity includes a brief description and timestamp.
+    """
+    user_ip = request.client.host if request.client else "unknown"
+
+    try:
+        # Query the activity log for the user's recent activities
+        activities = (
+            db.query(ActivityLog)
+            .filter(ActivityLog.user_id == user_id)
+            .order_by(desc(ActivityLog.timestamp))
+            .limit(limit)
+            .all()
+        )
+
+        # Log successful activity retrieval
+        logger.info(
+            f"User {user_id} retrieved their recent activity",
+            extra={
+                "category": "app",
+                "event": "recent_activity_retrieved",
+                "user_id": user_id,
+                "ip": user_ip,
+                "activity_count": len(activities),
+            },
+        )
+
+        return activities
+
+    except Exception as e:
+        # Log failed activity retrieval
+        logger.error(
+            f"Failed to retrieve recent activity for user {user_id}: {str(e)}",
+            extra={
+                "category": "app",
+                "event": "recent_activity_retrieval_failed",
+                "user_id": user_id,
+                "ip": user_ip,
+                "error": str(e),
+            },
+        )
+        raise
+
+
+@router.get("/recent-activity/", response_model=List[UserRecentActivity])
+def get_user_recent_activity(
+    limit: int = Query(default=10, le=50),
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get recent medical activity for the current user.
+
+    Returns recent activities related to all medical records including:
+    - Medications
+    - Lab Results & Lab Result Files
+    - Vitals
+    - Conditions
+    - Allergies
+    - Immunizations
+    - Procedures
+    - Treatments
+    - Visits/Encounters
+    - Patient Info updates
+    - Doctor/Practitioner interactions
+
+    Excludes user management activities like creation/deletion.
+    Includes both user actions and medical activities that affect the patient.
+    """
+    try:
+        # Get the user's patient record
+        patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+        if not patient_record:
+            return []
+
+        # Define medical entity types we want to include (all medical pages + doctors)
+        medical_entity_types = [
+            "medication",
+            "lab_result", 
+            "vitals",
+            "condition",
+            "allergy",
+            "immunization",
+            "procedure",
+            "treatment",
+            "encounter",
+            "patient",
+            "practitioner",  # Doctors/practitioners page
+            "lab_result_file",  # Lab result file uploads
+        ]        # Query activity logs for this patient's medical activities
+        # Include activities by the user AND activities that affect this patient
+        activity_logs = (
+            db.query(ActivityLog)
+            .filter(
+                ActivityLog.entity_type.in_(medical_entity_types),
+                # Show activities by this user OR activities that relate to this patient
+                # This captures both user actions and doctor actions affecting the patient
+                (ActivityLog.user_id == current_user_id) | 
+                (ActivityLog.description.like(f"%patient {patient_record.id}%")) |
+                (ActivityLog.description.like(f"%{patient_record.first_name}%")) |
+                (ActivityLog.description.like(f"%{patient_record.last_name}%"))
+            )
+            .order_by(desc(ActivityLog.timestamp))
+            .limit(limit)
+            .all()
+        )
+
+        recent_activities = []
+
+        for log in activity_logs:
+            entity_type = getattr(log, "entity_type", "")
+            action = getattr(log, "action", "unknown")
+            entity_id = getattr(log, "entity_id", None)
+            description = getattr(log, "description", "Activity recorded")
+
+            # Skip user creation/deletion activities
+            if entity_type == "user" or action in ["user_created", "user_deleted"]:
+                continue            # Map entity types to user-friendly names
+            type_mapping = {
+                "medication": "Medication",
+                "lab_result": "Lab Result",
+                "vitals": "Vital Signs",
+                "condition": "Medical Condition",
+                "allergy": "Allergy",
+                "immunization": "Immunization",
+                "procedure": "Procedure",
+                "treatment": "Treatment",
+                "encounter": "Visit",
+                "patient": "Patient Information",
+                "practitioner": "Doctor",
+                "lab_result_file": "Lab Result File",
+            }
+
+            activity_type = type_mapping.get(entity_type, entity_type.title())
+
+            # Clean up description for user display using format "Action Type: Item Name"
+            if description:
+                # Try to extract item name from the original description
+                item_name = None
+                
+                if ":" in description:
+                    # Extract name after colon and before "for" if present
+                    name_part = description.split(":", 1)[1]
+                    if " for " in name_part:
+                        item_name = name_part.split(" for ")[0].strip()
+                    else:
+                        item_name = name_part.strip()
+                
+                # Create description in format "Action Type: Item Name"
+                if entity_type == "patient" and action == "updated":
+                    description = "Updated Patient Information"
+                elif action == "created":
+                    if item_name:
+                        description = f"Created {activity_type}: {item_name}"
+                    else:
+                        description = f"Created {activity_type}"
+                elif action == "updated":
+                    if item_name:
+                        description = f"Updated {activity_type}: {item_name}"
+                    else:
+                        description = f"Updated {activity_type}"
+                elif action == "deleted":
+                    if item_name:
+                        description = f"Deleted {activity_type}: {item_name}"
+                    else:
+                        description = f"Deleted {activity_type}"
+                else:
+                    # For other actions, use title case
+                    if item_name:
+                        description = f"{action.title()} {activity_type}: {item_name}"
+                    else:
+                        description = f"{action.title()} {activity_type}"
+            else:
+                # Fallback if no description
+                description = f"{action.title()} {activity_type}"
+
+            recent_activities.append(
+                UserRecentActivity(
+                    id=entity_id or 0,
+                    type=activity_type,
+                    action=action,
+                    description=description,
+                    timestamp=getattr(log, "timestamp", datetime.utcnow()),
+                )
+            )
+
+        return recent_activities
+
+    except Exception as e:
+        logger.error(f"Error fetching user recent activity: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail="Error fetching recent activity"
+        )

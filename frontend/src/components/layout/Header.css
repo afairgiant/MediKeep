@@ -1,11 +1,13 @@
 /* Header Component Styles */
+@import '../../styles/themes/variables.css';
+
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border, #e9ecef);
 }
 
 .header-left {
@@ -17,16 +19,16 @@
 .back-button {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-primary, #667eea);
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0.25rem 0;
   align-self: flex-start;
-  transition: color 0.2s ease;
+  transition: var(--transition-all, color 0.2s ease);
 }
 
 .back-button:hover {
-  color: #5a6fd8;
+  color: var(--color-primary-dark, #5a6fd8);
   text-decoration: underline;
 }
 
@@ -36,14 +38,14 @@
 
 .page-title {
   margin: 0;
-  color: #333;
+  color: var(--color-text-primary, #333);
   font-size: 2rem;
   font-weight: 600;
 }
 
 .page-subtitle {
   margin: 0.25rem 0 0 0;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   font-size: 1rem;
   font-weight: normal;
 }
@@ -61,11 +63,11 @@
     gap: 1rem;
     align-items: flex-start;
   }
-  
+
   .page-title {
     font-size: 1.5rem;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: flex-start;

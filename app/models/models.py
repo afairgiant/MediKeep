@@ -1,7 +1,11 @@
-from os import name
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text, Float
 from sqlalchemy.orm import relationship, declarative_base
-from datetime import datetime
+from datetime import datetime, timezone
+
+# Timezone-aware datetime function to replace deprecated datetime.utcnow()
+def get_utc_now():
+    """Get the current UTC datetime with timezone awareness."""
+    return datetime.now(timezone.utc)
 
 Base = declarative_base()
 
@@ -14,12 +18,10 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
     full_name = Column(String, nullable=False)  # Role-based access control
-    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'
-
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'    # Timestamps
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
     patient = relationship("Patient", back_populates="user", uselist=False)
@@ -42,7 +44,9 @@ class Patient(Base):
     height = Column(Integer, nullable=True)  # in inches
     weight = Column(Integer, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
-    address = Column(String, nullable=True)  # Table Relationships
+    address = Column(String, nullable=True)  
+    
+    # Table Relationships
     user = relationship("User", back_populates="patient")
     practitioner = relationship("Practitioner", back_populates="patients")
     medications = relationship("Medication", back_populates="patient")
@@ -53,6 +57,7 @@ class Patient(Base):
     procedures = relationship("Procedure", back_populates="patient")
     treatments = relationship("Treatment", back_populates="patient")
     allergies = relationship("Allergy", back_populates="patient")
+    vitals = relationship("Vitals", back_populates="patient")
 
 
 class Practitioner(Base):
@@ -61,7 +66,12 @@ class Practitioner(Base):
 
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
-    practice = Column(String, nullable=False)  # Table Relationships
+    practice = Column(String, nullable=False)
+    phone_number = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    rating = Column(Float, nullable=True)  # Rating from 0.0 to 5.0
+
+    # Table Relationships
     patients = relationship("Patient", back_populates="practitioner")
     medications = relationship("Medication", back_populates="practitioner")
     encounters = relationship("Encounter", back_populates="practitioner")
@@ -70,6 +80,7 @@ class Practitioner(Base):
     procedures = relationship("Procedure", back_populates="practitioner")
     treatments = relationship("Treatment", back_populates="practitioner")
     conditions = relationship("Condition", back_populates="practitioner")
+    vitals = relationship("Vitals", back_populates="practitioner")
 
 
 class Medication(Base):
@@ -137,6 +148,9 @@ class LabResult(Base):
     status = Column(
         String, nullable=False, default="ordered"
     )  # 'ordered', 'completed', 'cancelled'
+    labs_result = Column(
+        String, nullable=True
+    )  # Lab result interpretation: 'normal', 'abnormal', etc.
     ordered_date = Column(DateTime, nullable=False)  # When the test was ordered
     completed_date = Column(DateTime, nullable=True)  # When results were received
 
@@ -288,3 +302,41 @@ class Allergy(Base):
 
     # Table Relationships
     patient = relationship("Patient", back_populates="allergies")
+
+
+class Vitals(Base):
+    __tablename__ = "vitals"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+
+    # Date and time when vitals were recorded
+    recorded_date = Column(DateTime, nullable=False)
+
+    # Vital sign measurements
+    systolic_bp = Column(Integer, nullable=True)  # Systolic blood pressure (mmHg)
+    diastolic_bp = Column(Integer, nullable=True)  # Diastolic blood pressure (mmHg)
+    heart_rate = Column(Integer, nullable=True)  # Heart rate (bpm)
+    temperature = Column(Float, nullable=True)  # Body temperature (Fahrenheit)
+    weight = Column(Float, nullable=True)  # Weight (lbs)
+    height = Column(Float, nullable=True)  # Height (inches)
+    oxygen_saturation = Column(Float, nullable=True)  # SpO2 percentage
+    respiratory_rate = Column(Integer, nullable=True)  # Breaths per minute
+    blood_glucose = Column(Float, nullable=True)  # Blood glucose (mg/dL)
+
+    # Additional measurements
+    bmi = Column(Float, nullable=True)  # Body Mass Index (calculated)
+    pain_scale = Column(Integer, nullable=True)  # Pain scale 0-10
+
+    # Optional notes and metadata
+    notes = Column(Text, nullable=True)  # Additional notes about the readings
+    location = Column(String, nullable=True)  # Where readings were taken (home, clinic, etc.)
+    device_used = Column(String, nullable=True)  # Device used for measurement    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    patient = relationship("Patient", back_populates="vitals")
+    practitioner = relationship("Practitioner", back_populates="vitals")

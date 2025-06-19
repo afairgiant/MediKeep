@@ -1,0 +1,365 @@
+/**
+ * VitalsList Component Styles
+ */
+
+.vitals-list {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.vitals-list.loading,
+.vitals-list.error,
+.vitals-list.empty {
+  padding: 40px;
+  text-align: center;
+}
+
+.loading-spinner {
+  color: #4299e1;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: #e53e3e;
+}
+
+.error-message p {
+  margin-bottom: 16px;
+}
+
+.retry-btn {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.retry-btn:hover {
+  background-color: #3182ce;
+}
+
+.empty-message {
+  color: #718096;
+}
+
+.empty-message p {
+  margin-bottom: 8px;
+}
+
+.empty-subtitle {
+  font-size: 0.9rem;
+  color: #a0aec0;
+}
+
+.vitals-table-container {
+  overflow-x: auto;
+}
+
+.vitals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.vitals-table th {
+  background-color: #f7fafc;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 16px 12px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.vitals-table th:hover {
+  background-color: #f7fafc;
+}
+
+.vitals-table th:last-child {
+  cursor: default; /* Actions column should not be sortable */
+}
+
+.vitals-table th:last-child:hover {
+  background-color: transparent;
+}
+
+.vitals-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.vitals-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.vitals-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.vitals-table tbody tr.expanded {
+  background-color: #ebf8ff;
+}
+
+.date-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.time {
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.bp-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bp-value {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.bp-category {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Blood Pressure Categories */
+.bp-category.normal {
+  background-color: #c6f6d5;
+  color: #22543d;
+}
+
+.bp-category.elevated {
+  background-color: #fef5e7;
+  color: #744210;
+}
+
+.bp-category.stage-1-hypertension {
+  background-color: #fed7cc;
+  color: #9c4221;
+}
+
+.bp-category.stage-2-hypertension,
+.bp-category.hypertensive-crisis {
+  background-color: #fed7d7;
+  color: #822727;
+}
+
+.vital-value {
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.na {
+  color: #a0aec0;
+  font-style: italic;
+}
+
+.bmi-value {
+  font-size: 0.85rem;
+  color: #2d3748;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.edit-btn:hover {
+  background-color: #ebf8ff;
+}
+
+.delete-btn:hover {
+  background-color: #fed7d7;
+}
+
+.expanded-details {
+  background-color: #f7fafc;
+}
+
+.expanded-details td {
+  padding: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.details-content {
+  max-width: 100%;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.detail-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-group.notes {
+  grid-column: 1 / -1;
+}
+
+.detail-group label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-group span {
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.load-more {
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f7fafc;
+}
+
+.load-more-btn {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.load-more-btn:hover {
+  background-color: #3182ce;
+}
+
+/* Sortable table headers */
+.vitals-table .sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.vitals-table .sortable-header:hover {
+  background-color: #f7fafc;
+}
+
+.vitals-table .actions-header {
+  cursor: default;
+}
+
+.vitals-table .actions-header:hover {
+  background-color: transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .vitals-table th,
+  .vitals-table td {
+    padding: 10px 8px;
+  }
+
+  .details-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vitals-table {
+    font-size: 0.8rem;
+  }
+
+  .vitals-table th,
+  .vitals-table td {
+    padding: 8px 6px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .expanded-details td {
+    padding: 16px;
+  }
+
+  .bp-category {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+  }
+}
+
+@media (max-width: 640px) {
+  .vitals-table th:nth-child(n + 6),
+  .vitals-table td:nth-child(n + 6) {
+    display: none;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vitals-table th:nth-child(n + 5),
+  .vitals-table td:nth-child(n + 5) {
+    display: none;
+  }
+
+  .vitals-table th,
+  .vitals-table td {
+    padding: 8px 4px;
+  }
+
+  .date-display {
+    gap: 1px;
+  }
+
+  .bp-display {
+    gap: 2px;
+  }
+}

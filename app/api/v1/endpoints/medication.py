@@ -10,6 +10,8 @@ from app.schemas.medication import (
     MedicationResponse,
 )
 from app.core.logging_config import get_logger
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -36,9 +38,7 @@ def create_medication(
     try:
         medication_obj = medication.create(db=db, obj_in=medication_in)
         medication_id = getattr(medication_obj, "id", None)
-        patient_id = getattr(medication_obj, "patient_id", None)
-
-        # Log successful medication creation
+        patient_id = getattr(medication_obj, "patient_id", None)        # Log successful medication creation
         logger.info(
             "Medication created successfully",
             extra={
@@ -50,6 +50,25 @@ def create_medication(
                 "ip": user_ip,
             },
         )
+
+        # Log the creation activity
+        try:
+            description = f"New medication: {getattr(medication_obj, 'name', 'Unknown medication')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(medication_obj, 'patient_id', None),
+                action="created",
+                entity_type="medication",
+                entity_id=getattr(medication_obj, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging medication creation activity: {e}")
 
         return medication_obj
 
@@ -137,9 +156,7 @@ def update_medication(
     try:
         updated_medication = medication.update(
             db=db, db_obj=medication_obj, obj_in=medication_in
-        )
-
-        # Log successful medication update
+        )        # Log successful medication update
         logger.info(
             f"Medication updated successfully: {medication_id}",
             extra={
@@ -151,6 +168,25 @@ def update_medication(
                 "ip": user_ip,
             },
         )
+
+        # Log the update activity
+        try:
+            description = f"Updated medication: {getattr(updated_medication, 'name', 'Unknown medication')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(updated_medication, 'patient_id', None),
+                action="updated",
+                entity_type="medication",
+                entity_id=getattr(updated_medication, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging medication update activity: {e}")
 
         return updated_medication
 
@@ -202,6 +238,25 @@ def delete_medication(
     patient_id = getattr(medication_obj, "patient_id", None)
 
     try:
+        # Log the deletion activity BEFORE deleting
+        try:
+            description = f"Deleted medication: {getattr(medication_obj, 'name', 'Unknown medication')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(medication_obj, 'patient_id', None),
+                action="deleted",
+                entity_type="medication",
+                entity_id=getattr(medication_obj, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging medication deletion activity: {e}")
+
         medication.delete(db=db, id=medication_id)
 
         # Log successful medication deletion

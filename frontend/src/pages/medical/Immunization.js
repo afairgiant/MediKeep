@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Immunization = () => {
   const navigate = useNavigate();
-  
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+
   // Standardized data management
   const {
     items: immunizations,
@@ -21,16 +25,19 @@ const Immunization = () => {
     refreshData,
     clearError,
     setSuccessMessage,
-    setError  } = useMedicalData({
+    setError,
+  } = useMedicalData({
     entityName: 'immunization',
     apiMethodsConfig: {
-      getAll: (signal) => apiService.getImmunizations(signal),
-      getByPatient: (patientId, signal) => apiService.getPatientImmunizations(patientId, signal),
+      getAll: signal => apiService.getImmunizations(signal),
+      getByPatient: (patientId, signal) =>
+        apiService.getPatientImmunizations(patientId, signal),
       create: (data, signal) => apiService.createImmunization(data, signal),
-      update: (id, data, signal) => apiService.updateImmunization(id, data, signal),
-      delete: (id, signal) => apiService.deleteImmunization(id, signal)
+      update: (id, data, signal) =>
+        apiService.updateImmunization(id, data, signal),
+      delete: (id, signal) => apiService.deleteImmunization(id, signal),
     },
-    requiresPatient: true
+    requiresPatient: true,
   });
 
   // Form and UI state
@@ -48,14 +55,14 @@ const Immunization = () => {
     route: '',
     expiration_date: '',
     notes: '',
-    practitioner_id: null
+    practitioner_id: null,
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -70,7 +77,7 @@ const Immunization = () => {
       route: '',
       expiration_date: '',
       notes: '',
-      practitioner_id: null
+      practitioner_id: null,
     });
     setEditingImmunization(null);
     setShowAddForm(false);
@@ -81,7 +88,7 @@ const Immunization = () => {
     setShowAddForm(true);
   };
 
-  const handleEditImmunization = (immunization) => {
+  const handleEditImmunization = immunization => {
     setFormData({
       vaccine_name: immunization.vaccine_name || '',
       date_administered: immunization.date_administered || '',
@@ -92,15 +99,15 @@ const Immunization = () => {
       route: immunization.route || '',
       expiration_date: immunization.expiration_date || '',
       notes: immunization.notes || '',
-      practitioner_id: immunization.practitioner_id || null
+      practitioner_id: immunization.practitioner_id || null,
     });
     setEditingImmunization(immunization);
     setShowAddForm(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     if (!currentPatient?.id) {
       setError('Patient information not available');
       return;
@@ -110,14 +117,18 @@ const Immunization = () => {
       vaccine_name: formData.vaccine_name,
       date_administered: formData.date_administered,
       patient_id: currentPatient.id,
-      dose_number: formData.dose_number ? parseInt(formData.dose_number, 10) : null,
+      dose_number: formData.dose_number
+        ? parseInt(formData.dose_number, 10)
+        : null,
       lot_number: formData.lot_number || null,
       manufacturer: formData.manufacturer || null,
       site: formData.site || null,
       route: formData.route || null,
       expiration_date: formData.expiration_date || null,
       notes: formData.notes || null,
-      practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id, 10) : null
+      practitioner_id: formData.practitioner_id
+        ? parseInt(formData.practitioner_id, 10)
+        : null,
     };
 
     let success;
@@ -133,7 +144,7 @@ const Immunization = () => {
     }
   };
 
-  const handleDeleteImmunization = async (immunizationId) => {
+  const handleDeleteImmunization = async immunizationId => {
     const success = await deleteItem(immunizationId);
     if (success) {
       await refreshData();
@@ -147,20 +158,20 @@ const Immunization = () => {
         const bDate = new Date(b.date_administered || 0);
         return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
       }
-      
+
       if (sortBy === 'vaccine_name') {
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? a.vaccine_name.localeCompare(b.vaccine_name)
           : b.vaccine_name.localeCompare(a.vaccine_name);
       }
-      
+
       return 0;
     });
-    
+
     return sorted;
   };
 
-  const handleSortChange = (newSortBy) => {
+  const handleSortChange = newSortBy => {
     if (sortBy === newSortBy) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -183,10 +194,7 @@ const Immunization = () => {
   return (
     <div className="medical-page-container">
       <header className="medical-page-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>💉 Immunizations</h1>
@@ -196,54 +204,70 @@ const Immunization = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">×</button>
+            <button onClick={clearError} className="error-close">
+              ×
+            </button>
           </div>
         )}
-        {successMessage && <div className="success-message">{successMessage}</div>}
-
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button 
-              className="add-button"
-              onClick={handleAddImmunization}
-            >
+            <button className="add-button" onClick={handleAddImmunization}>
               + Add New Immunization
             </button>
           </div>
-          
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
+          </div>
+
           <div className="controls-right">
             <div className="sort-controls">
               <label>Sort by:</label>
-              <select 
-                value={sortBy} 
-                onChange={(e) => handleSortChange(e.target.value)}
+              <select
+                value={sortBy}
+                onChange={e => handleSortChange(e.target.value)}
               >
                 <option value="date_administered">Date Administered</option>
                 <option value="vaccine_name">Vaccine Name</option>
               </select>
-              <button 
+              <button
                 className="sort-order-button"
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                onClick={() =>
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                }
               >
                 {sortOrder === 'asc' ? '↑' : '↓'}
               </button>
             </div>
           </div>
         </div>
-
         {showAddForm && (
-          <div className="medical-form-overlay" onClick={() => setShowAddForm(false)}>
-            <div className="medical-form-modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="medical-form-overlay"
+            onClick={() => setShowAddForm(false)}
+          >
+            <div
+              className="medical-form-modal"
+              onClick={e => e.stopPropagation()}
+            >
               <div className="form-header">
-                <h3>{editingImmunization ? 'Edit Immunization' : 'Add New Immunization'}</h3>
-                <button 
-                  className="close-button"
-                  onClick={resetForm}
-                >
+                <h3>
+                  {editingImmunization
+                    ? 'Edit Immunization'
+                    : 'Add New Immunization'}
+                </h3>
+                <button className="close-button" onClick={resetForm}>
                   ×
                 </button>
               </div>
-              
+
               <div className="medical-form-content">
                 <form onSubmit={handleSubmit}>
                   <div className="form-grid">
@@ -261,7 +285,9 @@ const Immunization = () => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="date_administered">Date Administered *</label>
+                      <label htmlFor="date_administered">
+                        Date Administered *
+                      </label>
                       <input
                         type="date"
                         id="date_administered"
@@ -369,26 +395,24 @@ const Immunization = () => {
                   </div>
 
                   <div className="form-actions">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="cancel-button"
                       onClick={resetForm}
                     >
                       Cancel
                     </button>
-                    <button 
-                      type="submit" 
-                      className="save-button"
-                    >
-                      {editingImmunization ? 'Update Immunization' : 'Add Immunization'}
+                    <button type="submit" className="save-button">
+                      {editingImmunization
+                        ? 'Update Immunization'
+                        : 'Add Immunization'}
                     </button>
                   </div>
                 </form>
               </div>
             </div>
           </div>
-        )}
-
+        )}{' '}
         <div className="medical-items-list">
           {getSortedImmunizations().length === 0 ? (
             <div className="empty-state">
@@ -396,9 +420,9 @@ const Immunization = () => {
               <h3>No immunizations found</h3>
               <p>Click "Add New Immunization" to get started.</p>
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedImmunizations().map((immunization) => (
+              {getSortedImmunizations().map(immunization => (
                 <div key={immunization.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">{immunization.vaccine_name}</h3>
@@ -408,54 +432,64 @@ const Immunization = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="medical-item-details">
                     <div className="detail-item">
                       <span className="label">Date Administered:</span>
-                      <span className="value">{formatDate(immunization.date_administered)}</span>
+                      <span className="value">
+                        {formatDate(immunization.date_administered)}
+                      </span>
                     </div>
-                    
+
                     {immunization.manufacturer && (
                       <div className="detail-item">
                         <span className="label">Manufacturer:</span>
-                        <span className="value">{immunization.manufacturer}</span>
+                        <span className="value">
+                          {immunization.manufacturer}
+                        </span>
                       </div>
                     )}
-                    
+
                     {immunization.site && (
                       <div className="detail-item">
                         <span className="label">Site:</span>
                         <span className="value">
-                          {immunization.site.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </span>
+                          {immunization.site
+                            .replace(/_/g, ' ')
+                            .replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
                       </div>
                     )}
-                    
+
                     {immunization.route && (
                       <div className="detail-item">
                         <span className="label">Route:</span>
                         <span className="value">{immunization.route}</span>
                       </div>
                     )}
-                    
+
                     {immunization.lot_number && (
                       <div className="detail-item">
                         <span className="label">Lot Number:</span>
                         <span className="value">{immunization.lot_number}</span>
                       </div>
                     )}
-                    
+
                     {immunization.expiration_date && (
                       <div className="detail-item">
                         <span className="label">Expiration Date:</span>
-                        <span className="value">{formatDate(immunization.expiration_date)}</span>
+                        <span className="value">
+                          {formatDate(immunization.expiration_date)}
+                        </span>
                       </div>
                     )}
 
                     {immunization.practitioner_id && (
                       <div className="detail-item">
                         <span className="label">Practitioner ID:</span>
-                        <span className="value">{immunization.practitioner_id}</span>
+                        <span className="value">
+                          {immunization.practitioner_id}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -466,15 +500,15 @@ const Immunization = () => {
                       <div className="notes-content">{immunization.notes}</div>
                     </div>
                   )}
-                  
+
                   <div className="medical-item-actions">
-                    <button 
+                    <button
                       className="edit-button"
                       onClick={() => handleEditImmunization(immunization)}
                     >
                       ✏️ Edit
                     </button>
-                    <button 
+                    <button
                       className="delete-button"
                       onClick={() => handleDeleteImmunization(immunization.id)}
                     >
@@ -484,6 +518,49 @@ const Immunization = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <MedicalTable
+              data={getSortedImmunizations()}
+              columns={[
+                { header: 'Vaccine Name', accessor: 'vaccine_name' },
+                { header: 'Date Administered', accessor: 'date_administered' },
+                { header: 'Dose Number', accessor: 'dose_number' },
+                { header: 'Manufacturer', accessor: 'manufacturer' },
+                { header: 'Site', accessor: 'site' },
+                { header: 'Route', accessor: 'route' },
+                { header: 'Lot Number', accessor: 'lot_number' },
+                { header: 'Expiration Date', accessor: 'expiration_date' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={currentPatient}
+              tableName="Immunizations"
+              onEdit={handleEditImmunization}
+              onDelete={handleDeleteImmunization}
+              formatters={{
+                vaccine_name: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                date_administered: value => formatDate(value),
+                expiration_date: value => (value ? formatDate(value) : '-'),
+                site: value =>
+                  value
+                    ? value
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, l => l.toUpperCase())
+                    : '-',
+                dose_number: value => (value ? `Dose ${value}` : '-'),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           )}
         </div>
       </div>

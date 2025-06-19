@@ -13,6 +13,7 @@ from .models import (
     Treatment,
     Allergy,
 )
+from .activity_log import ActivityLog
 
 __all__ = [
     "Base",
@@ -28,4 +29,5 @@ __all__ = [
     "Procedure",
     "Treatment",
     "Allergy",
+    "ActivityLog",
 ]

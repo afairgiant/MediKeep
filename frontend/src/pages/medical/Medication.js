@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
-import '../../styles/pages/Medication.css';
+import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Medication = () => {
   const [medications, setMedications] = useState([]);
@@ -12,8 +13,15 @@ const Medication = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMedication, setEditingMedication] = useState(null);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [sortBy, setSortBy] = useState('active');
   const [sortOrder, setSortOrder] = useState('desc');
+
+  // Filtering state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [routeFilter, setRouteFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState('all'); // all, current, past, future
   const [formData, setFormData] = useState({
     medication_name: '',
     dosage: '',
@@ -23,7 +31,7 @@ const Medication = () => {
     effectivePeriod_start: '',
     effectivePeriod_end: '',
     status: 'active',
-    practitioner_id: null
+    practitioner_id: null,
   });
   const navigate = useNavigate();
 
@@ -35,14 +43,16 @@ const Medication = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       // Get patient data first
       const patient = await apiService.getCurrentPatient();
       setPatientData(patient);
-      
+
       // Then get medications for this patient
       if (patient && patient.id) {
-        const medicationData = await apiService.getPatientMedications(patient.id);
+        const medicationData = await apiService.getPatientMedications(
+          patient.id
+        );
         setMedications(medicationData);
       }
     } catch (error) {
@@ -53,11 +63,11 @@ const Medication = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -71,7 +81,7 @@ const Medication = () => {
       effectivePeriod_start: '',
       effectivePeriod_end: '',
       status: 'active',
-      practitioner_id: null
+      practitioner_id: null,
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -82,7 +92,7 @@ const Medication = () => {
     setShowAddForm(true);
   };
 
-  const handleEditMedication = (medication) => {
+  const handleEditMedication = medication => {
     setFormData({
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
@@ -92,15 +102,15 @@ const Medication = () => {
       effectivePeriod_start: medication.effectivePeriod_start || '',
       effectivePeriod_end: medication.effectivePeriod_end || '',
       status: medication.status || 'active',
-      practitioner_id: medication.practitioner_id || null
+      practitioner_id: medication.practitioner_id || null,
     });
     setEditingMedication(medication);
     setShowAddForm(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     // Check authentication first
     const token = localStorage.getItem('token');
     if (!token) {
@@ -108,7 +118,7 @@ const Medication = () => {
       navigate('/login');
       return;
     }
-    
+
     if (!patientData?.id) {
       setError('Patient information not available');
       return;
@@ -120,7 +130,7 @@ const Medication = () => {
 
       // Debug auth and patient data
       console.log('🔐 Auth token length:', token.length);
-      console.log('🏥 Patient data:', patientData);      // Clean and validate medication data
+      console.log('🏥 Patient data:', patientData); // Clean and validate medication data
       const medicationData = {
         medication_name: formData.medication_name?.trim() || '',
         dosage: formData.dosage?.trim() || '',
@@ -128,7 +138,7 @@ const Medication = () => {
         route: formData.route?.trim() || '',
         indication: formData.indication?.trim() || '',
         status: formData.status || 'active',
-        patient_id: patientData.id
+        patient_id: patientData.id,
       };
 
       // Only include dates if they have values
@@ -144,7 +154,10 @@ const Medication = () => {
 
       console.log('🚀 Final medication data:', medicationData);
       console.log('🔍 Data type check:', typeof medicationData);
-      console.log('🔍 Is object?', medicationData && typeof medicationData === 'object');
+      console.log(
+        '🔍 Is object?',
+        medicationData && typeof medicationData === 'object'
+      );
       console.log('🔍 JSON stringify test:', JSON.stringify(medicationData));
 
       console.log('🚀 Submitting medication data:', medicationData);
@@ -158,7 +171,7 @@ const Medication = () => {
         effectivePeriod_end: formData.effectivePeriod_end,
         status: formData.status,
         practitioner_id: formData.practitioner_id,
-        patient_id: patientData.id
+        patient_id: patientData.id,
       });
 
       if (editingMedication) {
@@ -174,20 +187,28 @@ const Medication = () => {
 
       resetForm();
       await fetchPatientAndMedications();
-      
+
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('❌ Error saving medication:', error);
-      if (error.message?.includes('Authentication') || error.message?.includes('401') || error.message?.includes('403')) {
+      if (
+        error.message?.includes('Authentication') ||
+        error.message?.includes('401') ||
+        error.message?.includes('403')
+      ) {
         setError('Authentication failed. Please log in again.');
         navigate('/login');
       } else {
-        setError(error.response?.data?.detail || error.message || 'Failed to save medication');
+        setError(
+          error.response?.data?.detail ||
+            error.message ||
+            'Failed to save medication'
+        );
       }
     }
   };
 
-  const handleDeleteMedication = async (medicationId) => {
+  const handleDeleteMedication = async medicationId => {
     if (!window.confirm('Are you sure you want to delete this medication?')) {
       return;
     }
@@ -197,7 +218,7 @@ const Medication = () => {
       await apiService.deleteMedication(medicationId);
       setSuccessMessage('Medication deleted successfully!');
       await fetchPatientAndMedications();
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
@@ -205,62 +226,178 @@ const Medication = () => {
       setError(error.message || 'Failed to delete medication');
     }
   };
-
   const getSortedMedications = () => {
     const sorted = [...medications].sort((a, b) => {
       // First sort by active status (active first)
       if (sortBy === 'active') {
         const aIsActive = a.status === 'active';
         const bIsActive = b.status === 'active';
-        
+
         if (aIsActive && !bIsActive) return -1;
         if (!aIsActive && bIsActive) return 1;
-        
+
         // If both have same active status, sort by medication name
         return a.medication_name.localeCompare(b.medication_name);
       }
-      
+
       // Sort by other fields
       if (sortBy === 'name') {
-        return sortOrder === 'asc' 
+        return sortOrder === 'asc'
           ? a.medication_name.localeCompare(b.medication_name)
           : b.medication_name.localeCompare(a.medication_name);
       }
-      
+
       if (sortBy === 'start_date') {
         const aDate = new Date(a.effectivePeriod_start || 0);
         const bDate = new Date(b.effectivePeriod_start || 0);
         return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
       }
-      
+
       return 0;
     });
-    
+
     return sorted;
   };
 
-  const handleSortChange = (newSortBy) => {
+  const getFilteredAndSortedMedications = () => {
+    let filtered = medications;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(
+        med =>
+          med.medication_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          med.indication?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          med.dosage?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(med => med.status === statusFilter);
+    }
+
+    // Apply route filter
+    if (routeFilter !== 'all') {
+      filtered = filtered.filter(med => med.route === routeFilter);
+    }
+
+    // Apply date range filter
+    if (dateRangeFilter !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      filtered = filtered.filter(med => {
+        const startDate = med.effectivePeriod_start
+          ? new Date(med.effectivePeriod_start)
+          : null;
+        const endDate = med.effectivePeriod_end
+          ? new Date(med.effectivePeriod_end)
+          : null;
+
+        switch (dateRangeFilter) {
+          case 'current':
+            // Currently active medications (started and not yet ended)
+            return (
+              (!startDate || startDate <= today) &&
+              (!endDate || endDate >= today)
+            );
+          case 'past':
+            // Medications that have ended
+            return endDate && endDate < today;
+          case 'future':
+            // Medications that haven't started yet
+            return startDate && startDate > today;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting to filtered results
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === 'active') {
+        const aIsActive = a.status === 'active';
+        const bIsActive = b.status === 'active';
+
+        if (aIsActive && !bIsActive) return -1;
+        if (!aIsActive && bIsActive) return 1;
+
+        return a.medication_name.localeCompare(b.medication_name);
+      }
+
+      if (sortBy === 'name') {
+        return sortOrder === 'asc'
+          ? a.medication_name.localeCompare(b.medication_name)
+          : b.medication_name.localeCompare(a.medication_name);
+      }
+
+      if (sortBy === 'start_date') {
+        const aDate = new Date(a.effectivePeriod_start || 0);
+        const bDate = new Date(b.effectivePeriod_start || 0);
+        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+      }
+
+      return 0;
+    });
+
+    return sorted;
+  };
+  // Get unique values for filter dropdowns
+  const getUniqueStatuses = () => {
+    const statuses = [
+      ...new Set(medications.map(med => med.status).filter(Boolean)),
+    ];
+    return statuses.sort();
+  };
+
+  const getUniqueRoutes = () => {
+    const routes = [
+      ...new Set(medications.map(med => med.route).filter(Boolean)),
+    ];
+    return routes.sort();
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = () => {
+    return (
+      searchTerm.trim() !== '' ||
+      statusFilter !== 'all' ||
+      routeFilter !== 'all' ||
+      dateRangeFilter !== 'all'
+    );
+  };
+
+  const handleSortChange = newSortBy => {
     if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');    } else {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
       setSortBy(newSortBy);
       setSortOrder('asc');
     }
   };
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadgeClass = status => {
     switch (status?.toLowerCase()) {
-      case 'active': return 'status-active';
-      case 'stopped': return 'status-stopped';
-      case 'on-hold': return 'status-on-hold';
-      case 'completed': return 'status-completed';
-      case 'cancelled': return 'status-cancelled';
-      default: return 'status-unknown';
+      case 'active':
+        return 'status-active';
+      case 'stopped':
+        return 'status-stopped';
+      case 'on-hold':
+        return 'status-on-hold';
+      case 'completed':
+        return 'status-completed';
+      case 'cancelled':
+        return 'status-cancelled';
+      default:
+        return 'status-unknown';
     }
   };
-
   if (loading) {
     return (
-      <div className="medication-container">
+      <div className="medical-page-container">
         <div className="loading">
           <div className="spinner"></div>
           <p>Loading medications...</p>
@@ -268,266 +405,398 @@ const Medication = () => {
       </div>
     );
   }
-
   return (
-    <div className="medication-container">
-      <header className="medication-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+    <div className="medical-page-container">
+      <header className="medical-page-header">
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>💊 Medications</h1>
       </header>
 
-      <div className="medication-content">
+      <div className="medical-page-content">
         {error && <div className="error-message">{error}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
-
-        <div className="medication-controls">
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}{' '}
+        <div className="medical-page-controls">
           <div className="controls-left">
-            <button 
-              className="add-button"
-              onClick={handleAddMedication}
-            >
+            <button className="add-button" onClick={handleAddMedication}>
               + Add New Medication
             </button>
           </div>
-          
+
+          <div className="controls-center">
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                onClick={() => setViewMode('cards')}
+              >
+                📋 Cards
+              </button>
+              <button
+                className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+              >
+                📊 Table
+              </button>
+            </div>
+          </div>
+
           <div className="controls-right">
+            {viewMode === 'table' && (
+              <button className="print-button" onClick={() => window.print()}>
+                🖨️ Print
+              </button>
+            )}
             <div className="sort-controls">
               <label>Sort by:</label>
-              <select 
-                value={sortBy} 
-                onChange={(e) => handleSortChange(e.target.value)}
+              <select
+                value={sortBy}
+                onChange={e => handleSortChange(e.target.value)}
               >
                 <option value="active">Status (Active First)</option>
                 <option value="name">Medication Name</option>
                 <option value="start_date">Start Date</option>
               </select>
               {sortBy !== 'active' && (
-                <button 
+                <button
                   className="sort-order-button"
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  onClick={() =>
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                  }
                 >
                   {sortOrder === 'asc' ? '↑' : '↓'}
                 </button>
-              )}
+              )}{' '}
             </div>
           </div>
         </div>
+        {/* Filtering Section */}
+        <div className="medical-page-filters">
+          <div className="filters-row">
+            <div className="filter-group">
+              <label htmlFor="search">🔍 Search:</label>
+              <input
+                type="text"
+                id="search"
+                placeholder="Search medications, indications, or dosages..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
 
+            <div className="filter-group">
+              <label htmlFor="status-filter">Status:</label>
+              <select
+                id="status-filter"
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Statuses</option>
+                {getUniqueStatuses().map(status => (
+                  <option key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="route-filter">Route:</label>
+              <select
+                id="route-filter"
+                value={routeFilter}
+                onChange={e => setRouteFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Routes</option>
+                {getUniqueRoutes().map(route => (
+                  <option key={route} value={route}>
+                    {route.charAt(0).toUpperCase() + route.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="date-filter">Time Period:</label>
+              <select
+                id="date-filter"
+                value={dateRangeFilter}
+                onChange={e => setDateRangeFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Time Periods</option>
+                <option value="current">Currently Active</option>
+                <option value="past">Past Medications</option>
+                <option value="future">Future Medications</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <button
+                className="clear-filters-btn"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                  setRouteFilter('all');
+                  setDateRangeFilter('all');
+                }}
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+          <div className="filter-summary">
+            {hasActiveFilters() && (
+              <span className="active-filters-indicator">
+                🔍 Filters Active •{' '}
+              </span>
+            )}
+            {getFilteredAndSortedMedications().length} of {medications.length}{' '}
+            medications shown
+          </div>
+        </div>
         {showAddForm && (
-          <div className="medication-form-overlay">
-            <div className="medication-form-modal">
+          <div className="medical-form-overlay">
+            <div className="medical-form-modal">
+              {' '}
               <div className="form-header">
-                <h3>{editingMedication ? 'Edit Medication' : 'Add New Medication'}</h3>
-                <button 
-                  className="close-button"
-                  onClick={resetForm}
-                >
+                <h3>
+                  {editingMedication ? 'Edit Medication' : 'Add New Medication'}
+                </h3>
+                <button className="close-button" onClick={resetForm}>
                   ×
                 </button>
               </div>
-              
-              <form onSubmit={handleSubmit}>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="medication_name">Medication Name *</label>
-                    <input
-                      type="text"
-                      id="medication_name"
-                      name="medication_name"
-                      value={formData.medication_name}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+              <div className="medical-form-content">
+                <form onSubmit={handleSubmit}>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="medication_name">Medication Name *</label>
+                      <input
+                        type="text"
+                        id="medication_name"
+                        name="medication_name"
+                        value={formData.medication_name}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label htmlFor="dosage">Dosage</label>
-                    <input
-                      type="text"
-                      id="dosage"
-                      name="dosage"
-                      value={formData.dosage}
-                      onChange={handleInputChange}
-                      placeholder="e.g., 10mg, 1 tablet"
-                    />
-                  </div>
+                    <div className="form-group">
+                      <label htmlFor="dosage">Dosage</label>
+                      <input
+                        type="text"
+                        id="dosage"
+                        name="dosage"
+                        value={formData.dosage}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 10mg, 1 tablet"
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label htmlFor="frequency">Frequency</label>
-                    <input
-                      type="text"
-                      id="frequency"
-                      name="frequency"
-                      value={formData.frequency}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Once daily, Twice daily"
-                    />
-                  </div>
+                    <div className="form-group">
+                      <label htmlFor="frequency">Frequency</label>
+                      <input
+                        type="text"
+                        id="frequency"
+                        name="frequency"
+                        value={formData.frequency}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Once daily, Twice daily"
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label htmlFor="route">Route</label>
-                    <select
-                      id="route"
-                      name="route"
-                      value={formData.route}
-                      onChange={handleInputChange}
+                    <div className="form-group">
+                      <label htmlFor="route">Route</label>
+                      <select
+                        id="route"
+                        name="route"
+                        value={formData.route}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Select Route</option>
+                        <option value="oral">Oral</option>
+                        <option value="injection">Injection</option>
+                        <option value="topical">Topical</option>
+                        <option value="intravenous">Intravenous</option>
+                        <option value="intramuscular">Intramuscular</option>
+                        <option value="subcutaneous">Subcutaneous</option>
+                        <option value="inhalation">Inhalation</option>
+                        <option value="nasal">Nasal</option>
+                        <option value="rectal">Rectal</option>
+                        <option value="sublingual">Sublingual</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="indication">Indication</label>
+                      <input
+                        type="text"
+                        id="indication"
+                        name="indication"
+                        value={formData.indication}
+                        onChange={handleInputChange}
+                        placeholder="What is this medication for?"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="status">Status</label>
+                      <select
+                        id="status"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleInputChange}
+                      >
+                        <option value="active">Active</option>
+                        <option value="stopped">Stopped</option>
+                        <option value="on-hold">On Hold</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="effectivePeriod_start">Start Date</label>
+                      <input
+                        type="date"
+                        id="effectivePeriod_start"
+                        name="effectivePeriod_start"
+                        value={formData.effectivePeriod_start}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="effectivePeriod_end">End Date</label>
+                      <input
+                        type="date"
+                        id="effectivePeriod_end"
+                        name="effectivePeriod_end"
+                        value={formData.effectivePeriod_end}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>{' '}
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="cancel-button"
+                      onClick={resetForm}
                     >
-                      <option value="">Select Route</option>
-                      <option value="oral">Oral</option>
-                      <option value="injection">Injection</option>
-                      <option value="topical">Topical</option>
-                      <option value="intravenous">Intravenous</option>
-                      <option value="intramuscular">Intramuscular</option>
-                      <option value="subcutaneous">Subcutaneous</option>
-                      <option value="inhalation">Inhalation</option>
-                      <option value="nasal">Nasal</option>
-                      <option value="rectal">Rectal</option>
-                      <option value="sublingual">Sublingual</option>
-                    </select>
+                      Cancel
+                    </button>
+                    <button type="submit" className="save-button">
+                      {editingMedication
+                        ? 'Update Medication'
+                        : 'Add Medication'}
+                    </button>
                   </div>
-
-                  <div className="form-group">
-                    <label htmlFor="indication">Indication</label>
-                    <input
-                      type="text"
-                      id="indication"
-                      name="indication"
-                      value={formData.indication}
-                      onChange={handleInputChange}
-                      placeholder="What is this medication for?"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="status">Status</label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      <option value="active">Active</option>
-                      <option value="stopped">Stopped</option>
-                      <option value="on-hold">On Hold</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="effectivePeriod_start">Start Date</label>
-                    <input
-                      type="date"
-                      id="effectivePeriod_start"
-                      name="effectivePeriod_start"
-                      value={formData.effectivePeriod_start}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="effectivePeriod_end">End Date</label>
-                    <input
-                      type="date"
-                      id="effectivePeriod_end"
-                      name="effectivePeriod_end"
-                      value={formData.effectivePeriod_end}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-actions">
-                  <button 
-                    type="button" 
-                    className="cancel-button"
-                    onClick={resetForm}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="save-button"
-                  >
-                    {editingMedication ? 'Update Medication' : 'Add Medication'}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
-        )}
-
-        <div className="medications-list">
-          {getSortedMedications().length === 0 ? (
+        )}{' '}
+        <div className="medical-items-list">
+          {getFilteredAndSortedMedications().length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">💊</div>
-              <h3>No medications found</h3>
-              <p>Click "Add New Medication" to get started.</p>
+              {medications.length === 0 ? (
+                <>
+                  <h3>No medications found</h3>
+                  <p>Click "Add New Medication" to get started.</p>
+                </>
+              ) : (
+                <>
+                  <h3>No medications match your filters</h3>
+                  <p>
+                    Try adjusting your search criteria or clear the filters to
+                    see all medications.
+                  </p>
+                  <button
+                    className="secondary-button"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setStatusFilter('all');
+                      setRouteFilter('all');
+                      setDateRangeFilter('all');
+                    }}
+                  >
+                    Clear All Filters
+                  </button>
+                </>
+              )}
             </div>
-          ) : (
-            <div className="medications-grid">
-              {getSortedMedications().map((medication) => (
-                <div key={medication.id} className="medication-card">
-                  <div className="medication-header">
-                    <h3 className="medication-name">{medication.medication_name}</h3>
-                    <span className={`status-badge ${getStatusBadgeClass(medication.status)}`}>
+          ) : viewMode === 'cards' ? (
+            <div className="medical-items-grid">
+              {getFilteredAndSortedMedications().map(medication => (
+                <div key={medication.id} className="medical-item-card">
+                  <div className="medical-item-header">
+                    <h3 className="item-title">{medication.medication_name}</h3>
+                    <span
+                      className={`status-badge ${getStatusBadgeClass(medication.status)}`}
+                    >
                       {medication.status || 'Unknown'}
                     </span>
                   </div>
-                  
-                  <div className="medication-details">
+
+                  <div className="medical-item-details">
                     {medication.dosage && (
                       <div className="detail-item">
                         <span className="label">Dosage:</span>
                         <span className="value">{medication.dosage}</span>
                       </div>
                     )}
-                    
+
                     {medication.frequency && (
                       <div className="detail-item">
                         <span className="label">Frequency:</span>
                         <span className="value">{medication.frequency}</span>
                       </div>
                     )}
-                    
+
                     {medication.route && (
                       <div className="detail-item">
                         <span className="label">Route:</span>
                         <span className="value">{medication.route}</span>
                       </div>
                     )}
-                    
+
                     {medication.indication && (
                       <div className="detail-item">
                         <span className="label">Indication:</span>
                         <span className="value">{medication.indication}</span>
                       </div>
                     )}
-                    
+
                     <div className="detail-item">
                       <span className="label">Start Date:</span>
-                      <span className="value">{formatDate(medication.effectivePeriod_start)}</span>
+                      <span className="value">
+                        {formatDate(medication.effectivePeriod_start)}
+                      </span>
                     </div>
-                    
+
                     {medication.effectivePeriod_end && (
                       <div className="detail-item">
                         <span className="label">End Date:</span>
-                        <span className="value">{formatDate(medication.effectivePeriod_end)}</span>
+                        <span className="value">
+                          {formatDate(medication.effectivePeriod_end)}
+                        </span>
                       </div>
                     )}
                   </div>
-                  
-                  <div className="medication-actions">
-                    <button 
+
+                  <div className="medical-item-actions">
+                    <button
                       className="edit-button"
                       onClick={() => handleEditMedication(medication)}
                     >
                       ✏️ Edit
                     </button>
-                    <button 
+                    <button
                       className="delete-button"
                       onClick={() => handleDeleteMedication(medication.id)}
                     >
@@ -537,6 +806,77 @@ const Medication = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="medications-table-container">
+              <div className="print-header">
+                <h2>
+                  Medication List - {patientData?.first_name}{' '}
+                  {patientData?.last_name}
+                </h2>
+                <p>Generated on: {new Date().toLocaleDateString()}</p>
+              </div>
+              <table className="medications-table">
+                <thead>
+                  <tr>
+                    <th>Medication Name</th>
+                    <th>Dosage</th>
+                    <th>Frequency</th>
+                    <th>Route</th>
+                    <th>Indication</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th className="no-print">Actions</th>
+                  </tr>
+                </thead>{' '}
+                <tbody>
+                  {getFilteredAndSortedMedications().map(medication => (
+                    <tr key={medication.id}>
+                      <td className="medication-name">
+                        {medication.medication_name}
+                      </td>
+                      <td>{medication.dosage || '-'}</td>
+                      <td>{medication.frequency || '-'}</td>
+                      <td>{medication.route || '-'}</td>
+                      <td>{medication.indication || '-'}</td>
+                      <td>{formatDate(medication.effectivePeriod_start)}</td>
+                      <td>
+                        {medication.effectivePeriod_end
+                          ? formatDate(medication.effectivePeriod_end)
+                          : '-'}
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge-small ${getStatusBadgeClass(medication.status)}`}
+                        >
+                          {medication.status || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="no-print">
+                        <div className="table-actions">
+                          <button
+                            className="edit-button-small"
+                            onClick={() => handleEditMedication(medication)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="delete-button-small"
+                            onClick={() =>
+                              handleDeleteMedication(medication.id)
+                            }
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
@@ -545,4 +885,3 @@ const Medication = () => {
 };
 
 export default Medication;
-

@@ -2,7 +2,7 @@
  * Enhanced API Client with Authentication Integration
  * Provides centralized API communication with automatic token handling
  */
-import { authService } from './auth/enhancedAuthService';
+import { authService } from './auth/simpleAuthService';
 import { toast } from 'react-toastify';
 
 class APIClient {
@@ -11,11 +11,11 @@ class APIClient {
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };
-    
+
     // Request interceptors
     this.requestInterceptors = [];
     this.responseInterceptors = [];
-    
+
     // Add default auth interceptor
     this.addRequestInterceptor(this.authInterceptor.bind(this));
     this.addResponseInterceptor(this.errorInterceptor.bind(this));
@@ -37,7 +37,7 @@ class APIClient {
     if (token && authService.isTokenValid(token)) {
       config.headers = {
         ...config.headers,
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       };
     }
     return config;
@@ -47,28 +47,29 @@ class APIClient {
   async errorInterceptor(error, originalConfig) {
     if (error.status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
-      
+
       try {
         // Try to refresh token
         const refreshResult = await authService.refreshToken();
         if (refreshResult.success) {
           // Update config with new token
-          originalConfig.headers['Authorization'] = `Bearer ${refreshResult.token}`;
-          
+          originalConfig.headers['Authorization'] =
+            `Bearer ${refreshResult.token}`;
+
           // Retry original request
           return this.request(originalConfig);
         }
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
       }
-      
+
       // If refresh fails, clear auth data and redirect
       authService.clearTokens();
       toast.error('Session expired. Please log in again.');
       window.location.href = '/login';
       throw error;
     }
-    
+
     throw error;
   }
 
@@ -82,14 +83,14 @@ class APIClient {
       }
 
       // Prepare URL
-      const url = processedConfig.url.startsWith('http') 
-        ? processedConfig.url 
+      const url = processedConfig.url.startsWith('http')
+        ? processedConfig.url
         : `${this.baseURL}${processedConfig.url}`;
 
       // Prepare headers
       const headers = {
         ...this.defaultHeaders,
-        ...processedConfig.headers
+        ...processedConfig.headers,
       };
 
       // Make request
@@ -97,13 +98,13 @@ class APIClient {
         method: processedConfig.method || 'GET',
         headers,
         body: processedConfig.body,
-        ...processedConfig.options
+        ...processedConfig.options,
       });
 
       // Handle response
       let data;
       const contentType = response.headers.get('content-type');
-      
+
       if (contentType && contentType.includes('application/json')) {
         data = await response.json();
       } else {
@@ -111,11 +112,13 @@ class APIClient {
       }
 
       if (!response.ok) {
-        const error = new Error(data.detail || data.message || `HTTP ${response.status}`);
+        const error = new Error(
+          data.detail || data.message || `HTTP ${response.status}`
+        );
         error.status = response.status;
         error.response = response;
         error.data = data;
-        
+
         // Apply response interceptors for errors
         for (const interceptor of this.responseInterceptors) {
           try {
@@ -125,7 +128,7 @@ class APIClient {
             continue;
           }
         }
-        
+
         throw error;
       }
 
@@ -133,7 +136,7 @@ class APIClient {
         data,
         status: response.status,
         headers: response.headers,
-        response
+        response,
       };
     } catch (error) {
       console.error('API request failed:', error);
@@ -146,7 +149,7 @@ class APIClient {
     return this.request({
       method: 'GET',
       url,
-      ...config
+      ...config,
     });
   }
 
@@ -155,7 +158,7 @@ class APIClient {
       method: 'POST',
       url,
       body: data ? JSON.stringify(data) : null,
-      ...config
+      ...config,
     });
   }
 
@@ -164,7 +167,7 @@ class APIClient {
       method: 'PUT',
       url,
       body: data ? JSON.stringify(data) : null,
-      ...config
+      ...config,
     });
   }
 
@@ -173,7 +176,7 @@ class APIClient {
       method: 'PATCH',
       url,
       body: data ? JSON.stringify(data) : null,
-      ...config
+      ...config,
     });
   }
 
@@ -181,7 +184,7 @@ class APIClient {
     return this.request({
       method: 'DELETE',
       url,
-      ...config
+      ...config,
     });
   }
 
@@ -189,13 +192,13 @@ class APIClient {
   async postForm(url, formData, config = {}) {
     const headers = { ...config.headers };
     delete headers['Content-Type']; // Let browser set it for FormData
-    
+
     return this.request({
       method: 'POST',
       url,
       body: formData,
       headers,
-      ...config
+      ...config,
     });
   }
 
@@ -203,7 +206,7 @@ class APIClient {
   async uploadFile(url, file, additionalData = {}, config = {}) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     // Add additional data to form
     Object.keys(additionalData).forEach(key => {
       formData.append(key, additionalData[key]);
@@ -221,17 +224,17 @@ class APIClient {
         options: {
           ...config.options,
           // Don't parse as JSON
-        }
+        },
       });
 
       // Create blob from response
       const blob = new Blob([response.data]);
-      
+
       // Create download link
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      
+
       // Set filename
       if (filename) {
         link.download = filename;
@@ -245,15 +248,15 @@ class APIClient {
           }
         }
       }
-      
+
       // Trigger download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up
       window.URL.revokeObjectURL(downloadUrl);
-      
+
       return response;
     } catch (error) {
       toast.error('File download failed');
@@ -268,55 +271,69 @@ const apiClient = new APIClient();
 // Export specific API services
 export const patientsAPI = {
   getAll: (params = {}) => apiClient.get('/patients/', { params }),
-  getById: (id) => apiClient.get(`/patients/${id}/`),
-  create: (data) => apiClient.post('/patients/', data),
+  getById: id => apiClient.get(`/patients/${id}/`),
+  create: data => apiClient.post('/patients/', data),
   update: (id, data) => apiClient.patch(`/patients/${id}/`, data),
-  delete: (id) => apiClient.delete(`/patients/${id}/`),
-  search: (query) => apiClient.get(`/patients/search/?q=${encodeURIComponent(query)}`),
+  delete: id => apiClient.delete(`/patients/${id}/`),
+  search: query =>
+    apiClient.get(`/patients/search/?q=${encodeURIComponent(query)}`),
 };
 
 export const medicationsAPI = {
   getAll: (patientId = null) => {
-    const url = patientId ? `/medications/?patient_id=${patientId}` : '/medications/';
+    const url = patientId
+      ? `/medications/?patient_id=${patientId}`
+      : '/medications/';
     return apiClient.get(url);
   },
-  getById: (id) => apiClient.get(`/medications/${id}/`),
-  create: (data) => apiClient.post('/medications/', data),
+  getById: id => apiClient.get(`/medications/${id}/`),
+  create: data => apiClient.post('/medications/', data),
   update: (id, data) => apiClient.patch(`/medications/${id}/`, data),
-  delete: (id) => apiClient.delete(`/medications/${id}/`),
+  delete: id => apiClient.delete(`/medications/${id}/`),
 };
 
 export const allergiesAPI = {
   getAll: (patientId = null) => {
-    const url = patientId ? `/allergies/?patient_id=${patientId}` : '/allergies/';
+    const url = patientId
+      ? `/allergies/?patient_id=${patientId}`
+      : '/allergies/';
     return apiClient.get(url);
   },
-  getById: (id) => apiClient.get(`/allergies/${id}/`),
-  create: (data) => apiClient.post('/allergies/', data),
+  getById: id => apiClient.get(`/allergies/${id}/`),
+  create: data => apiClient.post('/allergies/', data),
   update: (id, data) => apiClient.patch(`/allergies/${id}/`, data),
-  delete: (id) => apiClient.delete(`/allergies/${id}/`),
+  delete: id => apiClient.delete(`/allergies/${id}/`),
 };
 
 export const conditionsAPI = {
   getAll: (patientId = null) => {
-    const url = patientId ? `/conditions/?patient_id=${patientId}` : '/conditions/';
+    const url = patientId
+      ? `/conditions/?patient_id=${patientId}`
+      : '/conditions/';
     return apiClient.get(url);
   },
-  getById: (id) => apiClient.get(`/conditions/${id}/`),
-  create: (data) => apiClient.post('/conditions/', data),
+  getById: id => apiClient.get(`/conditions/${id}/`),
+  create: data => apiClient.post('/conditions/', data),
   update: (id, data) => apiClient.patch(`/conditions/${id}/`, data),
-  delete: (id) => apiClient.delete(`/conditions/${id}/`),
+  delete: id => apiClient.delete(`/conditions/${id}/`),
 };
 
 export const labResultsAPI = {
   getAll: (patientId = null) => {
-    const url = patientId ? `/lab-results/?patient_id=${patientId}` : '/lab-results/';
+    const url = patientId
+      ? `/lab-results/?patient_id=${patientId}`
+      : '/lab-results/';
     return apiClient.get(url);
-  },  getById: (id) => apiClient.get(`/lab-results/${id}`),
-  create: (data) => apiClient.post('/lab-results/', data),
+  },
+  getById: id => apiClient.get(`/lab-results/${id}`),
+  create: data => apiClient.post('/lab-results/', data),
   update: (id, data) => apiClient.patch(`/lab-results/${id}`, data),
-  delete: (id) => apiClient.delete(`/lab-results/${id}`),  uploadFile: (labResultId, file) => {
-    return apiClient.uploadFile(`/lab-result-files/upload/${labResultId}`, file);
+  delete: id => apiClient.delete(`/lab-results/${id}`),
+  uploadFile: (labResultId, file) => {
+    return apiClient.uploadFile(
+      `/lab-result-files/upload/${labResultId}`,
+      file
+    );
   },
   downloadFile: (labResultId, fileId) => {
     return apiClient.downloadFile(`/lab-result-files/${fileId}/download`);
@@ -325,44 +342,49 @@ export const labResultsAPI = {
 
 export const immunizationsAPI = {
   getAll: (patientId = null) => {
-    const url = patientId ? `/immunizations/?patient_id=${patientId}` : '/immunizations/';
+    const url = patientId
+      ? `/immunizations/?patient_id=${patientId}`
+      : '/immunizations/';
     return apiClient.get(url);
   },
-  getById: (id) => apiClient.get(`/immunizations/${id}/`),
-  create: (data) => apiClient.post('/immunizations/', data),
+  getById: id => apiClient.get(`/immunizations/${id}/`),
+  create: data => apiClient.post('/immunizations/', data),
   update: (id, data) => apiClient.patch(`/immunizations/${id}/`, data),
-  delete: (id) => apiClient.delete(`/immunizations/${id}/`),
+  delete: id => apiClient.delete(`/immunizations/${id}/`),
 };
 
 export const proceduresAPI = {
   getAll: (patientId = null) => {
-    const url = patientId ? `/procedures/?patient_id=${patientId}` : '/procedures/';
+    const url = patientId
+      ? `/procedures/?patient_id=${patientId}`
+      : '/procedures/';
     return apiClient.get(url);
   },
-  getById: (id) => apiClient.get(`/procedures/${id}/`),
-  create: (data) => apiClient.post('/procedures/', data),
+  getById: id => apiClient.get(`/procedures/${id}/`),
+  create: data => apiClient.post('/procedures/', data),
   update: (id, data) => apiClient.patch(`/procedures/${id}/`, data),
-  delete: (id) => apiClient.delete(`/procedures/${id}/`),
+  delete: id => apiClient.delete(`/procedures/${id}/`),
 };
 
 export const authAPI = {
-  login: (credentials) => authService.login(credentials),
+  login: credentials => authService.login(credentials),
   logout: () => authService.logout(),
-  register: (userData) => authService.register(userData),
+  register: userData => authService.register(userData),
   getCurrentUser: () => authService.getCurrentUser(),
   refreshToken: () => authService.refreshToken(),
-  forgotPassword: (email) => authService.forgotPassword(email),
-  resetPassword: (token, password) => authService.resetPassword(token, password),
-  changePassword: (currentPassword, newPassword) => 
+  forgotPassword: email => authService.forgotPassword(email),
+  resetPassword: (token, password) =>
+    authService.resetPassword(token, password),
+  changePassword: (currentPassword, newPassword) =>
     authService.changePassword(currentPassword, newPassword),
 };
 
 export const adminAPI = {
   getUsers: () => apiClient.get('/admin/users/'),
-  getUserById: (id) => apiClient.get(`/admin/users/${id}/`),
-  createUser: (data) => apiClient.post('/admin/users/', data),
+  getUserById: id => apiClient.get(`/admin/users/${id}/`),
+  createUser: data => apiClient.post('/admin/users/', data),
   updateUser: (id, data) => apiClient.patch(`/admin/users/${id}/`, data),
-  deleteUser: (id) => apiClient.delete(`/admin/users/${id}/`),
+  deleteUser: id => apiClient.delete(`/admin/users/${id}/`),
   getSystemStats: () => apiClient.get('/admin/stats/'),
   getLogs: (params = {}) => apiClient.get('/admin/logs/', { params }),
   getAuditTrail: (params = {}) => apiClient.get('/admin/audit/', { params }),

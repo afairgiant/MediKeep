@@ -184,6 +184,43 @@
   line-height: 1.3;
 }
 
+/* Website link styling */
+.website-link {
+  color: #16a085;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.website-link:hover {
+  color: #1abc9c;
+  text-decoration: underline;
+}
+
+/* Rating display styling */
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star {
+  font-size: 0.9rem;
+  filter: grayscale(0);
+}
+
+.star.empty {
+  filter: grayscale(1);
+  opacity: 0.3;
+}
+
+.rating-number {
+  margin-left: 5px;
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  font-weight: normal;
+}
+
 .no-practitioners {
   text-align: center;
   padding: 60px 20px;
@@ -224,8 +261,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-message {
@@ -420,64 +461,64 @@
   .practitioners-page {
     padding: 15px;
   }
-  
+
   .practitioners-header {
     flex-direction: column;
     align-items: stretch;
     gap: 15px;
   }
-  
+
   .practitioners-actions {
     justify-content: space-between;
   }
-  
+
   .practitioners-search {
     min-width: auto;
     flex: 1;
   }
-  
+
   .practitioners-filters {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .filter-group {
     width: 100%;
   }
-  
+
   .practitioners-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .practitioner-card {
     padding: 15px;
   }
-  
+
   .practitioner-card-header {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
   }
-  
+
   .practitioner-badge {
     align-self: flex-start;
   }
-  
+
   .practitioner-details {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
+
   .modal-content {
     padding: 20px;
     margin: 15px;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
   }

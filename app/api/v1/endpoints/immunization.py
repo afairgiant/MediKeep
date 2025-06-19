@@ -10,6 +10,8 @@ from app.schemas.immunization import (
     ImmunizationResponse,
     ImmunizationWithRelations,
 )
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -25,6 +27,26 @@ def create_immunization(
     Create new immunization record.
     """
     immunization_obj = immunization.create(db=db, obj_in=immunization_in)
+    
+    # Log the creation activity
+    try:
+        description = f"New immunization: {getattr(immunization_obj, 'vaccine_name', 'Unknown vaccine')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(immunization_obj, 'patient_id', None),
+            action="created",
+            entity_type="immunization",
+            entity_id=getattr(immunization_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging immunization creation activity: {e}")
+    
     return immunization_obj
 
 
@@ -87,9 +109,30 @@ def update_immunization(
     immunization_obj = immunization.get(db=db, id=immunization_id)
     if not immunization_obj:
         raise HTTPException(status_code=404, detail="Immunization not found")
+    
     immunization_obj = immunization.update(
         db=db, db_obj=immunization_obj, obj_in=immunization_in
     )
+    
+    # Log the update activity
+    try:
+        description = f"Updated immunization: {getattr(immunization_obj, 'vaccine_name', 'Unknown vaccine')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(immunization_obj, 'patient_id', None),
+            action="updated",
+            entity_type="immunization",
+            entity_id=getattr(immunization_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging immunization update activity: {e}")
+    
     return immunization_obj
 
 
@@ -106,6 +149,26 @@ def delete_immunization(
     immunization_obj = immunization.get(db=db, id=immunization_id)
     if not immunization_obj:
         raise HTTPException(status_code=404, detail="Immunization not found")
+    
+    # Log the deletion activity BEFORE deleting
+    try:
+        description = f"Deleted immunization: {getattr(immunization_obj, 'vaccine_name', 'Unknown vaccine')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(immunization_obj, 'patient_id', None),
+            action="deleted",
+            entity_type="immunization",
+            entity_id=getattr(immunization_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging immunization deletion activity: {e}")
+    
     immunization.delete(db=db, id=immunization_id)
     return {"message": "Immunization deleted successfully"}
 

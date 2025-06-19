@@ -24,8 +24,8 @@ class AdminApiService extends BaseApiService {
     // Note: This endpoint is not under /admin, so we use the direct path
     const response = await fetch('/api/v1/lab-result-files/health/storage', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -37,8 +37,8 @@ class AdminApiService extends BaseApiService {
     // Note: This endpoint is not under /admin, so we use the direct path
     const response = await fetch('/api/v1/frontend-logs/health', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -59,7 +59,7 @@ class AdminApiService extends BaseApiService {
     const { page = 1, per_page = 25, search = null } = params;
     const queryParams = { page, per_page };
     if (search) queryParams.search = search;
-    
+
     return this.get(`/models/${modelName}/`, queryParams);
   }
 
@@ -83,7 +83,7 @@ class AdminApiService extends BaseApiService {
   async bulkDeleteRecords(modelName, recordIds) {
     return this.post('/bulk/delete', {
       model_name: modelName,
-      record_ids: recordIds
+      record_ids: recordIds,
     });
   }
 
@@ -91,7 +91,7 @@ class AdminApiService extends BaseApiService {
     return this.post('/bulk/update', {
       model_name: modelName,
       record_ids: recordIds,
-      update_data: updateData
+      update_data: updateData,
     });
   }
 
@@ -99,7 +99,7 @@ class AdminApiService extends BaseApiService {
   async globalSearch(query, models = null) {
     const params = { query };
     if (models) params.models = models.join(',');
-    
+
     return this.get('/search', params);
   }
 
@@ -114,11 +114,16 @@ class AdminApiService extends BaseApiService {
   }
 
   async getActivityLog(params = {}) {
-    const { page = 1, per_page = 50, model_name = null, action = null } = params;
+    const {
+      page = 1,
+      per_page = 50,
+      model_name = null,
+      action = null,
+    } = params;
     const queryParams = { page, per_page };
     if (model_name) queryParams.model_name = model_name;
     if (action) queryParams.action = action;
-    
+
     return this.get('/activity-log', queryParams);
   }
 

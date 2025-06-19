@@ -1,6 +1,6 @@
 /**
  * Frontend Error Logging Service for Medical Records Management System
- * 
+ *
  * This service provides comprehensive frontend error logging capabilities including:
  * - JavaScript error capture
  * - User interaction logging
@@ -9,8 +9,13 @@
  * - Integration with backend logging system
  */
 
-class FrontendLogger {  constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '/api/v1' : 'http://localhost:8000/api/v1');
+class FrontendLogger {
+  constructor() {
+    this.baseURL =
+      process.env.REACT_APP_API_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? '/api/v1'
+        : 'http://localhost:8000/api/v1');
     this.sessionId = this.generateSessionId();
     this.userId = null;
     this.patientId = null;
@@ -27,7 +32,7 @@ class FrontendLogger {  constructor() {
 
   setupErrorHandlers() {
     // Global error handler for uncaught JavaScript errors
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       this.logError({
         type: 'javascript_error',
         message: event.message,
@@ -37,19 +42,19 @@ class FrontendLogger {  constructor() {
         error: event.error?.stack,
         timestamp: new Date().toISOString(),
         url: window.location.href,
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       });
     });
 
     // Handler for unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener('unhandledrejection', event => {
       this.logError({
         type: 'unhandled_promise_rejection',
         message: event.reason?.message || 'Unhandled promise rejection',
         error: event.reason?.stack || String(event.reason),
         timestamp: new Date().toISOString(),
         url: window.location.href,
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       });
     });
 
@@ -66,10 +71,12 @@ class FrontendLogger {  constructor() {
           this.logPerformance({
             type: 'page_load',
             loadTime: perfData.loadEventEnd - perfData.loadEventStart,
-            domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+            domContentLoaded:
+              perfData.domContentLoadedEventEnd -
+              perfData.domContentLoadedEventStart,
             totalTime: perfData.loadEventEnd - perfData.fetchStart,
             url: window.location.href,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
         }
       }, 0);
@@ -83,7 +90,7 @@ class FrontendLogger {  constructor() {
       this.logEvent({
         type: 'network_status',
         status: 'online',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       this.flushErrorQueue();
     });
@@ -93,7 +100,7 @@ class FrontendLogger {  constructor() {
       this.logEvent({
         type: 'network_status',
         status: 'offline',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
   }
@@ -111,7 +118,7 @@ class FrontendLogger {  constructor() {
       patientId: this.patientId,
       category: 'frontend_error',
       severity: this.determineSeverity(errorData),
-      context: this.getPageContext()
+      context: this.getPageContext(),
     };
 
     console.error('Frontend Error:', enrichedError);
@@ -137,7 +144,7 @@ class FrontendLogger {  constructor() {
       patientId: this.patientId,
       category: 'frontend_api_error',
       severity: this.determineAPISeverity(apiError.status),
-      context: this.getPageContext()
+      context: this.getPageContext(),
     };
 
     console.error('API Error:', errorData);
@@ -156,7 +163,7 @@ class FrontendLogger {  constructor() {
       patientId: this.patientId,
       category: 'frontend_interaction',
       context: this.getPageContext(),
-      ...additionalData
+      ...additionalData,
     };
 
     // Only log significant interactions to avoid spam
@@ -172,7 +179,7 @@ class FrontendLogger {  constructor() {
       userId: this.userId,
       patientId: this.patientId,
       category: 'frontend_performance',
-      context: this.getPageContext()
+      context: this.getPageContext(),
     };
 
     console.log('Performance:', enrichedPerformance);
@@ -186,7 +193,7 @@ class FrontendLogger {  constructor() {
       userId: this.userId,
       patientId: this.patientId,
       category: 'frontend_event',
-      context: this.getPageContext()
+      context: this.getPageContext(),
     };
 
     this.sendToBackend('event', enrichedEvent);
@@ -194,7 +201,10 @@ class FrontendLogger {  constructor() {
 
   determineSeverity(errorData) {
     if (errorData.type === 'javascript_error') {
-      if (errorData.message?.includes('TypeError') || errorData.message?.includes('ReferenceError')) {
+      if (
+        errorData.message?.includes('TypeError') ||
+        errorData.message?.includes('ReferenceError')
+      ) {
         return 'high';
       }
       return 'medium';
@@ -213,8 +223,16 @@ class FrontendLogger {  constructor() {
 
   isSignificantInteraction(action) {
     const significantActions = [
-      'login', 'logout', 'save', 'delete', 'create', 'update',
-      'navigation', 'error_occurred', 'form_submission', 'file_upload'
+      'login',
+      'logout',
+      'save',
+      'delete',
+      'create',
+      'update',
+      'navigation',
+      'error_occurred',
+      'form_submission',
+      'file_upload',
     ];
     return significantActions.includes(action);
   }
@@ -226,11 +244,12 @@ class FrontendLogger {  constructor() {
       timestamp: new Date().toISOString(),
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight      },
+        height: window.innerHeight,
+      },
       screen: {
         width: window.screen.width,
-        height: window.screen.height
-      }
+        height: window.screen.height,
+      },
     };
   }
 
@@ -243,14 +262,14 @@ class FrontendLogger {  constructor() {
       onLine: navigator.onLine,
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       },
       screen: {
         width: window.screen.width,
         height: window.screen.height,
-        colorDepth: window.screen.colorDepth
+        colorDepth: window.screen.colorDepth,
       },
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
   }
 
@@ -258,7 +277,7 @@ class FrontendLogger {  constructor() {
     try {
       const token = localStorage.getItem('token');
       const headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       };
 
       if (token) {
@@ -273,7 +292,8 @@ class FrontendLogger {  constructor() {
         case 'error':
           // Transform to FrontendErrorRequest schema
           transformedData = {
-            error_message: data.message || data.error_message || 'Unknown error',
+            error_message:
+              data.message || data.error_message || 'Unknown error',
             error_type: data.type || data.error_type || 'frontend_error',
             stack_trace: data.stackTrace || data.stack_trace || data.stack,
             component_name: data.component || data.component_name,
@@ -286,8 +306,8 @@ class FrontendLogger {  constructor() {
               ...this.getBrowserInfo(),
               severity: data.severity,
               category: data.category,
-              sessionId: data.sessionId
-            }
+              sessionId: data.sessionId,
+            },
           };
           endpoint = 'error';
           break;
@@ -301,11 +321,11 @@ class FrontendLogger {  constructor() {
               ...data,
               sessionId: data.sessionId,
               patientId: data.patientId,
-              context: data.context
+              context: data.context,
             },
             user_id: data.userId || data.user_id,
             timestamp: data.timestamp || new Date().toISOString(),
-            url: data.url || window.location.href
+            url: data.url || window.location.href,
           };
           endpoint = 'user-action';
           break;
@@ -329,18 +349,21 @@ class FrontendLogger {  constructor() {
             details: {
               ...data,
               context: data.context,
-              patientId: data.patientId
-            }
+              patientId: data.patientId,
+            },
           };
           endpoint = 'log';
           break;
       }
 
-      const response = await fetch(`${this.baseURL}/frontend-logs/${endpoint}`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(transformedData)
-      });
+      const response = await fetch(
+        `${this.baseURL}/frontend-logs/${endpoint}`,
+        {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(transformedData),
+        }
+      );
 
       if (!response.ok) {
         console.error('Failed to send log to backend:', response.status);
@@ -357,7 +380,7 @@ class FrontendLogger {  constructor() {
     if (this.errorQueue.length > 0 && this.isOnline) {
       const queueCopy = [...this.errorQueue];
       this.errorQueue = [];
-      
+
       queueCopy.forEach(({ logType, data }) => {
         this.sendToBackend(logType, data);
       });
@@ -368,15 +391,15 @@ class FrontendLogger {  constructor() {
   async apiCall(apiFunction, endpoint, method = 'GET') {
     try {
       const result = await apiFunction();
-      
+
       // Log successful API calls for audit trail
       this.logEvent({
         type: 'api_success',
         endpoint: endpoint,
         method: method,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       return result;
     } catch (error) {
       this.logAPIError(error, endpoint, method);
@@ -392,7 +415,7 @@ class FrontendLogger {  constructor() {
       error: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
-      url: window.location.href
+      url: window.location.href,
     });
   }
 }

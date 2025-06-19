@@ -9,7 +9,7 @@ import './ModelEdit.css'; // Reuse the same styles as ModelEdit
 const ModelCreate = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
-  
+
   const [metadata, setMetadata] = useState(null);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -23,9 +23,10 @@ const ModelCreate = () => {
         setLoading(true);
         setError(null);
 
-        const metadataResult = await adminApiService.getModelMetadata(modelName);
+        const metadataResult =
+          await adminApiService.getModelMetadata(modelName);
         setMetadata(metadataResult);
-        
+
         // Initialize form data with default values
         const initialData = {};
         metadataResult.fields.forEach(field => {
@@ -41,7 +42,6 @@ const ModelCreate = () => {
           }
         });
         setFormData(initialData);
-        
       } catch (err) {
         console.error('Error loading metadata:', err);
         setError(err.message || 'Failed to load form metadata');
@@ -58,14 +58,14 @@ const ModelCreate = () => {
   const handleFieldChange = (fieldName, value) => {
     setFormData(prev => ({
       ...prev,
-      [fieldName]: value
+      [fieldName]: value,
     }));
-    
+
     // Clear validation error for this field when user starts typing
     if (validationErrors[fieldName]) {
       setValidationErrors(prev => ({
         ...prev,
-        [fieldName]: null
+        [fieldName]: null,
       }));
     }
   };
@@ -74,13 +74,22 @@ const ModelCreate = () => {
     const errors = [];
 
     // Required field validation
-    if (!field.nullable && (value === null || value === undefined || value === '')) {
+    if (
+      !field.nullable &&
+      (value === null || value === undefined || value === '')
+    ) {
       errors.push(`${field.name} is required`);
     }
 
     // Max length validation
-    if (field.max_length && typeof value === 'string' && value.length > field.max_length) {
-      errors.push(`${field.name} must be ${field.max_length} characters or less`);
+    if (
+      field.max_length &&
+      typeof value === 'string' &&
+      value.length > field.max_length
+    ) {
+      errors.push(
+        `${field.name} must be ${field.max_length} characters or less`
+      );
     }
 
     // Type validation
@@ -88,8 +97,12 @@ const ModelCreate = () => {
       if (field.type === 'number' && isNaN(Number(value))) {
         errors.push(`${field.name} must be a valid number`);
       }
-      
-      if (field.type === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+
+      if (
+        field.type === 'email' &&
+        value &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      ) {
         errors.push(`${field.name} must be a valid email address`);
       }
     }
@@ -99,15 +112,25 @@ const ModelCreate = () => {
   const validateForm = () => {
     const errors = {};
     let hasErrors = false;
-    const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+    const medicalModels = [
+      'medication',
+      'lab_result',
+      'condition',
+      'allergy',
+      'immunization',
+      'procedure',
+      'treatment',
+      'encounter',
+    ];
 
     metadata.fields.forEach(field => {
-      if (!field.primary_key) { // Don't validate primary keys (they're auto-generated)
+      if (!field.primary_key) {
+        // Don't validate primary keys (they're auto-generated)
         // Skip patient_id validation for medical models as it will be auto-populated
         if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
           return; // Skip validation for auto-populated patient_id
         }
-        
+
         const fieldErrors = validateField(field, formData[field.name]);
         if (fieldErrors.length > 0) {
           errors[field.name] = fieldErrors;
@@ -140,8 +163,17 @@ const ModelCreate = () => {
             submitData[field.name] = value;
           }
         }
-      });      // Auto-populate patient_id for medical records from current user
-      const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+      }); // Auto-populate patient_id for medical records from current user
+      const medicalModels = [
+        'medication',
+        'lab_result',
+        'condition',
+        'allergy',
+        'immunization',
+        'procedure',
+        'treatment',
+        'encounter',
+      ];
       if (medicalModels.includes(modelName)) {
         try {
           // Get current patient directly using the already imported apiService
@@ -152,15 +184,19 @@ const ModelCreate = () => {
             throw new Error('No patient record found for current user');
           }
         } catch (patientError) {
-          setError('Failed to get patient information. Please ensure you have a patient record.');
+          setError(
+            'Failed to get patient information. Please ensure you have a patient record.'
+          );
           setSaving(false);
           return;
         }
       }
 
-      const createdRecord = await adminApiService.createModelRecord(modelName, submitData);
+      const createdRecord = await adminApiService.createModelRecord(
+        modelName,
+        submitData
+      );
       navigate(`/admin/models/${modelName}/${createdRecord.id}`);
-      
     } catch (err) {
       console.error('Error creating record:', err);
       setError(err.message || 'Failed to create record');
@@ -172,7 +208,7 @@ const ModelCreate = () => {
   const handleCancel = () => {
     navigate(`/admin/models/${modelName}`);
   };
-  const renderFieldInput = (field) => {
+  const renderFieldInput = field => {
     const value = formData[field.name] || '';
     const hasError = validationErrors[field.name];
 
@@ -184,8 +220,17 @@ const ModelCreate = () => {
           <small className="field-note">Primary key (auto-generated)</small>
         </div>
       );
-    }    // Hide patient_id field for medical records - it will be auto-populated
-    const medicalModels = ['medication', 'lab_result', 'condition', 'allergy', 'immunization', 'procedure', 'treatment', 'encounter'];
+    } // Hide patient_id field for medical records - it will be auto-populated
+    const medicalModels = [
+      'medication',
+      'lab_result',
+      'condition',
+      'allergy',
+      'immunization',
+      'procedure',
+      'treatment',
+      'encounter',
+    ];
     if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
       return (
         <div className="field-value readonly">
@@ -197,17 +242,19 @@ const ModelCreate = () => {
 
     const commonProps = {
       value: value,
-      onChange: (e) => handleFieldChange(field.name, e.target.value),
+      onChange: e => handleFieldChange(field.name, e.target.value),
       className: `field-input ${hasError ? 'error' : ''}`,
-      disabled: saving
-    };    switch (field.type) {
+      disabled: saving,
+    };
+    switch (field.type) {
       case 'boolean':
         return (
-          <select 
-            {...commonProps} 
+          <select
+            {...commonProps}
             value={value === null ? '' : String(value)}
-            onChange={(e) => {
-              const val = e.target.value === '' ? null : e.target.value === 'true';
+            onChange={e => {
+              const val =
+                e.target.value === '' ? null : e.target.value === 'true';
               handleFieldChange(field.name, val);
             }}
           >
@@ -223,25 +270,21 @@ const ModelCreate = () => {
           <input
             {...commonProps}
             type={field.type === 'datetime' ? 'datetime-local' : 'date'}
-            value={value ? new Date(value).toISOString().slice(0, field.type === 'datetime' ? 16 : 10) : ''}
+            value={
+              value
+                ? new Date(value)
+                    .toISOString()
+                    .slice(0, field.type === 'datetime' ? 16 : 10)
+                : ''
+            }
           />
         );
 
       case 'number':
-        return (
-          <input
-            {...commonProps}
-            type="number"
-          />
-        );
+        return <input {...commonProps} type="number" />;
 
       case 'email':
-        return (
-          <input
-            {...commonProps}
-            type="email"
-          />
-        );
+        return <input {...commonProps} type="email" />;
 
       case 'text':
         if (field.max_length && field.max_length > 255) {
@@ -254,7 +297,7 @@ const ModelCreate = () => {
             />
           );
         }
-        // Fall through to default
+      // Fall through to default
 
       default:
         // Check if field has predefined choices (for dropdowns)
@@ -264,13 +307,14 @@ const ModelCreate = () => {
               <option value="">-- Select {field.name} --</option>
               {field.choices.map(choice => (
                 <option key={choice} value={choice}>
-                  {choice.charAt(0).toUpperCase() + choice.slice(1).replace('-', ' ')}
+                  {choice.charAt(0).toUpperCase() +
+                    choice.slice(1).replace('-', ' ')}
                 </option>
               ))}
             </select>
           );
         }
-        
+
         return (
           <input
             {...commonProps}
@@ -281,11 +325,12 @@ const ModelCreate = () => {
         );
     }
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading model creation form..." />
+        </div>
       </AdminLayout>
     );
   }
@@ -312,16 +357,16 @@ const ModelCreate = () => {
             <h1>Create New {metadata?.display_name || modelName}</h1>
             <p>Fill in the form below to create a new record</p>
           </div>
-          
+
           <div className="edit-actions">
-            <button 
+            <button
               onClick={handleCancel}
               className="btn btn-secondary"
               disabled={saving}
             >
               Cancel
             </button>
-            <button 
+            <button
               onClick={handleCreate}
               className="btn btn-primary"
               disabled={saving}
@@ -331,7 +376,13 @@ const ModelCreate = () => {
           </div>
         </div>
 
-        <form className="edit-form" onSubmit={(e) => { e.preventDefault(); handleCreate(); }}>
+        <form
+          className="edit-form"
+          onSubmit={e => {
+            e.preventDefault();
+            handleCreate();
+          }}
+        >
           <div className="form-grid">
             {metadata?.fields.map(field => (
               <div key={field.name} className="field-group">
@@ -339,19 +390,23 @@ const ModelCreate = () => {
                   {field.name}
                   {field.primary_key && <span className="pk-badge">PK</span>}
                   {field.foreign_key && <span className="fk-badge">FK</span>}
-                  {!field.nullable && !field.primary_key && <span className="required">*</span>}
+                  {!field.nullable && !field.primary_key && (
+                    <span className="required">*</span>
+                  )}
                 </label>
-                
+
                 {renderFieldInput(field)}
-                
+
                 {validationErrors[field.name] && (
                   <div className="field-errors">
                     {validationErrors[field.name].map((error, index) => (
-                      <div key={index} className="error-message">{error}</div>
+                      <div key={index} className="error-message">
+                        {error}
+                      </div>
                     ))}
                   </div>
                 )}
-                
+
                 <div className="field-meta">
                   Type: {field.type}
                   {field.max_length && ` | Max Length: ${field.max_length}`}

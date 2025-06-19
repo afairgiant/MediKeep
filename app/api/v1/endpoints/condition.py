@@ -10,6 +10,8 @@ from app.schemas.condition import (
     ConditionResponse,
     ConditionWithRelations,
 )
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -25,6 +27,26 @@ def create_condition(
     Create new condition.
     """
     condition_obj = condition.create(db=db, obj_in=condition_in)
+    
+    # Log the creation activity
+    try:
+        description = f"New condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(condition_obj, 'patient_id', None),
+            action="created",
+            entity_type="condition",
+            entity_id=getattr(condition_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging condition creation activity: {e}")
+    
     return condition_obj
 
 
@@ -84,6 +106,26 @@ def update_condition(
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
     condition_obj = condition.update(db=db, db_obj=condition_obj, obj_in=condition_in)
+    
+    # Log the update activity
+    try:
+        description = f"Updated condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(condition_obj, 'patient_id', None),
+            action="updated",
+            entity_type="condition",
+            entity_id=getattr(condition_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging condition update activity: {e}")
+    
     return condition_obj
 
 
@@ -107,6 +149,26 @@ def update_condition_with_slash(
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
     condition_obj = condition.update(db=db, db_obj=condition_obj, obj_in=condition_in)
+    
+    # Log the update activity
+    try:
+        description = f"Updated condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(condition_obj, 'patient_id', None),
+            action="updated",
+            entity_type="condition",
+            entity_id=getattr(condition_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging condition update activity: {e}")
+    
     return condition_obj
 
 
@@ -123,6 +185,26 @@ def delete_condition(
     condition_obj = condition.get(db=db, id=condition_id)
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
+    
+    # Log the deletion activity BEFORE deleting
+    try:
+        description = f"Deleted condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(condition_obj, 'patient_id', None),
+            action="deleted",
+            entity_type="condition",
+            entity_id=getattr(condition_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging condition deletion activity: {e}")
+    
     condition.delete(db=db, id=condition_id)
     return {"message": "Condition deleted successfully"}
 

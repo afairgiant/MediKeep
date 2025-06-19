@@ -10,6 +10,8 @@ from app.schemas.procedure import (
     ProcedureResponse,
     ProcedureWithRelations,
 )
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -25,6 +27,26 @@ def create_procedure(
     Create new procedure.
     """
     procedure_obj = procedure.create(db=db, obj_in=procedure_in)
+    
+    # Log the creation activity
+    try:
+        description = f"New procedure: {getattr(procedure_obj, 'name', 'Unknown procedure')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(procedure_obj, 'patient_id', None),
+            action="created",
+            entity_type="procedure",
+            entity_id=getattr(procedure_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging procedure creation activity: {e}")
+    
     return procedure_obj
 
 
@@ -88,7 +110,28 @@ def update_procedure(
     procedure_obj = procedure.get(db=db, id=procedure_id)
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
+    
     procedure_obj = procedure.update(db=db, db_obj=procedure_obj, obj_in=procedure_in)
+    
+    # Log the update activity
+    try:
+        description = f"Updated procedure: {getattr(procedure_obj, 'name', 'Unknown procedure')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(procedure_obj, 'patient_id', None),
+            action="updated",
+            entity_type="procedure",
+            entity_id=getattr(procedure_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging procedure update activity: {e}")
+    
     return procedure_obj
 
 
@@ -105,6 +148,26 @@ def delete_procedure(
     procedure_obj = procedure.get(db=db, id=procedure_id)
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
+    
+    # Log the deletion activity BEFORE deleting
+    try:
+        description = f"Deleted procedure: {getattr(procedure_obj, 'name', 'Unknown procedure')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(procedure_obj, 'patient_id', None),
+            action="deleted",
+            entity_type="procedure",
+            entity_id=getattr(procedure_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging procedure deletion activity: {e}")
+    
     procedure.delete(db=db, id=procedure_id)
     return {"message": "Procedure deleted successfully"}
 

@@ -8,19 +8,19 @@ import './ModelManagement.css';
 const ModelManagement = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
-  
+
   const [records, setRecords] = useState([]);
   const [metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Pagination and filtering
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [perPage, setPerPage] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Selection for bulk operations
   const [selectedRecords, setSelectedRecords] = useState(new Set());
   const [showBulkActions, setShowBulkActions] = useState(false);
@@ -35,15 +35,14 @@ const ModelManagement = () => {
         adminApiService.getModelRecords(modelName, {
           page: currentPage,
           per_page: perPage,
-          search: searchQuery || null
-        })
+          search: searchQuery || null,
+        }),
       ]);
 
       setMetadata(metadataResult);
       setRecords(recordsResult.items);
       setTotalPages(recordsResult.total_pages);
       setTotalRecords(recordsResult.total);
-      
     } catch (err) {
       console.error('Error loading model data:', err);
       setError(err.message || 'Failed to load model data');
@@ -58,24 +57,24 @@ const ModelManagement = () => {
     }
   }, [modelName, loadModelData]);
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = newPage => {
     setCurrentPage(newPage);
     setSelectedRecords(new Set());
   };
 
-  const handlePerPageChange = (newPerPage) => {
+  const handlePerPageChange = newPerPage => {
     setPerPage(newPerPage);
     setCurrentPage(1);
     setSelectedRecords(new Set());
   };
 
-  const handleSearch = (query) => {
+  const handleSearch = query => {
     setSearchQuery(query);
     setCurrentPage(1);
     setSelectedRecords(new Set());
   };
 
-  const handleSelectRecord = (recordId) => {
+  const handleSelectRecord = recordId => {
     const newSelected = new Set(selectedRecords);
     if (newSelected.has(recordId)) {
       newSelected.delete(recordId);
@@ -96,7 +95,7 @@ const ModelManagement = () => {
       setShowBulkActions(true);
     }
   };
-  const handleDeleteRecord = async (recordId) => {
+  const handleDeleteRecord = async recordId => {
     if (!window.confirm('Are you sure you want to delete this record?')) {
       return;
     }
@@ -110,12 +109,19 @@ const ModelManagement = () => {
   };
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${selectedRecords.size} records?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedRecords.size} records?`
+      )
+    ) {
       return;
     }
 
     try {
-      await adminApiService.bulkDeleteRecords(modelName, Array.from(selectedRecords));
+      await adminApiService.bulkDeleteRecords(
+        modelName,
+        Array.from(selectedRecords)
+      );
       setSelectedRecords(new Set());
       setShowBulkActions(false);
       loadModelData(); // Refresh the data
@@ -141,24 +147,46 @@ const ModelManagement = () => {
   };
   const getDisplayFields = () => {
     if (!metadata) return [];
-    
+
     // Show primary key and first few important fields
-    const displayFields = metadata.fields.filter(field => 
-      field.primary_key || 
-      [
-        // User fields
-        'username', 'email', 'full_name', 'role',
-        // Patient fields  
-        'first_name', 'last_name', 'birthDate',
-        // Practitioner fields
-        'name', 'specialty', 'practice',        
-        // Medical record fields
-        'medication_name', 'allergen', 'diagnosis', 'vaccine_name', 'test_name', 'reason', 'name',
-        // Status and date fields
-        'status', 'severity', 'date', 'start_date', 'end_date', 'onset_date', 'duration'
-      ].includes(field.name)
-    ).slice(0, 5);
-    
+    const displayFields = metadata.fields
+      .filter(
+        field =>
+          field.primary_key ||
+          [
+            // User fields
+            'username',
+            'email',
+            'full_name',
+            'role',
+            // Patient fields
+            'first_name',
+            'last_name',
+            'birthDate',
+            // Practitioner fields
+            'name',
+            'specialty',
+            'practice',
+            // Medical record fields
+            'medication_name',
+            'allergen',
+            'diagnosis',
+            'vaccine_name',
+            'test_name',
+            'reason',
+            'name',
+            // Status and date fields
+            'status',
+            'severity',
+            'date',
+            'start_date',
+            'end_date',
+            'onset_date',
+            'duration',
+          ].includes(field.name)
+      )
+      .slice(0, 5);
+
     // Always include id if not already included
     if (!displayFields.find(f => f.name === 'id')) {
       const idField = metadata.fields.find(f => f.name === 'id');
@@ -166,14 +194,15 @@ const ModelManagement = () => {
         displayFields.unshift(idField);
       }
     }
-    
+
     return displayFields;
   };
-
   if (loading) {
     return (
       <AdminLayout>
-        <Loading />
+        <div className="admin-page-loading">
+          <Loading message="Loading models..." />
+        </div>
       </AdminLayout>
     );
   }
@@ -202,9 +231,9 @@ const ModelManagement = () => {
             <h1>{metadata?.verbose_name_plural || modelName}</h1>
             <p>{totalRecords} total records</p>
           </div>
-          
+
           <div className="model-actions">
-            <button 
+            <button
               className="btn btn-primary"
               onClick={() => navigate(`/admin/models/${modelName}/create`)}
             >
@@ -220,15 +249,15 @@ const ModelManagement = () => {
               type="text"
               placeholder={`Search ${metadata?.verbose_name_plural || modelName}...`}
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={e => handleSearch(e.target.value)}
               className="search-input"
             />
           </div>
-          
+
           <div className="pagination-controls">
-            <select 
-              value={perPage} 
-              onChange={(e) => handlePerPageChange(Number(e.target.value))}
+            <select
+              value={perPage}
+              onChange={e => handlePerPageChange(Number(e.target.value))}
               className="per-page-select"
             >
               <option value={10}>10 per page</option>
@@ -257,14 +286,19 @@ const ModelManagement = () => {
                 <th>
                   <input
                     type="checkbox"
-                    checked={selectedRecords.size === records.length && records.length > 0}
+                    checked={
+                      selectedRecords.size === records.length &&
+                      records.length > 0
+                    }
                     onChange={handleSelectAll}
                   />
                 </th>
                 {displayFields.map(field => (
                   <th key={field.name}>
                     {field.name}
-                    {field.primary_key && <span className="pk-indicator">PK</span>}
+                    {field.primary_key && (
+                      <span className="pk-indicator">PK</span>
+                    )}
                   </th>
                 ))}
                 <th>Actions</th>
@@ -288,14 +322,20 @@ const ModelManagement = () => {
                   <td>
                     <div className="record-actions">
                       <button
-                        onClick={() => navigate(`/admin/models/${modelName}/${record.id}`)}
+                        onClick={() =>
+                          navigate(`/admin/models/${modelName}/${record.id}`)
+                        }
                         className="btn btn-sm btn-secondary"
                         title="View Details"
                       >
                         👁️
                       </button>
                       <button
-                        onClick={() => navigate(`/admin/models/${modelName}/${record.id}/edit`)}
+                        onClick={() =>
+                          navigate(
+                            `/admin/models/${modelName}/${record.id}/edit`
+                          )
+                        }
                         className="btn btn-sm btn-primary"
                         title="Edit"
                       >
@@ -326,11 +366,11 @@ const ModelManagement = () => {
             >
               ← Previous
             </button>
-            
+
             <span className="pagination-info">
               Page {currentPage} of {totalPages}
             </span>
-            
+
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}

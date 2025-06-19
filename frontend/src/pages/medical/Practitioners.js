@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { MedicalCard, StatusBadge } from '../../components';
+import {
+  formatPhoneNumber,
+  formatPhoneInput,
+  cleanPhoneNumber,
+} from '../../utils/phoneUtils';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -19,7 +24,10 @@ const Practitioners = () => {
   const [formData, setFormData] = useState({
     name: '',
     specialty: '',
-    practice: ''
+    practice: '',
+    phone_number: '',
+    website: '',
+    rating: '',
   });
 
   // Common specialties for the filter dropdown
@@ -39,7 +47,7 @@ const Practitioners = () => {
     'Pediatrics',
     'Psychiatry',
     'Radiology',
-    'Urology'
+    'Urology',
   ];
 
   useEffect(() => {
@@ -59,29 +67,38 @@ const Practitioners = () => {
       setLoading(false);
     }
   };
-
   const handleAddPractitioner = () => {
     setEditingPractitioner(null);
     setFormData({
       name: '',
       specialty: '',
-      practice: ''
+      practice: '',
+      phone_number: '',
+      website: '',
+      rating: '',
     });
     setShowModal(true);
   };
 
-  const handleEditPractitioner = (practitioner) => {
+  const handleEditPractitioner = practitioner => {
     setEditingPractitioner(practitioner);
     setFormData({
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
-      practice: practitioner.practice || ''
+      practice: practitioner.practice || '',
+      phone_number: formatPhoneNumber(practitioner.phone_number) || '',
+      website: practitioner.website || '',
+      rating: practitioner.rating || '',
     });
     setShowModal(true);
   };
 
-  const handleDeletePractitioner = async (practitionerId) => {
-    if (window.confirm('Are you sure you want to delete this practitioner? This action cannot be undone.')) {
+  const handleDeletePractitioner = async practitionerId => {
+    if (
+      window.confirm(
+        'Are you sure you want to delete this practitioner? This action cannot be undone.'
+      )
+    ) {
       try {
         await apiService.deletePractitioner(practitionerId);
         await fetchPractitioners();
@@ -93,15 +110,23 @@ const Practitioners = () => {
       }
     }
   };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
+      // Clean the phone number before sending to API (remove formatting)
+      const dataToSubmit = {
+        ...formData,
+        phone_number: cleanPhoneNumber(formData.phone_number) || null,
+      };
+
       if (editingPractitioner) {
-        await apiService.updatePractitioner(editingPractitioner.id, formData);
+        await apiService.updatePractitioner(
+          editingPractitioner.id,
+          dataToSubmit
+        );
         setSuccessMessage('Practitioner updated successfully');
       } else {
-        await apiService.createPractitioner(formData);
+        await apiService.createPractitioner(dataToSubmit);
         setSuccessMessage('Practitioner added successfully');
       }
 
@@ -113,25 +138,40 @@ const Practitioners = () => {
       console.error('Error saving practitioner:', err);
     }
   };
-
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    if (name === 'phone_number') {
+      // Format phone number as user types
+      const formattedValue = formatPhoneInput(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   // Get unique specialties from practitioners for filter
-  const availableSpecialties = [...new Set(practitioners.map(p => p.specialty).filter(Boolean))].sort();
+  const availableSpecialties = [
+    ...new Set(practitioners.map(p => p.specialty).filter(Boolean)),
+  ].sort();
 
   const filteredPractitioners = practitioners
     .filter(practitioner => {
-      const matchesSearch = practitioner.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          practitioner.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          practitioner.practice?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSpecialty = specialtyFilter === 'all' || practitioner.specialty === specialtyFilter;
-      
+      const matchesSearch =
+        practitioner.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        practitioner.specialty
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        practitioner.practice?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSpecialty =
+        specialtyFilter === 'all' || practitioner.specialty === specialtyFilter;
+
       return matchesSearch && matchesSpecialty;
     })
     .sort((a, b) => {
@@ -146,20 +186,20 @@ const Practitioners = () => {
       }
     });
 
-  const getSpecialtyColor = (specialty) => {
+  const getSpecialtyColor = specialty => {
     // Color coding for different specialties
     const specialtyColors = {
-      'Cardiology': 'error',
+      Cardiology: 'error',
       'Emergency Medicine': 'error',
       'Family Medicine': 'success',
       'Internal Medicine': 'success',
-      'Pediatrics': 'info',
-      'Surgery': 'warning',
+      Pediatrics: 'info',
+      Surgery: 'warning',
       'General Surgery': 'warning',
-      'Psychiatry': 'info',
-      'Neurology': 'warning'
+      Psychiatry: 'info',
+      Neurology: 'warning',
     };
-    
+
     return specialtyColors[specialty] || 'info';
   };
 
@@ -175,15 +215,15 @@ const Practitioners = () => {
   return (
     <div className="practitioners-page">
       <div className="practitioners-header">
-        <button
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1 className="practitioners-title">👩‍⚕️ Healthcare Practitioners</h1>
         <div className="practitioners-actions">
-          <button className="add-practitioner-btn" onClick={handleAddPractitioner}>
+          <button
+            className="add-practitioner-btn"
+            onClick={handleAddPractitioner}
+          >
             <span>+</span>
             Add Practitioner
           </button>
@@ -193,28 +233,35 @@ const Practitioners = () => {
               type="text"
               placeholder="Search practitioners..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
-      {successMessage && <div className="success-message">{successMessage}</div>}
+      {successMessage && (
+        <div className="success-message">{successMessage}</div>
+      )}
 
       <div className="practitioners-filters">
         <div className="filter-group">
           <label>Specialty</label>
-          <select value={specialtyFilter} onChange={(e) => setSpecialtyFilter(e.target.value)}>
+          <select
+            value={specialtyFilter}
+            onChange={e => setSpecialtyFilter(e.target.value)}
+          >
             <option value="all">All Specialties</option>
             {availableSpecialties.map(specialty => (
-              <option key={specialty} value={specialty}>{specialty}</option>
+              <option key={specialty} value={specialty}>
+                {specialty}
+              </option>
             ))}
           </select>
         </div>
         <div className="filter-group">
           <label>Sort By</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
             <option value="name">Name</option>
             <option value="specialty">Specialty</option>
             <option value="practice">Practice</option>
@@ -232,14 +279,17 @@ const Practitioners = () => {
               : 'Start by adding your first healthcare practitioner.'}
           </p>
           {!searchTerm && specialtyFilter === 'all' && (
-            <button className="add-practitioner-btn" onClick={handleAddPractitioner}>
+            <button
+              className="add-practitioner-btn"
+              onClick={handleAddPractitioner}
+            >
               Add Your First Practitioner
             </button>
           )}
         </div>
       ) : (
         <div className="practitioners-grid">
-          {filteredPractitioners.map((practitioner) => (
+          {filteredPractitioners.map(practitioner => (
             <MedicalCard
               key={practitioner.id}
               className="practitioner-card"
@@ -249,16 +299,17 @@ const Practitioners = () => {
               <div className="practitioner-card-header">
                 <div>
                   <h3 className="practitioner-name">{practitioner.name}</h3>
-                  <p className="practitioner-practice">{practitioner.practice}</p>
+                  <p className="practitioner-practice">
+                    {practitioner.practice}
+                  </p>
                 </div>
                 <div className="practitioner-badge">
-                  <StatusBadge 
-                    status={practitioner.specialty} 
-                    color={getSpecialtyColor(practitioner.specialty)} 
+                  <StatusBadge
+                    status={practitioner.specialty}
+                    color={getSpecialtyColor(practitioner.specialty)}
                   />
                 </div>
-              </div>
-
+              </div>{' '}
               <div className="practitioner-details">
                 <div className="detail-item">
                   <span className="detail-label">Specialty</span>
@@ -267,7 +318,51 @@ const Practitioners = () => {
                 <div className="detail-item">
                   <span className="detail-label">Practice</span>
                   <span className="detail-value">{practitioner.practice}</span>
-                </div>
+                </div>{' '}
+                {practitioner.phone_number && (
+                  <div className="detail-item">
+                    <span className="detail-label">Phone</span>
+                    <span className="detail-value">
+                      {formatPhoneNumber(practitioner.phone_number)}
+                    </span>
+                  </div>
+                )}
+                {practitioner.website && (
+                  <div className="detail-item">
+                    <span className="detail-label">Website</span>
+                    <span className="detail-value">
+                      <a
+                        href={practitioner.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="website-link"
+                      >
+                        Visit Website ↗
+                      </a>
+                    </span>
+                  </div>
+                )}
+                {practitioner.rating !== null &&
+                  practitioner.rating !== undefined && (
+                    <div className="detail-item">
+                      <span className="detail-label">Rating</span>
+                      <span className="detail-value">
+                        <div className="rating-display">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <span
+                              key={star}
+                              className={`star ${star <= practitioner.rating ? 'filled' : 'empty'}`}
+                            >
+                              ⭐
+                            </span>
+                          ))}
+                          <span className="rating-number">
+                            ({practitioner.rating}/5)
+                          </span>
+                        </div>
+                      </span>
+                    </div>
+                  )}
                 {practitioner.id && (
                   <div className="detail-item">
                     <span className="detail-label">ID</span>
@@ -282,10 +377,12 @@ const Practitioners = () => {
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2 className="modal-title">
-                {editingPractitioner ? 'Edit Practitioner' : 'Add New Practitioner'}
+                {editingPractitioner
+                  ? 'Edit Practitioner'
+                  : 'Add New Practitioner'}
               </h2>
               <button className="close-btn" onClick={() => setShowModal(false)}>
                 ×
@@ -305,7 +402,6 @@ const Practitioners = () => {
                   placeholder="Dr. John Smith"
                 />
               </div>
-
               <div className="form-group">
                 <label htmlFor="specialty">Specialty *</label>
                 <input
@@ -323,8 +419,7 @@ const Practitioners = () => {
                     <option key={specialty} value={specialty} />
                   ))}
                 </datalist>
-              </div>
-
+              </div>{' '}
               <div className="form-group">
                 <label htmlFor="practice">Practice/Hospital *</label>
                 <input
@@ -337,13 +432,54 @@ const Practitioners = () => {
                   placeholder="e.g., City General Hospital, Private Practice"
                 />
               </div>
-
+              <div className="form-group">
+                <label htmlFor="phone_number">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone_number"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleInputChange}
+                  placeholder="e.g., (555) 123-4567"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="website">Website</label>
+                <input
+                  type="url"
+                  id="website"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  placeholder="e.g., https://www.example.com"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="rating">Rating (0-5 stars)</label>
+                <input
+                  type="number"
+                  id="rating"
+                  name="rating"
+                  value={formData.rating}
+                  onChange={handleInputChange}
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  placeholder="e.g., 4.5"
+                />
+              </div>
               <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingPractitioner ? 'Update Practitioner' : 'Add Practitioner'}
+                  {editingPractitioner
+                    ? 'Update Practitioner'
+                    : 'Add Practitioner'}
                 </button>
               </div>
             </form>

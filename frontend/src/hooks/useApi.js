@@ -20,7 +20,7 @@ export const useApi = () => {
       setError(null);
 
       const result = await apiCall(controller.signal);
-      
+
       // Check if request was cancelled
       if (controller.signal.aborted) {
         return null;
@@ -30,7 +30,8 @@ export const useApi = () => {
     } catch (err) {
       // Don't show errors if request was cancelled
       if (err.name !== 'AbortError' && !controller.signal.aborted) {
-        const errorMessage = options.errorMessage || err.message || 'An error occurred';
+        const errorMessage =
+          options.errorMessage || err.message || 'An error occurred';
         setError(errorMessage);
         console.error('API Error:', err);
       }
@@ -46,7 +47,7 @@ export const useApi = () => {
     setError(null);
   }, []);
 
-  const setErrorMessage = useCallback((message) => {
+  const setErrorMessage = useCallback(message => {
     setError(message);
   }, []);
 
@@ -62,7 +63,7 @@ export const useApi = () => {
     execute,
     clearError,
     setError: setErrorMessage,
-    cleanup
+    cleanup,
   };
 };
 
@@ -77,20 +78,20 @@ export const useForm = (initialValues, validationSchema) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setValues(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
-  const handleBlur = (e) => {
+  const handleBlur = e => {
     const { name } = e.target;
     setTouched(prev => ({ ...prev, [name]: true }));
-    
+
     if (validationSchema) {
       const fieldErrors = validationSchema(values);
       setErrors(prev => ({ ...prev, [name]: fieldErrors[name] || '' }));
@@ -99,10 +100,10 @@ export const useForm = (initialValues, validationSchema) => {
 
   const validate = () => {
     if (!validationSchema) return true;
-    
+
     const validationErrors = validationSchema(values);
     setErrors(validationErrors);
-    
+
     return Object.keys(validationErrors).length === 0;
   };
 
@@ -120,6 +121,6 @@ export const useForm = (initialValues, validationSchema) => {
     handleBlur,
     validate,
     reset,
-    setValues
+    setValues,
   };
 };

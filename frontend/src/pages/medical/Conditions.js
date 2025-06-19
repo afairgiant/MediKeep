@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Conditions = () => {
   const navigate = useNavigate();
-  
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+
   // Standardized data management
   const {
     items: conditions,
@@ -21,35 +25,38 @@ const Conditions = () => {
     refreshData,
     clearError,
     setSuccessMessage,
-    setError  } = useMedicalData({
+    setError,
+  } = useMedicalData({
     entityName: 'condition',
     apiMethodsConfig: {
-      getAll: (signal) => apiService.getConditions(signal),
-      getByPatient: (patientId, signal) => apiService.getPatientConditions(patientId, signal),
+      getAll: signal => apiService.getConditions(signal),
+      getByPatient: (patientId, signal) =>
+        apiService.getPatientConditions(patientId, signal),
       create: (data, signal) => apiService.createCondition(data, signal),
-      update: (id, data, signal) => apiService.updateCondition(id, data, signal),
-      delete: (id, signal) => apiService.deleteCondition(id, signal)
+      update: (id, data, signal) =>
+        apiService.updateCondition(id, data, signal),
+      delete: (id, signal) => apiService.deleteCondition(id, signal),
     },
-    requiresPatient: true
+    requiresPatient: true,
   });
   console.log('🔍 CONDITIONS DEBUG:', {
     conditions,
     currentPatient,
     loading,
     error,
-    hasPatient: !!currentPatient?.id
+    hasPatient: !!currentPatient?.id,
   });
   // Form and UI state
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('onset_date');  
+  const [sortBy, setSortBy] = useState('onset_date');
   const [showModal, setShowModal] = useState(false);
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
     diagnosis: '',
     notes: '',
     status: 'active',
-    onsetDate: ''  // Form field name
+    onsetDate: '', // Form field name
   });
 
   const handleAddCondition = () => {
@@ -58,32 +65,32 @@ const Conditions = () => {
       diagnosis: '',
       notes: '',
       status: 'active',
-      onsetDate: ''
+      onsetDate: '',
     });
     setShowModal(true);
   };
 
-  const handleEditCondition = (condition) => {
+  const handleEditCondition = condition => {
     setEditingCondition(condition);
     setFormData({
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
       status: condition.status || 'active',
-      onsetDate: condition.onset_date ? condition.onset_date.split('T')[0] : '' 
+      onsetDate: condition.onset_date ? condition.onset_date.split('T')[0] : '',
     });
     setShowModal(true);
   };
 
-  const handleDeleteCondition = async (conditionId) => {
+  const handleDeleteCondition = async conditionId => {
     const success = await deleteItem(conditionId);
     if (success) {
       await refreshData();
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     if (!currentPatient?.id) {
       setError('Patient information not available');
       return;
@@ -93,8 +100,8 @@ const Conditions = () => {
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
       status: formData.status,
-      onset_date: formData.onsetDate || null,  // Map form field to API field
-      patient_id: currentPatient.id
+      onset_date: formData.onsetDate || null, // Map form field to API field
+      patient_id: currentPatient.id,
     };
 
     let success;
@@ -110,20 +117,22 @@ const Conditions = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const filteredConditions = conditions
     .filter(condition => {
-      const matchesSearch = condition.diagnosis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          condition.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || condition.status === statusFilter;
-      
+      const matchesSearch =
+        condition.diagnosis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        condition.notes?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === 'all' || condition.status === statusFilter;
+
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
@@ -132,9 +141,9 @@ const Conditions = () => {
           return (a.diagnosis || '').localeCompare(b.diagnosis || '');
         case 'status':
           return (a.status || '').localeCompare(b.status || '');
-        case 'onset_date': 
+        case 'onset_date':
         default:
-          return new Date(b.onset_date || 0) - new Date(a.onset_date || 0);  
+          return new Date(b.onset_date || 0) - new Date(a.onset_date || 0);
       }
     });
 
@@ -152,10 +161,7 @@ const Conditions = () => {
   return (
     <div className="medical-page-container">
       <header className="medical-page-header">
-        <button
-          className="back-button"
-          onClick={() => navigate('/dashboard')}
-        >
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>🏥 Medical Conditions</h1>
@@ -165,34 +171,49 @@ const Conditions = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">×</button>
+            <button onClick={clearError} className="error-close">
+              ×
+            </button>
           </div>
         )}
-        {successMessage && <div className="success-message">{successMessage}</div>}
-
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddCondition}>
               + Add Condition
             </button>
           </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
+          </div>
+
           <div className="controls-right">
             <div className="search-container">
               <input
                 type="text"
                 placeholder="Search conditions..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="search-input"
               />
             </div>
           </div>
-        </div>
-
+        </div>{' '}
         <div className="filters-container">
           <div className="filter-group">
             <label>Status</label>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="filter-select"
+            >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
               <option value="resolved">Resolved</option>
@@ -202,14 +223,17 @@ const Conditions = () => {
           </div>
           <div className="filter-group">
             <label>Sort By</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="filter-select"
+            >
               <option value="onset_date">Onset Date</option>
               <option value="diagnosis">Diagnosis</option>
               <option value="status">Status</option>
             </select>
           </div>
         </div>
-
         <div className="medical-items-list">
           {filteredConditions.length === 0 ? (
             <div className="empty-state">
@@ -226,16 +250,18 @@ const Conditions = () => {
                 </button>
               )}
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {filteredConditions.map((condition) => (
+              {filteredConditions.map(condition => (
                 <div key={condition.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
                       <h3 className="item-title">{condition.diagnosis}</h3>
                     </div>
                     <div className="status-badges">
-                      <span className={`status-badge status-${condition.status}`}>
+                      <span
+                        className={`status-badge status-${condition.status}`}
+                      >
                         {condition.status}
                       </span>
                     </div>
@@ -260,13 +286,13 @@ const Conditions = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button 
+                    <button
                       className="edit-button"
                       onClick={() => handleEditCondition(condition)}
                     >
                       ✏️ Edit
                     </button>
-                    <button 
+                    <button
                       className="delete-button"
                       onClick={() => handleDeleteCondition(condition.id)}
                     >
@@ -276,18 +302,62 @@ const Conditions = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <MedicalTable
+              data={filteredConditions}
+              columns={[
+                { header: 'Condition', accessor: 'diagnosis' },
+                { header: 'Onset Date', accessor: 'onset_date' },
+                { header: 'Status', accessor: 'status' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={currentPatient}
+              tableName="Conditions"
+              onEdit={handleEditCondition}
+              onDelete={handleDeleteCondition}
+              formatters={{
+                diagnosis: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                onset_date: value => (value ? formatDate(value) : '-'),
+                status: value => (
+                  <span className={`status-badge-small status-${value}`}>
+                    {value}
+                  </span>
+                ),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           )}
         </div>
       </div>
 
       {showModal && (
-        <div className="medical-form-overlay" onClick={() => setShowModal(false)}>
-          <div className="medical-form-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="medical-form-overlay"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="medical-form-modal"
+            onClick={e => e.stopPropagation()}
+          >
             <div className="form-header">
               <h3>
                 {editingCondition ? 'Edit Condition' : 'Add New Condition'}
               </h3>
-              <button className="close-button" onClick={() => setShowModal(false)}>
+              <button
+                className="close-button"
+                onClick={() => setShowModal(false)}
+              >
                 ×
               </button>
             </div>
@@ -350,7 +420,11 @@ const Conditions = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button type="button" className="cancel-button" onClick={() => setShowModal(false)}>
+                  <button
+                    type="button"
+                    className="cancel-button"
+                    onClick={() => setShowModal(false)}
+                  >
                     Cancel
                   </button>
                   <button type="submit" className="save-button">
