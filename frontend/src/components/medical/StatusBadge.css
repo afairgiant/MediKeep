@@ -1,14 +1,16 @@
 /* Status Badge Styles */
 .status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  box-sizing: border-box;
+  display: block;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12.8px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 /* Success/Active/Completed States */

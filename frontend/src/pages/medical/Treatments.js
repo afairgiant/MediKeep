@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { apiService } from "../../services/api";
-import { formatDate } from "../../utils/helpers";
-import "../../styles/shared/MedicalPageShared.css";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apiService } from '../../services/api';
+import { formatDate } from '../../utils/helpers';
+import '../../styles/shared/MedicalPageShared.css';
 
 const Treatments = () => {
   const navigate = useNavigate();
   const [treatments, setTreatments] = useState([]);
   const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
-  const [sortBy, setSortBy] = useState("start_date");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortBy, setSortBy] = useState('start_date');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
-    treatment_name: "",
-    treatment_type: "",
-    description: "",
-    start_date: "",
-    end_date: "",
-    status: "planned",
-    dosage: "",
-    frequency: "",
-    notes: "",
+    treatment_name: '',
+    treatment_type: '',
+    description: '',
+    start_date: '',
+    end_date: '',
+    status: 'planned',
+    dosage: '',
+    frequency: '',
+    notes: '',
   });
 
   // Fetch patient and treatments data on component mount
@@ -35,7 +35,7 @@ const Treatments = () => {
   const fetchPatientAndTreatments = async () => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
       // Get patient data first
       const patient = await apiService.getCurrentPatient();
@@ -47,31 +47,31 @@ const Treatments = () => {
         setTreatments(treatmentData);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error('Error fetching data:', error);
       setError(`Failed to load treatment data: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
   const resetForm = () => {
     setFormData({
-      treatment_name: "",
-      treatment_type: "",
-      description: "",
-      start_date: "",
-      end_date: "",
-      status: "planned",
-      dosage: "",
-      frequency: "",
-      notes: "",
+      treatment_name: '',
+      treatment_type: '',
+      description: '',
+      start_date: '',
+      end_date: '',
+      status: 'planned',
+      dosage: '',
+      frequency: '',
+      notes: '',
     });
     setEditingTreatment(null);
     setShowAddForm(false);
@@ -81,50 +81,50 @@ const Treatments = () => {
     resetForm();
     setShowAddForm(true);
   };
-  const handleEditTreatment = (treatment) => {
+  const handleEditTreatment = treatment => {
     setFormData({
-      treatment_name: treatment.treatment_name || "",
-      treatment_type: treatment.treatment_type || "",
-      description: treatment.description || "",
-      start_date: treatment.start_date || "",
-      end_date: treatment.end_date || "",
-      status: treatment.status || "planned",
-      dosage: treatment.dosage || "",
-      frequency: treatment.frequency || "",
-      notes: treatment.notes || "",
+      treatment_name: treatment.treatment_name || '',
+      treatment_type: treatment.treatment_type || '',
+      description: treatment.description || '',
+      start_date: treatment.start_date || '',
+      end_date: treatment.end_date || '',
+      status: treatment.status || 'planned',
+      dosage: treatment.dosage || '',
+      frequency: treatment.frequency || '',
+      notes: treatment.notes || '',
     });
     setEditingTreatment(treatment);
     setShowAddForm(true);
   };
 
   // Add form validation before submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     // Validation
     if (!formData.treatment_name.trim()) {
-      setError("Treatment name is required");
+      setError('Treatment name is required');
       return;
     }
 
     if (!formData.treatment_type.trim()) {
-      setError("Treatment type is required");
+      setError('Treatment type is required');
       return;
     }
 
     if (!formData.start_date) {
-      setError("Start date is required");
+      setError('Start date is required');
       return;
     }
 
     if (!patientData?.id) {
-      setError("Patient information not available");
+      setError('Patient information not available');
       return;
     }
 
     try {
-      setError("");
-      setSuccessMessage("");
+      setError('');
+      setSuccessMessage('');
       const treatmentData = {
         treatment_name: formData.treatment_name,
         treatment_type: formData.treatment_type,
@@ -140,60 +140,60 @@ const Treatments = () => {
 
       if (editingTreatment) {
         await apiService.updateTreatment(editingTreatment.id, treatmentData);
-        setSuccessMessage("Treatment updated successfully!");
+        setSuccessMessage('Treatment updated successfully!');
       } else {
         await apiService.createTreatment(treatmentData);
-        setSuccessMessage("Treatment added successfully!");
+        setSuccessMessage('Treatment added successfully!');
       }
 
       resetForm();
       await fetchPatientAndTreatments();
 
       // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(""), 3000);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error("Error saving treatment:", error);
-      setError(error.message || "Failed to save treatment");
+      console.error('Error saving treatment:', error);
+      setError(error.message || 'Failed to save treatment');
     }
   };
 
-  const handleDeleteTreatment = async (treatmentId) => {
+  const handleDeleteTreatment = async treatmentId => {
     if (
-      !window.confirm("Are you sure you want to delete this treatment record?")
+      !window.confirm('Are you sure you want to delete this treatment record?')
     ) {
       return;
     }
 
     try {
-      setError("");
+      setError('');
       await apiService.deleteTreatment(treatmentId);
-      setSuccessMessage("Treatment deleted successfully!");
+      setSuccessMessage('Treatment deleted successfully!');
       await fetchPatientAndTreatments();
 
       // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(""), 3000);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error("Error deleting treatment:", error);
-      setError(error.message || "Failed to delete treatment");
+      console.error('Error deleting treatment:', error);
+      setError(error.message || 'Failed to delete treatment');
     }
   };
 
   const getSortedTreatments = () => {
     const sorted = [...treatments].sort((a, b) => {
-      if (sortBy === "start_date") {
+      if (sortBy === 'start_date') {
         const aDate = new Date(a.start_date || 0);
         const bDate = new Date(b.start_date || 0);
-        return sortOrder === "asc" ? aDate - bDate : bDate - aDate;
+        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
       }
 
-      if (sortBy === "treatment_name") {
-        return sortOrder === "asc"
+      if (sortBy === 'treatment_name') {
+        return sortOrder === 'asc'
           ? a.treatment_name.localeCompare(b.treatment_name)
           : b.treatment_name.localeCompare(a.treatment_name);
       }
 
-      if (sortBy === "status") {
-        return sortOrder === "asc"
+      if (sortBy === 'status') {
+        return sortOrder === 'asc'
           ? a.status.localeCompare(b.status)
           : b.status.localeCompare(a.status);
       }
@@ -204,29 +204,29 @@ const Treatments = () => {
     return sorted;
   };
 
-  const handleSortChange = (newSortBy) => {
+  const handleSortChange = newSortBy => {
     if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(newSortBy);
-      setSortOrder("desc");
+      setSortOrder('desc');
     }
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = status => {
     switch (status) {
-      case "active":
-        return "🔄";
-      case "completed":
-        return "✅";
-      case "planned":
-        return "📋";
-      case "on-hold":
-        return "⏸️";
-      case "cancelled":
-        return "❌";
+      case 'active':
+        return '🔄';
+      case 'completed':
+        return '✅';
+      case 'planned':
+        return '📋';
+      case 'on-hold':
+        return '⏸️';
+      case 'cancelled':
+        return '❌';
       default:
-        return "❓";
+        return '❓';
     }
   };
   if (loading) {
@@ -241,7 +241,7 @@ const Treatments = () => {
   return (
     <div className="medical-page-container">
       <header className="medical-page-header">
-        <button className="back-button" onClick={() => navigate("/dashboard")}>
+        <button className="back-button" onClick={() => navigate('/dashboard')}>
           ← Back to Dashboard
         </button>
         <h1>🩹 Treatments</h1>
@@ -264,7 +264,8 @@ const Treatments = () => {
               <label>Sort by:</label>
               <select
                 value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}>
+                onChange={e => handleSortChange(e.target.value)}
+              >
                 <option value="start_date">Start Date</option>
                 <option value="treatment_name">Treatment Name</option>
                 <option value="status">Status</option>
@@ -272,24 +273,27 @@ const Treatments = () => {
               <button
                 className="sort-order-button"
                 onClick={() =>
-                  setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                }>
-                {sortOrder === "asc" ? "↑" : "↓"}
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                }
+              >
+                {sortOrder === 'asc' ? '↑' : '↓'}
               </button>
             </div>
-          </div>{" "}
+          </div>{' '}
         </div>
 
         {showAddForm && (
           <div
             className="medical-form-overlay"
-            onClick={() => setShowAddForm(false)}>
+            onClick={() => setShowAddForm(false)}
+          >
             <div
               className="medical-form-modal"
-              onClick={(e) => e.stopPropagation()}>
+              onClick={e => e.stopPropagation()}
+            >
               <div className="form-header">
                 <h3>
-                  {editingTreatment ? "Edit Treatment" : "Add New Treatment"}
+                  {editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
                 </h3>
                 <button className="close-button" onClick={resetForm}>
                   ×
@@ -299,7 +303,7 @@ const Treatments = () => {
               <div className="medical-form-content">
                 <form onSubmit={handleSubmit}>
                   <div className="form-grid">
-                    {" "}
+                    {' '}
                     <div className="form-group">
                       <label htmlFor="treatment_name">Treatment Name *</label>
                       <input
@@ -330,7 +334,8 @@ const Treatments = () => {
                         id="status"
                         name="status"
                         value={formData.status}
-                        onChange={handleInputChange}>
+                        onChange={handleInputChange}
+                      >
                         <option value="planned">Planned</option>
                         <option value="active">Active</option>
                         <option value="on-hold">On Hold</option>
@@ -390,7 +395,7 @@ const Treatments = () => {
                         rows="3"
                         placeholder="Description of the treatment..."
                       />
-                    </div>{" "}
+                    </div>{' '}
                     <div className="form-group full-width">
                       <label htmlFor="notes">Notes</label>
                       <textarea
@@ -408,11 +413,12 @@ const Treatments = () => {
                     <button
                       type="button"
                       className="cancel-button"
-                      onClick={resetForm}>
+                      onClick={resetForm}
+                    >
                       Cancel
                     </button>
                     <button type="submit" className="save-button">
-                      {editingTreatment ? "Update Treatment" : "Add Treatment"}
+                      {editingTreatment ? 'Update Treatment' : 'Add Treatment'}
                     </button>
                   </div>
                 </form>
@@ -430,7 +436,7 @@ const Treatments = () => {
         ) : (
           <div className="medical-items-list">
             <div className="medical-items-grid">
-              {getSortedTreatments().map((treatment) => (
+              {getSortedTreatments().map(treatment => (
                 <div key={treatment.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">
@@ -492,12 +498,14 @@ const Treatments = () => {
                   <div className="medical-item-actions">
                     <button
                       className="edit-button"
-                      onClick={() => handleEditTreatment(treatment)}>
+                      onClick={() => handleEditTreatment(treatment)}
+                    >
                       ✏️ Edit
                     </button>
                     <button
                       className="delete-button"
-                      onClick={() => handleDeleteTreatment(treatment.id)}>
+                      onClick={() => handleDeleteTreatment(treatment.id)}
+                    >
                       🗑️ Delete
                     </button>
                   </div>
