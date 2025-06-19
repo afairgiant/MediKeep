@@ -11,6 +11,8 @@ from app.schemas.treatment import (
     TreatmentWithRelations,
 )
 from app.core.logging_config import get_logger
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -34,9 +36,7 @@ def create_treatment(
     try:
         treatment_obj = treatment.create(db=db, obj_in=treatment_in)
         treatment_id = getattr(treatment_obj, "id", None)
-        patient_id = getattr(treatment_obj, "patient_id", None)
-
-        # Log successful treatment creation
+        patient_id = getattr(treatment_obj, "patient_id", None)        # Log successful treatment creation
         logger.info(
             "Treatment created successfully",
             extra={
@@ -48,6 +48,25 @@ def create_treatment(
                 "ip": user_ip,
             },
         )
+
+        # Log the creation activity
+        try:
+            description = f"New treatment: {getattr(treatment_obj, 'treatment_name', 'Unknown treatment')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(treatment_obj, 'patient_id', None),
+                action="created",
+                entity_type="treatment",
+                entity_id=getattr(treatment_obj, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging treatment creation activity: {e}")
 
         return treatment_obj
 
@@ -147,9 +166,7 @@ def update_treatment(
     try:
         updated_treatment = treatment.update(
             db=db, db_obj=treatment_obj, obj_in=treatment_in
-        )
-
-        # Log successful treatment update
+        )        # Log successful treatment update
         logger.info(
             f"Treatment updated successfully: {treatment_id}",
             extra={
@@ -161,6 +178,25 @@ def update_treatment(
                 "ip": user_ip,
             },
         )
+
+        # Log the update activity
+        try:
+            description = f"Updated treatment: {getattr(updated_treatment, 'treatment_name', 'Unknown treatment')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(updated_treatment, 'patient_id', None),
+                action="updated",
+                entity_type="treatment",
+                entity_id=getattr(updated_treatment, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging treatment update activity: {e}")
 
         return updated_treatment
 
@@ -212,6 +248,25 @@ def delete_treatment(
     patient_id = getattr(treatment_obj, "patient_id", None)
 
     try:
+        # Log the deletion activity BEFORE deleting
+        try:
+            description = f"Deleted treatment: {getattr(treatment_obj, 'treatment_name', 'Unknown treatment')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(treatment_obj, 'patient_id', None),
+                action="deleted",
+                entity_type="treatment",
+                entity_id=getattr(treatment_obj, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging treatment deletion activity: {e}")
+
         treatment.delete(db=db, id=treatment_id)
 
         # Log successful treatment deletion

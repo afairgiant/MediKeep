@@ -12,6 +12,8 @@ from app.schemas.vitals import (
     VitalsStats
 )
 from app.core.logging_config import get_logger
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -38,9 +40,7 @@ def create_vitals(
         # Use create_with_bmi to automatically calculate BMI if weight and height provided
         vitals_obj = vitals.create_with_bmi(db=db, obj_in=vitals_in)
         vitals_id = getattr(vitals_obj, "id", None)
-        patient_id = getattr(vitals_obj, "patient_id", None)
-
-        # Log successful vitals creation
+        patient_id = getattr(vitals_obj, "patient_id", None)        # Log successful vitals creation
         logger.info(
             "Vitals reading created successfully",
             extra={
@@ -52,6 +52,25 @@ def create_vitals(
                 "ip": user_ip,
             },
         )
+
+        # Log the creation activity
+        try:
+            description = f"New vitals: {getattr(vitals_obj, 'date_recorded', 'Unknown date')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(vitals_obj, 'patient_id', None),
+                action="created",
+                entity_type="vitals",
+                entity_id=getattr(vitals_obj, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging vitals creation activity: {e}")
 
         return vitals_obj
 
@@ -116,8 +135,7 @@ def update_vitals(
     vitals_obj = vitals.get(db=db, id=vitals_id)
     if not vitals_obj:
         raise HTTPException(status_code=404, detail="Vitals reading not found")
-    
-    # If weight and height are being updated, recalculate BMI
+      # If weight and height are being updated, recalculate BMI
     update_data = vitals_in.dict(exclude_unset=True)
     current_weight = update_data.get("weight", vitals_obj.weight)
     current_height = update_data.get("height", vitals_obj.height)
@@ -127,6 +145,26 @@ def update_vitals(
         update_data["bmi"] = bmi
     
     vitals_obj = vitals.update(db=db, db_obj=vitals_obj, obj_in=update_data)
+    
+    # Log the update activity
+    try:
+        description = f"Updated vitals: {getattr(vitals_obj, 'date_recorded', 'Unknown date')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(vitals_obj, 'patient_id', None),
+            action="updated",
+            entity_type="vitals",
+            entity_id=getattr(vitals_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging vitals update activity: {e}")
+    
     return vitals_obj
 
 
@@ -143,6 +181,26 @@ def delete_vitals(
     vitals_obj = vitals.get(db=db, id=vitals_id)
     if not vitals_obj:
         raise HTTPException(status_code=404, detail="Vitals reading not found")
+    
+    # Log the deletion activity BEFORE deleting
+    try:
+        description = f"Deleted vitals: {getattr(vitals_obj, 'date_recorded', 'Unknown date')}"
+        activity_log = ActivityLog(
+            user_id=current_user_id,
+            patient_id=getattr(vitals_obj, 'patient_id', None),
+            action="deleted",
+            entity_type="vitals",
+            entity_id=getattr(vitals_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception as e:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        print(f"Error logging vitals deletion activity: {e}")
+    
     db.delete(vitals_obj)
     db.commit()
     return {"message": "Vitals reading deleted successfully"}

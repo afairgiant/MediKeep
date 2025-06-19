@@ -14,7 +14,8 @@ from app.schemas.lab_result_file import (
     LabResultFileResponse,
     FileBatchOperation,
 )
-from app.models.models import User, LabResultFile
+from app.models.models import User, LabResultFile, get_utc_now
+from app.models.activity_log import ActivityLog
 import os
 import uuid
 from pathlib import Path
@@ -64,10 +65,28 @@ def create_lab_result_file(
         )
 
     # Check if user has access to this lab result (assuming patient ownership or admin)
-    # This would need to be implemented based on your user model and permissions
-
-    # Create the file entry
+    # This would need to be implemented based on your user model and permissions    # Create the file entry
     file_obj = lab_result_file.create(db=db, obj_in=file_in)
+    
+    # Log the creation activity
+    try:
+        description = f"New lab result file: {getattr(file_obj, 'file_name', 'Unknown file')}"
+        activity_log = ActivityLog(
+            user_id=current_user.id,
+            patient_id=getattr(lab_result_obj, 'patient_id', None),
+            action="created",
+            entity_type="lab_result_file",
+            entity_id=getattr(file_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+    
     return file_obj
 
 
@@ -142,11 +161,30 @@ async def upload_file(
         file_path=file_path,
         file_type=file.content_type,
         file_size=len(file_content),
-        description=description,
-        uploaded_at=datetime.utcnow(),
+        description=description,        uploaded_at=datetime.utcnow(),
     )
-
+    
     file_obj = lab_result_file.create(db=db, obj_in=file_create)
+    
+    # Log the upload activity
+    try:
+        description = f"Uploaded lab result file: {file.filename}"
+        activity_log = ActivityLog(
+            user_id=current_user.id,
+            patient_id=getattr(lab_result_obj, 'patient_id', None),
+            action="created",
+            entity_type="lab_result_file",
+            entity_id=getattr(file_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+    
     return file_obj
 
 
@@ -239,6 +277,26 @@ def update_lab_result_file(
         )
 
     file_obj = lab_result_file.update(db=db, db_obj=file_obj, obj_in=file_in)
+    
+    # Log the update activity
+    try:
+        description = f"Updated lab result file: {getattr(file_obj, 'file_name', 'Unknown file')}"
+        activity_log = ActivityLog(
+            user_id=current_user.id,
+            patient_id=None,  # Lab result file doesn't directly have patient_id, would need to join
+            action="updated",
+            entity_type="lab_result_file",
+            entity_id=getattr(file_obj, 'id', 0),
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+    
     return file_obj
 
 
@@ -256,8 +314,9 @@ def delete_lab_result_file(
     if not file_obj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
-        )
-
+        )    # Store name before deletion for logging
+    file_name = getattr(file_obj, 'file_name', 'Unknown file')
+    
     # Delete physical file
     try:
         file_path = getattr(file_obj, "file_path", None)
@@ -269,6 +328,26 @@ def delete_lab_result_file(
 
     # Delete from database
     lab_result_file.delete(db=db, id=file_id)
+    
+    # Log the delete activity
+    try:
+        description = f"Deleted lab result file: {file_name}"
+        activity_log = ActivityLog(
+            user_id=current_user.id,
+            patient_id=None,  # Lab result file doesn't directly have patient_id, would need to join
+            action="deleted",
+            entity_type="lab_result_file",
+            entity_id=file_id,
+            description=description,
+            timestamp=get_utc_now(),
+        )
+        db.add(activity_log)
+        db.commit()
+    except Exception:
+        # Don't fail the main operation if logging fails
+        db.rollback()
+        pass
+    
     return {"message": "Lab result file deleted successfully"}
 
 

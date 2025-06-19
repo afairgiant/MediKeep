@@ -178,7 +178,6 @@ const Dashboard = () => {
               link={item.link}
             />
           ))}
-
           {/* Secondary/smaller items section */}
           <div className="secondary-items">
             <h3>Additional Resources</h3>
@@ -193,18 +192,32 @@ const Dashboard = () => {
                 />
               ))}
             </div>
-          </div>
-
+          </div>{' '}
           <div className="recent-activity">
-            <h3>Recent Activity</h3>
+            <h3>Recent Medical Activity</h3>
             {recentActivity.length > 0 ? (
               <ul>
                 {recentActivity.map((activity, index) => (
-                  <li key={index}>{activity.description}</li>
+                  <li key={index} className="activity-item">
+                    <div className="activity-content">
+                      <span className="activity-description">
+                        {activity.description}
+                      </span>
+                      <span className="activity-time">
+                        {new Date(activity.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </li>
                 ))}
               </ul>
             ) : (
-              <p>No recent activity to display.</p>
+              <div className="no-activity">
+                <p>No recent medical activity to display.</p>
+                <p>
+                  Start by adding medications, lab results, or other medical
+                  information.
+                </p>
+              </div>
             )}
           </div>
         </div>

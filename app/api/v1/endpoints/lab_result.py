@@ -26,6 +26,8 @@ from app.schemas.lab_result import (
     LabResultWithRelations,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
+from app.models.activity_log import ActivityLog
+from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -71,6 +73,26 @@ def create_lab_result(
     """
     try:
         db_lab_result = lab_result.create(db, obj_in=lab_result_in)
+        
+        # Log the creation activity
+        try:
+            description = f"New lab result: {getattr(db_lab_result, 'test_name', 'Unknown test')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(db_lab_result, 'patient_id', None),
+                action="created",
+                entity_type="lab_result",
+                entity_id=getattr(db_lab_result, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging lab result creation activity: {e}")
+        
         return db_lab_result
     except Exception as e:
         raise HTTPException(
@@ -84,7 +106,7 @@ def update_lab_result(
     lab_result_in: LabResultUpdate,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-):
+    ):    
     """
     Update an existing lab result
     """
@@ -96,6 +118,26 @@ def update_lab_result(
         updated_lab_result = lab_result.update(
             db, db_obj=db_lab_result, obj_in=lab_result_in
         )
+        
+        # Log the update activity
+        try:
+            description = f"Updated lab result: {getattr(updated_lab_result, 'test_name', 'Unknown test')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(updated_lab_result, 'patient_id', None),
+                action="updated",
+                entity_type="lab_result",
+                entity_id=getattr(updated_lab_result, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging lab result update activity: {e}")
+        
         return updated_lab_result
     except Exception as e:
         raise HTTPException(
@@ -108,7 +150,7 @@ def delete_lab_result(
     lab_result_id: int,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-):
+    ):    
     """
     Delete a lab result and associated files
     """
@@ -117,6 +159,25 @@ def delete_lab_result(
         raise HTTPException(status_code=404, detail="Lab result not found")
 
     try:
+        # Log the deletion activity BEFORE deleting
+        try:
+            description = f"Deleted lab result: {getattr(db_lab_result, 'test_name', 'Unknown test')}"
+            activity_log = ActivityLog(
+                user_id=current_user_id,
+                patient_id=getattr(db_lab_result, 'patient_id', None),
+                action="deleted",
+                entity_type="lab_result",
+                entity_id=getattr(db_lab_result, 'id', 0),
+                description=description,
+                timestamp=get_utc_now(),
+            )
+            db.add(activity_log)
+            db.commit()
+        except Exception as e:
+            # Don't fail the main operation if logging fails
+            db.rollback()
+            print(f"Error logging lab result deletion activity: {e}")
+
         # Delete associated files first
         lab_result_file.delete_by_lab_result(db, lab_result_id=lab_result_id)
 
