@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Visits = () => {
   const navigate = useNavigate();
   const [visits, setVisits] = useState([]);
   const [patientData, setPatientData] = useState(null);
   const [practitioners, setPractitioners] = useState([]);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -182,13 +186,22 @@ const Visits = () => {
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddVisit}>
               + Add Visit
             </button>
           </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
+          </div>
+
           <div className="controls-right">
             <div className="search-container">
               <input
@@ -229,11 +242,10 @@ const Visits = () => {
               </button>
             )}
           </div>
-        ) : (
+        ) : viewMode === 'cards' ? (
           <div className="medical-items-grid">
             {filteredVisits.map(visit => (
               <div key={visit.id} className="medical-item-card">
-                {' '}
                 <div className="medical-item-header">
                   <div className="medical-item-info">
                     <h3>{visit.reason || 'General Visit'}</h3>
@@ -270,8 +282,38 @@ const Visits = () => {
                   )}
                 </div>
               </div>
-            ))}{' '}
+            ))}
           </div>
+        ) : (
+          <MedicalTable
+            data={filteredVisits}
+            columns={[
+              { header: 'Visit Date', accessor: 'date' },
+              { header: 'Reason', accessor: 'reason' },
+              { header: 'Practitioner', accessor: 'practitioner_name' },
+              { header: 'Notes', accessor: 'notes' },
+            ]}
+            patientData={patientData}
+            tableName="Visit History"
+            onEdit={handleEditVisit}
+            onDelete={handleDeleteVisit}
+            formatters={{
+              date: value => (
+                <span className="primary-field">{formatDate(value)}</span>
+              ),
+              reason: value => value || 'General Visit',
+              practitioner_name: (value, item) =>
+                getPractitionerDisplay(item.practitioner_id),
+              notes: value =>
+                value ? (
+                  <span title={value}>
+                    {value.length > 50 ? `${value.substring(0, 50)}...` : value}
+                  </span>
+                ) : (
+                  '-'
+                ),
+            }}
+          />
         )}
       </div>
 

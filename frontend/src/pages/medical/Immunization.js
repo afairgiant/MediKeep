@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Immunization = () => {
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
   const {
@@ -207,13 +211,20 @@ const Immunization = () => {
         )}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
-
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddImmunization}>
               + Add New Immunization
             </button>
+          </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
           </div>
 
           <div className="controls-right">
@@ -237,7 +248,6 @@ const Immunization = () => {
             </div>
           </div>
         </div>
-
         {showAddForm && (
           <div
             className="medical-form-overlay"
@@ -402,8 +412,7 @@ const Immunization = () => {
               </div>
             </div>
           </div>
-        )}
-
+        )}{' '}
         <div className="medical-items-list">
           {getSortedImmunizations().length === 0 ? (
             <div className="empty-state">
@@ -411,7 +420,7 @@ const Immunization = () => {
               <h3>No immunizations found</h3>
               <p>Click "Add New Immunization" to get started.</p>
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
               {getSortedImmunizations().map(immunization => (
                 <div key={immunization.id} className="medical-item-card">
@@ -509,6 +518,49 @@ const Immunization = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <MedicalTable
+              data={getSortedImmunizations()}
+              columns={[
+                { header: 'Vaccine Name', accessor: 'vaccine_name' },
+                { header: 'Date Administered', accessor: 'date_administered' },
+                { header: 'Dose Number', accessor: 'dose_number' },
+                { header: 'Manufacturer', accessor: 'manufacturer' },
+                { header: 'Site', accessor: 'site' },
+                { header: 'Route', accessor: 'route' },
+                { header: 'Lot Number', accessor: 'lot_number' },
+                { header: 'Expiration Date', accessor: 'expiration_date' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={currentPatient}
+              tableName="Immunizations"
+              onEdit={handleEditImmunization}
+              onDelete={handleDeleteImmunization}
+              formatters={{
+                vaccine_name: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                date_administered: value => formatDate(value),
+                expiration_date: value => (value ? formatDate(value) : '-'),
+                site: value =>
+                  value
+                    ? value
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, l => l.toUpperCase())
+                    : '-',
+                dose_number: value => (value ? `Dose ${value}` : '-'),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           )}
         </div>
       </div>

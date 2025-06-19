@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Allergies = () => {
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
   const {
@@ -207,13 +211,20 @@ const Allergies = () => {
         )}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
-
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddAllergy}>
               + Add New Allergy
             </button>
+          </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
           </div>
 
           <div className="controls-right">
@@ -238,7 +249,6 @@ const Allergies = () => {
             </div>
           </div>
         </div>
-
         {showAddForm && (
           <div
             className="medical-form-overlay"
@@ -356,8 +366,7 @@ const Allergies = () => {
               </div>
             </div>
           </div>
-        )}
-
+        )}{' '}
         <div className="medical-items-list">
           {getSortedAllergies().length === 0 ? (
             <div className="empty-state">
@@ -365,7 +374,7 @@ const Allergies = () => {
               <h3>No allergies found</h3>
               <p>Click "Add New Allergy" to get started.</p>
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
               {getSortedAllergies().map(allergy => (
                 <div key={allergy.id} className="medical-item-card">
@@ -432,6 +441,48 @@ const Allergies = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <MedicalTable
+              data={getSortedAllergies()}
+              columns={[
+                { header: 'Allergen', accessor: 'allergen' },
+                { header: 'Reaction', accessor: 'reaction' },
+                { header: 'Severity', accessor: 'severity' },
+                { header: 'Onset Date', accessor: 'onset_date' },
+                { header: 'Status', accessor: 'status' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={currentPatient}
+              tableName="Allergies"
+              onEdit={handleEditAllergy}
+              onDelete={handleDeleteAllergy}
+              formatters={{
+                allergen: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                severity: value => (
+                  <span className={`status-badge-small status-${value}`}>
+                    {getSeverityIcon(value)} {value}
+                  </span>
+                ),
+                status: value => (
+                  <span className={`status-badge-small status-${value}`}>
+                    {value}
+                  </span>
+                ),
+                onset_date: value => (value ? formatDate(value) : '-'),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           )}
         </div>
       </div>

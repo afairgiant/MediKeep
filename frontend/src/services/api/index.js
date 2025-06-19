@@ -84,24 +84,18 @@ class ApiService {
       return response.blob();
     }
     return response.text();
-  } // Core request method with logging and fallback
+  }  // Core request method with logging and fallback
   async request(method, url, data = null, options = {}) {
     const { signal, headers: customHeaders = {}, responseType } = options;
 
-    // Get token and validate it exists
-    const token = localStorage.getItem('token');
-    if (!token) {
-      logger.error('No authentication token found');
-      throw new Error('Authentication required. Please log in again.');
-    }
-
-    const config = {
+    // Get token but don't fail if it doesn't exist - let backend handle authentication
+    const token = localStorage.getItem('token');    const config = {
       method,
       signal,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: `Bearer ${token}`, // Always include auth token
+        ...(token && { Authorization: `Bearer ${token}` }), // Only include auth token if available
         ...customHeaders,
       },
     };

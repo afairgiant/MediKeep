@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { MedicalCard, StatusBadge } from '../../components';
+import {
+  formatPhoneNumber,
+  formatPhoneInput,
+  cleanPhoneNumber,
+} from '../../utils/phoneUtils';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -76,12 +81,11 @@ const Practitioners = () => {
   };
 
   const handleEditPractitioner = practitioner => {
-    setEditingPractitioner(practitioner);
-    setFormData({
+    setEditingPractitioner(practitioner);    setFormData({
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
       practice: practitioner.practice || '',
-      phone_number: practitioner.phone_number || '',
+      phone_number: formatPhoneNumber(practitioner.phone_number) || '',
       website: practitioner.website || '',
       rating: practitioner.rating || '',
     });
@@ -105,15 +109,20 @@ const Practitioners = () => {
       }
     }
   };
-
   const handleSubmit = async e => {
     e.preventDefault();
     try {
+      // Clean the phone number before sending to API (remove formatting)
+      const dataToSubmit = {
+        ...formData,
+        phone_number: cleanPhoneNumber(formData.phone_number) || null
+      };
+      
       if (editingPractitioner) {
-        await apiService.updatePractitioner(editingPractitioner.id, formData);
+        await apiService.updatePractitioner(editingPractitioner.id, dataToSubmit);
         setSuccessMessage('Practitioner updated successfully');
       } else {
-        await apiService.createPractitioner(formData);
+        await apiService.createPractitioner(dataToSubmit);
         setSuccessMessage('Practitioner added successfully');
       }
 
@@ -125,13 +134,22 @@ const Practitioners = () => {
       console.error('Error saving practitioner:', err);
     }
   };
-
   const handleInputChange = e => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    if (name === 'phone_number') {
+      // Format phone number as user types
+      const formattedValue = formatPhoneInput(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   // Get unique specialties from practitioners for filter
@@ -296,12 +314,11 @@ const Practitioners = () => {
                 <div className="detail-item">
                   <span className="detail-label">Practice</span>
                   <span className="detail-value">{practitioner.practice}</span>
-                </div>
-                {practitioner.phone_number && (
+                </div>                {practitioner.phone_number && (
                   <div className="detail-item">
                     <span className="detail-label">Phone</span>
                     <span className="detail-value">
-                      {practitioner.phone_number}
+                      {formatPhoneNumber(practitioner.phone_number)}
                     </span>
                   </div>
                 )}

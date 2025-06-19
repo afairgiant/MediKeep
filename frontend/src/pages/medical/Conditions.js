@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Conditions = () => {
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
   const {
@@ -174,13 +178,22 @@ const Conditions = () => {
         )}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddCondition}>
               + Add Condition
             </button>
           </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
+          </div>
+
           <div className="controls-right">
             <div className="search-container">
               <input
@@ -237,7 +250,7 @@ const Conditions = () => {
                 </button>
               )}
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
               {filteredConditions.map(condition => (
                 <div key={condition.id} className="medical-item-card">
@@ -289,6 +302,41 @@ const Conditions = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <MedicalTable
+              data={filteredConditions}
+              columns={[
+                { header: 'Condition', accessor: 'diagnosis' },
+                { header: 'Onset Date', accessor: 'onset_date' },
+                { header: 'Status', accessor: 'status' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={currentPatient}
+              tableName="Conditions"
+              onEdit={handleEditCondition}
+              onDelete={handleDeleteCondition}
+              formatters={{
+                diagnosis: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                onset_date: value => (value ? formatDate(value) : '-'),
+                status: value => (
+                  <span className={`status-badge-small status-${value}`}>
+                    {value}
+                  </span>
+                ),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           )}
         </div>
       </div>

@@ -2,12 +2,16 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDateTime } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/LabResults.css';
+import '../../styles/pages/MedicationTable.css';
 
 const LabResults = () => {
   const [labResults, setLabResults] = useState([]);
   const [filesCounts, setFilesCounts] = useState({}); // Track file counts per lab result
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -579,7 +583,7 @@ const LabResults = () => {
       </header>
 
       <div className="medical-page-content">
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">{error}</div>}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button
@@ -588,6 +592,14 @@ const LabResults = () => {
             >
               + Add New Lab Result
             </button>
+          </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
           </div>
 
           <div className="controls-right">
@@ -1158,7 +1170,7 @@ const LabResults = () => {
               </div>
             </div>
           </div>
-        )}
+        )}{' '}
         {/* Lab Results List */}
         <div className="medical-items-list">
           {labResults.length === 0 ? (
@@ -1167,14 +1179,9 @@ const LabResults = () => {
               <h3>No lab results found</h3>
               <p>Click "Add New Lab Result" to get started.</p>
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {' '}
               {labResults.map(result => {
-                console.log(
-                  `Rendering lab result ${result.id}, file count:`,
-                  filesCounts[result.id]
-                );
                 return (
                   <div key={result.id} className="medical-item-card">
                     <div className="medical-item-header">
@@ -1265,6 +1272,48 @@ const LabResults = () => {
                 );
               })}
             </div>
+          ) : (
+            <MedicalTable
+              data={labResults}
+              columns={[
+                { header: 'Test Name', accessor: 'test_name' },
+                { header: 'Test Code', accessor: 'test_code' },
+                { header: 'Category', accessor: 'test_category' },
+                { header: 'Type', accessor: 'test_type' },
+                { header: 'Facility', accessor: 'facility' },
+                { header: 'Status', accessor: 'status' },
+                { header: 'Ordered Date', accessor: 'ordered_date' },
+                { header: 'Completed Date', accessor: 'completed_date' },
+                { header: 'Files', accessor: 'files' },
+              ]}
+              patientData={currentPatient}
+              tableName="Lab Results"
+              onView={handleViewDetails}
+              onEdit={handleEditLabResult}
+              onDelete={handleDeleteLabResult}
+              formatters={{
+                test_name: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                status: value => (
+                  <span
+                    className={`status-badge-small status-${value.replace(/\s+/g, '-')}`}
+                  >
+                    {value}
+                  </span>
+                ),
+                ordered_date: value => formatDateTime(value),
+                completed_date: value => (value ? formatDateTime(value) : '-'),
+                files: (value, item) =>
+                  filesCounts[item.id] > 0 ? (
+                    <span className="file-indicator">
+                      📎 {filesCounts[item.id]}
+                    </span>
+                  ) : (
+                    <span className="no-files">None</span>
+                  ),
+              }}
+            />
           )}
         </div>{' '}
         {/* Lab Result Details Modal */}

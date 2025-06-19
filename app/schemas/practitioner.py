@@ -76,18 +76,26 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practice must be at least 2 characters long")
         if len(v) > 100:
             raise ValueError("Practice must be less than 100 characters")
-        return v.strip()
-
+        return v.strip()    
     @validator("phone_number")
     def validate_phone_number(cls, v):
         """
-        Validate phone number field.
+        Validate and clean phone number field.
+        
+        Accepts various formats like:
+        - (919) 555-1234
+        - 919-555-1234  
+        - 919.555.1234
+        - 9195551234
+        - +1 919 555 1234
+        
+        Stores as digits only for consistency.
 
         Args:
             v: The phone number value to validate
 
         Returns:
-            Cleaned phone number
+            Cleaned phone number (digits only) or None
 
         Raises:
             ValueError: If phone number format is invalid
@@ -95,14 +103,20 @@ class PractitionerBase(BaseModel):
         if v is None or v.strip() == "":
             return None
         
-        # Remove all non-digit characters for validation
+        # Remove all non-digit characters for validation and storage
         digits_only = re.sub(r'[^\d]', '', v)
+        
+        # Handle international numbers with country code
+        if digits_only.startswith('1') and len(digits_only) == 11:
+            # US/Canada number with country code - remove the leading 1
+            digits_only = digits_only[1:]
         
         # Check if it's a reasonable phone number length (10-15 digits)
         if len(digits_only) < 10 or len(digits_only) > 15:
             raise ValueError("Phone number must be between 10-15 digits")
         
-        return v.strip()
+        # Return digits only for consistent storage
+        return digits_only
 
     @validator("website")
     def validate_website(cls, v):

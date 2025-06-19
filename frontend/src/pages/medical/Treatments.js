@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Treatments = () => {
   const navigate = useNavigate();
   const [treatments, setTreatments] = useState([]);
   const [patientData, setPatientData] = useState(null);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -251,13 +255,19 @@ const Treatments = () => {
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
-
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddTreatment}>
               + Add New Treatment
             </button>
+          </div>
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
           </div>
           <div className="controls-right">
             <div className="sort-controls">
@@ -281,7 +291,6 @@ const Treatments = () => {
             </div>
           </div>{' '}
         </div>
-
         {showAddForm && (
           <div
             className="medical-form-overlay"
@@ -425,15 +434,14 @@ const Treatments = () => {
               </div>
             </div>
           </div>
-        )}
-
+        )}{' '}
         {getSortedTreatments().length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🩹</div>
             <h3>No treatments found</h3>
             <p>Click "Add New Treatment" to get started.</p>
           </div>
-        ) : (
+        ) : viewMode === 'cards' ? (
           <div className="medical-items-list">
             <div className="medical-items-grid">
               {getSortedTreatments().map(treatment => (
@@ -512,6 +520,48 @@ const Treatments = () => {
                 </div>
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="medical-items-list">
+            <MedicalTable
+              data={getSortedTreatments()}
+              columns={[
+                { header: 'Treatment Name', accessor: 'treatment_name' },
+                { header: 'Type', accessor: 'treatment_type' },
+                { header: 'Start Date', accessor: 'start_date' },
+                { header: 'End Date', accessor: 'end_date' },
+                { header: 'Status', accessor: 'status' },
+                { header: 'Dosage', accessor: 'dosage' },
+                { header: 'Frequency', accessor: 'frequency' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={patientData}
+              tableName="Treatments"
+              onEdit={handleEditTreatment}
+              onDelete={handleDeleteTreatment}
+              formatters={{
+                treatment_name: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                start_date: value => (value ? formatDate(value) : '-'),
+                end_date: value => (value ? formatDate(value) : '-'),
+                status: value => (
+                  <span className={`status-badge-small status-${value}`}>
+                    {getStatusIcon(value)} {value}
+                  </span>
+                ),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           </div>
         )}
       </div>

@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import MedicalTable from '../../components/shared/MedicalTable';
+import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
+import '../../styles/pages/MedicationTable.css';
 
 const Procedures = () => {
   const [procedures, setProcedures] = useState([]);
   const [patientData, setPatientData] = useState(null);
   const [practitioners, setPractitioners] = useState([]);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -248,13 +252,22 @@ const Procedures = () => {
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
-        )}
+        )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddProcedure}>
               + Add Procedure
             </button>
           </div>
+
+          <div className="controls-center">
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              showPrint={true}
+            />
+          </div>
+
           <div className="controls-right">
             <div className="search-container">
               <input
@@ -457,14 +470,12 @@ const Procedures = () => {
                 </button>
               )}
             </div>
-          ) : (
+          ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
               {filteredProcedures.map(procedure => (
                 <div key={procedure.id} className="medical-item-card">
                   <div className="medical-item-header">
-                    {' '}
                     <div className="item-info">
-                      {' '}
                       <h3 className="item-title">
                         <span className="type-icon">
                           {getProcedureTypeIcon(procedure.code)}
@@ -482,14 +493,14 @@ const Procedures = () => {
                         {getStatusIcon(procedure.status)} {procedure.status}
                       </span>
                     </div>
-                  </div>{' '}
+                  </div>
                   <div className="medical-item-details">
                     {procedure.date && (
                       <div className="detail-item">
                         <span className="label">Procedure Date:</span>
                         <span className="value">
                           {formatDate(procedure.date)}
-                        </span>{' '}
+                        </span>
                       </div>
                     )}
                     {procedure.facility && (
@@ -541,6 +552,62 @@ const Procedures = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <MedicalTable
+              data={filteredProcedures}
+              columns={[
+                { header: 'Procedure Name', accessor: 'procedure_name' },
+                { header: 'Code', accessor: 'code' },
+                { header: 'Date', accessor: 'date' },
+                { header: 'Status', accessor: 'status' },
+                { header: 'Facility', accessor: 'facility' },
+                { header: 'Practitioner', accessor: 'practitioner_name' },
+                { header: 'Description', accessor: 'description' },
+                { header: 'Notes', accessor: 'notes' },
+              ]}
+              patientData={patientData}
+              tableName="Procedures"
+              onEdit={handleEditProcedure}
+              onDelete={handleDeleteProcedure}
+              formatters={{
+                procedure_name: value => (
+                  <span className="primary-field">{value}</span>
+                ),
+                date: value => (value ? formatDate(value) : '-'),
+                status: value => (
+                  <span className={`status-badge-small status-${value}`}>
+                    {getStatusIcon(value)} {value}
+                  </span>
+                ),
+                practitioner_name: (value, item) => {
+                  if (!item.practitioner_id) return '-';
+                  return (
+                    practitioners.find(p => p.id === item.practitioner_id)
+                      ?.name || `Practitioner ID: ${item.practitioner_id}`
+                  );
+                },
+                description: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+                notes: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 50
+                        ? `${value.substring(0, 50)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+              }}
+            />
           )}
         </div>
       </div>
