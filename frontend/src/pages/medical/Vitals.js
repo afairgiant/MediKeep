@@ -9,6 +9,8 @@ import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
 import VitalsChart from '../../components/medical/VitalsChart';
 import { vitalsService } from '../../services/medical/vitalsService';
+import { useMedicalData } from '../../hooks/useMedicalData';
+import { apiService } from '../../services/api';
 import '../../styles/shared/MedicalPageShared.css';
 import './Vitals.css';
 
@@ -16,10 +18,23 @@ const Vitals = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingVitals, setEditingVitals] = useState(null);
   const [refreshList, setRefreshList] = useState(0);
-  const [currentPatient, setCurrentPatient] = useState(null);
-  // const [currentPractitioner, setCurrentPractitioner] = useState(null); // Disabled until practitioners are implemented
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('list');
+
+  // Use the medical data hook to get current patient
+  const { currentPatient } = useMedicalData({
+    entityName: 'vitals',
+    apiMethodsConfig: {
+      getAll: signal => apiService.getVitals(signal),
+      getByPatient: (patientId, signal) =>
+        apiService.getPatientVitals(patientId, signal),
+      create: (data, signal) => apiService.createVitals(data, signal),
+      update: (id, data, signal) => apiService.updateVitals(id, data, signal),
+      delete: (id, signal) => apiService.deleteVitals(id, signal),
+    },
+    requiresPatient: true,
+  });
+
   const loadStats = useCallback(async () => {
     if (!currentPatient?.id) return;
 
@@ -27,24 +42,22 @@ const Vitals = () => {
       const statsResponse = await vitalsService.getPatientVitalsStats(
         currentPatient.id
       );
-      console.log('Received stats response:', statsResponse);
 
-      // Extract the data from the response (same issue as with vitals list)
+      // Extract the data from the response
       const statsData = statsResponse?.data || statsResponse;
-      console.log('Extracted stats data:', statsData);
       setStats(statsData);
     } catch (error) {
-      console.error('Error loading stats:', error);
-      // Stats are optional, don't show error
+      // Stats are optional, don't show error to user
+      setStats(null);
     }
   }, [currentPatient?.id]);
+
   useEffect(() => {
-    // Load current patient and practitioner info
-    // This would typically come from context or authentication
-    setCurrentPatient({ id: 1, name: 'John Doe' }); // Mock data
-    // setCurrentPractitioner({ id: 1, name: 'Dr. Smith' }); // Commented out until practitioners exist
-    loadStats();
-  }, [loadStats]);
+    // Load stats when current patient is available
+    if (currentPatient) {
+      loadStats();
+    }
+  }, [loadStats, currentPatient]);
 
   const handleAddNew = () => {
     setEditingVitals(null);
@@ -94,7 +107,7 @@ const Vitals = () => {
     <div className="medical-page-container">
       <div className="medical-page-header">
         <Link to="/dashboard" className="back-button">
-          ← Back to Dashboard
+          ← Back to Dashboard{' '}
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '1.5rem' }}>🩺</span>

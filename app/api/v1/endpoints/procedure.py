@@ -56,32 +56,21 @@ def read_procedures(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    practitioner_id: Optional[int] = Query(None),
-    status: Optional[str] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    practitioner_id: Optional[int] = Query(None),    status: Optional[str] = Query(None),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve procedures for the current user with optional filtering.
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    user_patient_id = getattr(patient_record, "id")
-    
     # Filter procedures by the user's patient_id (ignore any provided patient_id for security)
     if status:
-        procedures = procedure.get_by_status(db, status=status, patient_id=user_patient_id)
+        procedures = procedure.get_by_status(db, status=status, patient_id=current_user_patient_id)
     elif practitioner_id:
         procedures = procedure.get_by_practitioner(
-            db, practitioner_id=practitioner_id, skip=skip, limit=limit
+            db, practitioner_id=practitioner_id, patient_id=current_user_patient_id, skip=skip, limit=limit
         )
-        # Further filter by user's patient_id
-        procedures = [proc for proc in procedures if getattr(proc, 'patient_id') == user_patient_id]
     else:
-        procedures = procedure.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
+        procedures = procedure.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
     return procedures
 
 
@@ -90,14 +79,20 @@ def read_procedure(
     *,
     db: Session = Depends(deps.get_db),
     procedure_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
-    Get procedure by ID with related information.
+    Get procedure by ID with related information - only allows access to user's own procedures.
     """
     procedure_obj = procedure.get_with_relations(db, procedure_id=procedure_id)
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
+    
+    # Security check: ensure the procedure belongs to the current user
+    deps.verify_patient_record_access(
+        getattr(procedure_obj, 'patient_id'), current_user_patient_id, "procedure"
+    )
+    
     return procedure_obj
 
 

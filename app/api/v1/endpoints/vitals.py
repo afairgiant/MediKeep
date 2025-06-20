@@ -96,21 +96,13 @@ def read_vitals(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve vitals readings for the current user.
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    patient_id = getattr(patient_record, "id")
-    
     # Filter vitals by the user's patient_id
-    vitals_list = vitals.get_by_patient(db=db, patient_id=patient_id, skip=skip, limit=limit)
+    vitals_list = vitals.get_by_patient(db=db, patient_id=current_user_patient_id, skip=skip, limit=limit)
     return vitals_list
 
 
@@ -119,14 +111,20 @@ def read_vitals_by_id(
     *,
     db: Session = Depends(deps.get_db),
     vitals_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
-    Get vitals reading by ID.
+    Get vitals reading by ID - only allows access to user's own vitals.
     """
     vitals_obj = vitals.get(db=db, id=vitals_id)
     if not vitals_obj:
         raise HTTPException(status_code=404, detail="Vitals reading not found")
+    
+    # Security check: ensure the vitals belongs to the current user
+    deps.verify_patient_record_access(
+        getattr(vitals_obj, 'patient_id'), current_user_patient_id, "vitals"
+    )
+    
     return vitals_obj
 
 
@@ -323,3 +321,16 @@ def create_patient_vitals(
         db=db,
         current_user_id=current_user_id
     )
+
+
+@router.get("/stats", response_model=VitalsStats)
+def read_current_user_vitals_stats(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """
+    Get vitals statistics for the current user.
+    """
+    stats = vitals.get_vitals_stats(db=db, patient_id=current_user_patient_id)
+    return stats

@@ -95,30 +95,20 @@ def read_treatments(
     patient_id: Optional[int] = Query(None),
     condition_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve treatments for the current user with optional filtering.
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    user_patient_id = getattr(patient_record, "id")
-    
     # Filter treatments by the user's patient_id (ignore any provided patient_id for security)
     if status:
-        treatments = treatment.get_by_status(db, status=status, patient_id=user_patient_id)
+        treatments = treatment.get_by_status(db, status=status, patient_id=current_user_patient_id)
     elif condition_id:
         treatments = treatment.get_by_condition(
-            db, condition_id=condition_id, skip=skip, limit=limit
+            db, condition_id=condition_id, patient_id=current_user_patient_id, skip=skip, limit=limit
         )
-        # Further filter by user's patient_id
-        treatments = [treat for treat in treatments if getattr(treat, 'patient_id') == user_patient_id]
     else:
-        treatments = treatment.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
+        treatments = treatment.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
     return treatments
 
 
@@ -127,14 +117,20 @@ def read_treatment(
     *,
     db: Session = Depends(deps.get_db),
     treatment_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
-    Get treatment by ID with related information.
+    Get treatment by ID with related information - only allows access to user's own treatments.
     """
     treatment_obj = treatment.get_with_relations(db, treatment_id=treatment_id)
     if not treatment_obj:
         raise HTTPException(status_code=404, detail="Treatment not found")
+    
+    # Security check: ensure the treatment belongs to the current user
+    deps.verify_patient_record_access(
+        getattr(treatment_obj, 'patient_id'), current_user_patient_id, "treatment"
+    )
+    
     return treatment_obj
 
 

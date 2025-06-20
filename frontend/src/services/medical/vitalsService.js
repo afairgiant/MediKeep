@@ -271,6 +271,24 @@ class VitalsService {
       warnings,
     };
   }
+
+  /**
+   * Get vitals statistics for the current user
+   * @param {Object} params - Query parameters (start_date, end_date)
+   * @returns {Promise<Object>}
+   */
+  async getVitalsStats(params = {}) {
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const url = queryParams
+        ? `/vitals/stats?${queryParams}`
+        : `/vitals/stats`;
+      return await apiClient.get(url);
+    } catch (error) {
+      // Error fetching current user vitals stats
+      throw error;
+    }
+  }
 }
 
 export const vitalsService = new VitalsService();

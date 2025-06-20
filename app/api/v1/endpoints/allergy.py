@@ -56,28 +56,19 @@ def read_allergies(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    severity: Optional[str] = Query(None),
-    allergen: Optional[str] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    severity: Optional[str] = Query(None),    allergen: Optional[str] = Query(None),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve allergies for the current user with optional filtering.
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    user_patient_id = getattr(patient_record, "id")
-    
     # Filter allergies by the user's patient_id (ignore any provided patient_id for security)
     if severity:
-        allergies = allergy.get_by_severity(db, severity=severity, patient_id=user_patient_id)
+        allergies = allergy.get_by_severity(db, severity=severity, patient_id=current_user_patient_id)
     elif allergen:
-        allergies = allergy.get_by_allergen(db, allergen=allergen, patient_id=user_patient_id)
+        allergies = allergy.get_by_allergen(db, allergen=allergen, patient_id=current_user_patient_id)
     else:
-        allergies = allergy.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
+        allergies = allergy.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
     return allergies
 
 
@@ -86,27 +77,20 @@ def read_allergy(
     *,
     db: Session = Depends(deps.get_db),
     allergy_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Get allergy by ID with related information - only allows access to user's own allergies.
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    user_patient_id = getattr(patient_record, "id")
-    
     # Get allergy and verify it belongs to the user
     allergy_obj = allergy.get_with_relations(db, allergy_id=allergy_id)
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
     
     # Security check: ensure the allergy belongs to the current user
-    if getattr(allergy_obj, 'patient_id') != user_patient_id:
-        raise HTTPException(status_code=404, detail="Allergy not found")
+    deps.verify_patient_record_access(
+        getattr(allergy_obj, 'patient_id'), current_user_patient_id, "allergy"
+    )
     
     return allergy_obj
 

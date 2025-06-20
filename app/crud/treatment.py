@@ -26,8 +26,7 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
         Returns:
             List of treatments for the patient
         """
-        return (
-            db.query(Treatment)
+        return (            db.query(Treatment)
             .filter(Treatment.patient_id == patient_id)
             .order_by(Treatment.start_date.desc())
             .offset(skip)
@@ -35,22 +34,27 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
             .all()
         )
 
-    def get_by_condition(self, db: Session, *, condition_id: int, skip: int = 0, limit: int = 100) -> List[Treatment]:
+    def get_by_condition(self, db: Session, *, condition_id: int, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100) -> List[Treatment]:
         """
         Retrieve all treatments for a specific condition.
 
         Args:
             db: SQLAlchemy database session
             condition_id: ID of the condition
+            patient_id: Optional patient ID to filter by
             skip: Number of records to skip (for pagination)
             limit: Maximum number of records to return
 
         Returns:
             List of treatments for the condition
         """
+        query = db.query(Treatment).filter(Treatment.condition_id == condition_id)
+        
+        if patient_id:
+            query = query.filter(Treatment.patient_id == patient_id)
+            
         return (
-            db.query(Treatment)
-            .filter(Treatment.condition_id == condition_id)
+            query
             .order_by(Treatment.start_date.desc())
             .offset(skip)
             .limit(limit)
