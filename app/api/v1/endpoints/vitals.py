@@ -99,9 +99,18 @@ def read_vitals(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Retrieve vitals readings.
+    Retrieve vitals readings for the current user.
     """
-    vitals_list = vitals.get_multi(db, skip=skip, limit=limit)
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    patient_id = getattr(patient_record, "id")
+    
+    # Filter vitals by the user's patient_id
+    vitals_list = vitals.get_by_patient(db=db, patient_id=patient_id, skip=skip, limit=limit)
     return vitals_list
 
 

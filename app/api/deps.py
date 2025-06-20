@@ -184,3 +184,52 @@ def get_current_admin_user(current_user: User = Depends(get_current_user)) -> Us
     )
 
     return current_user
+
+
+def get_current_user_patient_id(
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id),
+) -> int:
+    """
+    Get the current user's patient ID.
+
+    This is a convenience dependency that handles getting the user's patient record
+    and returns the patient_id for use in medical record endpoints.
+
+    Args:
+        db: Database session
+        current_user_id: Current authenticated user ID
+
+    Returns:
+        Patient ID for the current user
+
+    Raises:
+        HTTPException 404: If patient record not found
+    """
+    from app.crud.patient import patient
+    
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    return getattr(patient_record, "id")
+
+
+def verify_patient_record_access(
+    record_patient_id: int,
+    current_user_patient_id: int,
+    record_type: str = "record",
+) -> None:
+    """
+    Verify that a medical record belongs to the current user.
+
+    Args:
+        record_patient_id: Patient ID from the medical record
+        current_user_patient_id: Patient ID of the current user
+        record_type: Type of record for error message (e.g., "medication", "allergy")
+
+    Raises:
+        HTTPException 404: If record doesn't belong to current user
+    """
+    if record_patient_id != current_user_patient_id:
+        raise HTTPException(status_code=404, detail=f"{record_type.title()} not found")

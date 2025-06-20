@@ -61,22 +61,27 @@ def read_procedures(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Retrieve procedures with optional filtering.
+    Retrieve procedures for the current user with optional filtering.
     """
-    if patient_id and status:
-        procedures = procedure.get_by_status(db, status=status, patient_id=patient_id)
-    elif patient_id:
-        procedures = procedure.get_by_patient(
-            db, patient_id=patient_id, skip=skip, limit=limit
-        )
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    user_patient_id = getattr(patient_record, "id")
+    
+    # Filter procedures by the user's patient_id (ignore any provided patient_id for security)
+    if status:
+        procedures = procedure.get_by_status(db, status=status, patient_id=user_patient_id)
     elif practitioner_id:
         procedures = procedure.get_by_practitioner(
             db, practitioner_id=practitioner_id, skip=skip, limit=limit
         )
-    elif status:
-        procedures = procedure.get_by_status(db, status=status)
+        # Further filter by user's patient_id
+        procedures = [proc for proc in procedures if getattr(proc, 'patient_id') == user_patient_id]
     else:
-        procedures = procedure.get_multi(db, skip=skip, limit=limit)
+        procedures = procedure.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
     return procedures
 
 

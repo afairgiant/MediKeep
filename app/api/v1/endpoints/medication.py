@@ -95,15 +95,18 @@ def read_medications(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     name: Optional[str] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
-    Retrieve medications with optional filtering.
+    Retrieve medications for the current user with optional filtering.
     """
+    # Filter medications by the user's patient_id
+    medications = medication.get_by_patient(db=db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+    
+    # Apply name filter if provided
     if name:
-        medications = medication.get_by_name(db=db, name=name, skip=skip, limit=limit)
-    else:
-        medications = medication.get_multi(db, skip=skip, limit=limit)
+        medications = [med for med in medications if name.lower() in getattr(med, 'name', '').lower()]
+    
     return medications
 
 
@@ -112,14 +115,23 @@ def read_medication(
     *,
     db: Session = Depends(deps.get_db),
     medication_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
-    Get medication by ID.
+    Get medication by ID - only allows access to user's own medications.
     """
+    # Get medication and verify it belongs to the user
     medication_obj = medication.get(db=db, id=medication_id)
     if not medication_obj:
         raise HTTPException(status_code=404, detail="Medication not found")
+    
+    # Security check: ensure the medication belongs to the current user
+    deps.verify_patient_record_access(
+        getattr(medication_obj, 'patient_id'), 
+        current_user_patient_id, 
+        "medication"
+    )
+    
     return medication_obj
 
 
