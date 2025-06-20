@@ -41,9 +41,18 @@ def get_lab_results(
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """
-    Get all lab results with pagination
+    Get lab results for the current user with pagination
     """
-    results = lab_result.get_multi(db, skip=skip, limit=limit)
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    patient_id = getattr(patient_record, "id")
+    
+    # Filter lab results by the user's patient_id
+    results = lab_result.get_by_patient(db, patient_id=patient_id, skip=skip, limit=limit)
     return results
 
 

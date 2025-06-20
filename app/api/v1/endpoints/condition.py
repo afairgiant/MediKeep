@@ -60,18 +60,21 @@ def read_conditions(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Retrieve conditions with optional filtering.
+    Retrieve conditions for the current user with optional filtering.
     """
-    if patient_id and status:
-        conditions = condition.get_by_status(db, status=status, patient_id=patient_id)
-    elif patient_id:
-        conditions = condition.get_by_patient(
-            db, patient_id=patient_id, skip=skip, limit=limit
-        )
-    elif status:
-        conditions = condition.get_by_status(db, status=status)
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    user_patient_id = getattr(patient_record, "id")
+    
+    # Filter conditions by the user's patient_id (ignore any provided patient_id for security)
+    if status:
+        conditions = condition.get_by_status(db, status=status, patient_id=user_patient_id)
     else:
-        conditions = condition.get_multi(db, skip=skip, limit=limit)
+        conditions = condition.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
     return conditions
 
 
@@ -83,11 +86,25 @@ def read_condition(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Get condition by ID with related information.
+    Get condition by ID with related information - only allows access to user's own conditions.
     """
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    user_patient_id = getattr(patient_record, "id")
+    
+    # Get condition and verify it belongs to the user
     condition_obj = condition.get_with_relations(db, condition_id=condition_id)
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
+    
+    # Security check: ensure the condition belongs to the current user
+    if getattr(condition_obj, 'patient_id') != user_patient_id:
+        raise HTTPException(status_code=404, detail="Condition not found")
+    
     return condition_obj
 
 

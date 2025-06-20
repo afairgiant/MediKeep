@@ -60,20 +60,21 @@ def read_immunizations(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Retrieve immunizations with optional filtering.
+    Retrieve immunizations for the current user with optional filtering.
     """
-    if patient_id and vaccine_name:
-        immunizations = immunization.get_by_vaccine(
-            db, vaccine_name=vaccine_name, patient_id=patient_id
-        )
-    elif patient_id:
-        immunizations = immunization.get_by_patient(
-            db, patient_id=patient_id, skip=skip, limit=limit
-        )
-    elif vaccine_name:
-        immunizations = immunization.get_by_vaccine(db, vaccine_name=vaccine_name)
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    user_patient_id = getattr(patient_record, "id")
+    
+    # Filter immunizations by the user's patient_id (ignore any provided patient_id for security)
+    if vaccine_name:
+        immunizations = immunization.get_by_vaccine(db, vaccine_name=vaccine_name, patient_id=user_patient_id)
     else:
-        immunizations = immunization.get_multi(db, skip=skip, limit=limit)
+        immunizations = immunization.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
     return immunizations
 
 
@@ -85,13 +86,27 @@ def read_immunization(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Get immunization by ID with related information.
+    Get immunization by ID with related information - only allows access to user's own immunizations.
     """
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    user_patient_id = getattr(patient_record, "id")
+    
+    # Get immunization and verify it belongs to the user
     immunization_obj = immunization.get_with_relations(
         db, immunization_id=immunization_id
     )
     if not immunization_obj:
         raise HTTPException(status_code=404, detail="Immunization not found")
+    
+    # Security check: ensure the immunization belongs to the current user
+    if getattr(immunization_obj, 'patient_id') != user_patient_id:
+        raise HTTPException(status_code=404, detail="Immunization not found")
+    
     return immunization_obj
 
 

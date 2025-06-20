@@ -60,18 +60,25 @@ def read_encounters(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
-    Retrieve encounters with optional filtering.
+    Retrieve encounters for the current user with optional filtering.
     """
-    if patient_id:
-        encounters = encounter.get_by_patient(
-            db, patient_id=patient_id, skip=skip, limit=limit
-        )
-    elif practitioner_id:
+    # Get current user's patient record
+    from app.crud.patient import patient
+    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    
+    user_patient_id = getattr(patient_record, "id")
+    
+    # Filter encounters by the user's patient_id (ignore any provided patient_id for security)
+    if practitioner_id:
         encounters = encounter.get_by_practitioner(
             db, practitioner_id=practitioner_id, skip=skip, limit=limit
         )
+        # Further filter by user's patient_id
+        encounters = [enc for enc in encounters if getattr(enc, 'patient_id') == user_patient_id]
     else:
-        encounters = encounter.get_multi(db, skip=skip, limit=limit)
+        encounters = encounter.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
     return encounters
 
 
