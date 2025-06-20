@@ -82,7 +82,7 @@ def get_dashboard_stats(
     current_user: User = Depends(deps.get_current_admin_user),
 ):
     """Get dashboard statistics for admin overview"""
-
+    
     try:
         # Helper function to safely get count
         def safe_count(query):
@@ -90,7 +90,8 @@ def get_dashboard_stats(
                 result = query.count()
                 return result if result is not None else 0
             except Exception:
-                return 0        # Get counts for all models with error handling
+                return 0
+          # Get counts for all models with error handling
         stats = DashboardStats(
             total_users=safe_count(db.query(User)),
             total_patients=safe_count(db.query(Patient)),
@@ -104,28 +105,32 @@ def get_dashboard_stats(
             total_procedures=safe_count(db.query(Procedure)),
             total_treatments=safe_count(db.query(Treatment)),
             total_encounters=safe_count(db.query(Encounter)),
-            # Calculate derived statistics
             recent_registrations=safe_count(
                 db.query(User).filter(
-                    User.created_at >= datetime.now() - timedelta(days=30)
+                    User.created_at >= datetime.utcnow() - timedelta(days=30)
                 )
-            ),
+            ) if hasattr(User, 'created_at') else safe_count(db.query(User).limit(5)),
             active_medications=safe_count(
-                db.query(Medication).filter(Medication.status == "active")
-            ),
+                db.query(Medication).filter(
+                    Medication.status.in_(["active", "current"])
+                )
+            ) if hasattr(Medication, 'status') else safe_count(db.query(Medication)),
             pending_lab_results=safe_count(
                 db.query(LabResult).filter(
-                    LabResult.status.in_(["ordered", "in-progress"])
+                    LabResult.status == "pending"
                 )
-            ),
+            ) if hasattr(LabResult, 'status') else 0,
         )
 
         return stats
 
     except Exception as e:
+        import traceback
+        error_detail = f"Error fetching dashboard stats: {str(e)}\nTraceback: {traceback.format_exc()}"
+        print(f"DASHBOARD STATS ERROR: {error_detail}")  # This will show in server logs
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching dashboard stats: {str(e)}",
+            detail=error_detail,
         )
 
 
@@ -160,7 +165,8 @@ def get_recent_activity(
                     'procedure': 'Procedure',
                     'allergy': 'Allergy',
                     'condition': 'Condition',
-                    'immunization': 'Immunization',                    'vitals': 'Vitals',
+                    'immunization': 'Immunization',                    
+                    'vitals': 'Vitals',
                 }
                 entity_type = getattr(log, 'entity_type', None)
                 model_name = model_name_mapping.get(entity_type or '', entity_type.title() if entity_type else "Unknown")
@@ -242,19 +248,7 @@ def get_recent_activity(
                     description=f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}",
                     timestamp=timestamp,
                     user_info=None,
-                )
-            )
-            timestamp = base_time - timedelta(minutes=15 + i * 5)
-            recent_activities.append(
-                RecentActivity(
-                    id=getattr(medication, "id"),
-                    model_name="Medication",
-                    action="created",
-                    description=f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}",
-                    timestamp=timestamp,
-                    user_info=None,
-                )
-            )        # Recent procedures
+                )            )        # Recent procedures
         recent_procedures = db.query(Procedure).order_by(desc(Procedure.id)).limit(3).all()
         for i, procedure in enumerate(recent_procedures):
             patient_name = "Unknown Patient"
@@ -608,3 +602,9 @@ async def test_admin_access(
         "role": current_user.role,
         "timestamp": get_utc_now().isoformat(),
     }
+
+
+@router.get("/stats-test")
+def get_dashboard_stats_test():
+    """Simple test endpoint to debug routing issues"""
+    return {"message": "Test endpoint working", "status": "ok"}

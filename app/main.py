@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
@@ -217,7 +217,7 @@ def setup_spa_routing():
     """
     Setup SPA routing only when React build files exist (production).
     This avoids conflicts during development.
-    """
+    """    
     if not static_dir:
         logger.info("🔧 Development mode - No static directory, SPA routing disabled")
         return
@@ -226,22 +226,27 @@ def setup_spa_routing():
     if not os.path.exists(index_path):
         logger.info("🔧 Development mode - No index.html found, SPA routing disabled")
         return
-
+        
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         """
         Serve React SPA for non-API routes in production only.
         This route is only created when React build files exist.
         """
-        # Block API routes explicitly
-        if full_path.startswith("api/"):
+        # For API routes, let them fall through to be handled by FastAPI endpoints
+        # Don't serve React app for API routes - this is critical for proper API functionality
+        if (full_path.startswith("api/") or 
+            full_path.startswith("api") or 
+            full_path == "api" or
+            full_path.startswith("api/v1/")):
+            # Return a 404 to let FastAPI handle the routing properly
             raise HTTPException(status_code=404, detail="API endpoint not found")
 
-        # Block special FastAPI routes
+        # Block special FastAPI routes  
         if full_path in ["docs", "redoc", "openapi.json", "health"]:
-            raise HTTPException(status_code=404, detail="Not found")
+            raise HTTPException(status_code=404, detail="Route not found")
 
-        # Serve React app for all other routes
+        # Serve React app for all other routes (SPA routing)
         return FileResponse(index_path)
 
     logger.info("✅ Production mode - SPA routing enabled for React Router")
@@ -250,5 +255,5 @@ def setup_spa_routing():
 # Setup SPA routing (only activates if React build exists)
 setup_spa_routing()
 
-# Note: Catch-all route removed to prevent interference with API endpoints
-# For production deployment, React Router should be handled by the frontend build process
+# SPA routing is now properly configured to handle React Router paths
+# while preserving API endpoint functionality
