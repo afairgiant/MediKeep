@@ -52,14 +52,14 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
             List of procedures with the specified status
         """
         query = db.query(Procedure).filter(Procedure.status == status.lower())
-
+        
         if patient_id:
             query = query.filter(Procedure.patient_id == patient_id)
 
         return query.order_by(Procedure.date.desc()).all()
 
     def get_by_practitioner(
-        self, db: Session, *, practitioner_id: int, skip: int = 0, limit: int = 100
+        self, db: Session, *, practitioner_id: int, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
     ) -> List[Procedure]:
         """
         Retrieve all procedures for a specific practitioner.
@@ -67,15 +67,20 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Args:
             db: SQLAlchemy database session
             practitioner_id: ID of the practitioner
+            patient_id: Optional patient ID to filter by
             skip: Number of records to skip (for pagination)
             limit: Maximum number of records to return
 
         Returns:
             List of procedures for the practitioner
         """
+        query = db.query(Procedure).filter(Procedure.practitioner_id == practitioner_id)
+        
+        if patient_id:
+            query = query.filter(Procedure.patient_id == patient_id)
+            
         return (
-            db.query(Procedure)
-            .filter(Procedure.practitioner_id == practitioner_id)
+            query
             .order_by(Procedure.date.desc())
             .offset(skip)
             .limit(limit)

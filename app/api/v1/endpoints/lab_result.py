@@ -36,23 +36,14 @@ router = APIRouter()
 @router.get("/", response_model=List[LabResultResponse])
 def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
-    db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """
     Get lab results for the current user with pagination
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    patient_id = getattr(patient_record, "id")
-    
     # Filter lab results by the user's patient_id
-    results = lab_result.get_by_patient(db, patient_id=patient_id, skip=skip, limit=limit)
+    results = lab_result.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
     return results
 
 

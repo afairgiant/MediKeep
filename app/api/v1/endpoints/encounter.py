@@ -56,29 +56,18 @@ def read_encounters(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    practitioner_id: Optional[int] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    practitioner_id: Optional[int] = Query(None),    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve encounters for the current user with optional filtering.
     """
-    # Get current user's patient record
-    from app.crud.patient import patient
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-    if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
-    
-    user_patient_id = getattr(patient_record, "id")
-    
     # Filter encounters by the user's patient_id (ignore any provided patient_id for security)
     if practitioner_id:
         encounters = encounter.get_by_practitioner(
-            db, practitioner_id=practitioner_id, skip=skip, limit=limit
+            db, practitioner_id=practitioner_id, patient_id=current_user_patient_id, skip=skip, limit=limit
         )
-        # Further filter by user's patient_id
-        encounters = [enc for enc in encounters if getattr(enc, 'patient_id') == user_patient_id]
     else:
-        encounters = encounter.get_by_patient(db, patient_id=user_patient_id, skip=skip, limit=limit)
+        encounters = encounter.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
     return encounters
 
 
@@ -87,14 +76,20 @@ def read_encounter(
     *,
     db: Session = Depends(deps.get_db),
     encounter_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
-    Get encounter by ID with related information.
+    Get encounter by ID with related information - only allows access to user's own encounters.
     """
     encounter_obj = encounter.get_with_relations(db, encounter_id=encounter_id)
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
+    
+    # Security check: ensure the encounter belongs to the current user
+    deps.verify_patient_record_access(
+        getattr(encounter_obj, 'patient_id'), current_user_patient_id, "encounter"
+    )
+    
     return encounter_obj
 
 

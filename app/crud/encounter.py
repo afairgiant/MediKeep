@@ -27,8 +27,7 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
             limit: Maximum number of records to return
 
         Returns:
-            List of encounters for the patient
-        """
+            List of encounters for the patient        """
         return (
             db.query(Encounter)
             .filter(Encounter.patient_id == patient_id)
@@ -39,7 +38,7 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
         )
 
     def get_by_practitioner(
-        self, db: Session, *, practitioner_id: int, skip: int = 0, limit: int = 100
+        self, db: Session, *, practitioner_id: int, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
     ) -> List[Encounter]:
         """
         Retrieve all encounters for a specific practitioner.
@@ -47,15 +46,20 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
         Args:
             db: SQLAlchemy database session
             practitioner_id: ID of the practitioner
+            patient_id: Optional patient ID to filter by
             skip: Number of records to skip (for pagination)
             limit: Maximum number of records to return
 
         Returns:
             List of encounters for the practitioner
         """
+        query = db.query(Encounter).filter(Encounter.practitioner_id == practitioner_id)
+        
+        if patient_id:
+            query = query.filter(Encounter.patient_id == patient_id)
+            
         return (
-            db.query(Encounter)
-            .filter(Encounter.practitioner_id == practitioner_id)
+            query
             .order_by(Encounter.date.desc())
             .offset(skip)
             .limit(limit)
