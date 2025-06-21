@@ -101,13 +101,14 @@ class Medication(Base):
     effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
     effectivePeriod_end = Column(Date, nullable=True)  # End date of the medication
     status = Column(String, nullable=True)  # e.g., 'active', 'stopped, 'on-hold'
-
+    pharmacy_id = Column(Integer, ForeignKey("pharmacies.id"), nullable=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
 
     # Table Relationships
     patient = relationship("Patient", back_populates="medications")
     practitioner = relationship("Practitioner", back_populates="medications")
+    pharmacy = relationship("Pharmacy", back_populates="medications")
 
 
 class Encounter(Base):
@@ -340,3 +341,16 @@ class Vitals(Base):
     # Table Relationships
     patient = relationship("Patient", back_populates="vitals")
     practitioner = relationship("Practitioner", back_populates="vitals")
+
+class Pharmacy(Base):
+    __tablename__ = "pharmacies"
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    phone_number = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+
+    # Table Relationships
+    medications = relationship("Medication", back_populates="pharmacy")

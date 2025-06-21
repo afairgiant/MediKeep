@@ -131,11 +131,12 @@ const ExportPage = () => {
     );
   }
 
-  return (    <div className="export-page">
+  return (
+    <div className="export-page">
       <div className="export-header">
         <div className="header-top">
-          <button 
-            onClick={() => navigate('/')} 
+          <button
+            onClick={() => navigate('/')}
             className="back-button"
             type="button"
           >
