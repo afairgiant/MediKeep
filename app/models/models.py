@@ -346,11 +346,39 @@ class Pharmacy(Base):
     __tablename__ = "pharmacies"
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False)
-    address = Column(String, nullable=False)
+    # Descriptive name that includes location context
+    name = Column(String, nullable=False)  # e.g., "CVS Pharmacy - Main Street", "Walgreens - Downtown"
+    brand = Column(String, nullable=True)  # e.g., 'CVS', 'Walgreens', 'Independent'
+    
+    # Detailed address components for better identification
+    street_address = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=False)
+    zip_code = Column(String, nullable=False)
+    country = Column(String, nullable=False, default="USA")
+    
+    # Optional store identifier from the pharmacy chain
+    store_number = Column(String, nullable=True)  # CVS store #1234, Walgreens #5678
+    
+    # Contact information
     phone_number = Column(String, nullable=True)
+    fax_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
     website = Column(String, nullable=True)
-
+    
+    # Operating hours (could be JSON or separate table if more complex)
+    hours = Column(String, nullable=True)  # e.g., "Mon-Fri: 8AM-10PM, Sat-Sun: 9AM-9PM"
+    
+    # Pharmacy-specific features
+    drive_through = Column(String, nullable=True, default=False)  # Boolean for drive-through availability
+    twenty_four_hour = Column(String, nullable=True, default=False)  # Boolean for 24-hour service
+    specialty_services = Column(String, nullable=True)  # e.g., "Vaccinations, Medication Therapy Management"
+    
+    # Timestamps
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+    
     # Table Relationships
     medications = relationship("Medication", back_populates="pharmacy")
