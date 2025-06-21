@@ -1,12 +1,12 @@
-from typing import List
-from sqlalchemy.orm import Session
+from typing import List, Optional
+from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
 from app.models.models import Medication
 from app.schemas.medication import MedicationCreate, MedicationUpdate
 
 
-class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
+class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):    
     """
     CRUD operations for Medication model.
 
@@ -31,6 +31,10 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         """
         return (
             db.query(self.model)
+            .options(
+                joinedload(Medication.practitioner),
+                joinedload(Medication.pharmacy)
+            )
             .filter(Medication.patient_id == patient_id)
             .offset(skip)
             .limit(limit)
@@ -47,11 +51,14 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
             db: Database session
             patient_id: Patient ID to filter by
 
-        Returns:
-            List of active medications for the patient
+        Returns:            List of active medications for the patient
         """
         return (
             db.query(self.model)
+            .options(
+                joinedload(Medication.practitioner),
+                joinedload(Medication.pharmacy)
+            )
             .filter(Medication.patient_id == patient_id, Medication.is_active.is_(True))
             .all()
         )
@@ -112,6 +119,27 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
+
+    def get_with_relationships(self, db: Session, *, id: int) -> Optional[Medication]:
+        """
+        Get a medication by ID with its relationships loaded.
+
+        Args:
+            db: Database session
+            id: Medication ID
+
+        Returns:
+            Medication with relationships loaded
+        """
+        return (
+            db.query(self.model)
+            .options(
+                joinedload(Medication.practitioner),
+                joinedload(Medication.pharmacy)
+            )
+            .filter(Medication.id == id)
+            .first()
+        )
 
 
 medication = CRUDMedication(Medication)

@@ -8,6 +8,7 @@ from app.schemas.medication import (
     MedicationCreate,
     MedicationUpdate,
     MedicationResponse,
+    MedicationResponseWithNested,
 )
 from app.core.logging_config import get_logger
 from app.models.activity_log import ActivityLog
@@ -19,7 +20,7 @@ router = APIRouter()
 logger = get_logger(__name__, "app")
 
 
-@router.post("/", response_model=MedicationResponse)
+@router.post("/", response_model=MedicationResponseWithNested)
 def create_medication(
     medication_in: MedicationCreate,
     request: Request,
@@ -35,10 +36,18 @@ def create_medication(
 
     user_ip = request.client.host if request.client else "unknown"
 
-    try:
+    try:        
         medication_obj = medication.create(db=db, obj_in=medication_in)
         medication_id = getattr(medication_obj, "id", None)
-        patient_id = getattr(medication_obj, "patient_id", None)        # Log successful medication creation
+        patient_id = getattr(medication_obj, "patient_id", None)
+        
+        # Reload the medication with relationships
+        if medication_id is not None:
+            medication_with_relations = medication.get_with_relationships(db=db, id=medication_id)
+        else:
+            medication_with_relations = medication_obj
+        
+        # Log successful medication creation
         logger.info(
             "Medication created successfully",
             extra={
@@ -70,6 +79,10 @@ def create_medication(
             db.rollback()
             print(f"Error logging medication creation activity: {e}")
 
+        # Return medication with relationships loaded
+        medication_id = getattr(medication_obj, "id", None)
+        if medication_id:
+            return medication.get_with_relationships(db=db, id=medication_id)
         return medication_obj
 
     except Exception as e:
@@ -89,7 +102,7 @@ def create_medication(
         raise
 
 
-@router.get("/", response_model=List[MedicationResponse])
+@router.get("/", response_model=List[MedicationResponseWithNested])
 def read_medications(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -110,7 +123,7 @@ def read_medications(
     return medications
 
 
-@router.get("/{medication_id}", response_model=MedicationResponse)
+@router.get("/{medication_id}", response_model=MedicationResponseWithNested)
 def read_medication(
     *,
     db: Session = Depends(deps.get_db),
@@ -135,7 +148,7 @@ def read_medication(
     return medication_obj
 
 
-@router.put("/{medication_id}", response_model=MedicationResponse)
+@router.put("/{medication_id}", response_model=MedicationResponseWithNested)
 def update_medication(
     *,
     request: Request,
@@ -168,7 +181,9 @@ def update_medication(
     try:
         updated_medication = medication.update(
             db=db, db_obj=medication_obj, obj_in=medication_in
-        )        # Log successful medication update
+        )
+        
+        # Log successful medication update
         logger.info(
             f"Medication updated successfully: {medication_id}",
             extra={
@@ -195,12 +210,12 @@ def update_medication(
             )
             db.add(activity_log)
             db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
+        except Exception as e:            # Don't fail the main operation if logging fails
             db.rollback()
             print(f"Error logging medication update activity: {e}")
 
-        return updated_medication
+        # Return medication with relationships loaded
+        return medication.get_with_relationships(db=db, id=medication_id)
 
     except Exception as e:
         # Log failed medication update
@@ -303,7 +318,7 @@ def delete_medication(
         raise
 
 
-@router.get("/patient/{patient_id}", response_model=List[MedicationResponse])
+@router.get("/patient/{patient_id}", response_model=List[MedicationResponseWithNested])
 def read_patient_medications(
     *,
     db: Session = Depends(deps.get_db),

@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     treatment,
     allergy,
     practitioner,
+    pharmacy,
     medication,
     vitals,
     frontend_logs,
@@ -47,6 +48,9 @@ api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])
 # Healthcare provider endpoints
 api_router.include_router(
     practitioner.router, prefix="/practitioners", tags=["practitioners"]
+)
+api_router.include_router(
+    pharmacy.router, prefix="/pharmacies", tags=["pharmacies"]
 )
 api_router.include_router(
     medication.router, prefix="/medications", tags=["medications"]
