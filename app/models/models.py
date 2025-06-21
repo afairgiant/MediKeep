@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text, Float
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Date, DateTime, Text, Float
 from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime, timezone
 
@@ -370,8 +370,8 @@ class Pharmacy(Base):
     hours = Column(String, nullable=True)  # e.g., "Mon-Fri: 8AM-10PM, Sat-Sun: 9AM-9PM"
     
     # Pharmacy-specific features
-    drive_through = Column(String, nullable=True, default=False)  # Boolean for drive-through availability
-    twenty_four_hour = Column(String, nullable=True, default=False)  # Boolean for 24-hour service
+    drive_through = Column(Boolean, nullable=True, default=False)  # Boolean for drive-through availability
+    twenty_four_hour = Column(Boolean, nullable=True, default=False)  # Boolean for 24-hour service
     specialty_services = Column(String, nullable=True)  # e.g., "Vaccinations, Medication Therapy Management"
     
     # Timestamps
