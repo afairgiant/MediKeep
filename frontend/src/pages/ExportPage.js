@@ -343,10 +343,11 @@ const ExportPage = () => {
             <strong>Bulk Export:</strong> Creates a ZIP file containing multiple
             data types in your chosen format.
           </li>
-        </ul>
+        </ul>{' '}
         <p className="privacy-note">
-          🔒 All exports are encrypted and secure. Your data privacy is
-          protected throughout the export process.
+          🔒 Exports are secured through user authentication and access
+          controls. Data is transmitted securely and only accessible to
+          authorized users.
         </p>
       </div>
     </div>
