@@ -20,6 +20,7 @@ import ProtectedRoute, {
 // Pages
 import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
+import ExportPage from './pages/ExportPage';
 import PatientInfo from './pages/medical/Patient-Info';
 import Medication from './pages/medical/Medication';
 import LabResults from './pages/medical/LabResults';
@@ -213,12 +214,20 @@ function App() {
                       <Vitals />
                     </ProtectedRoute>
                   }
-                />
+                />{' '}
                 <Route
                   path="/practitioners"
                   element={
                     <ProtectedRoute>
                       <Practitioners />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/export"
+                  element={
+                    <ProtectedRoute>
+                      <ExportPage />
                     </ProtectedRoute>
                   }
                 />

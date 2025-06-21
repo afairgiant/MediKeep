@@ -1,0 +1,65 @@
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: white;
+  color: #374151;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.select:hover:not(:disabled) {
+  border-color: #9ca3af;
+}
+
+.select.disabled,
+.select:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.select option {
+  padding: 8px;
+  color: #374151;
+}
+
+/* Dark theme support */
+[data-theme='dark'] .select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+[data-theme='dark'] .select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+[data-theme='dark'] .select:hover:not(:disabled) {
+  border-color: #6b7280;
+}
+
+[data-theme='dark'] .select.disabled,
+[data-theme='dark'] .select:disabled {
+  background-color: #1f2937;
+  color: #6b7280;
+  border-color: #374151;
+}
+
+[data-theme='dark'] .select option {
+  background-color: #374151;
+  color: #f9fafb;
+}

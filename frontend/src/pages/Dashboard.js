@@ -125,6 +125,11 @@ const Dashboard = () => {
   ]; // Smaller secondary items for additional features
   const secondaryItems = [
     {
+      title: '📥 Export Records',
+      description: 'Download your medical data',
+      link: '/export',
+    },
+    {
       title: '👨‍⚕️ Doctors',
       description: 'View practitioner information',
       link: '/practitioners',
