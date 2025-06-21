@@ -11,44 +11,34 @@
   margin-bottom: 30px;
 }
 
-.export-header h1 {
-  color: #1e293b;
-  font-size: 2.5rem;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.export-header p {
-  color: #64748b;
-  font-size: 1.1rem;
-}
-
-.loading {
+.header-top {
   display: flex;
-  flex-direction: column;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #475569;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
+  gap: 4px;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+.back-button:hover {
+  background: #e2e8f0;
+  color: #334155;
+  border-color: #cbd5e1;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.back-button:active {
+  transform: translateY(1px);
 }
 
 .export-card {
