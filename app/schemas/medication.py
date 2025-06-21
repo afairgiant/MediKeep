@@ -1,6 +1,10 @@
 from pydantic import BaseModel, validator, root_validator
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import date
+
+if TYPE_CHECKING:
+    from app.schemas.practitioner import Practitioner
+    from app.schemas.pharmacy import Pharmacy
 
 
 class MedicationBase(BaseModel):
@@ -14,7 +18,9 @@ class MedicationBase(BaseModel):
     effectivePeriod_start: Optional[date] = None
     effectivePeriod_end: Optional[date] = None
     status: Optional[str] = None
-
+    practitioner_id: Optional[int] = None    
+    pharmacy_id: Optional[int] = None
+    
     @root_validator(pre=True)
     def clean_empty_strings(cls, values):
         """Convert empty strings to None for optional date fields"""
@@ -27,6 +33,8 @@ class MedicationBase(BaseModel):
                 "route",
                 "indication",
                 "status",
+                "practitioner_id",
+                "pharmacy_id",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -108,6 +116,7 @@ class MedicationCreate(MedicationBase):
 
     patient_id: int
     practitioner_id: Optional[int] = None
+    pharmacy_id: Optional[int] = None
 
 
 class MedicationUpdate(BaseModel):
@@ -122,10 +131,11 @@ class MedicationUpdate(BaseModel):
     effectivePeriod_end: Optional[date] = None
     status: Optional[str] = None
     practitioner_id: Optional[int] = None
+    pharmacy_id: Optional[int] = None
 
     @root_validator(pre=True)
     def clean_empty_strings(cls, values):
-        """Convert empty strings to None for optional fields"""
+        """Convert empty strings to None for optional fields"""        
         if isinstance(values, dict):
             for field in [
                 "medication_name",
@@ -136,6 +146,8 @@ class MedicationUpdate(BaseModel):
                 "effectivePeriod_start",
                 "effectivePeriod_end",
                 "status",
+                "practitioner_id",
+                "pharmacy_id",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -209,3 +221,24 @@ class MedicationWithRelations(MedicationResponse):
 
     class Config:
         from_attributes = True
+
+
+# Enhanced response schema with nested objects
+class MedicationResponseWithNested(MedicationBase):
+    """Schema for medication response with nested practitioner and pharmacy objects"""
+
+    id: int
+    patient_id: int
+    practitioner: Optional["Practitioner"] = None
+    pharmacy: Optional["Pharmacy"] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Import here to avoid circular imports
+from app.schemas.practitioner import Practitioner
+from app.schemas.pharmacy import Pharmacy
+
+# Rebuild the model to resolve forward references
+MedicationResponseWithNested.model_rebuild()

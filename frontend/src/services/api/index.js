@@ -334,6 +334,29 @@ class ApiService {
     return this.delete(`/practitioners/${practitionerId}`, { signal });
   }
 
+  // Pharmacy methods
+  getPharmacies(signal) {
+    return this.get('/pharmacies/', { signal });
+  }
+
+  getPharmacy(pharmacyId, signal) {
+    return this.get(`/pharmacies/${pharmacyId}`, { signal });
+  }
+
+  createPharmacy(pharmacyData, signal) {
+    return this.post('/pharmacies/', pharmacyData, { signal });
+  }
+
+  updatePharmacy(pharmacyId, pharmacyData, signal) {
+    return this.put(`/pharmacies/${pharmacyId}`, pharmacyData, {
+      signal,
+    });
+  }
+
+  deletePharmacy(pharmacyId, signal) {
+    return this.delete(`/pharmacies/${pharmacyId}`, { signal });
+  }
+
   // Allergy methods
   getAllergies(signal) {
     return this.get('/allergies/', { signal });

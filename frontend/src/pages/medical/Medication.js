@@ -22,6 +22,7 @@ const Medication = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [routeFilter, setRouteFilter] = useState('all');
   const [dateRangeFilter, setDateRangeFilter] = useState('all'); // all, current, past, future
+
   const [formData, setFormData] = useState({
     medication_name: '',
     dosage: '',
@@ -32,21 +33,33 @@ const Medication = () => {
     effectivePeriod_end: '',
     status: 'active',
     practitioner_id: null,
+    pharmacy_id: null,
   });
+
+  // Dropdown data
+  const [practitioners, setPractitioners] = useState([]);
+  const [pharmacies, setPharmacies] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchPatientAndMedications();
   }, []);
-
   const fetchPatientAndMedications = async () => {
     try {
       setLoading(true);
       setError('');
 
-      // Get patient data first
-      const patient = await apiService.getCurrentPatient();
+      // Fetch all data in parallel
+      const [patient, practitionersData, pharmaciesData] = await Promise.all([
+        apiService.getCurrentPatient(),
+        apiService.getPractitioners(),
+        apiService.getPharmacies(),
+      ]);
+
       setPatientData(patient);
+      setPractitioners(practitionersData);
+      setPharmacies(pharmaciesData);
 
       // Then get medications for this patient
       if (patient && patient.id) {
@@ -62,15 +75,23 @@ const Medication = () => {
       setLoading(false);
     }
   };
-
   const handleInputChange = e => {
     const { name, value } = e.target;
+
+    // Convert empty string to null for ID fields (practitioner_id, pharmacy_id)
+    let processedValue = value;
+    if (
+      (name === 'practitioner_id' || name === 'pharmacy_id') &&
+      value === ''
+    ) {
+      processedValue = null;
+    }
+
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
-
   const resetForm = () => {
     setFormData({
       medication_name: '',
@@ -82,6 +103,7 @@ const Medication = () => {
       effectivePeriod_end: '',
       status: 'active',
       practitioner_id: null,
+      pharmacy_id: null,
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -91,7 +113,6 @@ const Medication = () => {
     resetForm();
     setShowAddForm(true);
   };
-
   const handleEditMedication = medication => {
     setFormData({
       medication_name: medication.medication_name || '',
@@ -103,6 +124,7 @@ const Medication = () => {
       effectivePeriod_end: medication.effectivePeriod_end || '',
       status: medication.status || 'active',
       practitioner_id: medication.practitioner_id || null,
+      pharmacy_id: medication.pharmacy_id || null,
     });
     setEditingMedication(medication);
     setShowAddForm(true);
@@ -130,7 +152,7 @@ const Medication = () => {
 
       // Debug auth and patient data
       console.log('🔐 Auth token length:', token.length);
-      console.log('🏥 Patient data:', patientData); // Clean and validate medication data
+      console.log('🏥 Patient data:', patientData);      // Clean and validate medication data
       const medicationData = {
         medication_name: formData.medication_name?.trim() || '',
         dosage: formData.dosage?.trim() || '',
@@ -139,6 +161,8 @@ const Medication = () => {
         indication: formData.indication?.trim() || '',
         status: formData.status || 'active',
         patient_id: patientData.id,
+        practitioner_id: formData.practitioner_id,
+        pharmacy_id: formData.pharmacy_id,
       };
 
       // Only include dates if they have values
@@ -147,9 +171,6 @@ const Medication = () => {
       }
       if (formData.effectivePeriod_end) {
         medicationData.effectivePeriod_end = formData.effectivePeriod_end;
-      }
-      if (formData.practitioner_id) {
-        medicationData.practitioner_id = formData.practitioner_id;
       }
 
       console.log('🚀 Final medication data:', medicationData);
@@ -171,6 +192,7 @@ const Medication = () => {
         effectivePeriod_end: formData.effectivePeriod_end,
         status: formData.status,
         practitioner_id: formData.practitioner_id,
+        pharmacy_id: formData.pharmacy_id,
         patient_id: patientData.id,
       });
 
@@ -586,7 +608,6 @@ const Medication = () => {
                         required
                       />
                     </div>
-
                     <div className="form-group">
                       <label htmlFor="dosage">Dosage</label>
                       <input
@@ -598,7 +619,6 @@ const Medication = () => {
                         placeholder="e.g., 10mg, 1 tablet"
                       />
                     </div>
-
                     <div className="form-group">
                       <label htmlFor="frequency">Frequency</label>
                       <input
@@ -610,7 +630,6 @@ const Medication = () => {
                         placeholder="e.g., Once daily, Twice daily"
                       />
                     </div>
-
                     <div className="form-group">
                       <label htmlFor="route">Route</label>
                       <select
@@ -632,7 +651,6 @@ const Medication = () => {
                         <option value="sublingual">Sublingual</option>
                       </select>
                     </div>
-
                     <div className="form-group">
                       <label htmlFor="indication">Indication</label>
                       <input
@@ -644,7 +662,6 @@ const Medication = () => {
                         placeholder="What is this medication for?"
                       />
                     </div>
-
                     <div className="form-group">
                       <label htmlFor="status">Status</label>
                       <select
@@ -658,7 +675,6 @@ const Medication = () => {
                         <option value="on-hold">On Hold</option>
                       </select>
                     </div>
-
                     <div className="form-group">
                       <label htmlFor="effectivePeriod_start">Start Date</label>
                       <input
@@ -668,8 +684,7 @@ const Medication = () => {
                         value={formData.effectivePeriod_start}
                         onChange={handleInputChange}
                       />
-                    </div>
-
+                    </div>{' '}
                     <div className="form-group">
                       <label htmlFor="effectivePeriod_end">End Date</label>
                       <input
@@ -679,6 +694,40 @@ const Medication = () => {
                         value={formData.effectivePeriod_end}
                         onChange={handleInputChange}
                       />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="practitioner_id">
+                        Prescribing Provider
+                      </label>
+                      <select
+                        id="practitioner_id"
+                        name="practitioner_id"
+                        value={formData.practitioner_id || ''}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Select Provider</option>
+                        {practitioners.map(practitioner => (
+                          <option key={practitioner.id} value={practitioner.id}>
+                            {practitioner.name} - {practitioner.specialty}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="pharmacy_id">Pharmacy</label>
+                      <select
+                        id="pharmacy_id"
+                        name="pharmacy_id"
+                        value={formData.pharmacy_id || ''}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Select Pharmacy</option>
+                        {pharmacies.map(pharmacy => (
+                          <option key={pharmacy.id} value={pharmacy.id}>
+                            {pharmacy.name} - {pharmacy.city}, {pharmacy.state}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>{' '}
                   <div className="form-actions">
@@ -750,35 +799,46 @@ const Medication = () => {
                         <span className="value">{medication.dosage}</span>
                       </div>
                     )}
-
                     {medication.frequency && (
                       <div className="detail-item">
                         <span className="label">Frequency:</span>
                         <span className="value">{medication.frequency}</span>
                       </div>
                     )}
-
                     {medication.route && (
                       <div className="detail-item">
                         <span className="label">Route:</span>
                         <span className="value">{medication.route}</span>
                       </div>
-                    )}
-
+                    )}{' '}
                     {medication.indication && (
                       <div className="detail-item">
                         <span className="label">Indication:</span>
                         <span className="value">{medication.indication}</span>
                       </div>
                     )}
-
+                    {medication.practitioner && (
+                      <div className="detail-item">
+                        <span className="label">Prescriber:</span>
+                        <span className="value">
+                          {medication.practitioner.name}
+                        </span>
+                      </div>
+                    )}
+                    {medication.pharmacy && (
+                      <div className="detail-item">
+                        <span className="label">Pharmacy:</span>
+                        <span className="value">
+                          {medication.pharmacy.name}
+                        </span>
+                      </div>
+                    )}
                     <div className="detail-item">
                       <span className="label">Start Date:</span>
                       <span className="value">
                         {formatDate(medication.effectivePeriod_start)}
                       </span>
                     </div>
-
                     {medication.effectivePeriod_end && (
                       <div className="detail-item">
                         <span className="label">End Date:</span>
@@ -816,6 +876,7 @@ const Medication = () => {
                 <p>Generated on: {new Date().toLocaleDateString()}</p>
               </div>
               <table className="medications-table">
+                {' '}
                 <thead>
                   <tr>
                     <th>Medication Name</th>
@@ -823,6 +884,8 @@ const Medication = () => {
                     <th>Frequency</th>
                     <th>Route</th>
                     <th>Indication</th>
+                    <th>Prescriber</th>
+                    <th>Pharmacy</th>
                     <th>Start Date</th>
                     <th>End Date</th>
                     <th>Status</th>
@@ -830,6 +893,7 @@ const Medication = () => {
                   </tr>
                 </thead>{' '}
                 <tbody>
+                  {' '}
                   {getFilteredAndSortedMedications().map(medication => (
                     <tr key={medication.id}>
                       <td className="medication-name">
@@ -839,6 +903,8 @@ const Medication = () => {
                       <td>{medication.frequency || '-'}</td>
                       <td>{medication.route || '-'}</td>
                       <td>{medication.indication || '-'}</td>
+                      <td>{medication.practitioner?.name || '-'}</td>
+                      <td>{medication.pharmacy?.name || '-'}</td>
                       <td>{formatDate(medication.effectivePeriod_start)}</td>
                       <td>
                         {medication.effectivePeriod_end
