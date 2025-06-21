@@ -80,12 +80,20 @@ class APIClient {
       let processedConfig = { ...config };
       for (const interceptor of this.requestInterceptors) {
         processedConfig = await interceptor(processedConfig);
-      }
-
-      // Prepare URL
-      const url = processedConfig.url.startsWith('http')
+      } // Prepare URL
+      let url = processedConfig.url.startsWith('http')
         ? processedConfig.url
-        : `${this.baseURL}${processedConfig.url}`;
+        : `${this.baseURL}${processedConfig.url}`; // Add query parameters if provided
+      if (processedConfig.params) {
+        const urlObj = new URL(url, window.location.origin);
+        Object.entries(processedConfig.params).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            urlObj.searchParams.set(key, value);
+          }
+        });
+        url = urlObj.toString();
+        console.log('Request URL with params:', url); // Debug log
+      }
 
       // Prepare headers
       const headers = {
@@ -99,13 +107,14 @@ class APIClient {
         headers,
         body: processedConfig.body,
         ...processedConfig.options,
-      });
-
-      // Handle response
+      }); // Handle response
       let data;
       const contentType = response.headers.get('content-type');
 
-      if (contentType && contentType.includes('application/json')) {
+      // Check if blob response was requested
+      if (processedConfig.responseType === 'blob') {
+        data = await response.blob();
+      } else if (contentType && contentType.includes('application/json')) {
         data = await response.json();
       } else {
         data = await response.text();

@@ -1,0 +1,146 @@
+.alert {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.alert-content {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  gap: 12px;
+}
+
+.alert-icon-wrapper {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.alert-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.alert-message {
+  font-weight: 400;
+}
+
+.alert-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  margin-left: auto;
+}
+
+.alert-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.alert-close-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Success variant */
+.alert-success {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.alert-success .alert-icon {
+  color: #16a34a;
+}
+
+.alert-success .alert-close:hover {
+  background-color: rgba(22, 163, 74, 0.1);
+}
+
+/* Error variant */
+.alert-error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.alert-error .alert-icon {
+  color: #dc2626;
+}
+
+.alert-error .alert-close:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+/* Warning variant */
+.alert-warning {
+  background-color: #fffbeb;
+  border-color: #fed7aa;
+  color: #92400e;
+}
+
+.alert-warning .alert-icon {
+  color: #f59e0b;
+}
+
+.alert-warning .alert-close:hover {
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+/* Info variant */
+.alert-info {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.alert-info .alert-icon {
+  color: #3b82f6;
+}
+
+.alert-info .alert-close:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Dark theme support */
+[data-theme='dark'] .alert-success {
+  background-color: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+[data-theme='dark'] .alert-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+[data-theme='dark'] .alert-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+
+[data-theme='dark'] .alert-info {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+}

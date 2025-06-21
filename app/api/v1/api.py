@@ -17,6 +17,7 @@ from app.api.v1.endpoints import (
     vitals,
     frontend_logs,
 )
+from app.api.v1.endpoints import export
 from app.api.v1 import admin
 
 api_router = APIRouter()
@@ -55,6 +56,9 @@ api_router.include_router(
 api_router.include_router(
     frontend_logs.router, prefix="/frontend-logs", tags=["frontend-logs"]
 )
+
+# Export endpoints
+api_router.include_router(export.router, prefix="/export", tags=["export"])
 
 # Admin endpoints
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])

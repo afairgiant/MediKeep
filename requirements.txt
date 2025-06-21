@@ -33,6 +33,7 @@ MarkupSafe==3.0.2
 multidict==6.4.4
 packaging==25.0
 passlib==1.7.4
+pillow==11.2.1
 pluggy==1.6.0
 propcache==0.3.2
 psycopg2-binary==2.9.10
@@ -47,6 +48,7 @@ python-jose==3.3.0
 python-json-logger==2.0.7
 python-multipart==0.0.20
 PyYAML==6.0.2
+reportlab==4.0.7
 requests==2.32.3
 rsa==4.9.1
 six==1.17.0

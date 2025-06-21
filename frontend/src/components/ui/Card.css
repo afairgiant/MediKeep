@@ -1,0 +1,44 @@
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  padding: 20px 24px 0 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.card-title {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.card-content {
+  padding: 24px;
+}
+
+/* Dark theme support */
+[data-theme='dark'] .card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .card-header {
+  border-bottom-color: #334155;
+}
+
+[data-theme='dark'] .card-title {
+  color: #f1f5f9;
+}
