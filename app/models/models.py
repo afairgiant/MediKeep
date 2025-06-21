@@ -353,9 +353,9 @@ class Pharmacy(Base):
     # Detailed address components for better identification
     street_address = Column(String, nullable=True)
     city = Column(String, nullable=True)
-    state = Column(String, nullable=False)
-    zip_code = Column(String, nullable=False)
-    country = Column(String, nullable=False, default="USA")
+    state = Column(String, nullable=True)
+    zip_code = Column(String, nullable=True)
+    country = Column(String, nullable=True)  # e.g., 'USA', 'Canada'
     
     # Optional store identifier from the pharmacy chain
     store_number = Column(String, nullable=True)  # CVS store #1234, Walgreens #5678

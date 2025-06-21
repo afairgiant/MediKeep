@@ -128,15 +128,30 @@ def delete_pharmacy(
     """
     Delete a pharmacy.
     """
+    from app.models.models import Medication
+    
     pharmacy_obj = pharmacy.get(db=db, id=id)
     if not pharmacy_obj:
         raise HTTPException(status_code=404, detail="Pharmacy not found")
     
-    pharmacy.delete(db=db, id=id)
+    # First, check how many medications reference this pharmacy
+    medication_count = db.query(Medication).filter(Medication.pharmacy_id == id).count()
     
-    # Log the deletion activity
+    # Set pharmacy_id to NULL for all medications that reference this pharmacy
+    if medication_count > 0:
+        db.query(Medication).filter(Medication.pharmacy_id == id).update({"pharmacy_id": None})
+        db.commit()
+    
+    # Now delete the pharmacy
+    pharmacy.delete(db=db, id=id)
+      # Log the deletion activity
     try:
-        description = f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
+        base_description = f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
+        if medication_count > 0:
+            description = f"{base_description}. Updated {medication_count} medication(s) to remove pharmacy reference."
+        else:
+            description = base_description
+            
         activity_log = ActivityLog(
             user_id=current_user_id,
             patient_id=None,  # Pharmacies are not patient-specific

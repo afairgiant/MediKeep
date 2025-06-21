@@ -152,7 +152,7 @@ const Medication = () => {
 
       // Debug auth and patient data
       console.log('🔐 Auth token length:', token.length);
-      console.log('🏥 Patient data:', patientData);      // Clean and validate medication data
+      console.log('🏥 Patient data:', patientData); // Clean and validate medication data
       const medicationData = {
         medication_name: formData.medication_name?.trim() || '',
         dosage: formData.dosage?.trim() || '',

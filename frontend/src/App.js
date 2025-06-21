@@ -32,6 +32,7 @@ import Conditions from './pages/medical/Conditions';
 import Visits from './pages/medical/Visits';
 import Vitals from './pages/medical/Vitals';
 import Practitioners from './pages/medical/Practitioners';
+import Pharmacies from './pages/medical/Pharmacies';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ModelManagement from './pages/admin/ModelManagement';
@@ -220,6 +221,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Practitioners />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/pharmacies"
+                  element={
+                    <ProtectedRoute>
+                      <Pharmacies />
                     </ProtectedRoute>
                   }
                 />
