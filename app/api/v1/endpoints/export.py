@@ -88,7 +88,6 @@ async def export_patient_data(
             include_files=include_files
         )
         
-        logger.info(f"Export data generated, type: {type(export_data)}, keys: {list(export_data.keys()) if isinstance(export_data, dict) else 'N/A'}")
         
         # Determine content type and filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
