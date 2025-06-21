@@ -15,11 +15,11 @@ class PharmacyBase(BaseModel):
 
     name: str
     brand: Optional[str] = None
-    street_address: str
-    city: str
-    state: str
-    zip_code: str
-    country: str = "USA"
+    street_address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
+    country: Optional[str] = None
     store_number: Optional[str] = None
     phone_number: Optional[str] = None
     fax_number: Optional[str] = None
@@ -48,9 +48,9 @@ class PharmacyBase(BaseModel):
             raise ValueError('Pharmacy name must be at least 3 characters long')
         if len(v) > 150:
             raise ValueError('Pharmacy name must be less than 150 characters')
-        return v.strip()
-
-    @validator('brand')
+        return v.strip()   
+     
+    @validator('brand', pre=True)
     def validate_brand(cls, v):
         """
         Validate pharmacy brand field.
@@ -64,13 +64,15 @@ class PharmacyBase(BaseModel):
         Raises:
             ValueError: If brand is too short or too long
         """
-        if v and len(v.strip()) < 2:
+        if v is None or v.strip() == "":
+            return None
+        if len(v.strip()) < 2:
             raise ValueError('Brand must be at least 2 characters long')
-        if v and len(v) > 50:
+        if len(v) > 50:
             raise ValueError('Brand must be less than 50 characters')
-        return v.strip() if v else None
-
-    @validator('street_address')
+        return v.strip()    
+    
+    @validator('street_address', pre=True)
     def validate_street_address(cls, v):
         """
         Validate street address field.
@@ -79,18 +81,20 @@ class PharmacyBase(BaseModel):
             v: The street address value to validate
 
         Returns:
-            Cleaned street address (stripped whitespace)
+            Cleaned street address (stripped whitespace) or None
 
         Raises:
             ValueError: If street address is too short or too long
         """
-        if not v or len(v.strip()) < 5:
+        if v is None or v.strip() == "":
+            return None
+        if len(v.strip()) < 5:
             raise ValueError('Street address must be at least 5 characters long')
         if len(v) > 200:
             raise ValueError('Street address must be less than 200 characters')
-        return v.strip()
-
-    @validator('city')
+        return v.strip()    
+    
+    @validator('city', pre=True)
     def validate_city(cls, v):
         """
         Validate city field.
@@ -99,18 +103,20 @@ class PharmacyBase(BaseModel):
             v: The city value to validate
 
         Returns:
-            Cleaned city (stripped whitespace)
+            Cleaned city (stripped whitespace) or None
 
         Raises:
             ValueError: If city is too short or too long
         """
-        if not v or len(v.strip()) < 2:
+        if v is None or v.strip() == "":
+            return None
+        if len(v.strip()) < 2:
             raise ValueError('City must be at least 2 characters long')
         if len(v) > 100:
             raise ValueError('City must be less than 100 characters')
-        return v.strip()
-
-    @validator('state')
+        return v.strip()    
+    
+    @validator('state', pre=True)
     def validate_state(cls, v):
         """
         Validate state field.
@@ -119,19 +125,18 @@ class PharmacyBase(BaseModel):
             v: The state value to validate
 
         Returns:
-            Cleaned state (stripped whitespace)
-
-        Raises:
+            Cleaned state (stripped whitespace) or None        Raises:
             ValueError: If state is too short or too long
         """
-        if not v or len(v.strip()) < 2:
+        if v is None or v.strip() == "":
+            return None
+        if len(v.strip()) < 2:
             raise ValueError('State must be at least 2 characters long')
         if len(v) > 50:
             raise ValueError('State must be less than 50 characters')
-        # Could add specific US state validation here if needed
-        return v.strip()
-
-    @validator('zip_code')
+        # Could add specific US state validation here if needed        return v.strip()    
+    
+    @validator('zip_code', pre=True)
     def validate_zip_code(cls, v):
         """
         Validate ZIP code field.
@@ -144,20 +149,19 @@ class PharmacyBase(BaseModel):
             v: The ZIP code value to validate
 
         Returns:
-            Cleaned ZIP code (stripped whitespace)
+            Cleaned ZIP code (stripped whitespace) or None
 
-        Raises:
-            ValueError: If ZIP code format is invalid
+        Raises:        ValueError: If ZIP code format is invalid
         """
-        if not v:
-            raise ValueError('ZIP code is required')
+        if v is None or v.strip() == "":
+            return None
         # Basic US ZIP code validation (5 digits or 5+4 format)
         zip_pattern = r'^\d{5}(-\d{4})?$'
         if not re.match(zip_pattern, v.strip()):
             raise ValueError('ZIP code must be in format 12345 or 12345-6789')
-        return v.strip()
-
-    @validator('country')
+        return v.strip()    
+    
+    @validator('country', pre=True)
     def validate_country(cls, v):
         """
         Validate country field.
@@ -166,18 +170,19 @@ class PharmacyBase(BaseModel):
             v: The country value to validate
 
         Returns:
-            Cleaned country (stripped whitespace)
+            Cleaned country (stripped whitespace) or None
 
         Raises:
-            ValueError: If country is too short or too long
-        """
-        if v and len(v.strip()) < 2:
+            ValueError: If country is too short or too long        """
+        if v is None or v.strip() == "":
+            return None
+        if len(v.strip()) < 2:
             raise ValueError('Country must be at least 2 characters long')
-        if v and len(v) > 50:
+        if len(v) > 50:
             raise ValueError('Country must be less than 50 characters')
-        return v.strip() if v else "USA"
-
-    @validator('phone_number')
+        return v.strip()    
+    
+    @validator('phone_number', pre=True)
     def validate_phone_number(cls, v):
         """
         Validate and clean phone number field.
@@ -214,11 +219,10 @@ class PharmacyBase(BaseModel):
         # Check if it's a reasonable phone number length (10-15 digits)
         if len(digits_only) < 10 or len(digits_only) > 15:
             raise ValueError("Phone number must be between 10-15 digits")
-        
-        # Return digits only for consistent storage
+          # Return digits only for consistent storage
         return digits_only
 
-    @validator('fax_number')
+    @validator('fax_number', pre=True)
     def validate_fax_number(cls, v):
         """
         Validate and clean fax number field.
@@ -236,8 +240,7 @@ class PharmacyBase(BaseModel):
         """
         if v is None or v.strip() == "":
             return None
-        
-        # Apply same validation as phone number
+          # Apply same validation as phone number
         digits_only = re.sub(r'[^\d]', '', v)
         
         if digits_only.startswith('1') and len(digits_only) == 11:
@@ -248,7 +251,7 @@ class PharmacyBase(BaseModel):
         
         return digits_only
 
-    @validator('website')
+    @validator('website', pre=True)
     def validate_website(cls, v):
         """
         Validate website URL field.
@@ -403,40 +406,38 @@ class PharmacyUpdate(BaseModel):
             if len(v) > 150:
                 raise ValueError('Pharmacy name must be less than 150 characters')
             return v.strip()
-        return v
-
-    @validator('brand')
+        return v    @validator('brand')
     def validate_brand(cls, v):
         """Validate brand if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError('Brand must be at least 2 characters long')
-            if len(v) > 50:
-                raise ValueError('Brand must be less than 50 characters')
-            return v.strip()
-        return v
-
+        if v is None or str(v).strip() == "":
+            return None
+        if len(v.strip()) < 2:
+            raise ValueError('Brand must be at least 2 characters long')
+        if len(v) > 50:
+            raise ValueError('Brand must be less than 50 characters')
+        return v.strip()    
+    
     @validator('street_address')
     def validate_street_address(cls, v):
         """Validate street address if provided."""
-        if v is not None:
-            if len(v.strip()) < 5:
-                raise ValueError('Street address must be at least 5 characters long')
-            if len(v) > 200:
-                raise ValueError('Street address must be less than 200 characters')
-            return v.strip()
-        return v
-
+        if v is None or str(v).strip() == "":
+            return None
+        if len(v.strip()) < 5:
+            raise ValueError('Street address must be at least 5 characters long')
+        if len(v) > 200:
+            raise ValueError('Street address must be less than 200 characters')
+        return v.strip()    
+    
     @validator('city')
     def validate_city(cls, v):
         """Validate city if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError('City must be at least 2 characters long')
-            if len(v) > 100:
-                raise ValueError('City must be less than 100 characters')
-            return v.strip()
-        return v
+        if v is None or str(v).strip() == "":
+            return None
+        if len(v.strip()) < 2:
+            raise ValueError('City must be at least 2 characters long')
+        if len(v) > 100:
+            raise ValueError('City must be less than 100 characters')
+        return v.strip()
 
     @validator('state')
     def validate_state(cls, v):

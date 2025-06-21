@@ -134,6 +134,11 @@ const Dashboard = () => {
       description: 'View practitioner information',
       link: '/practitioners',
     },
+    {
+      title: '🏥 Pharmacies',
+      description: 'View pharmacy information',
+      link: '/pharmacies',
+    },
   ];
   // Add admin dashboard link if user is admin
   if (isAdmin) {
