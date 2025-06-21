@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { exportService } from '../services/exportService';
 import '../styles/pages/ExportPage.css';
 
 const ExportPage = () => {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
   const [formats, setFormats] = useState({ formats: [], scopes: [] });
   const [exportConfig, setExportConfig] = useState({
@@ -129,9 +131,17 @@ const ExportPage = () => {
     );
   }
 
-  return (
-    <div className="export-page">
+  return (    <div className="export-page">
       <div className="export-header">
+        <div className="header-top">
+          <button 
+            onClick={() => navigate('/')} 
+            className="back-button"
+            type="button"
+          >
+            ← Back to Home
+          </button>
+        </div>
         <h1>📥 Export Medical Records</h1>
         <p>Download your medical data in various formats</p>
       </div>
