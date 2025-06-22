@@ -16,7 +16,7 @@ const Medication = () => {
   } = usePatientWithStaticData();
 
   // Extract the actual data from the objects
-  const patientData = patientDataObject?.patient;
+  const patientData = patientDataObject?.patient; // patientDataObject has {patient: data, loading, error}
   const practitioners = practitionersObject?.practitioners || [];
   const pharmacies = pharmaciesObject?.pharmacies || [];
 
@@ -87,28 +87,14 @@ const Medication = () => {
     }
   }, [patientData?.id, patientData, globalDataLoading, fetchMedications]);
 
-  // Debug logging for production troubleshooting
+  // Debug logging to check auth status
   useEffect(() => {
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Medication page data state:', {
-        patientDataObject: !!patientDataObject,
-        practitionersObject: !!practitionersObject,
-        pharmaciesObject: !!pharmaciesObject,
-        patientData: !!patientData,
-        practitionersCount: practitioners.length,
-        pharmaciesCount: pharmacies.length,
-        globalDataLoading,
-      });
-    }
-  }, [
-    patientDataObject,
-    practitionersObject,
-    pharmaciesObject,
-    patientData,
-    practitioners.length,
-    pharmacies.length,
-    globalDataLoading,
-  ]);
+    console.log('AUTH CHECK:', {
+      hasToken: !!localStorage.getItem('token'),
+      patientData,
+      globalDataLoading,
+    });
+  }, [patientData, globalDataLoading]);
 
   const handleInputChange = e => {
     const { name, value } = e.target;
