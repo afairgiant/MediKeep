@@ -263,7 +263,9 @@ def delete_my_patient_record(
             },
         )
 
-        return {"message": "Patient record deleted successfully"}
+        return {
+            "message": "Patient record and all associated medical records deleted successfully"
+        }
 
     except Exception as e:
         # Log failed patient record deletion
@@ -278,7 +280,11 @@ def delete_my_patient_record(
                 "error": str(e),
             },
         )
-        raise
+        # Re-raise with more specific error message for the user
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete patient record and associated medical data. Please try again.",
+        )
 
 
 @router.get("/current", response_model=Patient)
