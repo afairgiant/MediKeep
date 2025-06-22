@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { DashboardCard } from '../components';
 import ThemeToggle from '../components/ui/ThemeToggle';
 import { apiService } from '../services/api';
+import { useCurrentPatient } from '../hooks/useGlobalData';
 import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
+  // Using global state for patient data
+  const { patient: user, loading: patientLoading } = useCurrentPatient();
+  
   const [recentActivity, setRecentActivity] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Combine loading states
+  const loading = patientLoading || activityLoading;
 
   useEffect(() => {
-    // Fetch user data from your FastAPI backend
-    fetchUserData();
+    // Only fetch activity and check admin status - patient data comes from global state
     fetchRecentActivity();
     checkAdminStatus();
   }, []);
@@ -46,23 +51,15 @@ const Dashboard = () => {
     }
   };
 
-  const fetchUserData = async () => {
-    try {
-      const userData = await apiService.getCurrentPatient();
-      setUser(userData);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchRecentActivity = async () => {
     try {
+      setActivityLoading(true);
       const activity = await apiService.getRecentActivity();
       setRecentActivity(activity);
     } catch (error) {
       console.error('Error fetching activity:', error);
+    } finally {
+      setActivityLoading(false);
     }
   };
 

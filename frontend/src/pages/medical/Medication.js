@@ -1,14 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 
 const Medication = () => {
+  // Using global state for patient, practitioners, and pharmacies data
+  const { 
+    patient: patientDataObject, 
+    practitioners: practitionersObject, 
+    pharmacies: pharmaciesObject, 
+    loading: globalDataLoading 
+  } = usePatientWithStaticData();
+
+  // Extract the actual data from the nested objects
+  const patientData = patientDataObject.patient;
+  const practitioners = practitionersObject.practitioners;
+  const pharmacies = pharmaciesObject.pharmacies;
+
   const [medications, setMedications] = useState([]);
-  const [patientData, setPatientData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [medicationsLoading, setMedicationsLoading] = useState(true);
+  // Combine loading states
+  const loading = medicationsLoading || globalDataLoading;
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -36,45 +51,41 @@ const Medication = () => {
     pharmacy_id: null,
   });
 
-  // Dropdown data
-  const [practitioners, setPractitioners] = useState([]);
-  const [pharmacies, setPharmacies] = useState([]);
-
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchPatientAndMedications();
-  }, []);
-  const fetchPatientAndMedications = async () => {
+  // Define fetchMedications before using it in useEffect
+  const fetchMedications = useCallback(async () => {
+    if (!patientData?.id) {
+      setMedicationsLoading(false);
+      return;
+    }
+
     try {
-      setLoading(true);
+      setMedicationsLoading(true);
       setError('');
 
-      // Fetch all data in parallel
-      const [patient, practitionersData, pharmaciesData] = await Promise.all([
-        apiService.getCurrentPatient(),
-        apiService.getPractitioners(),
-        apiService.getPharmacies(),
-      ]);
-
-      setPatientData(patient);
-      setPractitioners(practitionersData);
-      setPharmacies(pharmaciesData);
-
-      // Then get medications for this patient
-      if (patient && patient.id) {
-        const medicationData = await apiService.getPatientMedications(
-          patient.id
-        );
-        setMedications(medicationData);
-      }
+      // Only fetch medications - patient and static data comes from global state
+      const medicationData = await apiService.getPatientMedications(
+        patientData.id
+      );
+      setMedications(medicationData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching medications:', error);
       setError('Failed to load medication data. Please try again.');
     } finally {
-      setLoading(false);
+      setMedicationsLoading(false);
     }
-  };
+  }, [patientData?.id]);
+
+  // Fetch medications when patient data becomes available
+  useEffect(() => {
+    if (patientData?.id) {
+      fetchMedications();
+    } else if (patientData === null && !globalDataLoading) {
+      // If patient data is null and global loading is done, stop medications loading
+      setMedicationsLoading(false);
+    }
+  }, [patientData?.id, patientData, globalDataLoading, fetchMedications]);
   const handleInputChange = e => {
     const { name, value } = e.target;
 

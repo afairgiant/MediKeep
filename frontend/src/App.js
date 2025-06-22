@@ -12,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // Authentication
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AppDataProvider } from './contexts/AppDataContext';
 import ProtectedRoute, {
   AdminRoute,
   PublicRoute,
@@ -43,6 +44,7 @@ import SystemHealth from './pages/admin/SystemHealth';
 
 // Components
 import { LoggingTest, ErrorBoundary } from './components';
+import GlobalStateDemo from './components/common/GlobalStateDemo';
 import logger from './services/logger';
 import './App.css';
 
@@ -105,9 +107,10 @@ function App() {
     <ErrorBoundary componentName="App">
       <Router>
         <AuthProvider>
-          <ThemeProvider>
-            <NavigationTracker />
-            <div className="App">
+          <AppDataProvider>
+            <ThemeProvider>
+              <NavigationTracker />
+              <div className="App">
               <Routes>
                 {/* Public Routes */}
                 <Route
@@ -299,6 +302,7 @@ function App() {
                 />
                 {/* Development/Testing Routes */}
                 <Route path="/logging-test" element={<LoggingTest />} />
+                <Route path="/global-state-demo" element={<GlobalStateDemo />} />
                 {/* Default redirect */}
                 <Route path="/" element={<Navigate to="/dashboard" />} />
               </Routes>
@@ -318,6 +322,7 @@ function App() {
               theme="light"
             />
           </ThemeProvider>
+          </AppDataProvider>
         </AuthProvider>
       </Router>
     </ErrorBoundary>

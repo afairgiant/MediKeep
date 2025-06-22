@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 
 const Procedures = () => {
+  // Using global state for patient and practitioners data
+  const { 
+    patient: patientData, 
+    loading: patientLoading 
+  } = useCurrentPatient();
+  const { 
+    practitioners, 
+    loading: practitionersLoading 
+  } = usePractitioners();
+
   const [procedures, setProcedures] = useState([]);
-  const [patientData, setPatientData] = useState(null);
-  const [practitioners, setPractitioners] = useState([]);
+  const [proceduresLoading, setProceduresLoading] = useState(true);
+  // Combine loading states
+  const loading = patientLoading || practitionersLoading || proceduresLoading;
+  
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -31,42 +43,34 @@ const Procedures = () => {
     practitioner_id: '',
   });
   const navigate = useNavigate();
-  useEffect(() => {
-    fetchPatientAndProcedures();
-    fetchPractitioners();
-  }, []);
-
-  const fetchPractitioners = async () => {
-    try {
-      const practitionersData = await apiService.getPractitioners();
-      setPractitioners(practitionersData);
-    } catch (error) {
-      console.error('Error fetching practitioners:', error);
-      // Don't set error state for practitioner fetch failures
+  // Fetch procedures when patient data becomes available
+  const fetchProcedures = useCallback(async () => {
+    if (!patientData?.id) {
+      setProceduresLoading(false);
+      return;
     }
-  };
 
-  const fetchPatientAndProcedures = async () => {
     try {
-      setLoading(true);
+      setProceduresLoading(true);
       setError('');
 
-      // Get patient data first
-      const patient = await apiService.getCurrentPatient();
-      setPatientData(patient);
-
-      // Then get procedures for this patient
-      if (patient && patient.id) {
-        const procedureData = await apiService.getPatientProcedures(patient.id);
-        setProcedures(procedureData);
-      }
+      const procedureData = await apiService.getPatientProcedures(patientData.id);
+      setProcedures(procedureData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching procedures:', error);
       setError(`Failed to load procedure data: ${error.message}`);
     } finally {
-      setLoading(false);
+      setProceduresLoading(false);
     }
-  };
+  }, [patientData?.id]);
+
+  useEffect(() => {
+    if (patientData?.id) {
+      fetchProcedures();
+    } else if (patientData === null && !patientLoading) {
+      setProceduresLoading(false);
+    }
+  }, [patientData?.id, patientData, patientLoading, fetchProcedures]);
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -168,7 +172,7 @@ const Procedures = () => {
       }
 
       resetForm();
-      await fetchPatientAndProcedures();
+      await fetchProcedures();
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -189,7 +193,7 @@ const Procedures = () => {
       setError('');
       await apiService.deleteProcedure(procedureId);
       setSuccessMessage('Procedure deleted successfully!');
-      await fetchPatientAndProcedures();
+      await fetchProcedures();
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);

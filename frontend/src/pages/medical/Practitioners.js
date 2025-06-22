@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { MedicalCard, StatusBadge } from '../../components';
+import { usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
 import {
   formatPhoneNumber,
   formatPhoneInput,
@@ -12,8 +13,11 @@ import '../../styles/shared/MedicalPageShared.css';
 
 const Practitioners = () => {
   const navigate = useNavigate();
-  const [practitioners, setPractitioners] = useState([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Using global state for practitioners data
+  const { practitioners, loading, error: practitionersError, refresh } = usePractitioners();
+  const { invalidatePractitioners } = useCacheManager();
+  
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,23 +54,14 @@ const Practitioners = () => {
     'Urology',
   ];
 
+  // Handle global error state
   useEffect(() => {
-    fetchPractitioners();
-  }, []);
-
-  const fetchPractitioners = async () => {
-    try {
-      setLoading(true);
-      const response = await apiService.getPractitioners();
-      setPractitioners(response || []);
-      setError('');
-    } catch (err) {
+    if (practitionersError) {
       setError('Failed to load practitioners. Please try again.');
-      console.error('Error fetching practitioners:', err);
-    } finally {
-      setLoading(false);
+    } else {
+      setError('');
     }
-  };
+  }, [practitionersError]);
   const handleAddPractitioner = () => {
     setEditingPractitioner(null);
     setFormData({
@@ -101,7 +96,8 @@ const Practitioners = () => {
     ) {
       try {
         await apiService.deletePractitioner(practitionerId);
-        await fetchPractitioners();
+        // Refresh global practitioners data
+        await refresh();
         setSuccessMessage('Practitioner deleted successfully');
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
@@ -131,7 +127,8 @@ const Practitioners = () => {
       }
 
       setShowModal(false);
-      await fetchPractitioners();
+      // Refresh global practitioners data
+      await refresh();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError('Failed to save practitioner. Please try again.');
