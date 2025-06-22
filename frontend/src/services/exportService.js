@@ -59,22 +59,51 @@ export const exportService = {
       const contentDisposition = response.headers['content-disposition'];
       let filename = 'medical_records_export.json';
 
+      console.log('All response headers:', response.headers);
+      console.log('Content-Disposition header:', contentDisposition);
+      console.log('Content-Type header:', response.headers['content-type']);
+
       if (contentDisposition) {
+        console.log('Found Content-Disposition header:', contentDisposition);
         const filenameMatch = contentDisposition.match(
           /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
         );
         if (filenameMatch) {
           filename = filenameMatch[1].replace(/"/g, '');
+          console.log('Extracted filename from header:', filename);
+        } else {
+          console.log(
+            'Could not extract filename from Content-Disposition header'
+          );
         }
       } else {
+        console.log(
+          'No Content-Disposition header found, using fallback filename generation'
+        );
         // Fallback filename generation
         const timestamp = new Date()
           .toISOString()
           .slice(0, 19)
           .replace(/[-:]/g, '')
           .replace('T', '_');
-        const extension = params.format || 'json';
-        filename = `medical_records_${params.scope || 'export'}_${timestamp}.${extension}`;
+
+        // Determine if this should be a ZIP file based on parameters and content type
+        const contentType = response.headers['content-type'] || '';
+        const isZipFile =
+          contentType.includes('application/zip') ||
+          params.include_files === true ||
+          params.include_files === 'true';
+
+        if (isZipFile) {
+          // For ZIP files (when include_files=true), use .zip extension
+          filename = `medical_records_${params.scope || 'export'}_with_files_${timestamp}.zip`;
+          console.log('Generated ZIP filename (include_files=true):', filename);
+        } else {
+          // For regular exports, use the format parameter
+          const extension = params.format || 'json';
+          filename = `medical_records_${params.scope || 'export'}_${timestamp}.${extension}`;
+          console.log('Generated regular filename:', filename);
+        }
       }
 
       // Check if response.data is actually a Blob
@@ -95,14 +124,20 @@ export const exportService = {
         }
 
         // Create blob with appropriate MIME type
-        const mimeType =
-          params.format === 'json'
-            ? 'application/json'
-            : params.format === 'csv'
-              ? 'text/csv'
-              : params.format === 'pdf'
-                ? 'application/pdf'
-                : 'text/plain';
+        const contentType = response.headers['content-type'] || '';
+        let mimeType;
+
+        if (contentType.includes('application/zip')) {
+          mimeType = 'application/zip';
+        } else if (params.format === 'json') {
+          mimeType = 'application/json';
+        } else if (params.format === 'csv') {
+          mimeType = 'text/csv';
+        } else if (params.format === 'pdf') {
+          mimeType = 'application/pdf';
+        } else {
+          mimeType = 'text/plain';
+        }
 
         blob = new Blob([content], { type: mimeType });
       }

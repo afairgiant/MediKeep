@@ -5,21 +5,21 @@ This module provides endpoints for exporting patient medical data in various for
 Supports JSON, CSV, and PDF exports with different data scopes.
 """
 
+import io
+import json
+import zipfile
+from datetime import date, datetime
+from enum import Enum
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-from typing import Optional, List
-from datetime import datetime, date
-from enum import Enum
 from pydantic import BaseModel
-import json
-import io
-import zipfile
+from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_user_id
-
-from app.services.export_service import ExportService
+from app.api.deps import get_current_user_id, get_db
 from app.core.logging_config import get_logger
+from app.services.export_service import ExportService
 
 logger = get_logger(__name__, "app")
 
@@ -56,28 +56,40 @@ class BulkExportRequest(BaseModel):
 async def export_patient_data(
     format: ExportFormat = Query(ExportFormat.JSON, description="Export format"),
     scope: ExportScope = Query(ExportScope.ALL, description="Data scope to export"),
-    start_date: Optional[date] = Query(None, description="Start date for filtering records"),
-    end_date: Optional[date] = Query(None, description="End date for filtering records"),
-    include_files: bool = Query(False, description="Include associated files (PDF only)"),
+    start_date: Optional[date] = Query(
+        None, description="Start date for filtering records"
+    ),
+    end_date: Optional[date] = Query(
+        None, description="End date for filtering records"
+    ),
+    include_files: bool = Query(
+        False, description="Include associated files (PDF only)"
+    ),
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
     """
     Export patient medical data in the specified format.
-    
+
     - **format**: Output format (json, csv, pdf)
     - **scope**: What data to include (all, medications, lab_results, etc.)
     - **start_date**: Filter records from this date onwards
     - **end_date**: Filter records up to this date
-    - **include_files**: Whether to include file attachments (PDF exports only)    """
-    
+    - **include_files**: Whether to include file attachments (PDF exports only)"""
+
     try:
-        logger.info(f"Export request by user {current_user_id}: format={format}, scope={scope}")
-        logger.info(f"Format type: {type(format)}, value: {format.value if hasattr(format, 'value') else format}")
-        logger.info(f"Scope type: {type(scope)}, value: {scope.value if hasattr(scope, 'value') else scope}")
-        
+        logger.info(
+            f"Export request by user {current_user_id}: format={format}, scope={scope}"
+        )
+        logger.info(
+            f"Format type: {type(format)}, value: {format.value if hasattr(format, 'value') else format}"
+        )
+        logger.info(
+            f"Scope type: {type(scope)}, value: {scope.value if hasattr(scope, 'value') else scope}"
+        )
+
         export_service = ExportService(db)
-        
+
         # Generate the export
         export_data = await export_service.export_patient_data(
             user_id=current_user_id,
@@ -85,22 +97,21 @@ async def export_patient_data(
             scope=scope.value,
             start_date=start_date,
             end_date=end_date,
-            include_files=include_files
+            include_files=include_files,
         )
-        
-        
+
         # Determine content type and filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         if format == ExportFormat.JSON:
             media_type = "application/json"
             filename = f"medical_records_{scope.value}_{timestamp}.json"
-            
+
             def json_serializer(obj):
                 """Custom JSON serializer for complex objects."""
-                if hasattr(obj, 'isoformat'):  # datetime objects
+                if hasattr(obj, "isoformat"):  # datetime objects
                     return obj.isoformat()
-                elif hasattr(obj, '__dict__'):  # SQLAlchemy models or other objects
+                elif hasattr(obj, "__dict__"):  # SQLAlchemy models or other objects
                     return str(obj)
                 elif isinstance(obj, (list, tuple)):
                     return [json_serializer(item) for item in obj]
@@ -108,63 +119,167 @@ async def export_patient_data(
                     return {key: json_serializer(value) for key, value in obj.items()}
                 else:
                     return str(obj)
-            
+
             try:
-                content = json.dumps(export_data, default=json_serializer, indent=2, ensure_ascii=False)
+                content = json.dumps(
+                    export_data, default=json_serializer, indent=2, ensure_ascii=False
+                )
                 logger.info(f"JSON content length: {len(content)}")
             except Exception as json_error:
                 logger.error(f"JSON serialization error: {json_error}")
-                raise HTTPException(status_code=500, detail=f"JSON serialization failed: {str(json_error)}")
-            
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"JSON serialization failed: {str(json_error)}",
+                )
+
         elif format == ExportFormat.CSV:
             media_type = "text/csv"
             filename = f"medical_records_{scope.value}_{timestamp}.csv"
             content = export_service.convert_to_csv(export_data, scope.value)
-            
+
         elif format == ExportFormat.PDF:
+            logger.info(
+                f"PDF export requested - include_files parameter: {include_files} (type: {type(include_files)})"
+            )
+            if include_files:
+                # Create ZIP file with PDF and attached files
+                import os
+
+                logger.info(
+                    f"PDF export with files requested for user {current_user_id}"
+                )
+                pdf_content = await export_service.convert_to_pdf(
+                    export_data, include_files
+                )
+                files_info = export_service.get_lab_result_files(
+                    current_user_id, start_date, end_date
+                )
+                logger.info(f"Found {len(files_info)} lab result files to include")
+
+                # Debug: Print file info
+                for file_info in files_info:
+                    logger.info(
+                        f"File: {file_info['file_name']} at {file_info['file_path']}"
+                    )
+
+                if files_info:
+                    # Create ZIP file in memory
+                    zip_buffer = io.BytesIO()
+
+                    with zipfile.ZipFile(
+                        zip_buffer, "w", zipfile.ZIP_DEFLATED
+                    ) as zip_file:
+                        # Add the PDF to the ZIP
+                        pdf_filename = f"medical_records_{scope.value}_{timestamp}.pdf"
+                        zip_file.writestr(pdf_filename, pdf_content)
+
+                        # Add each lab result file to the ZIP
+                        for file_info in files_info:
+                            try:
+                                file_path = file_info["file_path"]
+                                if os.path.exists(file_path):
+                                    # Create a safe filename for the ZIP
+                                    safe_filename = f"{file_info['test_name']}_{file_info['file_name']}".replace(
+                                        " ", "_"
+                                    )
+                                    # Remove any potentially problematic characters
+                                    safe_filename = "".join(
+                                        c
+                                        for c in safe_filename
+                                        if c.isalnum() or c in "._-"
+                                    )
+
+                                    zip_file.write(
+                                        file_path, f"lab_files/{safe_filename}"
+                                    )
+                                    logger.info(
+                                        f"Added file {file_info['file_name']} to ZIP as {safe_filename}"
+                                    )
+                                else:
+                                    logger.warning(f"File not found: {file_path}")
+                            except Exception as file_error:
+                                logger.error(
+                                    f"Failed to add file {file_info['file_name']} to ZIP: {file_error}"
+                                )
+                                continue
+
+                    zip_buffer.seek(0)
+                    zip_filename = (
+                        f"medical_records_{scope.value}_with_files_{timestamp}.zip"
+                    )
+
+                    zip_content = zip_buffer.getvalue()
+                    logger.info(
+                        f"✅ RETURNING ZIP FILE: {zip_filename}, size: {len(zip_content)} bytes"
+                    )
+                    logger.info(f"ZIP media type: application/zip")
+                    logger.info(
+                        f'ZIP headers: Content-Disposition: attachment; filename="{zip_filename}"'
+                    )
+                    return Response(
+                        content=zip_content,
+                        media_type="application/zip",
+                        headers={
+                            "Content-Disposition": f'attachment; filename="{zip_filename}"'
+                        },
+                    )
+
+            # If we get here, either include_files=False or no files were found
+            # Generate standard PDF export
+            logger.info(
+                "📄 Generating standard PDF export (no files or files not found)"
+            )
             media_type = "application/pdf"
             filename = f"medical_records_{scope.value}_{timestamp}.pdf"
             content = await export_service.convert_to_pdf(export_data, include_files)
-            
+
         else:
             raise HTTPException(status_code=400, detail="Unsupported export format")
-        
+
         # Create appropriate response based on format
         if format == ExportFormat.PDF:
             # For PDF, use Response for binary data
             if not content:
-                raise HTTPException(status_code=500, detail="Generated PDF content is empty")
-            
-            logger.info(f"PDF content type: {type(content)}, size: {len(content)} bytes")
-            
+                raise HTTPException(
+                    status_code=500, detail="Generated PDF content is empty"
+                )
+
+            logger.info(
+                f"PDF content type: {type(content)}, size: {len(content)} bytes"
+            )
+
             return Response(
                 content=content,
                 media_type=media_type,
-                headers={"Content-Disposition": f"attachment; filename=\"{filename}\""}
+                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
             )
         else:
             # For text-based formats (JSON, CSV), use StreamingResponse
             if isinstance(content, str):
-                content_bytes = content.encode('utf-8')
+                content_bytes = content.encode("utf-8")
             else:
                 content_bytes = content
-                
+
             # Validate content exists
             if not content_bytes:
-                raise HTTPException(status_code=500, detail="Generated content is empty")
-                
-            logger.info(f"Content type: {type(content)}, Content bytes length: {len(content_bytes)}")
-                
+                raise HTTPException(
+                    status_code=500, detail="Generated content is empty"
+                )
+
+            logger.info(
+                f"Content type: {type(content)}, Content bytes length: {len(content_bytes)}"
+            )
+
             # Create a generator function for the StreamingResponse
             def generate():
                 yield content_bytes
-            
+
             return StreamingResponse(
                 generate(),
                 media_type=media_type,
-                headers={"Content-Disposition": f"attachment; filename=\"{filename}\""}
+                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
             )
-        
+
     except Exception as e:
         logger.error(f"Export failed for user {current_user_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
@@ -182,15 +297,17 @@ async def get_export_summary(
     try:
         export_service = ExportService(db)
         summary = await export_service.get_export_summary(current_user_id)
-        
+
         return {
             "status": "success",
             "data": summary,
-            "generated_at": datetime.now().isoformat()
+            "generated_at": datetime.now().isoformat(),
         }
-        
+
     except Exception as e:
-        logger.error(f"Failed to generate export summary for user {current_user_id}: {str(e)}")
+        logger.error(
+            f"Failed to generate export summary for user {current_user_id}: {str(e)}"
+        )
         raise HTTPException(status_code=500, detail="Failed to generate export summary")
 
 
@@ -204,31 +321,71 @@ async def get_supported_formats():
             {
                 "value": "json",
                 "label": "JSON",
-                "description": "Machine-readable structured data format"
+                "description": "Machine-readable structured data format",
             },
             {
-                "value": "csv", 
+                "value": "csv",
                 "label": "CSV",
-                "description": "Comma-separated values for spreadsheet applications"
+                "description": "Comma-separated values for spreadsheet applications",
             },
             {
                 "value": "pdf",
-                "label": "PDF", 
-                "description": "Human-readable document format"
-            }
+                "label": "PDF",
+                "description": "Human-readable document format",
+            },
         ],
         "scopes": [
-            {"value": "all", "label": "All Records", "description": "Complete medical history"},
-            {"value": "medications", "label": "Medications", "description": "Current and past medications"},
-            {"value": "lab_results", "label": "Lab Results", "description": "Laboratory test results"},
-            {"value": "allergies", "label": "Allergies", "description": "Known allergies and reactions"},
-            {"value": "conditions", "label": "Medical Conditions", "description": "Diagnosed conditions"},
-            {"value": "immunizations", "label": "Immunizations", "description": "Vaccination records"},
-            {"value": "procedures", "label": "Procedures", "description": "Medical procedures performed"},
-            {"value": "treatments", "label": "Treatments", "description": "Treatment plans and history"},
-            {"value": "encounters", "label": "Encounters", "description": "Medical visits and consultations"},
-            {"value": "vitals", "label": "Vital Signs", "description": "Blood pressure, weight, etc."}
-        ]
+            {
+                "value": "all",
+                "label": "All Records",
+                "description": "Complete medical history",
+            },
+            {
+                "value": "medications",
+                "label": "Medications",
+                "description": "Current and past medications",
+            },
+            {
+                "value": "lab_results",
+                "label": "Lab Results",
+                "description": "Laboratory test results",
+            },
+            {
+                "value": "allergies",
+                "label": "Allergies",
+                "description": "Known allergies and reactions",
+            },
+            {
+                "value": "conditions",
+                "label": "Medical Conditions",
+                "description": "Diagnosed conditions",
+            },
+            {
+                "value": "immunizations",
+                "label": "Immunizations",
+                "description": "Vaccination records",
+            },
+            {
+                "value": "procedures",
+                "label": "Procedures",
+                "description": "Medical procedures performed",
+            },
+            {
+                "value": "treatments",
+                "label": "Treatments",
+                "description": "Treatment plans and history",
+            },
+            {
+                "value": "encounters",
+                "label": "Encounters",
+                "description": "Medical visits and consultations",
+            },
+            {
+                "value": "vitals",
+                "label": "Vital Signs",
+                "description": "Blood pressure, weight, etc.",
+            },
+        ],
     }
 
 
@@ -243,20 +400,22 @@ async def create_bulk_export(
     Each scope is exported as a separate file within the ZIP.
     """
     try:
-        logger.info(f"Bulk export request by user {current_user_id}: {len(request.scopes)} scopes, format: {request.format}")
-        
+        logger.info(
+            f"Bulk export request by user {current_user_id}: {len(request.scopes)} scopes, format: {request.format}"
+        )
+
         export_service = ExportService(db)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         # Create ZIP file in memory
         zip_buffer = io.BytesIO()
-        
+
         # Custom JSON serializer (same as single export)
         def json_serializer(obj):
             """Custom JSON serializer for complex objects."""
-            if hasattr(obj, 'isoformat'):  # datetime objects
+            if hasattr(obj, "isoformat"):  # datetime objects
                 return obj.isoformat()
-            elif hasattr(obj, '__dict__'):  # SQLAlchemy models or other objects
+            elif hasattr(obj, "__dict__"):  # SQLAlchemy models or other objects
                 return str(obj)
             elif isinstance(obj, (list, tuple)):
                 return [json_serializer(item) for item in obj]
@@ -264,10 +423,10 @@ async def create_bulk_export(
                 return {key: json_serializer(value) for key, value in obj.items()}
             else:
                 return str(obj)
-        
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             exported_count = 0
-            
+
             for scope in request.scopes:
                 try:
                     # Export each scope
@@ -277,48 +436,71 @@ async def create_bulk_export(
                         scope=scope.value,
                         start_date=request.start_date,
                         end_date=request.end_date,
-                        include_files=False  # Files not supported in bulk export
+                        include_files=False,  # Files not supported in bulk export
                     )
-                    
+
                     # Convert to appropriate format
                     if request.format == ExportFormat.JSON:
-                        content = json.dumps(export_data, default=json_serializer, indent=2, ensure_ascii=False)
+                        content = json.dumps(
+                            export_data,
+                            default=json_serializer,
+                            indent=2,
+                            ensure_ascii=False,
+                        )
                         filename = f"medical_records_{scope.value}_{timestamp}.json"
                     elif request.format == ExportFormat.CSV:
-                        content = export_service.convert_to_csv(export_data, scope.value)
+                        content = export_service.convert_to_csv(
+                            export_data, scope.value
+                        )
                         filename = f"medical_records_{scope.value}_{timestamp}.csv"
                     else:
                         # PDF not supported in bulk for complexity reasons
-                        logger.warning(f"PDF format not supported in bulk export for scope {scope.value}")
+                        logger.warning(
+                            f"PDF format not supported in bulk export for scope {scope.value}"
+                        )
                         continue
-                    
+
                     # Add to ZIP
-                    zip_file.writestr(filename, content.encode('utf-8') if isinstance(content, str) else content)
+                    zip_file.writestr(
+                        filename,
+                        (
+                            content.encode("utf-8")
+                            if isinstance(content, str)
+                            else content
+                        ),
+                    )
                     exported_count += 1
                     logger.info(f"Successfully added {scope.value} to bulk export")
-                    
+
                 except Exception as e:
-                    logger.warning(f"Failed to export {scope.value} for user {current_user_id}: {str(e)}")
+                    logger.warning(
+                        f"Failed to export {scope.value} for user {current_user_id}: {str(e)}"
+                    )
                     continue
-        
+
         if exported_count == 0:
-            raise HTTPException(status_code=400, detail="No data could be exported for the selected scopes")
-        
+            raise HTTPException(
+                status_code=400,
+                detail="No data could be exported for the selected scopes",
+            )
+
         zip_buffer.seek(0)
         zip_filename = f"medical_records_bulk_{timestamp}.zip"
-        
+
         # Create a generator function for the StreamingResponse
         def generate():
             yield zip_buffer.getvalue()
-        
-        logger.info(f"Bulk export completed: {exported_count} files in ZIP for user {current_user_id}")
-        
+
+        logger.info(
+            f"Bulk export completed: {exported_count} files in ZIP for user {current_user_id}"
+        )
+
         return StreamingResponse(
             generate(),
             media_type="application/zip",
-            headers={"Content-Disposition": f"attachment; filename=\"{zip_filename}\""}
+            headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'},
         )
-        
+
     except Exception as e:
         logger.error(f"Bulk export failed for user {current_user_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Bulk export failed: {str(e)}")
@@ -341,13 +523,13 @@ async def debug_export_params(
             "start_date": start_date,
             "end_date": end_date,
             "include_files": include_files,
-            "user_id": current_user_id
+            "user_id": current_user_id,
         },
         "param_types": {
             "format": type(format).__name__,
             "scope": type(scope).__name__,
             "start_date": type(start_date).__name__,
             "end_date": type(end_date).__name__,
-            "include_files": type(include_files).__name__
-        }
+            "include_files": type(include_files).__name__,
+        },
     }
