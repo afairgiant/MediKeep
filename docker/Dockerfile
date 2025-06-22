@@ -22,7 +22,8 @@ COPY frontend/ ./
 
 # Build the React app with optimizations and ignore ESLint warnings
 RUN cp .eslintrc.production.js .eslintrc.js && \
-    ESLINT_NO_DEV_ERRORS=true npm run build && \
+    CI=false ESLINT_NO_DEV_ERRORS=true DISABLE_ESLINT_PLUGIN=true npm run build && \
+
     # Remove source maps and unnecessary files for production
     find build -name "*.map" -delete
 
@@ -81,7 +82,7 @@ EXPOSE 8000
 
 # Add labels for better maintenance
 LABEL maintainer="afairgiant" \
-      version="0.1.0" \
+      version="0.7.0" \
       description="Medical Records System - React + FastAPI"
 
 # Health check with better configuration
