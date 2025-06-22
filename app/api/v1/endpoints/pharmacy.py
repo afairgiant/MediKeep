@@ -1,16 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import Any, List
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.pharmacy import pharmacy
-from app.schemas.pharmacy import (
-    PharmacyCreate,
-    PharmacyUpdate,
-    Pharmacy,
-)
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
+from app.models.activity_log import EntityType
+from app.schemas.pharmacy import Pharmacy, PharmacyCreate, PharmacyUpdate
 
 router = APIRouter()
 
@@ -26,26 +23,15 @@ def create_pharmacy(
     Create new pharmacy.
     """
     pharmacy_obj = pharmacy.create(db=db, obj_in=pharmacy_in)
-    
-    # Log the creation activity
-    try:
-        description = f"New pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=None,  # Pharmacies are not patient-specific
-            action="created",
-            entity_type="pharmacy",
-            entity_id=getattr(pharmacy_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
+    # Log the creation activity using centralized logging
+    log_create(
+        db=db,
+        entity_type="pharmacy",
+        entity_obj=pharmacy_obj,
+        user_id=current_user_id,
+    )
+
     return pharmacy_obj
 
 
@@ -93,28 +79,17 @@ def update_pharmacy(
     pharmacy_obj = pharmacy.get(db=db, id=id)
     if not pharmacy_obj:
         raise HTTPException(status_code=404, detail="Pharmacy not found")
-    
+
     pharmacy_obj = pharmacy.update(db=db, db_obj=pharmacy_obj, obj_in=pharmacy_in)
-    
-    # Log the update activity
-    try:
-        description = f"Updated pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=None,  # Pharmacies are not patient-specific
-            action="updated",
-            entity_type="pharmacy",
-            entity_id=getattr(pharmacy_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type="pharmacy",
+        entity_obj=pharmacy_obj,
+        user_id=current_user_id,
+    )
+
     return pharmacy_obj
 
 
@@ -129,43 +104,44 @@ def delete_pharmacy(
     Delete a pharmacy.
     """
     from app.models.models import Medication
-    
+
     pharmacy_obj = pharmacy.get(db=db, id=id)
     if not pharmacy_obj:
         raise HTTPException(status_code=404, detail="Pharmacy not found")
-    
+
     # First, check how many medications reference this pharmacy
     medication_count = db.query(Medication).filter(Medication.pharmacy_id == id).count()
-    
+
     # Set pharmacy_id to NULL for all medications that reference this pharmacy
     if medication_count > 0:
-        db.query(Medication).filter(Medication.pharmacy_id == id).update({"pharmacy_id": None})
+        db.query(Medication).filter(Medication.pharmacy_id == id).update(
+            {"pharmacy_id": None}
+        )
         db.commit()
-    
+
+    # Log the deletion activity BEFORE deleting using centralized logging
+    # Create custom description for pharmacy deletion with medication info
+    base_description = (
+        f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
+    )
+    if medication_count > 0:
+        description = f"{base_description}. Updated {medication_count} medication(s) to remove pharmacy reference."
+    else:
+        description = base_description
+
+    from app.api.activity_logging import safe_log_activity
+    from app.models.activity_log import ActionType
+
+    safe_log_activity(
+        db=db,
+        action=ActionType.DELETED,
+        entity_type="pharmacy",
+        entity_obj=pharmacy_obj,
+        user_id=current_user_id,
+        description=description,
+    )
+
     # Now delete the pharmacy
     pharmacy.delete(db=db, id=id)
-      # Log the deletion activity
-    try:
-        base_description = f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
-        if medication_count > 0:
-            description = f"{base_description}. Updated {medication_count} medication(s) to remove pharmacy reference."
-        else:
-            description = base_description
-            
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=None,  # Pharmacies are not patient-specific
-            action="deleted",
-            entity_type="pharmacy",
-            entity_id=getattr(pharmacy_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
     return {"ok": True}

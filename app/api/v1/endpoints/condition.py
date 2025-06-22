@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from typing import Any, List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.condition import condition
+from app.models.activity_log import EntityType
 from app.schemas.condition import (
     ConditionCreate,
-    ConditionUpdate,
     ConditionResponse,
+    ConditionUpdate,
     ConditionWithRelations,
 )
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -27,26 +28,15 @@ def create_condition(
     Create new condition.
     """
     condition_obj = condition.create(db=db, obj_in=condition_in)
-    
-    # Log the creation activity
-    try:
-        description = f"New condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(condition_obj, 'patient_id', None),
-            action="created",
-            entity_type="condition",
-            entity_id=getattr(condition_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging condition creation activity: {e}")
-    
+
+    # Log the creation activity using centralized logging
+    log_create(
+        db=db,
+        entity_type=EntityType.CONDITION,
+        entity_obj=condition_obj,
+        user_id=current_user_id,
+    )
+
     return condition_obj
 
 
@@ -56,22 +46,28 @@ def read_conditions(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    status: Optional[str] = Query(None),    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    status: Optional[str] = Query(None),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve conditions for the current user with optional filtering.
     """
     # Filter conditions by the user's patient_id (ignore any provided patient_id for security)
     if status:
-        conditions = condition.get_by_status(db, status=status, patient_id=current_user_patient_id)
+        conditions = condition.get_by_status(
+            db, status=status, patient_id=current_user_patient_id
+        )
     else:
-        conditions = condition.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+        conditions = condition.get_by_patient(
+            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        )
     return conditions
 
 
 @router.get("/{condition_id}", response_model=ConditionWithRelations)
 def read_condition(
-    *,    db: Session = Depends(deps.get_db),
+    *,
+    db: Session = Depends(deps.get_db),
     condition_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
@@ -79,15 +75,17 @@ def read_condition(
     Get condition by ID with related information - only allows access to user's own conditions.
     """
     # Get condition and verify it belongs to the user
-    condition_obj = condition.get_with_relations(db, condition_id=condition_id)
+    condition_obj = condition.get_with_relations(
+        db=db, record_id=condition_id, relations=[]
+    )
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
-    
+
     # Security check: ensure the condition belongs to the current user
     deps.verify_patient_record_access(
-        getattr(condition_obj, 'patient_id'), current_user_patient_id, "condition"
+        getattr(condition_obj, "patient_id"), current_user_patient_id, "condition"
     )
-    
+
     return condition_obj
 
 
@@ -106,26 +104,15 @@ def update_condition(
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
     condition_obj = condition.update(db=db, db_obj=condition_obj, obj_in=condition_in)
-    
-    # Log the update activity
-    try:
-        description = f"Updated condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(condition_obj, 'patient_id', None),
-            action="updated",
-            entity_type="condition",
-            entity_id=getattr(condition_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging condition update activity: {e}")
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type=EntityType.CONDITION,
+        entity_obj=condition_obj,
+        user_id=current_user_id,
+    )
+
     return condition_obj
 
 
@@ -149,26 +136,15 @@ def update_condition_with_slash(
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
     condition_obj = condition.update(db=db, db_obj=condition_obj, obj_in=condition_in)
-    
-    # Log the update activity
-    try:
-        description = f"Updated condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(condition_obj, 'patient_id', None),
-            action="updated",
-            entity_type="condition",
-            entity_id=getattr(condition_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging condition update activity: {e}")
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type=EntityType.CONDITION,
+        entity_obj=condition_obj,
+        user_id=current_user_id,
+    )
+
     return condition_obj
 
 
@@ -185,26 +161,15 @@ def delete_condition(
     condition_obj = condition.get(db=db, id=condition_id)
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")
-    
-    # Log the deletion activity BEFORE deleting
-    try:
-        description = f"Deleted condition: {getattr(condition_obj, 'name', 'Unknown condition')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(condition_obj, 'patient_id', None),
-            action="deleted",
-            entity_type="condition",
-            entity_id=getattr(condition_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging condition deletion activity: {e}")
-    
+
+    # Log the deletion activity BEFORE deleting using centralized logging
+    log_delete(
+        db=db,
+        entity_type=EntityType.CONDITION,
+        entity_obj=condition_obj,
+        user_id=current_user_id,
+    )
+
     condition.delete(db=db, id=condition_id)
     return {"message": "Condition deleted successfully"}
 

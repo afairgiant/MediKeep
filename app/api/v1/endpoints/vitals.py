@@ -1,19 +1,15 @@
+from datetime import datetime
+from typing import Any, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
-from typing import Any, List, Optional
-from datetime import datetime
 
 from app.api import deps
-from app.crud.vitals import vitals
-from app.schemas.vitals import (
-    VitalsCreate,
-    VitalsUpdate,
-    VitalsResponse,
-    VitalsStats
-)
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.logging_config import get_logger
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
+from app.crud.vitals import vitals
+from app.models.activity_log import EntityType
+from app.schemas.vitals import VitalsCreate, VitalsResponse, VitalsStats, VitalsUpdate
 
 router = APIRouter()
 
@@ -40,7 +36,9 @@ def create_vitals(
         # Use create_with_bmi to automatically calculate BMI if weight and height provided
         vitals_obj = vitals.create_with_bmi(db=db, obj_in=vitals_in)
         vitals_id = getattr(vitals_obj, "id", None)
-        patient_id = getattr(vitals_obj, "patient_id", None)        # Log successful vitals creation
+        patient_id = getattr(
+            vitals_obj, "patient_id", None
+        )  # Log successful vitals creation
         logger.info(
             "Vitals reading created successfully",
             extra={
@@ -53,24 +51,14 @@ def create_vitals(
             },
         )
 
-        # Log the creation activity
-        try:
-            description = f"New vitals: {getattr(vitals_obj, 'date_recorded', 'Unknown date')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(vitals_obj, 'patient_id', None),
-                action="created",
-                entity_type="vitals",
-                entity_id=getattr(vitals_obj, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging vitals creation activity: {e}")
+        # Log the creation activity using centralized logging
+        log_create(
+            db=db,
+            entity_type="vitals",
+            entity_obj=vitals_obj,
+            user_id=current_user_id,
+            request=request,
+        )
 
         return vitals_obj
 
@@ -102,7 +90,9 @@ def read_vitals(
     Retrieve vitals readings for the current user.
     """
     # Filter vitals by the user's patient_id
-    vitals_list = vitals.get_by_patient(db=db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+    vitals_list = vitals.get_by_patient(
+        db=db, patient_id=current_user_patient_id, skip=skip, limit=limit
+    )
     return vitals_list
 
 
@@ -119,12 +109,12 @@ def read_vitals_by_id(
     vitals_obj = vitals.get(db=db, id=vitals_id)
     if not vitals_obj:
         raise HTTPException(status_code=404, detail="Vitals reading not found")
-    
+
     # Security check: ensure the vitals belongs to the current user
     deps.verify_patient_record_access(
-        getattr(vitals_obj, 'patient_id'), current_user_patient_id, "vitals"
+        getattr(vitals_obj, "patient_id"), current_user_patient_id, "vitals"
     )
-    
+
     return vitals_obj
 
 
@@ -142,36 +132,25 @@ def update_vitals(
     vitals_obj = vitals.get(db=db, id=vitals_id)
     if not vitals_obj:
         raise HTTPException(status_code=404, detail="Vitals reading not found")
-      # If weight and height are being updated, recalculate BMI
+    # If weight and height are being updated, recalculate BMI
     update_data = vitals_in.dict(exclude_unset=True)
     current_weight = update_data.get("weight", vitals_obj.weight)
     current_height = update_data.get("height", vitals_obj.height)
-    
+
     if current_weight and current_height:
         bmi = vitals.calculate_bmi(current_weight, current_height)
         update_data["bmi"] = bmi
-    
+
     vitals_obj = vitals.update(db=db, db_obj=vitals_obj, obj_in=update_data)
-    
-    # Log the update activity
-    try:
-        description = f"Updated vitals: {getattr(vitals_obj, 'date_recorded', 'Unknown date')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(vitals_obj, 'patient_id', None),
-            action="updated",
-            entity_type="vitals",
-            entity_id=getattr(vitals_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging vitals update activity: {e}")
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type="vitals",
+        entity_obj=vitals_obj,
+        user_id=current_user_id,
+    )
+
     return vitals_obj
 
 
@@ -188,26 +167,15 @@ def delete_vitals(
     vitals_obj = vitals.get(db=db, id=vitals_id)
     if not vitals_obj:
         raise HTTPException(status_code=404, detail="Vitals reading not found")
-    
-    # Log the deletion activity BEFORE deleting
-    try:
-        description = f"Deleted vitals: {getattr(vitals_obj, 'date_recorded', 'Unknown date')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(vitals_obj, 'patient_id', None),
-            action="deleted",
-            entity_type="vitals",
-            entity_id=getattr(vitals_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging vitals deletion activity: {e}")
-    
+
+    # Log the deletion activity BEFORE deleting using centralized logging
+    log_delete(
+        db=db,
+        entity_type="vitals",
+        entity_obj=vitals_obj,
+        user_id=current_user_id,
+    )
+
     db.delete(vitals_obj)
     db.commit()
     return {"message": "Vitals reading deleted successfully"}
@@ -220,7 +188,10 @@ def read_patient_vitals(
     patient_id: int,
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    vital_type: Optional[str] = Query(None, description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose"),
+    vital_type: Optional[str] = Query(
+        None,
+        description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose",
+    ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -229,7 +200,9 @@ def read_patient_vitals(
     """
     if days:
         # Get recent readings
-        vitals_list = vitals.get_recent_readings(db=db, patient_id=patient_id, days=days)
+        vitals_list = vitals.get_recent_readings(
+            db=db, patient_id=patient_id, days=days
+        )
     elif vital_type:
         # Get by specific vital type
         vitals_list = vitals.get_by_vital_type(
@@ -240,7 +213,7 @@ def read_patient_vitals(
         vitals_list = vitals.get_by_patient(
             db=db, patient_id=patient_id, skip=skip, limit=limit
         )
-    
+
     return vitals_list
 
 
@@ -256,7 +229,9 @@ def read_patient_latest_vitals(
     """
     latest_vitals = vitals.get_latest_by_patient(db=db, patient_id=patient_id)
     if not latest_vitals:
-        raise HTTPException(status_code=404, detail="No vitals readings found for this patient")
+        raise HTTPException(
+            status_code=404, detail="No vitals readings found for this patient"
+        )
     return latest_vitals
 
 
@@ -294,7 +269,7 @@ def read_patient_vitals_date_range(
         start_date=start_date,
         end_date=end_date,
         skip=skip,
-        limit=limit
+        limit=limit,
     )
     return vitals_list
 
@@ -312,14 +287,11 @@ def create_patient_vitals(
     if vitals_in.patient_id != patient_id:
         raise HTTPException(
             status_code=400,
-            detail="Patient ID in URL does not match patient ID in request body"
+            detail="Patient ID in URL does not match patient ID in request body",
         )
-    
+
     return create_vitals(
-        vitals_in=vitals_in,
-        request=request,
-        db=db,
-        current_user_id=current_user_id
+        vitals_in=vitals_in, request=request, db=db, current_user_id=current_user_id
     )
 
 

@@ -1,33 +1,34 @@
+import os
+import uuid
+from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
+
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException,
-    Query,
-    status,
-    UploadFile,
     File,
     Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
 )
 from sqlalchemy.orm import Session
-from datetime import datetime
-import os
-import uuid
-from pathlib import Path
 
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.database import get_db
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
+from app.models.activity_log import EntityType
 from app.schemas.lab_result import (
     LabResultCreate,
-    LabResultUpdate,
     LabResultResponse,
+    LabResultUpdate,
     LabResultWithRelations,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -36,14 +37,17 @@ router = APIRouter()
 @router.get("/", response_model=List[LabResultResponse])
 def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),    db: Session = Depends(get_db),
+    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+    db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """
     Get lab results for the current user with pagination
     """
     # Filter lab results by the user's patient_id
-    results = lab_result.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+    results = lab_result.get_by_patient(
+        db, patient_id=current_user_patient_id, skip=skip, limit=limit
+    )
     return results
 
 
@@ -73,26 +77,15 @@ def create_lab_result(
     """
     try:
         db_lab_result = lab_result.create(db, obj_in=lab_result_in)
-        
-        # Log the creation activity
-        try:
-            description = f"New lab result: {getattr(db_lab_result, 'test_name', 'Unknown test')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(db_lab_result, 'patient_id', None),
-                action="created",
-                entity_type="lab_result",
-                entity_id=getattr(db_lab_result, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging lab result creation activity: {e}")
-        
+
+        # Log the creation activity using centralized logging
+        log_create(
+            db=db,
+            entity_type=EntityType.LAB_RESULT,
+            entity_obj=db_lab_result,
+            user_id=current_user_id,
+        )
+
         return db_lab_result
     except Exception as e:
         raise HTTPException(
@@ -106,7 +99,7 @@ def update_lab_result(
     lab_result_in: LabResultUpdate,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    ):    
+):
     """
     Update an existing lab result
     """
@@ -118,26 +111,15 @@ def update_lab_result(
         updated_lab_result = lab_result.update(
             db, db_obj=db_lab_result, obj_in=lab_result_in
         )
-        
-        # Log the update activity
-        try:
-            description = f"Updated lab result: {getattr(updated_lab_result, 'test_name', 'Unknown test')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(updated_lab_result, 'patient_id', None),
-                action="updated",
-                entity_type="lab_result",
-                entity_id=getattr(updated_lab_result, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging lab result update activity: {e}")
-        
+
+        # Log the update activity using centralized logging
+        log_update(
+            db=db,
+            entity_type=EntityType.LAB_RESULT,
+            entity_obj=updated_lab_result,
+            user_id=current_user_id,
+        )
+
         return updated_lab_result
     except Exception as e:
         raise HTTPException(
@@ -150,7 +132,7 @@ def delete_lab_result(
     lab_result_id: int,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    ):    
+):
     """
     Delete a lab result and associated files
     """
@@ -159,24 +141,13 @@ def delete_lab_result(
         raise HTTPException(status_code=404, detail="Lab result not found")
 
     try:
-        # Log the deletion activity BEFORE deleting
-        try:
-            description = f"Deleted lab result: {getattr(db_lab_result, 'test_name', 'Unknown test')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(db_lab_result, 'patient_id', None),
-                action="deleted",
-                entity_type="lab_result",
-                entity_id=getattr(db_lab_result, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging lab result deletion activity: {e}")
+        # Log the deletion activity BEFORE deleting using centralized logging
+        log_delete(
+            db=db,
+            entity_type=EntityType.LAB_RESULT,
+            entity_obj=db_lab_result,
+            user_id=current_user_id,
+        )
 
         # Delete associated files first
         lab_result_file.delete_by_lab_result(db, lab_result_id=lab_result_id)
