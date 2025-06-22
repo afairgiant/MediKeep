@@ -247,7 +247,7 @@ const Medication = () => {
       }
 
       resetForm();
-      await fetchPatientAndMedications();
+      await fetchMedications();
 
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
@@ -278,7 +278,7 @@ const Medication = () => {
       setError('');
       await apiService.deleteMedication(medicationId);
       setSuccessMessage('Medication deleted successfully!');
-      await fetchPatientAndMedications();
+      await fetchMedications();
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
