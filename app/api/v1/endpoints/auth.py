@@ -10,9 +10,9 @@ from app.core.logging_config import get_logger, log_security_event
 from app.core.security import create_access_token, verify_password
 from app.crud.patient import patient
 from app.crud.user import user
-from app.models.models import User
+from app.models.models import User as DBUser
 from app.schemas.patient import PatientCreate
-from app.schemas.user import Token, UserCreate
+from app.schemas.user import Token, User, UserCreate
 
 router = APIRouter()
 
@@ -213,7 +213,7 @@ def change_password(
     password_data: ChangePasswordRequest,
     request: Request,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: DBUser = Depends(deps.get_current_user),
 ):
     """
     Change user password.
