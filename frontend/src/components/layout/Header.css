@@ -56,6 +56,23 @@
   align-items: center;
 }
 
+.settings-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-button:hover {
+  background-color: var(--color-background-secondary, #f8f9fa);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .page-header {
