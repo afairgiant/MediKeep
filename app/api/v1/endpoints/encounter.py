@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from typing import Any, List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.encounter import encounter
+from app.models.activity_log import EntityType
 from app.schemas.encounter import (
     EncounterCreate,
-    EncounterUpdate,
     EncounterResponse,
+    EncounterUpdate,
     EncounterWithRelations,
 )
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -28,24 +29,13 @@ def create_encounter(
     """
     encounter_obj = encounter.create(db=db, obj_in=encounter_in)
 
-    # Log the creation activity
-    try:
-        description = f"New encounter: {getattr(encounter_obj, 'reason', 'Unknown encounter')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(encounter_obj, 'patient_id', None),
-            action="created",
-            entity_type="encounter",
-            entity_id=getattr(encounter_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
+    # Log the creation activity using centralized logging
+    log_create(
+        db=db,
+        entity_type=EntityType.ENCOUNTER,
+        entity_obj=encounter_obj,
+        user_id=current_user_id,
+    )
 
     return encounter_obj
 
@@ -56,7 +46,8 @@ def read_encounters(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    practitioner_id: Optional[int] = Query(None),    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    practitioner_id: Optional[int] = Query(None),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Retrieve encounters for the current user with optional filtering.
@@ -64,10 +55,16 @@ def read_encounters(
     # Filter encounters by the user's patient_id (ignore any provided patient_id for security)
     if practitioner_id:
         encounters = encounter.get_by_practitioner(
-            db, practitioner_id=practitioner_id, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db,
+            practitioner_id=practitioner_id,
+            patient_id=current_user_patient_id,
+            skip=skip,
+            limit=limit,
         )
     else:
-        encounters = encounter.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+        encounters = encounter.get_by_patient(
+            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        )
     return encounters
 
 
@@ -84,12 +81,12 @@ def read_encounter(
     encounter_obj = encounter.get_with_relations(db, encounter_id=encounter_id)
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
-    
+
     # Security check: ensure the encounter belongs to the current user
     deps.verify_patient_record_access(
-        getattr(encounter_obj, 'patient_id'), current_user_patient_id, "encounter"
+        getattr(encounter_obj, "patient_id"), current_user_patient_id, "encounter"
     )
-    
+
     return encounter_obj
 
 
@@ -107,27 +104,18 @@ def update_encounter(
     encounter_obj = encounter.get(db=db, id=encounter_id)
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
-    encounter_obj = encounter.update(db=db, db_obj=encounter_obj, obj_in=encounter_in)
-    
-    # Log the update activity
-    try:
-        description = f"Updated encounter: {getattr(encounter_obj, 'reason', 'Unknown encounter')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(encounter_obj, 'patient_id', None),
-            action="updated",
-            entity_type="encounter",
-            entity_id=getattr(encounter_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
+        encounter_obj = encounter.update(
+            db=db, db_obj=encounter_obj, obj_in=encounter_in
         )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type=EntityType.ENCOUNTER,
+        entity_obj=encounter_obj,
+        user_id=current_user_id,
+    )
+
     return encounter_obj
 
 
@@ -144,32 +132,17 @@ def delete_encounter(
     encounter_obj = encounter.get(db=db, id=encounter_id)
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
-    
-    # Store name before deletion for logging
-    encounter_name = getattr(encounter_obj, 'reason', 'Unknown encounter')
-    encounter_patient_id = getattr(encounter_obj, 'patient_id', None)
-    
+
+        # Log the delete activity BEFORE deleting using centralized logging
+    log_delete(
+        db=db,
+        entity_type=EntityType.ENCOUNTER,
+        entity_obj=encounter_obj,
+        user_id=current_user_id,
+    )
+
     encounter.delete(db=db, id=encounter_id)
-    
-    # Log the delete activity
-    try:
-        description = f"Deleted encounter: {encounter_name}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=encounter_patient_id,
-            action="deleted",
-            entity_type="encounter",
-            entity_id=encounter_id,
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
     return {"message": "Encounter deleted successfully"}
 
 

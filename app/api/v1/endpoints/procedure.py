@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from typing import Any, List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.procedure import procedure
+from app.models.activity_log import EntityType
 from app.schemas.procedure import (
     ProcedureCreate,
-    ProcedureUpdate,
     ProcedureResponse,
+    ProcedureUpdate,
     ProcedureWithRelations,
 )
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -27,26 +28,15 @@ def create_procedure(
     Create new procedure.
     """
     procedure_obj = procedure.create(db=db, obj_in=procedure_in)
-    
-    # Log the creation activity
-    try:
-        description = f"New procedure: {getattr(procedure_obj, 'name', 'Unknown procedure')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(procedure_obj, 'patient_id', None),
-            action="created",
-            entity_type="procedure",
-            entity_id=getattr(procedure_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging procedure creation activity: {e}")
-    
+
+    # Log the creation activity using centralized logging
+    log_create(
+        db=db,
+        entity_type=EntityType.PROCEDURE,
+        entity_obj=procedure_obj,
+        user_id=current_user_id,
+    )
+
     return procedure_obj
 
 
@@ -56,7 +46,8 @@ def read_procedures(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    practitioner_id: Optional[int] = Query(None),    status: Optional[str] = Query(None),
+    practitioner_id: Optional[int] = Query(None),
+    status: Optional[str] = Query(None),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
@@ -64,13 +55,21 @@ def read_procedures(
     """
     # Filter procedures by the user's patient_id (ignore any provided patient_id for security)
     if status:
-        procedures = procedure.get_by_status(db, status=status, patient_id=current_user_patient_id)
+        procedures = procedure.get_by_status(
+            db, status=status, patient_id=current_user_patient_id
+        )
     elif practitioner_id:
         procedures = procedure.get_by_practitioner(
-            db, practitioner_id=practitioner_id, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db,
+            practitioner_id=practitioner_id,
+            patient_id=current_user_patient_id,
+            skip=skip,
+            limit=limit,
         )
     else:
-        procedures = procedure.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+        procedures = procedure.get_by_patient(
+            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        )
     return procedures
 
 
@@ -87,12 +86,12 @@ def read_procedure(
     procedure_obj = procedure.get_with_relations(db, procedure_id=procedure_id)
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
-    
+
     # Security check: ensure the procedure belongs to the current user
     deps.verify_patient_record_access(
-        getattr(procedure_obj, 'patient_id'), current_user_patient_id, "procedure"
+        getattr(procedure_obj, "patient_id"), current_user_patient_id, "procedure"
     )
-    
+
     return procedure_obj
 
 
@@ -110,28 +109,17 @@ def update_procedure(
     procedure_obj = procedure.get(db=db, id=procedure_id)
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
-    
+
     procedure_obj = procedure.update(db=db, db_obj=procedure_obj, obj_in=procedure_in)
-    
-    # Log the update activity
-    try:
-        description = f"Updated procedure: {getattr(procedure_obj, 'name', 'Unknown procedure')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(procedure_obj, 'patient_id', None),
-            action="updated",
-            entity_type="procedure",
-            entity_id=getattr(procedure_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging procedure update activity: {e}")
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type=EntityType.PROCEDURE,
+        entity_obj=procedure_obj,
+        user_id=current_user_id,
+    )
+
     return procedure_obj
 
 
@@ -148,26 +136,15 @@ def delete_procedure(
     procedure_obj = procedure.get(db=db, id=procedure_id)
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
-    
-    # Log the deletion activity BEFORE deleting
-    try:
-        description = f"Deleted procedure: {getattr(procedure_obj, 'name', 'Unknown procedure')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(procedure_obj, 'patient_id', None),
-            action="deleted",
-            entity_type="procedure",
-            entity_id=getattr(procedure_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging procedure deletion activity: {e}")
-    
+
+    # Log the deletion activity BEFORE deleting using centralized logging
+    log_delete(
+        db=db,
+        entity_type=EntityType.PROCEDURE,
+        entity_obj=procedure_obj,
+        user_id=current_user_id,
+    )
+
     procedure.delete(db=db, id=procedure_id)
     return {"message": "Procedure deleted successfully"}
 

@@ -1,16 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from typing import Any, List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.practitioner import practitioner
+from app.models.activity_log import EntityType
 from app.schemas.practitioner import (
+    Practitioner,
     PractitionerCreate,
     PractitionerUpdate,
-    Practitioner,
 )
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -26,26 +27,15 @@ def create_practitioner(
     Create new practitioner.
     """
     practitioner_obj = practitioner.create(db=db, obj_in=practitioner_in)
-    
-    # Log the creation activity
-    try:
-        description = f"New practitioner: {getattr(practitioner_obj, 'name', 'Unknown practitioner')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=None,  # Practitioners are not patient-specific
-            action="created",
-            entity_type="practitioner",
-            entity_id=getattr(practitioner_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
+    # Log the creation activity using centralized logging
+    log_create(
+        db=db,
+        entity_type=EntityType.PRACTITIONER,
+        entity_obj=practitioner_obj,
+        user_id=current_user_id,
+    )
+
     return practitioner_obj
 
 
@@ -102,26 +92,15 @@ def update_practitioner(
     practitioner_obj = practitioner.update(
         db=db, db_obj=practitioner_obj, obj_in=practitioner_in
     )
-    
-    # Log the update activity
-    try:
-        description = f"Updated practitioner: {getattr(practitioner_obj, 'name', 'Unknown practitioner')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=None,  # Practitioners are not patient-specific
-            action="updated",
-            entity_type="practitioner",
-            entity_id=getattr(practitioner_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type=EntityType.PRACTITIONER,
+        entity_obj=practitioner_obj,
+        user_id=current_user_id,
+    )
+
     return practitioner_obj
 
 
@@ -138,31 +117,17 @@ def delete_practitioner(
     practitioner_obj = practitioner.get(db=db, id=practitioner_id)
     if not practitioner_obj:
         raise HTTPException(status_code=404, detail="Practitioner not found")
-    
-    # Store name before deletion for logging
-    practitioner_name = getattr(practitioner_obj, 'name', 'Unknown practitioner')
-    
+
+    # Log the deletion activity BEFORE deleting using centralized logging
+    log_delete(
+        db=db,
+        entity_type=EntityType.PRACTITIONER,
+        entity_obj=practitioner_obj,
+        user_id=current_user_id,
+    )
+
     practitioner.delete(db=db, id=practitioner_id)
-    
-    # Log the delete activity
-    try:
-        description = f"Deleted practitioner: {practitioner_name}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=None,  # Practitioners are not patient-specific
-            action="deleted",
-            entity_type="practitioner",
-            entity_id=practitioner_id,
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        pass
-    
+
     return {"message": "Practitioner deleted successfully"}
 
 
