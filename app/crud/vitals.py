@@ -41,17 +41,14 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         limit: int = 100
     ) -> List[Vitals]:
         """Get vitals readings for a patient within a date range"""
-        return (
-            db.query(self.model)
-            .filter(
-                Vitals.patient_id == patient_id,
-                Vitals.recorded_date >= start_date,
-                Vitals.recorded_date <= end_date,
-            )
-            .order_by(desc(Vitals.recorded_date))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return self.get_by_date_range(
+            db=db,
+            date_field="recorded_date",
+            start_date=start_date,
+            end_date=end_date,
+            additional_filters={"patient_id": patient_id},
+            skip=skip,
+            limit=limit,
         )
 
     def get_latest_by_patient(
@@ -103,10 +100,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         """Get statistics for a patient's vitals"""
         # Get basic count and date info
         total_readings = (
-            db.query(func.count(Vitals.id))
-            .filter(Vitals.patient_id == patient_id)
-            .scalar()
-            or 0
+            db.query(Vitals).filter(Vitals.patient_id == patient_id).count() or 0
         )
 
         if total_readings == 0:
@@ -198,56 +192,51 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     def get_recent_readings(
         self, db: Session, *, patient_id: int, days: int = 30
     ) -> List[Vitals]:
-        """Get vitals readings from the last N days"""
-        cutoff_date = datetime.utcnow() - timedelta(days=days)
-        return (
-            db.query(self.model)
-            .filter(
-                Vitals.patient_id == patient_id, Vitals.recorded_date >= cutoff_date
-            )
-            .order_by(desc(Vitals.recorded_date))
-            .all()
+        """Get recent vitals readings for a patient"""
+        return self.get_recent_records(
+            db=db,
+            date_field="recorded_date",
+            days=days,
+            additional_filters={"patient_id": patient_id},
         )
 
     def get_with_relationships(
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[Vitals]:
-        """Get vitals with patient relationships loaded"""
+        """Get vitals with relationships loaded"""
         return (
             db.query(self.model)
-            .options(joinedload(Vitals.patient))
+            .options(joinedload(Vitals.patient), joinedload(Vitals.practitioner))
             .offset(skip)
             .limit(limit)
             .all()
         )
 
     def calculate_bmi(self, weight_lbs: float, height_inches: float) -> float:
-        """Calculate BMI from weight in pounds and height in inches"""
-        if not weight_lbs or not height_inches or height_inches <= 0:
-            return 0.0
+        """
+        Calculate BMI from weight in pounds and height in inches
+        Formula: BMI = (weight_lbs / height_inches^2) * 703
+        """
+        if weight_lbs <= 0 or height_inches <= 0:
+            raise ValueError("Weight and height must be positive values")
 
-        # Convert to metric: weight in kg, height in meters
-        weight_kg = weight_lbs * 0.453592
-        height_m = height_inches * 0.0254
-
-        # BMI = weight(kg) / height(m)²
-        bmi = weight_kg / (height_m**2)
+        bmi = (weight_lbs / (height_inches**2)) * 703
         return round(bmi, 1)
 
     def create_with_bmi(self, db: Session, *, obj_in: VitalsCreate) -> Vitals:
         """Create vitals record with automatic BMI calculation"""
         obj_data = obj_in.dict()
 
-        # Calculate BMI if we have weight and height
+        # Calculate BMI if weight and height are provided
         if obj_data.get("weight") and obj_data.get("height"):
             obj_data["bmi"] = self.calculate_bmi(obj_data["weight"], obj_data["height"])
 
-        db_obj = self.model(**obj_data)
+        db_obj = Vitals(**obj_data)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
         return db_obj
 
 
-# Create the vitals CRUD instance
+# Create instance of the CRUD class
 vitals = CRUDVitals(Vitals)

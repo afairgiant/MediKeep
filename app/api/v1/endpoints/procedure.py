@@ -167,9 +167,8 @@ def get_scheduled_procedures(
 def get_recent_procedures(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=90, ge=1, le=365),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get recent procedures for a patient within specified days.
@@ -184,10 +183,9 @@ def get_recent_procedures(
 def get_patient_procedures(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all procedures for a specific patient.

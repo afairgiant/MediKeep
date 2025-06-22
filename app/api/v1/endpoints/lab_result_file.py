@@ -208,10 +208,9 @@ def read_files_by_lab_result(
 def read_files_by_patient(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(deps.get_current_user),
 ) -> List[LabResultFile]:
     """
     Get all files for a specific patient.
@@ -384,24 +383,6 @@ def get_recent_files(
     Get recently uploaded files.
     """
     files = lab_result_file.get_recent_files(db=db, days=days, skip=skip, limit=limit)
-    return files
-
-
-@router.get("/filter/large-files", response_model=List[LabResultFileResponse])
-def get_large_files(
-    *,
-    db: Session = Depends(deps.get_db),
-    min_size_mb: float = 10,
-    skip: int = 0,
-    limit: int = 100,
-    current_user: User = Depends(deps.get_current_user),
-) -> List[LabResultFile]:
-    """
-    Get large files (above specified size).
-    """
-    files = lab_result_file.get_large_files(
-        db=db, min_size_mb=min_size_mb, skip=skip, limit=limit
-    )
     return files
 
 

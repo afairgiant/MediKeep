@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
@@ -108,6 +109,123 @@ class QueryMixin:
                     query = query.options(joinedload(getattr(self.model, relation)))
 
         return query.all()
+
+    def get_by_date_range(
+        self,
+        db: Session,
+        *,
+        date_field: str,
+        start_date: datetime,
+        end_date: datetime,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Generic method to get records within a date range.
+
+        Args:
+            db: Database session
+            date_field: Name of the date field to filter by
+            start_date: Start of date range
+            end_date: End of date range
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by (defaults to date_field)
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of records within the date range
+        """
+        if not hasattr(self.model, date_field):
+            raise ValueError(
+                f"Model {self.model.__name__} does not have field '{date_field}'"
+            )
+
+        # Start with base query
+        query = db.query(self.model)
+
+        # Apply date range filter
+        date_attr = getattr(self.model, date_field)
+        query = query.filter(and_(date_attr >= start_date, date_attr <= end_date))
+
+        # Apply additional filters
+        if additional_filters:
+            for filter_field, filter_value in additional_filters.items():
+                if hasattr(self.model, filter_field):
+                    field = getattr(self.model, filter_field)
+                    query = query.filter(field == filter_value)
+
+        # Apply ordering (default to date field)
+        order_field_name = order_by or date_field
+        if hasattr(self.model, order_field_name):
+            order_field = getattr(self.model, order_field_name)
+            if order_desc:
+                query = query.order_by(desc(order_field))
+            else:
+                query = query.order_by(asc(order_field))
+
+        # Apply pagination
+        query = query.offset(skip).limit(limit)
+
+        # Load relationships if specified
+        if load_relations:
+            for relation in load_relations:
+                if hasattr(self.model, relation):
+                    query = query.options(joinedload(getattr(self.model, relation)))
+
+        return query.all()
+
+    def get_recent_records(
+        self,
+        db: Session,
+        *,
+        date_field: str,
+        days: int = 7,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Generic method to get recent records from the last N days.
+
+        Args:
+            db: Database session
+            date_field: Name of the date field to filter by
+            days: Number of days back to look
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by (defaults to date_field)
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of recent records
+        """
+        cutoff_date = datetime.now() - timedelta(days=days)
+        end_date = datetime.now()
+
+        return self.get_by_date_range(
+            db=db,
+            date_field=date_field,
+            start_date=cutoff_date,
+            end_date=end_date,
+            skip=skip,
+            limit=limit,
+            order_by=order_by,
+            order_desc=order_desc,
+            additional_filters=additional_filters,
+            load_relations=load_relations,
+        )
 
     def get_by_patient(
         self,

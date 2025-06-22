@@ -7,12 +7,8 @@ import { useAppData } from '../contexts/AppDataContext';
  * @returns {object} Patient data, loading state, error, and refresh function
  */
 export function useCurrentPatient(autoFetch = true) {
-  const {
-    currentPatient,
-    patientLoading,
-    patientError,
-    fetchCurrentPatient,
-  } = useAppData();
+  const { currentPatient, patientLoading, patientError, fetchCurrentPatient } =
+    useAppData();
 
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
@@ -57,9 +53,14 @@ export function usePractitioners(autoFetch = true) {
   // Auto-fetch practitioners data on mount if enabled
   useEffect(() => {
     if (autoFetch && !initialFetchDone) {
-      fetchPractitioners().then(() => {
-        setInitialFetchDone(true);
-      });
+      fetchPractitioners()
+        .then(() => {
+          setInitialFetchDone(true);
+        })
+        .catch(error => {
+          console.error('Error in initial practitioners fetch:', error);
+          setInitialFetchDone(true); // Still mark as done to prevent infinite retries
+        });
     }
   }, [autoFetch, fetchPractitioners, initialFetchDone]);
 
@@ -69,11 +70,12 @@ export function usePractitioners(autoFetch = true) {
   }, [fetchPractitioners]);
 
   return {
-    practitioners,
+    // Ensure practitioners is always an array to prevent map errors
+    practitioners: Array.isArray(practitioners) ? practitioners : [],
     loading: practitionersLoading,
     error: practitionersError,
     refresh: refreshPractitioners,
-    hasData: practitioners.length > 0,
+    hasData: Array.isArray(practitioners) && practitioners.length > 0,
   };
 }
 
@@ -83,21 +85,22 @@ export function usePractitioners(autoFetch = true) {
  * @returns {object} Pharmacies data, loading state, error, and refresh function
  */
 export function usePharmacies(autoFetch = true) {
-  const {
-    pharmacies,
-    pharmaciesLoading,
-    pharmaciesError,
-    fetchPharmacies,
-  } = useAppData();
+  const { pharmacies, pharmaciesLoading, pharmaciesError, fetchPharmacies } =
+    useAppData();
 
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   // Auto-fetch pharmacies data on mount if enabled
   useEffect(() => {
     if (autoFetch && !initialFetchDone) {
-      fetchPharmacies().then(() => {
-        setInitialFetchDone(true);
-      });
+      fetchPharmacies()
+        .then(() => {
+          setInitialFetchDone(true);
+        })
+        .catch(error => {
+          console.error('Error in initial pharmacy fetch:', error);
+          setInitialFetchDone(true); // Still mark as done to prevent infinite retries
+        });
     }
   }, [autoFetch, fetchPharmacies, initialFetchDone]);
 
@@ -107,11 +110,12 @@ export function usePharmacies(autoFetch = true) {
   }, [fetchPharmacies]);
 
   return {
-    pharmacies,
+    // Ensure pharmacies is always an array to prevent map errors
+    pharmacies: Array.isArray(pharmacies) ? pharmacies : [],
     loading: pharmaciesLoading,
     error: pharmaciesError,
     refresh: refreshPharmacies,
-    hasData: pharmacies.length > 0,
+    hasData: Array.isArray(pharmacies) && pharmacies.length > 0,
   };
 }
 
@@ -125,10 +129,7 @@ export function useStaticData(autoFetch = true) {
   const pharmaciesData = usePharmacies(autoFetch);
 
   const refreshAll = useCallback(async () => {
-    await Promise.all([
-      practitionersData.refresh(),
-      pharmaciesData.refresh(),
-    ]);
+    await Promise.all([practitionersData.refresh(), pharmaciesData.refresh()]);
   }, [practitionersData.refresh, pharmaciesData.refresh]);
 
   return {
@@ -155,10 +156,7 @@ export function usePatientWithStaticData(autoFetch = true) {
   const staticData = useStaticData(autoFetch);
 
   const refreshAll = useCallback(async () => {
-    await Promise.all([
-      patientData.refresh(),
-      staticData.refreshAll(),
-    ]);
+    await Promise.all([patientData.refresh(), staticData.refreshAll()]);
   }, [patientData.refresh, staticData.refreshAll]);
 
   return {
@@ -180,7 +178,14 @@ export function usePatientWithStaticData(autoFetch = true) {
  * @returns {object} Cache management functions
  */
 export function useCacheManager() {
-  const { invalidateCache, updateCacheExpiry, isCacheValid } = useAppData();
+  const {
+    invalidateCache,
+    updateCacheExpiry,
+    isCacheValid,
+    fetchPharmacies,
+    fetchPractitioners,
+    fetchCurrentPatient,
+  } = useAppData();
 
   const invalidateAll = useCallback(() => {
     return invalidateCache('all');
@@ -198,12 +203,27 @@ export function useCacheManager() {
     return invalidateCache('pharmacies');
   }, [invalidateCache]);
 
+  const refreshPharmacies = useCallback(() => {
+    return fetchPharmacies(true);
+  }, [fetchPharmacies]);
+
+  const refreshPractitioners = useCallback(() => {
+    return fetchPractitioners(true);
+  }, [fetchPractitioners]);
+
+  const refreshPatient = useCallback(() => {
+    return fetchCurrentPatient(true);
+  }, [fetchCurrentPatient]);
+
   return {
     invalidateAll,
     invalidatePatient,
     invalidatePractitioners,
     invalidatePharmacies,
+    refreshPharmacies,
+    refreshPractitioners,
+    refreshPatient,
     updateCacheExpiry,
     isCacheValid,
   };
-} 
+}

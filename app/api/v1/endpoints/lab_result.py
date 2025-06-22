@@ -231,11 +231,10 @@ def delete_lab_result(
 # Patient-specific endpoints
 @router.get("/patient/{patient_id}", response_model=List[LabResultResponse])
 def get_lab_results_by_patient(
-    patient_id: int,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    patient_id: int = Depends(deps.verify_patient_access),
 ):
     """
     Get all lab results for a specific patient
@@ -248,7 +247,9 @@ def get_lab_results_by_patient(
 
 @router.get("/patient/{patient_id}/code/{code}", response_model=List[LabResultResponse])
 def get_lab_results_by_patient_and_code(
-    patient_id: int, code: str, db: Session = Depends(get_db)
+    code: str,
+    db: Session = Depends(get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
 ):
     """
     Get lab results for a specific patient and test code
@@ -467,7 +468,9 @@ def delete_lab_result_file(
 
 # Statistics endpoints
 @router.get("/stats/patient/{patient_id}/count")
-def get_patient_lab_result_count(patient_id: int, db: Session = Depends(get_db)):
+def get_patient_lab_result_count(
+    db: Session = Depends(get_db), patient_id: int = Depends(deps.verify_patient_access)
+):
     """
     Get count of lab results for a patient
     """

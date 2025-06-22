@@ -1,14 +1,15 @@
 from typing import Generator
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import SessionLocal
+from app.core.logging_config import get_logger, log_security_event
 from app.crud.user import user
 from app.models.models import User
-from app.core.logging_config import get_logger, log_security_event
 
 # Security scheme for JWT tokens
 security = HTTPBearer()
@@ -207,11 +208,11 @@ def get_current_user_patient_id(
         HTTPException 404: If patient record not found
     """
     from app.crud.patient import patient
-    
+
     patient_record = patient.get_by_user_id(db, user_id=current_user_id)
     if not patient_record:
         raise HTTPException(status_code=404, detail="Patient record not found")
-    
+
     return getattr(patient_record, "id")
 
 
@@ -233,3 +234,40 @@ def verify_patient_record_access(
     """
     if record_patient_id != current_user_patient_id:
         raise HTTPException(status_code=404, detail=f"{record_type.title()} not found")
+
+
+def verify_patient_access(
+    patient_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id),
+) -> int:
+    """
+    Dependency that verifies the current user can access the specified patient's records.
+
+    This dependency automatically:
+    1. Gets the current user's patient ID
+    2. Verifies they have access to the requested patient_id
+    3. Returns the verified patient_id for use in the endpoint
+
+    Args:
+        patient_id: The patient ID from the URL path
+        db: Database session
+        current_user_id: Current authenticated user ID
+
+    Returns:
+        The verified patient_id
+
+    Raises:
+        HTTPException 404: If patient not found or access denied
+    """
+    # Get current user's patient ID
+    current_user_patient_id = get_current_user_patient_id(db, current_user_id)
+
+    # Verify access to this patient's records
+    verify_patient_record_access(
+        record_patient_id=patient_id,
+        current_user_patient_id=current_user_patient_id,
+        record_type="patient records",
+    )
+
+    return patient_id

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useCallback,
+} from 'react';
 import { apiService } from '../services/api';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify';
@@ -27,7 +33,7 @@ const initialState = {
     patient: 15, // Patient data expires after 15 minutes
     practitioners: 60, // Practitioners list expires after 1 hour
     pharmacies: 60, // Pharmacies list expires after 1 hour
-  }
+  },
 };
 
 // Action types
@@ -42,7 +48,7 @@ const APP_DATA_ACTIONS = {
   SET_PRACTITIONERS_LOADING: 'SET_PRACTITIONERS_LOADING',
   SET_PRACTITIONERS_SUCCESS: 'SET_PRACTITIONERS_SUCCESS',
   SET_PRACTITIONERS_ERROR: 'SET_PRACTITIONERS_ERROR',
-  
+
   // Pharmacies actions
   SET_PHARMACIES_LOADING: 'SET_PHARMACIES_LOADING',
   SET_PHARMACIES_SUCCESS: 'SET_PHARMACIES_SUCCESS',
@@ -163,129 +169,218 @@ export function AppDataProvider({ children }) {
   const { isAuthenticated, user } = useAuth();
 
   // Helper function to check if cached data is still valid
-  const isCacheValid = useCallback((lastFetch, cacheKey) => {
-    if (!lastFetch) return false;
-    const expiryTime = state.cacheExpiry[cacheKey] * 60 * 1000; // Convert minutes to milliseconds
-    return (Date.now() - lastFetch) < expiryTime;
-  }, [state.cacheExpiry]);
+  const isCacheValid = useCallback(
+    (lastFetch, cacheKey) => {
+      if (!lastFetch) return false;
+      const expiryTime = state.cacheExpiry[cacheKey] * 60 * 1000; // Convert minutes to milliseconds
+      return Date.now() - lastFetch < expiryTime;
+    },
+    [state.cacheExpiry]
+  );
 
   // Fetch current patient data
-  const fetchCurrentPatient = useCallback(async (forceRefresh = false) => {
-    // Don't fetch if not authenticated
-    if (!isAuthenticated) {
-      dispatch({ type: APP_DATA_ACTIONS.CLEAR_PATIENT });
-      return null;
-    }
+  const fetchCurrentPatient = useCallback(
+    async (forceRefresh = false) => {
+      // Don't fetch if not authenticated
+      if (!isAuthenticated) {
+        dispatch({ type: APP_DATA_ACTIONS.CLEAR_PATIENT });
+        return null;
+      }
 
-    // Check if we have valid cached data and don't force refresh
-    if (!forceRefresh && state.currentPatient && isCacheValid(state.patientLastFetch, 'patient')) {
-      return state.currentPatient;
-    }
+      // Check if we have valid cached data and don't force refresh
+      if (
+        !forceRefresh &&
+        state.currentPatient &&
+        isCacheValid(state.patientLastFetch, 'patient')
+      ) {
+        return state.currentPatient;
+      }
 
-    try {
-      dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_LOADING, payload: true });
-      const patient = await apiService.getCurrentPatient();
-      dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS, payload: patient });
-      return patient;
-    } catch (error) {
-      console.error('Error fetching current patient:', error);
-      dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_ERROR, payload: error.message });
-      return null;
-    }
-  }, [isAuthenticated, state.currentPatient, state.patientLastFetch, isCacheValid]);
+      try {
+        dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_LOADING, payload: true });
+        const patient = await apiService.getCurrentPatient();
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS,
+          payload: patient,
+        });
+        return patient;
+      } catch (error) {
+        console.error('Error fetching current patient:', error);
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PATIENT_ERROR,
+          payload: error.message,
+        });
+        return null;
+      }
+    },
+    [
+      isAuthenticated,
+      state.currentPatient,
+      state.patientLastFetch,
+      isCacheValid,
+    ]
+  );
 
   // Fetch practitioners list
-  const fetchPractitioners = useCallback(async (forceRefresh = false) => {
-    // Check if we have valid cached data and don't force refresh
-    if (!forceRefresh && state.practitioners.length > 0 && isCacheValid(state.practitionersLastFetch, 'practitioners')) {
-      return state.practitioners;
-    }
+  const fetchPractitioners = useCallback(
+    async (forceRefresh = false) => {
+      // Check if we have valid cached data and don't force refresh
+      if (
+        !forceRefresh &&
+        state.practitioners.length > 0 &&
+        isCacheValid(state.practitionersLastFetch, 'practitioners')
+      ) {
+        return state.practitioners;
+      }
 
-    try {
-      dispatch({ type: APP_DATA_ACTIONS.SET_PRACTITIONERS_LOADING, payload: true });
-      const practitioners = await apiService.getPractitioners();
-      dispatch({ type: APP_DATA_ACTIONS.SET_PRACTITIONERS_SUCCESS, payload: practitioners || [] });
-      return practitioners || [];
-    } catch (error) {
-      console.error('Error fetching practitioners:', error);
-      dispatch({ type: APP_DATA_ACTIONS.SET_PRACTITIONERS_ERROR, payload: error.message });
-      return [];
-    }
-  }, [state.practitioners, state.practitionersLastFetch, isCacheValid]);
+      try {
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PRACTITIONERS_LOADING,
+          payload: true,
+        });
+        const practitioners = await apiService.getPractitioners();
+
+        // Ensure we always have an array, even if API returns null/undefined
+        const safePractitioners = Array.isArray(practitioners)
+          ? practitioners
+          : [];
+
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PRACTITIONERS_SUCCESS,
+          payload: safePractitioners,
+        });
+        return safePractitioners;
+      } catch (error) {
+        console.error('Error fetching practitioners:', error);
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PRACTITIONERS_ERROR,
+          payload: error.message,
+        });
+
+        // Return existing data if available, otherwise empty array
+        return Array.isArray(state.practitioners) ? state.practitioners : [];
+      }
+    },
+    [state.practitioners, state.practitionersLastFetch, isCacheValid]
+  );
 
   // Fetch pharmacies list
-  const fetchPharmacies = useCallback(async (forceRefresh = false) => {
-    // Check if we have valid cached data and don't force refresh
-    if (!forceRefresh && state.pharmacies.length > 0 && isCacheValid(state.pharmaciesLastFetch, 'pharmacies')) {
-      return state.pharmacies;
-    }
+  const fetchPharmacies = useCallback(
+    async (forceRefresh = false) => {
+      // Check if we have valid cached data and don't force refresh
+      if (
+        !forceRefresh &&
+        state.pharmacies.length > 0 &&
+        isCacheValid(state.pharmaciesLastFetch, 'pharmacies')
+      ) {
+        return state.pharmacies;
+      }
 
-    try {
-      dispatch({ type: APP_DATA_ACTIONS.SET_PHARMACIES_LOADING, payload: true });
-      const pharmacies = await apiService.getPharmacies();
-      dispatch({ type: APP_DATA_ACTIONS.SET_PHARMACIES_SUCCESS, payload: pharmacies || [] });
-      return pharmacies || [];
-    } catch (error) {
-      console.error('Error fetching pharmacies:', error);
-      dispatch({ type: APP_DATA_ACTIONS.SET_PHARMACIES_ERROR, payload: error.message });
-      return [];
-    }
-  }, [state.pharmacies, state.pharmaciesLastFetch, isCacheValid]);
+      try {
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PHARMACIES_LOADING,
+          payload: true,
+        });
+        const pharmacies = await apiService.getPharmacies();
+
+        // Ensure we always have an array, even if API returns null/undefined
+        const safePharmacies = Array.isArray(pharmacies) ? pharmacies : [];
+
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PHARMACIES_SUCCESS,
+          payload: safePharmacies,
+        });
+        return safePharmacies;
+      } catch (error) {
+        console.error('Error fetching pharmacies:', error);
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PHARMACIES_ERROR,
+          payload: error.message,
+        });
+
+        // Return existing data if available, otherwise empty array
+        return Array.isArray(state.pharmacies) ? state.pharmacies : [];
+      }
+    },
+    [state.pharmacies, state.pharmaciesLastFetch, isCacheValid]
+  );
 
   // Initialize app data when user logs in
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Fetch patient data immediately on login
-      fetchCurrentPatient();
-      
-      // Fetch static lists in parallel
-      Promise.all([
-        fetchPractitioners(),
-        fetchPharmacies(),
-      ]).catch(error => {
-        console.error('Error initializing app data:', error);
-      });
+      // Add timeout to prevent rapid fire requests in production
+      const timeoutId = setTimeout(
+        () => {
+          // Fetch patient data immediately on login
+          fetchCurrentPatient();
+
+          // Fetch static lists in parallel
+          Promise.all([fetchPractitioners(), fetchPharmacies()]).catch(
+            error => {
+              console.error('Error initializing app data:', error);
+            }
+          );
+        },
+        process.env.NODE_ENV === 'production' ? 100 : 0
+      ); // Small delay in production
+
+      return () => clearTimeout(timeoutId);
     } else {
       // Clear all data when user logs out
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
     }
-  }, [isAuthenticated, user, fetchCurrentPatient, fetchPractitioners, fetchPharmacies]);
+  }, [
+    isAuthenticated,
+    user,
+    fetchCurrentPatient,
+    fetchPractitioners,
+    fetchPharmacies,
+  ]);
 
   // Update patient data (after patient profile changes)
-  const updatePatientData = useCallback(async (updatedPatient) => {
-    dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS, payload: updatedPatient });
+  const updatePatientData = useCallback(async updatedPatient => {
+    dispatch({
+      type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS,
+      payload: updatedPatient,
+    });
   }, []);
 
   // Invalidate specific cache
-  const invalidateCache = useCallback(async (cacheType) => {
-    switch (cacheType) {
-      case 'patient':
-        await fetchCurrentPatient(true);
-        break;
-      case 'practitioners':
-        await fetchPractitioners(true);
-        break;
-      case 'pharmacies':
-        await fetchPharmacies(true);
-        break;
-      case 'all':
-        dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
-        if (isAuthenticated) {
-          await Promise.all([
-            fetchCurrentPatient(true),
-            fetchPractitioners(true),
-            fetchPharmacies(true),
-          ]);
-        }
-        break;
-      default:
-        console.warn(`Unknown cache type: ${cacheType}`);
-    }
-  }, [fetchCurrentPatient, fetchPractitioners, fetchPharmacies, isAuthenticated]);
+  const invalidateCache = useCallback(
+    async cacheType => {
+      switch (cacheType) {
+        case 'patient':
+          await fetchCurrentPatient(true);
+          break;
+        case 'practitioners':
+          await fetchPractitioners(true);
+          break;
+        case 'pharmacies':
+          await fetchPharmacies(true);
+          break;
+        case 'all':
+          dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+          if (isAuthenticated) {
+            await Promise.all([
+              fetchCurrentPatient(true),
+              fetchPractitioners(true),
+              fetchPharmacies(true),
+            ]);
+          }
+          break;
+        default:
+          console.warn(`Unknown cache type: ${cacheType}`);
+      }
+    },
+    [fetchCurrentPatient, fetchPractitioners, fetchPharmacies, isAuthenticated]
+  );
 
   // Update cache expiry settings
-  const updateCacheExpiry = useCallback((newSettings) => {
-    dispatch({ type: APP_DATA_ACTIONS.UPDATE_CACHE_EXPIRY, payload: newSettings });
+  const updateCacheExpiry = useCallback(newSettings => {
+    dispatch({
+      type: APP_DATA_ACTIONS.UPDATE_CACHE_EXPIRY,
+      payload: newSettings,
+    });
   }, []);
 
   // Context value
@@ -322,4 +417,4 @@ export function useAppData() {
 }
 
 // Export the context for advanced usage
-export { AppDataContext }; 
+export { AppDataContext };

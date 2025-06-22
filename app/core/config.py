@@ -15,7 +15,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.7.1"
+    VERSION: str = "0.7.2"
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development    # Database Configuration
@@ -27,7 +27,6 @@ class Settings:  # App Info
             else ""
         ),
     )
-    SEQUENCE_AUTO_FIX: bool = os.getenv("SEQUENCE_AUTO_FIX", "True").lower() == "true"
 
     # Security Configuration
     ALGORITHM: str = "HS256"

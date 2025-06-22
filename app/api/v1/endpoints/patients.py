@@ -1,16 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Query
-from sqlalchemy.orm import Session
-from typing import Any, List
 from datetime import datetime
+from typing import Any, List
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.crud.patient import patient
-from app.schemas.patient import Patient, PatientCreate, PatientUpdate
-from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.core.logging_config import get_logger
+from app.crud.patient import patient
 from app.models.activity_log import ActivityLog
-from pydantic import BaseModel
+from app.schemas.medication import MedicationCreate, MedicationResponse
+from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 
 router = APIRouter()
 
@@ -262,7 +263,9 @@ def delete_my_patient_record(
             },
         )
 
-        return {"message": "Patient record deleted successfully"}
+        return {
+            "message": "Patient record and all associated medical records deleted successfully"
+        }
 
     except Exception as e:
         # Log failed patient record deletion
@@ -277,7 +280,11 @@ def delete_my_patient_record(
                 "error": str(e),
             },
         )
-        raise
+        # Re-raise with more specific error message for the user
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete patient record and associated medical data. Please try again.",
+        )
 
 
 @router.get("/current", response_model=Patient)
@@ -298,9 +305,8 @@ def get_current_patient_record(
 
 @router.get("/{patient_id}/medications/")
 def get_patient_medications(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get medications for a specific patient"""
     from app.crud.medication import medication
@@ -310,17 +316,12 @@ def get_patient_medications(
 
 @router.post("/{patient_id}/medications/", response_model=MedicationResponse)
 def create_patient_medication(
-    patient_id: int,
     medication_in: MedicationCreate,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Create a new medication for a specific patient"""
-    # Debug logging - REMOVE THIS LATER
-    logger.info(
-        f"🔍 CREATE MEDICATION ENDPOINT CALLED: patient_id={patient_id}, user_id={current_user_id}"
-    )
-
     from app.crud.medication import medication
 
     # Ensure the medication is associated with the correct patient
@@ -338,9 +339,8 @@ def create_patient_medication(
 
 @router.get("/{patient_id}/conditions/")
 def get_patient_conditions(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get conditions for a specific patient"""
     from app.crud.condition import condition
@@ -350,9 +350,8 @@ def get_patient_conditions(
 
 @router.get("/{patient_id}/allergies/")
 def get_patient_allergies(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get allergies for a specific patient"""
     from app.crud.allergy import allergy
@@ -362,9 +361,8 @@ def get_patient_allergies(
 
 @router.get("/{patient_id}/immunizations/")
 def get_patient_immunizations(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get immunizations for a specific patient"""
     from app.crud.immunization import immunization
@@ -374,9 +372,8 @@ def get_patient_immunizations(
 
 @router.get("/{patient_id}/procedures/")
 def get_patient_procedures(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get procedures for a specific patient"""
     from app.crud.procedure import procedure
@@ -386,9 +383,8 @@ def get_patient_procedures(
 
 @router.get("/{patient_id}/treatments/")
 def get_patient_treatments(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get treatments for a specific patient"""
     from app.crud.treatment import treatment
@@ -398,9 +394,8 @@ def get_patient_treatments(
 
 @router.get("/{patient_id}/lab-results/")
 def get_patient_lab_results(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get lab results for a specific patient"""
     from app.crud.lab_result import lab_result
@@ -410,9 +405,8 @@ def get_patient_lab_results(
 
 @router.get("/{patient_id}/encounters/")
 def get_patient_encounters(
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Get encounters for a specific patient"""
     from app.crud.encounter import encounter
@@ -517,7 +511,7 @@ def get_user_recent_activity(
         # Define medical entity types we want to include (all medical pages + doctors)
         medical_entity_types = [
             "medication",
-            "lab_result", 
+            "lab_result",
             "vitals",
             "condition",
             "allergy",
@@ -528,7 +522,7 @@ def get_user_recent_activity(
             "patient",
             "practitioner",  # Doctors/practitioners page
             "lab_result_file",  # Lab result file uploads
-        ]        # Query activity logs for this patient's medical activities
+        ]  # Query activity logs for this patient's medical activities
         # Include activities by the user AND activities that affect this patient
         activity_logs = (
             db.query(ActivityLog)
@@ -536,10 +530,10 @@ def get_user_recent_activity(
                 ActivityLog.entity_type.in_(medical_entity_types),
                 # Show activities by this user OR activities that relate to this patient
                 # This captures both user actions and doctor actions affecting the patient
-                (ActivityLog.user_id == current_user_id) | 
-                (ActivityLog.description.like(f"%patient {patient_record.id}%")) |
-                (ActivityLog.description.like(f"%{patient_record.first_name}%")) |
-                (ActivityLog.description.like(f"%{patient_record.last_name}%"))
+                (ActivityLog.user_id == current_user_id)
+                | (ActivityLog.description.like(f"%patient {patient_record.id}%"))
+                | (ActivityLog.description.like(f"%{patient_record.first_name}%"))
+                | (ActivityLog.description.like(f"%{patient_record.last_name}%")),
             )
             .order_by(desc(ActivityLog.timestamp))
             .limit(limit)
@@ -556,7 +550,7 @@ def get_user_recent_activity(
 
             # Skip user creation/deletion activities
             if entity_type == "user" or action in ["user_created", "user_deleted"]:
-                continue            # Map entity types to user-friendly names
+                continue  # Map entity types to user-friendly names
             type_mapping = {
                 "medication": "Medication",
                 "lab_result": "Lab Result",
@@ -578,7 +572,7 @@ def get_user_recent_activity(
             if description:
                 # Try to extract item name from the original description
                 item_name = None
-                
+
                 if ":" in description:
                     # Extract name after colon and before "for" if present
                     name_part = description.split(":", 1)[1]
@@ -586,7 +580,7 @@ def get_user_recent_activity(
                         item_name = name_part.split(" for ")[0].strip()
                     else:
                         item_name = name_part.strip()
-                
+
                 # Create description in format "Action Type: Item Name"
                 if entity_type == "patient" and action == "updated":
                     description = "Updated Patient Information"
@@ -629,6 +623,4 @@ def get_user_recent_activity(
 
     except Exception as e:
         logger.error(f"Error fetching user recent activity: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail="Error fetching recent activity"
-        )
+        raise HTTPException(status_code=500, detail="Error fetching recent activity")

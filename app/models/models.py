@@ -1,11 +1,24 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Date, DateTime, Text, Float
-from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime, timezone
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import declarative_base, relationship
+
 
 # Timezone-aware datetime function to replace deprecated datetime.utcnow()
 def get_utc_now():
     """Get the current UTC datetime with timezone awareness."""
     return datetime.now(timezone.utc)
+
 
 Base = declarative_base()
 
@@ -18,7 +31,9 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
     full_name = Column(String, nullable=False)  # Role-based access control
-    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'    # Timestamps
+    role = Column(
+        String, nullable=False
+    )  # e.g., 'admin', 'user', 'guest'    # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
@@ -44,20 +59,38 @@ class Patient(Base):
     height = Column(Integer, nullable=True)  # in inches
     weight = Column(Integer, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
-    address = Column(String, nullable=True)  
-    
+    address = Column(String, nullable=True)
+
     # Table Relationships
     user = relationship("User", back_populates="patient")
     practitioner = relationship("Practitioner", back_populates="patients")
-    medications = relationship("Medication", back_populates="patient")
-    encounters = relationship("Encounter", back_populates="patient")
-    lab_results = relationship("LabResult", back_populates="patient")
-    immunizations = relationship("Immunization", back_populates="patient")
-    conditions = relationship("Condition", back_populates="patient")
-    procedures = relationship("Procedure", back_populates="patient")
-    treatments = relationship("Treatment", back_populates="patient")
-    allergies = relationship("Allergy", back_populates="patient")
-    vitals = relationship("Vitals", back_populates="patient")
+    medications = relationship(
+        "Medication", back_populates="patient", cascade="all, delete-orphan"
+    )
+    encounters = relationship(
+        "Encounter", back_populates="patient", cascade="all, delete-orphan"
+    )
+    lab_results = relationship(
+        "LabResult", back_populates="patient", cascade="all, delete-orphan"
+    )
+    immunizations = relationship(
+        "Immunization", back_populates="patient", cascade="all, delete-orphan"
+    )
+    conditions = relationship(
+        "Condition", back_populates="patient", cascade="all, delete-orphan"
+    )
+    procedures = relationship(
+        "Procedure", back_populates="patient", cascade="all, delete-orphan"
+    )
+    treatments = relationship(
+        "Treatment", back_populates="patient", cascade="all, delete-orphan"
+    )
+    allergies = relationship(
+        "Allergy", back_populates="patient", cascade="all, delete-orphan"
+    )
+    vitals = relationship(
+        "Vitals", back_populates="patient", cascade="all, delete-orphan"
+    )
 
 
 class Practitioner(Base):
@@ -331,8 +364,12 @@ class Vitals(Base):
 
     # Optional notes and metadata
     notes = Column(Text, nullable=True)  # Additional notes about the readings
-    location = Column(String, nullable=True)  # Where readings were taken (home, clinic, etc.)
-    device_used = Column(String, nullable=True)  # Device used for measurement    # Audit fields
+    location = Column(
+        String, nullable=True
+    )  # Where readings were taken (home, clinic, etc.)
+    device_used = Column(
+        String, nullable=True
+    )  # Device used for measurement    # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
@@ -342,43 +379,52 @@ class Vitals(Base):
     patient = relationship("Patient", back_populates="vitals")
     practitioner = relationship("Practitioner", back_populates="vitals")
 
+
 class Pharmacy(Base):
     __tablename__ = "pharmacies"
     id = Column(Integer, primary_key=True)
 
     # Descriptive name that includes location context
-    name = Column(String, nullable=False)  # e.g., "CVS Pharmacy - Main Street", "Walgreens - Downtown"
+    name = Column(
+        String, nullable=False
+    )  # e.g., "CVS Pharmacy - Main Street", "Walgreens - Downtown"
     brand = Column(String, nullable=True)  # e.g., 'CVS', 'Walgreens', 'Independent'
-    
+
     # Detailed address components for better identification
     street_address = Column(String, nullable=True)
     city = Column(String, nullable=True)
     state = Column(String, nullable=True)
     zip_code = Column(String, nullable=True)
     country = Column(String, nullable=True)  # e.g., 'USA', 'Canada'
-    
+
     # Optional store identifier from the pharmacy chain
     store_number = Column(String, nullable=True)  # CVS store #1234, Walgreens #5678
-    
+
     # Contact information
     phone_number = Column(String, nullable=True)
     fax_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
     website = Column(String, nullable=True)
-    
+
     # Operating hours (could be JSON or separate table if more complex)
     hours = Column(String, nullable=True)  # e.g., "Mon-Fri: 8AM-10PM, Sat-Sun: 9AM-9PM"
-    
+
     # Pharmacy-specific features
-    drive_through = Column(Boolean, nullable=True, default=False)  # Boolean for drive-through availability
-    twenty_four_hour = Column(Boolean, nullable=True, default=False)  # Boolean for 24-hour service
-    specialty_services = Column(String, nullable=True)  # e.g., "Vaccinations, Medication Therapy Management"
-    
+    drive_through = Column(
+        Boolean, nullable=True, default=False
+    )  # Boolean for drive-through availability
+    twenty_four_hour = Column(
+        Boolean, nullable=True, default=False
+    )  # Boolean for 24-hour service
+    specialty_services = Column(
+        String, nullable=True
+    )  # e.g., "Vaccinations, Medication Therapy Management"
+
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
-    
+
     # Table Relationships
     medications = relationship("Medication", back_populates="pharmacy")

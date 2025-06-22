@@ -150,8 +150,7 @@ def delete_allergy(
 def get_active_allergies(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    patient_id: int = Depends(deps.verify_patient_access),
 ) -> Any:
     """
     Get all active allergies for a patient.
@@ -164,8 +163,7 @@ def get_active_allergies(
 def get_critical_allergies(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    patient_id: int = Depends(deps.verify_patient_access),
 ) -> Any:
     """
     Get critical (severe and life-threatening) allergies for a patient.
@@ -178,9 +176,8 @@ def get_critical_allergies(
 def check_allergen_conflict(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     allergen: str,
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Check if a patient has any active allergies to a specific allergen.
@@ -195,10 +192,9 @@ def check_allergen_conflict(
 def get_patient_allergies(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all allergies for a specific patient.

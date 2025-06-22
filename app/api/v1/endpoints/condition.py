@@ -178,8 +178,7 @@ def delete_condition(
 def get_active_conditions(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    patient_id: int = Depends(deps.verify_patient_access),
 ) -> Any:
     """
     Get all active conditions for a patient.
@@ -194,10 +193,9 @@ def get_active_conditions(
 def get_patient_conditions(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all conditions for a specific patient.
