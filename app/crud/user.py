@@ -1,10 +1,11 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
 
+from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.models import User
 from app.schemas.user import UserCreate, UserUpdate
-from app.core.security import verify_password, get_password_hash
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
@@ -29,8 +30,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Example:
             user = user_crud.get_by_username(db, username="john_doe")
         """
-        # Query the User table filtering by username (case-insensitive)
-        return db.query(User).filter(User.username == username.lower()).first()
+        users = super().get_by_field(
+            db=db,
+            field_name="username",
+            field_value=username.lower(),
+            limit=1,
+        )
+        return users[0] if users else None
 
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         """
@@ -46,8 +52,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Example:
             user = user_crud.get_by_email(db, email="john@example.com")
         """
-        # Query the User table filtering by email
-        return db.query(User).filter(User.email == email).first()
+        users = super().get_by_field(
+            db=db,
+            field_name="email",
+            field_value=email,
+            limit=1,
+        )
+        return users[0] if users else None
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         """
@@ -185,14 +196,20 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             # Check if username is available for user update (excluding current user)
             is_taken = user_crud.is_username_taken(db, username="john_doe", exclude_user_id=5)
         """
-        query = db.query(User).filter(User.username == username.lower())
+        users = super().get_by_field(
+            db=db,
+            field_name="username",
+            field_value=username.lower(),
+            limit=1,
+        )
 
-        # If updating an existing user, exclude their current record
-        if exclude_user_id:
-            query = query.filter(User.id != exclude_user_id)
+        if not users:
+            return False
 
-        # Check if any matching records exist
-        return query.first() is not None
+        if exclude_user_id and users[0].id == exclude_user_id:
+            return False
+
+        return True
 
     def is_email_taken(
         self, db: Session, *, email: str, exclude_user_id: Optional[int] = None
@@ -209,18 +226,46 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             True if email is taken, False if available
 
         Example:
+            # Check if email is available for new user
             is_taken = user_crud.is_email_taken(db, email="john@example.com")
+
+            # Check if email is available for user update (excluding current user)
+            is_taken = user_crud.is_email_taken(db, email="john@example.com", exclude_user_id=5)
         """
-        query = db.query(User).filter(User.email == email)
+        users = super().get_by_field(
+            db=db,
+            field_name="email",
+            field_value=email,
+            limit=1,
+        )
 
-        # If updating an existing user, exclude their current record
-        if exclude_user_id:
-            query = query.filter(
-                User.id != exclude_user_id
-            )  # Check if any matching records exist
-        return query.first() is not None
+        if not users:
+            return False
+
+        if exclude_user_id and users[0].id == exclude_user_id:
+            return False
+
+        return True
+
+    def get_with_patient(self, db: Session, *, user_id: int) -> Optional[User]:
+        """
+        Get a user with their patient record loaded.
+
+        Args:
+            db: SQLAlchemy database session
+            user_id: ID of the user
+
+        Returns:
+            User object with patient relationship loaded, or None if not found
+
+        Example:
+            user_with_patient = user_crud.get_with_patient(db, user_id=current_user.id)
+            patient_info = user_with_patient.patient
+        """
+        return super().get_with_relations(
+            db=db, record_id=user_id, relations=["patient"]
+        )
 
 
-# Create an instance of CRUDUser to use throughout the application
-# This follows the singleton pattern - one instance used everywhere
+# Create the user CRUD instance
 user = CRUDUser(User)

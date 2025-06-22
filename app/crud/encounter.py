@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -27,18 +28,24 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
             limit: Maximum number of records to return
 
         Returns:
-            List of encounters for the patient        """
-        return (
-            db.query(Encounter)
-            .filter(Encounter.patient_id == patient_id)
-            .order_by(Encounter.date.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+            List of encounters for the patient"""
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="date",
+            order_desc=True,
         )
 
     def get_by_practitioner(
-        self, db: Session, *, practitioner_id: int, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
+        self,
+        db: Session,
+        *,
+        practitioner_id: int,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100
     ) -> List[Encounter]:
         """
         Retrieve all encounters for a specific practitioner.
@@ -53,17 +60,14 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
         Returns:
             List of encounters for the practitioner
         """
-        query = db.query(Encounter).filter(Encounter.practitioner_id == practitioner_id)
-        
-        if patient_id:
-            query = query.filter(Encounter.patient_id == patient_id)
-            
-        return (
-            query
-            .order_by(Encounter.date.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_practitioner(
+            db=db,
+            practitioner_id=practitioner_id,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="date",
+            order_desc=True,
         )
 
     def get_with_relations(self, db: Session, encounter_id: int) -> Optional[Encounter]:
@@ -77,11 +81,8 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
         Returns:
             Encounter with patient and practitioner relationships loaded
         """
-        return (
-            db.query(Encounter)
-            .options(joinedload(Encounter.patient), joinedload(Encounter.practitioner))
-            .filter(Encounter.id == encounter_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=encounter_id, relations=["patient", "practitioner"]
         )
 
     def get_recent(
@@ -98,14 +99,16 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
         Returns:
             List of recent encounters
         """
-        from datetime import date, timedelta
+        from app.crud.utils import get_recent_records
 
-        cutoff_date = date.today() - timedelta(days=days)
-        return (
-            db.query(Encounter)
-            .filter(Encounter.patient_id == patient_id, Encounter.date >= cutoff_date)
-            .order_by(Encounter.date.desc())
-            .all()
+        return get_recent_records(
+            db=db,
+            model=self.model,
+            date_field="date",
+            days=days,
+            patient_id=patient_id,
+            order_by="date",
+            order_desc=True,
         )
 
 
