@@ -1,6 +1,8 @@
-from typing import Generic, TypeVar, Type, Optional, List, Union, Dict, Any
-from sqlalchemy.orm import Session
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import and_, asc, desc, or_
+from sqlalchemy.orm import Session, joinedload
 
 # Define the type variables for the Generic class
 ModelType = TypeVar("ModelType")
@@ -8,7 +10,351 @@ CreateSchemaType = TypeVar("CreateSchemaType")
 UpdateSchemaType = TypeVar("UpdateSchemaType")
 
 
-class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+class QueryMixin:
+    """
+    Mixin providing common query patterns for CRUD operations.
+
+    This mixin provides generic methods for common filtering patterns
+    that are repeated across multiple CRUD classes.
+
+    Note: This mixin expects the class using it to have a 'model' attribute.
+    """
+
+    model: Type[Any]  # Type hint for the model attribute
+
+    def get_by_field(
+        self,
+        db: Session,
+        *,
+        field_name: str,
+        field_value: Any,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Generic method to get records by any field with optional additional filters.
+
+        Args:
+            db: Database session
+            field_name: Name of the field to filter by
+            field_value: Value to filter for
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by (defaults to 'id' if not specified)
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters as {field_name: value}
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of records matching the criteria
+
+        Example:
+            # Get all medications for patient 5
+            meds = medication.get_by_field(db, field_name="patient_id", field_value=5)
+
+            # Get active medications for patient 5
+            active_meds = medication.get_by_field(
+                db,
+                field_name="patient_id",
+                field_value=5,
+                additional_filters={"status": "active"}
+            )
+        """
+        if not hasattr(self.model, field_name):
+            raise ValueError(
+                f"Model {self.model.__name__} does not have field '{field_name}'"
+            )
+
+        # Start with base query
+        query = db.query(self.model)
+
+        # Apply main filter
+        field = getattr(self.model, field_name)
+        query = query.filter(field == field_value)
+
+        # Apply additional filters
+        if additional_filters:
+            for filter_field, filter_value in additional_filters.items():
+                if hasattr(self.model, filter_field):
+                    field = getattr(self.model, filter_field)
+                    query = query.filter(field == filter_value)
+
+        # Apply ordering
+        if order_by:
+            if hasattr(self.model, order_by):
+                order_field = getattr(self.model, order_by)
+                if order_desc:
+                    query = query.order_by(desc(order_field))
+                else:
+                    query = query.order_by(asc(order_field))
+        else:
+            # Default ordering by id
+            if order_desc:
+                query = query.order_by(desc(self.model.id))
+            else:
+                query = query.order_by(asc(self.model.id))
+
+        # Apply pagination
+        query = query.offset(skip).limit(limit)
+
+        # Load relationships if specified
+        if load_relations:
+            for relation in load_relations:
+                if hasattr(self.model, relation):
+                    query = query.options(joinedload(getattr(self.model, relation)))
+
+        return query.all()
+
+    def get_by_patient(
+        self,
+        db: Session,
+        *,
+        patient_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Get records by patient_id with optional additional filters.
+
+        Args:
+            db: Database session
+            patient_id: Patient ID to filter by
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of records for the patient
+        """
+        return self.get_by_field(
+            db=db,
+            field_name="patient_id",
+            field_value=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by=order_by,
+            order_desc=order_desc,
+            additional_filters=additional_filters,
+            load_relations=load_relations,
+        )
+
+    def get_by_practitioner(
+        self,
+        db: Session,
+        *,
+        practitioner_id: int,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Get records by practitioner_id with optional patient filter.
+
+        Args:
+            db: Database session
+            practitioner_id: Practitioner ID to filter by
+            patient_id: Optional patient ID to filter by
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of records for the practitioner
+        """
+        filters = {"practitioner_id": practitioner_id}
+        if patient_id:
+            filters["patient_id"] = patient_id
+
+        if additional_filters:
+            filters.update(additional_filters)
+
+        return self.get_by_field(
+            db=db,
+            field_name="practitioner_id",
+            field_value=practitioner_id,
+            skip=skip,
+            limit=limit,
+            order_by=order_by,
+            order_desc=order_desc,
+            additional_filters=additional_filters,
+            load_relations=load_relations,
+        )
+
+    def get_by_status(
+        self,
+        db: Session,
+        *,
+        status: str,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Get records by status with optional patient filter.
+
+        Args:
+            db: Database session
+            status: Status to filter by
+            patient_id: Optional patient ID to filter by
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of records with the specified status
+        """
+        filters: Dict[str, Any] = {"status": status.lower()}
+        if patient_id:
+            filters["patient_id"] = patient_id
+
+        if additional_filters:
+            filters.update(additional_filters)
+
+        return self.get_by_field(
+            db=db,
+            field_name="status",
+            field_value=status.lower(),
+            skip=skip,
+            limit=limit,
+            order_by=order_by,
+            order_desc=order_desc,
+            additional_filters=additional_filters,
+            load_relations=load_relations,
+        )
+
+    def search_by_text_field(
+        self,
+        db: Session,
+        *,
+        field_name: str,
+        search_term: str,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None,
+    ) -> List[ModelType]:
+        """
+        Search records by text field using ILIKE pattern matching.
+
+        Args:
+            db: Database session
+            field_name: Name of the text field to search
+            search_term: Text to search for
+            patient_id: Optional patient ID to filter by
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            order_by: Field name to order by
+            order_desc: Whether to order in descending order
+            additional_filters: Additional field filters
+            load_relations: List of relationship names to eager load
+
+        Returns:
+            List of records matching the search criteria
+        """
+        if not hasattr(self.model, field_name):
+            raise ValueError(
+                f"Model {self.model.__name__} does not have field '{field_name}'"
+            )
+
+        # Start with base query
+        query = db.query(self.model)
+
+        # Apply text search filter
+        field = getattr(self.model, field_name)
+        search_pattern = f"%{search_term}%"
+        query = query.filter(field.ilike(search_pattern))
+
+        # Apply patient filter if specified
+        if patient_id:
+            if hasattr(self.model, "patient_id"):
+                query = query.filter(self.model.patient_id == patient_id)
+
+        # Apply additional filters
+        if additional_filters:
+            for filter_field, filter_value in additional_filters.items():
+                if hasattr(self.model, filter_field):
+                    field = getattr(self.model, filter_field)
+                    query = query.filter(field == filter_value)
+
+        # Apply ordering
+        if order_by:
+            if hasattr(self.model, order_by):
+                order_field = getattr(self.model, order_by)
+                if order_desc:
+                    query = query.order_by(desc(order_field))
+                else:
+                    query = query.order_by(asc(order_field))
+        else:
+            # Default ordering by id
+            if order_desc:
+                query = query.order_by(desc(self.model.id))
+            else:
+                query = query.order_by(asc(self.model.id))
+
+        # Apply pagination
+        query = query.offset(skip).limit(limit)
+
+        # Load relationships if specified
+        if load_relations:
+            for relation in load_relations:
+                if hasattr(self.model, relation):
+                    query = query.options(joinedload(getattr(self.model, relation)))
+
+        return query.all()
+
+    def get_with_relations(
+        self, db: Session, *, record_id: int, relations: List[str]
+    ) -> Optional[ModelType]:
+        """
+        Get a single record with specified relationships loaded.
+
+        Args:
+            db: Database session
+            record_id: ID of the record to retrieve
+            relations: List of relationship names to eager load
+
+        Returns:
+            Record with relationships loaded, or None if not found
+        """
+        query = db.query(self.model)
+
+        # Load specified relationships
+        for relation in relations:
+            if hasattr(self.model, relation):
+                query = query.options(joinedload(getattr(self.model, relation)))
+
+        return query.filter(self.model.id == record_id).first()
+
+
+class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixin):
     """
     Base CRUD class with default methods to Create, Read, Update, Delete (CRUD).
 
@@ -39,7 +385,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         Example:
             user_crud = CRUDUser(User, primary_key="user_id")  # User is the class
             # For composite keys: CRUDUser(User, primary_key=["user_id", "tenant_id"])
-        """  # Import Base at runtime to avoid the TYPE_CHECKING issue
+        """
+        # Import Base at runtime to avoid the TYPE_CHECKING issue
         from app.models.models import Base
 
         if not issubclass(model, Base):
@@ -82,12 +429,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             filter_condition = [
                 getattr(self.model, key) == id[key] for key in self.primary_key
             ]
-            return db.query(self.model).filter(*filter_condition).first()
+            return db.query(self.model).filter(*filter_condition).first()  # type: ignore
         else:
             return (
                 db.query(self.model)
                 .filter(getattr(self.model, self.primary_key) == id)
-                .first()
+                .first()  # type: ignore
             )
 
     def get_multi(
@@ -132,6 +479,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             new_user = user_crud.create(db, obj_in=user_data)
         """
         from sqlalchemy.exc import IntegrityError
+
         from app.core.logging_config import get_logger
 
         logger = get_logger(__name__, "crud")
@@ -205,6 +553,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             True if sequence was successfully fixed, False otherwise
         """
         from sqlalchemy import text
+
         from app.core.logging_config import get_logger
 
         logger = get_logger(__name__, "sequence_fix")
