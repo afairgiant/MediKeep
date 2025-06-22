@@ -66,4 +66,54 @@
 
 .settings-option-control {
   margin-left: 1rem;
-} 
+}
+
+/* Password Form Styling */
+.password-form {
+  max-width: 400px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: var(--color-text-primary, #333);
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: var(--border-radius-md, 5px);
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #667eea);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-help {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  margin-top: 2rem;
+}
+
+.settings-placeholder-text {
+  color: var(--color-text-secondary, #666);
+  font-style: italic;
+}

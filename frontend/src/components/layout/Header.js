@@ -36,8 +36,8 @@ const Header = ({
 
       <div className="header-actions">
         {actions}
-        <button 
-          className="settings-button" 
+        <button
+          className="settings-button"
           onClick={() => navigate('/settings')}
           type="button"
           title="Settings"
