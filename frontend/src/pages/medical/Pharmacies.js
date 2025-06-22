@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
+import { usePharmacies, useCacheManager } from '../../hooks/useGlobalData';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
 
 const Pharmacies = () => {
   const navigate = useNavigate();
-  const [pharmacies, setPharmacies] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,22 +25,19 @@ const Pharmacies = () => {
     store_number: '',
   });
 
-  useEffect(() => {
-    fetchPharmacies();
-  }, []);
+  // Use global state for pharmacies data
+  const { data: pharmacies, loading, error: globalError } = usePharmacies();
+  const { refreshPharmacies } = useCacheManager();
 
-  const fetchPharmacies = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const pharmaciesData = await apiService.getPharmacies();
-      setPharmacies(pharmaciesData || []);
-    } catch (error) {
+  // Handle global error
+  useEffect(() => {
+    if (globalError) {
       setError('Failed to load pharmacies. Please try again.');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [globalError]);
+
+  // Legacy function name for compatibility
+  const fetchPharmacies = refreshPharmacies;
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -101,7 +97,7 @@ const Pharmacies = () => {
         setSuccessMessage('Pharmacy added successfully!');
       }
 
-      await fetchPharmacies();
+      await refreshPharmacies(); // Refresh global cache
       resetForm();
     } catch (error) {
       setError(`Failed to save pharmacy: ${error.message}`);
@@ -117,7 +113,7 @@ const Pharmacies = () => {
       setError('');
       await apiService.deletePharmacy(pharmacyId);
       setSuccessMessage('Pharmacy deleted successfully!');
-      await fetchPharmacies();
+      await refreshPharmacies(); // Refresh global cache
     } catch (error) {
       setError(`Failed to delete pharmacy: ${error.message}`);
     }

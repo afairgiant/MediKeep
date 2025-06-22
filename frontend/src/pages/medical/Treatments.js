@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { useCurrentPatient } from '../../hooks/useGlobalData';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -10,9 +11,8 @@ import '../../styles/pages/MedicationTable.css';
 const Treatments = () => {
   const navigate = useNavigate();
   const [treatments, setTreatments] = useState([]);
-  const [patientData, setPatientData] = useState(null);
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
-  const [loading, setLoading] = useState(true);
+  const [treatmentsLoading, setTreatmentsLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -31,32 +31,46 @@ const Treatments = () => {
     notes: '',
   });
 
-  // Fetch patient and treatments data on component mount
-  useEffect(() => {
-    fetchPatientAndTreatments();
-  }, []);
+  // Use global state for patient data
+  const { data: patientData, loading: globalDataLoading, error: globalDataError } = useCurrentPatient();
 
-  const fetchPatientAndTreatments = async () => {
+  // Define fetchTreatments before using it in useEffect
+  const fetchTreatments = useCallback(async () => {
+    if (!patientData?.id) {
+      setTreatmentsLoading(false);
+      return;
+    }
+
     try {
-      setLoading(true);
+      setTreatmentsLoading(true);
       setError('');
 
-      // Get patient data first
-      const patient = await apiService.getCurrentPatient();
-      setPatientData(patient);
-
-      // Then get treatments for this patient
-      if (patient && patient.id) {
-        const treatmentData = await apiService.getPatientTreatments(patient.id);
-        setTreatments(treatmentData);
-      }
+      // Only fetch treatments - patient data comes from global state
+      const treatmentData = await apiService.getPatientTreatments(patientData.id);
+      setTreatments(treatmentData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching treatments:', error);
       setError(`Failed to load treatment data: ${error.message}`);
     } finally {
-      setLoading(false);
+      setTreatmentsLoading(false);
     }
-  };
+  }, [patientData?.id]);
+
+  // Fetch treatments when patient data becomes available
+  useEffect(() => {
+    if (patientData?.id) {
+      fetchTreatments();
+    } else if (patientData === null && !globalDataLoading) {
+      // If patient data is null and global loading is done, stop treatments loading
+      setTreatmentsLoading(false);
+    }
+  }, [patientData?.id, patientData, globalDataLoading, fetchTreatments]);
+
+  // Combined loading state
+  const loading = globalDataLoading || treatmentsLoading;
+
+  // Legacy function name for compatibility
+  const fetchPatientAndTreatments = fetchTreatments;
 
   const handleInputChange = e => {
     const { name, value } = e.target;
