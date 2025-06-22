@@ -175,6 +175,36 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         return user
 
+    def update_password_by_user(
+        self, db: Session, *, user_obj: User, new_password: str
+    ) -> User:
+        """
+        Update a user's password using the user object.
+
+        Args:
+            db: SQLAlchemy database session
+            user_obj: User object to update
+            new_password: New plain text password
+
+        Returns:
+            Updated User object
+
+        Example:
+            updated_user = user_crud.update_password_by_user(db, user_obj=current_user, new_password="new_password123")
+        """
+        # Hash the new password
+        hashed_password = get_password_hash(new_password)
+
+        # Update the password hash
+        setattr(user_obj, "password_hash", hashed_password)
+
+        # Commit the changes
+        db.add(user_obj)
+        db.commit()
+        db.refresh(user_obj)
+
+        return user_obj
+
     def is_username_taken(
         self, db: Session, *, username: str, exclude_user_id: Optional[int] = None
     ) -> bool:

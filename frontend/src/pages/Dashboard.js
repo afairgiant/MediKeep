@@ -8,14 +8,14 @@ import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  
+
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
-  
+
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   // Combine loading states
   const loading = patientLoading || activityLoading;
 
@@ -165,8 +165,8 @@ const Dashboard = () => {
       <header>
         <h1>🏥 Medical Records Dashboard</h1>
         <nav>
-          <button 
-            className="settings-button" 
+          <button
+            className="settings-button"
             onClick={() => navigate('/settings')}
             type="button"
             title="Settings"

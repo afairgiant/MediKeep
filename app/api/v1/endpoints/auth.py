@@ -1,18 +1,18 @@
-from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from datetime import date, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.config import settings
-from app.crud.user import user
-from app.crud.patient import patient
-from app.schemas.user import User, UserCreate, Token
-from app.schemas.patient import PatientCreate
-from app.core.security import create_access_token
 from app.core.logging_config import get_logger, log_security_event
-from datetime import date
-
+from app.core.security import create_access_token, verify_password
+from app.crud.patient import patient
+from app.crud.user import user
+from app.models.models import User
+from app.schemas.patient import PatientCreate
+from app.schemas.user import Token, UserCreate
 
 router = APIRouter()
 
@@ -185,9 +185,9 @@ def login(
     access_token = create_access_token(
         data={
             "sub": db_user.username,
-            "role": db_user.role
-            if db_user.role in ["admin", "user", "guest"]
-            else "user",
+            "role": (
+                db_user.role if db_user.role in ["admin", "user", "guest"] else "user"
+            ),
             "user_id": db_user.id,
             "full_name": full_name,
         },
@@ -198,3 +198,81 @@ def login(
     log_successful_login(getattr(db_user, "id", 0), form_data.username, user_ip)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+from pydantic import BaseModel
+
+
+class ChangePasswordRequest(BaseModel):
+    currentPassword: str
+    newPassword: str
+
+
+@router.post("/change-password")
+def change_password(
+    password_data: ChangePasswordRequest,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Change user password.
+
+    Requires the current password to be provided for security.
+    """
+    user_ip = request.client.host if request.client else "unknown"
+
+    logger.info(
+        f"Password change attempt for user: {current_user.username}",
+        extra={
+            "category": "security",
+            "event": "password_change_attempt",
+            "user_id": current_user.id,
+            "username": current_user.username,
+            "ip": user_ip,
+        },
+    )
+
+    # Verify current password
+    if not verify_password(
+        password_data.currentPassword, str(current_user.password_hash)
+    ):
+        logger.warning(
+            f"Failed password change attempt - incorrect current password for user: {current_user.username}",
+            extra={
+                "category": "security",
+                "event": "password_change_failed_verification",
+                "user_id": current_user.id,
+                "username": current_user.username,
+                "ip": user_ip,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+
+    # Validate new password
+    if len(password_data.newPassword) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 6 characters long",
+        )
+
+    # Update password
+    user.update_password_by_user(
+        db, user_obj=current_user, new_password=password_data.newPassword
+    )
+
+    logger.info(
+        f"Password changed successfully for user: {current_user.username}",
+        extra={
+            "category": "security",
+            "event": "password_change_success",
+            "user_id": current_user.id,
+            "username": current_user.username,
+            "ip": user_ip,
+        },
+    )
+
+    return {"message": "Password changed successfully"}

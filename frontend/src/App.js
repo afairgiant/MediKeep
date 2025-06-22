@@ -112,225 +112,228 @@ function App() {
             <ThemeProvider>
               <NavigationTracker />
               <div className="App">
-              <Routes>
-                {/* Public Routes */}
-                <Route
-                  path="/login"
-                  element={
-                    <PublicRoute>
-                      <Login />
-                    </PublicRoute>
-                  }
-                />
-                {/* Protected Routes */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                {/* Medical Records Routes */}
-                <Route
-                  path="/patients/me"
-                  element={
-                    <ProtectedRoute>
-                      <PatientInfo />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/patients/:section?"
-                  element={
-                    <ProtectedRoute>
-                      <PlaceholderPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/lab-results"
-                  element={
-                    <ProtectedRoute>
-                      <LabResults />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/medications"
-                  element={
-                    <ProtectedRoute>
-                      <Medication />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/immunizations"
-                  element={
-                    <ProtectedRoute>
-                      <Immunization />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/procedures"
-                  element={
-                    <ProtectedRoute>
-                      <Procedures />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/allergies"
-                  element={
-                    <ProtectedRoute>
-                      <Allergies />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/conditions"
-                  element={
-                    <ProtectedRoute>
-                      <Conditions />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/treatments"
-                  element={
-                    <ProtectedRoute>
-                      <Treatments />
-                    </ProtectedRoute>
-                  }
-                />{' '}
-                <Route
-                  path="/visits"
-                  element={
-                    <ProtectedRoute>
-                      <Visits />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/vitals"
-                  element={
-                    <ProtectedRoute>
-                      <Vitals />
-                    </ProtectedRoute>
-                  }
-                />{' '}
-                <Route
-                  path="/practitioners"
-                  element={
-                    <ProtectedRoute>
-                      <Practitioners />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/pharmacies"
-                  element={
-                    <ProtectedRoute>
-                      <Pharmacies />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/export"
-                  element={
-                    <ProtectedRoute>
-                      <ExportPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  }
-                />
-                {/* Admin Routes - Require Admin Role */}
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/models/:modelName"
-                  element={
-                    <AdminRoute>
-                      <ModelManagement />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/models/:modelName/:recordId"
-                  element={
-                    <AdminRoute>
-                      <ModelView />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/models/:modelName/:recordId/edit"
-                  element={
-                    <AdminRoute>
-                      <ModelEdit />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/models/:modelName/create"
-                  element={
-                    <AdminRoute>
-                      <ModelCreate />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/bulk-operations"
-                  element={
-                    <AdminRoute>
-                      <PlaceholderPage />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/system-health"
-                  element={
-                    <AdminRoute>
-                      <SystemHealth />
-                    </AdminRoute>
-                  }
-                />
-                {/* Development/Testing Routes */}
-                <Route path="/logging-test" element={<LoggingTest />} />
-                <Route path="/global-state-demo" element={<GlobalStateDemo />} />
-                {/* Default redirect */}
-                <Route path="/" element={<Navigate to="/dashboard" />} />
-              </Routes>
-            </div>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route
+                    path="/login"
+                    element={
+                      <PublicRoute>
+                        <Login />
+                      </PublicRoute>
+                    }
+                  />
+                  {/* Protected Routes */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* Medical Records Routes */}
+                  <Route
+                    path="/patients/me"
+                    element={
+                      <ProtectedRoute>
+                        <PatientInfo />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/patients/:section?"
+                    element={
+                      <ProtectedRoute>
+                        <PlaceholderPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/lab-results"
+                    element={
+                      <ProtectedRoute>
+                        <LabResults />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/medications"
+                    element={
+                      <ProtectedRoute>
+                        <Medication />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/immunizations"
+                    element={
+                      <ProtectedRoute>
+                        <Immunization />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/procedures"
+                    element={
+                      <ProtectedRoute>
+                        <Procedures />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/allergies"
+                    element={
+                      <ProtectedRoute>
+                        <Allergies />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/conditions"
+                    element={
+                      <ProtectedRoute>
+                        <Conditions />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/treatments"
+                    element={
+                      <ProtectedRoute>
+                        <Treatments />
+                      </ProtectedRoute>
+                    }
+                  />{' '}
+                  <Route
+                    path="/visits"
+                    element={
+                      <ProtectedRoute>
+                        <Visits />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/vitals"
+                    element={
+                      <ProtectedRoute>
+                        <Vitals />
+                      </ProtectedRoute>
+                    }
+                  />{' '}
+                  <Route
+                    path="/practitioners"
+                    element={
+                      <ProtectedRoute>
+                        <Practitioners />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pharmacies"
+                    element={
+                      <ProtectedRoute>
+                        <Pharmacies />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/export"
+                    element={
+                      <ProtectedRoute>
+                        <ExportPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* Admin Routes - Require Admin Role */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/models/:modelName"
+                    element={
+                      <AdminRoute>
+                        <ModelManagement />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/models/:modelName/:recordId"
+                    element={
+                      <AdminRoute>
+                        <ModelView />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/models/:modelName/:recordId/edit"
+                    element={
+                      <AdminRoute>
+                        <ModelEdit />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/models/:modelName/create"
+                    element={
+                      <AdminRoute>
+                        <ModelCreate />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/bulk-operations"
+                    element={
+                      <AdminRoute>
+                        <PlaceholderPage />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/system-health"
+                    element={
+                      <AdminRoute>
+                        <SystemHealth />
+                      </AdminRoute>
+                    }
+                  />
+                  {/* Development/Testing Routes */}
+                  <Route path="/logging-test" element={<LoggingTest />} />
+                  <Route
+                    path="/global-state-demo"
+                    element={<GlobalStateDemo />}
+                  />
+                  {/* Default redirect */}
+                  <Route path="/" element={<Navigate to="/dashboard" />} />
+                </Routes>
+              </div>
 
-            {/* Toast Notifications */}
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-            />
-          </ThemeProvider>
+              {/* Toast Notifications */}
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+              />
+            </ThemeProvider>
           </AppDataProvider>
         </AuthProvider>
       </Router>

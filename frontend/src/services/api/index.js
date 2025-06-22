@@ -197,6 +197,11 @@ class ApiService {
       { signal }
     );
   }
+
+  changePassword(passwordData, signal) {
+    return this.post('/auth/change-password/', passwordData, { signal });
+  }
+
   // Patient methods
   getCurrentPatient(signal) {
     return this.get('/patients/me/', { signal });
