@@ -1,10 +1,11 @@
-from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import desc, and_
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import and_, desc, func
+from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
-from app.models.activity_log import ActivityLog, EntityType, ActionType
+from app.models.activity_log import ActionType, ActivityLog, EntityType
 
 
 class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
@@ -17,12 +18,7 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
     """
 
     def get_by_user(
-        self, 
-        db: Session, 
-        *, 
-        user_id: int, 
-        skip: int = 0, 
-        limit: int = 50
+        self, db: Session, *, user_id: int, skip: int = 0, limit: int = 50
     ) -> List[ActivityLog]:
         """
         Get all activities for a specific user.
@@ -39,22 +35,18 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         Example:
             activities = activity_log.get_by_user(db, user_id=current_user.id, limit=20)
         """
-        return (
-            db.query(self.model)
-            .filter(self.model.user_id == user_id)
-            .order_by(desc(self.model.timestamp))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_field(
+            db=db,
+            field_name="user_id",
+            field_value=user_id,
+            skip=skip,
+            limit=limit,
+            order_by="timestamp",
+            order_desc=True,
         )
 
     def get_by_patient(
-        self, 
-        db: Session, 
-        *, 
-        patient_id: int, 
-        skip: int = 0, 
-        limit: int = 50
+        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 50
     ) -> List[ActivityLog]:
         """
         Get all activities related to a specific patient.
@@ -71,21 +63,18 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         Example:
             activities = activity_log.get_by_patient(db, patient_id=patient.id, limit=20)
         """
-        return (
-            db.query(self.model)
-            .filter(self.model.patient_id == patient_id)
-            .order_by(desc(self.model.timestamp))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_field(
+            db=db,
+            field_name="patient_id",
+            field_value=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="timestamp",
+            order_desc=True,
         )
 
     def get_recent_activity(
-        self, 
-        db: Session, 
-        *, 
-        hours: int = 24, 
-        limit: int = 100
+        self, db: Session, *, hours: int = 24, limit: int = 100
     ) -> List[ActivityLog]:
         """
         Get recent system-wide activity within specified time range.
@@ -111,13 +100,13 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         )
 
     def get_by_entity(
-        self, 
-        db: Session, 
-        *, 
-        entity_type: str, 
+        self,
+        db: Session,
+        *,
+        entity_type: str,
         entity_id: int,
-        skip: int = 0, 
-        limit: int = 50
+        skip: int = 0,
+        limit: int = 50,
     ) -> List[ActivityLog]:
         """
         Get all activities for a specific entity (e.g., a specific medication, lab result).
@@ -134,33 +123,30 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
 
         Example:
             activities = activity_log.get_by_entity(
-                db, 
-                entity_type=EntityType.MEDICATION, 
+                db,
+                entity_type=EntityType.MEDICATION,
                 entity_id=medication.id
             )
         """
-        return (
-            db.query(self.model)
-            .filter(
-                and_(
-                    self.model.entity_type == entity_type,
-                    self.model.entity_id == entity_id
-                )
-            )
-            .order_by(desc(self.model.timestamp))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_field(
+            db=db,
+            field_name="entity_type",
+            field_value=entity_type,
+            additional_filters={"entity_id": entity_id},
+            skip=skip,
+            limit=limit,
+            order_by="timestamp",
+            order_desc=True,
         )
 
     def get_by_action_type(
-        self, 
-        db: Session, 
-        *, 
+        self,
+        db: Session,
+        *,
         action: str,
         user_id: Optional[int] = None,
-        skip: int = 0, 
-        limit: int = 50
+        skip: int = 0,
+        limit: int = 50,
     ) -> List[ActivityLog]:
         """
         Get activities by action type, optionally filtered by user.
@@ -178,56 +164,48 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         Example:
             # Get all deletion activities
             deletions = activity_log.get_by_action_type(db, action=ActionType.DELETED)
-            
+
             # Get login activities for specific user
             logins = activity_log.get_by_action_type(
-                db, 
-                action=ActionType.LOGIN, 
+                db,
+                action=ActionType.LOGIN,
                 user_id=user.id
             )
         """
-        query = db.query(self.model).filter(self.model.action == action)
-        
+        additional_filters = {}
         if user_id:
-            query = query.filter(self.model.user_id == user_id)
-            
-        return (
-            query
-            .order_by(desc(self.model.timestamp))
-            .offset(skip)
-            .limit(limit)
-            .all()
+            additional_filters["user_id"] = user_id
+
+        return super().get_by_field(
+            db=db,
+            field_name="action",
+            field_value=action,
+            additional_filters=additional_filters,
+            skip=skip,
+            limit=limit,
+            order_by="timestamp",
+            order_desc=True,
         )
 
     def get_with_relations(
-        self, 
-        db: Session, 
-        *, 
-        activity_id: int
+        self, db: Session, *, activity_id: int
     ) -> Optional[ActivityLog]:
         """
-        Get activity log with user and patient relationships loaded.
+        Get an activity log entry with user and patient relationships loaded.
 
         Args:
             db: Database session
-            activity_id: ID of the activity log
+            activity_id: ID of the activity log entry
 
         Returns:
             ActivityLog with relationships loaded, or None if not found
 
         Example:
             activity = activity_log.get_with_relations(db, activity_id=log.id)
-            user_info = activity.user
-            patient_info = activity.patient
+            user_name = activity.user.username if activity.user else "System"
         """
-        return (
-            db.query(self.model)
-            .options(
-                joinedload(self.model.user),
-                joinedload(self.model.patient)
-            )
-            .filter(self.model.id == activity_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=activity_id, relations=["user", "patient"]
         )
 
     def search_activities(
@@ -242,20 +220,20 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         end_date: Optional[datetime] = None,
         description_search: Optional[str] = None,
         skip: int = 0,
-        limit: int = 50
+        limit: int = 50,
     ) -> List[ActivityLog]:
         """
-        Advanced search for activities with multiple filter criteria.
+        Search activities with multiple filter options.
 
         Args:
             db: Database session
-            user_id: Filter by user ID
-            patient_id: Filter by patient ID
-            entity_type: Filter by entity type
-            action: Filter by action type
-            start_date: Filter activities after this date
-            end_date: Filter activities before this date
-            description_search: Search in description text
+            user_id: Optional user ID filter
+            patient_id: Optional patient ID filter
+            entity_type: Optional entity type filter
+            action: Optional action type filter
+            start_date: Optional start date filter
+            end_date: Optional end date filter
+            description_search: Optional text search in description
             skip: Number of records to skip
             limit: Maximum number of records to return
 
@@ -266,96 +244,120 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
             activities = activity_log.search_activities(
                 db,
                 user_id=user.id,
-                entity_type=EntityType.LAB_RESULT,
                 action=ActionType.CREATED,
-                start_date=datetime.now() - timedelta(days=7)
+                start_date=datetime(2023, 1, 1),
+                description_search="medication"
             )
         """
-        query = db.query(self.model)
-
-        # Apply filters
+        # Build filters dictionary
+        filters = {}
         if user_id:
-            query = query.filter(self.model.user_id == user_id)
-        
+            filters["user_id"] = user_id
         if patient_id:
-            query = query.filter(self.model.patient_id == patient_id)
-            
+            filters["patient_id"] = patient_id
         if entity_type:
-            query = query.filter(self.model.entity_type == entity_type)
-            
+            filters["entity_type"] = entity_type
         if action:
-            query = query.filter(self.model.action == action)
-            
-        if start_date:
-            query = query.filter(self.model.timestamp >= start_date)
-            
-        if end_date:
-            query = query.filter(self.model.timestamp <= end_date)
-            
-        if description_search:
-            query = query.filter(
-                self.model.description.ilike(f"%{description_search}%")
-            )
+            filters["action"] = action
 
-        return (
-            query
-            .order_by(desc(self.model.timestamp))
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+        # Handle description search or date filters with custom query
+        if description_search or start_date or end_date:
+            query = db.query(self.model)
+
+            # Apply filters
+            for field_name, field_value in filters.items():
+                if hasattr(self.model, field_name):
+                    field = getattr(self.model, field_name)
+                    query = query.filter(field == field_value)
+
+            # Apply description search
+            if description_search:
+                query = query.filter(
+                    self.model.description.ilike(f"%{description_search}%")
+                )
+
+            # Apply date filters
+            if start_date:
+                query = query.filter(self.model.timestamp >= start_date)
+            if end_date:
+                query = query.filter(self.model.timestamp <= end_date)
+
+            return (
+                query.order_by(desc(self.model.timestamp))
+                .offset(skip)
+                .limit(limit)
+                .all()
+            )
+        elif filters:
+            # Use generic method for simple field filters
+            first_filter = next(iter(filters.items()))
+            remaining_filters = {
+                k: v for k, v in filters.items() if k != first_filter[0]
+            }
+            return super().get_by_field(
+                db=db,
+                field_name=first_filter[0],
+                field_value=first_filter[1],
+                additional_filters=remaining_filters,
+                skip=skip,
+                limit=limit,
+                order_by="timestamp",
+                order_desc=True,
+            )
+        else:
+            # No filters, return recent activities
+            return self.get_multi(db, skip=skip, limit=limit)
 
     def get_activity_summary(
-        self, 
-        db: Session, 
-        *, 
-        user_id: Optional[int] = None,
-        days: int = 30
+        self, db: Session, *, user_id: Optional[int] = None, days: int = 30
     ) -> Dict[str, Any]:
         """
-        Get activity summary statistics for a user or system-wide.
+        Get activity summary statistics.
 
         Args:
             db: Database session
-            user_id: User ID to filter by (None for system-wide)
+            user_id: Optional user ID to filter by
             days: Number of days to look back
 
         Returns:
-            Dictionary with activity summary statistics
+            Dictionary with activity statistics
 
         Example:
             summary = activity_log.get_activity_summary(db, user_id=user.id, days=7)
-            print(f"Created: {summary['actions']['created']}")
-            print(f"Total activities: {summary['total_activities']}")
+            total_activities = summary["total_activities"]
         """
         cutoff_date = datetime.utcnow() - timedelta(days=days)
-        
+
+        # Base query
         query = db.query(self.model).filter(self.model.timestamp >= cutoff_date)
-        
+
         if user_id:
             query = query.filter(self.model.user_id == user_id)
-        
-        activities = query.all()
-        
-        # Count by action type
-        action_counts = {}
-        for action in ActionType.get_all_actions():
-            action_counts[action] = sum(1 for a in activities if a.action == action)
-        
-        # Count by entity type
-        entity_counts = {}
-        for entity in EntityType.get_all_types():
-            entity_counts[entity] = sum(1 for a in activities if a.entity_type == entity)
-        
+
+        # Get total count
+        total_activities = query.count()
+
+        # Get counts by action type
+        action_counts = (
+            query.with_entities(self.model.action, func.count(self.model.id))
+            .group_by(self.model.action)
+            .all()
+        )
+
+        # Get counts by entity type
+        entity_counts = (
+            query.with_entities(self.model.entity_type, func.count(self.model.id))
+            .group_by(self.model.entity_type)
+            .all()
+        )
+
         return {
-            "total_activities": len(activities),
-            "actions": action_counts,
-            "entities": entity_counts,
-            "date_range": {
-                "start": cutoff_date.isoformat(),
-                "end": datetime.utcnow().isoformat()
-            },
-            "user_id": user_id
+            "total_activities": total_activities,
+            "days_covered": days,
+            "actions": {action: count for action, count in action_counts},
+            "entities": {entity: count for entity, count in entity_counts},
+            "start_date": cutoff_date,
+            "end_date": datetime.utcnow(),
         }
 
     def log_activity(
@@ -373,52 +375,53 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         user_agent: Optional[str] = None,
     ) -> ActivityLog:
         """
-        Convenience method to create and save an activity log.
+        Log a new activity entry.
 
         Args:
             db: Database session
             action: Action performed (use ActionType constants)
             entity_type: Type of entity (use EntityType constants)
             description: Human-readable description
-            user_id: ID of user who performed the action
-            patient_id: ID of patient whose data was affected
-            entity_id: ID of the specific record affected
-            metadata: Additional context data
-            ip_address: Client IP address
-            user_agent: Client user agent string
+            user_id: Optional user who performed the action
+            patient_id: Optional patient related to the action
+            entity_id: Optional ID of the specific entity
+            metadata: Optional additional metadata
+            ip_address: Optional IP address
+            user_agent: Optional user agent string
 
         Returns:
-            Created ActivityLog instance
+            Created ActivityLog object
 
         Example:
-            activity = activity_log.log_activity(
+            log_entry = activity_log.log_activity(
                 db,
                 action=ActionType.CREATED,
                 entity_type=EntityType.MEDICATION,
-                description="Added new medication: Aspirin 325mg",
+                description="Created new medication record",
                 user_id=current_user.id,
                 patient_id=patient.id,
-                entity_id=medication.id,
-                metadata={"dosage": "325mg", "frequency": "daily"}
+                entity_id=medication.id
             )
         """
-        activity = ActivityLog.create_activity(            action=action,
-            entity_type=entity_type,
-            description=description,
-            user_id=user_id,
-            patient_id=patient_id,
-            entity_id=entity_id,
-            metadata=metadata,
-            ip_address=ip_address,
-            user_agent=user_agent,
-        )
-        
-        db.add(activity)
+        activity_data = {
+            "action": action,
+            "entity_type": entity_type,
+            "description": description,
+            "timestamp": datetime.utcnow(),
+            "user_id": user_id,
+            "patient_id": patient_id,
+            "entity_id": entity_id,
+            "metadata": metadata,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+        }
+
+        db_obj = self.model(**activity_data)
+        db.add(db_obj)
         db.commit()
-        db.refresh(activity)
-        
-        return activity
+        db.refresh(db_obj)
+        return db_obj
 
 
-# Create instance of the CRUD class
+# Create the activity log CRUD instance
 activity_log = CRUDActivityLog(ActivityLog)

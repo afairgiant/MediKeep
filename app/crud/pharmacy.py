@@ -1,6 +1,7 @@
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
+
+from sqlalchemy import distinct, func
 from sqlalchemy.orm import Session
-from sqlalchemy import func, distinct
 
 from app.crud.base import CRUDBase
 from app.models.models import Pharmacy as PharmacyModel
@@ -29,7 +30,13 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacy = pharmacy_crud.get_by_name(db, name="CVS Pharmacy - Main Street")
         """
-        return db.query(PharmacyModel).filter(PharmacyModel.name == name).first()
+        pharmacies = super().get_by_field(
+            db=db,
+            field_name="name",
+            field_value=name,
+            limit=1,
+        )
+        return pharmacies[0] if pharmacies else None
 
     def search_by_name(
         self, db: Session, *, name: str, skip: int = 0, limit: int = 20
@@ -49,13 +56,12 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.search_by_name(db, name="CVS")
         """
-        search_pattern = f"%{name}%"
-        return (
-            db.query(PharmacyModel)
-            .filter(PharmacyModel.name.ilike(search_pattern))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().search_by_text_field(
+            db=db,
+            field_name="name",
+            search_term=name,
+            skip=skip,
+            limit=limit,
         )
 
     def search_by_brand(
@@ -76,13 +82,12 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.search_by_brand(db, brand="CVS")
         """
-        search_pattern = f"%{brand}%"
-        return (
-            db.query(PharmacyModel)
-            .filter(PharmacyModel.brand.ilike(search_pattern))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().search_by_text_field(
+            db=db,
+            field_name="brand",
+            search_term=brand,
+            skip=skip,
+            limit=limit,
         )
 
     def get_by_brand(
@@ -103,12 +108,12 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             cvs_pharmacies = pharmacy_crud.get_by_brand(db, brand="CVS")
         """
-        return (
-            db.query(PharmacyModel)
-            .filter(PharmacyModel.brand.ilike(brand))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_field(
+            db=db,
+            field_name="brand",
+            field_value=brand,
+            skip=skip,
+            limit=limit,
         )
 
     def get_all_brands(self, db: Session) -> List[str]:
@@ -151,21 +156,21 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         query = db.query(distinct(PharmacyModel.city)).filter(
             PharmacyModel.city.isnot(None)
         )
-        
+
         if state:
             query = query.filter(PharmacyModel.state.ilike(state))
-        
+
         result = query.all()
         return sorted([row[0] for row in result if row[0]])
 
     def search_by_location(
-        self, 
-        db: Session, 
-        *, 
+        self,
+        db: Session,
+        *,
         city: Optional[str] = None,
         state: Optional[str] = None,
         zip_code: Optional[str] = None,
-        skip: int = 0, 
+        skip: int = 0,
         limit: int = 20
     ) -> List[PharmacyModel]:
         """
@@ -182,18 +187,51 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Returns:
             List of Pharmacy objects matching the location criteria
         """
-        query = db.query(PharmacyModel)
-        
-        if city:
-            query = query.filter(PharmacyModel.city.ilike(f"%{city}%"))
-        
-        if state:
-            query = query.filter(PharmacyModel.state.ilike(f"%{state}%"))
-        
+        # Build filters dictionary
+        filters = {}
         if zip_code:
-            query = query.filter(PharmacyModel.zip_code == zip_code)
-        
-        return query.offset(skip).limit(limit).all()
+            filters["zip_code"] = zip_code
+
+        # Use text search for city and state if provided
+        if city and state:
+            # If both city and state provided, use text search on city with state filter
+            return super().search_by_text_field(
+                db=db,
+                field_name="city",
+                search_term=city,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif city:
+            return super().search_by_text_field(
+                db=db,
+                field_name="city",
+                search_term=city,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif state:
+            return super().search_by_text_field(
+                db=db,
+                field_name="state",
+                search_term=state,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif zip_code:
+            return super().get_by_field(
+                db=db,
+                field_name="zip_code",
+                field_value=zip_code,
+                skip=skip,
+                limit=limit,
+            )
+        else:
+            # No filters provided, return all with pagination
+            return self.get_multi(db, skip=skip, limit=limit)
 
     def get_by_store_number(
         self, db: Session, *, brand: str, store_number: str
@@ -203,45 +241,55 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
 
         Args:
             db: SQLAlchemy database session
-            brand: Brand name of the pharmacy
-            store_number: Store number within the brand
+            brand: Brand name to filter by
+            store_number: Store number to filter by
 
         Returns:
             Pharmacy object if found, None otherwise
+
+        Example:
+            pharmacy = pharmacy_crud.get_by_store_number(db, brand="CVS", store_number="12345")
         """
-        return db.query(PharmacyModel).filter(
-            PharmacyModel.brand.ilike(brand),
-            PharmacyModel.store_number == store_number
-        ).first()
+        pharmacies = super().get_by_field(
+            db=db,
+            field_name="brand",
+            field_value=brand,
+            additional_filters={"store_number": store_number},
+            limit=1,
+        )
+        return pharmacies[0] if pharmacies else None
 
     def get_by_zip_code(
         self, db: Session, *, zip_code: str, skip: int = 0, limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Get all pharmacies in a specific ZIP code.
+        Retrieve pharmacies by ZIP code.
 
         Args:
             db: SQLAlchemy database session
-            zip_code: ZIP code to search for
+            zip_code: ZIP code to filter by
             skip: Number of records to skip
             limit: Maximum number of records to return
 
         Returns:
             List of Pharmacy objects in the specified ZIP code
+
+        Example:
+            pharmacies = pharmacy_crud.get_by_zip_code(db, zip_code="27601")
         """
-        return (
-            db.query(PharmacyModel)
-            .filter(PharmacyModel.zip_code == zip_code)
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_field(
+            db=db,
+            field_name="zip_code",
+            field_value=zip_code,
+            skip=skip,
+            limit=limit,
         )
 
     def get_24_hour_pharmacies(
         self, db: Session, *, skip: int = 0, limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Get all 24-hour pharmacies.
+        Retrieve pharmacies that are open 24 hours.
 
         Args:
             db: SQLAlchemy database session
@@ -249,20 +297,24 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             limit: Maximum number of records to return
 
         Returns:
-            List of 24-hour Pharmacy objects        """
-        return (
-            db.query(PharmacyModel)
-            .filter(PharmacyModel.twenty_four_hour.is_(True))
-            .offset(skip)
-            .limit(limit)
-            .all()
+            List of 24-hour Pharmacy objects
+
+        Example:
+            pharmacies = pharmacy_crud.get_24_hour_pharmacies(db)
+        """
+        return super().get_by_field(
+            db=db,
+            field_name="twenty_four_hour",
+            field_value=True,
+            skip=skip,
+            limit=limit,
         )
 
     def get_drive_through_pharmacies(
         self, db: Session, *, skip: int = 0, limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Get all pharmacies with drive-through service.
+        Retrieve pharmacies that have drive-through service.
 
         Args:
             db: SQLAlchemy database session
@@ -270,13 +322,17 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             limit: Maximum number of records to return
 
         Returns:
-            List of Pharmacy objects with drive-through service        """
-        return (
-            db.query(PharmacyModel)
-            .filter(PharmacyModel.drive_through.is_(True))
-            .offset(skip)
-            .limit(limit)
-            .all()
+            List of Pharmacy objects with drive-through service
+
+        Example:
+            pharmacies = pharmacy_crud.get_drive_through_pharmacies(db)
+        """
+        return super().get_by_field(
+            db=db,
+            field_name="drive_through",
+            field_value=True,
+            skip=skip,
+            limit=limit,
         )
 
     def get_with_medications(
@@ -291,18 +347,13 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             pharmacy_id: ID of the pharmacy to retrieve
 
         Returns:
-            Pharmacy object with all medication relationships loaded, or None if not found
+            Pharmacy object with medications relationship loaded, or None if not found
 
         Example:
             pharmacy = pharmacy_crud.get_with_medications(db, pharmacy_id=5)
         """
-        from sqlalchemy.orm import joinedload
-
-        return (
-            db.query(PharmacyModel)
-            .options(joinedload(PharmacyModel.medications))
-            .filter(PharmacyModel.id == pharmacy_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=pharmacy_id, relations=["medications"]
         )
 
     def is_name_taken(
@@ -320,15 +371,23 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             True if name is taken, False if available
 
         Example:
-            if pharmacy_crud.is_name_taken(db, name="CVS - Main St"):
+            if pharmacy_crud.is_name_taken(db, name="CVS Main Street"):
                 raise HTTPException(400, "Pharmacy already exists")
         """
-        query = db.query(PharmacyModel).filter(PharmacyModel.name == name)
+        pharmacies = super().get_by_field(
+            db=db,
+            field_name="name",
+            field_value=name,
+            limit=1,
+        )
 
-        if exclude_id:
-            query = query.filter(PharmacyModel.id != exclude_id)
+        if not pharmacies:
+            return False
 
-        return query.first() is not None
+        if exclude_id and pharmacies[0].id == exclude_id:
+            return False
+
+        return True
 
     def create_if_not_exists(
         self, db: Session, *, pharmacy_data: PharmacyCreate
@@ -345,7 +404,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             New or existing Pharmacy object
 
         Example:
-            pharmacy_data = PharmacyCreate(name="CVS - Main St", brand="CVS", ...)
+            pharmacy_data = PharmacyCreate(name="CVS Main Street", brand="CVS")
             pharmacy = pharmacy_crud.create_if_not_exists(db, pharmacy_data=pharmacy_data)
         """
         # Check if pharmacy already exists
@@ -364,23 +423,20 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             db: SQLAlchemy database session
 
         Returns:
-            Dictionary with brand as key and count as value
+            Dictionary mapping brand names to counts
 
         Example:
             counts = pharmacy_crud.count_by_brand(db)
-            # Returns: {"CVS": 15, "Walgreens": 12, ...}
+            # Returns: {"CVS": 150, "Walgreens": 120, "Rite Aid": 85, ...}
         """
         result = (
-            db.query(
-                PharmacyModel.brand,
-                func.count(PharmacyModel.id).label("count"),
-            )
+            db.query(PharmacyModel.brand, func.count(PharmacyModel.id))
             .filter(PharmacyModel.brand.isnot(None))
             .group_by(PharmacyModel.brand)
             .all()
         )
 
-        return {row[0]: row[1] for row in result if row[0]}
+        return {brand: count for brand, count in result}
 
     def count_by_state(self, db: Session) -> Dict[str, int]:
         """
@@ -390,78 +446,70 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             db: SQLAlchemy database session
 
         Returns:
-            Dictionary with state as key and count as value
+            Dictionary mapping state names to counts
 
         Example:
             counts = pharmacy_crud.count_by_state(db)
-            # Returns: {"NC": 25, "SC": 18, ...}
+            # Returns: {"NC": 245, "SC": 180, "VA": 210, ...}
         """
         result = (
-            db.query(
-                PharmacyModel.state,
-                func.count(PharmacyModel.id).label("count"),
-            )
+            db.query(PharmacyModel.state, func.count(PharmacyModel.id))
+            .filter(PharmacyModel.state.isnot(None))
             .group_by(PharmacyModel.state)
             .all()
         )
 
-        return {row[0]: row[1] for row in result}
+        return {state: count for state, count in result}
 
     def get_most_referenced(
         self, db: Session, *, limit: int = 10
     ) -> List[PharmacyModel]:
         """
-        Get pharmacies that are most frequently referenced in medication records.
-        Useful for showing popular/commonly used pharmacies.
+        Get the most referenced pharmacies (by medication count).
 
         Args:
             db: SQLAlchemy database session
             limit: Maximum number of pharmacies to return
 
         Returns:
-            List of pharmacies ordered by frequency of use
+            List of most referenced Pharmacy objects
 
         Example:
-            popular_pharmacies = pharmacy_crud.get_most_referenced(db, limit=5)
+            popular = pharmacy_crud.get_most_referenced(db, limit=5)
         """
-        # Count references in medications
-        subquery = (
-            db.query(
-                PharmacyModel.id,
-                func.count(PharmacyModel.medications).label("medication_count"),
-            )
-            .outerjoin(PharmacyModel.medications)
-            .group_by(PharmacyModel.id)
-            .subquery()
-        )
+        from sqlalchemy import func
+
+        from app.models.models import Medication
 
         return (
             db.query(PharmacyModel)
-            .join(subquery, PharmacyModel.id == subquery.c.id)
-            .order_by(subquery.c.medication_count.desc())
+            .join(Medication, PharmacyModel.id == Medication.pharmacy_id)
+            .group_by(PharmacyModel.id)
+            .order_by(func.count(Medication.id).desc())
             .limit(limit)
             .all()
         )
 
     def get_nearby_pharmacies(
-        self, 
-        db: Session, 
-        *, 
-        zip_code: str, 
+        self,
+        db: Session,
+        *,
+        zip_code: str,
         radius_miles: int = 10,
-        skip: int = 0, 
+        skip: int = 0,
         limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Get pharmacies near a given ZIP code.
-        
-        Note: This is a simplified implementation. In production, you'd want to use
-        geographical distance calculations or a geospatial database.
+        Get pharmacies near a specific ZIP code.
+
+        Note: This is a simplified implementation that just returns
+        pharmacies in the same ZIP code. For true geographic search,
+        you would need to implement proper distance calculation.
 
         Args:
             db: SQLAlchemy database session
-            zip_code: Center ZIP code to search around
-            radius_miles: Search radius in miles (currently unused in this simple implementation)
+            zip_code: ZIP code to search near
+            radius_miles: Search radius in miles (not implemented in this version)
             skip: Number of records to skip
             limit: Maximum number of records to return
 
@@ -469,10 +517,8 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             List of nearby Pharmacy objects
 
         Example:
-            nearby = pharmacy_crud.get_nearby_pharmacies(db, zip_code="27514", radius_miles=5)
+            nearby = pharmacy_crud.get_nearby_pharmacies(db, zip_code="27601", radius_miles=5)
         """
-        # Simple implementation: return pharmacies in the same ZIP code
-        # In production, you'd implement proper geographical distance calculation
         return self.get_by_zip_code(db, zip_code=zip_code, skip=skip, limit=limit)
 
     def search_comprehensive(
@@ -490,55 +536,87 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Comprehensive search across multiple pharmacy attributes.
+        Comprehensive search across multiple pharmacy fields.
 
         Args:
             db: SQLAlchemy database session
-            name: Pharmacy name to search (partial match)
-            brand: Brand to search (partial match)
-            city: City to search (partial match)
-            state: State to search (partial match)
-            zip_code: ZIP code to search (exact match)
+            name: Partial name to search for
+            brand: Partial brand to search for
+            city: Partial city to search for
+            state: Partial state to search for
+            zip_code: Exact ZIP code to search for
             drive_through: Filter by drive-through availability
             twenty_four_hour: Filter by 24-hour availability
             skip: Number of records to skip
             limit: Maximum number of records to return
 
         Returns:
-            List of Pharmacy objects matching all specified criteria
-
-        Example:
-            pharmacies = pharmacy_crud.search_comprehensive(
-                db,
-                brand="CVS",
-                city="Raleigh",
-                drive_through=True
-            )
+            List of Pharmacy objects matching the search criteria
         """
-        query = db.query(PharmacyModel)
-
-        if name:
-            query = query.filter(PharmacyModel.name.ilike(f"%{name}%"))
-
-        if brand:
-            query = query.filter(PharmacyModel.brand.ilike(f"%{brand}%"))
-
-        if city:
-            query = query.filter(PharmacyModel.city.ilike(f"%{city}%"))
-
-        if state:
-            query = query.filter(PharmacyModel.state.ilike(f"%{state}%"))
-
+        # Build filters for exact matches
+        filters = {}
         if zip_code:
-            query = query.filter(PharmacyModel.zip_code == zip_code)
-
+            filters["zip_code"] = zip_code
         if drive_through is not None:
-            query = query.filter(PharmacyModel.drive_through.is_(drive_through))
-
+            filters["drive_through"] = drive_through
         if twenty_four_hour is not None:
-            query = query.filter(PharmacyModel.twenty_four_hour.is_(twenty_four_hour))
+            filters["twenty_four_hour"] = twenty_four_hour
 
-        return query.offset(skip).limit(limit).all()
+        # Determine which field to use for text search (prioritize name)
+        if name:
+            return super().search_by_text_field(
+                db=db,
+                field_name="name",
+                search_term=name,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif brand:
+            return super().search_by_text_field(
+                db=db,
+                field_name="brand",
+                search_term=brand,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif city:
+            return super().search_by_text_field(
+                db=db,
+                field_name="city",
+                search_term=city,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif state:
+            return super().search_by_text_field(
+                db=db,
+                field_name="state",
+                search_term=state,
+                additional_filters=filters,
+                skip=skip,
+                limit=limit,
+            )
+        elif filters:
+            # Only exact filters provided, use get_by_field with first filter
+            first_filter = next(iter(filters.items()))
+            remaining_filters = {
+                k: v for k, v in filters.items() if k != first_filter[0]
+            }
+            return super().get_by_field(
+                db=db,
+                field_name=first_filter[0],
+                field_value=first_filter[1],
+                additional_filters=remaining_filters,
+                skip=skip,
+                limit=limit,
+            )
+        else:
+            # No filters provided, return all with pagination
+            return self.get_multi(db, skip=skip, limit=limit)
 
-# Create an instance of CRUDPharmacy to use throughout the application
+
+# Create the pharmacy CRUD instance
 pharmacy = CRUDPharmacy(PharmacyModel)

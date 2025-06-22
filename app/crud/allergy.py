@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -28,13 +29,13 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of allergies for the patient
         """
-        return (
-            db.query(Allergy)
-            .filter(Allergy.patient_id == patient_id)
-            .order_by(Allergy.onset_date.desc().nullslast())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="onset_date",
+            order_desc=True,
         )
 
     def get_by_severity(
@@ -51,12 +52,18 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of allergies with the specified severity
         """
-        query = db.query(Allergy).filter(Allergy.severity == severity.lower())
-
+        additional_filters = {}
         if patient_id:
-            query = query.filter(Allergy.patient_id == patient_id)
+            additional_filters["patient_id"] = patient_id
 
-        return query.order_by(Allergy.onset_date.desc().nullslast()).all()
+        return super().get_by_field(
+            db=db,
+            field_name="severity",
+            field_value=severity.lower(),
+            order_by="onset_date",
+            order_desc=True,
+            additional_filters=additional_filters,
+        )
 
     def get_active_allergies(self, db: Session, *, patient_id: int) -> List[Allergy]:
         """
@@ -69,11 +76,12 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of active allergies
         """
-        return (
-            db.query(Allergy)
-            .filter(Allergy.patient_id == patient_id, Allergy.status == "active")
-            .order_by(Allergy.severity.desc(), Allergy.onset_date.desc().nullslast())
-            .all()
+        return super().get_by_status(
+            db=db,
+            status="active",
+            patient_id=patient_id,
+            order_by="severity",
+            order_desc=True,
         )
 
     def get_critical_allergies(self, db: Session, *, patient_id: int) -> List[Allergy]:
@@ -87,16 +95,20 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of critical allergies
         """
-        return (
+        from sqlalchemy import or_
+
+        query = (
             db.query(Allergy)
             .filter(
                 Allergy.patient_id == patient_id,
                 Allergy.status == "active",
-                Allergy.severity.in_(["severe", "life-threatening"]),
+                or_(
+                    Allergy.severity == "severe", Allergy.severity == "life-threatening"
+                ),
             )
             .order_by(Allergy.severity.desc(), Allergy.onset_date.desc().nullslast())
-            .all()
         )
+        return query.all()
 
     def get_by_allergen(
         self, db: Session, *, allergen: str, patient_id: Optional[int] = None
@@ -112,14 +124,14 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of allergies matching the allergen
         """
-        query = db.query(Allergy).filter(Allergy.allergen.ilike(f"%{allergen}%"))
-
-        if patient_id:
-            query = query.filter(Allergy.patient_id == patient_id)
-
-        return query.order_by(
-            Allergy.severity.desc(), Allergy.onset_date.desc().nullslast()
-        ).all()
+        return super().search_by_text_field(
+            db=db,
+            field_name="allergen",
+            search_term=allergen,
+            patient_id=patient_id,
+            order_by="severity",
+            order_desc=True,
+        )
 
     def get_with_relations(self, db: Session, allergy_id: int) -> Optional[Allergy]:
         """
@@ -132,11 +144,8 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             Allergy with patient relationship loaded
         """
-        return (
-            db.query(Allergy)
-            .options(joinedload(Allergy.patient))
-            .filter(Allergy.id == allergy_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=allergy_id, relations=["patient"]
         )
 
     def check_allergen_conflict(
@@ -153,16 +162,15 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             True if patient has active allergy to the allergen, False otherwise
         """
-        allergy = (
-            db.query(Allergy)
-            .filter(
-                Allergy.patient_id == patient_id,
-                Allergy.status == "active",
-                Allergy.allergen.ilike(f"%{allergen}%"),
-            )
-            .first()
+        allergies = super().search_by_text_field(
+            db=db,
+            field_name="allergen",
+            search_term=allergen,
+            patient_id=patient_id,
+            additional_filters={"status": "active"},
+            limit=1,
         )
-        return allergy is not None
+        return len(allergies) > 0
 
 
 # Create the allergy CRUD instance

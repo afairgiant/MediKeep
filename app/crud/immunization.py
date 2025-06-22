@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -70,13 +71,13 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
             limit: Maximum number of records to return        Returns:
             List of immunizations for the patient
         """
-        return (
-            db.query(Immunization)
-            .filter(Immunization.patient_id == patient_id)
-            .order_by(Immunization.date_administered.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="date_administered",
+            order_desc=True,
         )
 
     def get_by_vaccine(
@@ -91,14 +92,14 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         Returns:
             List of immunizations for the specified vaccine
         """
-        query = db.query(Immunization).filter(
-            Immunization.vaccine_name.ilike(f"%{vaccine_name}%")
+        return super().search_by_text_field(
+            db=db,
+            field_name="vaccine_name",
+            search_term=vaccine_name,
+            patient_id=patient_id,
+            order_by="date_administered",
+            order_desc=True,
         )
-
-        if patient_id:
-            query = query.filter(Immunization.patient_id == patient_id)
-
-        return query.order_by(Immunization.date_administered.desc()).all()
 
     def get_recent_immunizations(
         self, db: Session, *, patient_id: int, days: int = 365
@@ -113,17 +114,16 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
 
         Returns:
             List of recent immunizations"""
-        from datetime import date, timedelta
+        from app.crud.utils import get_recent_records
 
-        cutoff_date = date.today() - timedelta(days=days)
-        return (
-            db.query(Immunization)
-            .filter(
-                Immunization.patient_id == patient_id,
-                Immunization.date_administered >= cutoff_date,
-            )
-            .order_by(Immunization.date_administered.desc())
-            .all()
+        return get_recent_records(
+            db=db,
+            model=self.model,
+            date_field="date_administered",
+            days=days,
+            patient_id=patient_id,
+            order_by="date_administered",
+            order_desc=True,
         )
 
     def get_with_relations(
@@ -139,13 +139,8 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         Returns:
             Immunization with patient and practitioner relationships loaded
         """
-        return (
-            db.query(Immunization)
-            .options(
-                joinedload(Immunization.patient), joinedload(Immunization.practitioner)
-            )
-            .filter(Immunization.id == immunization_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=immunization_id, relations=["patient", "practitioner"]
         )
 
     def get_due_for_booster(
@@ -170,18 +165,23 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         """
         from datetime import date, timedelta
 
-        last_dose = (
-            db.query(Immunization)
-            .filter(
-                Immunization.patient_id == patient_id,
-                Immunization.vaccine_name.ilike(f"%{vaccine_name}%"),
-            )
-            .order_by(Immunization.date_administered.desc())
-            .first()
+        # Get latest dose using our generic search method
+        last_doses = super().search_by_text_field(
+            db=db,
+            field_name="vaccine_name",
+            search_term=vaccine_name,
+            patient_id=patient_id,
+            order_by="date_administered",
+            order_desc=True,
+            limit=1,
         )
 
-        if not last_dose:
-            return True  # Never vaccinated        # Convert to actual date value for comparison
+        if not last_doses:
+            return True  # Never vaccinated
+
+        last_dose = last_doses[0]
+
+        # Convert to actual date value for comparison
         last_dose_date = last_dose.date_administered
         if hasattr(last_dose_date, "date"):
             last_dose_date = last_dose_date.date()
