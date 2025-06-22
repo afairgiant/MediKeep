@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/helpers';
+import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -9,11 +10,23 @@ import '../../styles/pages/MedicationTable.css';
 
 const Visits = () => {
   const navigate = useNavigate();
+  
+  // Using global state for patient and practitioners data
+  const { 
+    patient: patientData, 
+    loading: patientLoading 
+  } = useCurrentPatient();
+  const { 
+    practitioners, 
+    loading: practitionersLoading 
+  } = usePractitioners();
+
   const [visits, setVisits] = useState([]);
-  const [patientData, setPatientData] = useState(null);
-  const [practitioners, setPractitioners] = useState([]);
+  const [visitsLoading, setVisitsLoading] = useState(true);
+  // Combine loading states
+  const loading = patientLoading || practitionersLoading || visitsLoading;
+  
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,42 +40,34 @@ const Visits = () => {
     notes: '',
     practitioner_id: '',
   });
-  useEffect(() => {
-    fetchPatientAndVisits();
-    fetchPractitioners();
-  }, []);
-
-  const fetchPractitioners = async () => {
-    try {
-      const practitionersData = await apiService.getPractitioners();
-      setPractitioners(practitionersData || []);
-    } catch (error) {
-      console.error('Error fetching practitioners:', error);
-      // Don't set error for practitioners fetch failure, just log it
+  // Fetch visits when patient data becomes available
+  const fetchVisits = useCallback(async () => {
+    if (!patientData?.id) {
+      setVisitsLoading(false);
+      return;
     }
-  };
 
-  const fetchPatientAndVisits = async () => {
     try {
-      setLoading(true);
+      setVisitsLoading(true);
       setError('');
 
-      // Get patient data first
-      const patient = await apiService.getCurrentPatient();
-      setPatientData(patient);
-
-      // Then get visits for this patient
-      if (patient && patient.id) {
-        const response = await apiService.getPatientEncounters(patient.id);
-        setVisits(response.data || response || []);
-      }
+      const response = await apiService.getPatientEncounters(patientData.id);
+      setVisits(response.data || response || []);
     } catch (err) {
       setError('Failed to load visits. Please try again.');
       console.error('Error fetching visits:', err);
     } finally {
-      setLoading(false);
+      setVisitsLoading(false);
     }
-  };
+  }, [patientData?.id]);
+
+  useEffect(() => {
+    if (patientData?.id) {
+      fetchVisits();
+    } else if (patientData === null && !patientLoading) {
+      setVisitsLoading(false);
+    }
+  }, [patientData?.id, patientData, patientLoading, fetchVisits]);
   const handleAddVisit = () => {
     setEditingVisit(null);
     setFormData({
@@ -87,7 +92,7 @@ const Visits = () => {
     if (window.confirm('Are you sure you want to delete this visit?')) {
       try {
         await apiService.deleteEncounter(visitId);
-        await fetchPatientAndVisits();
+        await fetchVisits();
         setSuccessMessage('Visit deleted successfully');
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
@@ -122,7 +127,7 @@ const Visits = () => {
       }
 
       setShowModal(false);
-      await fetchPatientAndVisits();
+      await fetchVisits();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError('Failed to save visit. Please try again.');
