@@ -4,6 +4,7 @@ import React, {
   useReducer,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 import { apiService } from '../services/api';
 import { useAuth } from './AuthContext';
@@ -168,6 +169,10 @@ export function AppDataProvider({ children }) {
   const [state, dispatch] = useReducer(appDataReducer, initialState);
   const { isAuthenticated, user } = useAuth();
 
+  // Use ref to access current state without dependency loops
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   // Helper function to check if cached data is still valid
   const isCacheValid = useCallback(
     (lastFetch, cacheKey) => {
@@ -190,10 +195,10 @@ export function AppDataProvider({ children }) {
       // Check if we have valid cached data and don't force refresh
       if (
         !forceRefresh &&
-        state.currentPatient &&
-        isCacheValid(state.patientLastFetch, 'patient')
+        stateRef.current.currentPatient &&
+        isCacheValid(stateRef.current.patientLastFetch, 'patient')
       ) {
-        return state.currentPatient;
+        return stateRef.current.currentPatient;
       }
 
       try {
@@ -213,7 +218,7 @@ export function AppDataProvider({ children }) {
         return null;
       }
     },
-    [isCacheValid]
+    [isCacheValid, isAuthenticated]
   );
 
   // Fetch practitioners list
@@ -222,10 +227,10 @@ export function AppDataProvider({ children }) {
       // Check if we have valid cached data and don't force refresh
       if (
         !forceRefresh &&
-        state.practitioners.length > 0 &&
-        isCacheValid(state.practitionersLastFetch, 'practitioners')
+        stateRef.current.practitioners.length > 0 &&
+        isCacheValid(stateRef.current.practitionersLastFetch, 'practitioners')
       ) {
-        return state.practitioners;
+        return stateRef.current.practitioners;
       }
 
       try {
@@ -253,7 +258,9 @@ export function AppDataProvider({ children }) {
         });
 
         // Return existing data if available, otherwise empty array
-        return Array.isArray(state.practitioners) ? state.practitioners : [];
+        return Array.isArray(stateRef.current.practitioners)
+          ? stateRef.current.practitioners
+          : [];
       }
     },
     [isCacheValid]
@@ -265,10 +272,10 @@ export function AppDataProvider({ children }) {
       // Check if we have valid cached data and don't force refresh
       if (
         !forceRefresh &&
-        state.pharmacies.length > 0 &&
-        isCacheValid(state.pharmaciesLastFetch, 'pharmacies')
+        stateRef.current.pharmacies.length > 0 &&
+        isCacheValid(stateRef.current.pharmaciesLastFetch, 'pharmacies')
       ) {
-        return state.pharmacies;
+        return stateRef.current.pharmacies;
       }
 
       try {
@@ -294,7 +301,9 @@ export function AppDataProvider({ children }) {
         });
 
         // Return existing data if available, otherwise empty array
-        return Array.isArray(state.pharmacies) ? state.pharmacies : [];
+        return Array.isArray(stateRef.current.pharmacies)
+          ? stateRef.current.pharmacies
+          : [];
       }
     },
     [isCacheValid]
