@@ -32,7 +32,7 @@ const Treatments = () => {
   });
 
   // Use global state for patient data
-  const { data: patientData, loading: globalDataLoading, error: globalDataError } = useCurrentPatient();
+  const { patient: patientData, loading: globalDataLoading, error: globalDataError } = useCurrentPatient();
 
   // Define fetchTreatments before using it in useEffect
   const fetchTreatments = useCallback(async () => {
