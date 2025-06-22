@@ -1,22 +1,23 @@
+import os
+
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-import os
 
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import (
     check_database_connection,
-    create_tables,
-    create_default_user,
     check_sequences_on_startup,
+    create_default_user,
+    create_tables,
     database_migrations,
 )
+from app.core.logging_config import LoggingConfig, get_logger
 from app.core.logging_middleware import RequestLoggingMiddleware
-from app.core.logging_config import get_logger, LoggingConfig
 from app.scripts.sequence_monitor import SequenceMonitor
 
 # Initialize logging configuration
@@ -183,20 +184,45 @@ async def startup_event():
     db_check_result = check_database_connection()
 
     if not db_check_result:
-        logger.error("❌ Database connection failed")
-        import sys
+        error_msg = "❌ STARTUP FAILED: Cannot connect to database"
 
-        sys.exit(1)
+        # Provide helpful troubleshooting information
+        if settings.DATABASE_URL.startswith("postgresql"):
+            error_msg += f"\n   Database URL: {settings.DATABASE_URL}"
+            error_msg += "\n   💡 Possible solutions:"
+            error_msg += "\n      • Start your PostgreSQL database container: docker-compose up -d postgres"
+            error_msg += (
+                "\n      • Check if PostgreSQL is running on the specified host/port"
+            )
+            error_msg += "\n      • Verify database credentials in your .env file"
+        elif settings.DATABASE_URL.startswith("sqlite"):
+            error_msg += (
+                f"\n   Database file: {settings.DATABASE_URL.replace('sqlite:///', '')}"
+            )
+            error_msg += "\n   💡 Check if the SQLite database file path is accessible"
+
+        logger.error(error_msg)
+
+        # Instead of sys.exit(1), raise a more informative startup error
+        raise RuntimeError(
+            "Database connection failed. See logs above for troubleshooting steps."
+        )
 
     logger.info("✅ Database connection established")
 
     # Run database migrations
     migration_success = database_migrations()
     if not migration_success:
-        logger.error("❌ Database migrations failed")
-        import sys
+        error_msg = "❌ STARTUP FAILED: Database migrations failed"
+        error_msg += "\n   💡 Possible solutions:"
+        error_msg += "\n      • Check if the database schema is compatible"
+        error_msg += "\n      • Verify Alembic migration files are present"
+        error_msg += "\n      • Ensure proper database permissions"
 
-        sys.exit(1)
+        logger.error(error_msg)
+
+        # Instead of sys.exit(1), raise a more informative startup error
+        raise RuntimeError("Database migrations failed. See logs above for details.")
 
     # Create default user if not exists
     create_default_user()
@@ -217,7 +243,7 @@ def setup_spa_routing():
     """
     Setup SPA routing only when React build files exist (production).
     This avoids conflicts during development.
-    """    
+    """
     if not static_dir:
         logger.info("🔧 Development mode - No static directory, SPA routing disabled")
         return
@@ -226,7 +252,7 @@ def setup_spa_routing():
     if not os.path.exists(index_path):
         logger.info("🔧 Development mode - No index.html found, SPA routing disabled")
         return
-        
+
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         """
@@ -235,14 +261,16 @@ def setup_spa_routing():
         """
         # For API routes, let them fall through to be handled by FastAPI endpoints
         # Don't serve React app for API routes - this is critical for proper API functionality
-        if (full_path.startswith("api/") or 
-            full_path.startswith("api") or 
-            full_path == "api" or
-            full_path.startswith("api/v1/")):
+        if (
+            full_path.startswith("api/")
+            or full_path.startswith("api")
+            or full_path == "api"
+            or full_path.startswith("api/v1/")
+        ):
             # Return a 404 to let FastAPI handle the routing properly
             raise HTTPException(status_code=404, detail="API endpoint not found")
 
-        # Block special FastAPI routes  
+        # Block special FastAPI routes
         if full_path in ["docs", "redoc", "openapi.json", "health"]:
             raise HTTPException(status_code=404, detail="Route not found")
 

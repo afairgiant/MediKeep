@@ -1,11 +1,13 @@
 import os
 from typing import Generator
-from sqlalchemy import create_engine, text, event
-from sqlalchemy.orm import sessionmaker, Session
+
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
-from app.models.models import Base
-from app.core.logging_config import get_logger
+
 from app.core.config import Settings
+from app.core.logging_config import get_logger
+from app.models.models import Base
 
 # Initialize logger
 logger = get_logger(__name__, "app")
@@ -125,12 +127,35 @@ def check_database_connection():
         )
         return True
     except Exception as e:
+        # Log detailed error information for troubleshooting
+        error_type = type(e).__name__
+        error_details = f"Database connection check failed ({error_type}): {e}"
+
+        # Add database-specific troubleshooting hints
+        if (
+            "could not connect to server" in str(e).lower()
+            or "connection refused" in str(e).lower()
+        ):
+            error_details += (
+                "\n   🔍 This typically means the database server is not running"
+            )
+        elif (
+            "authentication failed" in str(e).lower()
+            or "password authentication failed" in str(e).lower()
+        ):
+            error_details += "\n   🔍 This indicates incorrect database credentials"
+        elif "database" in str(e).lower() and "does not exist" in str(e).lower():
+            error_details += "\n   🔍 The specified database does not exist"
+        elif "timeout" in str(e).lower():
+            error_details += "\n   🔍 Database connection timeout - server may be slow or unreachable"
+
         logger.error(
-            f"Database connection check failed: {e}",
+            error_details,
             extra={
                 "category": "app",
                 "event": "database_connection_check_failed",
                 "error": str(e),
+                "error_type": error_type,
             },
         )
         return False
