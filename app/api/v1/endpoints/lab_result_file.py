@@ -386,24 +386,6 @@ def get_recent_files(
     return files
 
 
-@router.get("/filter/large-files", response_model=List[LabResultFileResponse])
-def get_large_files(
-    *,
-    db: Session = Depends(deps.get_db),
-    min_size_mb: float = 10,
-    skip: int = 0,
-    limit: int = 100,
-    current_user: User = Depends(deps.get_current_user),
-) -> List[LabResultFile]:
-    """
-    Get large files (above specified size).
-    """
-    files = lab_result_file.get_large_files(
-        db=db, min_size_mb=min_size_mb, skip=skip, limit=limit
-    )
-    return files
-
-
 @router.get("/filter/date-range", response_model=List[LabResultFileResponse])
 def get_files_by_date_range(
     *,

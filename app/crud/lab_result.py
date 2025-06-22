@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.datetime_utils import LAB_RESULT_CONVERTER
 from app.crud.base import CRUDBase
-from app.models.models import LabResult, LabResultFile
+from app.models.models import LabResult
 from app.schemas.lab_result import LabResultCreate, LabResultUpdate
 
 
@@ -117,7 +117,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Get all lab results by test code (e.g., LOINC code)"""
-        return super().get_by_field(
+        return self.get_by_field(
             db=db,
             field_name="test_code",
             field_value=test_code,
@@ -131,7 +131,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, patient_id: int, test_code: str
     ) -> List[LabResult]:
         """Get lab results for a specific patient and test code"""
-        return super().get_by_field(
+        return self.get_by_field(
             db=db,
             field_name="patient_id",
             field_value=patient_id,
@@ -148,7 +148,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code_pattern: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Search lab results by test code pattern (partial match)"""
-        return super().search_by_text_field(
+        return self.search_by_text_field(
             db=db,
             field_name="test_code",
             search_term=test_code_pattern,
@@ -159,52 +159,5 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         )
 
 
-class CRUDLabResultFile(CRUDBase[LabResultFile, dict, dict]):
-    """CRUD operations for LabResultFile"""
-
-    def get_by_lab_result(
-        self, db: Session, *, lab_result_id: int
-    ) -> List[LabResultFile]:
-        """Get all files for a specific lab result"""
-        return super().get_by_field(
-            db=db,
-            field_name="lab_result_id",
-            field_value=lab_result_id,
-        )
-
-    def get_by_file_type(
-        self, db: Session, *, file_type: str, skip: int = 0, limit: int = 100
-    ) -> List[LabResultFile]:
-        """Get files by file type (e.g., 'pdf', 'image/png')"""
-        return super().get_by_field(
-            db=db,
-            field_name="file_type",
-            field_value=file_type,
-            skip=skip,
-            limit=limit,
-        )
-
-    def delete_by_lab_result(self, db: Session, *, lab_result_id: int) -> int:
-        """Delete all files associated with a lab result"""
-        deleted_count = (
-            db.query(self.model)
-            .filter(LabResultFile.lab_result_id == lab_result_id)
-            .delete()
-        )
-        db.commit()
-        return deleted_count
-
-    def get_by_filename(self, db: Session, *, filename: str) -> Optional[LabResultFile]:
-        """Get file by filename"""
-        files = super().get_by_field(
-            db=db,
-            field_name="file_name",
-            field_value=filename,
-            limit=1,
-        )
-        return files[0] if files else None
-
-
-# Create instances of the CRUD classes
+# Create instance of the CRUD class
 lab_result = CRUDLabResult(LabResult)
-lab_result_file = CRUDLabResultFile(LabResultFile)
