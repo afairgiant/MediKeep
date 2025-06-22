@@ -2,6 +2,11 @@
 
 A medical records management system with React frontend and FastAPI backend.
 
+
+[![CodeQL](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql)
+[![Medical Records Docker Image CI](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml) 
+
+
 ## STILL VERY MUCH SO A WORK IN PROGRESS!
 
 ## Quick Start
