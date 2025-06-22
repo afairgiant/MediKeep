@@ -15,14 +15,10 @@ const Medication = () => {
     loading: globalDataLoading,
   } = usePatientWithStaticData();
 
-  // Extract the actual data from the nested objects with defensive programming
-  const patientData = patientDataObject?.patient || null;
-  const practitioners = Array.isArray(practitionersObject?.practitioners)
-    ? practitionersObject.practitioners
-    : [];
-  const pharmacies = Array.isArray(pharmaciesObject?.pharmacies)
-    ? pharmaciesObject.pharmacies
-    : [];
+  // Extract the actual data from the objects
+  const patientData = patientDataObject?.patient;
+  const practitioners = practitionersObject?.practitioners || [];
+  const pharmacies = pharmaciesObject?.pharmacies || [];
 
   const [medications, setMedications] = useState([]);
   const [medicationsLoading, setMedicationsLoading] = useState(true);
