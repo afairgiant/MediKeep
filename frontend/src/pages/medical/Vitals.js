@@ -22,7 +22,7 @@ const Vitals = () => {
   const [activeTab, setActiveTab] = useState('list');
 
   // Use global state for patient data
-  const { data: currentPatient, loading: globalDataLoading } = useCurrentPatient();
+  const { patient: currentPatient, loading: globalDataLoading } = useCurrentPatient();
 
   const loadStats = useCallback(async () => {
     if (!currentPatient?.id) return;
