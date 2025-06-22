@@ -40,6 +40,24 @@
   gap: 1rem;
 }
 
+.dashboard-container .settings-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-md, 5px);
+  transition: var(--transition-all, background-color 0.2s ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light, white);
+}
+
+.dashboard-container .settings-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .logout-btn {
   background: rgba(255, 255, 255, 0.2);
   color: var(--color-text-light, white);

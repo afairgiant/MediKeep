@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardCard } from '../components';
 import ThemeToggle from '../components/ui/ThemeToggle';
 import { apiService } from '../services/api';
@@ -6,6 +7,8 @@ import { useCurrentPatient } from '../hooks/useGlobalData';
 import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
   
@@ -162,6 +165,14 @@ const Dashboard = () => {
       <header>
         <h1>🏥 Medical Records Dashboard</h1>
         <nav>
+          <button 
+            className="settings-button" 
+            onClick={() => navigate('/settings')}
+            type="button"
+            title="Settings"
+          >
+            ⚙️
+          </button>
           <ThemeToggle />
           <button onClick={handleLogout} className="logout-btn">
             Logout

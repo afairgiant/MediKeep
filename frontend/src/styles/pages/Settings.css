@@ -1,0 +1,69 @@
+/* Settings Page Styles */
+@import '../themes/variables.css';
+
+.settings-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.settings-placeholder {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-secondary, #666);
+}
+
+.settings-placeholder h3 {
+  color: var(--color-text-primary, #333);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.settings-placeholder p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Future settings sections styling */
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.settings-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+}
+
+.settings-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border-light, #f1f3f5);
+}
+
+.settings-option:last-child {
+  border-bottom: none;
+}
+
+.settings-option-info {
+  flex: 1;
+}
+
+.settings-option-title {
+  font-weight: 500;
+  color: var(--color-text-primary, #333);
+  margin-bottom: 0.25rem;
+}
+
+.settings-option-description {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.settings-option-control {
+  margin-left: 1rem;
+} 

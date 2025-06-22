@@ -35,6 +35,7 @@ import Vitals from './pages/medical/Vitals';
 import Practitioners from './pages/medical/Practitioners';
 import Pharmacies from './pages/medical/Pharmacies';
 import PlaceholderPage from './pages/PlaceholderPage';
+import Settings from './pages/Settings';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ModelManagement from './pages/admin/ModelManagement';
 import ModelView from './pages/admin/ModelView';
@@ -240,6 +241,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ExportPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
                     </ProtectedRoute>
                   }
                 />
