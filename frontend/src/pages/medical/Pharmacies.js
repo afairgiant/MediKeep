@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
-import { usePharmacies, useCacheManager } from '../../hooks/useGlobalData';
+import { usePharmacies } from '../../hooks/useGlobalData';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -26,8 +26,12 @@ const Pharmacies = () => {
   });
 
   // Use global state for pharmacies data
-  const { data: pharmacies, loading, error: globalError } = usePharmacies();
-  const { refreshPharmacies } = useCacheManager();
+  const {
+    pharmacies,
+    loading,
+    error: globalError,
+    refresh: refreshPharmacies,
+  } = usePharmacies();
 
   // Handle global error
   useEffect(() => {
@@ -35,9 +39,6 @@ const Pharmacies = () => {
       setError('Failed to load pharmacies. Please try again.');
     }
   }, [globalError]);
-
-  // Legacy function name for compatibility
-  const fetchPharmacies = refreshPharmacies;
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -120,6 +121,7 @@ const Pharmacies = () => {
   };
 
   const getFilteredAndSortedPharmacies = () => {
+    if (!pharmacies) return [];
     let filtered = [...pharmacies];
 
     // Apply search filter
@@ -163,11 +165,13 @@ const Pharmacies = () => {
   };
 
   const getUniqueBrands = () => {
+    if (!pharmacies) return [];
     const brands = [...new Set(pharmacies.map(p => p.brand).filter(Boolean))];
     return brands.sort();
   };
 
   const getUniqueCities = () => {
+    if (!pharmacies) return [];
     const cities = [...new Set(pharmacies.map(p => p.city).filter(Boolean))];
     return cities.sort();
   };
@@ -281,8 +285,8 @@ const Pharmacies = () => {
             {(searchTerm || brandFilter !== 'all' || cityFilter !== 'all') && (
               <span className="filter-indicator">🔍 Filters Active • </span>
             )}
-            {getFilteredAndSortedPharmacies().length} of {pharmacies.length}{' '}
-            pharmacies shown
+            {getFilteredAndSortedPharmacies().length} of{' '}
+            {pharmacies?.length || 0} pharmacies shown
           </span>
         </div>
 
@@ -290,7 +294,7 @@ const Pharmacies = () => {
           {getFilteredAndSortedPharmacies().length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🏥</div>
-              {pharmacies.length === 0 ? (
+              {(pharmacies?.length || 0) === 0 ? (
                 <>
                   <h3>No pharmacies found</h3>
                   <p>Click "Add New Pharmacy" to get started.</p>

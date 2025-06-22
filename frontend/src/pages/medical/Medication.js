@@ -8,17 +8,21 @@ import '../../styles/pages/MedicationTable.css';
 
 const Medication = () => {
   // Using global state for patient, practitioners, and pharmacies data
-  const { 
-    patient: patientDataObject, 
-    practitioners: practitionersObject, 
-    pharmacies: pharmaciesObject, 
-    loading: globalDataLoading 
+  const {
+    patient: patientDataObject,
+    practitioners: practitionersObject,
+    pharmacies: pharmaciesObject,
+    loading: globalDataLoading,
   } = usePatientWithStaticData();
 
-  // Extract the actual data from the nested objects
-  const patientData = patientDataObject.patient;
-  const practitioners = practitionersObject.practitioners;
-  const pharmacies = pharmaciesObject.pharmacies;
+  // Extract the actual data from the nested objects with defensive programming
+  const patientData = patientDataObject?.patient || null;
+  const practitioners = Array.isArray(practitionersObject?.practitioners)
+    ? practitionersObject.practitioners
+    : [];
+  const pharmacies = Array.isArray(pharmaciesObject?.pharmacies)
+    ? pharmaciesObject.pharmacies
+    : [];
 
   const [medications, setMedications] = useState([]);
   const [medicationsLoading, setMedicationsLoading] = useState(true);
@@ -86,6 +90,30 @@ const Medication = () => {
       setMedicationsLoading(false);
     }
   }, [patientData?.id, patientData, globalDataLoading, fetchMedications]);
+
+  // Debug logging for production troubleshooting
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Medication page data state:', {
+        patientDataObject: !!patientDataObject,
+        practitionersObject: !!practitionersObject,
+        pharmaciesObject: !!pharmaciesObject,
+        patientData: !!patientData,
+        practitionersCount: practitioners.length,
+        pharmaciesCount: pharmacies.length,
+        globalDataLoading,
+      });
+    }
+  }, [
+    patientDataObject,
+    practitionersObject,
+    pharmaciesObject,
+    patientData,
+    practitioners.length,
+    pharmacies.length,
+    globalDataLoading,
+  ]);
+
   const handleInputChange = e => {
     const { name, value } = e.target;
 
@@ -717,11 +745,11 @@ const Medication = () => {
                         onChange={handleInputChange}
                       >
                         <option value="">Select Provider</option>
-                        {practitioners.map(practitioner => (
+                        {practitioners?.map(practitioner => (
                           <option key={practitioner.id} value={practitioner.id}>
                             {practitioner.name} - {practitioner.specialty}
                           </option>
-                        ))}
+                        )) || []}
                       </select>
                     </div>
                     <div className="form-group">
@@ -733,11 +761,13 @@ const Medication = () => {
                         onChange={handleInputChange}
                       >
                         <option value="">Select Pharmacy</option>
-                        {pharmacies.map(pharmacy => (
+                        {pharmacies?.map(pharmacy => (
                           <option key={pharmacy.id} value={pharmacy.id}>
-                            {pharmacy.name} - {pharmacy.city}, {pharmacy.state}
+                            {pharmacy.name}
+                            {pharmacy.city ? ` - ${pharmacy.city}` : ''}
+                            {pharmacy.state ? `, ${pharmacy.state}` : ''}
                           </option>
-                        ))}
+                        )) || []}
                       </select>
                     </div>
                   </div>{' '}
