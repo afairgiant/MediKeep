@@ -116,3 +116,4 @@ docs/IMPLEMENTATION_CHECKLIST.md
 docker/dev/dev-docker-compose.yml
 
 /logs
+.cursor/rules/venv.mdc
