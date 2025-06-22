@@ -34,7 +34,7 @@ router = APIRouter()
 
 
 # Lab Result Endpoints
-@router.get("/", response_model=List[LabResultResponse])
+@router.get("/", response_model=List[LabResultWithRelations])
 def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
@@ -42,13 +42,49 @@ def get_lab_results(
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """
-    Get lab results for the current user with pagination
+    Get lab results for the current user with pagination and practitioner info
     """
-    # Filter lab results by the user's patient_id
+    # Filter lab results by the user's patient_id with practitioner relationship loaded
     results = lab_result.get_by_patient(
-        db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        db,
+        patient_id=current_user_patient_id,
+        skip=skip,
+        limit=limit,
+        load_relations=["practitioner", "patient"],
     )
-    return results
+
+    # Convert to response format with practitioner names
+    response_results = []
+    for result in results:
+        result_dict = {
+            "id": result.id,
+            "patient_id": result.patient_id,
+            "practitioner_id": result.practitioner_id,
+            "test_name": result.test_name,
+            "test_code": result.test_code,
+            "test_category": result.test_category,
+            "test_type": result.test_type,
+            "facility": result.facility,
+            "status": result.status,
+            "labs_result": result.labs_result,
+            "ordered_date": result.ordered_date,
+            "completed_date": result.completed_date,
+            "notes": result.notes,
+            "created_at": result.created_at,
+            "updated_at": result.updated_at,
+            "practitioner_name": (
+                result.practitioner.name if result.practitioner else None
+            ),
+            "patient_name": (
+                f"{result.patient.first_name} {result.patient.last_name}"
+                if result.patient
+                else None
+            ),
+            "files": [],  # Files will be loaded separately if needed
+        }
+        response_results.append(result_dict)
+
+    return response_results
 
 
 @router.get("/{lab_result_id}", response_model=LabResultWithRelations)
@@ -60,10 +96,41 @@ def get_lab_result(
     """
     Get a specific lab result by ID with related data
     """
-    db_lab_result = lab_result.get(db, id=lab_result_id)
+    db_lab_result = lab_result.get_with_relations(
+        db, record_id=lab_result_id, relations=["practitioner", "patient", "files"]
+    )
     if not db_lab_result:
         raise HTTPException(status_code=404, detail="Lab result not found")
-    return db_lab_result
+
+    # Convert to response format with practitioner name
+    result_dict = {
+        "id": db_lab_result.id,
+        "patient_id": db_lab_result.patient_id,
+        "practitioner_id": db_lab_result.practitioner_id,
+        "test_name": db_lab_result.test_name,
+        "test_code": db_lab_result.test_code,
+        "test_category": db_lab_result.test_category,
+        "test_type": db_lab_result.test_type,
+        "facility": db_lab_result.facility,
+        "status": db_lab_result.status,
+        "labs_result": db_lab_result.labs_result,
+        "ordered_date": db_lab_result.ordered_date,
+        "completed_date": db_lab_result.completed_date,
+        "notes": db_lab_result.notes,
+        "created_at": db_lab_result.created_at,
+        "updated_at": db_lab_result.updated_at,
+        "practitioner_name": (
+            db_lab_result.practitioner.name if db_lab_result.practitioner else None
+        ),
+        "patient_name": (
+            f"{db_lab_result.patient.first_name} {db_lab_result.patient.last_name}"
+            if db_lab_result.patient
+            else None
+        ),
+        "files": db_lab_result.files or [],
+    }
+
+    return result_dict
 
 
 @router.post("/", response_model=LabResultResponse, status_code=status.HTTP_201_CREATED)
