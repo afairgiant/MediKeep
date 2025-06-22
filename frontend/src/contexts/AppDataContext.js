@@ -213,12 +213,7 @@ export function AppDataProvider({ children }) {
         return null;
       }
     },
-    [
-      isAuthenticated,
-      state.currentPatient,
-      state.patientLastFetch,
-      isCacheValid,
-    ]
+    [isCacheValid]
   );
 
   // Fetch practitioners list
@@ -261,7 +256,7 @@ export function AppDataProvider({ children }) {
         return Array.isArray(state.practitioners) ? state.practitioners : [];
       }
     },
-    [state.practitioners, state.practitionersLastFetch, isCacheValid]
+    [isCacheValid]
   );
 
   // Fetch pharmacies list
@@ -302,7 +297,7 @@ export function AppDataProvider({ children }) {
         return Array.isArray(state.pharmacies) ? state.pharmacies : [];
       }
     },
-    [state.pharmacies, state.pharmaciesLastFetch, isCacheValid]
+    [isCacheValid]
   );
 
   // Initialize app data when user logs in
