@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDateTime } from '../../utils/helpers';
+import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -12,7 +13,6 @@ const LabResults = () => {
   const [labResults, setLabResults] = useState([]);
   const [filesCounts, setFilesCounts] = useState({}); // Track file counts per lab result
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -22,8 +22,14 @@ const LabResults = () => {
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
   const [pendingFiles, setPendingFiles] = useState([]); // Files to be uploaded after lab result creation/update
   const [filesToDelete, setFilesToDelete] = useState([]); // Files to be deleted during edit
-  const [currentPatient, setCurrentPatient] = useState(null);
-  const [practitioners, setPractitioners] = useState([]);
+
+  // Using global state for patient and practitioners data
+  const { patient: currentPatient, loading: patientLoading } = useCurrentPatient();
+  const { practitioners, loading: practitionersLoading } = usePractitioners();
+
+  const [labResultsLoading, setLabResultsLoading] = useState(true);
+  // Combine loading states for overall loading indicator
+  const loading = labResultsLoading || patientLoading || practitionersLoading;
 
   // Use useRef to maintain abort controller reference without causing re-renders
   const abortControllerRef = useRef(null);
@@ -75,25 +81,8 @@ const LabResults = () => {
     'borderline',
     'inconclusive',
   ];
-  const fetchCurrentPatient = async () => {
-    try {
-      const patient = await apiService.getCurrentPatient();
-      setCurrentPatient(patient);
-    } catch (error) {
-      console.error('Error fetching current patient:', error);
-      // Don't set error state for patient fetch failures to avoid blocking the page
-    }
-  };
-
-  const fetchPractitioners = async () => {
-    try {
-      const practitionersData = await apiService.getPractitioners();
-      setPractitioners(practitionersData);
-    } catch (error) {
-      console.error('Error fetching practitioners:', error);
-      // Don't set error state for practitioner fetch failures
-    }
-  };
+  // Patient and practitioners data now comes from global state
+  // No need for individual fetch functions
   const fetchLabResults = useCallback(async () => {
     // Cancel any existing requests
     if (abortControllerRef.current) {
@@ -105,7 +94,7 @@ const LabResults = () => {
     abortControllerRef.current = newAbortController;
 
     try {
-      setLoading(true);
+      setLabResultsLoading(true);
       setError(null);
 
       let results;
@@ -146,14 +135,11 @@ const LabResults = () => {
       }
     } finally {
       if (!newAbortController.signal.aborted) {
-        setLoading(false);
+        setLabResultsLoading(false);
       }
     }
   }, [currentPatient?.id]); // Only depend on patient ID
   useEffect(() => {
-    fetchCurrentPatient();
-    fetchPractitioners();
-
     // Cleanup function to cancel requests when component unmounts
     return () => {
       if (abortControllerRef.current) {
@@ -1231,6 +1217,17 @@ const LabResults = () => {
                           </span>
                         </div>
                       )}
+                      {result.practitioner_id && (
+                        <div className="detail-item">
+                          <span className="label">Ordering Practitioner:</span>
+                          <span className="value">
+                            {practitioners.find(
+                              p => p.id === result.practitioner_id
+                            )?.name ||
+                              `Practitioner ID: ${result.practitioner_id}`}
+                          </span>
+                        </div>
+                      )}
                       <div className="detail-item">
                         <span className="label">Files:</span>
                         <span className="value">
@@ -1282,6 +1279,7 @@ const LabResults = () => {
                 { header: 'Type', accessor: 'test_type' },
                 { header: 'Facility', accessor: 'facility' },
                 { header: 'Status', accessor: 'status' },
+                { header: 'Ordering Practitioner', accessor: 'practitioner_id' },
                 { header: 'Ordered Date', accessor: 'ordered_date' },
                 { header: 'Completed Date', accessor: 'completed_date' },
                 { header: 'Files', accessor: 'files' },
@@ -1302,6 +1300,11 @@ const LabResults = () => {
                     {value}
                   </span>
                 ),
+                practitioner_id: (value, item) => {
+                  if (!value) return '-';
+                  const practitioner = practitioners.find(p => p.id === value);
+                  return practitioner ? practitioner.name : `ID: ${value}`;
+                },
                 ordered_date: value => formatDateTime(value),
                 completed_date: value => (value ? formatDateTime(value) : '-'),
                 files: (value, item) =>

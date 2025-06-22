@@ -1,4 +1,5 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -30,7 +31,13 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             # User accessing their own patient record
             patient = patient_crud.get_by_user_id(db, user_id=current_user.id)
         """
-        return db.query(Patient).filter(Patient.user_id == user_id).first()
+        patients = super().get_by_field(
+            db=db,
+            field_name="user_id",
+            field_value=user_id,
+            limit=1,
+        )
+        return patients[0] if patients else None
 
     def get_with_user(self, db: Session, patient_id: int) -> Optional[Patient]:
         """
@@ -48,13 +55,8 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             patient_with_user = patient_crud.get_with_user(db, patient_id=5)
             user_info = patient_with_user.user
         """
-        from sqlalchemy.orm import joinedload
-
-        return (
-            db.query(Patient)
-            .options(joinedload(Patient.user))
-            .filter(Patient.id == patient_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=patient_id, relations=["user"]
         )
 
     def get_with_medical_records(
@@ -75,21 +77,18 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             # Get complete medical history for the user
             patient = patient_crud.get_with_medical_records(db, patient_id=current_patient.id)
         """
-        from sqlalchemy.orm import joinedload
-
-        return (
-            db.query(Patient)
-            .options(
-                joinedload(Patient.medications),
-                joinedload(Patient.encounters),
-                joinedload(Patient.lab_results),
-                joinedload(Patient.immunizations),
-                joinedload(Patient.conditions),
-                joinedload(Patient.procedures),
-                joinedload(Patient.treatments),
-            )
-            .filter(Patient.id == patient_id)
-            .first()
+        return super().get_with_relations(
+            db=db,
+            record_id=patient_id,
+            relations=[
+                "medications",
+                "encounters",
+                "lab_results",
+                "immunizations",
+                "conditions",
+                "procedures",
+                "treatments",
+            ],
         )
 
     def is_user_already_patient(self, db: Session, *, user_id: int) -> bool:
@@ -108,7 +107,13 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             if patient_crud.is_user_already_patient(db, user_id=new_user.id):
                 raise HTTPException(400, "User already has a patient record")
         """
-        return db.query(Patient).filter(Patient.user_id == user_id).first() is not None
+        patients = super().get_by_field(
+            db=db,
+            field_name="user_id",
+            field_value=user_id,
+            limit=1,
+        )
+        return len(patients) > 0
 
     def create_for_user(
         self, db: Session, *, user_id: int, patient_data: PatientCreate
@@ -201,11 +206,9 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
         if not db_patient:
             return None
 
-        # Delete the patient record
-        db.delete(db_patient)
-        db.commit()
-        return db_patient
+        # Use the base delete method
+        return self.delete(db, id=int(db_patient.id))
 
 
-# Create an instance of CRUDPatient to use throughout the application
+# Create the patient CRUD instance
 patient = CRUDPatient(Patient)

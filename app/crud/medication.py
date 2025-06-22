@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -6,7 +7,7 @@ from app.models.models import Medication
 from app.schemas.medication import MedicationCreate, MedicationUpdate
 
 
-class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):    
+class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
     """
     CRUD operations for Medication model.
 
@@ -29,16 +30,12 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             List of medications for the patient
         """
-        return (
-            db.query(self.model)
-            .options(
-                joinedload(Medication.practitioner),
-                joinedload(Medication.pharmacy)
-            )
-            .filter(Medication.patient_id == patient_id)
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            load_relations=["practitioner", "pharmacy"],
         )
 
     def get_active_by_patient(
@@ -51,16 +48,14 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
             db: Database session
             patient_id: Patient ID to filter by
 
-        Returns:            List of active medications for the patient
+        Returns:
+            List of active medications for the patient
         """
-        return (
-            db.query(self.model)
-            .options(
-                joinedload(Medication.practitioner),
-                joinedload(Medication.pharmacy)
-            )
-            .filter(Medication.patient_id == patient_id, Medication.is_active.is_(True))
-            .all()
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            additional_filters={"is_active": True},
+            load_relations=["practitioner", "pharmacy"],
         )
 
     def get_by_name(
@@ -78,12 +73,12 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             List of medications matching the name
         """
-        return (
-            db.query(self.model)
-            .filter(Medication.name.ilike(f"%{name}%"))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return self.search_by_text_field(
+            db=db,
+            field_name="medication_name",
+            search_term=name,
+            skip=skip,
+            limit=limit,
         )
 
     def deactivate(self, db: Session, *, db_obj: Medication) -> Medication:
@@ -131,14 +126,8 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             Medication with relationships loaded
         """
-        return (
-            db.query(self.model)
-            .options(
-                joinedload(Medication.practitioner),
-                joinedload(Medication.pharmacy)
-            )
-            .filter(Medication.id == id)
-            .first()
+        return self.get_with_relations(
+            db=db, record_id=id, relations=["practitioner", "pharmacy"]
         )
 
 

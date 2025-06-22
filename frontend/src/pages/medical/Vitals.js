@@ -9,7 +9,7 @@ import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
 import VitalsChart from '../../components/medical/VitalsChart';
 import { vitalsService } from '../../services/medical/vitalsService';
-import { useMedicalData } from '../../hooks/useMedicalData';
+import { useCurrentPatient } from '../../hooks/useGlobalData';
 import { apiService } from '../../services/api';
 import '../../styles/shared/MedicalPageShared.css';
 import './Vitals.css';
@@ -21,19 +21,8 @@ const Vitals = () => {
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('list');
 
-  // Use the medical data hook to get current patient
-  const { currentPatient } = useMedicalData({
-    entityName: 'vitals',
-    apiMethodsConfig: {
-      getAll: signal => apiService.getVitals(signal),
-      getByPatient: (patientId, signal) =>
-        apiService.getPatientVitals(patientId, signal),
-      create: (data, signal) => apiService.createVitals(data, signal),
-      update: (id, data, signal) => apiService.updateVitals(id, data, signal),
-      delete: (id, signal) => apiService.deleteVitals(id, signal),
-    },
-    requiresPatient: true,
-  });
+  // Use global state for patient data
+  const { patient: currentPatient, loading: globalDataLoading } = useCurrentPatient();
 
   const loadStats = useCallback(async () => {
     if (!currentPatient?.id) return;

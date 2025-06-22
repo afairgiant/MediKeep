@@ -1,4 +1,5 @@
-from typing import Optional, List
+from typing import List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -30,9 +31,13 @@ class CRUDPractitioner(
         Example:
             doctor = practitioner_crud.get_by_name(db, name="Dr. John Smith")
         """
-        return (
-            db.query(PractitionerModel).filter(PractitionerModel.name == name).first()
+        practitioners = super().get_by_field(
+            db=db,
+            field_name="name",
+            field_value=name,
+            limit=1,
         )
+        return practitioners[0] if practitioners else None
 
     def search_by_name(
         self, db: Session, *, name: str, skip: int = 0, limit: int = 20
@@ -52,13 +57,12 @@ class CRUDPractitioner(
         Example:
             doctors = practitioner_crud.search_by_name(db, name="Smith")
         """
-        search_pattern = f"%{name}%"
-        return (
-            db.query(PractitionerModel)
-            .filter(PractitionerModel.name.ilike(search_pattern))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().search_by_text_field(
+            db=db,
+            field_name="name",
+            search_term=name,
+            skip=skip,
+            limit=limit,
         )
 
     def get_by_specialty(
@@ -79,12 +83,12 @@ class CRUDPractitioner(
         Example:
             cardiologists = practitioner_crud.get_by_specialty(db, specialty="Cardiology")
         """
-        return (
-            db.query(PractitionerModel)
-            .filter(PractitionerModel.specialty.ilike(f"%{specialty}%"))
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().search_by_text_field(
+            db=db,
+            field_name="specialty",
+            search_term=specialty,
+            skip=skip,
+            limit=limit,
         )
 
     def get_all_specialties(self, db: Session) -> List[str]:
@@ -128,20 +132,17 @@ class CRUDPractitioner(
         Example:
             practitioner = practitioner_crud.get_with_medical_records(db, practitioner_id=5)
         """
-        from sqlalchemy.orm import joinedload
-
-        return (
-            db.query(PractitionerModel)
-            .options(
-                joinedload(PractitionerModel.encounters),
-                joinedload(PractitionerModel.lab_results),
-                joinedload(PractitionerModel.immunizations),
-                joinedload(PractitionerModel.conditions),
-                joinedload(PractitionerModel.procedures),
-                joinedload(PractitionerModel.treatments),
-            )
-            .filter(PractitionerModel.id == practitioner_id)
-            .first()
+        return super().get_with_relations(
+            db=db,
+            record_id=practitioner_id,
+            relations=[
+                "encounters",
+                "lab_results",
+                "immunizations",
+                "conditions",
+                "procedures",
+                "treatments",
+            ],
         )
 
     def is_name_taken(
@@ -162,12 +163,20 @@ class CRUDPractitioner(
             if practitioner_crud.is_name_taken(db, name="Dr. Smith"):
                 raise HTTPException(400, "Practitioner already exists")
         """
-        query = db.query(PractitionerModel).filter(PractitionerModel.name == name)
+        practitioners = super().get_by_field(
+            db=db,
+            field_name="name",
+            field_value=name,
+            limit=1,
+        )
 
-        if exclude_id:
-            query = query.filter(PractitionerModel.id != exclude_id)
+        if not practitioners:
+            return False
 
-        return query.first() is not None
+        if exclude_id and practitioners[0].id == exclude_id:
+            return False
+
+        return True
 
     def create_if_not_exists(
         self, db: Session, *, practitioner_data: PractitionerCreate
@@ -203,73 +212,59 @@ class CRUDPractitioner(
             db: SQLAlchemy database session
 
         Returns:
-            Dictionary with specialty as key and count as value
+            Dictionary mapping specialty names to counts
 
         Example:
             counts = practitioner_crud.count_by_specialty(db)
-            # Returns: {"Cardiology": 5, "Dermatology": 3, ...}
+            # Returns: {"Cardiology": 15, "Dermatology": 12, ...}
         """
         from sqlalchemy import func
 
         result = (
-            db.query(
-                PractitionerModel.specialty,
-                func.count(PractitionerModel.id).label("count"),
-            )
+            db.query(PractitionerModel.specialty, func.count(PractitionerModel.id))
+            .filter(PractitionerModel.specialty.isnot(None))
             .group_by(PractitionerModel.specialty)
             .all()
         )
 
-        return {row.specialty: row.count for row in result if row.specialty}
+        return {specialty: count for specialty, count in result}
 
     def get_most_referenced(
         self, db: Session, *, limit: int = 10
     ) -> List[PractitionerModel]:
         """
-        Get practitioners who are most frequently referenced in medical records.
-        Useful for showing popular/commonly used practitioners.
+        Get the most referenced practitioners (by total medical record count).
 
         Args:
             db: SQLAlchemy database session
             limit: Maximum number of practitioners to return
 
         Returns:
-            List of practitioners ordered by frequency of use
+            List of most referenced Practitioner objects
 
         Example:
-            popular_doctors = practitioner_crud.get_most_referenced(db, limit=5)
+            popular = practitioner_crud.get_most_referenced(db, limit=5)
         """
         from sqlalchemy import func
 
-        # Count references across different medical record types
-        subquery = (
-            db.query(
-                PractitionerModel.id,
-                (
-                    func.count(PractitionerModel.encounters.distinct())
-                    + func.count(PractitionerModel.lab_results.distinct())
-                    + func.count(PractitionerModel.conditions.distinct())
-                    + func.count(PractitionerModel.procedures.distinct())
-                    + func.count(PractitionerModel.treatments.distinct())
-                ).label("reference_count"),
-            )
-            .outerjoin(PractitionerModel.encounters)
-            .outerjoin(PractitionerModel.lab_results)
-            .outerjoin(PractitionerModel.conditions)
-            .outerjoin(PractitionerModel.procedures)
-            .outerjoin(PractitionerModel.treatments)
-            .group_by(PractitionerModel.id)
-            .subquery()
-        )
+        from app.models.models import Encounter, Procedure, Treatment
 
+        # Count total references across encounters, treatments, and procedures
         return (
             db.query(PractitionerModel)
-            .join(subquery, PractitionerModel.id == subquery.c.id)
-            .order_by(subquery.c.reference_count.desc())
+            .outerjoin(Encounter, PractitionerModel.id == Encounter.practitioner_id)
+            .outerjoin(Treatment, PractitionerModel.id == Treatment.practitioner_id)
+            .outerjoin(Procedure, PractitionerModel.id == Procedure.practitioner_id)
+            .group_by(PractitionerModel.id)
+            .order_by(
+                func.count(Encounter.id).desc()
+                + func.count(Treatment.id).desc()
+                + func.count(Procedure.id).desc()
+            )
             .limit(limit)
             .all()
         )
 
 
-# Create an instance of CRUDPractitioner to use throughout the application
+# Create the practitioner CRUD instance
 practitioner = CRUDPractitioner(PractitionerModel)

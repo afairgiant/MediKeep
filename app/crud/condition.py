@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -28,13 +29,13 @@ class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate]):
         Returns:
             List of conditions for the patient
         """
-        return (
-            db.query(Condition)
-            .filter(Condition.patient_id == patient_id)
-            .order_by(Condition.onsetDate.desc().nullslast())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="onsetDate",
+            order_desc=True,
         )
 
     def get_by_status(
@@ -51,12 +52,13 @@ class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate]):
         Returns:
             List of conditions with the specified status
         """
-        query = db.query(Condition).filter(Condition.status == status.lower())
-
-        if patient_id:
-            query = query.filter(Condition.patient_id == patient_id)
-
-        return query.order_by(Condition.onsetDate.desc().nullslast()).all()
+        return super().get_by_status(
+            db=db,
+            status=status,
+            patient_id=patient_id,
+            order_by="onsetDate",
+            order_desc=True,
+        )
 
     def get_active_conditions(self, db: Session, *, patient_id: int) -> List[Condition]:
         """
@@ -69,33 +71,32 @@ class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate]):
         Returns:
             List of active conditions
         """
-        return (
-            db.query(Condition)
-            .filter(Condition.patient_id == patient_id, Condition.status == "active")
-            .order_by(Condition.onsetDate.desc().nullslast())
-            .all()
+        return super().get_by_status(
+            db=db,
+            status="active",
+            patient_id=patient_id,
+            order_by="onsetDate",
+            order_desc=True,
         )
 
-    def get_with_relations(self, db: Session, condition_id: int) -> Optional[Condition]:
+    def get_with_relations(
+        self, db: Session, *, record_id: int, relations: List[str]
+    ) -> Optional[Condition]:
         """
         Retrieve a condition with all related information loaded.
 
         Args:
             db: SQLAlchemy database session
-            condition_id: ID of the condition
+            record_id: ID of the condition
+            relations: List of relationships to load
 
         Returns:
-            Condition with patient, practitioner, and treatments relationships loaded
+            Condition with relationships loaded
         """
-        return (
-            db.query(Condition)
-            .options(
-                joinedload(Condition.patient),
-                joinedload(Condition.practitioner),
-                joinedload(Condition.treatments),
-            )
-            .filter(Condition.id == condition_id)
-            .first()
+        return super().get_with_relations(
+            db=db,
+            record_id=record_id,
+            relations=relations,
         )
 
 

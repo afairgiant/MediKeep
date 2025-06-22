@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from typing import Any, List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.allergy import allergy
+from app.models.activity_log import EntityType
 from app.schemas.allergy import (
     AllergyCreate,
-    AllergyUpdate,
     AllergyResponse,
+    AllergyUpdate,
     AllergyWithRelations,
 )
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -27,26 +28,15 @@ def create_allergy(
     Create new allergy record.
     """
     allergy_obj = allergy.create(db=db, obj_in=allergy_in)
-    
-    # Log the creation activity
-    try:
-        description = f"New allergy: {getattr(allergy_obj, 'allergen', 'Unknown allergen')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(allergy_obj, 'patient_id', None),
-            action="created",
-            entity_type="allergy",
-            entity_id=getattr(allergy_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging allergy creation activity: {e}")
-    
+
+    # Log the creation activity using centralized logging
+    log_create(
+        db=db,
+        entity_type=EntityType.ALLERGY,
+        entity_obj=allergy_obj,
+        user_id=current_user_id,
+    )
+
     return allergy_obj
 
 
@@ -56,7 +46,8 @@ def read_allergies(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     patient_id: Optional[int] = Query(None),
-    severity: Optional[str] = Query(None),    allergen: Optional[str] = Query(None),
+    severity: Optional[str] = Query(None),
+    allergen: Optional[str] = Query(None),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
@@ -64,11 +55,17 @@ def read_allergies(
     """
     # Filter allergies by the user's patient_id (ignore any provided patient_id for security)
     if severity:
-        allergies = allergy.get_by_severity(db, severity=severity, patient_id=current_user_patient_id)
+        allergies = allergy.get_by_severity(
+            db, severity=severity, patient_id=current_user_patient_id
+        )
     elif allergen:
-        allergies = allergy.get_by_allergen(db, allergen=allergen, patient_id=current_user_patient_id)
+        allergies = allergy.get_by_allergen(
+            db, allergen=allergen, patient_id=current_user_patient_id
+        )
     else:
-        allergies = allergy.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
+        allergies = allergy.get_by_patient(
+            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        )
     return allergies
 
 
@@ -86,12 +83,12 @@ def read_allergy(
     allergy_obj = allergy.get_with_relations(db, allergy_id=allergy_id)
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
-    
+
     # Security check: ensure the allergy belongs to the current user
     deps.verify_patient_record_access(
-        getattr(allergy_obj, 'patient_id'), current_user_patient_id, "allergy"
+        getattr(allergy_obj, "patient_id"), current_user_patient_id, "allergy"
     )
-    
+
     return allergy_obj
 
 
@@ -109,28 +106,17 @@ def update_allergy(
     allergy_obj = allergy.get(db=db, id=allergy_id)
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
-    
+
     allergy_obj = allergy.update(db=db, db_obj=allergy_obj, obj_in=allergy_in)
-    
-    # Log the update activity
-    try:
-        description = f"Updated allergy: {getattr(allergy_obj, 'allergen', 'Unknown allergen')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(allergy_obj, 'patient_id', None),
-            action="updated",
-            entity_type="allergy",
-            entity_id=getattr(allergy_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging allergy update activity: {e}")
-    
+
+    # Log the update activity using centralized logging
+    log_update(
+        db=db,
+        entity_type=EntityType.ALLERGY,
+        entity_obj=allergy_obj,
+        user_id=current_user_id,
+    )
+
     return allergy_obj
 
 
@@ -140,33 +126,22 @@ def delete_allergy(
     db: Session = Depends(deps.get_db),
     allergy_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
-    ) -> Any:
+) -> Any:
     """
     Delete an allergy record.
     """
     allergy_obj = allergy.get(db=db, id=allergy_id)
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
-    
-    # Log the deletion activity BEFORE deleting
-    try:
-        description = f"Deleted allergy: {getattr(allergy_obj, 'allergen', 'Unknown allergen')}"
-        activity_log = ActivityLog(
-            user_id=current_user_id,
-            patient_id=getattr(allergy_obj, 'patient_id', None),
-            action="deleted",
-            entity_type="allergy",
-            entity_id=getattr(allergy_obj, 'id', 0),
-            description=description,
-            timestamp=get_utc_now(),
-        )
-        db.add(activity_log)
-        db.commit()
-    except Exception as e:
-        # Don't fail the main operation if logging fails
-        db.rollback()
-        print(f"Error logging allergy deletion activity: {e}")
-    
+
+    # Log the deletion activity BEFORE deleting (using centralized logging)
+    log_delete(
+        db=db,
+        entity_type=EntityType.ALLERGY,
+        entity_obj=allergy_obj,
+        user_id=current_user_id,
+    )
+
     allergy.delete(db=db, id=allergy_id)
     return {"message": "Allergy deleted successfully"}
 

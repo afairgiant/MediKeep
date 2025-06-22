@@ -1,50 +1,90 @@
+import os
+import uuid
+from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
+
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException,
-    Query,
-    status,
-    UploadFile,
     File,
     Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
 )
 from sqlalchemy.orm import Session
-from datetime import datetime
-import os
-import uuid
-from pathlib import Path
 
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.database import get_db
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
+from app.models.activity_log import EntityType
 from app.schemas.lab_result import (
     LabResultCreate,
-    LabResultUpdate,
     LabResultResponse,
+    LabResultUpdate,
     LabResultWithRelations,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
 
 # Lab Result Endpoints
-@router.get("/", response_model=List[LabResultResponse])
+@router.get("/", response_model=List[LabResultWithRelations])
 def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),    db: Session = Depends(get_db),
+    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+    db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """
-    Get lab results for the current user with pagination
+    Get lab results for the current user with pagination and practitioner info
     """
-    # Filter lab results by the user's patient_id
-    results = lab_result.get_by_patient(db, patient_id=current_user_patient_id, skip=skip, limit=limit)
-    return results
+    # Filter lab results by the user's patient_id with practitioner relationship loaded
+    results = lab_result.get_by_patient(
+        db,
+        patient_id=current_user_patient_id,
+        skip=skip,
+        limit=limit,
+        load_relations=["practitioner", "patient"],
+    )
+
+    # Convert to response format with practitioner names
+    response_results = []
+    for result in results:
+        result_dict = {
+            "id": result.id,
+            "patient_id": result.patient_id,
+            "practitioner_id": result.practitioner_id,
+            "test_name": result.test_name,
+            "test_code": result.test_code,
+            "test_category": result.test_category,
+            "test_type": result.test_type,
+            "facility": result.facility,
+            "status": result.status,
+            "labs_result": result.labs_result,
+            "ordered_date": result.ordered_date,
+            "completed_date": result.completed_date,
+            "notes": result.notes,
+            "created_at": result.created_at,
+            "updated_at": result.updated_at,
+            "practitioner_name": (
+                result.practitioner.name if result.practitioner else None
+            ),
+            "patient_name": (
+                f"{result.patient.first_name} {result.patient.last_name}"
+                if result.patient
+                else None
+            ),
+            "files": [],  # Files will be loaded separately if needed
+        }
+        response_results.append(result_dict)
+
+    return response_results
 
 
 @router.get("/{lab_result_id}", response_model=LabResultWithRelations)
@@ -56,10 +96,41 @@ def get_lab_result(
     """
     Get a specific lab result by ID with related data
     """
-    db_lab_result = lab_result.get(db, id=lab_result_id)
+    db_lab_result = lab_result.get_with_relations(
+        db, record_id=lab_result_id, relations=["practitioner", "patient", "files"]
+    )
     if not db_lab_result:
         raise HTTPException(status_code=404, detail="Lab result not found")
-    return db_lab_result
+
+    # Convert to response format with practitioner name
+    result_dict = {
+        "id": db_lab_result.id,
+        "patient_id": db_lab_result.patient_id,
+        "practitioner_id": db_lab_result.practitioner_id,
+        "test_name": db_lab_result.test_name,
+        "test_code": db_lab_result.test_code,
+        "test_category": db_lab_result.test_category,
+        "test_type": db_lab_result.test_type,
+        "facility": db_lab_result.facility,
+        "status": db_lab_result.status,
+        "labs_result": db_lab_result.labs_result,
+        "ordered_date": db_lab_result.ordered_date,
+        "completed_date": db_lab_result.completed_date,
+        "notes": db_lab_result.notes,
+        "created_at": db_lab_result.created_at,
+        "updated_at": db_lab_result.updated_at,
+        "practitioner_name": (
+            db_lab_result.practitioner.name if db_lab_result.practitioner else None
+        ),
+        "patient_name": (
+            f"{db_lab_result.patient.first_name} {db_lab_result.patient.last_name}"
+            if db_lab_result.patient
+            else None
+        ),
+        "files": db_lab_result.files or [],
+    }
+
+    return result_dict
 
 
 @router.post("/", response_model=LabResultResponse, status_code=status.HTTP_201_CREATED)
@@ -73,26 +144,15 @@ def create_lab_result(
     """
     try:
         db_lab_result = lab_result.create(db, obj_in=lab_result_in)
-        
-        # Log the creation activity
-        try:
-            description = f"New lab result: {getattr(db_lab_result, 'test_name', 'Unknown test')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(db_lab_result, 'patient_id', None),
-                action="created",
-                entity_type="lab_result",
-                entity_id=getattr(db_lab_result, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging lab result creation activity: {e}")
-        
+
+        # Log the creation activity using centralized logging
+        log_create(
+            db=db,
+            entity_type=EntityType.LAB_RESULT,
+            entity_obj=db_lab_result,
+            user_id=current_user_id,
+        )
+
         return db_lab_result
     except Exception as e:
         raise HTTPException(
@@ -106,7 +166,7 @@ def update_lab_result(
     lab_result_in: LabResultUpdate,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    ):    
+):
     """
     Update an existing lab result
     """
@@ -118,26 +178,15 @@ def update_lab_result(
         updated_lab_result = lab_result.update(
             db, db_obj=db_lab_result, obj_in=lab_result_in
         )
-        
-        # Log the update activity
-        try:
-            description = f"Updated lab result: {getattr(updated_lab_result, 'test_name', 'Unknown test')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(updated_lab_result, 'patient_id', None),
-                action="updated",
-                entity_type="lab_result",
-                entity_id=getattr(updated_lab_result, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging lab result update activity: {e}")
-        
+
+        # Log the update activity using centralized logging
+        log_update(
+            db=db,
+            entity_type=EntityType.LAB_RESULT,
+            entity_obj=updated_lab_result,
+            user_id=current_user_id,
+        )
+
         return updated_lab_result
     except Exception as e:
         raise HTTPException(
@@ -150,7 +199,7 @@ def delete_lab_result(
     lab_result_id: int,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    ):    
+):
     """
     Delete a lab result and associated files
     """
@@ -159,24 +208,13 @@ def delete_lab_result(
         raise HTTPException(status_code=404, detail="Lab result not found")
 
     try:
-        # Log the deletion activity BEFORE deleting
-        try:
-            description = f"Deleted lab result: {getattr(db_lab_result, 'test_name', 'Unknown test')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(db_lab_result, 'patient_id', None),
-                action="deleted",
-                entity_type="lab_result",
-                entity_id=getattr(db_lab_result, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging lab result deletion activity: {e}")
+        # Log the deletion activity BEFORE deleting using centralized logging
+        log_delete(
+            db=db,
+            entity_type=EntityType.LAB_RESULT,
+            entity_obj=db_lab_result,
+            user_id=current_user_id,
+        )
 
         # Delete associated files first
         lab_result_file.delete_by_lab_result(db, lab_result_id=lab_result_id)

@@ -3,14 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
+import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
-  const [patientData, setPatientData] = useState(null);
+  // Using global state for patient and practitioners data
+  const { 
+    patient: patientData, 
+    loading: patientLoading, 
+    error: patientError,
+    refresh: refreshPatient 
+  } = useCurrentPatient();
+  const { 
+    practitioners, 
+    loading: practitionersLoading 
+  } = usePractitioners();
+
+  // Combine loading states
+  const loading = patientLoading || practitionersLoading;
+
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [patientExists, setPatientExists] = useState(true);
-  const [practitioners, setPractitioners] = useState([]);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -18,65 +32,49 @@ const PatientInfo = () => {
     gender: '',
     address: '',
   });
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+  // Initialize form data when patient data becomes available or changes
   useEffect(() => {
-    fetchPatientData();
-    fetchPractitioners();
-  }, []);
-  const fetchPractitioners = async () => {
-    try {
-      console.log('Fetching practitioners...');
-      const practitionersData = await apiService.getPractitioners();
-      console.log('Practitioners data received:', practitionersData);
-      setPractitioners(practitionersData);
-    } catch (error) {
-      console.error('Error fetching practitioners:', error);
-      // Don't set error for practitioners fetch failure, just log it
-    }
-  };
-  const fetchPatientData = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const data = await apiService.getCurrentPatient();
-      setPatientData(data);
+    if (patientData) {
       setPatientExists(true);
       setFormData({
-        first_name: data.first_name || '',
-        last_name: data.last_name || '',
-        birthDate: data.birthDate || '',
-        gender: data.gender || '',
-        address: data.address || '',
-        bloodType: data.bloodType || '',
-        height: data.height || '',
-        weight: data.weight || '',
-        physician_id: data.physician_id || '',
+        first_name: patientData.first_name || '',
+        last_name: patientData.last_name || '',
+        birthDate: patientData.birthDate || '',
+        gender: patientData.gender || '',
+        address: patientData.address || '',
+        bloodType: patientData.bloodType || '',
+        height: patientData.height || '',
+        weight: patientData.weight || '',
+        physician_id: patientData.physician_id || '',
       });
-    } catch (error) {
-      console.error('Error fetching patient data:', error);
-      if (
-        error.message.includes('Patient record not found') ||
-        error.message.includes('404')
-      ) {
-        setPatientExists(false);
-        setFormData({
-          first_name: '',
-          last_name: '',
-          birthDate: '',
-          gender: '',
-          address: '',
-        });
-      } else {
-        setError('Failed to load patient information. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    } else if (patientError && patientError.includes('Patient record not found')) {
+      setPatientExists(false);
+      setFormData({
+        first_name: '',
+        last_name: '',
+        birthDate: '',
+        gender: '',
+        address: '',
+        bloodType: '',
+        height: '',
+        weight: '',
+        physician_id: '',
+      });
     }
-  };
+  }, [patientData, patientError]);
+
+  // Handle global error state
+  useEffect(() => {
+    if (patientError && !patientError.includes('Patient record not found')) {
+      setError('Failed to load patient information. Please try again.');
+    } else {
+      setError('');
+    }
+  }, [patientError]);
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -140,7 +138,8 @@ const PatientInfo = () => {
         setSuccessMessage('Patient information updated successfully!');
       }
 
-      setPatientData(updatedData);
+      // Refresh global patient data to reflect changes across the app
+      await refreshPatient();
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);

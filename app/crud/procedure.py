@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -28,13 +29,13 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             List of procedures for the patient
         """
-        return (
-            db.query(Procedure)
-            .filter(Procedure.patient_id == patient_id)
-            .order_by(Procedure.date.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_patient(
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="date",
+            order_desc=True,
         )
 
     def get_by_status(
@@ -51,15 +52,22 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             List of procedures with the specified status
         """
-        query = db.query(Procedure).filter(Procedure.status == status.lower())
-        
-        if patient_id:
-            query = query.filter(Procedure.patient_id == patient_id)
-
-        return query.order_by(Procedure.date.desc()).all()
+        return super().get_by_status(
+            db=db,
+            status=status,
+            patient_id=patient_id,
+            order_by="date",
+            order_desc=True,
+        )
 
     def get_by_practitioner(
-        self, db: Session, *, practitioner_id: int, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
+        self,
+        db: Session,
+        *,
+        practitioner_id: int,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100
     ) -> List[Procedure]:
         """
         Retrieve all procedures for a specific practitioner.
@@ -74,17 +82,14 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             List of procedures for the practitioner
         """
-        query = db.query(Procedure).filter(Procedure.practitioner_id == practitioner_id)
-        
-        if patient_id:
-            query = query.filter(Procedure.patient_id == patient_id)
-            
-        return (
-            query
-            .order_by(Procedure.date.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+        return super().get_by_practitioner(
+            db=db,
+            practitioner_id=practitioner_id,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            order_by="date",
+            order_desc=True,
         )
 
     def get_scheduled(
@@ -100,12 +105,13 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             List of scheduled procedures
         """
-        query = db.query(Procedure).filter(Procedure.status == "scheduled")
-
-        if patient_id:
-            query = query.filter(Procedure.patient_id == patient_id)
-
-        return query.order_by(Procedure.date.asc()).all()
+        return super().get_by_status(
+            db=db,
+            status="scheduled",
+            patient_id=patient_id,
+            order_by="date",
+            order_desc=False,  # Ascending order for scheduled procedures
+        )
 
     def get_with_relations(self, db: Session, procedure_id: int) -> Optional[Procedure]:
         """
@@ -118,11 +124,8 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             Procedure with patient and practitioner relationships loaded
         """
-        return (
-            db.query(Procedure)
-            .options(joinedload(Procedure.patient), joinedload(Procedure.practitioner))
-            .filter(Procedure.id == procedure_id)
-            .first()
+        return super().get_with_relations(
+            db=db, record_id=procedure_id, relations=["patient", "practitioner"]
         )
 
     def get_recent(
@@ -139,14 +142,16 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             List of recent procedures
         """
-        from datetime import date, timedelta
+        from app.crud.utils import get_recent_records
 
-        cutoff_date = date.today() - timedelta(days=days)
-        return (
-            db.query(Procedure)
-            .filter(Procedure.patient_id == patient_id, Procedure.date >= cutoff_date)
-            .order_by(Procedure.date.desc())
-            .all()
+        return get_recent_records(
+            db=db,
+            model=self.model,
+            date_field="date",
+            days=days,
+            patient_id=patient_id,
+            order_by="date",
+            order_desc=True,
         )
 
 

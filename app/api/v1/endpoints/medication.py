@@ -1,18 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.orm import Session
 from typing import Any, List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy.orm import Session
+
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
+from app.core.logging_config import get_logger
 from app.crud.medication import medication
+from app.models.activity_log import EntityType
 from app.schemas.medication import (
     MedicationCreate,
-    MedicationUpdate,
     MedicationResponse,
     MedicationResponseWithNested,
+    MedicationUpdate,
 )
-from app.core.logging_config import get_logger
-from app.models.activity_log import ActivityLog
-from app.models.models import get_utc_now
 
 router = APIRouter()
 
@@ -36,17 +37,19 @@ def create_medication(
 
     user_ip = request.client.host if request.client else "unknown"
 
-    try:        
+    try:
         medication_obj = medication.create(db=db, obj_in=medication_in)
         medication_id = getattr(medication_obj, "id", None)
         patient_id = getattr(medication_obj, "patient_id", None)
-        
+
         # Reload the medication with relationships
         if medication_id is not None:
-            medication_with_relations = medication.get_with_relationships(db=db, id=medication_id)
+            medication_with_relations = medication.get_with_relationships(
+                db=db, id=medication_id
+            )
         else:
             medication_with_relations = medication_obj
-        
+
         # Log successful medication creation
         logger.info(
             "Medication created successfully",
@@ -60,24 +63,14 @@ def create_medication(
             },
         )
 
-        # Log the creation activity
-        try:
-            description = f"New medication: {getattr(medication_obj, 'name', 'Unknown medication')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(medication_obj, 'patient_id', None),
-                action="created",
-                entity_type="medication",
-                entity_id=getattr(medication_obj, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging medication creation activity: {e}")
+        # Log the creation activity using centralized logging
+        log_create(
+            db=db,
+            entity_type=EntityType.MEDICATION,
+            entity_obj=medication_obj,
+            user_id=current_user_id,
+            request=request,
+        )
 
         # Return medication with relationships loaded
         medication_id = getattr(medication_obj, "id", None)
@@ -114,12 +107,18 @@ def read_medications(
     Retrieve medications for the current user with optional filtering.
     """
     # Filter medications by the user's patient_id
-    medications = medication.get_by_patient(db=db, patient_id=current_user_patient_id, skip=skip, limit=limit)
-    
+    medications = medication.get_by_patient(
+        db=db, patient_id=current_user_patient_id, skip=skip, limit=limit
+    )
+
     # Apply name filter if provided
     if name:
-        medications = [med for med in medications if name.lower() in getattr(med, 'name', '').lower()]
-    
+        medications = [
+            med
+            for med in medications
+            if name.lower() in getattr(med, "name", "").lower()
+        ]
+
     return medications
 
 
@@ -137,14 +136,12 @@ def read_medication(
     medication_obj = medication.get(db=db, id=medication_id)
     if not medication_obj:
         raise HTTPException(status_code=404, detail="Medication not found")
-    
+
     # Security check: ensure the medication belongs to the current user
     deps.verify_patient_record_access(
-        getattr(medication_obj, 'patient_id'), 
-        current_user_patient_id, 
-        "medication"
+        getattr(medication_obj, "patient_id"), current_user_patient_id, "medication"
     )
-    
+
     return medication_obj
 
 
@@ -182,7 +179,7 @@ def update_medication(
         updated_medication = medication.update(
             db=db, db_obj=medication_obj, obj_in=medication_in
         )
-        
+
         # Log successful medication update
         logger.info(
             f"Medication updated successfully: {medication_id}",
@@ -196,23 +193,14 @@ def update_medication(
             },
         )
 
-        # Log the update activity
-        try:
-            description = f"Updated medication: {getattr(updated_medication, 'name', 'Unknown medication')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(updated_medication, 'patient_id', None),
-                action="updated",
-                entity_type="medication",
-                entity_id=getattr(updated_medication, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging medication update activity: {e}")
+        # Log the update activity using centralized logging
+        log_update(
+            db=db,
+            entity_type=EntityType.MEDICATION,
+            entity_obj=updated_medication,
+            user_id=current_user_id,
+            request=request,
+        )
 
         # Return medication with relationships loaded
         return medication.get_with_relationships(db=db, id=medication_id)
@@ -265,24 +253,14 @@ def delete_medication(
     patient_id = getattr(medication_obj, "patient_id", None)
 
     try:
-        # Log the deletion activity BEFORE deleting
-        try:
-            description = f"Deleted medication: {getattr(medication_obj, 'name', 'Unknown medication')}"
-            activity_log = ActivityLog(
-                user_id=current_user_id,
-                patient_id=getattr(medication_obj, 'patient_id', None),
-                action="deleted",
-                entity_type="medication",
-                entity_id=getattr(medication_obj, 'id', 0),
-                description=description,
-                timestamp=get_utc_now(),
-            )
-            db.add(activity_log)
-            db.commit()
-        except Exception as e:
-            # Don't fail the main operation if logging fails
-            db.rollback()
-            print(f"Error logging medication deletion activity: {e}")
+        # Log the deletion activity BEFORE deleting using centralized logging
+        log_delete(
+            db=db,
+            entity_type=EntityType.MEDICATION,
+            entity_obj=medication_obj,
+            user_id=current_user_id,
+            request=request,
+        )
 
         medication.delete(db=db, id=medication_id)
 
