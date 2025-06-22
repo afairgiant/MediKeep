@@ -150,9 +150,8 @@ def delete_encounter(
 def get_recent_encounters(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=30, ge=1, le=365),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get recent encounters for a patient within specified days.
@@ -167,10 +166,9 @@ def get_recent_encounters(
 def get_patient_encounters(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all encounters for a specific patient.

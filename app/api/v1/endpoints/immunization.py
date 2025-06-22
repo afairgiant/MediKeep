@@ -149,9 +149,8 @@ def delete_immunization(
 def get_recent_immunizations(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=365, ge=1, le=3650),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get recent immunizations for a patient within specified days.
@@ -166,10 +165,9 @@ def get_recent_immunizations(
 def check_booster_due(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     vaccine_name: str,
     months_interval: int = Query(default=12, ge=1, le=120),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Check if a patient is due for a booster shot.
@@ -193,10 +191,9 @@ def check_booster_due(
 def get_patient_immunizations(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all immunizations for a specific patient.

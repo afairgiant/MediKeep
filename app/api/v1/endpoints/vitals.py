@@ -185,7 +185,7 @@ def delete_vitals(
 def read_patient_vitals(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     vital_type: Optional[str] = Query(
@@ -193,7 +193,6 @@ def read_patient_vitals(
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose",
     ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all vitals readings for a specific patient.
@@ -221,8 +220,7 @@ def read_patient_vitals(
 def read_patient_latest_vitals(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    patient_id: int = Depends(deps.verify_patient_access),
 ) -> Any:
     """
     Get the most recent vitals reading for a patient.
@@ -239,8 +237,7 @@ def read_patient_latest_vitals(
 def read_patient_vitals_stats(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    patient_id: int = Depends(deps.verify_patient_access),
 ) -> Any:
     """
     Get vitals statistics for a patient.
@@ -253,12 +250,11 @@ def read_patient_vitals_stats(
 def read_patient_vitals_date_range(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     start_date: datetime = Query(..., description="Start date for the range"),
     end_date: datetime = Query(..., description="End date for the range"),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get vitals readings for a patient within a specific date range.
@@ -276,10 +272,10 @@ def read_patient_vitals_date_range(
 
 @router.post("/patient/{patient_id}/vitals/", response_model=VitalsResponse)
 def create_patient_vitals(
-    patient_id: int,
     vitals_in: VitalsCreate,
     request: Request,
     db: Session = Depends(deps.get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Create a new vitals reading for a specific patient"""

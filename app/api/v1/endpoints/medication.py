@@ -300,11 +300,10 @@ def delete_medication(
 def read_patient_medications(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     active_only: bool = Query(False),
-    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all medications for a specific patient.

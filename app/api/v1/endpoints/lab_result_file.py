@@ -208,10 +208,9 @@ def read_files_by_lab_result(
 def read_files_by_patient(
     *,
     db: Session = Depends(deps.get_db),
-    patient_id: int,
+    patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(deps.get_current_user),
 ) -> List[LabResultFile]:
     """
     Get all files for a specific patient.
