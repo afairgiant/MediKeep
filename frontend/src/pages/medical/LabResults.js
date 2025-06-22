@@ -1231,6 +1231,17 @@ const LabResults = () => {
                           </span>
                         </div>
                       )}
+                      {result.practitioner_id && (
+                        <div className="detail-item">
+                          <span className="label">Ordering Practitioner:</span>
+                          <span className="value">
+                            {practitioners.find(
+                              p => p.id === result.practitioner_id
+                            )?.name ||
+                              `Practitioner ID: ${result.practitioner_id}`}
+                          </span>
+                        </div>
+                      )}
                       <div className="detail-item">
                         <span className="label">Files:</span>
                         <span className="value">
@@ -1282,6 +1293,7 @@ const LabResults = () => {
                 { header: 'Type', accessor: 'test_type' },
                 { header: 'Facility', accessor: 'facility' },
                 { header: 'Status', accessor: 'status' },
+                { header: 'Ordering Practitioner', accessor: 'practitioner_id' },
                 { header: 'Ordered Date', accessor: 'ordered_date' },
                 { header: 'Completed Date', accessor: 'completed_date' },
                 { header: 'Files', accessor: 'files' },
@@ -1302,6 +1314,11 @@ const LabResults = () => {
                     {value}
                   </span>
                 ),
+                practitioner_id: (value, item) => {
+                  if (!value) return '-';
+                  const practitioner = practitioners.find(p => p.id === value);
+                  return practitioner ? practitioner.name : `ID: ${value}`;
+                },
                 ordered_date: value => formatDateTime(value),
                 completed_date: value => (value ? formatDateTime(value) : '-'),
                 files: (value, item) =>

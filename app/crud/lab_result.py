@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -77,7 +77,16 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         return db_obj
 
     def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
+        self,
+        db: Session,
+        *,
+        patient_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        order_by: Optional[str] = None,
+        order_desc: bool = True,
+        additional_filters: Optional[Dict[str, Any]] = None,
+        load_relations: Optional[List[str]] = None
     ) -> List[LabResult]:
         """Get all lab results for a specific patient"""
         return super().get_by_patient(
@@ -85,8 +94,10 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
             patient_id=patient_id,
             skip=skip,
             limit=limit,
-            order_by="result_date",
-            order_desc=True,
+            order_by=order_by or "ordered_date",
+            order_desc=order_desc,
+            additional_filters=additional_filters,
+            load_relations=load_relations,
         )
 
     def get_by_practitioner(
@@ -98,7 +109,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
             practitioner_id=practitioner_id,
             skip=skip,
             limit=limit,
-            order_by="result_date",
+            order_by="ordered_date",
             order_desc=True,
         )
 
@@ -112,7 +123,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
             field_value=test_code,
             skip=skip,
             limit=limit,
-            order_by="result_date",
+            order_by="ordered_date",
             order_desc=True,
         )
 
@@ -125,6 +136,8 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
             field_name="patient_id",
             field_value=patient_id,
             additional_filters={"test_code": test_code},
+            order_by="ordered_date",
+            order_desc=True,
         )
 
     def get_with_files(self, db: Session, *, lab_result_id: int) -> Optional[LabResult]:
@@ -141,7 +154,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
             search_term=test_code_pattern,
             skip=skip,
             limit=limit,
-            order_by="result_date",
+            order_by="ordered_date",
             order_desc=True,
         )
 
