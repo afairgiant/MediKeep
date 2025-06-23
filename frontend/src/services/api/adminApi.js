@@ -137,6 +137,40 @@ class AdminApiService extends BaseApiService {
       throw error;
     }
   }
+
+  // Backup management endpoints
+  async getBackups() {
+    return this.get('/backups/');
+  }
+
+  async createDatabaseBackup(description) {
+    return this.post('/backups/create-database', { description });
+  }
+
+  async createFilesBackup(description) {
+    return this.post('/backups/create-files', { description });
+  }
+
+  async downloadBackup(backupId) {
+    const response = await fetch(
+      `${this.baseURL}${this.basePath}/backups/${backupId}/download`,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.blob();
+  }
+
+  async verifyBackup(backupId) {
+    return this.post(`/backups/${backupId}/verify`);
+  }
+
+  async cleanupBackups() {
+    return this.post('/backups/cleanup');
+  }
 }
 
 // Create and export a singleton instance

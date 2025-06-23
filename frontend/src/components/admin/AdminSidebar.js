@@ -22,7 +22,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     { name: 'immunization', display: 'Immunizations', icon: '💉' },
     { name: 'procedure', display: 'Procedures', icon: '🔬' },
     { name: 'treatment', display: 'Treatments', icon: '🩹' },
-    { name: 'encounter', display: 'Encounters', icon: '�' },
+    { name: 'encounter', display: 'Encounters', icon: '📝' },
   ];
 
   const handleToggle = () => {
@@ -81,6 +81,14 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
 
         <div className="nav-section">
           <h3>Tools</h3>
+          <Link
+            to="/admin/backup"
+            className={`nav-item ${currentPath.includes('/admin/backup') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/backup')}
+          >
+            <span className="nav-icon">💾</span>
+            <span className="nav-text">Backup Management</span>
+          </Link>
           <Link
             to="/admin/bulk-operations"
             className={`nav-item ${currentPath.includes('/admin/bulk-operations') ? 'active' : ''}`}

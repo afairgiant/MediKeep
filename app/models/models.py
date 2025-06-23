@@ -428,3 +428,23 @@ class Pharmacy(Base):
 
     # Table Relationships
     medications = relationship("Medication", back_populates="pharmacy")
+
+
+class BackupRecord(Base):
+    """
+    Represents a backup record for tracking backup operations.
+    """
+
+    __tablename__ = "backup_records"
+
+    id = Column(Integer, primary_key=True)
+    backup_type = Column(String, nullable=False)  # 'full', 'database', 'files'
+    status = Column(String, nullable=False)  # 'created', 'failed', 'verified'
+    file_path = Column(String, nullable=False)  # Path to the backup file
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    size_bytes = Column(Integer, nullable=True)  # Size of backup file in bytes
+    description = Column(Text, nullable=True)  # Optional description
+
+    # Optional metadata
+    compression_used = Column(Boolean, default=False, nullable=False)
+    checksum = Column(String, nullable=True)  # File checksum for integrity verification

@@ -39,9 +39,15 @@ class Settings:  # App Info
 
     # File Storage
     UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", "./uploads"))
-    MAX_FILE_SIZE: int = int(
-        os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024))
-    )  # 10MB    # Logging Configuration
+    MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024)))  # 10MB
+
+    # Backup Configuration
+    BACKUP_DIR: Path = Path(os.getenv("BACKUP_DIR", "./backups"))
+    BACKUP_RETENTION_DAYS: int = int(
+        os.getenv("BACKUP_RETENTION_DAYS", "7")
+    )  # Keep it simple initially
+
+    # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
@@ -63,6 +69,10 @@ class Settings:  # App Info
         # Ensure upload directory exists
         if not self.UPLOAD_DIR.exists():
             self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Ensure backup directory exists
+        if not self.BACKUP_DIR.exists():
+            self.BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # Create global settings instance

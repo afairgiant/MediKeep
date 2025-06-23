@@ -1,0 +1,244 @@
+"""
+Admin Backup API Endpoints
+
+Provides admin-only endpoints for backup and restore operations.
+Phase 1 implementation: Basic manual backup functionality.
+"""
+
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_admin_user, get_db
+from app.core.logging_config import get_logger
+from app.models.models import User
+from app.services.backup_service import BackupService
+
+logger = get_logger(__name__, "app")
+
+router = APIRouter()
+
+
+class BackupCreateRequest(BaseModel):
+    description: Optional[str] = None
+
+
+class BackupResponse(BaseModel):
+    id: int
+    backup_type: str
+    filename: str
+    size_bytes: int
+    status: str
+    created_at: str
+    description: Optional[str]
+
+
+@router.post("/create-database", response_model=BackupResponse)
+async def create_database_backup(
+    request: BackupCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Create a database backup.
+
+    Only admin users can create backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        backup_result = await backup_service.create_database_backup(
+            description=request.description
+        )
+
+        logger.info(
+            f"Database backup created by admin user {current_user.id}: {backup_result['filename']}"
+        )
+
+        return BackupResponse(
+            id=backup_result["id"],
+            backup_type=backup_result["backup_type"],
+            filename=backup_result["filename"],
+            size_bytes=backup_result["size_bytes"],
+            status=backup_result["status"],
+            created_at=backup_result["created_at"],
+            description=request.description,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to create database backup: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create database backup: {str(e)}",
+        )
+
+
+@router.post("/create-files", response_model=BackupResponse)
+async def create_files_backup(
+    request: BackupCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Create a files backup.
+
+    Only admin users can create backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        backup_result = await backup_service.create_files_backup(
+            description=request.description
+        )
+
+        logger.info(
+            f"Files backup created by admin user {current_user.id}: {backup_result['filename']}"
+        )
+
+        return BackupResponse(
+            id=backup_result["id"],
+            backup_type=backup_result["backup_type"],
+            filename=backup_result["filename"],
+            size_bytes=backup_result["size_bytes"],
+            status=backup_result["status"],
+            created_at=backup_result["created_at"],
+            description=request.description,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to create files backup: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create files backup: {str(e)}",
+        )
+
+
+@router.get("/")
+async def list_backups(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    List all backup records.
+
+    Only admin users can view backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        backups = await backup_service.list_backups()
+
+        return {"backups": backups, "total": len(backups)}
+
+    except Exception as e:
+        logger.error(f"Failed to list backups: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list backups: {str(e)}",
+        )
+
+
+@router.get("/{backup_id}/download")
+async def download_backup(
+    backup_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Download a backup file.
+
+    Only admin users can download backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        backups = await backup_service.list_backups()
+
+        # Find the backup record
+        backup = None
+        for b in backups:
+            if b["id"] == backup_id:
+                backup = b
+                break
+
+        if not backup:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Backup not found"
+            )
+
+        if not backup["file_exists"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Backup file does not exist",
+            )
+
+        logger.info(f"Backup {backup_id} downloaded by admin user {current_user.id}")
+
+        return FileResponse(
+            path=backup["file_path"],
+            filename=backup["filename"],
+            media_type="application/octet-stream",
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to download backup {backup_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download backup: {str(e)}",
+        )
+
+
+@router.post("/{backup_id}/verify")
+async def verify_backup(
+    backup_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Verify the integrity of a backup.
+
+    Only admin users can verify backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        verification_result = await backup_service.verify_backup(backup_id)
+
+        logger.info(
+            f"Backup {backup_id} verification requested by admin user {current_user.id}"
+        )
+
+        return verification_result
+
+    except Exception as e:
+        logger.error(f"Failed to verify backup {backup_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify backup: {str(e)}",
+        )
+
+
+@router.post("/cleanup")
+async def cleanup_old_backups(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Clean up old backups based on retention policy.
+
+    Only admin users can trigger cleanup.
+    """
+    try:
+        backup_service = BackupService(db)
+        cleanup_result = await backup_service.cleanup_old_backups()
+
+        logger.info(f"Backup cleanup triggered by admin user {current_user.id}")
+
+        return cleanup_result
+
+    except Exception as e:
+        logger.error(f"Failed to cleanup backups: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to cleanup backups: {str(e)}",
+        )
