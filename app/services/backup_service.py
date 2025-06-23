@@ -6,9 +6,11 @@ Phase 1 implementation: Basic manual backup functionality.
 """
 
 import hashlib
+import json
 import os
 import shutil
 import subprocess
+import tempfile
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -452,6 +454,179 @@ class BackupService:
         except Exception as e:
             logger.error(f"Failed to cleanup old backups: {str(e)}")
             raise Exception(f"Failed to cleanup old backups: {str(e)}")
+
+    async def create_full_backup(
+        self, description: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a full system backup (database + files) in a single archive.
+
+        Args:
+            description: Optional description for the backup
+
+        Returns:
+            Dictionary containing backup information
+        """
+        try:
+            # Generate backup filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_filename = f"full_backup_{timestamp}.zip"
+            backup_path = self.backup_dir / backup_filename
+
+            # Ensure backup directory exists
+            self.backup_dir.mkdir(parents=True, exist_ok=True)
+
+            logger.info(f"Starting full system backup: {backup_filename}")
+
+            # Create temporary directory for staging
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_path = Path(temp_dir)
+
+                # Create database backup
+                db_backup_path = temp_path / "database.sql"
+                await self._create_database_dump(db_backup_path)
+
+                # Create manifest file
+                manifest = {
+                    "backup_type": "full",
+                    "created_at": datetime.now().isoformat(),
+                    "description": description
+                    or f"Full system backup created on {datetime.now()}",
+                    "components": {"database": "database.sql", "files": "uploads/"},
+                    "version": "1.0",
+                }
+
+                manifest_path = temp_path / "backup_manifest.json"
+                with open(manifest_path, "w") as f:
+                    json.dump(manifest, f, indent=2)
+
+                # Create ZIP archive with all components
+                with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+                    # Add database dump
+                    zipf.write(db_backup_path, "database.sql")
+
+                    # Add manifest
+                    zipf.write(manifest_path, "backup_manifest.json")
+
+                    # Add files from uploads directory
+                    uploads_dir = settings.UPLOAD_DIR
+                    if uploads_dir.exists():
+                        for root, dirs, files in os.walk(uploads_dir):
+                            # Skip trash directory
+                            root_path = Path(root)
+                            if "trash" in root_path.parts:
+                                continue
+
+                            for file in files:
+                                file_path = Path(root) / file
+                                # Create archive path relative to uploads directory
+                                arcname = Path("uploads") / file_path.relative_to(
+                                    uploads_dir
+                                )
+                                zipf.write(file_path, arcname)
+
+            # Verify backup file was created
+            if not backup_path.exists():
+                raise Exception("Backup file was not created")
+
+            # Get file size
+            file_size = backup_path.stat().st_size
+
+            # Calculate checksum for integrity verification
+            checksum = self._calculate_file_checksum(backup_path)
+
+            # Create backup record in database
+            backup_record = BackupRecord(
+                backup_type="full",
+                status="created",
+                file_path=str(backup_path),
+                size_bytes=file_size,
+                description=description
+                or f"Full system backup created on {datetime.now()}",
+                compression_used=True,
+                checksum=checksum,
+            )
+
+            self.db.add(backup_record)
+            self.db.commit()
+
+            logger.info(
+                f"Full backup completed successfully: {backup_filename} ({file_size} bytes)"
+            )
+
+            return {
+                "id": backup_record.id,
+                "backup_type": "full",
+                "filename": backup_filename,
+                "file_path": str(backup_path),
+                "size_bytes": file_size,
+                "status": "created",
+                "created_at": backup_record.created_at.isoformat(),
+                "checksum": checksum,
+                "components": ["database", "files", "manifest"],
+            }
+
+        except Exception as e:
+            error_msg = f"Full backup failed: {str(e)}"
+            logger.error(error_msg)
+
+            # Record failed backup
+            backup_record = BackupRecord(
+                backup_type="full",
+                status="failed",
+                file_path=str(backup_path) if "backup_path" in locals() else "",
+                description=f"Failed backup: {error_msg}",
+            )
+            self.db.add(backup_record)
+            self.db.commit()
+
+            raise Exception(error_msg)
+
+    async def _create_database_dump(self, output_path: Path) -> None:
+        """Create a database dump to a specific file path."""
+        # Extract database connection details from DATABASE_URL
+        db_url = settings.DATABASE_URL
+        if not db_url:
+            raise ValueError("DATABASE_URL not configured")
+
+        import urllib.parse
+
+        parsed = urllib.parse.urlparse(db_url)
+
+        # Handle localhost connections for Docker
+        hostname = parsed.hostname
+        if hostname in ["localhost", "127.0.0.1"]:
+            hostname = "host.docker.internal"
+
+        # Auto-detect PostgreSQL version for compatibility
+        postgres_version = self._get_postgres_version()
+
+        cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "-e",
+            f"PGPASSWORD={parsed.password}",
+            f"postgres:{postgres_version}",
+            "pg_dump",
+            "-h",
+            hostname,
+            "-p",
+            str(parsed.port),
+            "-U",
+            parsed.username,
+            "-d",
+            parsed.path[1:],
+            "--verbose",
+            "--no-password",
+        ]
+
+        # Execute pg_dump via Docker and capture output
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+
+        # Write the SQL dump to file
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(result.stdout)
 
     async def cleanup_all_old_data(self) -> Dict[str, Any]:
         """

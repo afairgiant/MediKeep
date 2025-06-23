@@ -113,6 +113,15 @@
   background-color: #d35400;
 }
 
+.backup-btn.full {
+  background-color: #8e44ad;
+  color: white;
+}
+
+.backup-btn.full:hover:not(:disabled) {
+  background-color: #7d3c98;
+}
+
 .backup-btn.cleanup {
   background-color: #ffc107;
   color: white;
@@ -129,6 +138,24 @@
 
 .backup-btn.cleanup-all:hover:not(:disabled) {
   background-color: #c82333;
+}
+
+.backup-btn.upload {
+  background-color: #17a2b8;
+  color: white;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
+.backup-btn.upload:hover:not(.disabled) {
+  background-color: #138496;
+}
+
+.backup-btn.upload.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #6c757d;
 }
 
 .backup-btn:disabled {
@@ -240,6 +267,11 @@
   color: #f57c00;
 }
 
+.backup-type.full {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
 .backup-status {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -314,6 +346,26 @@
 
 .action-btn.verify:hover {
   background-color: #138496;
+}
+
+.action-btn.restore {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.action-btn.restore:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.action-btn.restore:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Responsive design */

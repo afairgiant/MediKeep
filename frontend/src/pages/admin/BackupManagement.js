@@ -8,7 +8,13 @@ import './BackupManagement.css';
 const BackupManagement = () => {
   const [backups, setBackups] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState({ database: false, files: false });
+  const [creating, setCreating] = useState({
+    database: false,
+    files: false,
+    full: false,
+  });
+  const [restoring, setRestoring] = useState({});
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const navigate = useNavigate();
 
@@ -65,13 +71,21 @@ const BackupManagement = () => {
 
       if (type === 'database') {
         await adminApiService.createDatabaseBackup(description);
-      } else {
+      } else if (type === 'files') {
         await adminApiService.createFilesBackup(description);
+      } else if (type === 'full') {
+        await adminApiService.createFullBackup(description);
       }
 
+      const typeText =
+        type === 'database'
+          ? 'Database'
+          : type === 'files'
+            ? 'Files'
+            : 'Full system';
       setMessage({
         type: 'success',
-        text: `${type === 'database' ? 'Database' : 'Files'} backup created successfully!`,
+        text: `${typeText} backup created successfully!`,
       });
 
       // Reload backups to show the new one
@@ -84,6 +98,47 @@ const BackupManagement = () => {
       });
     } finally {
       setCreating(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
+  const uploadBackup = async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const filename = file.name.toLowerCase();
+    if (!filename.endsWith('.sql') && !filename.endsWith('.zip')) {
+      setMessage({
+        type: 'error',
+        text: 'Please select a .sql or .zip backup file',
+      });
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setMessage({ type: '', text: '' });
+
+      const result = await adminApiService.uploadBackup(file);
+
+      setMessage({
+        type: 'success',
+        text: `Backup uploaded successfully! Type: ${result.backup_type}, Size: ${formatFileSize(result.backup_size)}`,
+      });
+
+      // Reload backups to show the uploaded one
+      await loadBackups();
+
+      // Clear the file input
+      event.target.value = '';
+    } catch (error) {
+      console.error('Error uploading backup:', error);
+      setMessage({
+        type: 'error',
+        text: 'Failed to upload backup: ' + error.message,
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -177,6 +232,51 @@ const BackupManagement = () => {
     }
   };
 
+  const restoreBackup = async (backupId, backupType) => {
+    try {
+      // Double confirmation for restore operations
+      const confirmRestore = window.confirm(
+        `⚠️ WARNING: This will restore from backup and REPLACE current data!\n\n` +
+          `This action will:\n` +
+          `- Create a safety backup of current data\n` +
+          `- Replace current ${backupType} with backup data\n` +
+          `- This operation cannot be undone\n\n` +
+          `Are you absolutely sure you want to continue?`
+      );
+
+      if (!confirmRestore) return;
+
+      setRestoring(prev => ({ ...prev, [backupId]: true }));
+      setMessage({ type: '', text: '' });
+
+      // Get confirmation token
+      const tokenResponse =
+        await adminApiService.getConfirmationToken(backupId);
+
+      // Execute restore
+      const result = await adminApiService.executeRestore(
+        backupId,
+        tokenResponse.confirmation_token
+      );
+
+      setMessage({
+        type: 'success',
+        text: `Restore completed successfully! Safety backup created with ID: ${result.safety_backup_id}`,
+      });
+
+      // Reload backups list
+      await loadBackups();
+    } catch (error) {
+      console.error('Error restoring backup:', error);
+      setMessage({
+        type: 'error',
+        text: 'Failed to restore backup: ' + error.message,
+      });
+    } finally {
+      setRestoring(prev => ({ ...prev, [backupId]: false }));
+    }
+  };
+
   return (
     <div className="backup-management">
       <AdminHeader
@@ -218,6 +318,39 @@ const BackupManagement = () => {
             >
               {creating.files ? 'Creating...' : 'Create Files Backup'}
             </button>
+          </div>
+
+          <div className="backup-action-card">
+            <h3>Full System Backup</h3>
+            <p>Create a complete backup (database + files)</p>
+            <button
+              className="backup-btn full"
+              onClick={() => createBackup('full')}
+              disabled={creating.full}
+            >
+              {creating.full ? 'Creating...' : 'Create Full Backup'}
+            </button>
+          </div>
+
+          <div className="backup-action-card">
+            <h3>Upload Backup</h3>
+            <p>Upload an external backup file (.sql or .zip)</p>
+            <div className="upload-section">
+              <input
+                type="file"
+                accept=".sql,.zip"
+                onChange={uploadBackup}
+                disabled={uploading}
+                id="backup-upload"
+                style={{ display: 'none' }}
+              />
+              <label
+                htmlFor="backup-upload"
+                className={`backup-btn upload ${uploading ? 'disabled' : ''}`}
+              >
+                {uploading ? 'Uploading...' : 'Choose Backup File'}
+              </label>
+            </div>
           </div>
 
           <div className="backup-action-card">
@@ -323,6 +456,20 @@ const BackupManagement = () => {
                             >
                               Verify
                             </button>
+                            {backup.file_exists && (
+                              <button
+                                className="action-btn restore"
+                                onClick={() =>
+                                  restoreBackup(backup.id, backup.backup_type)
+                                }
+                                disabled={restoring[backup.id]}
+                                title="Restore from this backup (DANGER: Replaces current data)"
+                              >
+                                {restoring[backup.id]
+                                  ? 'Restoring...'
+                                  : 'Restore'}
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -151,6 +151,10 @@ class AdminApiService extends BaseApiService {
     return this.post('/backups/create-files', { description });
   }
 
+  async createFullBackup(description) {
+    return this.post('/backups/create-full', { description });
+  }
+
   async downloadBackup(backupId) {
     const response = await fetch(
       `${this.baseURL}${this.basePath}/backups/${backupId}/download`,
@@ -204,6 +208,50 @@ class AdminApiService extends BaseApiService {
 
   async updateRetentionSettings(settings) {
     return this.post('/backups/settings/retention', settings);
+  }
+
+  // Restore management endpoints
+  async previewRestore(backupId) {
+    return this.post(`/restore/preview/${backupId}`);
+  }
+
+  async getConfirmationToken(backupId) {
+    return this.get(`/restore/confirmation-token/${backupId}`);
+  }
+
+  async executeRestore(backupId, confirmationToken) {
+    return this.post(`/restore/execute/${backupId}`, {
+      confirmation_token: confirmationToken,
+    });
+  }
+
+  // Upload backup file
+  async uploadBackup(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(
+      `${this.baseURL}${this.basePath}/restore/upload`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          // Don't set Content-Type - let browser set it with boundary for FormData
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(
+        errorData.detail || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    return response.json();
   }
 }
 

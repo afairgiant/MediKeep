@@ -125,6 +125,45 @@ async def create_files_backup(
         )
 
 
+@router.post("/create-full", response_model=BackupResponse)
+async def create_full_backup(
+    request: BackupCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Create a full system backup (database + files).
+
+    Only admin users can create backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        backup_result = await backup_service.create_full_backup(
+            description=request.description
+        )
+
+        logger.info(
+            f"Full backup created by admin user {current_user.id}: {backup_result['filename']}"
+        )
+
+        return BackupResponse(
+            id=backup_result["id"],
+            backup_type=backup_result["backup_type"],
+            filename=backup_result["filename"],
+            size_bytes=backup_result["size_bytes"],
+            status=backup_result["status"],
+            created_at=backup_result["created_at"],
+            description=request.description,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to create full backup: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create full backup: {str(e)}",
+        )
+
+
 @router.get("/")
 async def list_backups(
     db: Session = Depends(get_db),
