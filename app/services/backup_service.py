@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.models.models import BackupRecord
+from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
 
@@ -33,7 +34,9 @@ class BackupService:
     def _get_postgres_version(self) -> str:
         """Get PostgreSQL major version from the database."""
         try:
-            result = self.db.execute("SELECT version()").fetchone()
+            from sqlalchemy import text
+
+            result = self.db.execute(text("SELECT version()")).fetchone()
             version_string = result[0]
             # Extract major version from "PostgreSQL 15.3 on ..." -> "15"
             major_version = version_string.split()[1].split(".")[0]
@@ -217,6 +220,11 @@ class BackupService:
             with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 # Walk through the uploads directory and add all files
                 for root, dirs, files in os.walk(uploads_dir):
+                    # Skip trash directory
+                    root_path = Path(root)
+                    if "trash" in root_path.parts:
+                        continue
+
                     for file in files:
                         file_path = Path(root) / file
                         # Create archive path relative to uploads directory
@@ -301,7 +309,7 @@ class BackupService:
                     "backup_type": record.backup_type,
                     "status": record.status,
                     "filename": (
-                        Path(record.file_path).name if record.file_path else None
+                        Path(record.file_path).name if record.file_path else None  # type: ignore
                     ),
                     "file_path": record.file_path,
                     "size_bytes": record.size_bytes,
@@ -310,7 +318,7 @@ class BackupService:
                     "compression_used": record.compression_used,
                     "checksum": record.checksum,
                     "file_exists": (
-                        Path(record.file_path).exists() if record.file_path else False
+                        Path(record.file_path).exists() if record.file_path else False  # type: ignore
                     ),
                 }
                 backups.append(backup_info)
@@ -338,7 +346,7 @@ class BackupService:
             if not backup_record:
                 raise ValueError(f"Backup with ID {backup_id} not found")
 
-            backup_path = Path(backup_record.file_path)
+            backup_path = Path(backup_record.file_path)  # type: ignore
 
             # Check if file exists
             if not backup_path.exists():
@@ -354,7 +362,7 @@ class BackupService:
 
             # Check checksum if available
             checksum_matches = True
-            if backup_record.checksum:
+            if backup_record.checksum:  # type: ignore
                 current_checksum = self._calculate_file_checksum(backup_path)
                 checksum_matches = current_checksum == backup_record.checksum
 
@@ -363,7 +371,7 @@ class BackupService:
 
             # Update status if verification failed
             if not verified:
-                backup_record.status = "failed"
+                setattr(backup_record, "status", "failed")
                 self.db.commit()
 
             return {
@@ -415,8 +423,8 @@ class BackupService:
             for backup in old_backups:
                 try:
                     # Delete physical file
-                    if backup.file_path and Path(backup.file_path).exists():
-                        Path(backup.file_path).unlink()
+                    if backup.file_path and Path(backup.file_path).exists():  # type: ignore
+                        Path(backup.file_path).unlink()  # type: ignore
 
                     # Delete database record
                     self.db.delete(backup)
@@ -438,3 +446,32 @@ class BackupService:
         except Exception as e:
             logger.error(f"Failed to cleanup old backups: {str(e)}")
             raise Exception(f"Failed to cleanup old backups: {str(e)}")
+
+    async def cleanup_all_old_data(self) -> Dict[str, Any]:
+        """
+        Clean up both old backups and old trash files.
+
+        Returns:
+            Dictionary with cleanup statistics for both backups and trash
+        """
+        try:
+            # Cleanup old backups
+            backup_stats = await self.cleanup_old_backups()
+
+            # Cleanup old trash files
+            trash_stats = file_management_service.cleanup_old_trash()
+
+            total_stats = {
+                "backups": backup_stats,
+                "trash": trash_stats,
+                "total_files_cleaned": backup_stats.get("deleted_count", 0)
+                + trash_stats.get("deleted_files", 0),
+            }
+
+            logger.info(f"Complete cleanup finished: {total_stats}")
+            return total_stats
+
+        except Exception as e:
+            error_msg = f"Failed to cleanup old data: {str(e)}"
+            logger.error(error_msg)
+            raise Exception(error_msg)

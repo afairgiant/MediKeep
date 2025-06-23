@@ -171,6 +171,31 @@ class AdminApiService extends BaseApiService {
   async cleanupBackups() {
     return this.post('/backups/cleanup');
   }
+
+  async cleanupAllOldData() {
+    return this.post('/backups/cleanup-all');
+  }
+
+  // Trash management endpoints
+  async listTrashContents() {
+    return this.get('/trash/');
+  }
+
+  async cleanupTrash() {
+    return this.post('/trash/cleanup');
+  }
+
+  async restoreFromTrash(trashPath, restorePath = null) {
+    const body = { trash_path: trashPath };
+    if (restorePath) body.restore_path = restorePath;
+    return this.post('/trash/restore', body);
+  }
+
+  async permanentlyDeleteFromTrash(trashPath) {
+    return this.delete(
+      `/trash/permanently-delete?trash_path=${encodeURIComponent(trashPath)}`
+    );
+  }
 }
 
 // Create and export a singleton instance

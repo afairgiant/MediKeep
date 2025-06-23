@@ -47,6 +47,12 @@ class Settings:  # App Info
         os.getenv("BACKUP_RETENTION_DAYS", "7")
     )  # Keep it simple initially
 
+    # Trash directory settings
+    TRASH_DIR: Path = Path(os.getenv("TRASH_DIR", "./uploads/trash"))
+    TRASH_RETENTION_DAYS: int = int(
+        os.getenv("TRASH_RETENTION_DAYS", "30")
+    )  # Keep deleted files for 30 days
+
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")

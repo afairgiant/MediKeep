@@ -242,3 +242,29 @@ async def cleanup_old_backups(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup backups: {str(e)}",
         )
+
+
+@router.post("/cleanup-all")
+async def cleanup_all_old_data(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Clean up both old backups and old trash files.
+
+    Only admin users can trigger cleanup.
+    """
+    try:
+        backup_service = BackupService(db)
+        cleanup_result = await backup_service.cleanup_all_old_data()
+
+        logger.info(f"Complete cleanup triggered by admin user {current_user.id}")
+
+        return cleanup_result
+
+    except Exception as e:
+        logger.error(f"Failed to cleanup old data: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to cleanup old data: {str(e)}",
+        )

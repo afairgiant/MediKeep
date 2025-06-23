@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import List, Optional
 
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.crud.base import CRUDBase
 from app.models.models import LabResultFile
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileUpdate
+from app.services.file_management_service import file_management_service
 
 
 class CRUDLabResultFile(
@@ -102,14 +104,59 @@ class CRUDLabResultFile(
         )
 
     def delete_by_lab_result(self, db: Session, *, lab_result_id: int) -> int:
-        """Delete all files associated with a lab result"""
-        deleted_count = (
-            db.query(self.model)
-            .filter(LabResultFile.lab_result_id == lab_result_id)
-            .delete()
-        )
+        """Delete all files associated with a lab result (moves to trash)"""
+        # Get all files for this lab result
+        files_to_delete = self.get_by_lab_result(db=db, lab_result_id=lab_result_id)
+
+        deleted_count = 0
+        for file_record in files_to_delete:
+            try:
+                # Move physical file to trash
+                file_management_service.move_to_trash(
+                    file_record.file_path, reason=f"Lab result {lab_result_id} deletion"
+                )
+
+                # Remove database record
+                db.delete(file_record)
+                deleted_count += 1
+
+            except Exception as e:
+                # Log error but continue with other files
+                from app.core.logging_config import get_logger
+
+                logger = get_logger(__name__, "app")
+                logger.error(f"Failed to delete file {file_record.file_path}: {str(e)}")
+
         db.commit()
         return deleted_count
+
+    def remove(self, db: Session, *, id: int) -> Optional[LabResultFile]:
+        """Override base remove method to move file to trash before deleting record"""
+        # Get the file record first
+        file_record = self.get(db=db, id=id)
+        if not file_record:
+            return None
+
+        try:
+            # Move physical file to trash
+            file_management_service.move_to_trash(
+                file_record.file_path, reason="Individual file deletion"
+            )
+
+            # Remove database record
+            db.delete(file_record)
+            db.commit()
+
+            return file_record
+
+        except Exception as e:
+            # Log error and rollback
+            from app.core.logging_config import get_logger
+
+            logger = get_logger(__name__, "app")
+            logger.error(f"Failed to delete file {file_record.file_path}: {str(e)}")
+            db.rollback()
+            raise e
 
     def get_files_by_date_range(
         self, db: Session, *, start_date, end_date, skip: int = 0, limit: int = 100
