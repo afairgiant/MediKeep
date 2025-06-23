@@ -331,7 +331,7 @@ class ExportService:
 
     def _format_file_size(self, size_bytes: Optional[int]) -> str:
         """Format file size in human readable format."""
-        if not size_bytes:
+        if size_bytes is None or size_bytes <= 0:
             return "Unknown size"
 
         for unit in ["B", "KB", "MB", "GB"]:
