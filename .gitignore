@@ -118,3 +118,4 @@ docker/dev/dev-docker-compose.yml
 /logs
 .cursor/rules/venv.mdc
 scripts/
+backups/

@@ -9,7 +9,7 @@ import hashlib
 import os
 import shutil
 import subprocess
-import tarfile
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -200,7 +200,7 @@ class BackupService:
         try:
             # Generate backup filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_filename = f"files_backup_{timestamp}.tar.gz"
+            backup_filename = f"files_backup_{timestamp}.zip"
             backup_path = self.backup_dir / backup_filename
 
             # Ensure backup directory exists
@@ -213,9 +213,15 @@ class BackupService:
 
             logger.info(f"Starting files backup: {backup_filename}")
 
-            # Create tar archive
-            with tarfile.open(backup_path, "w:gz") as tar:
-                tar.add(uploads_dir, arcname="uploads", recursive=True)
+            # Create ZIP archive
+            with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+                # Walk through the uploads directory and add all files
+                for root, dirs, files in os.walk(uploads_dir):
+                    for file in files:
+                        file_path = Path(root) / file
+                        # Create archive path relative to uploads directory
+                        arcname = Path("uploads") / file_path.relative_to(uploads_dir)
+                        zipf.write(file_path, arcname)
 
             # Verify backup file was created
             if not backup_path.exists():
