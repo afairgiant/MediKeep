@@ -51,10 +51,18 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
       <div className="header-right">
         <button
           className="back-to-dashboard-btn"
+          onClick={() => (window.location.href = '/admin')}
+          title="Return to Admin Dashboard"
+        >
+          ← Admin Dashboard
+        </button>
+
+        <button
+          className="back-to-home-btn"
           onClick={() => (window.location.href = '/dashboard')}
           title="Return to Normal Dashboard"
         >
-          ← Home
+          🏠 Home
         </button>
 
         <div className="admin-user-info">

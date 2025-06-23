@@ -196,6 +196,15 @@ class AdminApiService extends BaseApiService {
       `/trash/permanently-delete?trash_path=${encodeURIComponent(trashPath)}`
     );
   }
+
+  // Settings management endpoints
+  async getRetentionSettings() {
+    return this.get('/backups/settings/retention');
+  }
+
+  async updateRetentionSettings(settings) {
+    return this.post('/backups/settings/retention', settings);
+  }
 }
 
 // Create and export a singleton instance

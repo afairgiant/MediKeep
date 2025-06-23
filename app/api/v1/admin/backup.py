@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
+from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.models.models import User
 from app.services.backup_service import BackupService
@@ -34,6 +35,16 @@ class BackupResponse(BaseModel):
     status: str
     created_at: str
     description: Optional[str]
+
+
+class RetentionSettingsResponse(BaseModel):
+    backup_retention_days: int
+    trash_retention_days: int
+
+
+class RetentionSettingsUpdate(BaseModel):
+    backup_retention_days: Optional[int] = None
+    trash_retention_days: Optional[int] = None
 
 
 @router.post("/create-database", response_model=BackupResponse)
@@ -267,4 +278,66 @@ async def cleanup_all_old_data(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup old data: {str(e)}",
+        )
+
+
+@router.get("/settings/retention", response_model=RetentionSettingsResponse)
+async def get_retention_settings(
+    current_user: User = Depends(get_current_admin_user),
+) -> RetentionSettingsResponse:
+    """Get current retention settings for backups and trash."""
+    return RetentionSettingsResponse(
+        backup_retention_days=settings.BACKUP_RETENTION_DAYS,
+        trash_retention_days=settings.TRASH_RETENTION_DAYS,
+    )
+
+
+@router.post("/settings/retention")
+async def update_retention_settings(
+    settings_update: RetentionSettingsUpdate,
+    current_user: User = Depends(get_current_admin_user),
+):
+    """Update retention settings for backups and trash."""
+    try:
+        updated_settings = {}
+
+        if settings_update.backup_retention_days is not None:
+            if settings_update.backup_retention_days < 1:
+                raise HTTPException(
+                    status_code=400, detail="Backup retention days must be at least 1"
+                )
+            settings.BACKUP_RETENTION_DAYS = settings_update.backup_retention_days
+            updated_settings["backup_retention_days"] = (
+                settings_update.backup_retention_days
+            )
+
+        if settings_update.trash_retention_days is not None:
+            if settings_update.trash_retention_days < 1:
+                raise HTTPException(
+                    status_code=400, detail="Trash retention days must be at least 1"
+                )
+            settings.TRASH_RETENTION_DAYS = settings_update.trash_retention_days
+            updated_settings["trash_retention_days"] = (
+                settings_update.trash_retention_days
+            )
+
+        logger.info(
+            f"Admin {current_user.username} updated retention settings: {updated_settings}"
+        )
+
+        return {
+            "message": "Retention settings updated successfully",
+            "updated_settings": updated_settings,
+            "current_settings": {
+                "backup_retention_days": settings.BACKUP_RETENTION_DAYS,
+                "trash_retention_days": settings.TRASH_RETENTION_DAYS,
+            },
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update retention settings: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update retention settings: {str(e)}"
         )

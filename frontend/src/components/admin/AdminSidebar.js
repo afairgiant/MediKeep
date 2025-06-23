@@ -105,6 +105,14 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
             <span className="nav-icon">🔍</span>
             <span className="nav-text">System Health</span>
           </Link>
+          <Link
+            to="/admin/settings"
+            className={`nav-item ${currentPath.includes('/admin/settings') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/settings')}
+          >
+            <span className="nav-icon">⚙️</span>
+            <span className="nav-text">Settings</span>
+          </Link>
         </div>
       </nav>
     </div>

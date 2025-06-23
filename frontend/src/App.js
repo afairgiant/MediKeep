@@ -43,6 +43,7 @@ import ModelEdit from './pages/admin/ModelEdit';
 import ModelCreate from './pages/admin/ModelCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
+import AdminSettings from './pages/admin/AdminSettings';
 
 // Components
 import { LoggingTest, ErrorBoundary } from './components';
@@ -315,6 +316,14 @@ function App() {
                     element={
                       <AdminRoute>
                         <SystemHealth />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/settings"
+                    element={
+                      <AdminRoute>
+                        <AdminSettings />
                       </AdminRoute>
                     }
                   />

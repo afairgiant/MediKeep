@@ -37,6 +37,12 @@ class BackupService:
             from sqlalchemy import text
 
             result = self.db.execute(text("SELECT version()")).fetchone()
+            if result is None:
+                logger.warning(
+                    "PostgreSQL version query returned no results, defaulting to 17"
+                )
+                return "17"
+
             version_string = result[0]
             # Extract major version from "PostgreSQL 15.3 on ..." -> "15"
             major_version = version_string.split()[1].split(".")[0]
