@@ -105,7 +105,12 @@ class FileManagementService:
             Dictionary with restore operation details
         """
         try:
-            trash_file = Path(trash_path)
+            # Validate and normalize trash_path to prevent directory traversal
+            normalized_trash_path = os.path.normpath(trash_path)
+            if not normalized_trash_path.startswith(str(self.trash_dir)):
+                raise ValueError(f"Invalid trash path: {trash_path}")
+
+            trash_file = Path(normalized_trash_path)
 
             if not trash_file.exists():
                 raise FileNotFoundError(f"File not found in trash: {trash_path}")
@@ -123,7 +128,14 @@ class FileManagementService:
 
             # Determine restore destination
             if restore_path:
-                destination = Path(restore_path)
+                # Validate and normalize restore_path to prevent directory traversal
+                normalized_restore_path = os.path.normpath(restore_path)
+                # Only allow restore to uploads directory or its subdirectories
+                if not normalized_restore_path.startswith(str(self.uploads_dir)):
+                    raise ValueError(
+                        f"Invalid restore path: {restore_path}. Files can only be restored to uploads directory."
+                    )
+                destination = Path(normalized_restore_path)
             elif original_path:
                 destination = Path(original_path)
             else:

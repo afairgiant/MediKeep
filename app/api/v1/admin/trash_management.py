@@ -51,6 +51,8 @@ async def restore_file_from_trash(
     """
     try:
         return file_management_service.restore_from_trash(trash_path, restore_path)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="File not found in trash")
     except Exception as e:
@@ -66,9 +68,17 @@ async def permanently_delete_from_trash(
     Permanently delete a file from trash (cannot be recovered).
     """
     try:
+        import os
         from pathlib import Path
 
-        trash_file = Path(trash_path)
+        from app.core.config import settings
+
+        # Validate and normalize trash_path to prevent directory traversal
+        normalized_trash_path = os.path.normpath(trash_path)
+        if not normalized_trash_path.startswith(str(settings.TRASH_DIR)):
+            raise ValueError(f"Invalid trash path: {trash_path}")
+
+        trash_file = Path(normalized_trash_path)
         if not trash_file.exists():
             raise HTTPException(status_code=404, detail="File not found in trash")
 
@@ -84,5 +94,7 @@ async def permanently_delete_from_trash(
             "message": f"File permanently deleted: {trash_path}",
         }
 
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
