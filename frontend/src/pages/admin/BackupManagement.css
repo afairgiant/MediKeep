@@ -226,6 +226,7 @@
 .backup-table table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .backup-table th {
@@ -238,10 +239,40 @@
   white-space: nowrap;
 }
 
+.backup-table th:nth-child(1) {
+  width: 10%;
+}
+.backup-table th:nth-child(2) {
+  width: 25%;
+}
+.backup-table th:nth-child(3) {
+  width: 10%;
+}
+.backup-table th:nth-child(4) {
+  width: 10%;
+}
+.backup-table th:nth-child(5) {
+  width: 15%;
+}
+.backup-table th:nth-child(6) {
+  width: 10%;
+}
+.backup-table th:nth-child(7) {
+  width: 20%;
+}
+
 .backup-table td {
   padding: 1rem;
   border-bottom: 1px solid #dee2e6;
   vertical-align: middle;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.backup-table td:nth-child(2) {
+  word-break: break-all;
+  line-height: 1.4;
+  max-width: 0;
 }
 
 .backup-table tr:hover {
@@ -286,6 +317,11 @@
   color: #155724;
 }
 
+.backup-status.uploaded {
+  background-color: #e1f5fe;
+  color: #01579b;
+}
+
 .backup-status.failed {
   background-color: #f8d7da;
   color: #721c24;
@@ -294,6 +330,26 @@
 .backup-status.verified {
   background-color: #cce5ff;
   color: #004085;
+}
+
+.backup-status.missing {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.backup-status.corrupted {
+  background-color: #f5c6cb;
+  color: #721c24;
+}
+
+.backup-status.size_mismatch {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.backup-status.checksum_failed {
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 .file-exists {
@@ -360,6 +416,15 @@
 .action-btn.restore:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
+}
+
+.action-btn.delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.action-btn.delete:hover {
+  background-color: #c82333;
 }
 
 .upload-section {

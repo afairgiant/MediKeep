@@ -172,6 +172,10 @@ class AdminApiService extends BaseApiService {
     return this.post(`/backups/${backupId}/verify`);
   }
 
+  async deleteBackup(backupId) {
+    return this.delete(`/backups/${backupId}`);
+  }
+
   async cleanupBackups() {
     return this.post('/backups/cleanup');
   }

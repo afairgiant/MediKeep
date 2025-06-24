@@ -47,6 +47,7 @@ class RestoreExecuteResponse(BaseModel):
     backup_type: str
     safety_backup_id: int
     restore_completed: str
+    warnings: Optional[str] = None
 
 
 class UploadBackupResponse(BaseModel):
@@ -162,14 +163,15 @@ async def execute_restore(
     Requires a valid confirmation token.
     """
     try:
+        # Extract user info before restore to prevent session issues
+        username = current_user.username
+
         restore_service = RestoreService(db)
         result = await restore_service.execute_restore(
             backup_id, request.confirmation_token
         )
 
-        logger.info(
-            f"Admin {current_user.username} executed restore for backup {backup_id}"
-        )
+        logger.info(f"Admin {username} executed restore for backup {backup_id}")
 
         return RestoreExecuteResponse(**result)
 

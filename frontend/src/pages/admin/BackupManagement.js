@@ -169,18 +169,58 @@ const BackupManagement = () => {
   const verifyBackup = async backupId => {
     try {
       const result = await adminApiService.verifyBackup(backupId);
-      const statusText = result.verified
-        ? 'Backup is valid!'
-        : 'Backup verification failed!';
+
+      let statusText;
+      if (result.verified) {
+        statusText = 'Backup is valid!';
+      } else if (result.status_updated) {
+        statusText = `Backup verification failed: ${result.status_updated}`;
+      } else {
+        statusText = 'Backup verification failed!';
+      }
+
       setMessage({
         type: result.verified ? 'success' : 'error',
         text: statusText,
       });
+
+      // Reload backups to show updated status
+      await loadBackups();
     } catch (error) {
       console.error('Error verifying backup:', error);
       setMessage({
         type: 'error',
         text: 'Failed to verify backup: ' + error.message,
+      });
+    }
+  };
+
+  const deleteBackup = async (backupId, filename) => {
+    try {
+      const confirmDelete = window.confirm(
+        `Are you sure you want to delete backup "${filename}"?\n\n` +
+          `This will permanently remove:\n` +
+          `- The backup file from storage\n` +
+          `- The backup record from the database\n\n` +
+          `This action cannot be undone.`
+      );
+
+      if (!confirmDelete) return;
+
+      const result = await adminApiService.deleteBackup(backupId);
+
+      setMessage({
+        type: 'success',
+        text: result.message,
+      });
+
+      // Reload backups to remove the deleted one
+      await loadBackups();
+    } catch (error) {
+      console.error('Error deleting backup:', error);
+      setMessage({
+        type: 'error',
+        text: 'Failed to delete backup: ' + error.message,
       });
     }
   };
@@ -259,9 +299,16 @@ const BackupManagement = () => {
         tokenResponse.confirmation_token
       );
 
+      let successMessage = `Restore completed successfully! Safety backup created with ID: ${result.safety_backup_id}`;
+
+      // Add warnings if they exist
+      if (result.warnings) {
+        successMessage += `\n\nNote: Some compatibility warnings occurred during restore (this is normal when restoring backups from different systems).`;
+      }
+
       setMessage({
         type: 'success',
-        text: `Restore completed successfully! Safety backup created with ID: ${result.safety_backup_id}`,
+        text: successMessage,
       });
 
       // Reload backups list
@@ -455,6 +502,15 @@ const BackupManagement = () => {
                               title="Verify backup integrity"
                             >
                               Verify
+                            </button>
+                            <button
+                              className="action-btn delete"
+                              onClick={() =>
+                                deleteBackup(backup.id, backup.filename)
+                              }
+                              title="Delete backup record and file"
+                            >
+                              Delete
                             </button>
                             {backup.file_exists && (
                               <button

@@ -302,10 +302,10 @@ class BackupService:
             List of backup records
         """
         try:
-            # Only return successful backups, not failed ones
+            # Return all backups except completely failed ones (so users can see and manage problematic ones)
             backup_records = (
                 self.db.query(BackupRecord)
-                .filter(BackupRecord.status == "created")
+                .filter(BackupRecord.status != "failed")
                 .order_by(BackupRecord.created_at.desc())
                 .all()
             )
@@ -358,10 +358,15 @@ class BackupService:
 
             # Check if file exists
             if not backup_path.exists():
+                # Update status to indicate missing file
+                setattr(backup_record, "status", "missing")
+                self.db.commit()
                 return {
                     "backup_id": backup_id,
                     "verified": False,
+                    "file_exists": False,
                     "error": "Backup file does not exist",
+                    "status_updated": "missing",
                 }
 
             # Check file size
@@ -377,9 +382,19 @@ class BackupService:
             # Overall verification result
             verified = size_matches and checksum_matches
 
-            # Update status if verification failed
+            # Update status based on verification result
+            new_status = None
             if not verified:
-                setattr(backup_record, "status", "failed")
+                if not size_matches and not checksum_matches:
+                    new_status = "corrupted"
+                elif not size_matches:
+                    new_status = "size_mismatch"
+                elif not checksum_matches:
+                    new_status = "checksum_failed"
+                else:
+                    new_status = "failed"
+
+                setattr(backup_record, "status", new_status)
                 self.db.commit()
 
             return {
@@ -390,11 +405,57 @@ class BackupService:
                 "checksum_matches": checksum_matches,
                 "current_size": current_size,
                 "expected_size": backup_record.size_bytes,
+                "status_updated": new_status,
             }
 
         except Exception as e:
             logger.error(f"Failed to verify backup {backup_id}: {str(e)}")
             return {"backup_id": backup_id, "verified": False, "error": str(e)}
+
+    async def delete_backup(self, backup_id: int) -> Dict[str, Any]:
+        """
+        Delete a backup record and its associated file.
+
+        Args:
+            backup_id: ID of the backup to delete
+
+        Returns:
+            Dictionary containing deletion results
+        """
+        try:
+            backup_record = (
+                self.db.query(BackupRecord).filter(BackupRecord.id == backup_id).first()
+            )
+            if not backup_record:
+                raise ValueError(f"Backup with ID {backup_id} not found")
+
+            backup_path = Path(backup_record.file_path) if backup_record.file_path else None  # type: ignore
+            filename = backup_path.name if backup_path else "Unknown"
+
+            # Delete physical file if it exists
+            file_deleted = False
+            if backup_path and backup_path.exists():
+                backup_path.unlink()
+                file_deleted = True
+                logger.info(f"Deleted backup file: {backup_path}")
+
+            # Delete database record
+            self.db.delete(backup_record)
+            self.db.commit()
+
+            logger.info(f"Deleted backup record: {backup_id} ({filename})")
+
+            return {
+                "backup_id": backup_id,
+                "filename": filename,
+                "file_deleted": file_deleted,
+                "record_deleted": True,
+                "message": f"Backup '{filename}' deleted successfully",
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to delete backup {backup_id}: {str(e)}")
+            raise Exception(f"Failed to delete backup: {str(e)}")
 
     def _calculate_file_checksum(self, file_path: Path) -> str:
         """Calculate SHA256 checksum of a file."""
@@ -589,44 +650,53 @@ class BackupService:
         if not db_url:
             raise ValueError("DATABASE_URL not configured")
 
+        import os
+        import shutil
         import urllib.parse
 
         parsed = urllib.parse.urlparse(db_url)
 
-        # Handle localhost connections for Docker
-        hostname = parsed.hostname
-        if hostname in ["localhost", "127.0.0.1"]:
-            hostname = "host.docker.internal"
+        # Use native pg_dump (since we're in a container without Docker)
+        logger.info("Using native pg_dump for database backup")
 
-        # Auto-detect PostgreSQL version for compatibility
-        postgres_version = self._get_postgres_version()
+        # Check if pg_dump is available
+        if not shutil.which("pg_dump"):
+            raise Exception("pg_dump is not available for database backup")
 
         cmd = [
-            "docker",
-            "run",
-            "--rm",
-            "-e",
-            f"PGPASSWORD={parsed.password}",
-            f"postgres:{postgres_version}",
             "pg_dump",
             "-h",
-            hostname,
+            parsed.hostname,
             "-p",
             str(parsed.port),
             "-U",
             parsed.username,
             "-d",
-            parsed.path[1:],
+            parsed.path[1:],  # Remove leading slash
             "--verbose",
             "--no-password",
         ]
 
-        # Execute pg_dump via Docker and capture output
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # Set password via environment variable
+        env = os.environ.copy()
+        env["PGPASSWORD"] = parsed.password
 
-        # Write the SQL dump to file
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(result.stdout)
+        # Execute pg_dump and capture output
+        try:
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=True, env=env
+            )
+
+            # Write the SQL dump to file
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(result.stdout)
+
+            logger.info(f"Database dump created successfully: {output_path}")
+
+        except subprocess.CalledProcessError as e:
+            error_msg = f"Database dump failed: {e.stderr}"
+            logger.error(error_msg)
+            raise Exception(error_msg)
 
     async def cleanup_all_old_data(self) -> Dict[str, Any]:
         """

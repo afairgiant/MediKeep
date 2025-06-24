@@ -268,6 +268,35 @@ async def verify_backup(
         )
 
 
+@router.delete("/{backup_id}")
+async def delete_backup(
+    backup_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Delete a backup record and its associated file.
+
+    Only admin users can delete backups.
+    """
+    try:
+        backup_service = BackupService(db)
+        deletion_result = await backup_service.delete_backup(backup_id)
+
+        logger.info(f"Backup {backup_id} deleted by admin user {current_user.id}")
+
+        return deletion_result
+
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to delete backup {backup_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete backup: {str(e)}",
+        )
+
+
 @router.post("/cleanup")
 async def cleanup_old_backups(
     db: Session = Depends(get_db),
