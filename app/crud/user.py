@@ -296,6 +296,40 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             db=db, record_id=user_id, relations=["patient"]
         )
 
+    def get_admin_count(self, db: Session) -> int:
+        """
+        Get the total count of admin users in the system.
+
+        Args:
+            db: SQLAlchemy database session
+
+        Returns:
+            Number of admin users in the system
+
+        Example:
+            admin_count = user_crud.get_admin_count(db)
+        """
+        return (
+            db.query(self.model)
+            .filter(self.model.role.in_(["admin", "administrator"]))
+            .count()
+        )
+
+    def get_total_count(self, db: Session) -> int:
+        """
+        Get the total count of all users in the system.
+
+        Args:
+            db: SQLAlchemy database session
+
+        Returns:
+            Total number of users in the system
+
+        Example:
+            total_users = user_crud.get_total_count(db)
+        """
+        return db.query(self.model).count()
+
 
 # Create the user CRUD instance
 user = CRUDUser(User)

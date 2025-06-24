@@ -162,18 +162,27 @@ def check_database_connection():
 
 
 def create_default_user():
-    """Create a default admin user and patient record if none exists"""
+    """Create a default admin user only if NO admin users exist (fresh installation)"""
+    from app.crud.user import user
     from app.services.auth import AuthService
 
     db = SessionLocal()
     try:
-        if not AuthService.get_user_by_username(db, "admin"):
+        # Check if ANY admin users exist in the system
+        admin_count = user.get_admin_count(db)
+
+        if admin_count == 0:
+            # No admin users exist - create default admin
             AuthService.create_user(
                 db, username="admin", password="admin123", is_superuser=True
             )
-            print("✅ Default admin user and patient record created successfully.")
+            print("✅ Fresh installation detected - Default admin user created")
+            print("   Username: admin, Password: admin123")
+            print("   🔐 Please change the default password after first login!")
         else:
-            print("ℹ️  Default admin user already exists.")
+            print(
+                f"ℹ️  Admin users already exist ({admin_count} found) - skipping default user creation"
+            )
     finally:
         db.close()
 

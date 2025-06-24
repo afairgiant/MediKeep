@@ -38,7 +38,7 @@ yarn.lock
 *.env.production.local
 
 !/frontend/.env
-!/app/scripts/
+!/app/scripts
 
 # Editor and system files
 .DS_Store
@@ -117,5 +117,5 @@ docker/dev/dev-docker-compose.yml
 
 /logs
 .cursor/rules/venv.mdc
-scripts/
+
 backups/
