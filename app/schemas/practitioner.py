@@ -1,6 +1,7 @@
-from pydantic import BaseModel, validator
-from typing import Optional
 import re
+from typing import Optional
+
+from pydantic import BaseModel, validator
 
 
 class PractitionerBase(BaseModel):
@@ -76,19 +77,20 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practice must be at least 2 characters long")
         if len(v) > 100:
             raise ValueError("Practice must be less than 100 characters")
-        return v.strip()    
+        return v.strip()
+
     @validator("phone_number")
     def validate_phone_number(cls, v):
         """
         Validate and clean phone number field.
-        
+
         Accepts various formats like:
         - (919) 555-1234
-        - 919-555-1234  
+        - 919-555-1234
         - 919.555.1234
         - 9195551234
         - +1 919 555 1234
-        
+
         Stores as digits only for consistency.
 
         Args:
@@ -102,19 +104,19 @@ class PractitionerBase(BaseModel):
         """
         if v is None or v.strip() == "":
             return None
-        
+
         # Remove all non-digit characters for validation and storage
-        digits_only = re.sub(r'[^\d]', '', v)
-        
+        digits_only = re.sub(r"[^\d]", "", v)
+
         # Handle international numbers with country code
-        if digits_only.startswith('1') and len(digits_only) == 11:
+        if digits_only.startswith("1") and len(digits_only) == 11:
             # US/Canada number with country code - remove the leading 1
             digits_only = digits_only[1:]
-        
+
         # Check if it's a reasonable phone number length (10-15 digits)
         if len(digits_only) < 10 or len(digits_only) > 15:
             raise ValueError("Phone number must be between 10-15 digits")
-        
+
         # Return digits only for consistent storage
         return digits_only
 
@@ -134,25 +136,27 @@ class PractitionerBase(BaseModel):
         """
         if v is None or v.strip() == "":
             return None
-        
+
         # Basic URL validation
         url_pattern = re.compile(
-            r'^https?://'  # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-        
+            r"^https?://"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
+            r"localhost|"  # localhost...
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+            r"(?::\d+)?"  # optional port
+            r"(?:/?|[/?]\S+)$",
+            re.IGNORECASE,
+        )
+
         cleaned_url = v.strip()
-        
+
         # Add https:// if no protocol specified
-        if not cleaned_url.startswith(('http://', 'https://')):
-            cleaned_url = 'https://' + cleaned_url
-        
+        if not cleaned_url.startswith(("http://", "https://")):
+            cleaned_url = "https://" + cleaned_url
+
         if not url_pattern.match(cleaned_url):
             raise ValueError("Please enter a valid website URL")
-        
+
         return cleaned_url
 
     @validator("rating")
@@ -171,13 +175,13 @@ class PractitionerBase(BaseModel):
         """
         if v is None:
             return None
-        
+
         if not isinstance(v, (int, float)):
             raise ValueError("Rating must be a number")
-        
+
         if v < 0 or v > 5:
             raise ValueError("Rating must be between 0 and 5")
-        
+
         return round(float(v), 1)  # Round to 1 decimal place
 
 
@@ -255,14 +259,14 @@ class PractitionerUpdate(BaseModel):
         """Validate phone number if provided."""
         if v is None or v.strip() == "":
             return None
-        
+
         # Remove all non-digit characters for validation
-        digits_only = re.sub(r'[^\d]', '', v)
-        
+        digits_only = re.sub(r"[^\d]", "", v)
+
         # Check if it's a reasonable phone number length (10-15 digits)
         if len(digits_only) < 10 or len(digits_only) > 15:
             raise ValueError("Phone number must be between 10-15 digits")
-        
+
         return v.strip()
 
     @validator("website")
@@ -270,25 +274,27 @@ class PractitionerUpdate(BaseModel):
         """Validate website URL if provided."""
         if v is None or v.strip() == "":
             return None
-        
+
         # Basic URL validation
         url_pattern = re.compile(
-            r'^https?://'  # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-        
+            r"^https?://"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
+            r"localhost|"  # localhost...
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+            r"(?::\d+)?"  # optional port
+            r"(?:/?|[/?]\S+)$",
+            re.IGNORECASE,
+        )
+
         cleaned_url = v.strip()
-        
+
         # Add https:// if no protocol specified
-        if not cleaned_url.startswith(('http://', 'https://')):
-            cleaned_url = 'https://' + cleaned_url
-        
+        if not cleaned_url.startswith(("http://", "https://")):
+            cleaned_url = "https://" + cleaned_url
+
         if not url_pattern.match(cleaned_url):
             raise ValueError("Please enter a valid website URL")
-        
+
         return cleaned_url
 
     @validator("rating")
@@ -296,13 +302,13 @@ class PractitionerUpdate(BaseModel):
         """Validate rating if provided."""
         if v is None:
             return None
-        
+
         if not isinstance(v, (int, float)):
             raise ValueError("Rating must be a number")
-        
+
         if v < 0 or v > 5:
             raise ValueError("Rating must be between 0 and 5")
-        
+
         return round(float(v), 1)  # Round to 1 decimal place
 
 

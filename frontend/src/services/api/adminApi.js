@@ -137,6 +137,126 @@ class AdminApiService extends BaseApiService {
       throw error;
     }
   }
+
+  // Backup management endpoints
+  async getBackups() {
+    return this.get('/backups/');
+  }
+
+  async createDatabaseBackup(description) {
+    return this.post('/backups/create-database', { description });
+  }
+
+  async createFilesBackup(description) {
+    return this.post('/backups/create-files', { description });
+  }
+
+  async createFullBackup(description) {
+    return this.post('/backups/create-full', { description });
+  }
+
+  async downloadBackup(backupId) {
+    const response = await fetch(
+      `${this.baseURL}${this.basePath}/backups/${backupId}/download`,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.blob();
+  }
+
+  async verifyBackup(backupId) {
+    return this.post(`/backups/${backupId}/verify`);
+  }
+
+  async deleteBackup(backupId) {
+    return this.delete(`/backups/${backupId}`);
+  }
+
+  async cleanupBackups() {
+    return this.post('/backups/cleanup');
+  }
+
+  async cleanupAllOldData() {
+    return this.post('/backups/cleanup-all');
+  }
+
+  // Trash management endpoints
+  async listTrashContents() {
+    return this.get('/trash/');
+  }
+
+  async cleanupTrash() {
+    return this.post('/trash/cleanup');
+  }
+
+  async restoreFromTrash(trashPath, restorePath = null) {
+    const body = { trash_path: trashPath };
+    if (restorePath) body.restore_path = restorePath;
+    return this.post('/trash/restore', body);
+  }
+
+  async permanentlyDeleteFromTrash(trashPath) {
+    return this.delete(
+      `/trash/permanently-delete?trash_path=${encodeURIComponent(trashPath)}`
+    );
+  }
+
+  // Settings management endpoints
+  async getRetentionSettings() {
+    return this.get('/backups/settings/retention');
+  }
+
+  async updateRetentionSettings(settings) {
+    return this.post('/backups/settings/retention', settings);
+  }
+
+  // Restore management endpoints
+  async previewRestore(backupId) {
+    return this.post(`/restore/preview/${backupId}`);
+  }
+
+  async getConfirmationToken(backupId) {
+    return this.get(`/restore/confirmation-token/${backupId}`);
+  }
+
+  async executeRestore(backupId, confirmationToken) {
+    return this.post(`/restore/execute/${backupId}`, {
+      confirmation_token: confirmationToken,
+    });
+  }
+
+  // Upload backup file
+  async uploadBackup(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(
+      `${this.baseURL}${this.basePath}/restore/upload`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          // Don't set Content-Type - let browser set it with boundary for FormData
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(
+        errorData.detail || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    return response.json();
+  }
 }
 
 // Create and export a singleton instance

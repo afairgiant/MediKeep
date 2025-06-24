@@ -41,6 +41,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     bash \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -70,7 +71,7 @@ COPY --from=frontend-build /frontend/build ./static
 COPY docker/entrypoint.sh /app/entrypoint.sh
 
 # Create directories and set all permissions in one layer
-RUN mkdir -p logs uploads/labwork && \
+RUN mkdir -p logs uploads/labwork backups && \
     chmod +x /app/entrypoint.sh && \
     chown -R appuser:appuser /app
 
@@ -82,8 +83,8 @@ EXPOSE 8000
 
 # Add labels for better maintenance
 LABEL maintainer="afairgiant" \
-      version="0.7.0" \
-      description="Medical Records System - React + FastAPI"
+        version="0.7.0" \
+        description="Medical Records System - React + FastAPI"
 
 # Health check with better configuration
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

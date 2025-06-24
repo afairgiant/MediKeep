@@ -13,11 +13,16 @@ import '../../styles/shared/MedicalPageShared.css';
 
 const Practitioners = () => {
   const navigate = useNavigate();
-  
+
   // Using global state for practitioners data
-  const { practitioners, loading, error: practitionersError, refresh } = usePractitioners();
+  const {
+    practitioners,
+    loading,
+    error: practitionersError,
+    refresh,
+  } = usePractitioners();
   const { invalidatePractitioners } = useCacheManager();
-  
+
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,10 +114,18 @@ const Practitioners = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      // Clean the phone number before sending to API (remove formatting)
+      // Clean the data before sending to API
       const dataToSubmit = {
         ...formData,
         phone_number: cleanPhoneNumber(formData.phone_number) || null,
+        website:
+          formData.website && formData.website.trim() !== ''
+            ? formData.website.trim()
+            : null,
+        rating:
+          formData.rating && formData.rating.trim() !== ''
+            ? parseFloat(formData.rating)
+            : null,
       };
 
       if (editingPractitioner) {

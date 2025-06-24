@@ -73,6 +73,29 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.back-to-home-btn {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.back-to-home-btn:hover {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+  color: #0c4a6e;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .header-center {
   flex: 1;
   max-width: 500px;
@@ -230,6 +253,16 @@
 
   .admin-user-info .user-name {
     display: none;
+  }
+
+  .back-to-dashboard-btn,
+  .back-to-home-btn {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  .back-to-home-btn {
+    display: none; /* Hide home button on mobile to save space */
   }
 
   .logout-btn {
