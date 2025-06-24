@@ -87,7 +87,7 @@ LABEL maintainer="afairgiant" \
         description="Medical Records System - React + FastAPI"
 
 # Health check with better configuration
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=120s --timeout=15s --start-period=60s --retries=2 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Start the application with migrations (using absolute path)

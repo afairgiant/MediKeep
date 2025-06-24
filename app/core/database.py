@@ -44,7 +44,7 @@ class DatabaseConfig:
         elif self.database_url.startswith("postgresql"):
             return {
                 "pool_pre_ping": True,
-                "pool_recycle": 300,
+                "pool_recycle": 1800,
                 "pool_size": 10,
                 "max_overflow": 20,
                 "echo": False,
