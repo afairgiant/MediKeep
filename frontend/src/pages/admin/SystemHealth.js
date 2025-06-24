@@ -521,8 +521,22 @@ const SystemHealth = () => {
                     </div>
                     <div className="health-item">
                       <span className="health-label">Response Time:</span>
-                      <span className="health-value">
-                        {systemMetrics.application.response_time}
+                      <span
+                        className={`health-status ${
+                          systemMetrics?.services?.api?.response_time_ms
+                            ? systemMetrics.services.api.response_time_ms < 100
+                              ? 'healthy'
+                              : systemMetrics.services.api.response_time_ms <
+                                  500
+                                ? 'warning'
+                                : 'error'
+                            : 'unknown'
+                        }`}
+                      >
+                        {systemMetrics?.services?.api?.response_time_ms
+                          ? `${systemMetrics.services.api.response_time_ms}ms`
+                          : systemMetrics?.application?.response_time ||
+                            'Unknown'}
                       </span>
                     </div>
                   </>
@@ -588,15 +602,18 @@ const SystemHealth = () => {
             <div className="health-items">
               <div className="health-item">
                 <span className="health-label">Authentication:</span>
-                <span className="health-status healthy">
-                  {systemMetrics?.security?.authentication_method ||
-                    'JWT Secure'}
+                <span
+                  className={`health-status ${getHealthStatusColor(systemMetrics?.security?.authentication_status)}`}
+                >
+                  {systemMetrics?.security?.authentication_method || 'JWT'}
                 </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Authorization:</span>
-                <span className="health-status healthy">
-                  Role-based Access Control
+                <span
+                  className={`health-status ${getHealthStatusColor(systemMetrics?.security?.authorization_status)}`}
+                >
+                  Role-based (RBAC)
                 </span>
               </div>
               <div className="health-item">
@@ -635,7 +652,11 @@ const SystemHealth = () => {
               )}
               <div className="health-item">
                 <span className="health-label">Session Management:</span>
-                <span className="health-status healthy">Token-based</span>
+                <span
+                  className={`health-status ${getHealthStatusColor(systemMetrics?.security?.session_status)}`}
+                >
+                  JWT Tokens
+                </span>
               </div>{' '}
               <div className="health-item">
                 <span className="health-label">Security Scanning:</span>
