@@ -125,6 +125,8 @@ class RestoreService:
             if current_stats.get("total_records", 0) > 0:
                 warnings.append("Current database contains data that will be replaced")
 
+            warnings.append("Current backup records will be preserved")
+
             # Check backup age
             backup_mtime = datetime.fromtimestamp(backup_path.stat().st_mtime)
             backup_age_days = (datetime.now() - backup_mtime).days
@@ -254,6 +256,7 @@ class RestoreService:
             warnings = [
                 "This will restore BOTH database and files",
                 "All current data will be replaced",
+                "Current backup records will be preserved",
                 "Safety backups will be created before restore",
             ]
 
@@ -330,7 +333,7 @@ class RestoreService:
             backup_type = str(backup_record.backup_type)
             backup_file_path = str(backup_record.file_path)
 
-            print(
+            self._debug_print(
                 f"📋 RESTORE DEBUG: Backup details - Type: {backup_type}, Path: {backup_file_path}"
             )
 
@@ -341,7 +344,7 @@ class RestoreService:
                 )
                 raise ValueError(f"Backup file does not exist: {backup_path}")
 
-            print(
+            self._debug_print(
                 f"✅ RESTORE DEBUG: Backup file exists, size: {backup_path.stat().st_size} bytes"
             )
 
@@ -352,7 +355,7 @@ class RestoreService:
                 "🛡️ RESTORE DEBUG: Creating safety backup before restore..."
             )
             safety_backup_id = await self._create_safety_backup(backup_type)
-            print(
+            self._debug_print(
                 f"✅ RESTORE DEBUG: Safety backup created with ID: {safety_backup_id}"
             )
 
@@ -380,7 +383,7 @@ class RestoreService:
                 }
             )
 
-            print(
+            self._debug_print(
                 f"🎉 RESTORE DEBUG: Restore operation completed successfully for backup {backup_id}"
             )
             logger.info(
@@ -426,7 +429,7 @@ class RestoreService:
         import asyncio
 
         async def restore_operations():
-            print(
+            self._debug_print(
                 "🚀 RESTORE DEBUG: Starting clean slate database restore operations..."
             )
 
@@ -465,7 +468,7 @@ class RestoreService:
             }
 
         try:
-            print(
+            self._debug_print(
                 f"🎯 RESTORE DEBUG: Starting clean slate database restore for backup: {backup_path}"
             )
             logger.info("Starting clean slate database restore")
@@ -475,7 +478,7 @@ class RestoreService:
                 "⏰ RESTORE DEBUG: Setting 5-minute timeout for restore operation..."
             )
             result = await asyncio.wait_for(restore_operations(), timeout=300.0)
-            print(
+            self._debug_print(
                 "🎉 RESTORE DEBUG: Clean slate database restore completed successfully!"
             )
             logger.info("Clean slate database restore completed successfully")
@@ -500,13 +503,14 @@ class RestoreService:
             self._debug_print("🧹 RESTORE DEBUG: Starting table clearing process...")
             logger.info("Clearing existing table data...")
 
-            # Get list of all user tables (excluding system tables)
+            # Get list of all user tables (excluding system tables and backup_records)
             tables_query = text(
                 """
                 SELECT tablename 
                 FROM pg_tables 
                 WHERE schemaname = 'public' 
                 AND tablename != 'alembic_version'
+                AND tablename != 'backup_records'
                 ORDER BY tablename
             """
             )
@@ -519,12 +523,12 @@ class RestoreService:
                 logger.info("No tables found to clear")
                 return
 
-            print(
+            self._debug_print(
                 f"📋 RESTORE DEBUG: Found {len(table_names)} tables to clear: {table_names}"
             )
 
             # Use DELETE instead of TRUNCATE to avoid lock issues
-            print(
+            self._debug_print(
                 "🗑️ RESTORE DEBUG: Deleting data from tables (avoiding TRUNCATE locks)..."
             )
             logger.info("Deleting data from tables (avoiding TRUNCATE locks)...")
@@ -544,12 +548,12 @@ class RestoreService:
                     # SQLAlchemy Result doesn't always have rowcount, use alternative
                     row_count = getattr(result, "rowcount", 0) or 0
                     deleted_count += row_count
-                    print(
+                    self._debug_print(
                         f"   ✅ RESTORE DEBUG: Deleted {row_count} rows from {table_name}"
                     )
                     logger.debug(f"Deleted {row_count} rows from {table_name}")
                 except Exception as e:
-                    print(
+                    self._debug_print(
                         f"   ❌ RESTORE DEBUG: Could not clear table {table_name}: {str(e)}"
                     )
                     logger.warning(f"Could not clear table {table_name}: {str(e)}")
@@ -567,7 +571,7 @@ class RestoreService:
                     self.db.execute(text(f"SELECT setval('{seq_name}', 1, false)"))
                     self._debug_print(f"   ✅ RESTORE DEBUG: Reset sequence {seq_name}")
                 except Exception as e:
-                    print(
+                    self._debug_print(
                         f"   ⚠️ RESTORE DEBUG: No sequence to reset for {table_name}: {str(e)}"
                     )
                     logger.debug(f"No sequence to reset for {table_name}: {str(e)}")
@@ -576,7 +580,7 @@ class RestoreService:
             self._debug_print("💾 RESTORE DEBUG: Committing deletion changes...")
             self.db.commit()
 
-            print(
+            self._debug_print(
                 f"✅ RESTORE DEBUG: Successfully deleted {deleted_count} total rows from {len(table_names)} tables"
             )
             logger.info(
@@ -638,7 +642,7 @@ class RestoreService:
                             line_stripped.split("INSERT INTO")[1].split()[0].strip()
                         )
                         if len(insert_statements) % 10 == 0:  # Log every 10th statement
-                            print(
+                            self._debug_print(
                                 f"📝 RESTORE DEBUG: Found INSERT for {table_name} (statement #{len(insert_statements) + 1})"
                             )
                     except:
@@ -660,40 +664,64 @@ class RestoreService:
                         current_insert = ""
                         in_insert = False
 
-            print(
+            self._debug_print(
                 f"📝 RESTORE DEBUG: Found {len(insert_statements)} direct INSERT statements"
             )
 
             # If no INSERT statements found, look for COPY format and convert
             if len(insert_statements) == 0:
-                print(
+                self._debug_print(
                     "🔄 RESTORE DEBUG: No INSERT statements found, looking for COPY format..."
                 )
                 copy_inserts = self._convert_copy_to_inserts(lines)
                 insert_statements.extend(copy_inserts)
-                print(
+                self._debug_print(
                     f"🔄 RESTORE DEBUG: Converted {len(copy_inserts)} COPY statements to INSERT format"
                 )
 
-            print(
+            self._debug_print(
                 f"✅ RESTORE DEBUG: Total extracted statements: {len(insert_statements)}"
             )
 
+            # Filter out backup_records statements to preserve current system's backup history
+            filtered_statements = []
+            backup_records_filtered = 0
+
+            for stmt in insert_statements:
+                try:
+                    table_name = stmt.split("INSERT INTO")[1].split()[0].strip().lower()
+                    if table_name == "backup_records":
+                        backup_records_filtered += 1
+                        continue  # Skip backup_records statements
+                    filtered_statements.append(stmt)
+                except:
+                    # If we can't parse the table name, include the statement
+                    filtered_statements.append(stmt)
+
+            if backup_records_filtered > 0:
+                self._debug_print(
+                    f"🚫 RESTORE DEBUG: Filtered out {backup_records_filtered} backup_records statements to preserve current backup history"
+                )
+
             # Count statements by table for debugging
             table_counts = {}
-            for stmt in insert_statements:
+            for stmt in filtered_statements:
                 try:
                     table_name = stmt.split("INSERT INTO")[1].split()[0].strip()
                     table_counts[table_name] = table_counts.get(table_name, 0) + 1
                 except:
                     pass
 
-            self._debug_print("📊 RESTORE DEBUG: INSERT statements by table:")
+            self._debug_print(
+                "📊 RESTORE DEBUG: INSERT statements by table (after filtering):"
+            )
             for table, count in sorted(table_counts.items()):
                 self._debug_print(f"   {table}: {count} statements")
 
-            logger.info(f"Extracted {len(insert_statements)} INSERT statements")
-            return insert_statements
+            logger.info(
+                f"Extracted {len(filtered_statements)} INSERT statements (filtered out {backup_records_filtered} backup_records)"
+            )
+            return filtered_statements
 
         except Exception as e:
             logger.error(f"Failed to extract INSERT statements: {str(e)}")
@@ -720,6 +748,20 @@ class RestoreService:
                     # Remove "public." prefix if present
                     if "." in table_name:
                         table_name = table_name.split(".", 1)[1]
+
+                    # Skip backup_records table to preserve current system's backup history
+                    if table_name.lower() == "backup_records":
+                        self._debug_print(
+                            f"🚫 RESTORE DEBUG: Skipping backup_records table to preserve current backup history"
+                        )
+                        # Skip to the end of this COPY block
+                        i += 1
+                        while i < len(lines):
+                            if lines[i].strip() == "\\.":
+                                break
+                            i += 1
+                        i += 1
+                        continue
 
                     # Extract column names from COPY statement
                     columns_start = line.find("(")
@@ -835,6 +877,7 @@ class RestoreService:
         )
 
         # Define table dependency order (dependencies first, then dependents)
+        # NOTE: backup_records is intentionally excluded to preserve current system's backup history
         table_order = [
             "alembic_version",  # No dependencies
             "users",  # No dependencies
@@ -851,7 +894,6 @@ class RestoreService:
             "procedures",  # Depends on patients, practitioners
             "treatments",  # Depends on patients, practitioners, conditions
             "vitals",  # Depends on patients, practitioners
-            "backup_records",  # No critical dependencies
             "activity_logs",  # Depends on users, patients (insert last)
         ]
 
