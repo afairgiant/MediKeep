@@ -410,7 +410,7 @@ class BackupService:
 
         except Exception as e:
             logger.error(f"Failed to verify backup {backup_id}: {str(e)}")
-            return {"backup_id": backup_id, "verified": False, "error": str(e)}
+            return {"backup_id": backup_id, "verified": False}
 
     async def delete_backup(self, backup_id: int) -> Dict[str, Any]:
         """

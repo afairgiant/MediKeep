@@ -264,7 +264,7 @@ async def verify_backup(
         logger.error(f"Failed to verify backup {backup_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to verify backup: {str(e)}",
+            detail="An internal error occurred while verifying the backup."
         )
 
 
