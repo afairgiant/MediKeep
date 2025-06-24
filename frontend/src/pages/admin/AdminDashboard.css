@@ -300,6 +300,26 @@
   height: 250px;
 }
 
+/* Analytics Summary Styles */
+.activity-summary {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activity-total {
+  font-weight: 600;
+  color: var(--admin-primary);
+  font-size: 0.9rem;
+}
+
+.activity-period {
+  font-size: 0.8rem;
+  color: var(--admin-secondary);
+  opacity: 0.8;
+}
+
 /* Overview Section */
 .overview-section {
   display: grid;

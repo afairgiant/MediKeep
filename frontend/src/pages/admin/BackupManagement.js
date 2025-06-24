@@ -240,9 +240,14 @@ const BackupManagement = () => {
   const cleanupOldBackups = async () => {
     try {
       const result = await adminApiService.cleanupBackups();
+      const trackedDeleted = result.deleted_count || 0;
+      const orphanedDeleted = result.orphaned_deleted || 0;
+      const totalDeleted =
+        result.total_deleted || trackedDeleted + orphanedDeleted;
+
       setMessage({
         type: 'success',
-        text: `Cleanup completed: ${result.deleted_count} old backups removed`,
+        text: `Cleanup completed: ${totalDeleted} files removed (${trackedDeleted} tracked backups, ${orphanedDeleted} orphaned files)`,
       });
       await loadBackups(); // Refresh the list
     } catch (error) {
@@ -258,9 +263,11 @@ const BackupManagement = () => {
     try {
       const result = await adminApiService.cleanupAllOldData();
       const totalFiles = result.total_files_cleaned || 0;
+      const summary = result.summary || {};
+
       setMessage({
         type: 'success',
-        text: `Complete cleanup finished: ${totalFiles} files removed (backups + trash)`,
+        text: `Complete cleanup finished: ${totalFiles} files removed (${summary.tracked_backups_deleted || 0} tracked backups, ${summary.orphaned_backups_deleted || 0} orphaned backups, ${summary.trash_files_deleted || 0} trash files)`,
       });
       await loadBackups(); // Refresh the list
     } catch (error) {
@@ -402,7 +409,10 @@ const BackupManagement = () => {
 
           <div className="backup-action-card">
             <h3>Cleanup Old Backups</h3>
-            <p>Remove old backups based on retention policy</p>
+            <p>
+              Remove old backups based on retention policy (includes orphaned
+              files)
+            </p>
             <button
               className="backup-btn cleanup"
               onClick={cleanupOldBackups}
@@ -414,13 +424,13 @@ const BackupManagement = () => {
 
           <div className="backup-action-card">
             <h3>Complete Cleanup</h3>
-            <p>Remove old backups and trash files</p>
+            <p>Remove old backups, orphaned files, and trash files</p>
             <button
               className="backup-btn cleanup-all"
               onClick={cleanupAllOldData}
               disabled={loading}
             >
-              {loading ? 'Cleaning...' : 'Cleanup All Old Data'}
+              {loading ? 'Cleaning...' : 'Complete Cleanup'}
             </button>
           </div>
         </div>

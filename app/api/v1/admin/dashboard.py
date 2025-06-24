@@ -7,28 +7,28 @@ recent activity, and system health information.
 
 from datetime import datetime, timedelta
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import desc, text
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
+from sqlalchemy import desc, text
+from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.models.activity_log import get_utc_now
+from app.models.activity_log import ActivityLog, get_utc_now
 from app.models.models import (
-    User,
+    Allergy,
+    Condition,
+    Encounter,
+    Immunization,
+    LabResult,
+    Medication,
     Patient,
     Practitioner,
-    Medication,
-    LabResult,
-    Vitals,
-    Condition,
-    Allergy,
-    Immunization,
     Procedure,
     Treatment,
-    Encounter,
+    User,
+    Vitals,
 )
-from app.models.activity_log import ActivityLog
 
 router = APIRouter()
 
@@ -82,7 +82,7 @@ def get_dashboard_stats(
     current_user: User = Depends(deps.get_current_admin_user),
 ):
     """Get dashboard statistics for admin overview"""
-    
+
     try:
         # Helper function to safely get count
         def safe_count(query):
@@ -91,7 +91,8 @@ def get_dashboard_stats(
                 return result if result is not None else 0
             except Exception:
                 return 0
-          # Get counts for all models with error handling
+
+        # Get counts for all models with error handling
         stats = DashboardStats(
             total_users=safe_count(db.query(User)),
             total_patients=safe_count(db.query(Patient)),
@@ -105,27 +106,36 @@ def get_dashboard_stats(
             total_procedures=safe_count(db.query(Procedure)),
             total_treatments=safe_count(db.query(Treatment)),
             total_encounters=safe_count(db.query(Encounter)),
-            recent_registrations=safe_count(
-                db.query(User).filter(
-                    User.created_at >= datetime.utcnow() - timedelta(days=30)
+            recent_registrations=(
+                safe_count(
+                    db.query(User).filter(
+                        User.created_at >= datetime.utcnow() - timedelta(days=30)
+                    )
                 )
-            ) if hasattr(User, 'created_at') else safe_count(db.query(User).limit(5)),
-            active_medications=safe_count(
-                db.query(Medication).filter(
-                    Medication.status.in_(["active", "current"])
+                if hasattr(User, "created_at")
+                else safe_count(db.query(User).limit(5))
+            ),
+            active_medications=(
+                safe_count(
+                    db.query(Medication).filter(
+                        Medication.status.in_(["active", "current"])
+                    )
                 )
-            ) if hasattr(Medication, 'status') else safe_count(db.query(Medication)),
-            pending_lab_results=safe_count(
-                db.query(LabResult).filter(
-                    LabResult.status == "pending"
-                )
-            ) if hasattr(LabResult, 'status') else 0,
+                if hasattr(Medication, "status")
+                else safe_count(db.query(Medication))
+            ),
+            pending_lab_results=(
+                safe_count(db.query(LabResult).filter(LabResult.status == "pending"))
+                if hasattr(LabResult, "status")
+                else 0
+            ),
         )
 
         return stats
 
     except Exception as e:
         import traceback
+
         error_detail = f"Error fetching dashboard stats: {str(e)}\nTraceback: {traceback.format_exc()}"
         print(f"DASHBOARD STATS ERROR: {error_detail}")  # This will show in server logs
         raise HTTPException(
@@ -150,43 +160,51 @@ def get_recent_activity(
             .limit(limit)
             .all()
         )
-        
+
         recent_activities = []
-        
+
         if activity_logs:
             # Use real activity log data - this preserves deleted records
             for log in activity_logs:
                 # Map entity_type to model_name for consistency
                 model_name_mapping = {
-                    'medication': 'Medication',
-                    'patient': 'Patient', 
-                    'user': 'User',
-                    'lab_result': 'LabResult',
-                    'procedure': 'Procedure',
-                    'allergy': 'Allergy',
-                    'condition': 'Condition',
-                    'immunization': 'Immunization',                    
-                    'vitals': 'Vitals',
+                    "medication": "Medication",
+                    "patient": "Patient",
+                    "user": "User",
+                    "lab_result": "LabResult",
+                    "procedure": "Procedure",
+                    "allergy": "Allergy",
+                    "condition": "Condition",
+                    "immunization": "Immunization",
+                    "vitals": "Vitals",
                 }
-                entity_type = getattr(log, 'entity_type', None)
-                model_name = model_name_mapping.get(entity_type or '', entity_type.title() if entity_type else "Unknown")
-                
+                entity_type = getattr(log, "entity_type", None)
+                model_name = model_name_mapping.get(
+                    entity_type or "", entity_type.title() if entity_type else "Unknown"
+                )
+
                 # Get the raw description and action
-                raw_description = getattr(log, 'description', 'No description')
-                action = getattr(log, 'action', 'unknown')
-                
+                raw_description = getattr(log, "description", "No description")
+                action = getattr(log, "action", "unknown")
+
                 # Fix malformed descriptions that don't match the action
-                if raw_description and ("delete" in raw_description.lower() and action != "deleted"):
+                if raw_description and (
+                    "delete" in raw_description.lower() and action != "deleted"
+                ):
                     # This is a malformed description, regenerate it
-                    entity_id = getattr(log, 'entity_id', None)
+                    entity_id = getattr(log, "entity_id", None)
                     if entity_type == "medication" and entity_id:
                         # Try to get the medication details if it still exists
-                        medication = db.query(Medication).filter(Medication.id == entity_id).first()
+                        medication = (
+                            db.query(Medication)
+                            .filter(Medication.id == entity_id)
+                            .first()
+                        )
                         if medication:
                             patient_name = "Unknown Patient"
-                            if hasattr(medication, 'patient') and medication.patient:
+                            if hasattr(medication, "patient") and medication.patient:
                                 patient_name = f"{getattr(medication.patient, 'first_name', '')} {getattr(medication.patient, 'last_name', '')}".strip()
-                            
+
                             if action == "created":
                                 description = f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}"
                             elif action == "updated":
@@ -214,31 +232,37 @@ def get_recent_activity(
                 else:
                     # Description is already correct
                     description = raw_description
-                
+
                 # Create RecentActivity from ActivityLog - this includes all actions including deletions
                 recent_activities.append(
                     RecentActivity(
-                        id=getattr(log, 'entity_id', None) or getattr(log, 'id', 0),
+                        id=getattr(log, "entity_id", None) or getattr(log, "id", 0),
                         model_name=model_name,
-                        action=getattr(log, 'action', 'unknown'),
-                        description=getattr(log, 'description', 'No description'),
-                        timestamp=getattr(log, 'timestamp', get_utc_now()),
-                        user_info=getattr(log.user, 'username', None) if getattr(log, 'user', None) else None,
+                        action=getattr(log, "action", "unknown"),
+                        description=getattr(log, "description", "No description"),
+                        timestamp=getattr(log, "timestamp", get_utc_now()),
+                        user_info=(
+                            getattr(log.user, "username", None)
+                            if getattr(log, "user", None)
+                            else None
+                        ),
                     )
                 )
-                
+
             return recent_activities
-        
+
         # Fallback to old method only if no activity logs exist
         base_time = get_utc_now()
-        
+
         # Recent medications (fallback method)
-        recent_medications = db.query(Medication).order_by(desc(Medication.id)).limit(5).all()
+        recent_medications = (
+            db.query(Medication).order_by(desc(Medication.id)).limit(5).all()
+        )
         for i, medication in enumerate(recent_medications):
             patient_name = "Unknown Patient"
-            if hasattr(medication, 'patient') and medication.patient:
+            if hasattr(medication, "patient") and medication.patient:
                 patient_name = f"{getattr(medication.patient, 'first_name', '')} {getattr(medication.patient, 'last_name', '')}".strip()
-            
+
             timestamp = base_time - timedelta(minutes=15 + i * 5)
             recent_activities.append(
                 RecentActivity(
@@ -248,13 +272,16 @@ def get_recent_activity(
                     description=f"New medication: {getattr(medication, 'medication_name', 'Unknown')} for {patient_name}",
                     timestamp=timestamp,
                     user_info=None,
-                )            )        # Recent procedures
-        recent_procedures = db.query(Procedure).order_by(desc(Procedure.id)).limit(3).all()
+                )
+            )  # Recent procedures
+        recent_procedures = (
+            db.query(Procedure).order_by(desc(Procedure.id)).limit(3).all()
+        )
         for i, procedure in enumerate(recent_procedures):
             patient_name = "Unknown Patient"
-            if hasattr(procedure, 'patient') and procedure.patient:
+            if hasattr(procedure, "patient") and procedure.patient:
                 patient_name = f"{getattr(procedure.patient, 'first_name', '')} {getattr(procedure.patient, 'last_name', '')}".strip()
-            
+
             timestamp = base_time - timedelta(hours=3 + i)
             recent_activities.append(
                 RecentActivity(
@@ -271,9 +298,9 @@ def get_recent_activity(
         recent_allergies = db.query(Allergy).order_by(desc(Allergy.id)).limit(3).all()
         for i, allergy in enumerate(recent_allergies):
             patient_name = "Unknown Patient"
-            if hasattr(allergy, 'patient') and allergy.patient:
+            if hasattr(allergy, "patient") and allergy.patient:
                 patient_name = f"{getattr(allergy.patient, 'first_name', '')} {getattr(allergy.patient, 'last_name', '')}".strip()
-            
+
             timestamp = base_time - timedelta(hours=4 + i)
             recent_activities.append(
                 RecentActivity(
@@ -300,8 +327,12 @@ def get_recent_activity(
 @router.get("/recent-activity-enhanced", response_model=List[RecentActivity])
 def get_recent_activity_enhanced(
     limit: int = 20,
-    action_filter: Optional[str] = None,  # Filter by action: 'created', 'updated', 'deleted', etc.
-    entity_filter: Optional[str] = None,  # Filter by entity type: 'medication', 'patient', etc.
+    action_filter: Optional[
+        str
+    ] = None,  # Filter by action: 'created', 'updated', 'deleted', etc.
+    entity_filter: Optional[
+        str
+    ] = None,  # Filter by entity type: 'medication', 'patient', etc.
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -313,50 +344,54 @@ def get_recent_activity_enhanced(
     try:
         # Build query for ActivityLog
         query = db.query(ActivityLog).order_by(desc(ActivityLog.timestamp))
-        
+
         # Apply filters if provided
         if action_filter:
             query = query.filter(ActivityLog.action == action_filter)
         if entity_filter:
             query = query.filter(ActivityLog.entity_type == entity_filter)
-        
+
         # Execute query
         activity_logs = query.limit(limit).all()
-        
+
         recent_activities = []
-        
+
         for log in activity_logs:
             # Map entity_type to model_name for consistency with existing UI
             model_name_mapping = {
-                'medication': 'Medication',
-                'patient': 'Patient', 
-                'user': 'User',
-                'lab_result': 'LabResult',
-                'procedure': 'Procedure',
-                'allergy': 'Allergy',
-                'condition': 'Condition',
-                'immunization': 'Immunization',
-                'vitals': 'Vitals',
+                "medication": "Medication",
+                "patient": "Patient",
+                "user": "User",
+                "lab_result": "LabResult",
+                "procedure": "Procedure",
+                "allergy": "Allergy",
+                "condition": "Condition",
+                "immunization": "Immunization",
+                "vitals": "Vitals",
             }
-            
-            entity_type = getattr(log, 'entity_type', None)
+
+            entity_type = getattr(log, "entity_type", None)
             if entity_type:
                 model_name = model_name_mapping.get(entity_type, entity_type.title())
             else:
                 model_name = "Unknown"
-            
+
             # Create RecentActivity from ActivityLog
             recent_activities.append(
                 RecentActivity(
-                    id=getattr(log, 'entity_id', None) or getattr(log, 'id', 0),
+                    id=getattr(log, "entity_id", None) or getattr(log, "id", 0),
                     model_name=model_name or "Unknown",
-                    action=getattr(log, 'action', 'unknown'),
-                    description=getattr(log, 'description', 'No description'),
-                    timestamp=getattr(log, 'timestamp', get_utc_now()),
-                    user_info=getattr(log.user, 'username', None) if getattr(log, 'user', None) else None,
+                    action=getattr(log, "action", "unknown"),
+                    description=getattr(log, "description", "No description"),
+                    timestamp=getattr(log, "timestamp", get_utc_now()),
+                    user_info=(
+                        getattr(log.user, "username", None)
+                        if getattr(log, "user", None)
+                        else None
+                    ),
                 )
             )
-        
+
         return recent_activities
 
     except Exception as e:
@@ -393,7 +428,9 @@ def get_system_health(
         except Exception as e:
             database_status = "error"
             database_connection_test = False
-            print(f"Database connection test failed: {e}")        # Calculate total records across all models with error handling
+            print(
+                f"Database connection test failed: {e}"
+            )  # Calculate total records across all models with error handling
         total_records = (
             safe_count(db.query(User))
             + safe_count(db.query(Patient))
@@ -407,7 +444,7 @@ def get_system_health(
             + safe_count(db.query(Procedure))
             + safe_count(db.query(Treatment))
             + safe_count(db.query(Encounter))
-        )# Calculate application uptime using startup time
+        )  # Calculate application uptime using startup time
         try:
             # Try to get process startup time as a fallback
             import os
@@ -460,8 +497,8 @@ def get_system_health(
             disk_usage = "Unable to determine"  # Check for actual backup files
         last_backup = None
         try:
-            import os
             import glob
+            import os
 
             # Look for backup files in common locations
             backup_patterns = [
@@ -512,12 +549,53 @@ def get_system_health(
 
 @router.get("/system-metrics")
 def get_system_metrics(
+    request: Request,  # Add request parameter to detect SSL
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
     """Get detailed system performance metrics"""
 
     try:
+        # More secure environment detection
+        import os
+
+        # Check for explicit environment variable first
+        explicit_env = os.getenv("ENVIRONMENT", os.getenv("ENV", "")).lower()
+
+        # Detect SSL/HTTPS more reliably
+        is_https = (
+            str(request.url).startswith("https://")
+            or request.headers.get("x-forwarded-proto") == "https"
+            or request.headers.get("x-forwarded-ssl") == "on"
+        )
+
+        # More precise localhost detection
+        host = request.url.hostname
+        is_localhost = (
+            host in ["localhost", "127.0.0.1", "::1"]
+            or host.startswith("192.168.")
+            or host.startswith("10.")
+            or host.startswith("172.")
+        )
+
+        # Determine environment with security priority
+        if explicit_env in ["production", "prod"]:
+            environment = "production"
+        elif explicit_env in ["development", "dev", "debug"]:
+            environment = "development"
+        elif is_localhost:
+            environment = "development"
+        else:
+            # Unknown environment - assume production for security
+            environment = "production"
+
+        # Security warnings
+        security_warnings = []
+        if environment == "production" and not is_https:
+            security_warnings.append("⚠️ PRODUCTION WITHOUT SSL/HTTPS")
+        if environment == "production" and is_localhost:
+            security_warnings.append("⚠️ PRODUCTION ON LOCALHOST")
+
         metrics = {
             "timestamp": get_utc_now().isoformat(),
             "database": {
@@ -536,9 +614,14 @@ def get_system_metrics(
                 "available_space": "Available",
             },
             "security": {
-                "ssl_enabled": True,
+                "ssl_enabled": is_https,
                 "authentication_method": "JWT",
-                "last_security_scan": None,  # Changed to None to indicate no scan has been run
+                "last_security_scan": None,
+                "environment": environment,
+                "protocol": "https" if is_https else "http",
+                "localhost": is_localhost,
+                "security_warnings": security_warnings,
+                "environment_source": "explicit" if explicit_env else "detected",
             },
         }
 
@@ -598,10 +681,244 @@ async def test_admin_access(
     Used for debugging and monitoring purposes.
     """
     return {
-        "message": "Admin access verified",        "user": current_user.username,
+        "message": "Admin access verified",
+        "user": current_user.username,
         "role": current_user.role,
         "timestamp": get_utc_now().isoformat(),
     }
+
+
+@router.get("/storage-health")
+def get_storage_health(
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Check storage system health for admin dashboard"""
+    import os
+    import shutil
+
+    # Define directories to check
+    directories = {
+        "uploads": "uploads/lab_result_files",
+        "backups": "backups",
+        "logs": "logs",
+    }
+
+    try:
+        # Get disk space information (use uploads directory as reference)
+        upload_dir = directories["uploads"]
+        os.makedirs(upload_dir, exist_ok=True)
+        total, used, free = shutil.disk_usage(upload_dir)
+
+        # Check each directory
+        directory_status = {}
+        overall_healthy = True
+
+        for dir_name, dir_path in directories.items():
+            try:
+                # Create directory if it doesn't exist
+                os.makedirs(dir_path, exist_ok=True)
+
+                # Test write permissions
+                test_file = os.path.join(dir_path, f"health_check_{dir_name}.tmp")
+                try:
+                    with open(test_file, "w") as f:
+                        f.write("test")
+                    os.remove(test_file)
+                    write_permission = True
+                except Exception:
+                    write_permission = False
+                    overall_healthy = False
+
+                # Get directory size
+                dir_size_bytes = 0
+                file_count = 0
+                try:
+                    for root, dirs, files in os.walk(dir_path):
+                        file_count += len(files)
+                        for file in files:
+                            try:
+                                file_path = os.path.join(root, file)
+                                dir_size_bytes += os.path.getsize(file_path)
+                            except (OSError, IOError):
+                                continue
+                except Exception:
+                    pass
+
+                directory_status[dir_name] = {
+                    "path": dir_path,
+                    "exists": os.path.exists(dir_path),
+                    "write_permission": write_permission,
+                    "size_mb": round(dir_size_bytes / (1024 * 1024), 2),
+                    "file_count": file_count,
+                }
+
+            except Exception as e:
+                directory_status[dir_name] = {
+                    "path": dir_path,
+                    "exists": False,
+                    "write_permission": False,
+                    "size_mb": 0,
+                    "file_count": 0,
+                    "error": str(e),
+                }
+                overall_healthy = False
+
+        return {
+            "status": "healthy" if overall_healthy else "unhealthy",
+            "directories": directory_status,
+            "disk_space": {
+                "total_gb": round(total / (1024**3), 2),
+                "used_gb": round(used / (1024**3), 2),
+                "free_gb": round(free / (1024**3), 2),
+                "usage_percent": round((used / total) * 100, 1),
+            },
+            # Keep legacy fields for backward compatibility
+            "upload_directory": upload_dir,
+            "write_permission": directory_status.get("uploads", {}).get(
+                "write_permission", False
+            ),
+        }
+
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+@router.get("/analytics-data")
+def get_analytics_data(
+    days: int = 7,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Get analytics data for dashboard charts"""
+    from datetime import datetime, timedelta
+
+    from sqlalchemy import Date, cast, func
+
+    try:
+        # Get current date and calculate date range
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=days - 1)
+
+        # Generate list of dates for the range
+        date_range = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_range.append(current_date)
+            current_date += timedelta(days=1)
+
+        # Query activity logs grouped by date
+        daily_activity = {}
+        try:
+            # Get activity counts by date
+            activity_counts = (
+                db.query(
+                    cast(ActivityLog.timestamp, Date).label("date"),
+                    func.count(ActivityLog.id).label("count"),
+                )
+                .filter(ActivityLog.timestamp >= start_date)
+                .filter(ActivityLog.timestamp <= end_date + timedelta(days=1))
+                .group_by(cast(ActivityLog.timestamp, Date))
+                .all()
+            )
+
+            # Convert to dictionary
+            for date, count in activity_counts:
+                daily_activity[date] = count
+
+        except Exception as e:
+            print(f"Error querying activity logs: {e}")
+
+        # Create week labels and data arrays
+        week_labels = []
+        activity_data = []
+
+        for date in date_range:
+            # Format day labels (Mon, Tue, etc.)
+            day_name = date.strftime("%a")
+            week_labels.append(day_name)
+
+            # Get activity count for this date (default to 0 if no activity)
+            count = daily_activity.get(date, 0)
+            activity_data.append(count)
+
+        # Get activity breakdown by model type
+        model_activity = {}
+        try:
+            model_counts = (
+                db.query(
+                    ActivityLog.entity_type, func.count(ActivityLog.id).label("count")
+                )
+                .filter(ActivityLog.timestamp >= start_date)
+                .group_by(ActivityLog.entity_type)
+                .all()
+            )
+
+            for entity_type, count in model_counts:
+                model_activity[entity_type or "unknown"] = count
+
+        except Exception as e:
+            print(f"Error querying model activity: {e}")
+
+        # Get hourly activity for today
+        today = datetime.utcnow().date()
+        hourly_activity = []
+        try:
+            hourly_counts = (
+                db.query(
+                    func.extract("hour", ActivityLog.timestamp).label("hour"),
+                    func.count(ActivityLog.id).label("count"),
+                )
+                .filter(cast(ActivityLog.timestamp, Date) == today)
+                .group_by(func.extract("hour", ActivityLog.timestamp))
+                .all()
+            )
+
+            # Create 24-hour array
+            hourly_data = [0] * 24
+            for hour, count in hourly_counts:
+                if hour is not None:
+                    hourly_data[int(hour)] = count
+
+            hourly_activity = hourly_data
+
+        except Exception as e:
+            print(f"Error querying hourly activity: {e}")
+            hourly_activity = [0] * 24
+
+        return {
+            "weekly_activity": {
+                "labels": week_labels,
+                "data": activity_data,
+                "total": sum(activity_data),
+            },
+            "model_activity": model_activity,
+            "hourly_activity": {
+                "labels": [f"{i:02d}:00" for i in range(24)],
+                "data": hourly_activity,
+            },
+            "date_range": {
+                "start": start_date.isoformat(),
+                "end": end_date.isoformat(),
+                "days": days,
+            },
+        }
+
+    except Exception as e:
+        print(f"Error generating analytics data: {e}")
+        # Return fallback data if there's an error
+        return {
+            "weekly_activity": {
+                "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                "data": [0, 0, 0, 0, 0, 0, 0],
+                "total": 0,
+            },
+            "model_activity": {},
+            "hourly_activity": {
+                "labels": [f"{i:02d}:00" for i in range(24)],
+                "data": [0] * 24,
+            },
+            "error": str(e),
+        }
 
 
 @router.get("/stats-test")

@@ -34,6 +34,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
   const [systemHealth, setSystemHealth] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(null);
@@ -60,14 +61,17 @@ const AdminDashboard = () => {
       console.log('🔄 Loading comprehensive dashboard data...');
 
       // Load all data in parallel for better performance
-      const [statsData, activityData, healthData] = await Promise.all([
-        adminApiService.getDashboardStats(),
-        adminApiService.getRecentActivity(15),
-        adminApiService.getSystemHealth(),
-      ]);
+      const [statsData, activityData, healthData, analyticsData] =
+        await Promise.all([
+          adminApiService.getDashboardStats(),
+          adminApiService.getRecentActivity(15),
+          adminApiService.getSystemHealth(),
+          adminApiService.getAnalyticsData(7),
+        ]);
       setStats(statsData);
       setRecentActivity(activityData);
       setSystemHealth(healthData);
+      setAnalyticsData(analyticsData);
       setLastRefresh(new Date());
 
       console.log('✅ All dashboard data loaded successfully');
@@ -156,11 +160,19 @@ const AdminDashboard = () => {
 
   // Chart data preparation
   const activityChartData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: analyticsData?.weekly_activity?.labels || [
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+      'Sun',
+    ],
     datasets: [
       {
         label: 'User Activity',
-        data: stats?.weekly_activity || [12, 19, 8, 15, 22, 18, 25],
+        data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
@@ -343,6 +355,19 @@ const AdminDashboard = () => {
                 <div className="chart-header">
                   <h3>📈 Weekly Activity Trend</h3>
                   <p>User interactions over the past week</p>
+                  {analyticsData?.weekly_activity && (
+                    <div className="activity-summary">
+                      <span className="activity-total">
+                        Total: {analyticsData.weekly_activity.total} activities
+                      </span>
+                      {analyticsData.date_range && (
+                        <span className="activity-period">
+                          ({analyticsData.date_range.start} to{' '}
+                          {analyticsData.date_range.end})
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="chart-container">
                   <Line
@@ -352,9 +377,36 @@ const AdminDashboard = () => {
                       maintainAspectRatio: false,
                       plugins: {
                         legend: { display: false },
+                        tooltip: {
+                          callbacks: {
+                            title: function (context) {
+                              const date = analyticsData?.date_range?.start;
+                              if (date && context[0]) {
+                                const startDate = new Date(date);
+                                startDate.setDate(
+                                  startDate.getDate() + context[0].dataIndex
+                                );
+                                return startDate.toLocaleDateString();
+                              }
+                              return context[0]?.label || '';
+                            },
+                          },
+                        },
                       },
                       scales: {
-                        y: { beginAtZero: true },
+                        y: {
+                          beginAtZero: true,
+                          title: {
+                            display: true,
+                            text: 'Activities',
+                          },
+                        },
+                        x: {
+                          title: {
+                            display: true,
+                            text: 'Day of Week',
+                          },
+                        },
                       },
                     }}
                   />

@@ -264,7 +264,7 @@ async def verify_backup(
         logger.error(f"Failed to verify backup {backup_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An internal error occurred while verifying the backup."
+            detail="An internal error occurred while verifying the backup.",
         )
 
 
@@ -323,13 +323,39 @@ async def cleanup_old_backups(
         )
 
 
+@router.post("/cleanup-orphaned")
+async def cleanup_orphaned_files(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """
+    Clean up orphaned backup files (files that exist but aren't tracked in database).
+
+    Only admin users can trigger cleanup.
+    """
+    try:
+        backup_service = BackupService(db)
+        cleanup_result = await backup_service.cleanup_orphaned_files()
+
+        logger.info(f"Orphaned file cleanup triggered by admin user {current_user.id}")
+
+        return cleanup_result
+
+    except Exception as e:
+        logger.error(f"Failed to cleanup orphaned files: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to cleanup orphaned files: {str(e)}",
+        )
+
+
 @router.post("/cleanup-all")
 async def cleanup_all_old_data(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
     """
-    Clean up both old backups and old trash files.
+    Clean up old backups, orphaned files, and old trash files.
 
     Only admin users can trigger cleanup.
     """

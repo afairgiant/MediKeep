@@ -21,16 +21,11 @@ class AdminApiService extends BaseApiService {
   }
 
   async getStorageHealth() {
-    // Note: This endpoint is not under /admin, so we use the direct path
-    const response = await fetch('/api/v1/lab-result-files/health/storage', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
+    return this.get('/dashboard/storage-health');
+  }
+
+  async getAnalyticsData(days = 7) {
+    return this.get('/dashboard/analytics-data', { days });
   }
 
   async getFrontendLogHealth() {
@@ -178,6 +173,10 @@ class AdminApiService extends BaseApiService {
 
   async cleanupBackups() {
     return this.post('/backups/cleanup');
+  }
+
+  async cleanupOrphanedFiles() {
+    return this.post('/backups/cleanup-orphaned');
   }
 
   async cleanupAllOldData() {

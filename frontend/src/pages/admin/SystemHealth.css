@@ -226,6 +226,177 @@
   color: #dc2626;
 }
 
+/* Enhanced Storage Section */
+.storage-section {
+  min-height: auto;
+}
+
+.storage-overview {
+  margin-bottom: 20px;
+}
+
+.storage-status-row,
+.disk-usage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.disk-usage-row:last-child {
+  border-bottom: none;
+}
+
+.disk-usage-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 300px;
+}
+
+.disk-usage-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.disk-usage-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.disk-usage-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* Directory Cards Grid */
+.storage-directories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.directory-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.directory-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.directory-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.directory-icon {
+  font-size: 1.2rem;
+}
+
+.directory-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #374151;
+  flex: 1;
+  margin-left: 6px;
+}
+
+.directory-status {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.directory-status.healthy {
+  color: #10b981;
+}
+
+.directory-status.error {
+  color: #ef4444;
+}
+
+.directory-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stat {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-value {
+  display: block;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.directory-error {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+/* Security Warnings */
+.security-warnings {
+  margin-bottom: 20px;
+}
+
+.security-warning {
+  background: #fef2f2;
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%,
+  100% {
+    background: #fef2f2;
+  }
+  50% {
+    background: #fee2e2;
+  }
+}
+
 /* Quick Actions */
 .health-actions-section {
   background: white;
@@ -380,6 +551,22 @@
   .health-value,
   .health-status {
     text-align: left;
+  }
+
+  /* Storage section mobile adjustments */
+  .storage-directories {
+    grid-template-columns: 1fr;
+  }
+
+  .disk-usage-info {
+    max-width: none;
+  }
+
+  .storage-status-row,
+  .disk-usage-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 

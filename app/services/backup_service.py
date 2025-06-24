@@ -468,6 +468,7 @@ class BackupService:
     async def cleanup_old_backups(self) -> Dict[str, Any]:
         """
         Clean up old backups based on retention policy.
+        This includes both database records and orphaned files.
 
         Returns:
             Dictionary containing cleanup results
@@ -487,8 +488,10 @@ class BackupService:
             )
 
             deleted_count = 0
+            orphaned_deleted = 0
             errors = []
 
+            # Delete old backup records and their files
             for backup in old_backups:
                 try:
                     # Delete physical file
@@ -504,10 +507,57 @@ class BackupService:
 
             self.db.commit()
 
-            logger.info(f"Cleanup completed: deleted {deleted_count} old backups")
+            # Clean up orphaned files (files that exist but aren't in database)
+            if self.backup_dir.exists():
+                try:
+                    # Get all file paths from database records
+                    all_backup_records = self.db.query(BackupRecord).all()
+                    tracked_files = set()
+                    for record in all_backup_records:
+                        if record.file_path:
+                            tracked_files.add(Path(record.file_path).resolve())
+
+                    # Scan backup directory for all backup files
+                    backup_patterns = [
+                        "*.sql",
+                        "*.zip",
+                        "*backup*",
+                        "database_*",
+                        "files_*",
+                        "full_*",
+                    ]
+                    for pattern in backup_patterns:
+                        for file_path in self.backup_dir.glob(pattern):
+                            if file_path.is_file():
+                                resolved_path = file_path.resolve()
+                                if resolved_path not in tracked_files:
+                                    try:
+                                        # Check if file is old enough to be considered orphaned
+                                        file_mtime = datetime.fromtimestamp(
+                                            file_path.stat().st_mtime
+                                        )
+                                        if file_mtime < cutoff_date:
+                                            file_path.unlink()
+                                            orphaned_deleted += 1
+                                            logger.info(
+                                                f"Deleted orphaned backup file: {file_path}"
+                                            )
+                                    except Exception as e:
+                                        errors.append(
+                                            f"Failed to delete orphaned file {file_path}: {str(e)}"
+                                        )
+
+                except Exception as e:
+                    errors.append(f"Error scanning for orphaned files: {str(e)}")
+
+            logger.info(
+                f"Cleanup completed: deleted {deleted_count} tracked backups and {orphaned_deleted} orphaned files"
+            )
 
             return {
                 "deleted_count": deleted_count,
+                "orphaned_deleted": orphaned_deleted,
+                "total_deleted": deleted_count + orphaned_deleted,
                 "errors": errors,
                 "cutoff_date": cutoff_date.isoformat(),
             }
@@ -515,6 +565,64 @@ class BackupService:
         except Exception as e:
             logger.error(f"Failed to cleanup old backups: {str(e)}")
             raise Exception(f"Failed to cleanup old backups: {str(e)}")
+
+    async def cleanup_orphaned_files(self) -> Dict[str, Any]:
+        """
+        Clean up orphaned backup files (files that exist but aren't tracked in database).
+        This removes ALL orphaned files regardless of age.
+
+        Returns:
+            Dictionary containing cleanup results
+        """
+        try:
+            orphaned_deleted = 0
+            errors = []
+
+            if self.backup_dir.exists():
+                # Get all file paths from database records
+                all_backup_records = self.db.query(BackupRecord).all()
+                tracked_files = set()
+                for record in all_backup_records:
+                    if record.file_path:
+                        tracked_files.add(Path(record.file_path).resolve())
+
+                # Scan backup directory for all backup files
+                backup_patterns = [
+                    "*.sql",
+                    "*.zip",
+                    "*backup*",
+                    "database_*",
+                    "files_*",
+                    "full_*",
+                ]
+                for pattern in backup_patterns:
+                    for file_path in self.backup_dir.glob(pattern):
+                        if file_path.is_file():
+                            resolved_path = file_path.resolve()
+                            if resolved_path not in tracked_files:
+                                try:
+                                    file_path.unlink()
+                                    orphaned_deleted += 1
+                                    logger.info(
+                                        f"Deleted orphaned backup file: {file_path}"
+                                    )
+                                except Exception as e:
+                                    errors.append(
+                                        f"Failed to delete orphaned file {file_path}: {str(e)}"
+                                    )
+
+            logger.info(
+                f"Orphaned file cleanup completed: deleted {orphaned_deleted} files"
+            )
+
+            return {
+                "orphaned_deleted": orphaned_deleted,
+                "errors": errors,
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to cleanup orphaned files: {str(e)}")
+            raise Exception(f"Failed to cleanup orphaned files: {str(e)}")
 
     async def create_full_backup(
         self, description: Optional[str] = None
@@ -700,26 +808,44 @@ class BackupService:
 
     async def cleanup_all_old_data(self) -> Dict[str, Any]:
         """
-        Clean up both old backups and old trash files.
+        Clean up both old backups, orphaned backup files, and old trash files.
 
         Returns:
-            Dictionary with cleanup statistics for both backups and trash
+            Dictionary with cleanup statistics for backups, orphaned files, and trash
         """
         try:
-            # Cleanup old backups
+            # Cleanup old backups (includes both tracked and orphaned files)
             backup_stats = await self.cleanup_old_backups()
+
+            # Also cleanup any remaining orphaned files (regardless of age)
+            orphaned_stats = await self.cleanup_orphaned_files()
 
             # Cleanup old trash files
             trash_stats = file_management_service.cleanup_old_trash()
 
+            total_files_cleaned = (
+                backup_stats.get("total_deleted", 0)
+                + orphaned_stats.get("orphaned_deleted", 0)
+                + trash_stats.get("deleted_files", 0)
+            )
+
             total_stats = {
                 "backups": backup_stats,
+                "orphaned_files": orphaned_stats,
                 "trash": trash_stats,
-                "total_files_cleaned": backup_stats.get("deleted_count", 0)
-                + trash_stats.get("deleted_files", 0),
+                "total_files_cleaned": total_files_cleaned,
+                "summary": {
+                    "tracked_backups_deleted": backup_stats.get("deleted_count", 0),
+                    "orphaned_backups_deleted": backup_stats.get("orphaned_deleted", 0)
+                    + orphaned_stats.get("orphaned_deleted", 0),
+                    "trash_files_deleted": trash_stats.get("deleted_files", 0),
+                    "total_deleted": total_files_cleaned,
+                },
             }
 
-            logger.info(f"Complete cleanup finished: {total_stats}")
+            logger.info(
+                f"Complete cleanup finished: {total_files_cleaned} total files cleaned"
+            )
             return total_stats
 
         except Exception as e:

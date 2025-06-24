@@ -287,10 +287,12 @@ const SystemHealth = () => {
           </div>
           {/* Storage Health */}
           {storageHealth && (
-            <div className="health-section">
+            <div className="health-section storage-section">
               <h2>💽 Storage Health</h2>
-              <div className="health-items">
-                <div className="health-item">
+
+              {/* Overall Status & Disk Usage */}
+              <div className="storage-overview">
+                <div className="storage-status-row">
                   <span className="health-label">Status:</span>
                   <span
                     className={`health-status ${getHealthStatusColor(storageHealth.status)}`}
@@ -298,41 +300,91 @@ const SystemHealth = () => {
                     {storageHealth.status}
                   </span>
                 </div>
-                <div className="health-item">
-                  <span className="health-label">Upload Directory:</span>
-                  <span className="health-value">
-                    {storageHealth.upload_directory}
-                  </span>
-                </div>
-                <div className="health-item">
-                  <span className="health-label">Write Permission:</span>
-                  <span
-                    className={`health-status ${storageHealth.write_permission ? 'healthy' : 'error'}`}
-                  >
-                    {storageHealth.write_permission ? 'Granted' : 'Denied'}
-                  </span>
-                </div>
                 {storageHealth.disk_space && (
-                  <>
-                    <div className="health-item">
-                      <span className="health-label">Disk Usage:</span>
-                      <span
-                        className={`health-value ${getStorageUsageColor(storageHealth.disk_space.usage_percent)}`}
-                      >
+                  <div className="disk-usage-row">
+                    <span className="health-label">Disk Usage:</span>
+                    <div className="disk-usage-info">
+                      <div className="disk-usage-bar">
+                        <div
+                          className="disk-usage-fill"
+                          style={{
+                            width: `${storageHealth.disk_space.usage_percent}%`,
+                            backgroundColor:
+                              getStorageUsageColor(
+                                storageHealth.disk_space.usage_percent
+                              ) === 'healthy'
+                                ? '#10b981'
+                                : getStorageUsageColor(
+                                      storageHealth.disk_space.usage_percent
+                                    ) === 'warning'
+                                  ? '#f59e0b'
+                                  : '#ef4444',
+                          }}
+                        ></div>
+                      </div>
+                      <span className="disk-usage-text">
                         {storageHealth.disk_space.usage_percent}% (
-                        {storageHealth.disk_space.used_gb}GB /{' '}
-                        {storageHealth.disk_space.total_gb}GB)
+                        {storageHealth.disk_space.free_gb}GB free)
                       </span>
                     </div>
-                    <div className="health-item">
-                      <span className="health-label">Free Space:</span>
-                      <span className="health-value">
-                        {storageHealth.disk_space.free_gb}GB
-                      </span>
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
+
+              {/* Directory Cards */}
+              {storageHealth.directories && (
+                <div className="storage-directories">
+                  {Object.entries(storageHealth.directories).map(
+                    ([dirName, dirInfo]) => {
+                      const dirIcons = {
+                        uploads: '📁',
+                        backups: '💾',
+                        logs: '📝',
+                      };
+
+                      return (
+                        <div key={dirName} className="directory-card">
+                          <div className="directory-header">
+                            <span className="directory-icon">
+                              {dirIcons[dirName] || '📂'}
+                            </span>
+                            <span className="directory-name">
+                              {dirName.charAt(0).toUpperCase() +
+                                dirName.slice(1)}
+                            </span>
+                            <span
+                              className={`directory-status ${dirInfo.write_permission && dirInfo.exists ? 'healthy' : 'error'}`}
+                            >
+                              {dirInfo.write_permission && dirInfo.exists
+                                ? '✓'
+                                : '✗'}
+                            </span>
+                          </div>
+                          <div className="directory-stats">
+                            <div className="stat">
+                              <span className="stat-value">
+                                {dirInfo.size_mb}
+                              </span>
+                              <span className="stat-label">MB</span>
+                            </div>
+                            <div className="stat">
+                              <span className="stat-value">
+                                {dirInfo.file_count}
+                              </span>
+                              <span className="stat-label">files</span>
+                            </div>
+                          </div>
+                          {dirInfo.error && (
+                            <div className="directory-error">
+                              {dirInfo.error}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              )}
             </div>
           )}{' '}
           {/* Application Services */}
@@ -486,6 +538,21 @@ const SystemHealth = () => {
           {/* Security Status */}
           <div className="health-section">
             <h2>🔒 Security Status</h2>
+
+            {/* Security Warnings */}
+            {systemMetrics?.security?.security_warnings &&
+              systemMetrics.security.security_warnings.length > 0 && (
+                <div className="security-warnings">
+                  {systemMetrics.security.security_warnings.map(
+                    (warning, index) => (
+                      <div key={index} className="security-warning">
+                        {warning}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
             <div className="health-items">
               <div className="health-item">
                 <span className="health-label">Authentication:</span>
@@ -502,33 +569,61 @@ const SystemHealth = () => {
               </div>
               <div className="health-item">
                 <span className="health-label">Data Encryption:</span>
-                <span className="health-status healthy">
+                <span
+                  className={`health-status ${
+                    systemMetrics?.security?.ssl_enabled
+                      ? 'healthy'
+                      : systemMetrics?.security?.environment === 'development'
+                        ? 'warning'
+                        : 'error'
+                  }`}
+                >
                   {systemMetrics?.security?.ssl_enabled
                     ? 'HTTPS Enabled'
-                    : 'HTTPS Required'}
+                    : systemMetrics?.security?.environment === 'development'
+                      ? 'Development Mode'
+                      : 'HTTPS Required'}
                 </span>
               </div>
+              {systemMetrics?.security?.environment && (
+                <div className="health-item">
+                  <span className="health-label">Environment:</span>
+                  <span
+                    className={`health-status ${
+                      systemMetrics.security.environment === 'production'
+                        ? 'healthy'
+                        : 'warning'
+                    }`}
+                  >
+                    {systemMetrics.security.environment === 'development'
+                      ? '🔧 Development'
+                      : '🏭 Production'}
+                  </span>
+                </div>
+              )}
               <div className="health-item">
                 <span className="health-label">Session Management:</span>
                 <span className="health-status healthy">Token-based</span>
               </div>{' '}
-              {systemMetrics?.security?.last_security_scan && (
-                <div className="health-item">
-                  <span className="health-label">Last Security Scan:</span>
+              <div className="health-item">
+                <span className="health-label">Security Scanning:</span>
+                {systemMetrics?.security?.last_security_scan ? (
                   <span className="health-value">
                     {systemMetrics.security.last_security_scan}
                   </span>
-                </div>
-              )}
-              {!systemMetrics?.security?.last_security_scan &&
-                systemMetrics?.security && (
-                  <div className="health-item">
-                    <span className="health-label">Last Security Scan:</span>
-                    <span className="health-value" style={{ color: '#d97706' }}>
-                      Not implemented
-                    </span>
-                  </div>
+                ) : (
+                  <span
+                    className="health-status"
+                    style={{
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                    }}
+                  >
+                    🚀 Coming Soon
+                  </span>
                 )}
+              </div>
             </div>
           </div>
         </div>
