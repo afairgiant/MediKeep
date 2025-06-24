@@ -196,21 +196,31 @@
 .health-status.healthy {
   background: #d1fae5;
   color: #065f46;
+  border: 1px solid #a7f3d0;
 }
 
 .health-status.warning {
   background: #fef3c7;
   color: #92400e;
+  border: 1px solid #fde68a;
 }
 
 .health-status.error {
   background: #fee2e2;
   color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .health-status.unknown {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.health-detail {
+  font-size: 0.85em;
+  opacity: 0.8;
+  font-weight: normal;
 }
 
 /* Storage usage colors */

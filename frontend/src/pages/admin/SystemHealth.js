@@ -36,6 +36,7 @@ const SystemHealth = () => {
       setHealthData(health); // Load system metrics
       try {
         const metricsData = await adminApiService.getSystemMetrics();
+        console.log('🔧 System Metrics Data:', metricsData);
         setSystemMetrics(metricsData);
       } catch (metricsError) {
         console.warn('Failed to load system metrics:', metricsError);
@@ -95,11 +96,14 @@ const SystemHealth = () => {
     switch (status?.toLowerCase()) {
       case 'healthy':
       case 'ok':
+      case 'operational':
         return 'healthy';
       case 'warning':
+      case 'slow':
         return 'warning';
       case 'error':
       case 'unhealthy':
+      case 'failed':
         return 'error';
       default:
         return 'unknown';
@@ -393,48 +397,64 @@ const SystemHealth = () => {
             <div className="health-items">
               <div className="health-item">
                 <span className="health-label">API Status:</span>
-                <span className="health-status healthy">Operational</span>
+                <span
+                  className={`health-status ${getHealthStatusColor(systemMetrics?.services?.api?.status)}`}
+                >
+                  {systemMetrics?.services?.api?.status
+                    ?.charAt(0)
+                    .toUpperCase() +
+                    systemMetrics?.services?.api?.status?.slice(1) || 'Unknown'}
+                  {systemMetrics?.services?.api?.response_time_ms && (
+                    <span className="health-detail">
+                      {' '}
+                      ({systemMetrics.services.api.response_time_ms}ms)
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="health-item">
                 <span className="health-label">Authentication Service:</span>
-                <span className="health-status healthy">Operational</span>
+                <span
+                  className={`health-status ${getHealthStatusColor(systemMetrics?.services?.authentication?.status)}`}
+                >
+                  {systemMetrics?.services?.authentication?.status
+                    ?.charAt(0)
+                    .toUpperCase() +
+                    systemMetrics?.services?.authentication?.status?.slice(1) ||
+                    'Unknown'}
+                </span>
               </div>
-              {frontendLogHealth && (
-                <div className="health-item">
-                  <span className="health-label">Frontend Logging:</span>
-                  <span
-                    className={`health-status ${getHealthStatusColor(frontendLogHealth.status)}`}
-                  >
-                    {frontendLogHealth.status}
-                  </span>
-                </div>
-              )}
+              <div className="health-item">
+                <span className="health-label">Frontend Logging:</span>
+                <span
+                  className={`health-status ${getHealthStatusColor(
+                    systemMetrics?.services?.frontend_logging?.status ||
+                      frontendLogHealth?.status
+                  )}`}
+                >
+                  {systemMetrics?.services?.frontend_logging?.status
+                    ?.charAt(0)
+                    .toUpperCase() +
+                    systemMetrics?.services?.frontend_logging?.status?.slice(
+                      1
+                    ) ||
+                    frontendLogHealth?.status ||
+                    'Unknown'}
+                </span>
+              </div>
               <div className="health-item">
                 <span className="health-label">Admin Interface:</span>
-                <span className="health-status healthy">Operational</span>
+                <span
+                  className={`health-status ${getHealthStatusColor(systemMetrics?.services?.admin_interface?.status)}`}
+                >
+                  {systemMetrics?.services?.admin_interface?.status
+                    ?.charAt(0)
+                    .toUpperCase() +
+                    systemMetrics?.services?.admin_interface?.status?.slice(
+                      1
+                    ) || 'Unknown'}
+                </span>
               </div>
-              {systemMetrics?.application && (
-                <>
-                  <div className="health-item">
-                    <span className="health-label">Memory Usage:</span>
-                    <span className="health-value">
-                      {systemMetrics.application.memory_usage}
-                    </span>
-                  </div>
-                  <div className="health-item">
-                    <span className="health-label">CPU Usage:</span>
-                    <span className="health-value">
-                      {systemMetrics.application.cpu_usage}
-                    </span>
-                  </div>
-                  <div className="health-item">
-                    <span className="health-label">Response Time:</span>
-                    <span className="health-value">
-                      {systemMetrics.application.response_time}
-                    </span>
-                  </div>
-                </>
-              )}
             </div>
           </div>
           {/* Application Performance */}
@@ -445,48 +465,64 @@ const SystemHealth = () => {
                 {systemMetrics.application && (
                   <>
                     <div className="health-item">
-                      <span className="health-label">Memory Status:</span>
+                      <span className="health-label">Memory Usage:</span>
                       <span
-                        className={`health-status ${systemMetrics.application.memory_usage === 'Normal' ? 'healthy' : 'warning'}`}
+                        className={`health-status ${
+                          systemMetrics.application.memory_usage === 'low'
+                            ? 'healthy'
+                            : systemMetrics.application.memory_usage ===
+                                'normal'
+                              ? 'warning'
+                              : 'error'
+                        }`}
                       >
-                        {systemMetrics.application.memory_usage}
-                      </span>
-                    </div>
-                    <div className="health-item">
-                      <span className="health-label">CPU Load:</span>
-                      <span
-                        className={`health-status ${systemMetrics.application.cpu_usage === 'Low' ? 'healthy' : 'warning'}`}
-                      >
-                        {systemMetrics.application.cpu_usage}
-                      </span>
-                    </div>
-                    <div className="health-item">
-                      <span className="health-label">Avg Response Time:</span>
-                      <span className="health-value">
-                        {systemMetrics.application.response_time}
-                      </span>
-                    </div>
-                  </>
-                )}
-                {systemMetrics.storage && (
-                  <>
-                    <div className="health-item">
-                      <span className="health-label">Database File Size:</span>
-                      <span className="health-value">
-                        {systemMetrics.storage.database_size || 'Unknown'}
-                      </span>
-                    </div>
-                    <div className="health-item">
-                      <span className="health-label">Upload Directory:</span>
-                      <span className="health-value">
-                        {systemMetrics.storage.upload_directory_size ||
+                        {systemMetrics.application.memory_usage
+                          ?.charAt(0)
+                          .toUpperCase() +
+                          systemMetrics.application.memory_usage?.slice(1) ||
                           'Unknown'}
                       </span>
                     </div>
                     <div className="health-item">
-                      <span className="health-label">Storage Status:</span>
-                      <span className="health-status healthy">
-                        {systemMetrics.storage.available_space}
+                      <span className="health-label">CPU Usage:</span>
+                      <span
+                        className={`health-status ${
+                          systemMetrics.application.cpu_usage === 'low'
+                            ? 'healthy'
+                            : systemMetrics.application.cpu_usage === 'normal'
+                              ? 'warning'
+                              : 'error'
+                        }`}
+                      >
+                        {systemMetrics.application.cpu_usage
+                          ?.charAt(0)
+                          .toUpperCase() +
+                          systemMetrics.application.cpu_usage?.slice(1) ||
+                          'Unknown'}
+                      </span>
+                    </div>
+                    <div className="health-item">
+                      <span className="health-label">System Load:</span>
+                      <span
+                        className={`health-status ${
+                          systemMetrics.application.system_load === 'low'
+                            ? 'healthy'
+                            : systemMetrics.application.system_load === 'normal'
+                              ? 'warning'
+                              : 'error'
+                        }`}
+                      >
+                        {systemMetrics.application.system_load
+                          ?.charAt(0)
+                          .toUpperCase() +
+                          systemMetrics.application.system_load?.slice(1) ||
+                          'Unknown'}
+                      </span>
+                    </div>
+                    <div className="health-item">
+                      <span className="health-label">Response Time:</span>
+                      <span className="health-value">
+                        {systemMetrics.application.response_time}
                       </span>
                     </div>
                   </>
@@ -527,10 +563,6 @@ const SystemHealth = () => {
                   <span className="health-value">
                     {detailedStats.pending_lab_results || 0}
                   </span>
-                </div>
-                <div className="health-item">
-                  <span className="health-label">System Load:</span>
-                  <span className="health-status healthy">Normal</span>
                 </div>
               </div>
             </div>
