@@ -296,11 +296,9 @@ const BackupManagement = () => {
       setRestoring(prev => ({ ...prev, [backupId]: true }));
       setMessage({ type: '', text: '' });
 
-      // Get confirmation token
+      // Get confirmation token and execute restore in one flow
       const tokenResponse =
         await adminApiService.getConfirmationToken(backupId);
-
-      // Execute restore
       const result = await adminApiService.executeRestore(
         backupId,
         tokenResponse.confirmation_token
@@ -322,9 +320,25 @@ const BackupManagement = () => {
       await loadBackups();
     } catch (error) {
       console.error('Error restoring backup:', error);
+
+      // Provide user-friendly error messages
+      let userMessage = 'Failed to restore backup';
+      if (error.message.includes('Invalid confirmation token')) {
+        userMessage = 'Restore session expired. Please try again.';
+      } else if (error.message.includes('Backup file does not exist')) {
+        userMessage = 'Backup file is missing or corrupted.';
+      } else if (error.message.includes('Database restore failed')) {
+        userMessage = 'Database restore failed. Check system logs for details.';
+      } else if (error.message.includes('timeout')) {
+        userMessage =
+          'Restore operation timed out. Large backups may take longer.';
+      } else {
+        userMessage = 'Restore operation failed. Please check system logs.';
+      }
+
       setMessage({
         type: 'error',
-        text: 'Failed to restore backup: ' + error.message,
+        text: userMessage,
       });
     } finally {
       setRestoring(prev => ({ ...prev, [backupId]: false }));
