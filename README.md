@@ -7,7 +7,7 @@ A medical records management system with React frontend and FastAPI backend.
 [![Medical Records Docker Image CI](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml) 
 
 
-## STILL VERY MUCH SO A WORK IN PROGRESS!
+## This is actievly being worked on!
 
 ## Quick Start
 
@@ -133,14 +133,3 @@ http://localhost:8005
 
 - Username: `admin`
 - Password: `admin123`
-
-## To Do
-
-1. Revamp the logging system since it currently broken/not working great
-2. Create and setup methods to change user passwords.
-3. Update the admin dashboard to work with the new api setup
-4. Update admin health status with working info
-5. Backup / Restores
-6. Exports
-7. Finish adding individual search & filtering to each page
-8. Whole patient search
