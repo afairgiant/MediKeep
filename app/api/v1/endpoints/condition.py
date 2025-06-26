@@ -116,38 +116,6 @@ def update_condition(
     return condition_obj
 
 
-@router.put("/{condition_id}/", response_model=ConditionResponse)
-def update_condition_with_slash(
-    *,
-    db: Session = Depends(deps.get_db),
-    condition_id: int,
-    condition_in: ConditionUpdate,
-    current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
-    """
-    Update a condition (with trailing slash for compatibility).
-
-    TODO: TEMPORARY FIX - Remove this duplicate route after investigating why
-    the frontend is adding trailing slashes to conditions URLs but not to
-    procedures URLs. The root cause needs to be identified and fixed in the
-    frontend URL construction or middleware configuration.
-    """
-    condition_obj = condition.get(db=db, id=condition_id)
-    if not condition_obj:
-        raise HTTPException(status_code=404, detail="Condition not found")
-    condition_obj = condition.update(db=db, db_obj=condition_obj, obj_in=condition_in)
-
-    # Log the update activity using centralized logging
-    log_update(
-        db=db,
-        entity_type=EntityType.CONDITION,
-        entity_obj=condition_obj,
-        user_id=current_user_id,
-    )
-
-    return condition_obj
-
-
 @router.delete("/{condition_id}")
 def delete_condition(
     *,
