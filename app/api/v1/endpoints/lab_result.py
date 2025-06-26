@@ -11,13 +11,19 @@ from fastapi import (
     Form,
     HTTPException,
     Query,
+    Request,
     UploadFile,
     status,
 )
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.v1.endpoints.utils import (
+    handle_create_with_logging,
+    handle_delete_with_logging,
+    handle_not_found,
+    handle_update_with_logging,
+)
 from app.core.database import get_db
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
@@ -36,14 +42,13 @@ router = APIRouter()
 # Lab Result Endpoints
 @router.get("/", response_model=List[LabResultWithRelations])
 def get_lab_results(
+    *,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
-    """
-    Get lab results for the current user with pagination and practitioner info
-    """
+    """Get lab results for the current user with pagination and practitioner info."""
     # Filter lab results by the user's patient_id with practitioner relationship loaded
     results = lab_result.get_by_patient(
         db,
@@ -89,18 +94,19 @@ def get_lab_results(
 
 @router.get("/{lab_result_id}", response_model=LabResultWithRelations)
 def get_lab_result(
+    *,
     lab_result_id: int,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
-    """
-    Get a specific lab result by ID with related data
-    """
+    """Get a specific lab result by ID with related data."""
     db_lab_result = lab_result.get_with_relations(
         db=db, record_id=lab_result_id, relations=["patient", "practitioner"]
     )
-    if not db_lab_result:
-        raise HTTPException(status_code=404, detail="Lab result not found")
+    handle_not_found(db_lab_result, "Lab result")
+    assert (
+        db_lab_result is not None
+    )  # Type checker hint - handle_not_found raises if None
 
     # Convert to response format with practitioner name
     result_dict = {
@@ -135,85 +141,69 @@ def get_lab_result(
 
 @router.post("/", response_model=LabResultResponse, status_code=status.HTTP_201_CREATED)
 def create_lab_result(
+    *,
     lab_result_in: LabResultCreate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
-    """
-    Create a new lab result
-    """
-    try:
-        db_lab_result = lab_result.create(db, obj_in=lab_result_in)
-
-        # Log the creation activity using centralized logging
-        log_create(
-            db=db,
-            entity_type=EntityType.LAB_RESULT,
-            entity_obj=db_lab_result,
-            user_id=current_user_id,
-        )
-
-        return db_lab_result
-    except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Error creating lab result: {str(e)}"
-        )
+    """Create a new lab result."""
+    return handle_create_with_logging(
+        db=db,
+        crud_obj=lab_result,
+        obj_in=lab_result_in,
+        entity_type=EntityType.LAB_RESULT,
+        user_id=current_user_id,
+        entity_name="Lab result",
+        request=request,
+    )
 
 
 @router.put("/{lab_result_id}", response_model=LabResultResponse)
 def update_lab_result(
+    *,
     lab_result_id: int,
     lab_result_in: LabResultUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
-    """
-    Update an existing lab result
-    """
-    db_lab_result = lab_result.get(db, id=lab_result_id)
-    if not db_lab_result:
-        raise HTTPException(status_code=404, detail="Lab result not found")
-
-    try:
-        updated_lab_result = lab_result.update(
-            db, db_obj=db_lab_result, obj_in=lab_result_in
-        )
-
-        # Log the update activity using centralized logging
-        log_update(
-            db=db,
-            entity_type=EntityType.LAB_RESULT,
-            entity_obj=updated_lab_result,
-            user_id=current_user_id,
-        )
-
-        return updated_lab_result
-    except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Error updating lab result: {str(e)}"
-        )
+    """Update an existing lab result."""
+    return handle_update_with_logging(
+        db=db,
+        crud_obj=lab_result,
+        entity_id=lab_result_id,
+        obj_in=lab_result_in,
+        entity_type=EntityType.LAB_RESULT,
+        user_id=current_user_id,
+        entity_name="Lab result",
+        request=request,
+    )
 
 
 @router.delete("/{lab_result_id}")
 def delete_lab_result(
+    *,
     lab_result_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
-    """
-    Delete a lab result and associated files
-    """
+    """Delete a lab result and associated files."""
+    # Custom deletion logic to handle associated files
     db_lab_result = lab_result.get(db, id=lab_result_id)
-    if not db_lab_result:
-        raise HTTPException(status_code=404, detail="Lab result not found")
+    handle_not_found(db_lab_result, "Lab result")
 
     try:
-        # Log the deletion activity BEFORE deleting using centralized logging
+        # Log the deletion activity BEFORE deleting
+        from app.api.activity_logging import log_delete
+
         log_delete(
             db=db,
             entity_type=EntityType.LAB_RESULT,
             entity_obj=db_lab_result,
             user_id=current_user_id,
+            request=request,
         )
 
         # Delete associated files first
@@ -231,14 +221,13 @@ def delete_lab_result(
 # Patient-specific endpoints
 @router.get("/patient/{patient_id}", response_model=List[LabResultResponse])
 def get_lab_results_by_patient(
+    *,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
     patient_id: int = Depends(deps.verify_patient_access),
 ):
-    """
-    Get all lab results for a specific patient
-    """
+    """Get all lab results for a specific patient."""
     results = lab_result.get_by_patient(
         db, patient_id=patient_id, skip=skip, limit=limit
     )
@@ -247,13 +236,12 @@ def get_lab_results_by_patient(
 
 @router.get("/patient/{patient_id}/code/{code}", response_model=List[LabResultResponse])
 def get_lab_results_by_patient_and_code(
+    *,
     code: str,
     db: Session = Depends(get_db),
     patient_id: int = Depends(deps.verify_patient_access),
 ):
-    """
-    Get lab results for a specific patient and test code
-    """
+    """Get lab results for a specific patient and test code."""
     # Get all results for the patient first, then filter by code
     patient_results = lab_result.get_by_patient(db, patient_id=patient_id)
     results = [result for result in patient_results if result.code == code]
@@ -263,14 +251,13 @@ def get_lab_results_by_patient_and_code(
 # Practitioner-specific endpoints
 @router.get("/practitioner/{practitioner_id}", response_model=List[LabResultResponse])
 def get_lab_results_by_practitioner(
+    *,
     practitioner_id: int,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
-    """
-    Get all lab results ordered by a specific practitioner
-    """
+    """Get all lab results ordered by a specific practitioner."""
     results = lab_result.get_by_practitioner(
         db, practitioner_id=practitioner_id, skip=skip, limit=limit
     )
@@ -280,14 +267,13 @@ def get_lab_results_by_practitioner(
 # Search endpoints
 @router.get("/search/code/{code}", response_model=List[LabResultResponse])
 def search_lab_results_by_code(
+    *,
     code: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
-    """
-    Search lab results by test code
-    """
+    """Search lab results by test code."""
     # Get all results and filter by code - replace with proper CRUD method if available
     all_results = lab_result.get_multi(db, skip=0, limit=10000)
     filtered_results = [result for result in all_results if result.code == code]
@@ -302,14 +288,13 @@ def search_lab_results_by_code(
     "/search/code-pattern/{code_pattern}", response_model=List[LabResultResponse]
 )
 def search_lab_results_by_code_pattern(
+    *,
     code_pattern: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
-    """
-    Search lab results by code pattern (partial match)
-    """
+    """Search lab results by code pattern (partial match)."""
     # Get all results and filter by code pattern - replace with proper CRUD method if available
     all_results = lab_result.get_multi(db, skip=0, limit=10000)
     filtered_results = [
@@ -324,14 +309,11 @@ def search_lab_results_by_code_pattern(
 
 # File Management Endpoints
 @router.get("/{lab_result_id}/files", response_model=List[LabResultFileResponse])
-def get_lab_result_files(lab_result_id: int, db: Session = Depends(get_db)):
-    """
-    Get all files for a specific lab result
-    """
+def get_lab_result_files(*, lab_result_id: int, db: Session = Depends(get_db)):
+    """Get all files for a specific lab result."""
     # Verify lab result exists
     db_lab_result = lab_result.get(db, id=lab_result_id)
-    if not db_lab_result:
-        raise HTTPException(status_code=404, detail="Lab result not found")
+    handle_not_found(db_lab_result, "Lab result")
 
     files = lab_result_file.get_by_lab_result(db, lab_result_id=lab_result_id)
     return files
@@ -339,19 +321,17 @@ def get_lab_result_files(lab_result_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{lab_result_id}/files", response_model=LabResultFileResponse)
 async def upload_lab_result_file(
+    *,
     lab_result_id: int,
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
-    """
-    Upload a new file for a lab result
-    """
+    """Upload a new file for a lab result."""
     # Verify lab result exists
     db_lab_result = lab_result.get(db, id=lab_result_id)
-    if not db_lab_result:
-        raise HTTPException(status_code=404, detail="Lab result not found")
+    handle_not_found(db_lab_result, "Lab result")
 
     # Validate file
     if not file.filename:
@@ -412,7 +392,9 @@ async def upload_lab_result_file(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error saving file: {str(e)}",
-        )  # Create file entry in database
+        )
+
+    # Create file entry in database
     file_create = LabResultFileCreate(
         lab_result_id=lab_result_id,
         file_name=file.filename,
@@ -440,19 +422,16 @@ async def upload_lab_result_file(
 
 @router.delete("/{lab_result_id}/files/{file_id}")
 def delete_lab_result_file(
-    lab_result_id: int, file_id: int, db: Session = Depends(get_db)
+    *, lab_result_id: int, file_id: int, db: Session = Depends(get_db)
 ):
-    """
-    Delete a specific file from a lab result
-    """
+    """Delete a specific file from a lab result."""
     # Verify lab result exists
     db_lab_result = lab_result.get(db, id=lab_result_id)
-    if not db_lab_result:
-        raise HTTPException(status_code=404, detail="Lab result not found")
+    handle_not_found(db_lab_result, "Lab result")
+
     # Verify file exists and belongs to this lab result
     db_file = lab_result_file.get(db, id=file_id)
-    if not db_file:
-        raise HTTPException(status_code=404, detail="File not found")
+    handle_not_found(db_file, "File")
 
     if getattr(db_file, "lab_result_id") != lab_result_id:
         raise HTTPException(
@@ -469,31 +448,27 @@ def delete_lab_result_file(
 # Statistics endpoints
 @router.get("/stats/patient/{patient_id}/count")
 def get_patient_lab_result_count(
-    db: Session = Depends(get_db), patient_id: int = Depends(deps.verify_patient_access)
+    *,
+    db: Session = Depends(get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
 ):
-    """
-    Get count of lab results for a patient
-    """
+    """Get count of lab results for a patient."""
     results = lab_result.get_by_patient(db, patient_id=patient_id)
     return {"patient_id": patient_id, "lab_result_count": len(results)}
 
 
 @router.get("/stats/practitioner/{practitioner_id}/count")
 def get_practitioner_lab_result_count(
-    practitioner_id: int, db: Session = Depends(get_db)
+    *, practitioner_id: int, db: Session = Depends(get_db)
 ):
-    """
-    Get count of lab results ordered by a practitioner
-    """
+    """Get count of lab results ordered by a practitioner."""
     results = lab_result.get_by_practitioner(db, practitioner_id=practitioner_id)
     return {"practitioner_id": practitioner_id, "lab_result_count": len(results)}
 
 
 @router.get("/stats/code/{code}/count")
-def get_code_usage_count(code: str, db: Session = Depends(get_db)):
-    """
-    Get count of how many times a specific test code has been used
-    """
+def get_code_usage_count(*, code: str, db: Session = Depends(get_db)):
+    """Get count of how many times a specific test code has been used."""
     all_results = lab_result.get_multi(db, skip=0, limit=10000)
     results = [result for result in all_results if result.code == code]
     return {"code": code, "usage_count": len(results)}

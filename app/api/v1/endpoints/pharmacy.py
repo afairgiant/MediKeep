@@ -1,10 +1,14 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.v1.endpoints.utils import (
+    handle_create_with_logging,
+    handle_not_found,
+    handle_update_with_logging,
+)
 from app.crud.pharmacy import pharmacy
 from app.models.activity_log import EntityType
 from app.schemas.pharmacy import Pharmacy, PharmacyCreate, PharmacyUpdate
@@ -15,36 +19,32 @@ router = APIRouter()
 @router.post("/", response_model=Pharmacy)
 def create_pharmacy(
     *,
-    db: Session = Depends(deps.get_db),
     pharmacy_in: PharmacyCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Create new pharmacy.
-    """
-    pharmacy_obj = pharmacy.create(db=db, obj_in=pharmacy_in)
-
-    # Log the creation activity using centralized logging
-    log_create(
+    """Create new pharmacy."""
+    return handle_create_with_logging(
         db=db,
+        crud_obj=pharmacy,
+        obj_in=pharmacy_in,
         entity_type="pharmacy",
-        entity_obj=pharmacy_obj,
         user_id=current_user_id,
+        entity_name="Pharmacy",
+        request=request,
     )
-
-    return pharmacy_obj
 
 
 @router.get("/", response_model=List[Pharmacy])
 def read_pharmacies(
+    *,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Retrieve pharmacies.
-    """
+    """Retrieve pharmacies."""
     pharmacies = pharmacy.get_multi(db, skip=skip, limit=limit)
     return pharmacies
 
@@ -56,60 +56,49 @@ def read_pharmacy(
     id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Get pharmacy by ID.
-    """
+    """Get pharmacy by ID."""
     pharmacy_obj = pharmacy.get(db=db, id=id)
-    if not pharmacy_obj:
-        raise HTTPException(status_code=404, detail="Pharmacy not found")
+    handle_not_found(pharmacy_obj, "Pharmacy")
     return pharmacy_obj
 
 
 @router.put("/{id}", response_model=Pharmacy)
 def update_pharmacy(
     *,
-    db: Session = Depends(deps.get_db),
     id: int,
     pharmacy_in: PharmacyUpdate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Update a pharmacy.
-    """
-    pharmacy_obj = pharmacy.get(db=db, id=id)
-    if not pharmacy_obj:
-        raise HTTPException(status_code=404, detail="Pharmacy not found")
-
-    pharmacy_obj = pharmacy.update(db=db, db_obj=pharmacy_obj, obj_in=pharmacy_in)
-
-    # Log the update activity using centralized logging
-    log_update(
+    """Update a pharmacy."""
+    return handle_update_with_logging(
         db=db,
+        crud_obj=pharmacy,
+        entity_id=id,
+        obj_in=pharmacy_in,
         entity_type="pharmacy",
-        entity_obj=pharmacy_obj,
         user_id=current_user_id,
+        entity_name="Pharmacy",
+        request=request,
     )
-
-    return pharmacy_obj
 
 
 @router.delete("/{id}")
 def delete_pharmacy(
     *,
-    db: Session = Depends(deps.get_db),
     id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Delete a pharmacy.
-    """
+    """Delete a pharmacy."""
     from app.models.models import Medication
 
     pharmacy_obj = pharmacy.get(db=db, id=id)
-    if not pharmacy_obj:
-        raise HTTPException(status_code=404, detail="Pharmacy not found")
+    handle_not_found(pharmacy_obj, "Pharmacy")
 
-    # First, check how many medications reference this pharmacy
+    # Check how many medications reference this pharmacy
     medication_count = db.query(Medication).filter(Medication.pharmacy_id == id).count()
 
     # Set pharmacy_id to NULL for all medications that reference this pharmacy
@@ -119,8 +108,7 @@ def delete_pharmacy(
         )
         db.commit()
 
-    # Log the deletion activity BEFORE deleting using centralized logging
-    # Create custom description for pharmacy deletion with medication info
+    # Log the deletion activity BEFORE deleting with custom description
     base_description = (
         f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
     )
@@ -139,9 +127,10 @@ def delete_pharmacy(
         entity_obj=pharmacy_obj,
         user_id=current_user_id,
         description=description,
+        request=request,
     )
 
-    # Now delete the pharmacy
+    # Delete the pharmacy
     pharmacy.delete(db=db, id=id)
 
     return {"ok": True}

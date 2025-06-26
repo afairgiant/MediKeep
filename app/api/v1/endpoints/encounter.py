@@ -1,10 +1,16 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.v1.endpoints.utils import (
+    handle_create_with_logging,
+    handle_delete_with_logging,
+    handle_not_found,
+    handle_update_with_logging,
+    verify_patient_ownership,
+)
 from app.crud.encounter import encounter
 from app.models.activity_log import EntityType
 from app.schemas.encounter import (
@@ -20,28 +26,26 @@ router = APIRouter()
 @router.post("/", response_model=EncounterResponse)
 def create_encounter(
     *,
-    db: Session = Depends(deps.get_db),
     encounter_in: EncounterCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Create new encounter.
-    """
-    encounter_obj = encounter.create(db=db, obj_in=encounter_in)
-
-    # Log the creation activity using centralized logging
-    log_create(
+    """Create new encounter."""
+    return handle_create_with_logging(
         db=db,
+        crud_obj=encounter,
+        obj_in=encounter_in,
         entity_type=EntityType.ENCOUNTER,
-        entity_obj=encounter_obj,
         user_id=current_user_id,
+        entity_name="Encounter",
+        request=request,
     )
-
-    return encounter_obj
 
 
 @router.get("/", response_model=List[EncounterResponse])
 def read_encounters(
+    *,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
@@ -49,9 +53,7 @@ def read_encounters(
     practitioner_id: Optional[int] = Query(None),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
-    """
-    Retrieve encounters for the current user with optional filtering.
-    """
+    """Retrieve encounters for the current user with optional filtering."""
     # Filter encounters by the user's patient_id (ignore any provided patient_id for security)
     if practitioner_id:
         encounters = encounter.get_by_practitioner(
@@ -75,77 +77,55 @@ def read_encounter(
     encounter_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
-    """
-    Get encounter by ID with related information - only allows access to user's own encounters.
-    """
+    """Get encounter by ID with related information - only allows access to user's own encounters."""
     encounter_obj = encounter.get_with_relations(
         db=db, record_id=encounter_id, relations=["patient", "practitioner"]
     )
-    if not encounter_obj:
-        raise HTTPException(status_code=404, detail="Encounter not found")
-
-    # Security check: ensure the encounter belongs to the current user
-    deps.verify_patient_record_access(
-        getattr(encounter_obj, "patient_id"), current_user_patient_id, "encounter"
-    )
-
+    handle_not_found(encounter_obj, "Encounter")
+    verify_patient_ownership(encounter_obj, current_user_patient_id, "encounter")
     return encounter_obj
 
 
 @router.put("/{encounter_id}", response_model=EncounterResponse)
 def update_encounter(
     *,
-    db: Session = Depends(deps.get_db),
     encounter_id: int,
     encounter_in: EncounterUpdate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Update an encounter.
-    """
-    encounter_obj = encounter.get(db=db, id=encounter_id)
-    if not encounter_obj:
-        raise HTTPException(status_code=404, detail="Encounter not found")
-        encounter_obj = encounter.update(
-            db=db, db_obj=encounter_obj, obj_in=encounter_in
-        )
-
-    # Log the update activity using centralized logging
-    log_update(
+    """Update an encounter."""
+    return handle_update_with_logging(
         db=db,
+        crud_obj=encounter,
+        entity_id=encounter_id,
+        obj_in=encounter_in,
         entity_type=EntityType.ENCOUNTER,
-        entity_obj=encounter_obj,
         user_id=current_user_id,
+        entity_name="Encounter",
+        request=request,
     )
-
-    return encounter_obj
 
 
 @router.delete("/{encounter_id}")
 def delete_encounter(
     *,
-    db: Session = Depends(deps.get_db),
     encounter_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """
-    Delete an encounter.
-    """
-    encounter_obj = encounter.get(db=db, id=encounter_id)
-    if not encounter_obj:
-        raise HTTPException(status_code=404, detail="Encounter not found")
-
-        # Log the delete activity BEFORE deleting using centralized logging
-    log_delete(
+    """Delete an encounter."""
+    return handle_delete_with_logging(
         db=db,
+        crud_obj=encounter,
+        entity_id=encounter_id,
         entity_type=EntityType.ENCOUNTER,
-        entity_obj=encounter_obj,
         user_id=current_user_id,
+        entity_name="Encounter",
+        request=request,
     )
-
-    encounter.delete(db=db, id=encounter_id)
-
-    return {"message": "Encounter deleted successfully"}
 
 
 @router.get("/patient/{patient_id}/recent", response_model=List[EncounterResponse])
@@ -155,9 +135,7 @@ def get_recent_encounters(
     patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=30, ge=1, le=365),
 ) -> Any:
-    """
-    Get recent encounters for a patient within specified days.
-    """
+    """Get recent encounters for a patient within specified days."""
     encounters = encounter.get_recent(db, patient_id=patient_id, days=days)
     return encounters
 
@@ -172,9 +150,7 @@ def get_patient_encounters(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
 ) -> Any:
-    """
-    Get all encounters for a specific patient.
-    """
+    """Get all encounters for a specific patient."""
     encounters = encounter.get_by_patient(
         db, patient_id=patient_id, skip=skip, limit=limit
     )
