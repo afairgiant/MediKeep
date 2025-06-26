@@ -30,10 +30,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Example:
             user = user_crud.get_by_username(db, username="john_doe")
         """
-        users = super().get_by_field(
+        users = self.query(
             db=db,
-            field_name="username",
-            field_value=username.lower(),
+            filters={"username": username.lower()},
             limit=1,
         )
         return users[0] if users else None
@@ -52,10 +51,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Example:
             user = user_crud.get_by_email(db, email="john@example.com")
         """
-        users = super().get_by_field(
+        users = self.query(
             db=db,
-            field_name="email",
-            field_value=email,
+            filters={"email": email},
             limit=1,
         )
         return users[0] if users else None
@@ -226,10 +224,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             # Check if username is available for user update (excluding current user)
             is_taken = user_crud.is_username_taken(db, username="john_doe", exclude_user_id=5)
         """
-        users = super().get_by_field(
+        users = self.query(
             db=db,
-            field_name="username",
-            field_value=username.lower(),
+            filters={"username": username.lower()},
             limit=1,
         )
 
@@ -262,10 +259,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             # Check if email is available for user update (excluding current user)
             is_taken = user_crud.is_email_taken(db, email="john@example.com", exclude_user_id=5)
         """
-        users = super().get_by_field(
+        users = self.query(
             db=db,
-            field_name="email",
-            field_value=email,
+            filters={"email": email},
             limit=1,
         )
 

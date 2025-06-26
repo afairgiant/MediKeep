@@ -81,10 +81,9 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Get all lab results by test code (e.g., LOINC code)"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="test_code",
-            field_value=test_code,
+            filters={"test_code": test_code},
             skip=skip,
             limit=limit,
             order_by="ordered_date",
@@ -95,11 +94,9 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, patient_id: int, test_code: str
     ) -> List[LabResult]:
         """Get lab results for a specific patient and test code"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="patient_id",
-            field_value=patient_id,
-            additional_filters={"test_code": test_code},
+            filters={"patient_id": patient_id, "test_code": test_code},
             order_by="ordered_date",
             order_desc=True,
         )
@@ -112,10 +109,9 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code_pattern: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Search lab results by test code pattern (partial match)"""
-        return self.search_by_text_field(
+        return self.query(
             db=db,
-            field_name="test_code",
-            search_term=test_code_pattern,
+            search={"field": "test_code", "term": test_code_pattern},
             skip=skip,
             limit=limit,
             order_by="ordered_date",

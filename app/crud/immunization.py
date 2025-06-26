@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -72,11 +72,14 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         Returns:
             List of immunizations for the specified vaccine
         """
-        return super().search_by_text_field(
+        filters: Dict[str, Any] = {}
+        if patient_id:
+            filters["patient_id"] = patient_id
+
+        return self.query(
             db=db,
-            field_name="vaccine_name",
-            search_term=vaccine_name,
-            patient_id=patient_id,
+            filters=filters,
+            search={"field": "vaccine_name", "term": vaccine_name},
             order_by="date_administered",
             order_desc=True,
         )
@@ -130,11 +133,10 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         from datetime import date, timedelta
 
         # Get latest dose using our generic search method
-        last_doses = super().search_by_text_field(
+        last_doses = self.query(
             db=db,
-            field_name="vaccine_name",
-            search_term=vaccine_name,
-            patient_id=patient_id,
+            filters={"patient_id": patient_id},
+            search={"field": "vaccine_name", "term": vaccine_name},
             order_by="date_administered",
             order_desc=True,
             limit=1,

@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
-from typing import List, Optional
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -36,10 +36,9 @@ class CRUDLabResultFile(
         self, db: Session, *, lab_result_id: int
     ) -> List[LabResultFile]:
         """Get all files for a specific lab result"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="lab_result_id",
-            field_value=lab_result_id,
+            filters={"lab_result_id": lab_result_id},
             order_by="uploaded_at",
             order_desc=True,
         )
@@ -48,20 +47,18 @@ class CRUDLabResultFile(
         self, db: Session, *, file_type: str, skip: int = 0, limit: int = 100
     ) -> List[LabResultFile]:
         """Get files by file type (e.g., 'pdf', 'image/png')"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="file_type",
-            field_value=file_type,
+            filters={"file_type": file_type},
             skip=skip,
             limit=limit,
         )
 
     def get_by_filename(self, db: Session, *, filename: str) -> Optional[LabResultFile]:
         """Get file by filename"""
-        results = self.get_by_field(
+        results = self.query(
             db=db,
-            field_name="file_name",
-            field_value=filename,
+            filters={"file_name": filename},
             limit=1,
         )
         return results[0] if results else None
@@ -70,10 +67,9 @@ class CRUDLabResultFile(
         self, db: Session, *, file_path: str
     ) -> Optional[LabResultFile]:
         """Get file by file path"""
-        results = self.get_by_field(
+        results = self.query(
             db=db,
-            field_name="file_path",
-            field_value=file_path,
+            filters={"file_path": file_path},
             limit=1,
         )
         return results[0] if results else None
@@ -82,10 +78,9 @@ class CRUDLabResultFile(
         self, db: Session, *, filename_pattern: str, skip: int = 0, limit: int = 100
     ) -> List[LabResultFile]:
         """Search files by filename pattern (partial match)"""
-        return self.search_by_text_field(
+        return self.query(
             db=db,
-            field_name="file_name",
-            search_term=filename_pattern,
+            search={"field": "file_name", "term": filename_pattern},
             skip=skip,
             limit=limit,
         )
@@ -94,11 +89,9 @@ class CRUDLabResultFile(
         self, db: Session, *, lab_result_id: int, file_type: str
     ) -> List[LabResultFile]:
         """Get files for a specific lab result filtered by file type"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="lab_result_id",
-            field_value=lab_result_id,
-            additional_filters={"file_type": file_type},
+            filters={"lab_result_id": lab_result_id, "file_type": file_type},
             order_by="uploaded_at",
             order_desc=True,
         )
@@ -162,11 +155,9 @@ class CRUDLabResultFile(
         self, db: Session, *, start_date, end_date, skip: int = 0, limit: int = 100
     ) -> List[LabResultFile]:
         """Get files uploaded within a date range"""
-        return self.get_by_date_range(
+        return self.query(
             db=db,
-            date_field="uploaded_at",
-            start_date=start_date,
-            end_date=end_date,
+            date_range={"field": "uploaded_at", "start": start_date, "end": end_date},
             skip=skip,
             limit=limit,
         )
@@ -175,10 +166,14 @@ class CRUDLabResultFile(
         self, db: Session, *, days: int = 7, skip: int = 0, limit: int = 100
     ) -> List[LabResultFile]:
         """Get files uploaded in the last N days"""
-        return self.get_recent_records(
+        start_date = datetime.utcnow() - timedelta(days=days)
+        return self.query(
             db=db,
-            date_field="uploaded_at",
-            days=days,
+            date_range={
+                "field": "uploaded_at",
+                "start": start_date,
+                "end": datetime.utcnow(),
+            },
             skip=skip,
             limit=limit,
         )

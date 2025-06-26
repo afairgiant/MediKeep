@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import distinct, func
 from sqlalchemy.orm import Session
@@ -30,10 +30,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacy = pharmacy_crud.get_by_name(db, name="CVS Pharmacy - Main Street")
         """
-        pharmacies = super().get_by_field(
+        pharmacies = self.query(
             db=db,
-            field_name="name",
-            field_value=name,
+            filters={"name": name},
             limit=1,
         )
         return pharmacies[0] if pharmacies else None
@@ -56,10 +55,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.search_by_name(db, name="CVS")
         """
-        return super().search_by_text_field(
+        return self.query(
             db=db,
-            field_name="name",
-            search_term=name,
+            search={"field": "name", "term": name},
             skip=skip,
             limit=limit,
         )
@@ -82,10 +80,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.search_by_brand(db, brand="CVS")
         """
-        return super().search_by_text_field(
+        return self.query(
             db=db,
-            field_name="brand",
-            search_term=brand,
+            search={"field": "brand", "term": brand},
             skip=skip,
             limit=limit,
         )
@@ -108,10 +105,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             cvs_pharmacies = pharmacy_crud.get_by_brand(db, brand="CVS")
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="brand",
-            field_value=brand,
+            filters={"brand": brand},
             skip=skip,
             limit=limit,
         )
@@ -188,44 +184,41 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             List of Pharmacy objects matching the location criteria
         """
         # Build filters dictionary
-        filters = {}
+        filters: Dict[str, Any] = {}
         if zip_code:
             filters["zip_code"] = zip_code
 
         # Use text search for city and state if provided
         if city and state:
             # If both city and state provided, use text search on city with state filter
-            return super().search_by_text_field(
+            filters.update({"state": state})  # Add state as exact filter
+            return self.query(
                 db=db,
-                field_name="city",
-                search_term=city,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "city", "term": city},
                 skip=skip,
                 limit=limit,
             )
         elif city:
-            return super().search_by_text_field(
+            return self.query(
                 db=db,
-                field_name="city",
-                search_term=city,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "city", "term": city},
                 skip=skip,
                 limit=limit,
             )
         elif state:
-            return super().search_by_text_field(
+            return self.query(
                 db=db,
-                field_name="state",
-                search_term=state,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "state", "term": state},
                 skip=skip,
                 limit=limit,
             )
         elif zip_code:
-            return super().get_by_field(
+            return self.query(
                 db=db,
-                field_name="zip_code",
-                field_value=zip_code,
+                filters={"zip_code": zip_code},
                 skip=skip,
                 limit=limit,
             )
@@ -250,11 +243,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacy = pharmacy_crud.get_by_store_number(db, brand="CVS", store_number="12345")
         """
-        pharmacies = super().get_by_field(
+        pharmacies = self.query(
             db=db,
-            field_name="brand",
-            field_value=brand,
-            additional_filters={"store_number": store_number},
+            filters={"brand": brand, "store_number": store_number},
             limit=1,
         )
         return pharmacies[0] if pharmacies else None
@@ -277,10 +268,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.get_by_zip_code(db, zip_code="27601")
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="zip_code",
-            field_value=zip_code,
+            filters={"zip_code": zip_code},
             skip=skip,
             limit=limit,
         )
@@ -302,10 +292,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.get_24_hour_pharmacies(db)
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="twenty_four_hour",
-            field_value=True,
+            filters={"twenty_four_hour": True},
             skip=skip,
             limit=limit,
         )
@@ -327,10 +316,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             pharmacies = pharmacy_crud.get_drive_through_pharmacies(db)
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="drive_through",
-            field_value=True,
+            filters={"drive_through": True},
             skip=skip,
             limit=limit,
         )
@@ -374,10 +362,9 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             if pharmacy_crud.is_name_taken(db, name="CVS Main Street"):
                 raise HTTPException(400, "Pharmacy already exists")
         """
-        pharmacies = super().get_by_field(
+        pharmacies = self.query(
             db=db,
-            field_name="name",
-            field_value=name,
+            filters={"name": name},
             limit=1,
         )
 
@@ -554,7 +541,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             List of Pharmacy objects matching the search criteria
         """
         # Build filters for exact matches
-        filters = {}
+        filters: Dict[str, Any] = {}
         if zip_code:
             filters["zip_code"] = zip_code
         if drive_through is not None:
@@ -564,52 +551,42 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
 
         # Determine which field to use for text search (prioritize name)
         if name:
-            return super().search_by_text_field(
+            return self.query(
                 db=db,
-                field_name="name",
-                search_term=name,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "name", "term": name},
                 skip=skip,
                 limit=limit,
             )
         elif brand:
-            return super().search_by_text_field(
+            return self.query(
                 db=db,
-                field_name="brand",
-                search_term=brand,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "brand", "term": brand},
                 skip=skip,
                 limit=limit,
             )
         elif city:
-            return super().search_by_text_field(
+            return self.query(
                 db=db,
-                field_name="city",
-                search_term=city,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "city", "term": city},
                 skip=skip,
                 limit=limit,
             )
         elif state:
-            return super().search_by_text_field(
+            return self.query(
                 db=db,
-                field_name="state",
-                search_term=state,
-                additional_filters=filters,
+                filters=filters,
+                search={"field": "state", "term": state},
                 skip=skip,
                 limit=limit,
             )
         elif filters:
-            # Only exact filters provided, use get_by_field with first filter
-            first_filter = next(iter(filters.items()))
-            remaining_filters = {
-                k: v for k, v in filters.items() if k != first_filter[0]
-            }
-            return super().get_by_field(
+            # Only exact filters provided, use query with filters
+            return self.query(
                 db=db,
-                field_name=first_filter[0],
-                field_value=first_filter[1],
-                additional_filters=remaining_filters,
+                filters=filters,
                 skip=skip,
                 limit=limit,
             )
