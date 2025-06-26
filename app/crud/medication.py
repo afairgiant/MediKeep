@@ -28,10 +28,9 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             List of active medications for the patient
         """
-        return super().get_by_patient(
+        return self.query(
             db=db,
-            patient_id=patient_id,
-            additional_filters={"is_active": True},
+            filters={"patient_id": patient_id, "is_active": True},
             load_relations=["practitioner", "pharmacy"],
         )
 
@@ -50,10 +49,9 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             List of medications matching the name
         """
-        return self.search_by_text_field(
+        return self.query(
             db=db,
-            field_name="medication_name",
-            search_term=name,
+            search={"field": "medication_name", "term": name},
             skip=skip,
             limit=limit,
         )

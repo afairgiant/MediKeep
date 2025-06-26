@@ -36,19 +36,17 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
         Returns:
             List of treatments for the condition
         """
-        additional_filters = {}
+        filters = {"condition_id": condition_id}
         if patient_id:
-            additional_filters["patient_id"] = patient_id
+            filters["patient_id"] = patient_id
 
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="condition_id",
-            field_value=condition_id,
+            filters=filters,
             skip=skip,
             limit=limit,
             order_by="start_date",
             order_desc=True,
-            additional_filters=additional_filters,
         )
 
     def get_active_treatments(self, db: Session, *, patient_id: int) -> List[Treatment]:
@@ -62,10 +60,9 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
         Returns:
             List of active treatments
         """
-        return super().get_by_status(
+        return self.query(
             db=db,
-            status="active",
-            patient_id=patient_id,
+            filters={"status": "active", "patient_id": patient_id},
             order_by="start_date",
             order_desc=True,
         )

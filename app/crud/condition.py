@@ -25,10 +25,9 @@ class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate]):
         Returns:
             List of active conditions
         """
-        return super().get_by_status(
+        return self.query(
             db=db,
-            status="active",
-            patient_id=patient_id,
+            filters={"status": "active", "patient_id": patient_id},
             order_by="onsetDate",
             order_desc=True,
         )

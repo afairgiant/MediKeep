@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -27,10 +27,13 @@ class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
         Returns:
             List of scheduled procedures
         """
-        return super().get_by_status(
+        filters: Dict[str, Any] = {"status": "scheduled"}
+        if patient_id:
+            filters["patient_id"] = patient_id
+
+        return self.query(
             db=db,
-            status="scheduled",
-            patient_id=patient_id,
+            filters=filters,
             order_by="date",
             order_desc=False,  # Ascending order for scheduled procedures
         )
