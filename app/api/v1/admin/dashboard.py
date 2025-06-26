@@ -12,9 +12,15 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import desc, text
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from app.api import deps
 from app.core.config import settings
+from app.core.datetime_utils import (
+    get_application_startup_time,
+    get_application_uptime_seconds,
+    get_application_uptime_string,
+)
 from app.models.activity_log import ActivityLog, get_utc_now
 from app.models.models import (
     Allergy,
@@ -445,40 +451,9 @@ def get_system_health(
             + safe_count(db.query(Procedure))
             + safe_count(db.query(Treatment))
             + safe_count(db.query(Encounter))
-        )  # Calculate application uptime using startup time
+        )  # Calculate application uptime using actual startup time
         try:
-            # Try to get process startup time as a fallback
-            import os
-            import time
-
-            # Get process creation time (approximate app startup)
-            # This is a simplified approach - in production you'd store the actual startup time
-            current_time = time.time()
-
-            # Try to get file modification time of this script as a proxy for last restart
-            script_path = __file__
-            if os.path.exists(script_path):
-                script_mtime = os.path.getmtime(script_path)
-                # Use a reasonable approximation (this assumes recent deployment)
-                app_start_time = max(
-                    script_mtime, current_time - (7 * 24 * 3600)
-                )  # Max 7 days
-            else:
-                # Fallback - assume recent startup
-                app_start_time = current_time - (2 * 24 * 3600)  # 2 days ago
-
-            uptime_seconds = current_time - app_start_time
-            uptime_days = int(uptime_seconds // 86400)
-            uptime_hours = int((uptime_seconds % 86400) // 3600)
-            uptime_minutes = int((uptime_seconds % 3600) // 60)
-
-            if uptime_days > 0:
-                system_uptime = f"{uptime_days} days, {uptime_hours} hours"
-            elif uptime_hours > 0:
-                system_uptime = f"{uptime_hours} hours, {uptime_minutes} minutes"
-            else:
-                system_uptime = f"{uptime_minutes} minutes"
-
+            system_uptime = get_application_uptime_string()
         except Exception as e:
             print(f"Error calculating uptime: {e}")
             system_uptime = "Unable to determine"
@@ -577,9 +552,9 @@ def get_system_metrics(
         host = request.url.hostname
         is_localhost = (
             host in ["localhost", "127.0.0.1", "::1"]
-            or host.startswith("192.168.")
-            or host.startswith("10.")
-            or host.startswith("172.")
+            or (host and host.startswith("192.168."))
+            or (host and host.startswith("10."))
+            or (host and host.startswith("172."))
         )
 
         # Determine environment with security priority
@@ -702,12 +677,15 @@ def get_system_metrics(
             try:
                 load_avg = os.getloadavg()[0]  # 1-minute load average
                 cpu_count = psutil.cpu_count()
-                load_percent = (load_avg / cpu_count) * 100
-                system_load = (
-                    "high"
-                    if load_percent > 80
-                    else "normal" if load_percent > 50 else "low"
-                )
+                if cpu_count and cpu_count > 0:
+                    load_percent = (load_avg / cpu_count) * 100
+                    system_load = (
+                        "high"
+                        if load_percent > 80
+                        else "normal" if load_percent > 50 else "low"
+                    )
+                else:
+                    system_load = "normal"
             except (OSError, AttributeError):
                 # Windows doesn't have getloadavg
                 system_load = "normal"
@@ -805,12 +783,17 @@ def get_system_metrics(
 @router.get("/health-check")
 def quick_health_check():
     """Quick health check endpoint for monitoring services"""
+    startup_time = get_application_startup_time()
+    uptime_seconds = get_application_uptime_seconds()
+    uptime_info = f"{uptime_seconds}s" if uptime_seconds is not None else "operational"
+
     return {
         "status": "healthy",
         "timestamp": get_utc_now().isoformat(),
         "service": "medical_records_api",
         "version": "2.0",
-        "uptime": "operational",
+        "uptime": uptime_info,
+        "startup_time": startup_time.isoformat() if startup_time else None,
     }
 
 
@@ -934,7 +917,7 @@ def get_analytics_data(
     """Get analytics data for dashboard charts"""
     from datetime import datetime, timedelta
 
-    from sqlalchemy import Date, cast, func
+    from sqlalchemy import Date, cast
 
     try:
         # Get current date and calculate date range

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +17,7 @@ from app.core.database import (
     create_tables,
     database_migrations,
 )
+from app.core.datetime_utils import set_application_startup_time
 from app.core.logging_config import LoggingConfig, get_logger
 from app.core.logging_middleware import RequestLoggingMiddleware
 from app.scripts.sequence_monitor import SequenceMonitor
@@ -163,6 +165,9 @@ else:
 @app.on_event("startup")
 async def startup_event():
     """Initialize database tables on startup"""
+    # Record the actual application startup time
+    set_application_startup_time()
+
     logger.info(
         "Application starting up",
         extra={

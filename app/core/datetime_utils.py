@@ -5,15 +5,15 @@ This module provides utilities for handling datetime conversions and validations
 across the Medical Records Management System.
 """
 
-from datetime import datetime, date, timezone
-from typing import Optional, Union, Any
 import re
+from datetime import date, datetime, timezone
+from typing import Any, Optional, Union
 
 
 def get_utc_now() -> datetime:
     """
     Get the current UTC datetime with timezone awareness.
-    
+
     This replaces the deprecated datetime.utcnow() with a timezone-aware alternative.
     """
     return datetime.now(timezone.utc)
@@ -382,3 +382,70 @@ PATIENT_CONVERTER = DateTimeConverter(["created_at", "updated_at"])
 PATIENT_DATE_CONVERTER = DateConverter(["birthDate"])
 
 FILE_CONVERTER = DateTimeConverter(["uploaded_at", "created_at", "updated_at"])
+
+
+# ========================================
+# Application Startup Time Tracking
+# ========================================
+
+# Global variable to store the actual application startup time
+_APPLICATION_START_TIME: Optional[datetime] = None
+
+
+def set_application_startup_time(startup_time: Optional[datetime] = None) -> None:
+    """
+    Set the application startup time.
+
+    Args:
+        startup_time: The startup time to set. If None, uses current UTC time.
+    """
+    global _APPLICATION_START_TIME
+    _APPLICATION_START_TIME = startup_time or get_utc_now()
+
+
+def get_application_startup_time() -> Optional[datetime]:
+    """
+    Get the actual application startup time.
+
+    Returns:
+        The datetime when the application started, or None if not set yet.
+    """
+    return _APPLICATION_START_TIME
+
+
+def get_application_uptime_seconds() -> Optional[int]:
+    """
+    Get the application uptime in seconds.
+
+    Returns:
+        The number of seconds since startup, or None if startup time not set.
+    """
+    if _APPLICATION_START_TIME is None:
+        return None
+
+    uptime_delta = get_utc_now() - _APPLICATION_START_TIME
+    return int(uptime_delta.total_seconds())
+
+
+def get_application_uptime_string() -> str:
+    """
+    Get a formatted uptime string.
+
+    Returns:
+        A human-readable uptime string, or "Starting up..." if not available.
+    """
+    uptime_seconds = get_application_uptime_seconds()
+
+    if uptime_seconds is None:
+        return "Starting up..."
+
+    uptime_days = uptime_seconds // 86400
+    uptime_hours = (uptime_seconds % 86400) // 3600
+    uptime_minutes = (uptime_seconds % 3600) // 60
+
+    if uptime_days > 0:
+        return f"{uptime_days} days, {uptime_hours} hours"
+    elif uptime_hours > 0:
+        return f"{uptime_hours} hours, {uptime_minutes} minutes"
+    else:
+        return f"{uptime_minutes} minutes"
