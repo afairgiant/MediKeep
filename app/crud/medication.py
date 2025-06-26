@@ -15,29 +15,6 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
     patient-specific medication queries and dosage management.
     """
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Medication]:
-        """
-        Get all medications for a specific patient.
-
-        Args:
-            db: Database session
-            patient_id: Patient ID to filter by
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of medications for the patient
-        """
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            load_relations=["practitioner", "pharmacy"],
-        )
-
     def get_active_by_patient(
         self, db: Session, *, patient_id: int
     ) -> List[Medication]:
@@ -114,21 +91,6 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
-
-    def get_with_relationships(self, db: Session, *, id: int) -> Optional[Medication]:
-        """
-        Get a medication by ID with its relationships loaded.
-
-        Args:
-            db: Database session
-            id: Medication ID
-
-        Returns:
-            Medication with relationships loaded
-        """
-        return self.get_with_relations(
-            db=db, record_id=id, relations=["practitioner", "pharmacy"]
-        )
 
 
 medication = CRUDMedication(Medication)

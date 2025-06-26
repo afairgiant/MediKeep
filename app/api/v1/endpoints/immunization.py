@@ -76,7 +76,7 @@ def read_immunization(
     """
     # Get immunization and verify it belongs to the user
     immunization_obj = immunization.get_with_relations(
-        db, immunization_id=immunization_id
+        db=db, record_id=immunization_id, relations=["patient", "practitioner"]
     )
     if not immunization_obj:
         raise HTTPException(status_code=404, detail="Immunization not found")

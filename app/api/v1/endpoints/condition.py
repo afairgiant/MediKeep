@@ -76,7 +76,7 @@ def read_condition(
     """
     # Get condition and verify it belongs to the user
     condition_obj = condition.get_with_relations(
-        db=db, record_id=condition_id, relations=[]
+        db=db, record_id=condition_id, relations=["patient", "practitioner"]
     )
     if not condition_obj:
         raise HTTPException(status_code=404, detail="Condition not found")

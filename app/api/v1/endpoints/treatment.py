@@ -123,7 +123,12 @@ def read_treatment(
     """
     Get treatment by ID with related information - only allows access to user's own treatments.
     """
-    treatment_obj = treatment.get_with_relations(db, treatment_id=treatment_id)
+    # Get the treatment with relationships loaded
+    treatment_obj = treatment.get_with_relations(
+        db=db,
+        record_id=treatment_id,
+        relations=["patient", "practitioner", "condition"],
+    )
     if not treatment_obj:
         raise HTTPException(status_code=404, detail="Treatment not found")
 

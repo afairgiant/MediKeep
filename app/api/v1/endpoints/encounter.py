@@ -78,7 +78,9 @@ def read_encounter(
     """
     Get encounter by ID with related information - only allows access to user's own encounters.
     """
-    encounter_obj = encounter.get_with_relations(db, encounter_id=encounter_id)
+    encounter_obj = encounter.get_with_relations(
+        db=db, record_id=encounter_id, relations=["patient", "practitioner"]
+    )
     if not encounter_obj:
         raise HTTPException(status_code=404, detail="Encounter not found")
 

@@ -14,30 +14,6 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
     Handles patient allergy records, allergen tracking, and severity management.
     """
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Allergy]:
-        """
-        Retrieve all allergies for a specific patient.
-
-        Args:
-            db: SQLAlchemy database session
-            patient_id: ID of the patient
-            skip: Number of records to skip (for pagination)
-            limit: Maximum number of records to return
-
-        Returns:
-            List of allergies for the patient
-        """
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            order_by="onset_date",
-            order_desc=True,
-        )
-
     def get_by_severity(
         self, db: Session, *, severity: str, patient_id: Optional[int] = None
     ) -> List[Allergy]:
@@ -131,21 +107,6 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             patient_id=patient_id,
             order_by="severity",
             order_desc=True,
-        )
-
-    def get_with_relations(self, db: Session, allergy_id: int) -> Optional[Allergy]:
-        """
-        Retrieve an allergy with all related information loaded.
-
-        Args:
-            db: SQLAlchemy database session
-            allergy_id: ID of the allergy
-
-        Returns:
-            Allergy with patient relationship loaded
-        """
-        return super().get_with_relations(
-            db=db, record_id=allergy_id, relations=["patient"]
         )
 
     def check_allergen_conflict(

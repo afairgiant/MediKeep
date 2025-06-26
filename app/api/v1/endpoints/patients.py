@@ -311,7 +311,9 @@ def get_patient_medications(
     """Get medications for a specific patient"""
     from app.crud.medication import medication
 
-    return medication.get_by_patient(db=db, patient_id=patient_id)
+    return medication.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner", "pharmacy"]
+    )
 
 
 @router.post("/{patient_id}/medications/", response_model=MedicationResponse)
@@ -345,7 +347,9 @@ def get_patient_conditions(
     """Get conditions for a specific patient"""
     from app.crud.condition import condition
 
-    return condition.get_by_patient(db=db, patient_id=patient_id)
+    return condition.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner"]
+    )
 
 
 @router.get("/{patient_id}/allergies/")
@@ -367,7 +371,9 @@ def get_patient_immunizations(
     """Get immunizations for a specific patient"""
     from app.crud.immunization import immunization
 
-    return immunization.get_by_patient(db=db, patient_id=patient_id)
+    return immunization.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner"]
+    )
 
 
 @router.get("/{patient_id}/procedures/")
@@ -378,7 +384,9 @@ def get_patient_procedures(
     """Get procedures for a specific patient"""
     from app.crud.procedure import procedure
 
-    return procedure.get_by_patient(db=db, patient_id=patient_id)
+    return procedure.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner"]
+    )
 
 
 @router.get("/{patient_id}/treatments/")
@@ -389,7 +397,9 @@ def get_patient_treatments(
     """Get treatments for a specific patient"""
     from app.crud.treatment import treatment
 
-    return treatment.get_by_patient(db=db, patient_id=patient_id)
+    return treatment.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner", "condition"]
+    )
 
 
 @router.get("/{patient_id}/lab-results/")
@@ -400,7 +410,9 @@ def get_patient_lab_results(
     """Get lab results for a specific patient"""
     from app.crud.lab_result import lab_result
 
-    return lab_result.get_by_patient(db=db, patient_id=patient_id)
+    return lab_result.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner"]
+    )
 
 
 @router.get("/{patient_id}/encounters/")
@@ -411,7 +423,9 @@ def get_patient_encounters(
     """Get encounters for a specific patient"""
     from app.crud.encounter import encounter
 
-    return encounter.get_by_patient(db=db, patient_id=patient_id)
+    return encounter.get_by_patient(
+        db=db, patient_id=patient_id, load_relations=["practitioner"]
+    )
 
 
 @router.get("/me/recent-activity", response_model=List[UserRecentActivity])

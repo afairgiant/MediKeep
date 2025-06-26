@@ -97,7 +97,7 @@ def get_lab_result(
     Get a specific lab result by ID with related data
     """
     db_lab_result = lab_result.get_with_relations(
-        db, record_id=lab_result_id, relations=["practitioner", "patient", "files"]
+        db=db, record_id=lab_result_id, relations=["patient", "practitioner"]
     )
     if not db_lab_result:
         raise HTTPException(status_code=404, detail="Lab result not found")

@@ -80,7 +80,9 @@ def read_allergy(
     Get allergy by ID with related information - only allows access to user's own allergies.
     """
     # Get allergy and verify it belongs to the user
-    allergy_obj = allergy.get_with_relations(db, allergy_id=allergy_id)
+    allergy_obj = allergy.get_with_relations(
+        db=db, record_id=allergy_id, relations=["patient"]
+    )
     if not allergy_obj:
         raise HTTPException(status_code=404, detail="Allergy not found")
 

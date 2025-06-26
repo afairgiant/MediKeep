@@ -58,33 +58,13 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         db.refresh(db_obj)
         return db_obj
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Immunization]:
-        """
-        Retrieve all immunizations for a specific patient.
-
-        Args:
-            db: SQLAlchemy database session
-            patient_id: ID of the patient
-            skip: Number of records to skip (for pagination)
-            limit: Maximum number of records to return        Returns:
-            List of immunizations for the patient
-        """
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            order_by="date_administered",
-            order_desc=True,
-        )
-
     def get_by_vaccine(
         self, db: Session, *, vaccine_name: str, patient_id: Optional[int] = None
     ) -> List[Immunization]:
         """
-        Retrieve immunizations by vaccine name, optionally filtered by patient.        Args:
+        Retrieve immunizations by vaccine name, optionally filtered by patient.
+
+        Args:
             db: SQLAlchemy database session
             vaccine_name: Name of the vaccine
             patient_id: Optional patient ID to filter by
@@ -113,7 +93,8 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
             days: Number of days to look back
 
         Returns:
-            List of recent immunizations"""
+            List of recent immunizations
+        """
         from app.crud.utils import get_recent_records
 
         return get_recent_records(
@@ -124,23 +105,6 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
             patient_id=patient_id,
             order_by="date_administered",
             order_desc=True,
-        )
-
-    def get_with_relations(
-        self, db: Session, immunization_id: int
-    ) -> Optional[Immunization]:
-        """
-        Retrieve an immunization with all related information loaded.
-
-        Args:
-            db: SQLAlchemy database session
-            immunization_id: ID of the immunization
-
-        Returns:
-            Immunization with patient and practitioner relationships loaded
-        """
-        return super().get_with_relations(
-            db=db, record_id=immunization_id, relations=["patient", "practitioner"]
         )
 
     def get_due_for_booster(

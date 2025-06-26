@@ -17,19 +17,6 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     patient-specific queries, date range filtering, and statistics.
     """
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Vitals]:
-        """Get all vitals readings for a specific patient"""
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            order_by="recorded_date",
-            order_desc=True,
-        )
-
     def get_by_patient_date_range(
         self,
         db: Session,

@@ -497,7 +497,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
         Args:
             model (Type[ModelType]): A SQLAlchemy model class (like User, Patient, etc.)
-                  This is the actual class, not an instance of it
+            This is the actual class, not an instance of it
             primary_key (Union[str, List[str]]): The name(s) of the primary key attribute(s)
 
         Example:

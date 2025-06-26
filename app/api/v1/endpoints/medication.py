@@ -44,8 +44,8 @@ def create_medication(
 
         # Reload the medication with relationships
         if medication_id is not None:
-            medication_with_relations = medication.get_with_relationships(
-                db=db, id=medication_id
+            medication_with_relations = medication.get_with_relations(
+                db=db, record_id=medication_id, relations=["practitioner", "pharmacy"]
             )
         else:
             medication_with_relations = medication_obj
@@ -75,7 +75,9 @@ def create_medication(
         # Return medication with relationships loaded
         medication_id = getattr(medication_obj, "id", None)
         if medication_id:
-            return medication.get_with_relationships(db=db, id=medication_id)
+            return medication.get_with_relations(
+                db=db, record_id=medication_id, relations=["practitioner", "pharmacy"]
+            )
         return medication_obj
 
     except Exception as e:
@@ -106,9 +108,13 @@ def read_medications(
     """
     Retrieve medications for the current user with optional filtering.
     """
-    # Filter medications by the user's patient_id
+    # Filter medications by the user's patient_id - use base class method with relationships
     medications = medication.get_by_patient(
-        db=db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        db=db,
+        patient_id=current_user_patient_id,
+        skip=skip,
+        limit=limit,
+        load_relations=["practitioner", "pharmacy"],
     )
 
     # Apply name filter if provided
@@ -116,7 +122,7 @@ def read_medications(
         medications = [
             med
             for med in medications
-            if name.lower() in getattr(med, "name", "").lower()
+            if name.lower() in getattr(med, "medication_name", "").lower()
         ]
 
     return medications
@@ -203,7 +209,9 @@ def update_medication(
         )
 
         # Return medication with relationships loaded
-        return medication.get_with_relationships(db=db, id=medication_id)
+        return medication.get_with_relations(
+            db=db, record_id=medication_id, relations=["practitioner", "pharmacy"]
+        )
 
     except Exception as e:
         # Log failed medication update
@@ -312,6 +320,10 @@ def read_patient_medications(
         medications = medication.get_active_by_patient(db=db, patient_id=patient_id)
     else:
         medications = medication.get_by_patient(
-            db=db, patient_id=patient_id, skip=skip, limit=limit
+            db=db,
+            patient_id=patient_id,
+            skip=skip,
+            limit=limit,
+            load_relations=["practitioner", "pharmacy"],
         )
     return medications
