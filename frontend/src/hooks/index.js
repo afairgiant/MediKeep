@@ -4,3 +4,4 @@
 
 export * from './useApi';
 export * from './useGlobalData';
+export * from './useAdminData';

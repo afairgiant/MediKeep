@@ -81,6 +81,24 @@ const ModelCreate = () => {
       errors.push(`${field.name} is required`);
     }
 
+    // Password validation for user creation
+    if (
+      (field.name === 'password_hash' ||
+        field.name === 'password' ||
+        field.name.includes('password')) &&
+      modelName === 'user'
+    ) {
+      if (!value || value.length < 6) {
+        errors.push('Password must be at least 6 characters long');
+      }
+
+      const hasLetter = /[a-zA-Z]/.test(value);
+      const hasNumber = /\d/.test(value);
+      if (value && (!hasLetter || !hasNumber)) {
+        errors.push('Password must contain at least one letter and one number');
+      }
+    }
+
     // Max length validation
     if (
       field.max_length &&
@@ -220,7 +238,46 @@ const ModelCreate = () => {
           <small className="field-note">Primary key (auto-generated)</small>
         </div>
       );
-    } // Hide patient_id field for medical records - it will be auto-populated
+    }
+
+    // Handle password fields properly for user creation
+    if (
+      field.name === 'password_hash' ||
+      field.name === 'password' ||
+      field.name.includes('password')
+    ) {
+      if (modelName === 'user') {
+        return (
+          <div className="password-field-create">
+            <input
+              type="password"
+              value={value}
+              onChange={e => handleFieldChange(field.name, e.target.value)}
+              className={`field-input ${hasError ? 'error' : ''}`}
+              disabled={saving}
+              placeholder="Enter password for new user..."
+              minLength="6"
+            />
+            <small className="field-note">
+              Enter a plain text password (minimum 6 characters with letter and
+              number) - it will be securely hashed
+            </small>
+          </div>
+        );
+      } else {
+        // For non-user models, hide password fields
+        return (
+          <div className="field-value readonly">
+            Not applicable
+            <small className="field-note">
+              Password fields not supported for this model
+            </small>
+          </div>
+        );
+      }
+    }
+
+    // Hide patient_id field for medical records - it will be auto-populated
     const medicalModels = [
       'medication',
       'lab_result',

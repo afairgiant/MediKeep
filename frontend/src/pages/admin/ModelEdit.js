@@ -128,10 +128,15 @@ const ModelEdit = () => {
       setSaving(true);
       setError(null);
 
-      // Create update data excluding primary key fields
+      // Create update data excluding primary key fields and password fields
       const updateData = {};
       metadata.fields.forEach(field => {
-        if (!field.primary_key) {
+        if (
+          !field.primary_key &&
+          field.name !== 'password_hash' &&
+          field.name !== 'password' &&
+          !field.name.includes('password')
+        ) {
           updateData[field.name] = formData[field.name];
         }
       });
@@ -141,6 +146,43 @@ const ModelEdit = () => {
     } catch (err) {
       console.error('Error saving record:', err);
       setError(err.message || 'Failed to save record');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async userId => {
+    const newPassword = prompt(
+      'Enter new password for this user:\n\n' +
+        'Password requirements:\n' +
+        '- At least 6 characters\n' +
+        '- Must contain at least one letter and one number'
+    );
+
+    if (!newPassword) {
+      return; // User cancelled
+    }
+
+    // Basic client-side validation
+    if (newPassword.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+
+    const hasLetter = /[a-zA-Z]/.test(newPassword);
+    const hasNumber = /\d/.test(newPassword);
+    if (!hasLetter || !hasNumber) {
+      alert('Password must contain at least one letter and one number');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await adminApiService.adminResetPassword(userId, newPassword);
+      alert('Password reset successfully!');
+    } catch (err) {
+      console.error('Error resetting password:', err);
+      alert('Failed to reset password: ' + (err.message || 'Unknown error'));
     } finally {
       setSaving(false);
     }
@@ -161,7 +203,44 @@ const ModelEdit = () => {
           <small className="field-note">Primary key (read-only)</small>
         </div>
       );
-    } // Hide patient_id field for medical records - it should not be changed
+    }
+
+    // Password fields should be read-only for security reasons
+    if (
+      field.name === 'password_hash' ||
+      field.name === 'password' ||
+      field.name.includes('password')
+    ) {
+      const maskedValue = value
+        ? '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'
+        : '';
+      return (
+        <div className="field-value readonly password-field">
+          <div className="password-display">{maskedValue}</div>
+          <div className="password-actions">
+            <small className="field-note">
+              Password hash (read-only for security)
+            </small>
+            {modelName === 'user' && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-small"
+                onClick={() => handleChangePassword(recordId)}
+                style={{
+                  marginLeft: '1rem',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.75rem',
+                }}
+              >
+                🔑 Reset Password
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Hide patient_id field for medical records - it should not be changed
     const medicalModels = [
       'medication',
       'lab_result',

@@ -131,6 +131,8 @@
   margin-right: 0;
 }
 
+/* Remove portrait monitor overlay - let normal layout handle it */
+
 /* Responsive design */
 @media (max-width: 768px) {
   .admin-sidebar {
