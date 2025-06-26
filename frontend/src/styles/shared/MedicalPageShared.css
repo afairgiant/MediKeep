@@ -730,6 +730,11 @@
 }
 
 /* Print Styles */
+@page {
+  size: landscape;
+  margin: 0.5in;
+}
+
 @media print {
   .medical-page-header,
   .medical-page-controls,
