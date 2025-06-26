@@ -19,6 +19,7 @@ export { default as FormSelect } from './forms/FormSelect';
 // Layout Components
 export { default as Header } from './layout/Header';
 export { default as Container } from './layout/Container';
+export { default as PageHeader } from './layout/PageHeader';
 
 // Medical Components
 export { default as StatusBadge } from './medical/StatusBadge';

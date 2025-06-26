@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import { PageHeader } from '../../components';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import '../../styles/pages/Practitioners.css';
@@ -189,12 +190,7 @@ const Pharmacies = () => {
 
   return (
     <div className="medical-page">
-      <header className="medical-page-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1>🏥 Pharmacies</h1>
-      </header>
+      <PageHeader title="Pharmacies" icon="🏥" />
 
       <div className="medical-page-content">
         {error && <div className="error-message">{error}</div>}

@@ -4,6 +4,7 @@ import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
+import { PageHeader } from '../../components';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
@@ -230,12 +231,7 @@ const Procedures = () => {
 
   return (
     <div className="medical-page-container">
-      <header className="medical-page-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1>🔬 Procedures</h1>
-      </header>
+      <PageHeader title="Procedures" icon="🔬" />
 
       <div className="medical-page-content">
         {error && (

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardCard } from '../components';
-import ThemeToggle from '../components/ui/ThemeToggle';
+import { DashboardCard, PageHeader } from '../components';
 import { apiService } from '../services/api';
 import { useCurrentPatient } from '../hooks/useGlobalData';
 import '../styles/pages/Dashboard.css';
@@ -64,11 +63,6 @@ const Dashboard = () => {
     } finally {
       setActivityLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
   };
 
   const dashboardItems = [
@@ -162,23 +156,12 @@ const Dashboard = () => {
   }
   return (
     <div className="dashboard-container">
-      <header>
-        <h1>🏥 Medical Records Dashboard</h1>
-        <nav>
-          <button
-            className="settings-button"
-            onClick={() => navigate('/settings')}
-            type="button"
-            title="Settings"
-          >
-            ⚙️
-          </button>
-          <ThemeToggle />
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
-        </nav>
-      </header>
+      <PageHeader
+        title="Medical Records Dashboard"
+        icon="🏥"
+        variant="dashboard"
+        showBackButton={false}
+      />
 
       <main>
         <div className="welcome-section">

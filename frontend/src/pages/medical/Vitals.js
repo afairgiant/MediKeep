@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { PageHeader } from '../../components';
 import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
 import VitalsChart from '../../components/medical/VitalsChart';
@@ -22,7 +23,8 @@ const Vitals = () => {
   const [activeTab, setActiveTab] = useState('list');
 
   // Use global state for patient data
-  const { patient: currentPatient, loading: globalDataLoading } = useCurrentPatient();
+  const { patient: currentPatient, loading: globalDataLoading } =
+    useCurrentPatient();
 
   const loadStats = useCallback(async () => {
     if (!currentPatient?.id) return;
@@ -94,20 +96,17 @@ const Vitals = () => {
   };
   return (
     <div className="medical-page-container">
-      <div className="medical-page-header">
-        <Link to="/dashboard" className="back-button">
-          ← Back to Dashboard{' '}
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>🩺</span>
-          <h1>Vital Signs</h1>
-        </div>
-        {currentPatient && (
-          <div style={{ marginLeft: 'auto', fontSize: '1.1rem', opacity: 0.9 }}>
-            {currentPatient.name}
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Vital Signs"
+        icon="🩺"
+        actions={
+          currentPatient && (
+            <div style={{ fontSize: '1.1rem', opacity: 0.9 }}>
+              {currentPatient.name}
+            </div>
+          )
+        }
+      />
 
       <div className="medical-page-content">
         <div

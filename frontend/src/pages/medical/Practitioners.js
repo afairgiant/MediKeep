@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { MedicalCard, StatusBadge } from '../../components';
+import { MedicalCard, StatusBadge, PageHeader } from '../../components';
 import { usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
 import {
   formatPhoneNumber,
@@ -224,30 +224,30 @@ const Practitioners = () => {
   }
   return (
     <div className="practitioners-page">
-      <div className="practitioners-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1 className="practitioners-title">👩‍⚕️ Healthcare Practitioners</h1>
-        <div className="practitioners-actions">
-          <button
-            className="add-practitioner-btn"
-            onClick={handleAddPractitioner}
-          >
-            <span>+</span>
-            Add Practitioner
-          </button>
-          <div className="practitioners-search">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search practitioners..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Healthcare Practitioners"
+        icon="👩‍⚕️"
+        actions={
+          <>
+            <button
+              className="add-practitioner-btn"
+              onClick={handleAddPractitioner}
+            >
+              <span>+</span>
+              Add Practitioner
+            </button>
+            <div className="practitioners-search">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="Search practitioners..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </>
+        }
+      />
 
       {error && <div className="error-message">{error}</div>}
       {successMessage && (
