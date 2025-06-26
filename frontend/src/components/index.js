@@ -33,6 +33,7 @@ export {
   useErrorHandler,
 } from './common/ErrorBoundary';
 export { default as ProtectedRoute } from './common/ProtectedRoute';
+export { default as FilterControls } from './common/FilterControls';
 export { default as LoggingTest } from './common/LoggingTest';
 
 // Layout Components (future)

@@ -4,6 +4,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
+import { PageHeader } from '../../components';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {

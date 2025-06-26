@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { MedicalCard, StatusBadge, PageHeader } from '../../components';
-import { usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
+import {
+  MedicalCard,
+  StatusBadge,
+  PageHeader,
+  FilterControls,
+} from '../../components';
+import {
+  usePractitioners,
+  useCacheManager,
+  useDataManagement,
+} from '../../hooks';
 import {
   formatPhoneNumber,
   formatPhoneInput,
   cleanPhoneNumber,
 } from '../../utils/phoneUtils';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -25,10 +35,11 @@ const Practitioners = () => {
 
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [specialtyFilter, setSpecialtyFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
   const [showModal, setShowModal] = useState(false);
+
+  // Standardized filtering and sorting
+  const config = getMedicalPageConfig('practitioners');
+  const dataManagement = useDataManagement(practitioners, config);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -166,35 +177,7 @@ const Practitioners = () => {
     }
   };
 
-  // Get unique specialties from practitioners for filter
-  const availableSpecialties = [
-    ...new Set(practitioners.map(p => p.specialty).filter(Boolean)),
-  ].sort();
-
-  const filteredPractitioners = practitioners
-    .filter(practitioner => {
-      const matchesSearch =
-        practitioner.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        practitioner.specialty
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        practitioner.practice?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSpecialty =
-        specialtyFilter === 'all' || practitioner.specialty === specialtyFilter;
-
-      return matchesSearch && matchesSpecialty;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'specialty':
-          return (a.specialty || '').localeCompare(b.specialty || '');
-        case 'practice':
-          return (a.practice || '').localeCompare(b.practice || '');
-        case 'name':
-        default:
-          return (a.name || '').localeCompare(b.name || '');
-      }
-    });
+  const filteredPractitioners = dataManagement.data;
 
   const getSpecialtyColor = specialty => {
     // Color coding for different specialties
@@ -228,24 +211,13 @@ const Practitioners = () => {
         title="Healthcare Practitioners"
         icon="👩‍⚕️"
         actions={
-          <>
-            <button
-              className="add-practitioner-btn"
-              onClick={handleAddPractitioner}
-            >
-              <span>+</span>
-              Add Practitioner
-            </button>
-            <div className="practitioners-search">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Search practitioners..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </>
+          <button
+            className="add-practitioner-btn"
+            onClick={handleAddPractitioner}
+          >
+            <span>+</span>
+            Add Practitioner
+          </button>
         }
       />
 
@@ -254,41 +226,35 @@ const Practitioners = () => {
         <div className="success-message">{successMessage}</div>
       )}
 
-      <div className="practitioners-filters">
-        <div className="filter-group">
-          <label>Specialty</label>
-          <select
-            value={specialtyFilter}
-            onChange={e => setSpecialtyFilter(e.target.value)}
-          >
-            <option value="all">All Specialties</option>
-            {availableSpecialties.map(specialty => (
-              <option key={specialty} value={specialty}>
-                {specialty}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="filter-group">
-          <label>Sort By</label>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="name">Name</option>
-            <option value="specialty">Specialty</option>
-            <option value="practice">Practice</option>
-          </select>
-        </div>
-      </div>
+      {/* Standardized Filter Controls */}
+      <FilterControls
+        filters={dataManagement.filters}
+        updateFilter={dataManagement.updateFilter}
+        clearFilters={dataManagement.clearFilters}
+        hasActiveFilters={dataManagement.hasActiveFilters}
+        statusOptions={dataManagement.statusOptions}
+        categoryOptions={dataManagement.categoryOptions}
+        dateRangeOptions={dataManagement.dateRangeOptions}
+        sortOptions={dataManagement.sortOptions}
+        sortBy={dataManagement.sortBy}
+        sortOrder={dataManagement.sortOrder}
+        handleSortChange={dataManagement.handleSortChange}
+        getSortIndicator={dataManagement.getSortIndicator}
+        totalCount={dataManagement.totalCount}
+        filteredCount={dataManagement.filteredCount}
+        config={config.filterControls}
+      />
 
       {filteredPractitioners.length === 0 ? (
         <div className="no-practitioners">
           <div className="no-practitioners-icon">👨‍⚕️</div>
           <h3>No Healthcare Practitioners Found</h3>
           <p>
-            {searchTerm || specialtyFilter !== 'all'
+            {dataManagement.hasActiveFilters
               ? 'Try adjusting your search or filter criteria.'
               : 'Start by adding your first healthcare practitioner.'}
           </p>
-          {!searchTerm && specialtyFilter === 'all' && (
+          {!dataManagement.hasActiveFilters && (
             <button
               className="add-practitioner-btn"
               onClick={handleAddPractitioner}
