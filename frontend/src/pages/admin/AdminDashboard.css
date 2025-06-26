@@ -486,7 +486,7 @@
   flex-shrink: 0;
 }
 
-.status-badge {
+.admin-dashboard-modern .status-badge {
   width: 24px;
   height: 24px;
   border-radius: 50%;

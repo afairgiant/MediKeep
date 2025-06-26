@@ -5,6 +5,8 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import StatusBadge from '../../components/medical/StatusBadge';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 
@@ -259,11 +261,7 @@ const Conditions = () => {
                       <h3 className="item-title">{condition.diagnosis}</h3>
                     </div>
                     <div className="status-badges">
-                      <span
-                        className={`status-badge status-${condition.status}`}
-                      >
-                        {condition.status}
-                      </span>
+                      <StatusBadge status={condition.status} />
                     </div>
                   </div>
 
@@ -320,11 +318,7 @@ const Conditions = () => {
                   <span className="primary-field">{value}</span>
                 ),
                 onset_date: value => (value ? formatDate(value) : '-'),
-                status: value => (
-                  <span className={`status-badge-small status-${value}`}>
-                    {value}
-                  </span>
-                ),
+                status: value => <StatusBadge status={value} size="small" />,
                 notes: value =>
                   value ? (
                     <span title={value}>
@@ -341,101 +335,81 @@ const Conditions = () => {
         </div>
       </div>
 
-      {showModal && (
-        <div
-          className="medical-form-overlay"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="medical-form-modal"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="form-header">
-              <h3>
-                {editingCondition ? 'Edit Condition' : 'Add New Condition'}
-              </h3>
-              <button
-                className="close-button"
-                onClick={() => setShowModal(false)}
-              >
-                ×
-              </button>
+      <MedicalFormModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingCondition ? 'Edit Condition' : 'Add New Condition'}
+      >
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="diagnosis">Diagnosis *</label>
+              <input
+                type="text"
+                id="diagnosis"
+                name="diagnosis"
+                value={formData.diagnosis}
+                onChange={handleInputChange}
+                required
+                placeholder="e.g., Hypertension, Diabetes Type 2"
+              />
             </div>
 
-            <div className="medical-form-content">
-              <form onSubmit={handleSubmit}>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="diagnosis">Diagnosis *</label>
-                    <input
-                      type="text"
-                      id="diagnosis"
-                      name="diagnosis"
-                      value={formData.diagnosis}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="e.g., Hypertension, Diabetes Type 2"
-                    />
-                  </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="status">Status</label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="active">Active</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="chronic">Chronic</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="status">Status</label>
-                      <select
-                        id="status"
-                        name="status"
-                        value={formData.status}
-                        onChange={handleInputChange}
-                      >
-                        <option value="active">Active</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="chronic">Chronic</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
+              <div className="form-group">
+                <label htmlFor="onsetDate">Onset Date</label>
+                <input
+                  type="date"
+                  id="onsetDate"
+                  name="onsetDate"
+                  value={formData.onsetDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
 
-                    <div className="form-group">
-                      <label htmlFor="onsetDate">Onset Date</label>
-                      <input
-                        type="date"
-                        id="onsetDate"
-                        name="onsetDate"
-                        value={formData.onsetDate}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="notes">Notes</label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      rows="4"
-                      placeholder="Additional notes about this condition..."
-                    />
-                  </div>
-                </div>
-
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="cancel-button"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="save-button">
-                    {editingCondition ? 'Update Condition' : 'Add Condition'}
-                  </button>
-                </div>
-              </form>
+            <div className="form-group">
+              <label htmlFor="notes">Notes</label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="4"
+                placeholder="Additional notes about this condition..."
+              />
             </div>
           </div>
-        </div>
-      )}
+
+          <div className="form-actions">
+            <button
+              type="button"
+              className="cancel-button"
+              onClick={() => setShowModal(false)}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="save-button">
+              {editingCondition ? 'Update Condition' : 'Add Condition'}
+            </button>
+          </div>
+        </form>
+      </MedicalFormModal>
     </div>
   );
 };

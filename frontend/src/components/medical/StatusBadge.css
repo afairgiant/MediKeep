@@ -1,62 +1,224 @@
-/* Status Badge Styles */
-.status-badge {
-  box-sizing: border-box;
-  display: block;
-  padding: 4px 12px;
-  border-radius: 15px;
-  font-size: 12.8px;
+/* StatusBadge Component Styles - Medical Records Specific */
+
+/* Status Badge - Main Style - Highest Specificity */
+.medical-page-container .status-badge,
+.medical-item-card .status-badge,
+.medical-items-grid .status-badge,
+span.status-badge.status-badge {
+  display: inline-block !important;
+  padding: 4px 12px !important;
+  border-radius: 15px !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  text-transform: capitalize !important;
+  border: 1px solid transparent !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  /* Override any circular badge styles */
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  min-height: auto !important;
+}
+
+/* Small Status Badge for Tables */
+.status-badge-small {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm, 3px);
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-/* Success/Active/Completed States */
-.status-success,
-.status-active,
-.status-completed {
-  background-color: #d4edda;
-  color: #155724;
-  border-color: #c3e6cb;
+/* Status Colors - Medical Records Specific */
+.medical-page-container .status-active,
+.medical-item-card .status-active,
+.medical-items-grid .status-active,
+span.status-badge.status-active {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+  border-color: #c3e6cb !important;
 }
 
-/* Warning/Pending/In-Progress States */
-.status-warning,
-.status-in-progress,
-.status-ordered {
-  background-color: #fff3cd;
-  color: #856404;
-  border-color: #ffeaa7;
+.medical-page-container .status-inactive,
+.medical-page-container .status-stopped,
+.medical-page-container .status-resolved,
+.medical-item-card .status-inactive,
+.medical-item-card .status-stopped,
+.medical-item-card .status-resolved,
+.medical-items-grid .status-inactive,
+.medical-items-grid .status-stopped,
+.medical-items-grid .status-resolved,
+span.status-badge.status-inactive,
+span.status-badge.status-stopped,
+span.status-badge.status-resolved {
+  background-color: #e2e3e5 !important;
+  color: #383d41 !important;
+  border-color: #d6d8db !important;
 }
 
-/* Error/Cancelled/Failed States */
-.status-error,
-.status-cancelled {
-  background-color: #f8d7da;
-  color: #721c24;
-  border-color: #f5c6cb;
+.medical-page-container .status-completed,
+.medical-item-card .status-completed,
+.medical-items-grid .status-completed,
+span.status-badge.status-completed {
+  background-color: #d1ecf1 !important;
+  color: #0c5460 !important;
+  border-color: #bee5eb !important;
 }
 
-/* Inactive/Stopped States */
-.status-inactive,
-.status-stopped,
-.status-on-hold {
-  background-color: #e2e3e5;
-  color: #383d41;
-  border-color: #d6d8db;
+.medical-page-container .status-in-progress,
+.medical-page-container .status-ongoing,
+.medical-page-container .status-scheduled,
+.medical-page-container .status-pending,
+.medical-page-container .status-planned,
+.medical-item-card .status-in-progress,
+.medical-item-card .status-ongoing,
+.medical-item-card .status-scheduled,
+.medical-item-card .status-pending,
+.medical-item-card .status-planned,
+.medical-items-grid .status-in-progress,
+.medical-items-grid .status-ongoing,
+.medical-items-grid .status-scheduled,
+.medical-items-grid .status-pending,
+.medical-items-grid .status-planned,
+span.status-badge.status-in-progress,
+span.status-badge.status-ongoing,
+span.status-badge.status-scheduled,
+span.status-badge.status-pending,
+span.status-badge.status-planned {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border-color: #ffeaa7 !important;
 }
 
-/* Unknown/Default State */
-.status-unknown {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  border-color: #dee2e6;
+.medical-page-container .status-cancelled,
+.medical-item-card .status-cancelled,
+.medical-items-grid .status-cancelled,
+span.status-badge.status-cancelled {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  border-color: #f5c6cb !important;
 }
 
-/* Hover Effects */
-.status-badge:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.medical-page-container .status-severe,
+.medical-page-container .status-critical,
+.medical-item-card .status-severe,
+.medical-item-card .status-critical,
+.medical-items-grid .status-severe,
+.medical-items-grid .status-critical,
+span.status-badge.status-severe,
+span.status-badge.status-critical {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  border-color: #f5c6cb !important;
+}
+
+.medical-page-container .status-mild,
+.medical-page-container .status-low,
+.medical-page-container .status-normal,
+.medical-item-card .status-mild,
+.medical-item-card .status-low,
+.medical-item-card .status-normal,
+.medical-items-grid .status-mild,
+.medical-items-grid .status-low,
+.medical-items-grid .status-normal,
+span.status-badge.status-mild,
+span.status-badge.status-low,
+span.status-badge.status-normal {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+  border-color: #c3e6cb !important;
+}
+
+.medical-page-container .status-moderate,
+.medical-page-container .status-abnormal,
+.medical-item-card .status-moderate,
+.medical-item-card .status-abnormal,
+.medical-items-grid .status-moderate,
+.medical-items-grid .status-abnormal,
+span.status-badge.status-moderate,
+span.status-badge.status-abnormal {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border-color: #ffeaa7 !important;
+}
+
+.medical-page-container .status-chronic,
+.medical-page-container .status-on-hold,
+.medical-item-card .status-chronic,
+.medical-item-card .status-on-hold,
+.medical-items-grid .status-chronic,
+.medical-items-grid .status-on-hold,
+span.status-badge.status-chronic,
+span.status-badge.status-on-hold {
+  background-color: #d1ecf1 !important;
+  color: #0c5460 !important;
+  border-color: #bee5eb !important;
+}
+
+.medical-page-container .status-unknown,
+.medical-item-card .status-unknown,
+.medical-items-grid .status-unknown,
+span.status-badge.status-unknown {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  border-color: #dee2e6 !important;
+}
+
+/* Legacy color support for backward compatibility */
+.medical-page-container .status-success,
+.medical-item-card .status-success,
+.medical-items-grid .status-success,
+span.status-badge.status-success {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+  border-color: #c3e6cb !important;
+}
+
+.medical-page-container .status-error,
+.medical-item-card .status-error,
+.medical-items-grid .status-error,
+span.status-badge.status-error {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  border-color: #f5c6cb !important;
+}
+
+.medical-page-container .status-warning,
+.medical-item-card .status-warning,
+.medical-items-grid .status-warning,
+span.status-badge.status-warning {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border-color: #ffeaa7 !important;
+}
+
+.medical-page-container .status-info,
+.medical-item-card .status-info,
+.medical-items-grid .status-info,
+span.status-badge.status-info {
+  background-color: #d1ecf1 !important;
+  color: #0c5460 !important;
+  border-color: #bee5eb !important;
+}
+
+/* Icon support (optional) */
+.status-icon {
+  font-size: 0.875em;
+  margin-right: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .status-badge {
+    padding: 3px 10px;
+    font-size: 0.75rem;
+  }
+
+  .status-badge-small {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+  }
 }
