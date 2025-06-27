@@ -18,6 +18,25 @@ export const useSorting = (data = [], config = {}) => {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   };
 
+  // Determine sort type for a field
+  const getSortType = (field, sortTypes = {}) => {
+    if (sortTypes[field]) return sortTypes[field];
+
+    // Auto-detect based on field name
+    if (field.includes('date') || field.includes('Date')) return 'date';
+    if (
+      field.includes('amount') ||
+      field.includes('price') ||
+      field.includes('rating')
+    )
+      return 'number';
+    if (field.includes('active') || field.includes('enabled')) return 'boolean';
+    if (field === 'status') return 'status';
+    if (field === 'severity') return 'severity';
+
+    return 'string';
+  };
+
   // Sort data
   const sortedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -96,25 +115,6 @@ export const useSorting = (data = [], config = {}) => {
 
     return sorted;
   }, [data, sortBy, sortOrder, config]);
-
-  // Determine sort type for a field
-  const getSortType = (field, sortTypes = {}) => {
-    if (sortTypes[field]) return sortTypes[field];
-
-    // Auto-detect based on field name
-    if (field.includes('date') || field.includes('Date')) return 'date';
-    if (
-      field.includes('amount') ||
-      field.includes('price') ||
-      field.includes('rating')
-    )
-      return 'number';
-    if (field.includes('active') || field.includes('enabled')) return 'boolean';
-    if (field === 'status') return 'status';
-    if (field === 'severity') return 'severity';
-
-    return 'string';
-  };
 
   // Handle sort change
   const handleSortChange = newSortBy => {

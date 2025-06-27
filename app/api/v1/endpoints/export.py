@@ -79,13 +79,7 @@ async def export_patient_data(
 
     try:
         logger.info(
-            f"Export request by user {current_user_id}: format={format}, scope={scope}"
-        )
-        logger.info(
-            f"Format type: {type(format)}, value: {format.value if hasattr(format, 'value') else format}"
-        )
-        logger.info(
-            f"Scope type: {type(scope)}, value: {scope.value if hasattr(scope, 'value') else scope}"
+            f"Export request by user {current_user_id}: format={format.value}, scope={scope.value}"
         )
 
         export_service = ExportService(db)
@@ -124,7 +118,6 @@ async def export_patient_data(
                 content = json.dumps(
                     export_data, default=json_serializer, indent=2, ensure_ascii=False
                 )
-                logger.info(f"JSON content length: {len(content)}")
             except Exception as json_error:
                 logger.error(f"JSON serialization error: {json_error}")
                 raise HTTPException(
@@ -138,29 +131,16 @@ async def export_patient_data(
             content = export_service.convert_to_csv(export_data, scope.value)
 
         elif format == ExportFormat.PDF:
-            logger.info(
-                f"PDF export requested - include_files parameter: {include_files} (type: {type(include_files)})"
-            )
             if include_files:
                 # Create ZIP file with PDF and attached files
                 import os
 
-                logger.info(
-                    f"PDF export with files requested for user {current_user_id}"
-                )
                 pdf_content = await export_service.convert_to_pdf(
                     export_data, include_files
                 )
                 files_info = export_service.get_lab_result_files(
                     current_user_id, start_date, end_date
                 )
-                logger.info(f"Found {len(files_info)} lab result files to include")
-
-                # Debug: Print file info
-                for file_info in files_info:
-                    logger.info(
-                        f"File: {file_info['file_name']} at {file_info['file_path']}"
-                    )
 
                 if files_info:
                     # Create ZIP file in memory
@@ -192,9 +172,6 @@ async def export_patient_data(
                                     zip_file.write(
                                         file_path, f"lab_files/{safe_filename}"
                                     )
-                                    logger.info(
-                                        f"Added file {file_info['file_name']} to ZIP as {safe_filename}"
-                                    )
                                 else:
                                     logger.warning(f"File not found: {file_path}")
                             except Exception as file_error:
@@ -210,12 +187,9 @@ async def export_patient_data(
 
                     zip_content = zip_buffer.getvalue()
                     logger.info(
-                        f"✅ RETURNING ZIP FILE: {zip_filename}, size: {len(zip_content)} bytes"
+                        f"Generated ZIP export: {zip_filename}, size: {len(zip_content)} bytes"
                     )
-                    logger.info(f"ZIP media type: application/zip")
-                    logger.info(
-                        f'ZIP headers: Content-Disposition: attachment; filename="{zip_filename}"'
-                    )
+
                     return Response(
                         content=zip_content,
                         media_type="application/zip",
@@ -224,11 +198,7 @@ async def export_patient_data(
                         },
                     )
 
-            # If we get here, either include_files=False or no files were found
             # Generate standard PDF export
-            logger.info(
-                "📄 Generating standard PDF export (no files or files not found)"
-            )
             media_type = "application/pdf"
             filename = f"medical_records_{scope.value}_{timestamp}.pdf"
             content = await export_service.convert_to_pdf(export_data, include_files)
@@ -243,10 +213,6 @@ async def export_patient_data(
                 raise HTTPException(
                     status_code=500, detail="Generated PDF content is empty"
                 )
-
-            logger.info(
-                f"PDF content type: {type(content)}, size: {len(content)} bytes"
-            )
 
             return Response(
                 content=content,
@@ -265,10 +231,6 @@ async def export_patient_data(
                 raise HTTPException(
                     status_code=500, detail="Generated content is empty"
                 )
-
-            logger.info(
-                f"Content type: {type(content)}, Content bytes length: {len(content_bytes)}"
-            )
 
             # Create a generator function for the StreamingResponse
             def generate():
@@ -401,7 +363,7 @@ async def create_bulk_export(
     """
     try:
         logger.info(
-            f"Bulk export request by user {current_user_id}: {len(request.scopes)} scopes, format: {request.format}"
+            f"Bulk export request by user {current_user_id}: {len(request.scopes)} scopes, format: {request.format.value}"
         )
 
         export_service = ExportService(db)
@@ -470,7 +432,6 @@ async def create_bulk_export(
                         ),
                     )
                     exported_count += 1
-                    logger.info(f"Successfully added {scope.value} to bulk export")
 
                 except Exception as e:
                     logger.warning(
@@ -504,32 +465,3 @@ async def create_bulk_export(
     except Exception as e:
         logger.error(f"Bulk export failed for user {current_user_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Bulk export failed: {str(e)}")
-
-
-@router.get("/debug")
-async def debug_export_params(
-    format: Optional[str] = Query(None),
-    scope: Optional[str] = Query(None),
-    start_date: Optional[str] = Query(None),
-    end_date: Optional[str] = Query(None),
-    include_files: Optional[str] = Query(None),
-    current_user_id: int = Depends(get_current_user_id),
-):
-    """Debug endpoint to see what parameters are being sent by the frontend."""
-    return {
-        "received_params": {
-            "format": format,
-            "scope": scope,
-            "start_date": start_date,
-            "end_date": end_date,
-            "include_files": include_files,
-            "user_id": current_user_id,
-        },
-        "param_types": {
-            "format": type(format).__name__,
-            "scope": type(scope).__name__,
-            "start_date": type(start_date).__name__,
-            "end_date": type(end_date).__name__,
-            "include_files": type(include_files).__name__,
-        },
-    }

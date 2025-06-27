@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './FilterControls.css';
 
 const FilterControls = ({
@@ -25,30 +25,62 @@ const FilterControls = ({
     showDateRange = false,
     showSort = true,
     searchPlaceholder = 'Search...',
-    title = 'Filters',
+    title = 'Filters & Search',
     compactMode = false,
+    defaultCollapsed = false,
   } = config;
 
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <div className={`filter-controls ${compactMode ? 'compact' : ''}`}>
+    <div
+      className={`filter-controls ${compactMode ? 'compact' : ''} ${isCollapsed ? 'collapsed' : 'expanded'}`}
+    >
       <div className="filter-controls-header">
-        <h3 className="filter-title">{title}</h3>
-        {hasActiveFilters && (
+        <div className="header-left">
+          <h3 className="filter-title">{title}</h3>
           <button
-            className="clear-filters-btn"
-            onClick={clearFilters}
-            title="Clear all filters"
+            className="collapse-toggle"
+            onClick={toggleCollapse}
+            title={isCollapsed ? 'Expand filters' : 'Collapse filters'}
           >
-            Clear Filters
+            {isCollapsed ? '▼' : '▲'}
           </button>
-        )}
+        </div>
+        <div className="header-right">
+          {hasActiveFilters && (
+            <button
+              className="clear-filters-btn"
+              onClick={clearFilters}
+              title="Clear all filters"
+            >
+              ✕ Clear Filters
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="filter-controls-content">
+      {/* Always show filter summary for quick reference */}
+      <div className="filter-summary-top">
+        {hasActiveFilters && (
+          <span className="active-filters-indicator">Active Filters</span>
+        )}
+        <span className="count-display">
+          Showing {filteredCount} of {totalCount} items
+        </span>
+      </div>
+
+      <div
+        className={`filter-controls-content ${isCollapsed ? 'collapsed' : 'expanded'}`}
+      >
         {/* Search Filter */}
         {showSearch && (
           <div className="filter-group search-filter">
-            <label htmlFor="search-filter">🔍 Search:</label>
+            <label htmlFor="search-filter">🔍 Search</label>
             <input
               id="search-filter"
               type="text"
@@ -63,7 +95,7 @@ const FilterControls = ({
         {/* Status Filter */}
         {showStatus && statusOptions && statusOptions.length > 1 && (
           <div className="filter-group">
-            <label htmlFor="status-filter">Status:</label>
+            <label htmlFor="status-filter">📊 Status</label>
             <select
               id="status-filter"
               value={filters.status}
@@ -82,7 +114,7 @@ const FilterControls = ({
         {/* Category Filter */}
         {showCategory && categoryOptions && categoryOptions.length > 1 && (
           <div className="filter-group">
-            <label htmlFor="category-filter">Category:</label>
+            <label htmlFor="category-filter">🏷️ Category</label>
             <select
               id="category-filter"
               value={filters.category}
@@ -101,7 +133,7 @@ const FilterControls = ({
         {/* Date Range Filter */}
         {showDateRange && dateRangeOptions && dateRangeOptions.length > 1 && (
           <div className="filter-group">
-            <label htmlFor="date-range-filter">Time Period:</label>
+            <label htmlFor="date-range-filter">📅 Time Period</label>
             <select
               id="date-range-filter"
               value={filters.dateRange}
@@ -120,7 +152,7 @@ const FilterControls = ({
         {/* Sort Controls */}
         {showSort && sortOptions && sortOptions.length > 1 && (
           <div className="filter-group sort-controls">
-            <label htmlFor="sort-select">Sort by:</label>
+            <label htmlFor="sort-select">⚡ Sort by</label>
             <div className="sort-control-group">
               <select
                 id="sort-select"
@@ -144,16 +176,6 @@ const FilterControls = ({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Filter Summary */}
-      <div className="filter-summary">
-        {hasActiveFilters && (
-          <span className="active-filters-indicator">🔍 Filters Active •</span>
-        )}
-        <span className="count-display">
-          {filteredCount} of {totalCount} items shown
-        </span>
       </div>
     </div>
   );
