@@ -12,8 +12,8 @@ from pathlib import Path
 
 
 def main():
-    # Get the directory of this script
-    script_dir = Path(__file__).parent
+    # Get the directory of this script (resolve symlinks)
+    script_dir = Path(__file__).resolve().parent
     cli_script = script_dir / "backup_cli.py"
 
     # Build command args

@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""
+Simple Restore Wrapper
+
+Usage:
+    restore list                    # List all backups
+    restore list database           # List database backups only  
+    restore preview 123             # Preview restore for backup 123
+    restore restore 123 <code>      # Execute restore with confirmation code
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main():
+    script_dir = Path(__file__).resolve().parent
+    cli_script = script_dir / "restore_cli.py"
+
+    if len(sys.argv) < 2:
+        print("Usage: restore <list|preview|restore> [args...]", file=sys.stderr)
+        print("Examples:", file=sys.stderr)
+        print("  restore list", file=sys.stderr)
+        print("  restore preview 123", file=sys.stderr)
+        print("  restore restore 123 <confirm_code>", file=sys.stderr)
+        sys.exit(1)
+
+    # Pass all arguments to the main script
+    cmd = [sys.executable, str(cli_script)] + sys.argv[1:]
+
+    try:
+        result = subprocess.run(cmd, check=True)
+        sys.exit(result.returncode)
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.returncode)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
