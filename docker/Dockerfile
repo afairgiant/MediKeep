@@ -71,8 +71,16 @@ COPY --from=frontend-build /frontend/build ./static
 COPY docker/entrypoint.sh /app/entrypoint.sh
 
 # Create directories and set all permissions in one layer
-RUN mkdir -p logs uploads/labwork backups && \
+RUN mkdir -p logs uploads/labwork backups /usr/local/bin && \
     chmod +x /app/entrypoint.sh && \
+    chmod +x /app/app/scripts/backup_db && \
+    chmod +x /app/app/scripts/backup_files && \
+    chmod +x /app/app/scripts/backup_full && \
+    chmod +x /app/app/scripts/backup_cli.py && \
+    chmod +x /app/app/scripts/test_backup_cli.py && \
+    ln -sf /app/app/scripts/backup_db /usr/local/bin/backup_db && \
+    ln -sf /app/app/scripts/backup_files /usr/local/bin/backup_files && \
+    ln -sf /app/app/scripts/backup_full /usr/local/bin/backup_full && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
