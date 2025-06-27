@@ -2,10 +2,8 @@
 
 A medical records management system with React frontend and FastAPI backend.
 
-
 [![CodeQL](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql)
-[![Medical Records Docker Image CI](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml) 
-
+[![Medical Records Docker Image CI](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml)
 
 ## This is actievly being worked on!
 
@@ -66,6 +64,7 @@ services:
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
+      - app_backups:/app/backups
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,6 +84,8 @@ volumes:
   app_uploads:
     driver: local
   app_logs:
+    driver: local
+  app_backups:
     driver: local
 
 # Network for service communication
