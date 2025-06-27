@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
+import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
 import './ModelManagement.css';
 
@@ -96,7 +97,13 @@ const ModelManagement = () => {
     }
   };
   const handleDeleteRecord = async recordId => {
-    if (!window.confirm('Are you sure you want to delete this record?')) {
+    const record = records.find(r => r.id === recordId);
+    const confirmationMessage = getDeletionConfirmationMessage(
+      modelName,
+      record
+    );
+
+    if (!window.confirm(confirmationMessage)) {
       return;
     }
 
@@ -109,11 +116,16 @@ const ModelManagement = () => {
   };
 
   const handleBulkDelete = async () => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete ${selectedRecords.size} records?`
-      )
-    ) {
+    const selectedRecordsArray = Array.from(selectedRecords).map(id =>
+      records.find(r => r.id === id)
+    );
+    const confirmationMessage = getDeletionConfirmationMessage(
+      modelName,
+      selectedRecordsArray,
+      true
+    );
+
+    if (!window.confirm(confirmationMessage)) {
       return;
     }
 

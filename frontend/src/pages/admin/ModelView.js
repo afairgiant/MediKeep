@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
+import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
 import './ModelView.css';
 
@@ -70,7 +71,12 @@ const ModelView = () => {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this record?')) {
+    const confirmationMessage = getDeletionConfirmationMessage(
+      modelName,
+      record
+    );
+
+    if (!window.confirm(confirmationMessage)) {
       return;
     }
 
