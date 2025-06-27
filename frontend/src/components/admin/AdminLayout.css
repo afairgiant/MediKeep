@@ -3,20 +3,27 @@
   display: flex;
   min-height: 100vh;
   background-color: #f8fafc;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .admin-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  transition: margin-left 0.3s ease;
+  transition: all 0.3s ease;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .admin-main.sidebar-open {
+  width: calc(100vw - 280px);
   margin-left: 280px;
 }
 
 .admin-main.sidebar-closed {
+  width: calc(100vw - 60px);
   margin-left: 60px;
 }
 
@@ -24,15 +31,406 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
-/* Responsive design */
+/* Mobile responsive design */
 @media (max-width: 768px) {
   .admin-main.sidebar-open {
+    width: 100vw;
     margin-left: 0;
   }
 
   .admin-main.sidebar-closed {
+    width: 100vw;
     margin-left: 0;
+  }
+
+  .admin-content {
+    padding: 10px;
+  }
+}
+
+/* Portrait monitor optimization - dynamic width calculation */
+@media (max-width: 1200px) {
+  .admin-main.sidebar-open {
+    width: calc(100vw - 280px);
+    margin-left: 280px;
+  }
+
+  .admin-main.sidebar-closed {
+    width: calc(100vw - 60px);
+    margin-left: 60px;
+  }
+
+  /* Ensure content adapts to very narrow widths */
+  .admin-content {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-content {
+    padding: 6px;
+  }
+}
+
+/* Portrait monitor support - narrow width but desktop functionality needed */
+@media (max-width: 1200px) and (min-height: 1200px) {
+  /* Portrait monitor detected - prioritize vertical space, minimize horizontal waste */
+  .admin-content {
+    padding: 12px 8px !important;
+  }
+
+  /* Allow grids to use intelligent sizing instead of forcing single column */
+  /* Removed forced single column - let the responsive rules handle grid sizing */
+
+  /* Compact card styling for portrait */
+  .admin-card,
+  .backup-action-card,
+  .stat-card-modern,
+  .dashboard-card-modern {
+    padding: 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Smaller buttons but keep functionality */
+  button,
+  .btn,
+  .action-btn {
+    padding: 6px 10px !important;
+    font-size: 0.85rem !important;
+    min-width: 80px !important;
+  }
+
+  /* Table optimization for portrait */
+  table {
+    font-size: 0.8rem !important;
+  }
+
+  .backup-table th,
+  .backup-table td {
+    padding: 6px 4px !important;
+  }
+}
+
+/* Global narrow screen overflow protection - More aggressive for portrait monitors */
+@media (max-width: 1100px) {
+  /* Force all admin containers to fit narrow screens */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure no horizontal overflow */
+  .admin-content,
+  .admin-dashboard-modern,
+  .system-health,
+  .backup-content,
+  .model-edit {
+    overflow-x: hidden !important;
+    word-wrap: break-word !important;
+  }
+
+  /* Let intelligent responsive grids handle sizing instead of forcing single column */
+  /* Removed forced single column - let the grid-specific rules handle sizing */
+
+  /* Compact tables */
+  table {
+    width: 100% !important;
+    table-layout: auto !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Force text to wrap properly */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  div,
+  td,
+  th {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+
+  /* Additional overflow fixes for portrait monitors */
+  .backup-table td:nth-child(2) {
+    max-width: 120px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Compact action buttons */
+  .edit-actions .btn,
+  .backup-actions-cell .action-btn,
+  .action-buttons .action-btn {
+    min-width: 70px !important;
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Medium narrow screen protection */
+@media (max-width: 800px) {
+  /* Aggressive protection for narrow screens */
+  .admin-content {
+    padding: 8px 4px !important;
+  }
+
+  /* Compact cards */
+  .admin-card,
+  .backup-action-card,
+  .status-item,
+  .stat-card-modern,
+  .dashboard-card-modern {
+    padding: 8px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Hide non-essential table columns */
+  .backup-table th:nth-child(n + 4),
+  .backup-table td:nth-child(n + 4) {
+    display: none !important;
+  }
+
+  /* Force smaller fonts */
+  h1 {
+    font-size: 1.3rem !important;
+  }
+  h2 {
+    font-size: 1.1rem !important;
+  }
+  h3 {
+    font-size: 1rem !important;
+  }
+
+  /* Very compact buttons */
+  button,
+  .btn,
+  .action-btn {
+    min-width: 65px !important;
+    padding: 5px 7px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Emergency narrow screen protection */
+@media (max-width: 600px) {
+  /* Aggressive protection for very narrow screens */
+  .admin-content {
+    padding: 6px 2px !important;
+  }
+
+  /* Minimal button sizes */
+  button,
+  .btn,
+  .action-btn {
+    min-width: 60px !important;
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Ultra-compact cards */
+  .admin-card,
+  .backup-action-card,
+  .status-item,
+  .stat-card-modern,
+  .dashboard-card-modern {
+    padding: 6px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Even more aggressive table hiding */
+  .backup-table th:nth-child(n + 3),
+  .backup-table td:nth-child(n + 3) {
+    display: none !important;
+  }
+
+  /* Ultra small fonts */
+  h1 {
+    font-size: 1.1rem !important;
+  }
+  h2 {
+    font-size: 1rem !important;
+  }
+  h3 {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Basic overflow prevention */
+.admin-content * {
+  box-sizing: border-box;
+}
+
+.admin-content {
+  overflow-x: hidden;
+}
+
+/* Specific table overflow fixes */
+.backup-table,
+.admin-table {
+  width: 100%;
+  table-layout: auto;
+  word-break: break-word;
+}
+
+.backup-table td:nth-child(2), /* Filename column */
+.admin-table td:nth-child(2) {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Grid container overflow protection */
+.backup-actions,
+.health-overview-grid,
+.quick-stats-grid,
+.actions-grid,
+.form-grid {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Card overflow protection */
+.admin-card,
+.backup-action-card,
+.stat-card-modern,
+.dashboard-card-modern,
+.status-item {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+/* Button overflow protection */
+.edit-actions,
+.backup-actions-cell,
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-actions .btn,
+.backup-actions-cell .action-btn,
+.action-buttons .action-btn {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Intelligent responsive grid sizing */
+@media (max-width: 1200px) {
+  /* Backup actions can fit 2 per row on portrait monitors */
+  .backup-actions,
+  .backup-actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Stats cards can fit 2-3 per row even on narrow screens */
+  .quick-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Health overview can fit 2 per row */
+  .health-overview-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /* Actions grid single column (they have long text) */
+  .actions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Form grids single column for better readability */
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}
+
+/* Medium narrow screens - optimize card sizing */
+@media (max-width: 1000px) {
+  /* Backup actions with smaller minimum for better fit */
+  .backup-actions,
+  .backup-actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /* Stats cards with smaller minimum width for better fit */
+  .quick-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /* Health overview with smaller minimum */
+  .health-overview-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .backup-table {
+    overflow-x: auto;
+  }
+
+  .backup-table td:nth-child(2) {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Narrow screens - more compact cards */
+@media (max-width: 600px) {
+  /* Backup actions single column on narrow screens */
+  .backup-actions,
+  .backup-actions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Stats cards still try to fit 2 per row on mobile */
+  .quick-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  /* Health overview single column on very narrow screens */
+  .health-overview-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
 }

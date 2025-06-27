@@ -31,10 +31,9 @@ class CRUDPractitioner(
         Example:
             doctor = practitioner_crud.get_by_name(db, name="Dr. John Smith")
         """
-        practitioners = super().get_by_field(
+        practitioners = self.query(
             db=db,
-            field_name="name",
-            field_value=name,
+            filters={"name": name},
             limit=1,
         )
         return practitioners[0] if practitioners else None
@@ -57,10 +56,9 @@ class CRUDPractitioner(
         Example:
             doctors = practitioner_crud.search_by_name(db, name="Smith")
         """
-        return super().search_by_text_field(
+        return self.query(
             db=db,
-            field_name="name",
-            search_term=name,
+            search={"field": "name", "term": name},
             skip=skip,
             limit=limit,
         )
@@ -83,10 +81,9 @@ class CRUDPractitioner(
         Example:
             cardiologists = practitioner_crud.get_by_specialty(db, specialty="Cardiology")
         """
-        return super().search_by_text_field(
+        return self.query(
             db=db,
-            field_name="specialty",
-            search_term=specialty,
+            search={"field": "specialty", "term": specialty},
             skip=skip,
             limit=limit,
         )
@@ -163,10 +160,9 @@ class CRUDPractitioner(
             if practitioner_crud.is_name_taken(db, name="Dr. Smith"):
                 raise HTTPException(400, "Practitioner already exists")
         """
-        practitioners = super().get_by_field(
+        practitioners = self.query(
             db=db,
-            field_name="name",
-            field_value=name,
+            filters={"name": name},
             limit=1,
         )
 

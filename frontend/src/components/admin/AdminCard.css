@@ -1,0 +1,385 @@
+/* AdminCard Component Styles */
+
+.admin-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.admin-card:hover {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-color: #d1d5db;
+}
+
+.admin-card.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.admin-card.error {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+}
+
+/* Status variants */
+.admin-card.status-healthy {
+  border-left: 4px solid #10b981;
+}
+
+.admin-card.status-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.admin-card.status-error {
+  border-left: 4px solid #ef4444;
+}
+
+.admin-card.status-info {
+  border-left: 4px solid #3b82f6;
+}
+
+/* Header */
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.admin-card-title-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.admin-card-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  margin-top: 0.125rem;
+}
+
+.admin-card-title-content {
+  flex: 1;
+}
+
+.admin-card-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.admin-card-subtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.admin-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+/* Content */
+.admin-card-content {
+  position: relative;
+}
+
+/* Loading state */
+.admin-card-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.admin-card-loading .spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.5rem;
+}
+
+.admin-card-loading p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Error state */
+.admin-card-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #dc2626;
+}
+
+.admin-card-error .error-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.admin-card-error p {
+  margin: 0;
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+/* Responsive Design - Sidebar-aware breakpoints */
+/* Large desktop screens - sidebar + content fits comfortably */
+@media (min-width: 1300px) {
+  .admin-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Medium desktop - account for sidebar width limiting available space */
+@media (min-width: 1024px) and (max-width: 1299px) {
+  .admin-card {
+    padding: 1.25rem;
+  }
+
+  .admin-card-title {
+    font-size: 1.05rem;
+  }
+
+  .admin-card-icon {
+    font-size: 1.3rem;
+  }
+}
+
+/* Small desktop/large tablet - sidebar significantly reduces available width */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .admin-card-title {
+    font-size: 1rem;
+  }
+
+  .admin-card-icon {
+    font-size: 1.2rem;
+  }
+
+  .admin-card-header {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Small tablets and large mobile screens */
+@media (max-width: 767px) {
+  .admin-card {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .admin-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .admin-card-title-section {
+    width: 100%;
+  }
+
+  .admin-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .admin-card-title {
+    font-size: 1rem;
+  }
+
+  .admin-card-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .admin-card-icon {
+    font-size: 1.25rem;
+  }
+
+  .admin-card-loading {
+    padding: 1.5rem;
+  }
+
+  .admin-card-error {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Mobile phone screens */
+@media (max-width: 480px) {
+  .admin-card {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+  }
+
+  .admin-card-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .admin-card-title-section {
+    gap: 0.5rem;
+  }
+
+  .admin-card-title {
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  .admin-card-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .admin-card-icon {
+    font-size: 1.1rem;
+    margin-top: 0;
+  }
+
+  .admin-card-actions {
+    gap: 0.25rem;
+  }
+
+  .admin-card-loading {
+    padding: 1rem;
+  }
+
+  .admin-card-loading .spinner {
+    width: 20px;
+    height: 20px;
+  }
+
+  .admin-card-loading p {
+    font-size: 0.8rem;
+  }
+
+  .admin-card-error {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .admin-card-error .error-icon {
+    font-size: 1rem;
+  }
+}
+
+/* Very small mobile screens */
+@media (max-width: 360px) {
+  .admin-card {
+    padding: 0.4rem;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+  }
+
+  .admin-card-header {
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .admin-card-title {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .admin-card-subtitle {
+    font-size: 0.65rem;
+  }
+
+  .admin-card-icon {
+    font-size: 0.9rem;
+  }
+
+  .admin-card-title-section {
+    gap: 0.3rem;
+  }
+
+  .admin-card-loading {
+    padding: 0.75rem;
+  }
+
+  .admin-card-error {
+    padding: 0.4rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Utility classes for specific card types */
+.admin-card.compact {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-card.compact .admin-card-header {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.admin-card.full-width {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-card.no-border {
+  border: none;
+  box-shadow: none;
+}
+
+.admin-card.clickable {
+  cursor: pointer;
+}
+
+.admin-card.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

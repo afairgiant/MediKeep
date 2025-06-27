@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { PageHeader } from '../../components';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -193,12 +194,7 @@ const Immunization = () => {
 
   return (
     <div className="medical-page-container">
-      <header className="medical-page-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1>💉 Immunizations</h1>
-      </header>
+      <PageHeader title="Immunizations" icon="💉" />
 
       <div className="medical-page-content">
         {error && (

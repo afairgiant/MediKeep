@@ -198,6 +198,11 @@ class ApiService {
     );
   }
 
+  // Update user profile
+  updateUserProfile(profileData, signal) {
+    return this.put('/auth/profile/', profileData, { signal });
+  }
+
   changePassword(passwordData, signal) {
     return this.post('/auth/change-password/', passwordData, { signal });
   }

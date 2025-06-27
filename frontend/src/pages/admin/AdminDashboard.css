@@ -486,7 +486,7 @@
   flex-shrink: 0;
 }
 
-.status-badge {
+.admin-dashboard-modern .status-badge {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -702,8 +702,41 @@
   width: 100%;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* Responsive Design - Sidebar-aware breakpoints */
+/* Large desktop screens - sidebar + content fits comfortably */
+@media (min-width: 1300px) {
+  .admin-dashboard-modern {
+    max-width: 1400px;
+    padding: 24px;
+  }
+
+  .quick-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* Medium desktop - account for sidebar width */
+@media (min-width: 1024px) and (max-width: 1299px) {
+  .admin-dashboard-modern {
+    padding: 20px;
+  }
+
+  .header-title h1 {
+    font-size: 2.1rem;
+  }
+
+  .quick-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .stat-card-modern {
+    padding: 18px;
+  }
+
   .charts-section {
     grid-template-columns: 1fr;
   }
@@ -712,36 +745,66 @@
     grid-template-columns: 1fr;
   }
 
-  .quick-stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
-@media (max-width: 768px) {
+/* Small desktop/large tablet - sidebar significantly reduces available width */
+@media (min-width: 768px) and (max-width: 1023px) {
   .admin-dashboard-modern {
-    padding: 16px;
+    padding: 16px 12px;
+  }
+
+  .header-title h1 {
+    font-size: 1.9rem;
   }
 
   .header-content {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
+    gap: 12px;
   }
 
   .header-actions {
     justify-content: space-between;
+    flex-wrap: wrap;
   }
 
+  /* Force single column layouts due to sidebar */
   .quick-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-section {
     grid-template-columns: 1fr;
   }
 
   .actions-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .health-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .stat-card-modern {
+    padding: 16px;
+  }
+
+  .dashboard-card-modern {
+    padding: 16px;
+  }
+
+  .action-btn-modern {
+    padding: 14px;
+    gap: 12px;
   }
 
   .view-tabs {
@@ -749,25 +812,212 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Small tablets and large mobile screens */
+@media (max-width: 767px) {
+  .admin-dashboard-modern {
+    padding: 12px 8px;
+  }
+
   .header-title h1 {
     font-size: 1.75rem;
   }
 
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-actions {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .quick-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
   .stat-card-modern {
-    padding: 20px;
+    padding: 16px;
   }
 
   .stat-value {
     font-size: 2rem;
   }
 
+  .actions-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
   .action-btn-modern {
-    padding: 16px;
+    padding: 14px;
+    gap: 10px;
   }
 
   .dashboard-card-modern {
-    padding: 20px;
+    padding: 16px;
+  }
+
+  .health-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-item-modern {
+    padding: 12px 0;
+    gap: 10px;
+  }
+
+  .activity-icon-modern {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .view-tabs {
+    order: -1;
+  }
+}
+
+/* Mobile phone screens */
+@media (max-width: 480px) {
+  .admin-dashboard-modern {
+    padding: 10px 6px;
+  }
+
+  .header-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .stat-card-modern {
+    padding: 12px;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .action-btn-modern {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .action-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .action-title {
+    font-size: 0.9rem;
+  }
+
+  .action-desc {
+    font-size: 0.8rem;
+  }
+
+  .dashboard-card-modern {
+    padding: 12px;
+  }
+
+  .activity-item-modern {
+    padding: 10px 0;
+    gap: 8px;
+  }
+
+  .activity-icon-modern {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .activity-description {
+    font-size: 0.85rem;
+  }
+
+  .activity-meta {
+    font-size: 0.75rem;
+  }
+
+  .refresh-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Very small mobile screens */
+@media (max-width: 360px) {
+  .admin-dashboard-modern {
+    padding: 8px 4px;
+  }
+
+  .header-title h1 {
+    font-size: 1.3rem;
+    word-break: break-word;
+  }
+
+  .stat-card-modern {
+    padding: 10px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .action-btn-modern {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .action-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .action-title {
+    font-size: 0.85rem;
+  }
+
+  .action-desc {
+    font-size: 0.75rem;
+  }
+
+  .dashboard-card-modern {
+    padding: 10px;
+  }
+
+  .activity-item-modern {
+    padding: 8px 0;
+    gap: 6px;
+  }
+
+  .activity-icon-modern {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .activity-description {
+    font-size: 0.8rem;
+  }
+
+  .activity-meta {
+    font-size: 0.7rem;
+  }
+
+  .refresh-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
   }
 }
 

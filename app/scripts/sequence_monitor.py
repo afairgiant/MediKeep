@@ -1085,14 +1085,14 @@ def monitor_sequences_cli():
     try:
         # Show comprehensive statistics
         if args.stats:
-            print("🔍 Getting comprehensive sequence statistics...")
+            print("Getting comprehensive sequence statistics...")
             stats = monitor.get_all_sequence_statistics()
 
             if "error" in stats:
-                print(f"❌ Error: {stats['error']}")
+                print(f"Error: {stats['error']}")
                 return
 
-            print(f"\n📊 Sequence Statistics Summary:")
+            print(f"\nSequence Statistics Summary:")
             print(f"   Total sequences: {stats['total_sequences']}")
             print(
                 f"   High usage (>{monitor.config.WARNING_USAGE_THRESHOLD*100:.0f}%): {len(stats['high_usage_sequences'])}"
@@ -1102,43 +1102,37 @@ def monitor_sequences_cli():
             )
 
             if stats["sequences"]:
-                print(f"\n📋 Detailed Sequence Information:")
+                print(f"\nDetailed Sequence Information:")
                 for seq in stats["sequences"]:
-                    health_emoji = {
-                        "excellent": "🟢",
-                        "good": "🟡",
-                        "warning": "🟠",
-                        "critical": "🔴",
-                        "unknown": "⚪",
-                    }.get(seq["health_status"], "⚪")
+                    health_status = seq["health_status"]
 
                     print(
-                        f"   {health_emoji} {seq['sequence_name']}: {seq['percentage_used']:.1f}% used, "
+                        f"   [{health_status}] {seq['sequence_name']}: {seq['percentage_used']:.1f}% used, "
                         f"{seq['remaining_values']:,} remaining, cache hit: {seq['cache_hit_ratio']:.1f}%"
                     )
             return
 
         # Detect potential issues
         if args.detect_issues:
-            print("🔍 Detecting potential sequence issues...")
+            print("Detecting potential sequence issues...")
             issues = monitor.detect_sequence_issues()
 
             if "error" in issues:
-                print(f"❌ Error: {issues['error']}")
+                print(f"Error: {issues['error']}")
                 return
 
-            print(f"\n🚨 Issue Detection Results:")
+            print(f"\nIssue Detection Results:")
             print(f"   Total issues found: {issues['issues_found']}")
             print(f"   Critical issues: {len(issues['critical_issues'])}")
             print(f"   Warning issues: {len(issues['warning_issues'])}")
 
             if issues["critical_issues"]:
-                print(f"\n🔴 Critical Issues:")
+                print(f"\nCritical Issues:")
                 for issue in issues["critical_issues"]:
                     print(f"   • {issue['sequence_name']}: {issue['recommendation']}")
 
             if issues["warning_issues"]:
-                print(f"\n🟡 Warning Issues:")
+                print(f"\nWarning Issues:")
                 for issue in issues["warning_issues"]:
                     print(f"   • {issue['sequence_name']}: {issue['recommendation']}")
             return

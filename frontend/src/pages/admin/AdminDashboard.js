@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,6 +13,8 @@ import {
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 import AdminLayout from '../../components/admin/AdminLayout';
+import AdminCard from '../../components/admin/AdminCard';
+import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
 import './AdminDashboard.css';
@@ -31,76 +33,76 @@ ChartJS.register(
 );
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [systemHealth, setSystemHealth] = useState(null);
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastRefresh, setLastRefresh] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
-  useEffect(() => {
-    loadDashboardData();
 
-    // Set up auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      loadDashboardData(true); // Silent refresh
-    }, 30000);
+  // Dashboard Stats with auto-refresh
+  const {
+    data: stats,
+    loading: statsLoading,
+    error: statsError,
+    refreshData: refreshStats,
+  } = useAdminData({
+    entityName: 'Dashboard Statistics',
+    apiMethodsConfig: {
+      load: signal => adminApiService.getDashboardStats(signal),
+    },
+    autoRefresh: true,
+    refreshInterval: 30000,
+  });
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, []);
+  // Recent Activity
+  const {
+    data: recentActivity,
+    loading: activityLoading,
+    error: activityError,
+    refreshData: refreshActivity,
+  } = useAdminData({
+    entityName: 'Recent Activity',
+    apiMethodsConfig: {
+      load: signal => adminApiService.getRecentActivity(15, signal),
+    },
+    autoRefresh: true,
+    refreshInterval: 30000,
+  });
 
-  const loadDashboardData = async (silent = false) => {
-    try {
-      if (!silent) {
-        setLoading(true);
-        setError(null);
-      }
-      console.log('🔄 Loading comprehensive dashboard data...');
+  // System Health
+  const {
+    data: systemHealth,
+    loading: healthLoading,
+    error: healthError,
+    refreshData: refreshHealth,
+  } = useAdminData({
+    entityName: 'System Health',
+    apiMethodsConfig: {
+      load: signal => adminApiService.getSystemHealth(signal),
+    },
+    autoRefresh: true,
+    refreshInterval: 30000,
+  });
 
-      // Load all data in parallel for better performance
-      const [statsData, activityData, healthData, analyticsData] =
-        await Promise.all([
-          adminApiService.getDashboardStats(),
-          adminApiService.getRecentActivity(15),
-          adminApiService.getSystemHealth(),
-          adminApiService.getAnalyticsData(7),
-        ]);
-      setStats(statsData);
-      setRecentActivity(activityData);
-      setSystemHealth(healthData);
-      setAnalyticsData(analyticsData);
-      setLastRefresh(new Date());
+  // Analytics Data
+  const {
+    data: analyticsData,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refreshData: refreshAnalytics,
+  } = useAdminData({
+    entityName: 'Analytics Data',
+    apiMethodsConfig: {
+      load: signal => adminApiService.getAnalyticsData(7, signal),
+    },
+  });
 
-      console.log('✅ All dashboard data loaded successfully');
-      console.log(
-        '📊 Recent Activity loaded:',
-        activityData?.length || 0,
-        'items'
-      );
-      if (activityData?.length > 0) {
-        console.log(
-          '🔍 Activity sample:',
-          activityData
-            .slice(0, 3)
-            .map(a => `${a.action} ${a.model_name}: ${a.description}`)
-        );
-      }
-      console.log('📊 Stats:', statsData);
-      console.log('📋 Recent Activity:', activityData);
-      console.log(`🔍 Found ${activityData?.length || 0} recent activities`);
-    } catch (err) {
-      console.error('❌ Error loading dashboard data:', err);
-      if (!silent) setError('Failed to load dashboard data');
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  };
+  const loading =
+    statsLoading || activityLoading || healthLoading || analyticsLoading;
 
-  const handleRefresh = () => {
-    loadDashboardData();
+  const handleRefreshAll = async () => {
+    await Promise.all([
+      refreshStats(true),
+      refreshActivity(true),
+      refreshHealth(true),
+      refreshAnalytics(true),
+    ]);
   };
 
   const getHealthStatusColor = status => {
@@ -116,6 +118,7 @@ const AdminDashboard = () => {
         return '#6b7280';
     }
   };
+
   const getActivityIcon = (modelName, action) => {
     const baseIcons = {
       User: '👥',
@@ -128,7 +131,6 @@ const AdminDashboard = () => {
       Condition: '📋',
     };
 
-    // Add action-specific modifiers
     const actionModifiers = {
       created: '✨',
       updated: '📝',
@@ -139,78 +141,64 @@ const AdminDashboard = () => {
 
     const baseIcon = baseIcons[modelName] || '📄';
     const actionIcon = actionModifiers[action?.toLowerCase()] || '';
-
     return actionIcon ? `${actionIcon} ${baseIcon}` : baseIcon;
   };
 
-  const getActivityStatusClass = action => {
-    switch (action?.toLowerCase()) {
-      case 'created':
-        return 'success';
-      case 'updated':
-        return 'info';
-      case 'deleted':
-        return 'danger';
-      case 'viewed':
-        return 'secondary';
-      default:
-        return 'success';
-    }
-  };
+  const createChartData = () => ({
+    activity: {
+      labels: analyticsData?.weekly_activity?.labels || [
+        'Mon',
+        'Tue',
+        'Wed',
+        'Thu',
+        'Fri',
+        'Sat',
+        'Sun',
+      ],
+      datasets: [
+        {
+          label: 'User Activity',
+          data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.4,
+        },
+      ],
+    },
+    distribution: {
+      labels: [
+        'Patients',
+        'Lab Results',
+        'Medications',
+        'Procedures',
+        'Allergies',
+        'Vitals',
+      ],
+      datasets: [
+        {
+          data: [
+            stats?.total_patients || 0,
+            stats?.total_lab_results || 0,
+            stats?.total_medications || 0,
+            stats?.total_procedures || 0,
+            stats?.total_allergies || 0,
+            stats?.total_vitals || 0,
+          ],
+          backgroundColor: [
+            '#3b82f6',
+            '#10b981',
+            '#f59e0b',
+            '#ef4444',
+            '#8b5cf6',
+            '#06b6d4',
+          ],
+          borderWidth: 0,
+        },
+      ],
+    },
+  });
 
-  // Chart data preparation
-  const activityChartData = {
-    labels: analyticsData?.weekly_activity?.labels || [
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-      'Sun',
-    ],
-    datasets: [
-      {
-        label: 'User Activity',
-        data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-      },
-    ],
-  };
-  const recordsDistributionData = {
-    labels: [
-      'Patients',
-      'Lab Results',
-      'Medications',
-      'Procedures',
-      'Allergies',
-      'Vitals',
-    ],
-    datasets: [
-      {
-        data: [
-          stats?.total_patients || 0,
-          stats?.total_lab_results || 0,
-          stats?.total_medications || 0,
-          stats?.total_procedures || 0,
-          stats?.total_allergies || 0,
-          stats?.total_vitals || 0,
-        ],
-        backgroundColor: [
-          '#3b82f6',
-          '#10b981',
-          '#f59e0b',
-          '#ef4444',
-          '#8b5cf6',
-          '#06b6d4',
-        ],
-        borderWidth: 0,
-      },
-    ],
-  };
-  if (loading) {
+  if (loading && !stats) {
     return (
       <AdminLayout>
         <div className="admin-page-loading">
@@ -220,56 +208,28 @@ const AdminDashboard = () => {
     );
   }
 
-  if (error) {
-    return (
-      <AdminLayout>
-        <div className="admin-error">
-          <div className="error-icon">⚠️</div>
-          <h2>Dashboard Error</h2>
-          <p>{error}</p>
-          <div className="error-actions">
-            <button onClick={handleRefresh} className="retry-btn primary">
-              🔄 Retry
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="retry-btn secondary"
-            >
-              🔄 Reload Page
-            </button>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
+  const chartData = createChartData();
+
   return (
     <AdminLayout>
       <div className="admin-dashboard-modern">
         {/* Dashboard Header */}
-        <div className="dashboard-header-modern">
+        <AdminCard className="dashboard-header-card">
           <div className="header-content">
             <div className="header-title">
               <h1>🏥 Admin Dashboard</h1>
-              <p>Comprehensive system overview and management</p>{' '}
-              {lastRefresh && (
-                <small className="last-refresh">
-                  Last updated: {lastRefresh.toLocaleTimeString()}
-                  <span style={{ color: '#10b981', marginLeft: '8px' }}>
-                    ✓ Live Data
-                  </span>
-                </small>
-              )}
+              <p>Comprehensive system overview and management</p>
             </div>
             <div className="header-actions">
               <button
-                onClick={handleRefresh}
+                onClick={handleRefreshAll}
                 className="refresh-btn"
                 disabled={loading}
               >
                 <span className={`refresh-icon ${loading ? 'spinning' : ''}`}>
                   🔄
                 </span>
-                Refresh
+                Refresh All
               </button>
               <div className="view-tabs">
                 <button
@@ -287,378 +247,343 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
+        </AdminCard>
 
         {/* Quick Stats Grid */}
         <div className="quick-stats-grid">
-          <div className="stat-card-modern primary">
-            <div className="stat-icon">👥</div>
-            <div className="stat-content">
-              <div className="stat-value">{stats?.total_users || 0}</div>
-              <div className="stat-label">Total Users</div>
-              <div className="stat-change positive">
-                +{stats?.recent_registrations || 0} this week
-              </div>
-            </div>
-            <div className="stat-trend">📈</div>
-          </div>
-          <div className="stat-card-modern success">
-            <div className="stat-icon">🏥</div>
-            <div className="stat-content">
-              <div className="stat-value">{stats?.total_patients || 0}</div>
-              <div className="stat-label">Active Patients</div>
-              <div className="stat-change neutral">
-                {stats?.active_patients || 0} active
-              </div>
-            </div>
-            <div className="stat-trend">📊</div>
-          </div>
-          <div className="stat-card-modern warning">
-            <div className="stat-icon">🧪</div>
-            <div className="stat-content">
-              <div className="stat-value">{stats?.total_lab_results || 0}</div>
-              <div className="stat-label">Lab Results</div>
-              <div className="stat-change attention">
-                {stats?.pending_lab_results || 0} pending review
-              </div>
-            </div>
-            <div className="stat-trend">⏳</div>
-          </div>{' '}
-          <div className="stat-card-modern info">
-            <div className="stat-icon">💊</div>
-            <div className="stat-content">
-              <div className="stat-value">{stats?.total_medications || 0}</div>
-              <div className="stat-label">Medications</div>
-              <div className="stat-change positive">
-                {stats?.active_medications || 0} active prescriptions
-              </div>
-            </div>
-            <div className="stat-trend">💊</div>
-          </div>
-          <div className="stat-card-modern secondary">
-            <div className="stat-icon">📊</div>
-            <div className="stat-content">
-              <div className="stat-value">{stats?.total_vitals || 0}</div>
-              <div className="stat-label">Vital Signs</div>
-              <div className="stat-change neutral">Recent measurements</div>
-            </div>
-            <div className="stat-trend">❤️</div>
-          </div>
+          <StatCard
+            icon="👥"
+            value={stats?.total_users || 0}
+            label="Total Users"
+            change={`+${stats?.recent_registrations || 0} this week`}
+            variant="primary"
+            trend="📈"
+          />
+          <StatCard
+            icon="🏥"
+            value={stats?.total_patients || 0}
+            label="Active Patients"
+            change={`${stats?.active_patients || 0} active`}
+            variant="success"
+            trend="📊"
+          />
+          <StatCard
+            icon="🧪"
+            value={stats?.total_lab_results || 0}
+            label="Lab Results"
+            change={`${stats?.pending_lab_results || 0} pending review`}
+            variant="warning"
+            trend="⏳"
+          />
+          <StatCard
+            icon="💊"
+            value={stats?.total_medications || 0}
+            label="Medications"
+            change={`${stats?.active_medications || 0} active prescriptions`}
+            variant="info"
+            trend="💊"
+          />
+          <StatCard
+            icon="📊"
+            value={stats?.total_vitals || 0}
+            label="Vital Signs"
+            change="Recent measurements"
+            variant="secondary"
+            trend="❤️"
+          />
         </div>
 
         {/* Main Dashboard Content */}
-        <div className="dashboard-content-modern">
-          {/* Charts Section */}
-          {activeTab === 'analytics' && (
-            <div className="charts-section">
-              <div className="chart-card">
-                <div className="chart-header">
-                  <h3>📈 Weekly Activity Trend</h3>
-                  <p>User interactions over the past week</p>
-                  {analyticsData?.weekly_activity && (
-                    <div className="activity-summary">
-                      <span className="activity-total">
-                        Total: {analyticsData.weekly_activity.total} activities
-                      </span>
-                      {analyticsData.date_range && (
-                        <span className="activity-period">
-                          ({analyticsData.date_range.start} to{' '}
-                          {analyticsData.date_range.end})
-                        </span>
-                      )}
-                    </div>
+        {activeTab === 'analytics' && (
+          <div className="charts-section">
+            <AdminCard
+              title="📈 Weekly Activity Trend"
+              subtitle="User interactions over the past week"
+              className="chart-card"
+            >
+              {analyticsData?.weekly_activity && (
+                <div className="activity-summary">
+                  <span>
+                    Total: {analyticsData.weekly_activity.total} activities
+                  </span>
+                  {analyticsData.date_range && (
+                    <span>
+                      ({analyticsData.date_range.start} to{' '}
+                      {analyticsData.date_range.end})
+                    </span>
                   )}
                 </div>
-                <div className="chart-container">
-                  <Line
-                    data={activityChartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                          callbacks: {
-                            title: function (context) {
-                              const date = analyticsData?.date_range?.start;
-                              if (date && context[0]) {
-                                const startDate = new Date(date);
-                                startDate.setDate(
-                                  startDate.getDate() + context[0].dataIndex
-                                );
-                                return startDate.toLocaleDateString();
-                              }
-                              return context[0]?.label || '';
-                            },
-                          },
-                        },
-                      },
-                      scales: {
-                        y: {
-                          beginAtZero: true,
-                          title: {
-                            display: true,
-                            text: 'Activities',
-                          },
-                        },
-                        x: {
-                          title: {
-                            display: true,
-                            text: 'Day of Week',
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </div>
+              )}
+              <div className="chart-container">
+                <Line
+                  data={chartData.activity}
+                  options={createLineChartOptions()}
+                />
               </div>
+            </AdminCard>
 
-              <div className="chart-card">
-                <div className="chart-header">
-                  <h3>📊 Records Distribution</h3>
-                  <p>Breakdown of medical records by type</p>
-                </div>
-                <div className="chart-container doughnut">
-                  <Doughnut
-                    data={recordsDistributionData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { position: 'bottom' },
-                      },
-                    }}
-                  />
-                </div>
+            <AdminCard
+              title="📊 Records Distribution"
+              subtitle="Breakdown of medical records by type"
+              className="chart-card"
+            >
+              <div className="chart-container doughnut">
+                <Doughnut
+                  data={chartData.distribution}
+                  options={createDoughnutChartOptions()}
+                />
               </div>
-            </div>
-          )}
-
-          {/* Overview Content */}
-          {activeTab === 'overview' && (
-            <div className="overview-section">
-              {/* System Health Card */}
-              <div className="dashboard-card-modern health-card">
-                <div className="card-header">
-                  <h3>🔍 System Health</h3>
-                  <div className="health-status-indicator">
-                    <span
-                      className="status-dot"
-                      style={{
-                        backgroundColor: getHealthStatusColor(
-                          systemHealth?.database_status
-                        ),
-                      }}
-                    ></span>
-                    {systemHealth?.database_status || 'Unknown'}
-                  </div>
-                </div>
-                <div className="health-metrics">
-                  <div className="health-metric">
-                    <div className="metric-icon">💾</div>
-                    <div className="metric-content">
-                      <div className="metric-label">Database Status</div>
-                      <div className="metric-value">
-                        {systemHealth?.database_status || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="health-metric">
-                    <div className="metric-icon">📊</div>
-                    <div className="metric-content">
-                      <div className="metric-label">Total Records</div>
-                      <div className="metric-value">
-                        {systemHealth?.total_records || 0}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="health-metric">
-                    <div className="metric-icon">⏱️</div>
-                    <div className="metric-content">
-                      <div className="metric-label">Uptime</div>
-                      <div className="metric-value">
-                        {systemHealth?.system_uptime || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="health-metric">
-                    <div className="metric-icon">💽</div>
-                    <div className="metric-content">
-                      <div className="metric-label">Last Backup</div>
-                      <div className="metric-value">
-                        {systemHealth?.last_backup
-                          ? new Date(
-                              systemHealth.last_backup
-                            ).toLocaleDateString()
-                          : 'No backup'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>{' '}
-              {/* Recent Activity Card */}
-              <div className="dashboard-card-modern activity-card">
-                <div className="card-header">
-                  <h3>📋 Recent Activity</h3>
-                  <div className="activity-filter">
-                    <small style={{ color: '#6b7280', marginRight: '10px' }}>
-                      {recentActivity.length} activities
-                    </small>
-                    <select className="filter-select">
-                      <option value="all">All Activities</option>
-                      <option value="users">User Activities</option>
-                      <option value="medical">Medical Records</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="activity-feed">
-                  {recentActivity.length > 0 ? (
-                    recentActivity.map((activity, index) => (
-                      <div
-                        key={index}
-                        className={`activity-item-modern ${activity.action?.toLowerCase() === 'deleted' ? 'deleted' : ''}`}
-                      >
-                        <div className="activity-icon-modern">
-                          {getActivityIcon(
-                            activity.model_name,
-                            activity.action
-                          )}
-                        </div>{' '}
-                        <div className="activity-content-modern">
-                          <div className="activity-description">
-                            {activity.description}
-                          </div>
-                          <div className="activity-meta">
-                            <span className="activity-time">
-                              {new Date(activity.timestamp).toLocaleString()}
-                            </span>
-                            <span className="activity-type">
-                              {activity.model_name}
-                            </span>
-                            <span
-                              className={`activity-action ${activity.action?.toLowerCase()}`}
-                            >
-                              {activity.action || 'created'}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="activity-status">
-                          <span
-                            className={`status-badge ${getActivityStatusClass(activity.action)}`}
-                          >
-                            {activity.action === 'deleted'
-                              ? '🗑️'
-                              : activity.action === 'updated'
-                                ? '📝'
-                                : activity.action === 'viewed'
-                                  ? '👁️'
-                                  : '✓'}
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="no-activity-modern">
-                      <div className="no-activity-icon">📭</div>
-                      <p>No recent activity to display</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Quick Actions Panel */}
-          <div className="quick-actions-modern">
-            <h3>⚡ Quick Actions</h3>
-            <div className="actions-grid">
-              <button
-                className="action-btn-modern primary"
-                onClick={() => (window.location.href = '/admin/models/user')}
-              >
-                <div className="action-icon">👥</div>
-                <div className="action-content">
-                  <div className="action-title">Manage Users</div>
-                  <div className="action-desc">
-                    View, edit, and manage user accounts
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="action-btn-modern success"
-                onClick={() => (window.location.href = '/admin/models/patient')}
-              >
-                <div className="action-icon">🏥</div>
-                <div className="action-content">
-                  <div className="action-title">Patient Records</div>
-                  <div className="action-desc">
-                    Access and manage patient information
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="action-btn-modern warning"
-                onClick={() => (window.location.href = '/admin/system-health')}
-              >
-                <div className="action-icon">🔍</div>
-                <div className="action-content">
-                  <div className="action-title">System Health</div>
-                  <div className="action-desc">
-                    Monitor system performance and status
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="action-btn-modern info"
-                onClick={() =>
-                  (window.location.href = '/admin/bulk-operations')
-                }
-              >
-                <div className="action-icon">⚡</div>
-                <div className="action-content">
-                  <div className="action-title">Bulk Operations</div>
-                  <div className="action-desc">
-                    Perform batch operations on records
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="action-btn-modern secondary"
-                onClick={() =>
-                  (window.location.href = '/admin/models/lab-result')
-                }
-              >
-                <div className="action-icon">🧪</div>
-                <div className="action-content">
-                  <div className="action-title">Lab Results</div>
-                  <div className="action-desc">
-                    Review and manage laboratory results
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="action-btn-modern tertiary"
-                onClick={() => (window.location.href = '/admin/reports')}
-              >
-                <div className="action-icon">📊</div>
-                <div className="action-content">
-                  <div className="action-title">Generate Reports</div>
-                  <div className="action-desc">
-                    Create system and usage reports
-                  </div>
-                </div>
-              </button>
-            </div>
+            </AdminCard>
           </div>
-        </div>
+        )}
+
+        {activeTab === 'overview' && (
+          <div className="overview-section">
+            {/* System Health Card */}
+            <SystemHealthCard
+              systemHealth={systemHealth}
+              loading={healthLoading}
+              error={healthError}
+              getHealthStatusColor={getHealthStatusColor}
+            />
+
+            {/* Recent Activity Card */}
+            <ActivityCard
+              activities={recentActivity || []}
+              loading={activityLoading}
+              error={activityError}
+              getActivityIcon={getActivityIcon}
+            />
+
+            {/* Quick Actions Panel */}
+            <QuickActionsCard />
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
 };
+
+// Reusable StatCard Component
+const StatCard = ({ icon, value, label, change, variant, trend }) => (
+  <div className={`stat-card-modern ${variant}`}>
+    <div className="stat-icon">{icon}</div>
+    <div className="stat-content">
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
+      <div className="stat-change">{change}</div>
+    </div>
+    <div className="stat-trend">{trend}</div>
+  </div>
+);
+
+// Reusable SystemHealthCard Component
+const SystemHealthCard = ({
+  systemHealth,
+  loading,
+  error,
+  getHealthStatusColor,
+}) => (
+  <AdminCard
+    title="🔍 System Health"
+    loading={loading}
+    error={error}
+    className="health-card"
+    actions={
+      <div className="health-status-indicator">
+        <span
+          className="status-dot"
+          style={{
+            backgroundColor: getHealthStatusColor(
+              systemHealth?.database_status
+            ),
+          }}
+        />
+        {systemHealth?.database_status || 'Unknown'}
+      </div>
+    }
+  >
+    <div className="health-metrics">
+      <HealthMetric
+        icon="💾"
+        label="Database Status"
+        value={systemHealth?.database_status || 'Unknown'}
+      />
+      <HealthMetric
+        icon="📊"
+        label="Total Records"
+        value={systemHealth?.total_records || 0}
+      />
+      <HealthMetric
+        icon="⏱️"
+        label="Uptime"
+        value={systemHealth?.system_uptime || 'Unknown'}
+      />
+      <HealthMetric
+        icon="💽"
+        label="Last Backup"
+        value={
+          systemHealth?.last_backup
+            ? new Date(systemHealth.last_backup).toLocaleDateString()
+            : 'No backup'
+        }
+      />
+    </div>
+  </AdminCard>
+);
+
+// Reusable ActivityCard Component
+const ActivityCard = ({ activities, loading, error, getActivityIcon }) => (
+  <AdminCard
+    title="📋 Recent Activity"
+    loading={loading}
+    error={error}
+    className="activity-card"
+    actions={
+      <div className="activity-filter">
+        <small>{activities.length} activities</small>
+      </div>
+    }
+  >
+    <div className="activity-feed">
+      {activities.length > 0 ? (
+        activities.map((activity, index) => (
+          <ActivityItem
+            key={index}
+            activity={activity}
+            icon={getActivityIcon(activity.model_name, activity.action)}
+          />
+        ))
+      ) : (
+        <div className="no-activity-modern">
+          <div className="no-activity-icon">📭</div>
+          <p>No recent activity to display</p>
+        </div>
+      )}
+    </div>
+  </AdminCard>
+);
+
+// Reusable QuickActionsCard Component
+const QuickActionsCard = () => (
+  <AdminCard title="⚡ Quick Actions" className="quick-actions-card">
+    <div className="actions-grid">
+      <ActionButton
+        href="/admin/models/user"
+        icon="👥"
+        title="Manage Users"
+        desc="View, edit, and manage user accounts"
+        variant="primary"
+      />
+      <ActionButton
+        href="/admin/models/patient"
+        icon="🏥"
+        title="Patient Records"
+        desc="Access and manage patient information"
+        variant="success"
+      />
+      <ActionButton
+        href="/admin/system-health"
+        icon="🔍"
+        title="System Health"
+        desc="Monitor system performance and status"
+        variant="warning"
+      />
+      <ActionButton
+        href="/admin/bulk-operations"
+        icon="⚡"
+        title="Bulk Operations"
+        desc="Perform batch operations on records"
+        variant="info"
+      />
+      <ActionButton
+        href="/admin/models/lab-result"
+        icon="🧪"
+        title="Lab Results"
+        desc="Review and manage laboratory results"
+        variant="secondary"
+      />
+      <ActionButton
+        href="/admin/reports"
+        icon="📊"
+        title="Generate Reports"
+        desc="Create system and usage reports"
+        variant="tertiary"
+      />
+    </div>
+  </AdminCard>
+);
+
+// Helper Components
+const HealthMetric = ({ icon, label, value }) => (
+  <div className="health-metric">
+    <div className="metric-icon">{icon}</div>
+    <div className="metric-content">
+      <div className="metric-label">{label}</div>
+      <div className="metric-value">{value}</div>
+    </div>
+  </div>
+);
+
+const ActivityItem = ({ activity, icon }) => (
+  <div
+    className={`activity-item-modern ${activity.action?.toLowerCase() === 'deleted' ? 'deleted' : ''}`}
+  >
+    <div className="activity-icon-modern">{icon}</div>
+    <div className="activity-content-modern">
+      <div className="activity-description">{activity.description}</div>
+      <div className="activity-meta">
+        <span className="activity-time">
+          {new Date(activity.timestamp).toLocaleString()}
+        </span>
+        <span className="activity-type">{activity.model_name}</span>
+        <span className={`activity-action ${activity.action?.toLowerCase()}`}>
+          {activity.action || 'created'}
+        </span>
+      </div>
+    </div>
+    <div className="activity-status">
+      <span className="status-badge">
+        {activity.action === 'deleted'
+          ? '🗑️'
+          : activity.action === 'updated'
+            ? '📝'
+            : activity.action === 'viewed'
+              ? '👁️'
+              : '✓'}
+      </span>
+    </div>
+  </div>
+);
+
+const ActionButton = ({ href, icon, title, desc, variant }) => (
+  <button
+    className={`action-btn-modern ${variant}`}
+    onClick={() => (window.location.href = href)}
+  >
+    <div className="action-icon">{icon}</div>
+    <div className="action-content">
+      <div className="action-title">{title}</div>
+      <div className="action-desc">{desc}</div>
+    </div>
+  </button>
+);
+
+// Chart Configuration Functions
+const createLineChartOptions = () => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    y: { beginAtZero: true, title: { display: true, text: 'Activities' } },
+    x: { title: { display: true, text: 'Day of Week' } },
+  },
+});
+
+const createDoughnutChartOptions = () => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { position: 'bottom' } },
+});
 
 export default AdminDashboard;

@@ -52,7 +52,8 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
 
         Returns:
             Updated lab result object
-        """  # Convert the update data and handle datetime conversion
+        """
+        # Convert the update data and handle datetime conversion
         if hasattr(obj_in, "dict"):
             update_data = obj_in.dict(exclude_unset=True)
         else:
@@ -76,51 +77,13 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
 
         return db_obj
 
-    def get_by_patient(
-        self,
-        db: Session,
-        *,
-        patient_id: int,
-        skip: int = 0,
-        limit: int = 100,
-        order_by: Optional[str] = None,
-        order_desc: bool = True,
-        additional_filters: Optional[Dict[str, Any]] = None,
-        load_relations: Optional[List[str]] = None
-    ) -> List[LabResult]:
-        """Get all lab results for a specific patient"""
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            order_by=order_by or "ordered_date",
-            order_desc=order_desc,
-            additional_filters=additional_filters,
-            load_relations=load_relations,
-        )
-
-    def get_by_practitioner(
-        self, db: Session, *, practitioner_id: int, skip: int = 0, limit: int = 100
-    ) -> List[LabResult]:
-        """Get all lab results ordered by a specific practitioner"""
-        return super().get_by_practitioner(
-            db=db,
-            practitioner_id=practitioner_id,
-            skip=skip,
-            limit=limit,
-            order_by="ordered_date",
-            order_desc=True,
-        )
-
     def get_by_test_code(
         self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Get all lab results by test code (e.g., LOINC code)"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="test_code",
-            field_value=test_code,
+            filters={"test_code": test_code},
             skip=skip,
             limit=limit,
             order_by="ordered_date",
@@ -131,11 +94,9 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, patient_id: int, test_code: str
     ) -> List[LabResult]:
         """Get lab results for a specific patient and test code"""
-        return self.get_by_field(
+        return self.query(
             db=db,
-            field_name="patient_id",
-            field_value=patient_id,
-            additional_filters={"test_code": test_code},
+            filters={"patient_id": patient_id, "test_code": test_code},
             order_by="ordered_date",
             order_desc=True,
         )
@@ -148,10 +109,9 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code_pattern: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Search lab results by test code pattern (partial match)"""
-        return self.search_by_text_field(
+        return self.query(
             db=db,
-            field_name="test_code",
-            search_term=test_code_pattern,
+            search={"field": "test_code", "term": test_code_pattern},
             skip=skip,
             limit=limit,
             order_by="ordered_date",

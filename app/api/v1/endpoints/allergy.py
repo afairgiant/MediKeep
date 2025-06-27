@@ -1,10 +1,16 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.v1.endpoints.utils import (
+    handle_create_with_logging,
+    handle_delete_with_logging,
+    handle_not_found,
+    handle_update_with_logging,
+    verify_patient_ownership,
+)
 from app.crud.allergy import allergy
 from app.models.activity_log import EntityType
 from app.schemas.allergy import (
@@ -20,6 +26,7 @@ router = APIRouter()
 @router.post("/", response_model=AllergyResponse)
 def create_allergy(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     allergy_in: AllergyCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -27,17 +34,15 @@ def create_allergy(
     """
     Create new allergy record.
     """
-    allergy_obj = allergy.create(db=db, obj_in=allergy_in)
-
-    # Log the creation activity using centralized logging
-    log_create(
+    return handle_create_with_logging(
         db=db,
+        crud_obj=allergy,
+        obj_in=allergy_in,
         entity_type=EntityType.ALLERGY,
-        entity_obj=allergy_obj,
         user_id=current_user_id,
+        entity_name="Allergy",
+        request=request,
     )
-
-    return allergy_obj
 
 
 @router.get("/", response_model=List[AllergyResponse])
@@ -80,21 +85,18 @@ def read_allergy(
     Get allergy by ID with related information - only allows access to user's own allergies.
     """
     # Get allergy and verify it belongs to the user
-    allergy_obj = allergy.get_with_relations(db, allergy_id=allergy_id)
-    if not allergy_obj:
-        raise HTTPException(status_code=404, detail="Allergy not found")
-
-    # Security check: ensure the allergy belongs to the current user
-    deps.verify_patient_record_access(
-        getattr(allergy_obj, "patient_id"), current_user_patient_id, "allergy"
+    allergy_obj = allergy.get_with_relations(
+        db=db, record_id=allergy_id, relations=["patient"]
     )
-
+    handle_not_found(allergy_obj, "Allergy")
+    verify_patient_ownership(allergy_obj, current_user_patient_id, "allergy")
     return allergy_obj
 
 
 @router.put("/{allergy_id}", response_model=AllergyResponse)
 def update_allergy(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     allergy_id: int,
     allergy_in: AllergyUpdate,
@@ -103,26 +105,22 @@ def update_allergy(
     """
     Update an allergy record.
     """
-    allergy_obj = allergy.get(db=db, id=allergy_id)
-    if not allergy_obj:
-        raise HTTPException(status_code=404, detail="Allergy not found")
-
-    allergy_obj = allergy.update(db=db, db_obj=allergy_obj, obj_in=allergy_in)
-
-    # Log the update activity using centralized logging
-    log_update(
+    return handle_update_with_logging(
         db=db,
+        crud_obj=allergy,
+        entity_id=allergy_id,
+        obj_in=allergy_in,
         entity_type=EntityType.ALLERGY,
-        entity_obj=allergy_obj,
         user_id=current_user_id,
+        entity_name="Allergy",
+        request=request,
     )
-
-    return allergy_obj
 
 
 @router.delete("/{allergy_id}")
 def delete_allergy(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     allergy_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -130,20 +128,15 @@ def delete_allergy(
     """
     Delete an allergy record.
     """
-    allergy_obj = allergy.get(db=db, id=allergy_id)
-    if not allergy_obj:
-        raise HTTPException(status_code=404, detail="Allergy not found")
-
-    # Log the deletion activity BEFORE deleting (using centralized logging)
-    log_delete(
+    return handle_delete_with_logging(
         db=db,
+        crud_obj=allergy,
+        entity_id=allergy_id,
         entity_type=EntityType.ALLERGY,
-        entity_obj=allergy_obj,
         user_id=current_user_id,
+        entity_name="Allergy",
+        request=request,
     )
-
-    allergy.delete(db=db, id=allergy_id)
-    return {"message": "Allergy deleted successfully"}
 
 
 @router.get("/patient/{patient_id}/active", response_model=List[AllergyResponse])

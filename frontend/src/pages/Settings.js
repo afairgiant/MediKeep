@@ -3,9 +3,11 @@ import Header from '../components/layout/Header';
 import Container from '../components/layout/Container';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
+  const { user } = useAuth();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const handleOpenPasswordModal = () => {
@@ -15,6 +17,14 @@ const Settings = () => {
   const handleClosePasswordModal = () => {
     setIsPasswordModalOpen(false);
   };
+
+  if (!user) {
+    return (
+      <Container>
+        <Header title="Settings" subtitle="Loading..." showBackButton={true} />
+      </Container>
+    );
+  }
 
   return (
     <Container>

@@ -1,0 +1,282 @@
+/* Consolidated Form Styles for Medical Pages */
+
+/* Form Modal Structure */
+.medical-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-bg-overlay, rgba(0, 0, 0, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 1000);
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.medical-form-modal {
+  background: var(--color-bg-primary, white);
+  border-radius: var(--border-radius-xl, 10px);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-2xl, 0 20px 40px rgba(0, 0, 0, 0.2));
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Form Header */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid var(--color-border-light, #e9ecef);
+  background: var(--color-bg-primary, white);
+  border-radius: var(--border-radius-xl, 10px) var(--border-radius-xl, 10px) 0 0;
+}
+
+.form-header h3 {
+  margin: 0;
+  color: var(--color-text-primary, #333);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Form Content */
+.medical-form-content {
+  padding: 2rem;
+}
+
+/* Form Grid Layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  grid-column: 1 / -1;
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary, #333);
+  font-size: 0.9rem;
+}
+
+/* Form Inputs */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 2px solid var(--color-border-light, #e9ecef);
+  border-radius: var(--border-radius-md, 5px);
+  font-size: 1rem;
+  transition: var(--transition-normal, border-color 0.3s ease);
+  background: var(--color-bg-primary, white);
+  color: var(--color-text-primary, #333);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #667eea);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border-light, #e9ecef);
+}
+
+/* Search and Filter Containers */
+.search-container {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border-light, #e9ecef);
+  border-radius: var(--border-radius-md, 5px);
+  font-size: 0.9rem;
+  transition: var(--transition-normal, border-color 0.3s ease);
+  background: var(--color-bg-primary, white);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #667eea);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-muted, #999);
+}
+
+/* Filters */
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  background: var(--color-bg-secondary, #f8f9fa);
+  padding: 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  border: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary, #333);
+  font-size: 0.9rem;
+}
+
+.filter-select {
+  padding: 0.5rem;
+  border: 2px solid var(--color-border-light, #e9ecef);
+  border-radius: var(--border-radius-md, 5px);
+  background: var(--color-bg-primary, white);
+  color: var(--color-text-primary, #333);
+  cursor: pointer;
+  transition: var(--transition-normal, border-color 0.3s ease);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-primary, #667eea);
+}
+
+/* Sort Controls */
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-controls label {
+  font-weight: 500;
+  color: var(--color-text-primary, #333);
+}
+
+.sort-controls select {
+  padding: 0.5rem;
+  border: 2px solid var(--color-border-light, #e9ecef);
+  border-radius: var(--border-radius-md, 5px);
+  background: var(--color-bg-primary, white);
+  color: var(--color-text-primary, #333);
+  cursor: pointer;
+  transition: var(--transition-normal, border-color 0.3s ease);
+}
+
+.sort-controls select:focus {
+  outline: none;
+  border-color: var(--color-primary, #667eea);
+}
+
+/* Responsive Form Adjustments */
+@media (max-width: 768px) {
+  .medical-form-modal {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+
+  .form-header {
+    padding: 1rem 1.5rem 0.75rem;
+  }
+
+  .medical-form-content {
+    padding: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    min-width: auto;
+  }
+
+  .search-container {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .medical-form-modal {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+
+  .form-header {
+    padding: 0.75rem 1rem 0.5rem;
+  }
+
+  .medical-form-content {
+    padding: 1rem;
+  }
+}

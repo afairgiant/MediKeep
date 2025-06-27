@@ -310,22 +310,22 @@ class RestoreService:
             expected_token = f"restore_{backup_id}_{datetime.now().strftime('%Y%m%d')}"
             if confirmation_token != expected_token:
                 self._debug_print(
-                    f"❌ RESTORE DEBUG: Invalid confirmation token. Expected: {expected_token}, Got: {confirmation_token}"
+                    f"RESTORE DEBUG: Invalid confirmation token. Expected: {expected_token}, Got: {confirmation_token}"
                 )
                 raise ValueError("Invalid confirmation token")
 
-            self._debug_print("✅ RESTORE DEBUG: Confirmation token validated")
+            self._debug_print("RESTORE DEBUG: Confirmation token validated")
 
             # Get backup record and extract needed data using the original session
             self._debug_print(
-                f"🔍 RESTORE DEBUG: Looking up backup record for ID: {backup_id}"
+                f"RESTORE DEBUG: Looking up backup record for ID: {backup_id}"
             )
             backup_record = (
                 self.db.query(BackupRecord).filter(BackupRecord.id == backup_id).first()
             )
             if not backup_record:
                 self._debug_print(
-                    f"❌ RESTORE DEBUG: Backup with ID {backup_id} not found in database"
+                    f"RESTORE DEBUG: Backup with ID {backup_id} not found in database"
                 )
                 raise ValueError(f"Backup with ID {backup_id} not found")
 
@@ -334,29 +334,27 @@ class RestoreService:
             backup_file_path = str(backup_record.file_path)
 
             self._debug_print(
-                f"📋 RESTORE DEBUG: Backup details - Type: {backup_type}, Path: {backup_file_path}"
+                f"RESTORE DEBUG: Backup details - Type: {backup_type}, Path: {backup_file_path}"
             )
 
             backup_path = Path(backup_file_path)  # type: ignore
             if not backup_path.exists():
                 self._debug_print(
-                    f"❌ RESTORE DEBUG: Backup file does not exist at: {backup_path}"
+                    f"RESTORE DEBUG: Backup file does not exist at: {backup_path}"
                 )
                 raise ValueError(f"Backup file does not exist: {backup_path}")
 
             self._debug_print(
-                f"✅ RESTORE DEBUG: Backup file exists, size: {backup_path.stat().st_size} bytes"
+                f"RESTORE DEBUG: Backup file exists, size: {backup_path.stat().st_size} bytes"
             )
 
             logger.info(f"Starting restore operation for backup {backup_id}")
 
             # Create safety backup before restore
-            self._debug_print(
-                "🛡️ RESTORE DEBUG: Creating safety backup before restore..."
-            )
+            self._debug_print("RESTORE DEBUG: Creating safety backup before restore...")
             safety_backup_id = await self._create_safety_backup(backup_type)
             self._debug_print(
-                f"✅ RESTORE DEBUG: Safety backup created with ID: {safety_backup_id}"
+                f"RESTORE DEBUG: Safety backup created with ID: {safety_backup_id}"
             )
 
             self._debug_print(
@@ -370,7 +368,7 @@ class RestoreService:
                 result = await self._restore_full_backup(backup_path)
             else:
                 self._debug_print(
-                    f"❌ RESTORE DEBUG: Unsupported backup type: {backup_type}"
+                    f"RESTORE DEBUG: Unsupported backup type: {backup_type}"
                 )
                 raise ValueError(f"Unsupported backup type: {backup_type}")
 
@@ -384,7 +382,7 @@ class RestoreService:
             )
 
             self._debug_print(
-                f"🎉 RESTORE DEBUG: Restore operation completed successfully for backup {backup_id}"
+                f"RESTORE DEBUG: Restore operation completed successfully for backup {backup_id}"
             )
             logger.info(
                 f"Restore operation completed successfully for backup {backup_id}"
@@ -428,7 +426,7 @@ class RestoreService:
         """Restore database using PostgreSQL's native psql tool with single transaction."""
         try:
             self._debug_print(
-                f"🎯 RESTORE DEBUG: Starting native database restore for backup: {backup_path}"
+                f"RESTORE DEBUG: Starting native database restore for backup: {backup_path}"
             )
             logger.info("Starting native database restore using psql")
 
@@ -443,25 +441,19 @@ class RestoreService:
             )
 
             # Step 1: Drop existing tables to allow restore to recreate them
-            self._debug_print(
-                "🚀 RESTORE DEBUG: Step 1 - Dropping tables with CASCADE..."
-            )
+            self._debug_print("RESTORE DEBUG: Step 1 - Dropping tables with CASCADE...")
             logger.info("Step 1: Dropping tables with CASCADE...")
             await self._drop_all_tables()
 
             # Step 2: Restore using Docker psql
-            self._debug_print(
-                "🚀 RESTORE DEBUG: Step 2 - Restoring with Docker psql..."
-            )
+            self._debug_print("RESTORE DEBUG: Step 2 - Restoring with Docker psql...")
             logger.info("Step 2: Restoring with Docker psql...")
 
             # Use native psql from within container
             logger.info("Using native psql for database restore")
             await self._restore_with_native_psql(backup_path, conn_params)
 
-            self._debug_print(
-                "🎉 RESTORE DEBUG: Database restore completed successfully!"
-            )
+            self._debug_print("RESTORE DEBUG: Database restore completed successfully!")
             logger.info("Database restore completed successfully")
 
             return {
@@ -473,21 +465,19 @@ class RestoreService:
 
         except subprocess.CalledProcessError as e:
             error_msg = f"Database restore failed: {e.stderr if e.stderr else str(e)}"
-            self._debug_print(f"❌ RESTORE DEBUG: {error_msg}")
+            self._debug_print(f"RESTORE DEBUG: {error_msg}")
             logger.error(error_msg)
             raise Exception(error_msg)
         except Exception as e:
             error_msg = f"Database restore failed: {str(e)}"
-            self._debug_print(f"❌ RESTORE DEBUG: {error_msg}")
+            self._debug_print(f"RESTORE DEBUG: {error_msg}")
             logger.error(error_msg)
             raise Exception(error_msg)
 
     async def _drop_all_tables(self):
         """Drop all user tables to allow restore to recreate them with proper SQL escaping."""
         try:
-            self._debug_print(
-                "🧹 RESTORE DEBUG: Starting DROP TABLE CASCADE operation..."
-            )
+            self._debug_print("RESTORE DEBUG: Starting DROP TABLE CASCADE operation...")
             logger.info("Dropping existing tables with CASCADE to allow restore...")
 
             # Get list of all user tables (excluding only backup_records to preserve backup history)
@@ -506,7 +496,7 @@ class RestoreService:
             table_names = [row[0] for row in result]
 
             if not table_names:
-                self._debug_print("❌ RESTORE DEBUG: No tables found to drop")
+                self._debug_print("RESTORE DEBUG: No tables found to drop")
                 logger.info("No tables found to drop")
                 return
 
@@ -525,18 +515,18 @@ class RestoreService:
                     )
 
             if not safe_table_names:
-                self._debug_print("❌ RESTORE DEBUG: No safe table names to drop")
+                self._debug_print("RESTORE DEBUG: No safe table names to drop")
                 logger.info("No safe table names to drop")
                 return
 
             self._debug_print(
-                f"📋 RESTORE DEBUG: Found {len(safe_table_names)} tables to drop: {safe_table_names}"
+                f"RESTORE DEBUG: Found {len(safe_table_names)} tables to drop: {safe_table_names}"
             )
 
             # Use parameterized query construction to prevent SQL injection
             # Build individual DROP statements for each table to ensure safety
             self._debug_print(
-                f"🗑️ RESTORE DEBUG: Executing DROP TABLE CASCADE on {len(safe_table_names)} tables..."
+                f"RESTORE DEBUG: Executing DROP TABLE CASCADE on {len(safe_table_names)} tables..."
             )
             logger.info(f"Dropping {len(safe_table_names)} tables with CASCADE...")
 
@@ -548,9 +538,7 @@ class RestoreService:
                     drop_query = text(f'DROP TABLE IF EXISTS "{table_name}" CASCADE')
                     self.db.execute(drop_query)
                     dropped_tables.append(table_name)
-                    self._debug_print(
-                        f"   ✅ RESTORE DEBUG: Dropped table: {table_name}"
-                    )
+                    self._debug_print(f"   RESTORE DEBUG: Dropped table: {table_name}")
                 except Exception as e:
                     logger.warning(f"Failed to drop table {table_name}: {str(e)}")
                     # Continue with other tables
@@ -558,7 +546,7 @@ class RestoreService:
             if dropped_tables:
                 self.db.commit()
                 self._debug_print(
-                    f"✅ RESTORE DEBUG: Successfully dropped {len(dropped_tables)} tables with CASCADE"
+                    f"RESTORE DEBUG: Successfully dropped {len(dropped_tables)} tables with CASCADE"
                 )
                 logger.info(f"Successfully dropped {len(dropped_tables)} tables")
             else:
@@ -572,7 +560,7 @@ class RestoreService:
                 logger.warning(f"Could not rollback transaction: {str(rollback_error)}")
 
             error_msg = f"Failed to drop tables: {str(e)}"
-            self._debug_print(f"❌ RESTORE DEBUG: {error_msg}")
+            self._debug_print(f"RESTORE DEBUG: {error_msg}")
             logger.error(error_msg)
             raise Exception(error_msg)
 
@@ -605,7 +593,7 @@ class RestoreService:
         env = os.environ.copy()
         env["PGPASSWORD"] = conn_params["password"]
 
-        self._debug_print("🔧 RESTORE DEBUG: Running native psql command")
+        self._debug_print("RESTORE DEBUG: Running native psql command")
         logger.debug("Executing native psql restore command")
 
         try:
@@ -692,7 +680,7 @@ class RestoreService:
                 "ON_ERROR_STOP=on",  # Stop on first error
             ]
 
-            self._debug_print(f"🔧 RESTORE DEBUG: Running Docker psql command")
+            self._debug_print(f"RESTORE DEBUG: Running Docker psql command")
             logger.debug("Executing Docker psql restore command")
 
             # Execute Docker psql with the backup file

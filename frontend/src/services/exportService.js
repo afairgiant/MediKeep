@@ -13,6 +13,7 @@ export const exportService = {
       throw error;
     }
   },
+
   /**
    * Get supported export formats and scopes
    */
@@ -28,134 +29,34 @@ export const exportService = {
 
   /**
    * Download single export
-   */ async downloadExport(params) {
+   */
+  async downloadExport(params) {
     try {
-      console.log('Starting download with params:', params);
-
-      // Debug: First call our debug endpoint to see what's being sent
-      try {
-        const debugResponse = await apiClient.get('/export/debug', {
-          params: params,
-        });
-        console.log(
-          'Debug response - what backend received:',
-          debugResponse.data
-        );
-      } catch (debugError) {
-        console.log('Debug endpoint failed:', debugError);
-      }
-
-      // Always use blob response type for file downloads
       const response = await apiClient.get('/export/data', {
         params: params,
         responseType: 'blob',
       });
 
-      console.log('Response received:', response);
-      console.log('Response data type:', typeof response.data);
-      console.log('Response data:', response.data);
-
-      // Get filename from Content-Disposition header
+      // Get filename from Content-Disposition header or generate one
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'medical_records_export.json';
-
-      console.log('All response headers:', response.headers);
-      console.log('Content-Disposition header:', contentDisposition);
-      console.log('Content-Type header:', response.headers['content-type']);
+      let filename = this._generateDefaultFilename(params);
 
       if (contentDisposition) {
-        console.log('Found Content-Disposition header:', contentDisposition);
         const filenameMatch = contentDisposition.match(
           /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
         );
         if (filenameMatch) {
           filename = filenameMatch[1].replace(/"/g, '');
-          console.log('Extracted filename from header:', filename);
-        } else {
-          console.log(
-            'Could not extract filename from Content-Disposition header'
-          );
-        }
-      } else {
-        console.log(
-          'No Content-Disposition header found, using fallback filename generation'
-        );
-        // Fallback filename generation
-        const timestamp = new Date()
-          .toISOString()
-          .slice(0, 19)
-          .replace(/[-:]/g, '')
-          .replace('T', '_');
-
-        // Determine if this should be a ZIP file based on parameters and content type
-        const contentType = response.headers['content-type'] || '';
-        const isZipFile =
-          contentType.includes('application/zip') ||
-          params.include_files === true ||
-          params.include_files === 'true';
-
-        if (isZipFile) {
-          // For ZIP files (when include_files=true), use .zip extension
-          filename = `medical_records_${params.scope || 'export'}_with_files_${timestamp}.zip`;
-          console.log('Generated ZIP filename (include_files=true):', filename);
-        } else {
-          // For regular exports, use the format parameter
-          const extension = params.format || 'json';
-          filename = `medical_records_${params.scope || 'export'}_${timestamp}.${extension}`;
-          console.log('Generated regular filename:', filename);
         }
       }
 
-      // Check if response.data is actually a Blob
-      let blob;
-      if (response.data instanceof Blob) {
-        console.log('Response is already a Blob, size:', response.data.size);
-        blob = response.data;
-      } else {
-        console.log('Response is not a Blob, creating one from data');
-        // Convert the data to a proper blob
-        let content;
-        if (typeof response.data === 'string') {
-          content = response.data;
-        } else if (typeof response.data === 'object') {
-          content = JSON.stringify(response.data, null, 2);
-        } else {
-          content = String(response.data);
-        }
-
-        // Create blob with appropriate MIME type
-        const contentType = response.headers['content-type'] || '';
-        let mimeType;
-
-        if (contentType.includes('application/zip')) {
-          mimeType = 'application/zip';
-        } else if (params.format === 'json') {
-          mimeType = 'application/json';
-        } else if (params.format === 'csv') {
-          mimeType = 'text/csv';
-        } else if (params.format === 'pdf') {
-          mimeType = 'application/pdf';
-        } else {
-          mimeType = 'text/plain';
-        }
-
-        blob = new Blob([content], { type: mimeType });
-      }
-
-      console.log('Final blob:', blob, 'size:', blob.size, 'type:', blob.type);
-
-      if (blob.size === 0) {
+      // Validate response
+      if (!response.data || response.data.size === 0) {
         throw new Error('Export data is empty');
       }
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Download the file
+      this._downloadBlob(response.data, filename);
 
       return { success: true, filename };
     } catch (error) {
@@ -163,20 +64,17 @@ export const exportService = {
       throw error;
     }
   },
+
   /**
    * Download bulk export
    */
   async downloadBulkExport(data) {
     try {
-      console.log('Starting bulk export with data:', data);
-
       const response = await apiClient.post('/export/bulk', data, {
         responseType: 'blob',
       });
 
-      console.log('Bulk export response:', response);
-
-      // Get filename from Content-Disposition header
+      // Get filename from Content-Disposition header or use default
       const contentDisposition = response.headers['content-disposition'];
       let filename = 'medical_records_bulk_export.zip';
 
@@ -189,33 +87,13 @@ export const exportService = {
         }
       }
 
-      // Check if response.data is actually a Blob for ZIP files
-      let blob;
-      if (response.data instanceof Blob) {
-        console.log(
-          'Bulk export response is already a Blob, size:',
-          response.data.size
-        );
-        blob = response.data;
-      } else {
-        console.log('Bulk export response is not a Blob, creating one');
-        blob = new Blob([response.data], { type: 'application/zip' });
-      }
-
-      console.log('Final bulk export blob:', blob, 'size:', blob.size);
-
-      if (blob.size === 0) {
+      // Validate response
+      if (!response.data || response.data.size === 0) {
         throw new Error('Bulk export data is empty');
       }
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Download the file
+      this._downloadBlob(response.data, filename);
 
       return { success: true, filename };
     } catch (error) {
@@ -254,49 +132,40 @@ export const exportService = {
   },
 
   /**
-   * Get export history (if implemented in backend)
+   * Generate default filename for export
    */
-  async getExportHistory() {
-    try {
-      const response = await apiClient.get('/export/history');
-      return response.data;
-    } catch (error) {
-      // This endpoint might not be implemented yet
-      console.warn('Export history not available:', error);
-      return { exports: [] };
+  _generateDefaultFilename(params) {
+    const timestamp = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace(/[-:]/g, '')
+      .replace('T', '_');
+
+    const scope = params.scope || 'export';
+    const format = params.format || 'json';
+
+    // Check if this should be a ZIP file
+    const isZipFile =
+      params.include_files === true || params.include_files === 'true';
+
+    if (isZipFile) {
+      return `medical_records_${scope}_with_files_${timestamp}.zip`;
+    } else {
+      return `medical_records_${scope}_${timestamp}.${format}`;
     }
   },
 
   /**
-   * Get estimated export size
+   * Download blob as file
    */
-  async getEstimatedSize(params) {
-    try {
-      const response = await apiClient.post('/export/estimate', params);
-      return response.data;
-    } catch (error) {
-      // This endpoint might not be implemented yet
-      console.warn('Export size estimation not available:', error);
-      return { estimated_size: 'Unknown' };
-    }
-  },
-
-  /**
-   * Debug export parameters
-   */
-  async debugExportParams(params) {
-    try {
-      console.log('Debug: Starting with params:', params);
-
-      const response = await apiClient.get('/export/debug', {
-        params: params,
-      });
-
-      console.log('Debug response:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Debug failed:', error);
-      throw error;
-    }
+  _downloadBlob(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   },
 };

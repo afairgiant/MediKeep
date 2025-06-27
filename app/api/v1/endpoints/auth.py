@@ -173,12 +173,8 @@ def login(
             detail="User ID is missing in the database record",
         )
 
-    full_name = getattr(db_user, "full_name", None)
-    if not full_name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Full name is required for login",
-        )
+    # Get full name, use username as fallback if not set
+    full_name = getattr(db_user, "full_name", None) or db_user.username
 
     # Create access token with user role and additional info
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

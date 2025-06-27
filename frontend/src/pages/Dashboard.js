@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardCard } from '../components';
-import ThemeToggle from '../components/ui/ThemeToggle';
+import { DashboardCard, PageHeader } from '../components';
+import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { apiService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient } from '../hooks/useGlobalData';
 import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const {
+    user: authUser,
+    shouldShowProfilePrompts,
+    checkIsFirstLogin,
+  } = useAuth();
 
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
@@ -15,6 +21,7 @@ const Dashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Combine loading states
   const loading = patientLoading || activityLoading;
@@ -24,6 +31,31 @@ const Dashboard = () => {
     fetchRecentActivity();
     checkAdminStatus();
   }, []);
+
+  // Check for profile completion modal when both auth user and patient data are available
+  useEffect(() => {
+    if (authUser && user) {
+      checkProfileCompletionModal();
+    }
+  }, [authUser, user]);
+
+  const checkProfileCompletionModal = () => {
+    // Only show profile completion modal on first login and if patient data exists
+    if (
+      authUser &&
+      user &&
+      checkIsFirstLogin() &&
+      shouldShowProfilePrompts(user)
+    ) {
+      console.log(
+        '🔔 Showing patient profile completion modal for first login'
+      );
+      // Small delay to let dashboard load first
+      setTimeout(() => {
+        setShowProfileModal(true);
+      }, 1000);
+    }
+  };
   const checkAdminStatus = () => {
     try {
       const token = localStorage.getItem('token');
@@ -64,11 +96,6 @@ const Dashboard = () => {
     } finally {
       setActivityLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
   };
 
   const dashboardItems = [
@@ -162,23 +189,12 @@ const Dashboard = () => {
   }
   return (
     <div className="dashboard-container">
-      <header>
-        <h1>🏥 Medical Records Dashboard</h1>
-        <nav>
-          <button
-            className="settings-button"
-            onClick={() => navigate('/settings')}
-            type="button"
-            title="Settings"
-          >
-            ⚙️
-          </button>
-          <ThemeToggle />
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
-        </nav>
-      </header>
+      <PageHeader
+        title="Medical Records Dashboard"
+        icon="🏥"
+        variant="dashboard"
+        showBackButton={false}
+      />
 
       <main>
         <div className="welcome-section">
@@ -245,6 +261,13 @@ const Dashboard = () => {
       <footer>
         <p>&copy; 2025 Medical Records System. All rights reserved.</p>
       </footer>
+
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onComplete={() => setShowProfileModal(false)}
+      />
     </div>
   );
 };

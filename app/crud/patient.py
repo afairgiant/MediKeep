@@ -31,10 +31,9 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             # User accessing their own patient record
             patient = patient_crud.get_by_user_id(db, user_id=current_user.id)
         """
-        patients = super().get_by_field(
+        patients = self.query(
             db=db,
-            field_name="user_id",
-            field_value=user_id,
+            filters={"user_id": user_id},
             limit=1,
         )
         return patients[0] if patients else None
@@ -107,10 +106,9 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             if patient_crud.is_user_already_patient(db, user_id=new_user.id):
                 raise HTTPException(400, "User already has a patient record")
         """
-        patients = super().get_by_field(
+        patients = self.query(
             db=db,
-            field_name="user_id",
-            field_value=user_id,
+            filters={"user_id": user_id},
             limit=1,
         )
         return len(patients) > 0

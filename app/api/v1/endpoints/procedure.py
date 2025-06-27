@@ -83,7 +83,9 @@ def read_procedure(
     """
     Get procedure by ID with related information - only allows access to user's own procedures.
     """
-    procedure_obj = procedure.get_with_relations(db, procedure_id=procedure_id)
+    procedure_obj = procedure.get_with_relations(
+        db=db, record_id=procedure_id, relations=["patient", "practitioner"]
+    )
     if not procedure_obj:
         raise HTTPException(status_code=404, detail="Procedure not found")
 

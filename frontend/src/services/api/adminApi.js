@@ -256,6 +256,13 @@ class AdminApiService extends BaseApiService {
 
     return response.json();
   }
+
+  // Admin password reset
+  async adminResetPassword(userId, newPassword) {
+    return this.post(`/users/${userId}/reset-password`, {
+      new_password: newPassword,
+    });
+  }
 }
 
 // Create and export a singleton instance

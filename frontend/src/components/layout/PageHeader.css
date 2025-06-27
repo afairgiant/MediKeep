@@ -1,0 +1,299 @@
+.page-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1rem 1.5rem !important;
+  background: var(--surface-color, white) !important;
+  border-bottom: 1px solid var(--border-color, #e0e0e0) !important;
+  margin-bottom: 2rem !important;
+  min-height: 70px !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.page-header .header-left,
+.page-header .header-right {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.page-header .header-left {
+  justify-content: flex-start !important;
+}
+
+.page-header .header-right {
+  justify-content: flex-end !important;
+}
+
+.page-header .header-center {
+  flex: 2 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.page-title {
+  margin: 0 !important;
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary, #333) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  text-align: center !important;
+}
+
+/* Medical page title should be white */
+.medical-page-header .page-title {
+  color: var(--color-text-light, white) !important;
+  font-size: 1.8rem !important;
+}
+
+.page-header .title-icon {
+  font-size: 1.5rem !important;
+}
+
+.page-header .back-button {
+  background: none !important;
+  border: 1px solid var(--border-color, #ccc) !important;
+  color: var(--text-secondary, #666) !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  text-decoration: none !important;
+  font-weight: normal !important;
+}
+
+.page-header .back-button:hover {
+  background: var(--background-hover, #f0f0f0) !important;
+  color: var(--text-primary, #333) !important;
+  border-color: var(--border-hover, #999) !important;
+}
+
+/* Medical page back button should be white with transparent background */
+.medical-page-header .back-button {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-light, white) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  font-weight: 500 !important;
+}
+
+.medical-page-header .back-button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--color-text-light, white) !important;
+}
+
+.page-header .header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+/* Medical page header actions styling */
+.medical-page-header .header-actions button {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-light, white) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.medical-page-header .header-actions button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.medical-page-header .header-actions input {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-light, white) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  font-size: 0.9rem !important;
+}
+
+.medical-page-header .header-actions input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.medical-page-header .header-actions input:focus {
+  background: rgba(255, 255, 255, 0.3) !important;
+  outline: none !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Global actions styling */
+.global-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  margin-left: 1rem !important;
+  padding-left: 1rem !important;
+  border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Medical page global actions */
+.medical-page-header .global-actions {
+  border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.global-actions .settings-button,
+.global-actions .logout-btn {
+  background: none !important;
+  border: 1px solid var(--border-color, #ccc) !important;
+  color: var(--text-secondary, #666) !important;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+}
+
+.global-actions .settings-button:hover,
+.global-actions .logout-btn:hover {
+  background: var(--background-hover, #f0f0f0) !important;
+  color: var(--text-primary, #333) !important;
+  border-color: var(--border-hover, #999) !important;
+}
+
+/* Medical page global actions styling */
+.medical-page-header .global-actions .settings-button,
+.medical-page-header .global-actions .logout-btn {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-light, white) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.medical-page-header .global-actions .settings-button:hover,
+.medical-page-header .global-actions .logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--color-text-light, white) !important;
+}
+
+/* Dashboard global actions styling - same as medical pages since both are blue now */
+.dashboard-header .global-actions {
+  border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.dashboard-header .global-actions .settings-button,
+.dashboard-header .global-actions .logout-btn {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-light, white) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.dashboard-header .global-actions .settings-button:hover,
+.dashboard-header .global-actions .logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: var(--color-text-light, white) !important;
+}
+
+/* Dashboard variant styles */
+.dashboard-header {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #667eea) 0%,
+    var(--color-primary-dark, #764ba2) 100%
+  ) !important;
+  color: var(--color-text-light, white) !important;
+  box-shadow: var(--shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1)) !important;
+  border-bottom: 2px solid var(--border-color);
+  padding: 1.5rem 2rem;
+}
+
+.dashboard-header .page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-light, white) !important;
+}
+
+.dashboard-header .header-left {
+  justify-content: flex-start;
+}
+
+.dashboard-header .header-right {
+  gap: 1rem;
+}
+
+/* Medical page variant styles */
+.medical-page-header {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #667eea) 0%,
+    var(--color-primary-dark, #764ba2) 100%
+  ) !important;
+  color: var(--color-text-light, white) !important;
+  box-shadow: var(--shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1)) !important;
+  padding: 1.5rem 2rem !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: none;
+    width: 100%;
+  }
+
+  .header-center {
+    order: -1;
+  }
+
+  .header-left {
+    justify-content: center;
+  }
+
+  .header-right {
+    justify-content: center;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header .page-title {
+    font-size: 1.75rem;
+  }
+
+  .header-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .global-actions {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    border-left: none !important;
+    margin-top: 0.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-header .page-title {
+    font-size: 1.5rem;
+  }
+}

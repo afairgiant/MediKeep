@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/auth/simpleAuthService';
 import { toast } from 'react-toastify';
+import {
+  shouldShowPatientProfileCompletionPrompt,
+  isFirstLogin,
+} from '../utils/profileUtils';
 
 // Auth State Management
 const initialState = {
@@ -106,6 +110,19 @@ export function AuthProvider({ children }) {
   const isTokenExpired = tokenExpiry => {
     if (!tokenExpiry) return true;
     return Date.now() >= tokenExpiry;
+  };
+
+  // Check if user should see patient profile completion prompts (first login only)
+  const shouldShowProfilePrompts = patient => {
+    return (
+      state.user &&
+      shouldShowPatientProfileCompletionPrompt(state.user, patient)
+    );
+  };
+
+  // Check if this is user's first login
+  const checkIsFirstLogin = () => {
+    return state.user && isFirstLogin(state.user.username);
   };
 
   // Initialize auth state on app load
@@ -227,6 +244,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('tokenExpiry');
+    // Note: We don't clear first login status as it should persist across sessions
   };
 
   const updateStoredToken = (token, tokenExpiry) => {
@@ -236,6 +254,23 @@ export function AuthProvider({ children }) {
 
   const updateStoredUser = user => {
     localStorage.setItem('user', JSON.stringify(user));
+  };
+
+  // Update user data in context and storage
+  const updateUser = updatedUserData => {
+    const updatedUser = { ...state.user, ...updatedUserData };
+
+    dispatch({
+      type: AUTH_ACTIONS.LOGIN_SUCCESS,
+      payload: {
+        user: updatedUser,
+        token: state.token,
+        tokenExpiry: state.tokenExpiry,
+      },
+    });
+
+    updateStoredUser(updatedUser);
+    return updatedUser;
   };
 
   // Auth Actions
@@ -263,7 +298,14 @@ export function AuthProvider({ children }) {
         });
 
         toast.success('Login successful!');
-        return { success: true };
+
+        // Check if profile completion modal should be shown
+        // This will be handled by the component consuming the auth context
+
+        return {
+          success: true,
+          isFirstLogin: isFirstLogin(result.user.username),
+        };
       } else {
         dispatch({
           type: AUTH_ACTIONS.LOGIN_FAILURE,
@@ -333,10 +375,13 @@ export function AuthProvider({ children }) {
     logout,
     updateActivity,
     clearError,
+    updateUser,
 
     // Utilities
     hasRole,
     hasAnyRole,
+    shouldShowProfilePrompts,
+    checkIsFirstLogin,
   };
 
   return (

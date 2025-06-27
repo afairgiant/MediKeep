@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { MedicalCard, StatusBadge } from '../../components';
-import { usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
+import {
+  MedicalCard,
+  StatusBadge,
+  PageHeader,
+  FilterControls,
+} from '../../components';
+import {
+  usePractitioners,
+  useCacheManager,
+  useDataManagement,
+} from '../../hooks';
 import {
   formatPhoneNumber,
   formatPhoneInput,
   cleanPhoneNumber,
 } from '../../utils/phoneUtils';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -25,10 +35,11 @@ const Practitioners = () => {
 
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [specialtyFilter, setSpecialtyFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
   const [showModal, setShowModal] = useState(false);
+
+  // Standardized filtering and sorting
+  const config = getMedicalPageConfig('practitioners');
+  const dataManagement = useDataManagement(practitioners, config);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -166,35 +177,7 @@ const Practitioners = () => {
     }
   };
 
-  // Get unique specialties from practitioners for filter
-  const availableSpecialties = [
-    ...new Set(practitioners.map(p => p.specialty).filter(Boolean)),
-  ].sort();
-
-  const filteredPractitioners = practitioners
-    .filter(practitioner => {
-      const matchesSearch =
-        practitioner.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        practitioner.specialty
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        practitioner.practice?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSpecialty =
-        specialtyFilter === 'all' || practitioner.specialty === specialtyFilter;
-
-      return matchesSearch && matchesSpecialty;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'specialty':
-          return (a.specialty || '').localeCompare(b.specialty || '');
-        case 'practice':
-          return (a.practice || '').localeCompare(b.practice || '');
-        case 'name':
-        default:
-          return (a.name || '').localeCompare(b.name || '');
-      }
-    });
+  const filteredPractitioners = dataManagement.data;
 
   const getSpecialtyColor = specialty => {
     // Color coding for different specialties
@@ -224,166 +207,148 @@ const Practitioners = () => {
   }
   return (
     <div className="practitioners-page">
-      <div className="practitioners-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1 className="practitioners-title">👩‍⚕️ Healthcare Practitioners</h1>
-        <div className="practitioners-actions">
-          <button
-            className="add-practitioner-btn"
-            onClick={handleAddPractitioner}
-          >
-            <span>+</span>
-            Add Practitioner
-          </button>
-          <div className="practitioners-search">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search practitioners..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
+      <PageHeader title="Healthcare Practitioners" icon="👩‍⚕️" />
+
+      <div className="medical-page-content">
+        {error && <div className="error-message">{error}</div>}
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}
+
+        <div className="medical-page-controls">
+          <div className="controls-left">
+            <button className="add-button" onClick={handleAddPractitioner}>
+              + Add Practitioner
+            </button>
           </div>
         </div>
-      </div>
 
-      {error && <div className="error-message">{error}</div>}
-      {successMessage && (
-        <div className="success-message">{successMessage}</div>
-      )}
+        {/* Standardized Filter Controls */}
+        <FilterControls
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          getSortIndicator={dataManagement.getSortIndicator}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
 
-      <div className="practitioners-filters">
-        <div className="filter-group">
-          <label>Specialty</label>
-          <select
-            value={specialtyFilter}
-            onChange={e => setSpecialtyFilter(e.target.value)}
-          >
-            <option value="all">All Specialties</option>
-            {availableSpecialties.map(specialty => (
-              <option key={specialty} value={specialty}>
-                {specialty}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="filter-group">
-          <label>Sort By</label>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="name">Name</option>
-            <option value="specialty">Specialty</option>
-            <option value="practice">Practice</option>
-          </select>
-        </div>
-      </div>
-
-      {filteredPractitioners.length === 0 ? (
-        <div className="no-practitioners">
-          <div className="no-practitioners-icon">👨‍⚕️</div>
-          <h3>No Healthcare Practitioners Found</h3>
-          <p>
-            {searchTerm || specialtyFilter !== 'all'
-              ? 'Try adjusting your search or filter criteria.'
-              : 'Start by adding your first healthcare practitioner.'}
-          </p>
-          {!searchTerm && specialtyFilter === 'all' && (
-            <button
-              className="add-practitioner-btn"
-              onClick={handleAddPractitioner}
-            >
-              Add Your First Practitioner
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="practitioners-grid">
-          {filteredPractitioners.map(practitioner => (
-            <MedicalCard
-              key={practitioner.id}
-              className="practitioner-card"
-              onEdit={() => handleEditPractitioner(practitioner)}
-              onDelete={() => handleDeletePractitioner(practitioner.id)}
-            >
-              <div className="practitioner-card-header">
-                <div>
-                  <h3 className="practitioner-name">{practitioner.name}</h3>
-                  <p className="practitioner-practice">
-                    {practitioner.practice}
-                  </p>
-                </div>
-                <div className="practitioner-badge">
-                  <StatusBadge
-                    status={practitioner.specialty}
-                    color={getSpecialtyColor(practitioner.specialty)}
-                  />
-                </div>
-              </div>{' '}
-              <div className="practitioner-details">
-                <div className="detail-item">
-                  <span className="detail-label">Specialty</span>
-                  <span className="detail-value">{practitioner.specialty}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Practice</span>
-                  <span className="detail-value">{practitioner.practice}</span>
+        {filteredPractitioners.length === 0 ? (
+          <div className="no-practitioners">
+            <div className="no-practitioners-icon">👨‍⚕️</div>
+            <h3>No Healthcare Practitioners Found</h3>
+            <p>
+              {dataManagement.hasActiveFilters
+                ? 'Try adjusting your search or filter criteria.'
+                : 'Start by adding your first healthcare practitioner.'}
+            </p>
+            {!dataManagement.hasActiveFilters && (
+              <button className="add-button" onClick={handleAddPractitioner}>
+                Add Your First Practitioner
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="practitioners-grid">
+            {filteredPractitioners.map(practitioner => (
+              <MedicalCard
+                key={practitioner.id}
+                className="practitioner-card"
+                onEdit={() => handleEditPractitioner(practitioner)}
+                onDelete={() => handleDeletePractitioner(practitioner.id)}
+              >
+                <div className="practitioner-card-header">
+                  <div>
+                    <h3 className="practitioner-name">{practitioner.name}</h3>
+                    <p className="practitioner-practice">
+                      {practitioner.practice}
+                    </p>
+                  </div>
+                  <div className="practitioner-badge">
+                    <StatusBadge
+                      status={practitioner.specialty}
+                      color={getSpecialtyColor(practitioner.specialty)}
+                    />
+                  </div>
                 </div>{' '}
-                {practitioner.phone_number && (
+                <div className="practitioner-details">
                   <div className="detail-item">
-                    <span className="detail-label">Phone</span>
+                    <span className="detail-label">Specialty</span>
                     <span className="detail-value">
-                      {formatPhoneNumber(practitioner.phone_number)}
+                      {practitioner.specialty}
                     </span>
                   </div>
-                )}
-                {practitioner.website && (
                   <div className="detail-item">
-                    <span className="detail-label">Website</span>
+                    <span className="detail-label">Practice</span>
                     <span className="detail-value">
-                      <a
-                        href={practitioner.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="website-link"
-                      >
-                        Visit Website ↗
-                      </a>
+                      {practitioner.practice}
                     </span>
-                  </div>
-                )}
-                {practitioner.rating !== null &&
-                  practitioner.rating !== undefined && (
+                  </div>{' '}
+                  {practitioner.phone_number && (
                     <div className="detail-item">
-                      <span className="detail-label">Rating</span>
+                      <span className="detail-label">Phone</span>
                       <span className="detail-value">
-                        <div className="rating-display">
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <span
-                              key={star}
-                              className={`star ${star <= practitioner.rating ? 'filled' : 'empty'}`}
-                            >
-                              ⭐
-                            </span>
-                          ))}
-                          <span className="rating-number">
-                            ({practitioner.rating}/5)
-                          </span>
-                        </div>
+                        {formatPhoneNumber(practitioner.phone_number)}
                       </span>
                     </div>
                   )}
-                {practitioner.id && (
-                  <div className="detail-item">
-                    <span className="detail-label">ID</span>
-                    <span className="detail-value">{practitioner.id}</span>
-                  </div>
-                )}
-              </div>
-            </MedicalCard>
-          ))}
-        </div>
-      )}
+                  {practitioner.website && (
+                    <div className="detail-item">
+                      <span className="detail-label">Website</span>
+                      <span className="detail-value">
+                        <a
+                          href={practitioner.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="website-link"
+                        >
+                          Visit Website ↗
+                        </a>
+                      </span>
+                    </div>
+                  )}
+                  {practitioner.rating !== null &&
+                    practitioner.rating !== undefined && (
+                      <div className="detail-item">
+                        <span className="detail-label">Rating</span>
+                        <span className="detail-value">
+                          <div className="rating-display">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <span
+                                key={star}
+                                className={`star ${star <= practitioner.rating ? 'filled' : 'empty'}`}
+                              >
+                                ⭐
+                              </span>
+                            ))}
+                            <span className="rating-number">
+                              ({practitioner.rating}/5)
+                            </span>
+                          </div>
+                        </span>
+                      </div>
+                    )}
+                  {practitioner.id && (
+                    <div className="detail-item">
+                      <span className="detail-label">ID</span>
+                      <span className="detail-value">{practitioner.id}</span>
+                    </div>
+                  )}
+                </div>
+              </MedicalCard>
+            ))}
+          </div>
+        )}
+      </div>
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>

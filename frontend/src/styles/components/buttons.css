@@ -1,0 +1,251 @@
+/* Consolidated Button Styles for Medical Pages */
+
+/* Medical Action Buttons */
+.add-button {
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #28a745) 0%,
+    var(--color-info, #20c997) 100%
+  );
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-lg, 8px);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-md, 0 2px 10px rgba(40, 167, 69, 0.3));
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.edit-button {
+  background: linear-gradient(
+    135deg,
+    var(--color-warning, #ffc107) 0%,
+    var(--color-warning-dark, #e0a800) 100%
+  );
+  color: var(--color-text-dark, #212529);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(255, 193, 7, 0.3));
+}
+
+.edit-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+}
+
+.delete-button {
+  background: linear-gradient(
+    135deg,
+    var(--color-danger, #dc3545) 0%,
+    var(--color-danger-dark, #c82333) 100%
+  );
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(220, 53, 69, 0.3));
+}
+
+.delete-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+}
+
+.save-button {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #667eea) 0%,
+    var(--color-primary-dark, #764ba2) 100%
+  );
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-md, 0 2px 10px rgba(102, 126, 234, 0.3));
+}
+
+.save-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.cancel-button {
+  background: var(--color-gray-500, #6c757d);
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(108, 117, 125, 0.3));
+}
+
+.cancel-button:hover {
+  background: var(--color-gray-600, #5a6268);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.4);
+}
+
+/* Small button variants for tables */
+.edit-button-small,
+.delete-button-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: var(--border-radius-sm, 3px);
+  margin: 0 0.25rem;
+}
+
+.edit-button-small {
+  background: var(--color-warning, #ffc107);
+  color: var(--color-text-dark, #212529);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal, background-color 0.3s ease);
+}
+
+.edit-button-small:hover {
+  background: var(--color-warning-dark, #e0a800);
+}
+
+.delete-button-small {
+  background: var(--color-danger, #dc3545);
+  color: var(--color-text-light, white);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal, background-color 0.3s ease);
+}
+
+.delete-button-small:hover {
+  background: var(--color-danger-dark, #c82333);
+}
+
+/* View button */
+.view-button {
+  background: var(--color-info, #17a2b8);
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(23, 162, 184, 0.3));
+}
+
+.view-button:hover {
+  background: var(--color-info-dark, #138496);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.4);
+}
+
+/* Print button */
+.print-button {
+  background: var(--color-info, #17a2b8);
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition-all, all 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(23, 162, 184, 0.3));
+}
+
+.print-button:hover {
+  background: var(--color-info-dark, #138496);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 2px 8px rgba(23, 162, 184, 0.4));
+}
+
+/* Sort controls */
+.sort-order-button {
+  background: var(--color-gray-600, #6c757d);
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-size: 1rem;
+  min-width: 35px;
+  transition: var(--transition-normal, background-color 0.3s ease);
+}
+
+.sort-order-button:hover {
+  background: var(--color-gray-700, #5a6268);
+}
+
+/* Close button for modals */
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-text-secondary, #6c757d);
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  transition: var(--transition-normal, color 0.3s ease);
+}
+
+.close-button:hover {
+  color: var(--color-text-primary, #333);
+}
+
+/* Clear filters button */
+.clear-filters-btn {
+  background: var(--color-gray-500, #6c757d);
+  color: var(--color-text-light, white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md, 5px);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-all, all 0.3s ease);
+  white-space: nowrap;
+}
+
+.clear-filters-btn:hover {
+  background: var(--color-gray-600, #5a6268);
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .add-button,
+  .save-button,
+  .cancel-button {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .edit-button,
+  .delete-button,
+  .view-button {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+  }
+}

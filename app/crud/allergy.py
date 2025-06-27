@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session, joinedload
 
@@ -14,30 +14,6 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
     Handles patient allergy records, allergen tracking, and severity management.
     """
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Allergy]:
-        """
-        Retrieve all allergies for a specific patient.
-
-        Args:
-            db: SQLAlchemy database session
-            patient_id: ID of the patient
-            skip: Number of records to skip (for pagination)
-            limit: Maximum number of records to return
-
-        Returns:
-            List of allergies for the patient
-        """
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            order_by="onset_date",
-            order_desc=True,
-        )
-
     def get_by_severity(
         self, db: Session, *, severity: str, patient_id: Optional[int] = None
     ) -> List[Allergy]:
@@ -52,17 +28,15 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of allergies with the specified severity
         """
-        additional_filters = {}
+        filters: Dict[str, Any] = {"severity": severity.lower()}
         if patient_id:
-            additional_filters["patient_id"] = patient_id
+            filters["patient_id"] = patient_id
 
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="severity",
-            field_value=severity.lower(),
+            filters=filters,
             order_by="onset_date",
             order_desc=True,
-            additional_filters=additional_filters,
         )
 
     def get_active_allergies(self, db: Session, *, patient_id: int) -> List[Allergy]:
@@ -76,10 +50,9 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of active allergies
         """
-        return super().get_by_status(
+        return self.query(
             db=db,
-            status="active",
-            patient_id=patient_id,
+            filters={"status": "active", "patient_id": patient_id},
             order_by="severity",
             order_desc=True,
         )
@@ -124,28 +97,16 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             List of allergies matching the allergen
         """
-        return super().search_by_text_field(
+        filters: Dict[str, Any] = {}
+        if patient_id:
+            filters["patient_id"] = patient_id
+
+        return self.query(
             db=db,
-            field_name="allergen",
-            search_term=allergen,
-            patient_id=patient_id,
+            filters=filters,
+            search={"field": "allergen", "term": allergen},
             order_by="severity",
             order_desc=True,
-        )
-
-    def get_with_relations(self, db: Session, allergy_id: int) -> Optional[Allergy]:
-        """
-        Retrieve an allergy with all related information loaded.
-
-        Args:
-            db: SQLAlchemy database session
-            allergy_id: ID of the allergy
-
-        Returns:
-            Allergy with patient relationship loaded
-        """
-        return super().get_with_relations(
-            db=db, record_id=allergy_id, relations=["patient"]
         )
 
     def check_allergen_conflict(
@@ -162,12 +123,10 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         Returns:
             True if patient has active allergy to the allergen, False otherwise
         """
-        allergies = super().search_by_text_field(
+        allergies = self.query(
             db=db,
-            field_name="allergen",
-            search_term=allergen,
-            patient_id=patient_id,
-            additional_filters={"status": "active"},
+            filters={"patient_id": patient_id, "status": "active"},
+            search={"field": "allergen", "term": allergen},
             limit=1,
         )
         return len(allergies) > 0

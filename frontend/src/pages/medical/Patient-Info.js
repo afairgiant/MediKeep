@@ -4,20 +4,18 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
+import { PageHeader } from '../../components';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
   // Using global state for patient and practitioners data
-  const { 
-    patient: patientData, 
-    loading: patientLoading, 
+  const {
+    patient: patientData,
+    loading: patientLoading,
     error: patientError,
-    refresh: refreshPatient 
+    refresh: refreshPatient,
   } = useCurrentPatient();
-  const { 
-    practitioners, 
-    loading: practitionersLoading 
-  } = usePractitioners();
+  const { practitioners, loading: practitionersLoading } = usePractitioners();
 
   // Combine loading states
   const loading = patientLoading || practitionersLoading;
@@ -51,7 +49,10 @@ const PatientInfo = () => {
         weight: patientData.weight || '',
         physician_id: patientData.physician_id || '',
       });
-    } else if (patientError && patientError.includes('Patient record not found')) {
+    } else if (
+      patientError &&
+      patientError.includes('Patient record not found')
+    ) {
       setPatientExists(false);
       setFormData({
         first_name: '',
@@ -190,12 +191,7 @@ const PatientInfo = () => {
 
   return (
     <div className="patient-info-container">
-      <header className="patient-info-header">
-        <button className="back-button" onClick={() => navigate('/dashboard')}>
-          ← Back to Dashboard
-        </button>
-        <h1>📋 Patient Information</h1>
-      </header>
+      <PageHeader title="Patient Information" icon="📋" />
 
       <div className="patient-info-content">
         {error && <div className="error-message">{error}</div>}

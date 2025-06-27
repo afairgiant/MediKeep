@@ -35,10 +35,9 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         Example:
             activities = activity_log.get_by_user(db, user_id=current_user.id, limit=20)
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="user_id",
-            field_value=user_id,
+            filters={"user_id": user_id},
             skip=skip,
             limit=limit,
             order_by="timestamp",
@@ -63,10 +62,9 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         Example:
             activities = activity_log.get_by_patient(db, patient_id=patient.id, limit=20)
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="patient_id",
-            field_value=patient_id,
+            filters={"patient_id": patient_id},
             skip=skip,
             limit=limit,
             order_by="timestamp",
@@ -128,11 +126,9 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
                 entity_id=medication.id
             )
         """
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="entity_type",
-            field_value=entity_type,
-            additional_filters={"entity_id": entity_id},
+            filters={"entity_type": entity_type, "entity_id": entity_id},
             skip=skip,
             limit=limit,
             order_by="timestamp",
@@ -172,15 +168,13 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
                 user_id=user.id
             )
         """
-        additional_filters = {}
+        filters: Dict[str, Any] = {"action": action}
         if user_id:
-            additional_filters["user_id"] = user_id
+            filters["user_id"] = user_id
 
-        return super().get_by_field(
+        return self.query(
             db=db,
-            field_name="action",
-            field_value=action,
-            additional_filters=additional_filters,
+            filters=filters,
             skip=skip,
             limit=limit,
             order_by="timestamp",
@@ -289,16 +283,10 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
                 .all()
             )
         elif filters:
-            # Use generic method for simple field filters
-            first_filter = next(iter(filters.items()))
-            remaining_filters = {
-                k: v for k, v in filters.items() if k != first_filter[0]
-            }
-            return super().get_by_field(
+            # Use the new query method for simple field filters
+            return self.query(
                 db=db,
-                field_name=first_filter[0],
-                field_value=first_filter[1],
-                additional_filters=remaining_filters,
+                filters=filters,
                 skip=skip,
                 limit=limit,
                 order_by="timestamp",

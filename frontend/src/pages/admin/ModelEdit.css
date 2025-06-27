@@ -2,8 +2,10 @@
 
 .model-edit {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .model-edit-header {
@@ -166,6 +168,67 @@
   justify-content: space-between;
 }
 
+.field-value.readonly.password-field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.password-display {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  letter-spacing: 0.1em;
+  background-color: #f9fafb;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.password-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.password-field .field-note {
+  margin: 0;
+  flex: 1;
+}
+
+/* Password field for creation */
+.password-field-create {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.password-field-create .field-input {
+  width: 100%;
+}
+
+.password-field-create .field-note {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  background-color: #f0f9ff;
+  border: 1px solid #e0f2fe;
+  border-radius: 0.25rem;
+}
+
 .field-note {
   font-size: 0.75rem;
   color: #9ca3af;
@@ -241,16 +304,12 @@ select.field-input {
   width: 100%;
 }
 
-/* Responsive design */
-@media (min-width: 768px) {
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
+/* Responsive design - Sidebar-aware breakpoints */
+/* Large desktop screens - sidebar + content fits comfortably */
+@media (min-width: 1300px) {
   .model-edit {
     padding: 3rem;
+    max-width: 1200px;
   }
 
   .model-edit-header {
@@ -259,6 +318,249 @@ select.field-input {
 
   .edit-form {
     padding: 3rem;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium desktop - account for sidebar width (1024px - 280px sidebar = 744px content) */
+@media (min-width: 1024px) and (max-width: 1299px) {
+  .model-edit {
+    padding: 2.5rem 2rem;
+    max-width: 100%;
+  }
+
+  .model-edit-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .edit-form {
+    padding: 2.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .edit-actions .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Small desktop/large tablet - sidebar significantly reduces available width */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .model-edit {
+    padding: 1.5rem 1rem;
+    max-width: 100%;
+  }
+
+  .edit-form {
+    padding: 1.5rem;
+  }
+
+  /* Single column layout since available width is limited with sidebar */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .edit-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .edit-actions .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    min-width: 90px;
+  }
+}
+
+/* Small tablets and large mobile screens */
+@media (max-width: 767px) {
+  .model-edit {
+    padding: 1.5rem 1rem;
+  }
+
+  .model-edit-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .edit-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .edit-title p {
+    font-size: 0.8rem;
+  }
+
+  .edit-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .edit-actions .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .edit-form {
+    padding: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .field-input {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  textarea.field-input {
+    min-height: 5rem;
+  }
+
+  .password-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .password-actions .btn-small {
+    width: 100%;
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .field-value.readonly.password-field {
+    gap: 0.75rem;
+  }
+
+  .password-display {
+    font-size: 0.7rem;
+    padding: 0.6rem;
+  }
+}
+
+/* Mobile phone screens */
+@media (max-width: 480px) {
+  .model-edit {
+    padding: 1rem 0.75rem;
+  }
+
+  .model-edit-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .edit-title h1 {
+    font-size: 1.25rem;
+  }
+
+  .edit-title p {
+    font-size: 0.75rem;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .edit-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .edit-form {
+    padding: 1rem;
+    border-radius: 0.375rem;
+  }
+
+  .form-grid {
+    gap: 1rem;
+  }
+
+  .field-input {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .field-label {
+    font-size: 0.8rem;
+  }
+
+  .field-note,
+  .field-meta,
+  .error-message {
+    font-size: 0.7rem;
+  }
+
+  .pk-badge,
+  .fk-badge {
+    font-size: 0.55rem;
+    padding: 0.1rem 0.3rem;
+  }
+
+  .password-field-create .field-note {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .btn-small {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Very small mobile screens */
+@media (max-width: 360px) {
+  .model-edit {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .edit-title h1 {
+    font-size: 1rem;
+    word-break: break-word;
+  }
+
+  .edit-form {
+    padding: 0.5rem;
+  }
+
+  .field-input {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .edit-actions .btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 70px;
+  }
+
+  .field-label {
+    font-size: 0.75rem;
+  }
+
+  .password-display {
+    font-size: 0.65rem;
+    padding: 0.4rem;
   }
 }
 

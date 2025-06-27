@@ -1,11 +1,16 @@
-from typing import Optional
-from sqlalchemy.orm import Session
 from datetime import date
-from app.models.models import User
-from app.crud.user import user
+from typing import Optional
+
+from sqlalchemy.orm import Session
+
+from app.core.logging_config import get_logger
 from app.crud.patient import patient
-from app.schemas.user import UserCreate
+from app.crud.user import user
+from app.models.models import User
 from app.schemas.patient import PatientCreate
+from app.schemas.user import UserCreate
+
+logger = get_logger(__name__, "auth_service")
 
 
 class AuthService:
@@ -48,14 +53,14 @@ class AuthService:
             user_id = getattr(new_user, "id", None)
             if user_id:
                 patient.create_for_user(db, user_id=user_id, patient_data=patient_data)
-                print(f"Patient record created for user {username}")
+                logger.info(f"Patient record created for user {username}")
             else:
-                print(
-                    f"Warning: Could not create patient record for {username} - no user ID"
+                logger.warning(
+                    f"Could not create patient record for {username} - no user ID"
                 )
 
         except Exception as e:
-            print(f"Warning: Failed to create patient record for {username}: {e}")
+            logger.warning(f"Failed to create patient record for {username}: {e}")
             # Don't fail user creation if patient creation fails
 
         return new_user

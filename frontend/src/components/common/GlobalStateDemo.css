@@ -2,7 +2,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .global-state-demo h2 {
@@ -58,7 +59,7 @@
   margin-bottom: 1rem;
 }
 
-.status-badge {
+.global-state-demo .status-badge {
   display: inline-block;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
@@ -80,9 +81,15 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .cache-details p {
@@ -170,13 +177,13 @@
   .global-state-demo {
     padding: 1rem;
   }
-  
+
   .cache-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .cache-button {
     width: 100%;
     margin: 0.3rem 0;
   }
-} 
+}

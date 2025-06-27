@@ -19,9 +19,11 @@ export { default as FormSelect } from './forms/FormSelect';
 // Layout Components
 export { default as Header } from './layout/Header';
 export { default as Container } from './layout/Container';
+export { default as PageHeader } from './layout/PageHeader';
 
 // Medical Components
 export { default as StatusBadge } from './medical/StatusBadge';
+export { default as MedicalFormModal } from './medical/MedicalFormModal';
 export { default as MedicalCard } from './medical/MedicalCard';
 
 // Common Components
@@ -31,6 +33,7 @@ export {
   useErrorHandler,
 } from './common/ErrorBoundary';
 export { default as ProtectedRoute } from './common/ProtectedRoute';
+export { default as FilterControls } from './common/FilterControls';
 export { default as LoggingTest } from './common/LoggingTest';
 
 // Layout Components (future)

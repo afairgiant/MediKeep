@@ -2,8 +2,12 @@
 @import '../themes/variables.css';
 
 .settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   max-width: 800px;
   margin: 0 auto;
+  padding: 1rem;
 }
 
 .settings-placeholder {
@@ -25,16 +29,14 @@
 
 /* Future settings sections styling */
 .settings-section {
-  margin-bottom: 2rem;
+  padding: 1.5rem;
 }
 
 .settings-section-title {
-  font-size: 1.25rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--color-text-primary);
+  font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-text-primary, #333);
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-border, #e9ecef);
 }
 
 .settings-option {
@@ -42,7 +44,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--color-border-light, #f1f3f5);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .settings-option:last-child {
@@ -51,21 +53,23 @@
 
 .settings-option-info {
   flex: 1;
+  margin-right: 1rem;
 }
 
 .settings-option-title {
-  font-weight: 500;
-  color: var(--color-text-primary, #333);
+  font-weight: 600;
+  color: var(--color-text-primary);
   margin-bottom: 0.25rem;
 }
 
 .settings-option-description {
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
-  color: var(--color-text-secondary, #666);
+  line-height: 1.4;
 }
 
 .settings-option-control {
-  margin-left: 1rem;
+  flex-shrink: 0;
 }
 
 /* Password Form Styling */
@@ -74,46 +78,228 @@
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-group label {
-  display: block;
-  font-weight: 500;
-  color: var(--color-text-primary, #333);
-  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
 }
 
 .form-input {
-  width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--color-border, #e9ecef);
-  border-radius: var(--border-radius-md, 5px);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
   font-size: 1rem;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-  box-sizing: border-box;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-primary, #667eea);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.form-input:disabled {
+  background-color: var(--color-background-secondary);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
 }
 
 .form-help {
-  display: block;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #666);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
   margin-top: 0.25rem;
 }
 
 .form-actions {
-  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .settings-placeholder-text {
-  color: var(--color-text-secondary, #666);
+  color: var(--color-text-muted);
   font-style: italic;
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+/* Profile Completion Status */
+.profile-completion-status {
+  border-left: 4px solid var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.05),
+    rgba(var(--color-primary-rgb), 0.02)
+  );
+}
+
+.completion-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.completion-status-header h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+}
+
+.completion-percentage {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.completion-status-message {
+  margin: 0 0 1rem 0;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.completion-progress-bar {
+  height: 6px;
+  background-color: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.completion-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-success)
+  );
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.missing-info {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.completion-action {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Profile Display */
+.profile-display {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
+.field-value {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.placeholder-text {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.role-badge {
+  background-color: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Profile Edit Form */
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settings-content {
+    padding: 0.5rem;
+  }
+
+  .settings-section {
+    padding: 1rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .settings-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .settings-option-info {
+    margin-right: 0;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .completion-status-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .completion-percentage {
+    align-self: flex-start;
+  }
 }

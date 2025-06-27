@@ -17,19 +17,6 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     patient-specific queries, date range filtering, and statistics.
     """
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
-    ) -> List[Vitals]:
-        """Get all vitals readings for a specific patient"""
-        return super().get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            order_by="recorded_date",
-            order_desc=True,
-        )
-
     def get_by_patient_date_range(
         self,
         db: Session,
@@ -41,12 +28,10 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         limit: int = 100
     ) -> List[Vitals]:
         """Get vitals readings for a patient within a date range"""
-        return self.get_by_date_range(
+        return self.query(
             db=db,
-            date_field="recorded_date",
-            start_date=start_date,
-            end_date=end_date,
-            additional_filters={"patient_id": patient_id},
+            filters={"patient_id": patient_id},
+            date_range={"field": "recorded_date", "start": start_date, "end": end_date},
             skip=skip,
             limit=limit,
         )
@@ -193,11 +178,15 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         self, db: Session, *, patient_id: int, days: int = 30
     ) -> List[Vitals]:
         """Get recent vitals readings for a patient"""
-        return self.get_recent_records(
+        start_date = datetime.now() - timedelta(days=days)
+        return self.query(
             db=db,
-            date_field="recorded_date",
-            days=days,
-            additional_filters={"patient_id": patient_id},
+            filters={"patient_id": patient_id},
+            date_range={
+                "field": "recorded_date",
+                "start": start_date,
+                "end": datetime.now(),
+            },
         )
 
     def get_with_relationships(
