@@ -34,7 +34,7 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
     for dir_path in static_dirs:
         if os.path.exists(dir_path):
             static_dir = dir_path
-            logger.info(f"✅ Found static directory: {static_dir}")
+            logger.info(f"Found static directory: {static_dir}")
             break
 
     html_dir = None
@@ -45,13 +45,13 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
         if os.path.exists(nested_static):
             # Mount the nested static directory for assets
             app.mount("/static", StaticFiles(directory=nested_static), name="static")
-            logger.info(f"✅ Serving static assets from: {nested_static}")
+            logger.info(f"Serving static assets from: {nested_static}")
             # Use parent directory for index.html
             html_dir = static_dir
         else:
             # Mount the static directory directly
             app.mount("/static", StaticFiles(directory=static_dir), name="static")
-            logger.info(f"✅ Serving static files from: {static_dir}")
+            logger.info(f"Serving static files from: {static_dir}")
             html_dir = static_dir
 
         @app.get("/")
@@ -63,7 +63,7 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             return {"error": "React app index.html not found"}
 
     else:
-        logger.warning("❌ No static directory found - React app will not be served")
+        logger.warning("No static directory found - React app will not be served")
 
         @app.get("/")
         async def api_root():

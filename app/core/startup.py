@@ -39,7 +39,7 @@ async def startup_event():
     db_check_result = check_database_connection()
 
     if not db_check_result:
-        error_msg = "❌ STARTUP FAILED: Cannot connect to database"
+        error_msg = "STARTUP FAILED: Cannot connect to database"
 
         # Provide helpful troubleshooting information
         if settings.DATABASE_URL.startswith("postgresql"):
@@ -63,12 +63,12 @@ async def startup_event():
             "Database connection failed. See logs above for troubleshooting steps."
         )
 
-    logger.info("✅ Database connection established")
+        logger.info("Database connection established")
 
     # Run database migrations
     migration_success = database_migrations()
     if not migration_success:
-        error_msg = "❌ STARTUP FAILED: Database migrations failed"
+        error_msg = "STARTUP FAILED: Database migrations failed"
         error_msg += "\n   💡 Possible solutions:"
         error_msg += "\n      • Check if the database schema is compatible"
         error_msg += "\n      • Verify Alembic migration files are present"

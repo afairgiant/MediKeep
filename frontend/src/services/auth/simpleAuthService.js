@@ -28,7 +28,7 @@ class SimpleAuthService {
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       try {
-        console.log(`🔗 Attempting request ${i + 1}/${urls.length}: ${url}`);
+        console.log(`Attempting request ${i + 1}/${urls.length}: ${url}`);
 
         // Create timeout promise
         const timeoutPromise = new Promise((_, reject) => {
@@ -39,18 +39,18 @@ class SimpleAuthService {
         const response = await Promise.race([fetchPromise, timeoutPromise]);
 
         console.log(
-          `🔗 Response from ${url}: ${response.status} ${response.statusText}`
+          `Response from ${url}: ${response.status} ${response.statusText}`
         );
 
         // Return response regardless of status (let caller handle HTTP errors)
         return response;
       } catch (error) {
-        console.warn(`🔗 Failed to connect to ${url}:`, error.message);
+        console.warn(`Failed to connect to ${url}:`, error.message);
         lastError = error;
 
         // Continue to next URL if this one fails
         if (i < urls.length - 1) {
-          console.log(`🔗 Trying next URL...`);
+          console.log(`Trying next URL...`);
           continue;
         }
       }
@@ -110,7 +110,7 @@ class SimpleAuthService {
   // Login user
   async login(credentials) {
     try {
-      console.log('🔐 Attempting login for:', credentials.username);
+      console.log('Attempting login for:', credentials.username);
 
       const formData = new URLSearchParams();
       formData.append('username', credentials.username);
@@ -124,11 +124,11 @@ class SimpleAuthService {
         body: formData,
       });
 
-      console.log('🔐 Login response status:', response.status);
+      console.log('Login response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('🔐 Login failed:', errorData);
+        console.error('Login failed:', errorData);
         return {
           success: false,
           error: errorData.detail || `HTTP ${response.status}: Login failed`,
@@ -136,7 +136,7 @@ class SimpleAuthService {
       }
 
       const data = await response.json();
-      console.log('🔐 Login successful, received data:', {
+      console.log('Login successful, received data:', {
         hasToken: !!data.access_token,
         tokenType: data.token_type,
       });
@@ -153,7 +153,7 @@ class SimpleAuthService {
 
       // Extract user info from token
       const payload = this.parseJWT(data.access_token);
-      console.log('🔐 Token payload:', payload);
+      console.log('Token payload:', payload);
 
       const user = {
         id: payload.user_id,
@@ -173,7 +173,7 @@ class SimpleAuthService {
         tokenExpiry: payload.exp * 1000, // Convert to milliseconds
       };
     } catch (error) {
-      console.error('🔐 Login error:', error);
+      console.error('Login error:', error);
       return {
         success: false,
         error: error.message || 'Network error during login',
@@ -182,7 +182,7 @@ class SimpleAuthService {
   } // Register user
   async register(userData) {
     try {
-      console.log('📝 Attempting registration for:', userData.username);
+      console.log('Attempting registration for:', userData.username);
 
       // Add default role if not provided
       const registrationData = {
@@ -198,11 +198,11 @@ class SimpleAuthService {
         body: JSON.stringify(registrationData),
       });
 
-      console.log('📝 Registration response status:', response.status);
+      console.log('Registration response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('📝 Registration failed:', errorData);
+        console.error('Registration failed:', errorData);
         return {
           success: false,
           error: errorData.detail || errorData.message || 'Registration failed',
@@ -210,14 +210,14 @@ class SimpleAuthService {
       }
 
       const data = await response.json();
-      console.log('📝 Registration successful');
+      console.log('Registration successful');
 
       return {
         success: true,
         data,
       };
     } catch (error) {
-      console.error('📝 Registration error:', error);
+      console.error('Registration error:', error);
       return {
         success: false,
         error: error.message || 'Network error during registration',
@@ -242,7 +242,7 @@ class SimpleAuthService {
   // Logout user
   async logout() {
     try {
-      console.log('🚪 Logging out user');
+      console.log('Logging out user');
       this.clearTokens();
     } catch (error) {
       console.error('Logout error:', error);

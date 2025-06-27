@@ -55,4 +55,4 @@ def setup_spa_routing(app: FastAPI, static_dir: str | None, html_dir: str | None
         # Serve React app for all other routes (SPA routing)
         return FileResponse(index_path)
 
-    logger.info("✅ Production mode - SPA routing enabled for React Router")
+        logger.info("Production mode - SPA routing enabled for React Router")

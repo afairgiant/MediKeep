@@ -8,13 +8,14 @@ by checking the database connection and type.
 
 import os
 import sys
-from sqlalchemy import text, inspect
-from typing import Dict, Any
+from typing import Any, Dict
+
+from sqlalchemy import inspect, text
 
 # Add the app directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "app"))
 
-from app.core.database import engine, db_config
+from app.core.database import db_config, engine
 
 
 def check_database_type() -> Dict[str, Any]:
@@ -129,7 +130,7 @@ def print_database_status():
     print("DATABASE TYPE CHECKER")
     print("=" * 60)
     # Check environment variables
-    print("\n📋 ENVIRONMENT VARIABLES:")
+    print("\nENVIRONMENT VARIABLES:")
     env_vars = check_environment_variables()
     if env_vars:
         for key, value in env_vars.items():
@@ -137,16 +138,16 @@ def print_database_status():
     else:
         print("  No database-related environment variables found")
 
-    print("\n🔗 CONFIGURED DATABASE URL:")
+    print("\nCONFIGURED DATABASE URL:")
     print(f"  {db_config.database_url}")
 
     # Check database type and connection
-    print("\n🔍 DATABASE ANALYSIS:")
+    print("\nDATABASE ANALYSIS:")
     db_info = check_database_type()
 
     print(f"  Database Type: {db_info['database_type']}")
     print(
-        f"  Connection: {'✅ SUCCESS' if db_info['connection_successful'] else '❌ FAILED'}"
+        f"  Connection: {'SUCCESS' if db_info['connection_successful'] else 'FAILED'}"
     )
 
     if db_info["connection_successful"]:
@@ -158,13 +159,13 @@ def print_database_status():
             if "postgresql_version" in db_info:
                 print(f"  PostgreSQL Version: {db_info['postgresql_version']}")
             print(
-                f"  PostgreSQL Features Available: {'✅ YES' if db_info['postgresql_specific_check'] else '❌ NO'}"
+                f"  PostgreSQL Features Available: {'YES' if db_info['postgresql_specific_check'] else 'NO'}"
             )
 
         elif db_info["database_type"] == "SQLite":
             print(f"  Database File: {db_info.get('database_file', 'Unknown')}")
             print(
-                f"  File Exists: {'✅ YES' if db_info.get('file_exists', False) else '❌ NO'}"
+                f"  File Exists: {'YES' if db_info.get('file_exists', False) else 'NO'}"
             )
             if "sqlite_version" in db_info:
                 print(f"  SQLite Version: {db_info['sqlite_version']}")
@@ -177,10 +178,10 @@ def print_database_status():
         print(f"  Connection Error: {db_info.get('connection_error', 'Unknown error')}")
 
     # Provide recommendations
-    print("\n💡 RECOMMENDATIONS:")
+    print("\nRECOMMENDATIONS:")
     if db_info["database_type"] == "SQLite":
-        print("  ⚠️  You are using SQLite!")
-        print("  🐳 To use PostgreSQL in Docker, ensure:")
+        print("  WARNING: You are using SQLite!")
+        print("  To use PostgreSQL in Docker, ensure:")
         print("     1. Your .env file has proper DB_* variables set")
         print("     2. The DATABASE_URL environment variable is set to PostgreSQL")
         print("     3. The PostgreSQL container is running and healthy")
@@ -188,10 +189,10 @@ def print_database_status():
 
     elif db_info["database_type"] == "PostgreSQL":
         if db_info["connection_successful"] and db_info["postgresql_specific_check"]:
-            print("  ✅ You are successfully using PostgreSQL!")
-            print("  🎉 All PostgreSQL-specific features are available")
+            print("  SUCCESS: You are successfully using PostgreSQL!")
+            print("  All PostgreSQL-specific features are available")
         else:
-            print("  ⚠️  PostgreSQL connection configured but having issues")
+            print("  WARNING: PostgreSQL connection configured but having issues")
 
     print("\n" + "=" * 60)
 
@@ -202,5 +203,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\nOperation cancelled by user")
     except Exception as e:
-        print(f"\n❌ Error running database check: {e}")
+        print(f"\nError running database check: {e}")
         sys.exit(1)
