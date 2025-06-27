@@ -70,6 +70,10 @@ COPY --from=frontend-build /frontend/build ./static
 # Copy entrypoint script and set proper permissions
 COPY docker/entrypoint.sh /app/entrypoint.sh
 
+# Fix line endings for all script files (Windows to Unix conversion)
+RUN find /app/app/scripts -type f \( -name "*.py" -o -name "backup_*" -o -name "restore*" \) -exec sed -i 's/\r$//' {} \; && \
+    find /app -name "entrypoint.sh" -exec sed -i 's/\r$//' {} \;
+
 # Create directories and set all permissions in one layer
 RUN mkdir -p logs uploads/labwork backups /usr/local/bin && \
     chmod +x /app/entrypoint.sh && \
@@ -78,9 +82,13 @@ RUN mkdir -p logs uploads/labwork backups /usr/local/bin && \
     chmod +x /app/app/scripts/backup_full && \
     chmod +x /app/app/scripts/backup_cli.py && \
     chmod +x /app/app/scripts/test_backup_cli.py && \
+    chmod +x /app/app/scripts/restore_cli.py && \
+    chmod +x /app/app/scripts/restore && \
+    chmod +x /app/app/scripts/test_restore_cli.py && \
     ln -sf /app/app/scripts/backup_db /usr/local/bin/backup_db && \
     ln -sf /app/app/scripts/backup_files /usr/local/bin/backup_files && \
     ln -sf /app/app/scripts/backup_full /usr/local/bin/backup_full && \
+    ln -sf /app/app/scripts/restore /usr/local/bin/restore && \
     chown -R appuser:appuser /app
 
 # Switch to non-root user
