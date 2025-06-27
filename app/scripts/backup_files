@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""
+Files Backup Wrapper Script
+
+This script provides a simple command for creating files backups.
+Usage: docker exec <container> backup_files [description]
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main():
+    # Get the directory of this script (resolve symlinks)
+    script_dir = Path(__file__).resolve().parent
+    cli_script = script_dir / "backup_cli.py"
+
+    # Build command args
+    cmd = [sys.executable, str(cli_script), "files"]
+
+    # If description provided as argument, add it
+    if len(sys.argv) > 1:
+        description = " ".join(sys.argv[1:])
+        cmd.extend(["--description", description])
+
+    # Execute the main CLI script
+    try:
+        result = subprocess.run(cmd, check=True)
+        sys.exit(result.returncode)
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.returncode)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

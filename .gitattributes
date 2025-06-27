@@ -1,0 +1,46 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Scripts should always use LF line endings
+*.sh text eol=lf
+*.py text eol=lf
+app/scripts/* text eol=lf
+
+# Windows specific files should use CRLF
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files should be treated as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+
+# Documentation and config files
+*.md text
+*.txt text
+*.json text
+*.yaml text
+*.yml text
+*.xml text
+*.sql text
+
+# Source code files
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.css text
+*.scss text
+*.html text
+
+# Configuration files
+Dockerfile* text eol=lf
+*.dockerfile text eol=lf
+*.ini text
+*.cfg text
+*.conf text 
