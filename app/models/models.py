@@ -185,8 +185,8 @@ class LabResult(Base):
     labs_result = Column(
         String, nullable=True
     )  # Lab result interpretation: 'normal', 'abnormal', etc.
-    ordered_date = Column(DateTime, nullable=False)  # When the test was ordered
-    completed_date = Column(DateTime, nullable=True)  # When results were received
+    ordered_date = Column(Date, nullable=True)  # When the test was ordered
+    completed_date = Column(Date, nullable=True)  # When results were received
 
     # Optional notes
     notes = Column(Text, nullable=True)  # Any additional notes about the test

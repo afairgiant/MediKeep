@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from app.core.datetime_utils import LAB_RESULT_CONVERTER
 from app.crud.base import CRUDBase
 from app.models.models import LabResult
 from app.schemas.lab_result import LabResultCreate, LabResultUpdate
@@ -14,7 +13,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
     """CRUD operations for LabResult"""
 
     def __init__(self):
-        super().__init__(LabResult, timezone_fields=["ordered_date", "completed_date"])
+        super().__init__(LabResult)
 
     def get_by_test_code(
         self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
