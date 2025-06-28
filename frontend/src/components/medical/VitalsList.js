@@ -6,6 +6,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { vitalsService } from '../../services/medical/vitalsService';
+import {
+  formatDate as formatDateHelper,
+  formatDateTime,
+} from '../../utils/helpers';
 import './VitalsList.css';
 
 const VitalsList = ({
@@ -85,18 +89,11 @@ const VitalsList = ({
   };
 
   const formatDate = dateString => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return formatDateHelper(dateString);
   };
 
   const formatTime = dateString => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return formatDateTime(dateString);
   };
 
   const getBPDisplay = (systolic, diastolic) => {

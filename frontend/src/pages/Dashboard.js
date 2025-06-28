@@ -5,6 +5,7 @@ import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { apiService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient } from '../hooks/useGlobalData';
+import { formatDateTime } from '../utils/helpers';
 import '../styles/pages/Dashboard.css';
 
 const Dashboard = () => {
@@ -239,7 +240,7 @@ const Dashboard = () => {
                         {activity.description}
                       </span>
                       <span className="activity-time">
-                        {new Date(activity.timestamp).toLocaleDateString()}
+                        {formatDateTime(activity.timestamp)}
                       </span>
                     </div>
                   </li>

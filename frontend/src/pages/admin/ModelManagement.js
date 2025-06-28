@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
+import { formatDate } from '../../utils/helpers';
 import './ModelManagement.css';
 
 const ModelManagement = () => {
@@ -148,7 +149,7 @@ const ModelManagement = () => {
     }
 
     if (fieldType === 'datetime' || fieldType === 'date') {
-      return new Date(value).toLocaleDateString();
+      return formatDate(value);
     }
 
     if (typeof value === 'boolean') {

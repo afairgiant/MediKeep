@@ -22,6 +22,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { vitalsService } from '../../services/medical/vitalsService';
+import { formatDate } from '../../utils/helpers';
 import './VitalsChart.css';
 
 // Import date adapter after Chart.js registration
@@ -231,11 +232,7 @@ const VitalsChart = ({ patientId, dateRange: initialDateRange = 180 }) => {
         tooltip: {
           callbacks: {
             title: function (context) {
-              return new Date(context[0].parsed.x).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              });
+              return formatDate(new Date(context[0].parsed.x).toISOString());
             },
           },
         },

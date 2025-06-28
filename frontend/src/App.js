@@ -49,6 +49,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import { LoggingTest, ErrorBoundary } from './components';
 import GlobalStateDemo from './components/common/GlobalStateDemo';
 import logger from './services/logger';
+import { timezoneService } from './services/timezoneService';
 import './App.css';
 
 // Component to track navigation
@@ -92,6 +93,11 @@ function App() {
       component: 'App',
       userAgent: navigator.userAgent,
       url: window.location.href,
+    });
+
+    // Initialize timezone service
+    timezoneService.init().catch(error => {
+      console.warn('Timezone service initialization failed:', error);
     });
 
     // Set up performance monitoring

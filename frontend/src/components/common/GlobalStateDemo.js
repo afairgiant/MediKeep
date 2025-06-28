@@ -1,6 +1,12 @@
 import React from 'react';
 import { useAppData } from '../../contexts/AppDataContext';
-import { useCurrentPatient, usePractitioners, usePharmacies, useCacheManager } from '../../hooks/useGlobalData';
+import {
+  useCurrentPatient,
+  usePractitioners,
+  usePharmacies,
+  useCacheManager,
+} from '../../hooks/useGlobalData';
+import { formatDateTime } from '../../utils/helpers';
 import './GlobalStateDemo.css';
 
 const GlobalStateDemo = () => {
@@ -8,11 +14,16 @@ const GlobalStateDemo = () => {
   const { practitioners, loading: practitionersLoading } = usePractitioners();
   const { pharmacies, loading: pharmaciesLoading } = usePharmacies();
   const { invalidateAll, updateCacheExpiry } = useCacheManager();
-  const { patientLastFetch, practitionersLastFetch, pharmaciesLastFetch, cacheExpiry } = useAppData();
+  const {
+    patientLastFetch,
+    practitionersLastFetch,
+    pharmaciesLastFetch,
+    cacheExpiry,
+  } = useAppData();
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = timestamp => {
     if (!timestamp) return 'Never';
-    return new Date(timestamp).toLocaleString();
+    return formatDateTime(new Date(timestamp).toISOString());
   };
 
   const getTimeRemaining = (lastFetch, cacheKey) => {
@@ -28,71 +39,107 @@ const GlobalStateDemo = () => {
     <div className="global-state-demo">
       <h2>Global State Demo</h2>
       <p className="demo-description">
-        This demo shows how data is cached globally and shared across components.
-        Notice how navigating between pages doesn't refetch the same data!
+        This demo shows how data is cached globally and shared across
+        components. Notice how navigating between pages doesn't refetch the same
+        data!
       </p>
 
       <div className="cache-grid">
         <div className="cache-item">
           <h3>Patient Data</h3>
           <div className="cache-status">
-            <span className={`status-badge ${patientLoading ? 'loading' : 'ready'}`}>
+            <span
+              className={`status-badge ${patientLoading ? 'loading' : 'ready'}`}
+            >
               {patientLoading ? 'Loading...' : 'Ready'}
             </span>
           </div>
           <div className="cache-details">
-            <p><strong>Last Fetch:</strong> {formatTimestamp(patientLastFetch)}</p>
-            <p><strong>Cache Expires:</strong> {getTimeRemaining(patientLastFetch, 'patient')}</p>
-            <p><strong>Data:</strong> {patient ? patient.name || 'Loaded' : 'No data'}</p>
+            <p>
+              <strong>Last Fetch:</strong> {formatTimestamp(patientLastFetch)}
+            </p>
+            <p>
+              <strong>Cache Expires:</strong>{' '}
+              {getTimeRemaining(patientLastFetch, 'patient')}
+            </p>
+            <p>
+              <strong>Data:</strong>{' '}
+              {patient ? patient.name || 'Loaded' : 'No data'}
+            </p>
           </div>
         </div>
 
         <div className="cache-item">
           <h3>Practitioners</h3>
           <div className="cache-status">
-            <span className={`status-badge ${practitionersLoading ? 'loading' : 'ready'}`}>
+            <span
+              className={`status-badge ${practitionersLoading ? 'loading' : 'ready'}`}
+            >
               {practitionersLoading ? 'Loading...' : 'Ready'}
             </span>
           </div>
           <div className="cache-details">
-            <p><strong>Last Fetch:</strong> {formatTimestamp(practitionersLastFetch)}</p>
-            <p><strong>Cache Expires:</strong> {getTimeRemaining(practitionersLastFetch, 'practitioners')}</p>
-            <p><strong>Count:</strong> {practitioners.length}</p>
+            <p>
+              <strong>Last Fetch:</strong>{' '}
+              {formatTimestamp(practitionersLastFetch)}
+            </p>
+            <p>
+              <strong>Cache Expires:</strong>{' '}
+              {getTimeRemaining(practitionersLastFetch, 'practitioners')}
+            </p>
+            <p>
+              <strong>Count:</strong> {practitioners.length}
+            </p>
           </div>
         </div>
 
         <div className="cache-item">
           <h3>Pharmacies</h3>
           <div className="cache-status">
-            <span className={`status-badge ${pharmaciesLoading ? 'loading' : 'ready'}`}>
+            <span
+              className={`status-badge ${pharmaciesLoading ? 'loading' : 'ready'}`}
+            >
               {pharmaciesLoading ? 'Loading...' : 'Ready'}
             </span>
           </div>
           <div className="cache-details">
-            <p><strong>Last Fetch:</strong> {formatTimestamp(pharmaciesLastFetch)}</p>
-            <p><strong>Cache Expires:</strong> {getTimeRemaining(pharmaciesLastFetch, 'pharmacies')}</p>
-            <p><strong>Count:</strong> {pharmacies.length}</p>
+            <p>
+              <strong>Last Fetch:</strong>{' '}
+              {formatTimestamp(pharmaciesLastFetch)}
+            </p>
+            <p>
+              <strong>Cache Expires:</strong>{' '}
+              {getTimeRemaining(pharmaciesLastFetch, 'pharmacies')}
+            </p>
+            <p>
+              <strong>Count:</strong> {pharmacies.length}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="cache-controls">
         <h3>Cache Controls</h3>
-        <button 
-          className="cache-button"
-          onClick={() => invalidateAll()}
-        >
+        <button className="cache-button" onClick={() => invalidateAll()}>
           Clear All Caches
         </button>
-        <button 
+        <button
           className="cache-button"
-          onClick={() => updateCacheExpiry({ patient: 1, practitioners: 2, pharmacies: 2 })}
+          onClick={() =>
+            updateCacheExpiry({ patient: 1, practitioners: 2, pharmacies: 2 })
+          }
         >
           Set Short Cache (1-2 min)
         </button>
-        <button 
+        <button
           className="cache-button"
-          onClick={() => updateCacheExpiry({ patient: 15, practitioners: 60, pharmacies: 60 })}
+          onClick={() =>
+            updateCacheExpiry({
+              patient: 15,
+              practitioners: 60,
+              pharmacies: 60,
+            })
+          }
         >
           Reset Default Cache
         </button>
@@ -110,4 +157,4 @@ const GlobalStateDemo = () => {
   );
 };
 
-export default GlobalStateDemo; 
+export default GlobalStateDemo;

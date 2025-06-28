@@ -43,6 +43,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      TZ: ${TZ:-America/New_York}
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
