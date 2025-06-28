@@ -22,7 +22,6 @@ const VitalsList = ({
   const [vitals, setVitals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedRows, setExpandedRows] = useState(new Set());
   const [sortConfig, setSortConfig] = useState({
     key: 'recorded_date',
     direction: 'desc',
@@ -78,16 +77,6 @@ const VitalsList = ({
     }
   };
 
-  const toggleExpanded = vitalsId => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(vitalsId)) {
-      newExpanded.delete(vitalsId);
-    } else {
-      newExpanded.add(vitalsId);
-    }
-    setExpandedRows(newExpanded);
-  };
-
   const formatDate = dateString => {
     return formatDateHelper(dateString);
   };
@@ -101,15 +90,10 @@ const VitalsList = ({
     return `${systolic}/${diastolic}`;
   };
 
-  const getBPCategory = (systolic, diastolic) => {
-    if (!systolic || !diastolic) return '';
-    return vitalsService.getBloodPressureCategory(systolic, diastolic);
-  };
-
   const getBMIDisplay = (weight, height) => {
     if (!weight || !height) return 'N/A';
     const bmi = vitalsService.calculateBMI(weight, height);
-    return bmi ? `${bmi} (${vitalsService.getBMICategory(bmi)})` : 'N/A';
+    return bmi ? bmi.toString() : 'N/A';
   };
 
   const handleSort = key => {
@@ -270,141 +254,85 @@ const VitalsList = ({
           </thead>
           <tbody>
             {sortedVitals.map(vital => (
-              <React.Fragment key={vital.id}>
-                <tr
-                  className={expandedRows.has(vital.id) ? 'expanded' : ''}
-                  onClick={() => toggleExpanded(vital.id)}
-                >
-                  <td>
-                    <div className="date-display">
-                      {' '}
-                      <div className="date">
-                        {formatDate(vital.recorded_date)}
-                      </div>
-                      {vital.created_at && (
-                        <div className="time">
-                          {formatTime(vital.created_at)}
-                        </div>
-                      )}
+              <tr key={vital.id}>
+                <td>
+                  <div className="date-display">
+                    {' '}
+                    <div className="date">
+                      {formatDate(vital.recorded_date)}
                     </div>
-                  </td>
-                  <td>
-                    <div className="bp-display">
-                      <div className="bp-value">
-                        {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
-                      </div>
-                      {vital.systolic_bp && vital.diastolic_bp && (
-                        <div
-                          className={`bp-category ${getBPCategory(vital.systolic_bp, vital.diastolic_bp).toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          {getBPCategory(vital.systolic_bp, vital.diastolic_bp)}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    {vital.heart_rate ? (
-                      <span className="vital-value">
-                        {vital.heart_rate} BPM
-                      </span>
-                    ) : (
-                      <span className="na">N/A</span>
+                    {vital.created_at && (
+                      <div className="time">{formatTime(vital.created_at)}</div>
                     )}
-                  </td>
-                  <td>
-                    {vital.temperature ? (
-                      <span className="vital-value">{vital.temperature}°F</span>
-                    ) : (
-                      <span className="na">N/A</span>
-                    )}
-                  </td>
-                  <td>
-                    {vital.weight ? (
-                      <span className="vital-value">{vital.weight} lbs</span>
-                    ) : (
-                      <span className="na">N/A</span>
-                    )}
-                  </td>
-                  <td>
-                    <span className="bmi-value">
-                      {getBMIDisplay(vital.weight, vital.height)}
-                    </span>
-                  </td>
-                  <td>
-                    {vital.oxygen_saturation ? (
-                      <span className="vital-value">
-                        {vital.oxygen_saturation}%
-                      </span>
-                    ) : (
-                      <span className="na">N/A</span>
-                    )}
-                  </td>
-                  {showActions && (
-                    <td>
-                      <div className="actions">
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            onEdit(vital);
-                          }}
-                          className="edit-btn"
-                          title="Edit vitals"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleDelete(vital.id);
-                          }}
-                          className="delete-btn"
-                          title="Delete vitals"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
+                  </div>
+                </td>
+                <td>
+                  <span className="vital-value">
+                    {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
+                  </span>
+                </td>
+                <td>
+                  {vital.heart_rate ? (
+                    <span className="vital-value">{vital.heart_rate} BPM</span>
+                  ) : (
+                    <span className="na">N/A</span>
                   )}
-                </tr>
-
-                {expandedRows.has(vital.id) && (
-                  <tr className="expanded-details">
-                    <td colSpan={showActions ? 8 : 7}>
-                      <div className="details-content">
-                        <div className="details-grid">
-                          <div className="detail-group">
-                            <label>Height:</label>
-                            <span>
-                              {vital.height ? `${vital.height} cm` : 'N/A'}
-                            </span>
-                          </div>
-                          <div className="detail-group">
-                            <label>Respiratory Rate:</label>
-                            <span>
-                              {vital.respiratory_rate
-                                ? `${vital.respiratory_rate} breaths/min`
-                                : 'N/A'}
-                            </span>
-                          </div>
-                          <div className="detail-group">
-                            <label>Practitioner:</label>
-                            <span>
-                              {vital.practitioner?.name ||
-                                vital.practitioner_id}
-                            </span>
-                          </div>
-                          {vital.notes && (
-                            <div className="detail-group notes">
-                              <label>Notes:</label>
-                              <span>{vital.notes}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
+                </td>
+                <td>
+                  {vital.temperature ? (
+                    <span className="vital-value">{vital.temperature}°F</span>
+                  ) : (
+                    <span className="na">N/A</span>
+                  )}
+                </td>
+                <td>
+                  {vital.weight ? (
+                    <span className="vital-value">{vital.weight} lbs</span>
+                  ) : (
+                    <span className="na">N/A</span>
+                  )}
+                </td>
+                <td>
+                  <span className="bmi-value">
+                    {getBMIDisplay(vital.weight, vital.height)}
+                  </span>
+                </td>
+                <td>
+                  {vital.oxygen_saturation ? (
+                    <span className="vital-value">
+                      {vital.oxygen_saturation}%
+                    </span>
+                  ) : (
+                    <span className="na">N/A</span>
+                  )}
+                </td>
+                {showActions && (
+                  <td>
+                    <div className="actions">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          onEdit(vital);
+                        }}
+                        className="edit-btn"
+                        title="Edit vitals"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDelete(vital.id);
+                        }}
+                        className="delete-btn"
+                        title="Delete vitals"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
                 )}
-              </React.Fragment>
+              </tr>
             ))}
           </tbody>
         </table>

@@ -1,6 +1,6 @@
 {
-  "name": "frontend",
-  "version": "0.1.3",
+  "name": "medical-records-frontend",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -19,22 +19,19 @@
     "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "recharts": "^2.8.0",
+    "lodash": "^4.17.21",
+    "framer-motion": "^10.16.4",
+    "lucide-react": "^0.294.0",
+    "react-window": "^1.8.8",
+    "react-intersection-observer": "^9.5.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd ../. python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
-    "frontend": "react-scripts start"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "eject": "react-scripts eject"
   },
   "browserslist": {
     "production": [

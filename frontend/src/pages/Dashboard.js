@@ -200,10 +200,12 @@ const Dashboard = () => {
       <main>
         <div className="welcome-section">
           <h2>Welcome to your Medical Records System</h2>
-          <p>
-            Manage your personal health information securely and efficiently.
-          </p>
-          {user && <p>Hello, {user.name}!</p>}
+          <p>Manage your personal health information as you want!</p>
+          {user && (
+            <p>
+              Hello, {user.first_name} {user.last_name}!
+            </p>
+          )}
         </div>{' '}
         <div className="dashboard-grid">
           {dashboardItems.map((item, index) => (
