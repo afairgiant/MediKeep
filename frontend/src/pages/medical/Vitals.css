@@ -1,70 +1,361 @@
 /**
- * Vitals Page Styles
- * Uses MedicalPageShared.css for consistent header styling
+ * Vitals Page Styles - Enhanced Version
+ * Modern styling for the renovated vitals page with enhanced UX
  */
 
-/* Override any specific vitals page styles here */
-.add-vitals-btn {
-  background-color: #4299e1;
+.vitals-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc, #edf2f7);
+  padding: 24px;
+  position: relative;
+}
+
+/* Loading and No Patient States */
+.vitals-page.loading,
+.vitals-page.no-patient {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content,
+.no-patient-content {
+  text-align: center;
+  padding: 60px 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  max-width: 400px;
+}
+
+.loading-spinner {
+  color: #4299e1;
+  margin-bottom: 16px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.no-patient-icon {
+  color: #cbd5e0;
+  margin-bottom: 24px;
+}
+
+.no-patient-content h2 {
+  color: #2d3748;
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.no-patient-content p {
+  color: #718096;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.patient-info {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.patient-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 4px;
+}
+
+.patient-details {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.patient-details span {
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quick-actions-btn {
+  background: white;
+  border: 2px solid #e2e8f0;
+  color: #4a5568;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.quick-actions-btn:hover {
+  border-color: #4299e1;
+  background: #f0f8ff;
+  color: #4299e1;
+}
+
+.primary-action-btn {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
   color: white;
   border: none;
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.primary-action-btn:hover {
+  background: linear-gradient(135deg, #3182ce, #2c5282);
+  transform: translateY(-1px);
+}
+
+/* Quick Actions Dropdown */
+.quick-actions-dropdown {
+  position: absolute;
+  top: 120px;
+  right: 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.quick-actions-header {
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.quick-actions-header button {
+  background: none;
+  border: none;
+  color: #718096;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.quick-actions-header button:hover {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.quick-actions-list {
+  padding: 8px;
+}
+
+.quick-action-item {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #4a5568;
+  text-align: left;
+}
+
+.quick-action-item:hover {
+  background: #f1f5f9;
+  transform: translateX(4px);
+}
+
+/* Stats Overview */
+.stats-overview {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-overview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4299e1, #38a169, #805ad5, #e53e3e);
+}
+
+.stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.stats-title h3 {
+  margin: 0 0 4px 0;
+  color: #2d3748;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.stats-title p {
+  margin: 0;
+  color: #718096;
   font-size: 0.95rem;
 }
 
-.add-vitals-btn:hover {
-  background-color: #3182ce;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+.stats-actions {
+  display: flex;
+  gap: 12px;
 }
 
-.stats-overview {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
+.refresh-btn {
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  color: #4a5568;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
 }
 
-.stats-overview h3 {
-  margin: 0 0 20px 0;
-  color: #2d3748;
-  font-size: 1.25rem;
-  font-weight: 600;
+.refresh-btn:hover:not(:disabled) {
+  border-color: #4299e1;
+  background: #f0f8ff;
+  color: #4299e1;
 }
 
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-btn .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .stat-card {
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--stat-color, #4299e1);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
 }
 
 .stat-card:hover {
+  border-color: #cbd5e0;
+  background: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(66, 153, 225, 0.1);
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .stat-label {
   color: #718096;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-bottom: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -73,147 +364,239 @@
   color: #2d3748;
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.stat-unit {
+  font-size: 0.9rem;
+  color: #718096;
+  font-weight: 500;
 }
 
 .stat-category {
-  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 500;
-  display: inline-block;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  align-self: flex-start;
+  margin-top: 4px;
 }
 
-/* Blood Pressure Categories for Stats */
 .stat-category.normal {
-  background-color: #c6f6d5;
+  background: #c6f6d5;
   color: #22543d;
 }
 
+.stat-category.high,
 .stat-category.elevated {
-  background-color: #fef5e7;
-  color: #744210;
-}
-
-.stat-category.stage-1-hypertension {
-  background-color: #fed7cc;
+  background: #fed7cc;
   color: #9c4221;
 }
 
-.stat-category.stage-2-hypertension,
-.stat-category.hypertensive-crisis {
-  background-color: #fed7d7;
-  color: #822727;
+.stat-category.low {
+  background: #bee3f8;
+  color: #2c5282;
 }
 
+.stat-category.other {
+  background: #f1f5f9;
+  color: #4a5568;
+}
+
+/* Stats Loading/Error/Empty States */
+.stats-loading,
+.stats-error,
+.stats-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  text-align: center;
+  color: #718096;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+}
+
+.stats-loading .loading-spinner {
+  color: #4299e1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.stats-error {
+  color: #e53e3e;
+  background: #fef5f5;
+  border-color: #fed7d7;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-error .retry-btn {
+  background: #e53e3e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stats-error .retry-btn:hover {
+  background: #c53030;
+}
+
+.stats-empty {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-empty h4 {
+  margin: 0;
+  color: #4a5568;
+  font-size: 1.1rem;
+}
+
+.stats-empty p {
+  margin: 0;
+  color: #718096;
+}
+
+/* Form Overlay */
 .form-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
   padding: 20px;
 }
 
 .form-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  max-width: 800px;
   width: 100%;
+  max-width: 900px;
   max-height: 90vh;
-  overflow-y: auto;
+  position: relative;
 }
 
+/* Content Tabs */
 .content-tabs {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .tab-buttons {
   display: flex;
-  background-color: #f7fafc;
+  background: linear-gradient(135deg, #f8fafc, #edf2f7);
   border-bottom: 1px solid #e2e8f0;
+  padding: 4px;
+  gap: 4px;
 }
 
 .tab-button {
   flex: 1;
-  padding: 16px 24px;
   background: none;
   border: none;
+  padding: 16px 24px;
+  border-radius: 12px;
   color: #718096;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 0.9rem;
 }
 
 .tab-button:hover {
-  background-color: #edf2f7;
+  background: rgba(255, 255, 255, 0.8);
   color: #4a5568;
 }
 
 .tab-button.active {
+  background: white;
   color: #4299e1;
-  background-color: white;
-}
-
-.tab-button.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: #4299e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tab-content {
-  padding: 24px;
+  padding: 32px;
+  min-height: 400px;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .vitals-page {
-    padding: 16px;
+    padding: 20px;
   }
 
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-  }
-
-  .page-header {
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
   }
 
   .stats-overview {
+    padding: 24px;
     margin-bottom: 24px;
-    padding: 20px;
+  }
+
+  .header-actions {
+    gap: 16px;
+  }
+
+  .patient-info {
+    padding: 12px 16px;
+  }
+
+  .quick-actions-dropdown {
+    right: 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+  .vitals-page {
+    padding: 16px;
   }
 
   .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
     width: 100%;
   }
 
-  .add-vitals-btn {
+  .patient-info {
     width: 100%;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .quick-actions-btn,
+  .primary-action-btn {
+    flex: 1;
     justify-content: center;
   }
 
@@ -223,23 +606,53 @@
   }
 
   .stat-card {
-    padding: 12px;
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .stat-value {
     font-size: 1.25rem;
+    justify-content: center;
   }
 
   .tab-buttons {
-    flex-direction: column;
+    padding: 2px;
   }
 
   .tab-button {
     padding: 12px 16px;
+    font-size: 0.85rem;
   }
 
   .tab-content {
-    padding: 16px;
+    padding: 20px;
+  }
+
+  .stats-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .stats-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .quick-actions-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    max-width: none;
   }
 
   .form-overlay {
@@ -248,46 +661,161 @@
 }
 
 @media (max-width: 640px) {
-  .vitals-page {
-    padding: 12px;
-  }
-
-  .header-content h1 {
-    font-size: 1.75rem;
-  }
-
   .stats-grid {
     grid-template-columns: 1fr;
   }
 
+  .patient-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quick-actions-btn,
+  .primary-action-btn {
+    width: 100%;
+  }
+
   .stats-overview {
+    padding: 20px;
+  }
+
+  .stats-title h3 {
+    font-size: 1.25rem;
+  }
+
+  .tab-button {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .tab-content {
     padding: 16px;
-  }
-
-  .stats-overview h3 {
-    font-size: 1.1rem;
-  }
-
-  .page-header {
-    margin-bottom: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .form-overlay {
-    padding: 5px;
+  .vitals-page {
+    padding: 12px;
   }
 
-  .form-container {
-    border-radius: 8px;
-    max-height: 95vh;
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
   }
 
   .stat-value {
     font-size: 1.1rem;
   }
 
-  .stat-label {
+  .patient-name {
+    font-size: 1rem;
+  }
+
+  .patient-details {
     font-size: 0.8rem;
+  }
+
+  .stats-overview {
+    padding: 16px;
+  }
+
+  .stats-title h3 {
+    font-size: 1.1rem;
+  }
+
+  .form-overlay {
+    padding: 5px;
+  }
+}
+
+/* Animation classes */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .stat-card {
+    border-width: 3px;
+  }
+
+  .tab-button {
+    border: 2px solid transparent;
+  }
+
+  .tab-button.active {
+    border-color: #4299e1;
+  }
+
+  .quick-actions-btn,
+  .primary-action-btn,
+  .refresh-btn {
+    border-width: 3px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .stat-card:hover {
+    transform: none;
+  }
+
+  .primary-action-btn:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .vitals-page {
+    background: white;
+    padding: 0;
+  }
+
+  .quick-actions-dropdown,
+  .action-buttons,
+  .stats-actions {
+    display: none;
+  }
+
+  .stats-overview,
+  .content-tabs {
+    box-shadow: none;
+    border: 2px solid #000;
+    break-inside: avoid;
+  }
+
+  .tab-buttons {
+    display: none;
+  }
+
+  .tab-content {
+    padding: 16px;
+  }
+
+  .stat-card {
+    break-inside: avoid;
+    border: 1px solid #000;
   }
 }
