@@ -5,9 +5,31 @@ This module provides utilities for handling datetime conversions and validations
 across the Medical Records Management System.
 """
 
+import logging
+import os
 import re
 from datetime import date, datetime, timezone
 from typing import Any, Optional, Union
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+logger = logging.getLogger(__name__)
+
+# Module-level configuration (simple and effective)
+FACILITY_TIMEZONE = None
+
+
+def get_facility_timezone() -> ZoneInfo:
+    """Get facility timezone, initialized once on first call."""
+    global FACILITY_TIMEZONE
+    if FACILITY_TIMEZONE is None:
+        tz_name = os.getenv("TZ", "UTC")
+        try:
+            FACILITY_TIMEZONE = ZoneInfo(tz_name)
+            logger.info(f"Timezone configured: {tz_name}")
+        except ZoneInfoNotFoundError:
+            logger.warning(f"Unknown timezone '{tz_name}', using UTC")
+            FACILITY_TIMEZONE = ZoneInfo("UTC")
+    return FACILITY_TIMEZONE
 
 
 def get_utc_now() -> datetime:
@@ -17,6 +39,87 @@ def get_utc_now() -> datetime:
     This replaces the deprecated datetime.utcnow() with a timezone-aware alternative.
     """
     return datetime.now(timezone.utc)
+
+
+def to_utc(local_datetime: Union[str, datetime]) -> Optional[datetime]:
+    """Convert local datetime to UTC for storage."""
+    if local_datetime is None:
+        return None
+
+    try:
+        if isinstance(local_datetime, str):
+            from dateutil import parser
+
+            naive_dt = parser.parse(local_datetime).replace(tzinfo=None)
+        else:
+            naive_dt = (
+                local_datetime.replace(tzinfo=None)
+                if local_datetime.tzinfo
+                else local_datetime
+            )
+
+        # Simple localization - let zoneinfo handle DST
+        localized_dt = naive_dt.replace(tzinfo=get_facility_timezone())
+        return localized_dt.astimezone(timezone.utc)
+
+    except Exception as e:
+        logger.error(f"Failed to convert datetime to UTC: {local_datetime}, error: {e}")
+        raise ValueError(f"Invalid datetime: {local_datetime}")
+
+
+def to_local(utc_datetime: datetime) -> Optional[datetime]:
+    """Convert UTC datetime to local timezone for display."""
+    if utc_datetime is None:
+        return None
+
+    try:
+        if utc_datetime.tzinfo is None:
+            utc_datetime = utc_datetime.replace(tzinfo=timezone.utc)
+        return utc_datetime.astimezone(get_facility_timezone())
+    except Exception as e:
+        logger.error(f"Failed to convert to local timezone: {e}")
+        return None
+
+
+def format_datetime(utc_datetime: datetime, include_timezone: bool = True) -> str:
+    """Format datetime for display."""
+    if utc_datetime is None:
+        return "N/A"
+
+    local_dt = to_local(utc_datetime)
+    if local_dt is None:
+        return "Invalid Date"
+
+    if include_timezone:
+        return local_dt.strftime("%Y-%m-%d %I:%M %p %Z")
+    return local_dt.strftime("%Y-%m-%d %I:%M %p")
+
+
+def get_timezone_info():
+    """Get timezone info for API."""
+    try:
+        tz = get_facility_timezone()
+        current_utc = get_utc_now()
+        current_local = to_local(current_utc)
+
+        return {
+            "facility_timezone": str(tz),
+            "current_utc_time": current_utc.isoformat(),
+            "current_facility_time": (
+                current_local.isoformat() if current_local else None
+            ),
+            "timezone_offset_hours": (
+                current_local.utcoffset().total_seconds() / 3600 if current_local else 0
+            ),
+        }
+    except Exception as e:
+        logger.error(f"Failed to get timezone info: {e}")
+        return {
+            "facility_timezone": "UTC",
+            "current_utc_time": get_utc_now().isoformat(),
+            "current_facility_time": get_utc_now().isoformat(),
+            "timezone_offset_hours": 0,
+        }
 
 
 def parse_datetime_string(datetime_str: str) -> datetime:

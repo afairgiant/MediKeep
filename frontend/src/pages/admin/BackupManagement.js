@@ -5,6 +5,7 @@ import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
+import { formatDateTime } from '../../utils/helpers';
 import './BackupManagement.css';
 
 const BackupManagement = () => {
@@ -57,7 +58,7 @@ const BackupManagement = () => {
     setCreating(prev => ({ ...prev, [type]: true }));
 
     try {
-      const description = `Manual ${type} backup created on ${new Date().toLocaleString()}`;
+      const description = `Manual ${type} backup created on ${formatDateTime(new Date().toISOString())}`;
 
       if (type === 'database') {
         await executeAction('createDatabaseBackup', description);
@@ -431,7 +432,7 @@ const BackupTableRow = ({
     <td>
       <span className={`backup-status ${backup.status}`}>{backup.status}</span>
     </td>
-    <td>{new Date(backup.created_at).toLocaleString()}</td>
+    <td>{formatDateTime(backup.created_at)}</td>
     <td>
       <span className={`file-exists ${backup.file_exists ? 'yes' : 'no'}`}>
         {backup.file_exists ? 'Yes' : 'No'}

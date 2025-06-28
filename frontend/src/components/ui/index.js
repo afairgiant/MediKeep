@@ -11,3 +11,4 @@ export { default as Select } from './Select';
 export { default as Checkbox } from './Checkbox';
 export { default as Alert } from './Alert';
 export { default as DateInput } from './DateInput';
+export { default as TimezoneIndicator } from './TimezoneIndicator';

@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../../utils/helpers';
 
 const MedicalTable = ({
   data,
@@ -20,7 +21,7 @@ const MedicalTable = ({
         <h2>
           {tableName} - {patientData?.first_name} {patientData?.last_name}
         </h2>
-        <p>Generated on: {new Date().toLocaleDateString()}</p>
+        <p>Generated on: {formatDate(new Date().toISOString())}</p>
       </div>
       <table className="medications-table">
         <thead>

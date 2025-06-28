@@ -1,0 +1,114 @@
+/* Timezone Component Styles */
+
+/* Timezone Indicator Component */
+.timezone-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding: 0.25rem 0.75rem;
+  background: #f9fafb;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.timezone-indicator.loading {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.timezone-current-time {
+  font-weight: 500;
+  color: #374151;
+}
+
+.timezone-name {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  color: #6b7280;
+}
+
+/* Form Timezone Info */
+.timezone-info {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+/* Timezone hints for datetime inputs */
+.datetime-input-group {
+  position: relative;
+}
+
+.datetime-input-group::after {
+  content: attr(data-timezone);
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+/* Medical Card timezone-aware date fields */
+.medical-card-dates .date-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.medical-card-dates .date-item strong {
+  color: #374151;
+  margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .timezone-indicator {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+
+  .timezone-current-time {
+    font-size: 0.75rem;
+  }
+
+  .timezone-name {
+    font-size: 0.625rem;
+  }
+
+  .timezone-info {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .timezone-indicator {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+
+  .timezone-current-time {
+    color: #f9fafb;
+  }
+
+  .timezone-name {
+    color: #9ca3af;
+  }
+
+  .timezone-info {
+    color: #9ca3af;
+  }
+}

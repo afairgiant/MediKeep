@@ -336,7 +336,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
     """
 
     def __init__(
-        self, model: Type[ModelType], primary_key: Union[str, List[str]] = "id"
+        self,
+        model: Type[ModelType],
+        primary_key: Union[str, List[str]] = "id",
+        timezone_fields: Optional[List[str]] = None,
     ):
         """Initialize with model class - maintains backward compatibility with composite key support."""
         from app.models.models import Base
@@ -345,6 +348,23 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             raise TypeError(f"Expected a subclass of Base, got {type(model).__name__}")
         self.model = model
         self.primary_key = primary_key
+        self.timezone_fields = timezone_fields or []
+
+    def _convert_timezone_fields(self, obj_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert timezone fields from user input to UTC."""
+        from app.core.datetime_utils import to_utc
+
+        converted_data = obj_data.copy()
+        for field in self.timezone_fields:
+            if field in converted_data and converted_data[field] is not None:
+                try:
+                    converted_data[field] = to_utc(converted_data[field])
+                except ValueError as e:
+                    raise ValueError(
+                        f"Invalid datetime in field {field}: {obj_data[field]}"
+                    )
+
+        return converted_data
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
         """Get a single record by ID."""
@@ -359,6 +379,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """Create a new record with simplified error handling."""
         obj_in_data = jsonable_encoder(obj_in)
+
+        # Convert timezone fields
+        obj_in_data = self._convert_timezone_fields(obj_in_data)
 
         # Remove explicit ID if present
         if "id" in obj_in_data:
@@ -419,6 +442,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 if hasattr(obj_in, "dict")
                 else jsonable_encoder(obj_in)
             )
+
+        # Convert timezone fields
+        update_data = self._convert_timezone_fields(update_data)
 
         # Update only fields that exist in the model
         for field, value in update_data.items():

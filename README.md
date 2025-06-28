@@ -61,6 +61,7 @@ services:
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+      TZ: $(TZ:-America/New_York)
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
@@ -110,6 +111,8 @@ APP_PORT=8005
 
 # Application Security Key
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
+
+TZ=America/New_York
 ```
 
 ### 3️⃣ Start the Containers

@@ -17,6 +17,7 @@ import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
+import { formatDate, formatDateTime } from '../../utils/helpers';
 import './AdminDashboard.css';
 
 // Register Chart.js components
@@ -424,7 +425,7 @@ const SystemHealthCard = ({
         label="Last Backup"
         value={
           systemHealth?.last_backup
-            ? new Date(systemHealth.last_backup).toLocaleDateString()
+            ? formatDate(systemHealth.last_backup)
             : 'No backup'
         }
       />
@@ -534,7 +535,7 @@ const ActivityItem = ({ activity, icon }) => (
       <div className="activity-description">{activity.description}</div>
       <div className="activity-meta">
         <span className="activity-time">
-          {new Date(activity.timestamp).toLocaleString()}
+          {formatDateTime(activity.timestamp)}
         </span>
         <span className="activity-type">{activity.model_name}</span>
         <span className={`activity-action ${activity.action?.toLowerCase()}`}>

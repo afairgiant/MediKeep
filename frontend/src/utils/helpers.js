@@ -4,55 +4,92 @@
 
 import { DATE_FORMATS } from './constants';
 
+import { timezoneService } from '../services/timezoneService';
+
 /**
- * Format date for display
- * @param {string|Date} date - Date to format
- * @param {string} format - Format string
+ * Format date for display using facility timezone
+ * @param {string|Date} utcDate - UTC date to format
+ * @param {string} format - Format string (legacy parameter, maintained for compatibility)
  * @returns {string} - Formatted date
  */
-export const formatDate = (date, format = DATE_FORMATS.DISPLAY) => {
-  if (!date) return 'N/A';
+export const formatDate = (utcDate, format = DATE_FORMATS.DISPLAY) => {
+  return timezoneService.formatDateTime(utcDate, { dateOnly: true });
+};
+
+/**
+ * Format date and time for display using facility timezone
+ * @param {string|Date} utcDate - UTC date to format
+ * @param {boolean} includeTimezone - Whether to include timezone abbreviation
+ * @returns {string} - Formatted date and time
+ */
+export const formatDateTime = (utcDate, includeTimezone = true) => {
+  return timezoneService.formatDateTime(utcDate, { includeTimezone });
+};
+
+/**
+ * Get current facility time for form defaults
+ * @returns {string} - Current time in YYYY-MM-DDTHH:MM format
+ */
+export const getCurrentFacilityTime = () => {
+  return timezoneService.getCurrentFacilityTime();
+};
+
+/**
+ * Enhanced date handling for edge cases
+ * @param {string|Date} dateInput - Date input to parse
+ * @returns {Date|null} - Parsed date or null
+ */
+export const parseDateSafely = dateInput => {
+  if (!dateInput) return null;
 
   try {
-    let dateObj;
-
-    // Handle timezone issues for date-only strings (YYYY-MM-DD format)
-    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
-      // Parse as local date to avoid timezone conversion
-      const [year, month, day] = date.trim().split('-');
-      dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    } else {
-      dateObj = new Date(date);
+    // Handle date-only strings (YYYY-MM-DD)
+    if (
+      typeof dateInput === 'string' &&
+      /^\d{4}-\d{2}-\d{2}$/.test(dateInput.trim())
+    ) {
+      const [year, month, day] = dateInput.trim().split('-');
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     }
 
-    if (isNaN(dateObj.getTime())) return 'Invalid Date';
-    // Simple date formatting
-    const options = {
-      year: 'numeric',
-      month: format.includes('MMMM') ? 'long' : 'short',
-      day: '2-digit',
-    };
-
-    if (format.includes('HH:mm')) {
-      options.hour = '2-digit';
-      options.minute = '2-digit';
-    }
-
-    return dateObj.toLocaleDateString('en-US', options);
+    return new Date(dateInput);
   } catch (error) {
-    console.error('Date formatting error:', error);
-    return 'Invalid Date';
+    console.error('Date parsing error:', error);
+    return null;
   }
 };
 
 /**
- * Format date and time for display
- * @param {string|Date} date - Date to format
- * @returns {string} - Formatted date and time
+ * Input validation for datetime fields
+ * @param {string} dateTimeString - DateTime string to validate
+ * @param {string} fieldName - Field name for error messages
+ * @returns {Object} - Validation result with isValid and error
  */
-export const formatDateTime = date => {
-  if (!date) return 'N/A';
-  return new Date(date).toLocaleString();
+export const validateDateTime = (dateTimeString, fieldName = 'datetime') => {
+  if (!dateTimeString) {
+    return { isValid: false, error: `${fieldName} is required` };
+  }
+
+  try {
+    const date = new Date(dateTimeString);
+
+    if (isNaN(date.getTime())) {
+      return { isValid: false, error: `Invalid ${fieldName} format` };
+    }
+
+    // Check for reasonable date range (1900-2100)
+    const year = date.getFullYear();
+    if (year < 1900 || year > 2100) {
+      return {
+        isValid: false,
+        error: `${fieldName} year must be between 1900 and 2100`,
+      };
+    }
+
+    return { isValid: true };
+  } catch (error) {
+    return { isValid: false, error: `Invalid ${fieldName}: ${error.message}` };
+  }
 };
 
 /**

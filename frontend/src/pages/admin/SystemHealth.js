@@ -4,6 +4,7 @@ import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
+import { formatDate, formatDateTime } from '../../utils/helpers';
 import './SystemHealth.css';
 
 const SystemHealth = () => {
@@ -158,7 +159,9 @@ const SystemHealth = () => {
           <div className="health-actions">
             {lastRefresh && (
               <div className="last-refresh">
-                <span>Last updated: {lastRefresh.toLocaleTimeString()}</span>
+                <span>
+                  Last updated: {formatDateTime(lastRefresh.toISOString())}
+                </span>
               </div>
             )}
             <button
@@ -205,7 +208,7 @@ const SystemHealth = () => {
                 <h3>Last Backup</h3>
                 <p className="status-value">
                   {healthData?.last_backup
-                    ? new Date(healthData.last_backup).toLocaleDateString()
+                    ? formatDate(healthData.last_backup)
                     : 'No backups configured'}
                 </p>
               </div>

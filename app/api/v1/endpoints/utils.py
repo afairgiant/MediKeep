@@ -1,13 +1,22 @@
 from typing import Any, Optional, Type
 
-from fastapi import HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
+from app.core.datetime_utils import get_timezone_info
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__, "app")
+
+router = APIRouter(prefix="/utils", tags=["utils"])
+
+
+@router.get("/timezone-info")
+def timezone_info():
+    """Get facility timezone information."""
+    return get_timezone_info()
 
 
 def handle_not_found(obj: Any, entity_name: str) -> None:

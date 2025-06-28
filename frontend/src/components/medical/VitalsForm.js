@@ -6,6 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { vitalsService } from '../../services/medical/vitalsService';
+import { useTimezone } from '../../hooks';
+import { validateDateTime } from '../../utils/helpers';
 import './VitalsForm.css';
 
 const VitalsForm = ({
@@ -16,10 +18,12 @@ const VitalsForm = ({
   onCancel,
   isEdit = false,
 }) => {
+  const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
+
   const [formData, setFormData] = useState({
     patient_id: patientId || '',
     practitioner_id: practitionerId || null, // Use null instead of empty string
-    recorded_date: new Date().toISOString().split('T')[0],
+    recorded_date: getCurrentTime().split('T')[0], // Use facility timezone for default
     systolic_bp: '',
     diastolic_bp: '',
     heart_rate: '',
@@ -78,9 +82,22 @@ const VitalsForm = ({
 
   const validateForm = () => {
     const validation = vitalsService.validateVitalsData(formData);
-    setErrors(validation.errors);
+    let newErrors = { ...validation.errors };
+
+    // Additional timezone-aware date validation
+    if (formData.recorded_date) {
+      const dateValidation = validateDateTime(
+        formData.recorded_date,
+        'Recorded Date'
+      );
+      if (!dateValidation.isValid) {
+        newErrors.recorded_date = dateValidation.error;
+      }
+    }
+
+    setErrors(newErrors);
     setWarnings(validation.warnings);
-    return validation.isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async e => {
@@ -169,9 +186,11 @@ const VitalsForm = ({
       <form onSubmit={handleSubmit}>
         <div className="form-row">
           <div className="form-group">
-            {' '}
             <label htmlFor="recorded_date">
               Measurement Date <span className="required">*</span>
+              {isReady && (
+                <small className="timezone-info">({facilityTimezone})</small>
+              )}
             </label>
             <input
               type="date"

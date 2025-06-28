@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
+import { formatDateTime } from '../../utils/helpers';
 import './ModelView.css';
 
 const ModelView = () => {
@@ -49,7 +50,7 @@ const ModelView = () => {
 
     if (fieldType === 'datetime' || fieldType === 'date') {
       try {
-        return new Date(value).toLocaleString();
+        return formatDateTime(value);
       } catch {
         return value;
       }

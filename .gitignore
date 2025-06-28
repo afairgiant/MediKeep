@@ -114,6 +114,7 @@ test_download.py
 docs/AUTH_SYSTEM_DOCUMENTATION.md
 docs/IMPLEMENTATION_CHECKLIST.md
 docker/dev/dev-docker-compose.yml
+docs/
 
 /logs
 .cursor/rules/venv.mdc

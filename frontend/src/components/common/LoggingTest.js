@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import logger from '../../services/logger';
+import { formatDateTime } from '../../utils/helpers';
 import './LoggingTest.css';
 
 const LoggingTest = () => {
@@ -21,7 +22,7 @@ const LoggingTest = () => {
   }, []);
 
   const addLog = (message, type = 'info') => {
-    const timestamp = new Date().toLocaleTimeString();
+    const timestamp = formatDateTime(new Date().toISOString());
     setLogs(prev => [...prev, { message, type, timestamp }]);
   };
   const testGeneralLogging = () => {

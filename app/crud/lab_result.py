@@ -13,69 +13,8 @@ from app.schemas.lab_result import LabResultCreate, LabResultUpdate
 class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
     """CRUD operations for LabResult"""
 
-    def create(self, db: Session, *, obj_in: LabResultCreate) -> LabResult:
-        """
-        Create a new lab result with proper datetime conversion.
-
-        Args:
-            db: Database session
-            obj_in: Lab result data to create
-
-        Returns:
-            Created lab result object
-        """
-        # Convert the Pydantic model to dict and handle datetime conversion
-        obj_data = LAB_RESULT_CONVERTER.convert_model_data(obj_in)
-
-        # Set created_at and updated_at timestamps
-        now = datetime.utcnow()
-        obj_data["created_at"] = now
-        obj_data["updated_at"] = now
-
-        # Create the database object
-        db_obj = self.model(**obj_data)
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-
-    def update(
-        self, db: Session, *, db_obj: LabResult, obj_in: LabResultUpdate
-    ) -> LabResult:
-        """
-        Update a lab result with proper datetime conversion.
-
-        Args:
-            db: Database session
-            db_obj: Existing lab result object
-            obj_in: Updated lab result data
-
-        Returns:
-            Updated lab result object
-        """
-        # Convert the update data and handle datetime conversion
-        if hasattr(obj_in, "dict"):
-            update_data = obj_in.dict(exclude_unset=True)
-        else:
-            update_data = dict(obj_in) if obj_in else {}
-
-        if update_data:
-            # Convert datetime fields
-            update_data = LAB_RESULT_CONVERTER.convert(update_data)
-
-            # Set updated_at timestamp
-            update_data["updated_at"] = datetime.utcnow()
-
-            # Apply updates to the database object
-            for field, value in update_data.items():
-                if hasattr(db_obj, field):
-                    setattr(db_obj, field, value)
-
-            db.add(db_obj)
-            db.commit()
-            db.refresh(db_obj)
-
-        return db_obj
+    def __init__(self):
+        super().__init__(LabResult, timezone_fields=["ordered_date", "completed_date"])
 
     def get_by_test_code(
         self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
@@ -120,4 +59,4 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
 
 
 # Create instance of the CRUD class
-lab_result = CRUDLabResult(LabResult)
+lab_result = CRUDLabResult()

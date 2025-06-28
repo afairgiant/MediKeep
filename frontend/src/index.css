@@ -1,6 +1,9 @@
 /* Import CSS Variables */
 @import './styles/themes/variables.css';
 
+/* Import Component Styles */
+@import './styles/components/timezone.css';
+
 body {
   margin: 0;
   font-family: var(
