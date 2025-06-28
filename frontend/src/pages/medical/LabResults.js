@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { apiService } from '../../services/api';
-import { formatDateTime } from '../../utils/helpers';
+import { formatDate, formatDateTime } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -241,12 +241,8 @@ const LabResults = () => {
       facility: labResult.facility || '',
       status: labResult.status || 'ordered',
       labs_result: labResult.labs_result || '',
-      ordered_date: labResult.ordered_date
-        ? labResult.ordered_date.slice(0, 16)
-        : '',
-      completed_date: labResult.completed_date
-        ? labResult.completed_date.slice(0, 16)
-        : '',
+      ordered_date: labResult.ordered_date || '',
+      completed_date: labResult.completed_date || '',
       notes: labResult.notes || '',
       practitioner_id: labResult.practitioner_id || '',
     });
@@ -299,10 +295,8 @@ const LabResults = () => {
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id)
         : null,
-      ordered_date: formData.ordered_date || new Date().toISOString(),
-      completed_date: formData.completed_date
-        ? new Date(formData.completed_date).toISOString()
-        : null,
+      ordered_date: formData.ordered_date || null,
+      completed_date: formData.completed_date || null,
     };
 
     try {
@@ -521,14 +515,14 @@ const LabResults = () => {
                     <div className="detail-item">
                       <span className="label">Ordered:</span>
                       <span className="value">
-                        {formatDateTime(result.ordered_date)}
+                        {formatDate(result.ordered_date)}
                       </span>
                     </div>
                     {result.completed_date && (
                       <div className="detail-item">
                         <span className="label">Completed:</span>
                         <span className="value">
-                          {formatDateTime(result.completed_date)}
+                          {formatDate(result.completed_date)}
                         </span>
                       </div>
                     )}
@@ -622,8 +616,8 @@ const LabResults = () => {
                   const practitioner = practitioners.find(p => p.id === value);
                   return practitioner ? practitioner.name : `ID: ${value}`;
                 },
-                ordered_date: value => formatDateTime(value),
-                completed_date: value => (value ? formatDateTime(value) : '-'),
+                ordered_date: value => formatDate(value),
+                completed_date: value => (value ? formatDate(value) : '-'),
                 files: (value, item) =>
                   filesCounts[item.id] > 0 ? (
                     <span className="file-indicator">
@@ -771,7 +765,7 @@ const LabResults = () => {
                 <div className="form-group">
                   <label>Ordered Date</label>
                   <input
-                    type="datetime-local"
+                    type="date"
                     name="ordered_date"
                     value={formData.ordered_date}
                     onChange={handleInputChange}
@@ -781,7 +775,7 @@ const LabResults = () => {
                 <div className="form-group">
                   <label>Completed Date</label>
                   <input
-                    type="datetime-local"
+                    type="date"
                     name="completed_date"
                     value={formData.completed_date}
                     onChange={handleInputChange}
@@ -990,12 +984,12 @@ const LabResults = () => {
               )}
               <div className="detail-item">
                 <strong>Ordered Date:</strong>{' '}
-                {formatDateTime(selectedLabResult.ordered_date)}
+                {formatDate(selectedLabResult.ordered_date)}
               </div>
               {selectedLabResult.completed_date && (
                 <div className="detail-item">
                   <strong>Completed Date:</strong>{' '}
-                  {formatDateTime(selectedLabResult.completed_date)}
+                  {formatDate(selectedLabResult.completed_date)}
                 </div>
               )}
               {selectedLabResult.notes && (
