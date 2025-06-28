@@ -322,9 +322,26 @@ const LabResults = () => {
           await uploadPendingFiles(resultId);
         }
 
+        // Reset all form and modal state
         setShowModal(false);
+        setEditingLabResult(null);
+        setFormData({
+          test_name: '',
+          test_code: '',
+          test_category: '',
+          test_type: '',
+          facility: '',
+          status: 'ordered',
+          labs_result: '',
+          ordered_date: '',
+          completed_date: '',
+          notes: '',
+          practitioner_id: '',
+        });
         setPendingFiles([]);
         setFilesToDelete([]);
+        setSelectedFiles([]);
+
         await refreshData();
       }
     } catch (error) {
@@ -340,8 +357,23 @@ const LabResults = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedLabResult(null);
+    setEditingLabResult(null);
+    setFormData({
+      test_name: '',
+      test_code: '',
+      test_category: '',
+      test_type: '',
+      facility: '',
+      status: 'ordered',
+      labs_result: '',
+      ordered_date: '',
+      completed_date: '',
+      notes: '',
+      practitioner_id: '',
+    });
     setPendingFiles([]);
     setFilesToDelete([]);
+    setSelectedFiles([]);
   };
 
   // File operations for view modal

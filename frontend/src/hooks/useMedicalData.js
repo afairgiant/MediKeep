@@ -42,7 +42,7 @@ export const useMedicalData = config => {
       if (result) {
         setSuccessMessage(`${entityName} created successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
-        return true;
+        return result;
       }
       return false;
     },
@@ -60,7 +60,7 @@ export const useMedicalData = config => {
       if (result) {
         setSuccessMessage(`${entityName} updated successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
-        return true;
+        return result;
       }
       return false;
     },
@@ -84,7 +84,7 @@ export const useMedicalData = config => {
       if (result) {
         setSuccessMessage(`${entityName} deleted successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
-        return true;
+        return result;
       }
       return false;
     },
