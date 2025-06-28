@@ -1,7 +1,7 @@
 # Multi-stage build for React + FastAPI Medical Records System
 
 # Stage 1: Build React frontend
-FROM node:18-alpine AS frontend-build
+FROM node:24-alpine AS frontend-build
 
 # Set NODE_ENV for optimization
 ENV NODE_ENV=production
@@ -12,10 +12,11 @@ ENV GENERATE_SOURCEMAP=false
 WORKDIR /frontend
 
 # Copy package files first for better layer caching
-COPY frontend/package*.json ./
+COPY frontend/package.json ./
 
-# Install dependencies with more memory
-RUN npm install --silent --no-audit --no-fund --max_old_space_size=4096
+# Install dependencies with better error handling and compatibility
+# Use legacy-peer-deps to handle React 19 compatibility issues
+RUN npm install --silent --no-audit --no-fund --max_old_space_size=4096 --legacy-peer-deps --force
 
 # Copy frontend source
 COPY frontend/ ./
