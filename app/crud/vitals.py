@@ -17,6 +17,9 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     patient-specific queries, date range filtering, and statistics.
     """
 
+    def __init__(self):
+        super().__init__(Vitals, timezone_fields=["recorded_date"])
+
     def get_by_patient_date_range(
         self,
         db: Session,
@@ -228,4 +231,4 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
 
 
 # Create instance of the CRUD class
-vitals = CRUDVitals(Vitals)
+vitals = CRUDVitals()

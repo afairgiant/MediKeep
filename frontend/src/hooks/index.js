@@ -11,6 +11,9 @@ export { useMedicalData } from './useMedicalData';
 export { useAuth, AuthProvider, TokenManager } from './useAuth';
 export { useLabResults } from './useLabResults';
 
+// Timezone hook
+export { useTimezone } from './useTimezone';
+
 // Data management hooks
 export { default as useFiltering } from './useFiltering';
 export { default as useSorting } from './useSorting';

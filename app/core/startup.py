@@ -27,6 +27,15 @@ async def startup_event():
         },
     )
 
+    # Initialize and validate timezone configuration
+    from app.core.datetime_utils import get_facility_timezone
+
+    try:
+        tz = get_facility_timezone()
+        logger.info(f"Timezone configured successfully: {tz}")
+    except Exception as e:
+        logger.warning(f"Timezone configuration warning: {e}, using UTC fallback")
+
     # Skip database operations if in test mode
     skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
 

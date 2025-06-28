@@ -1,25 +1,26 @@
 from fastapi import APIRouter
 
+from app.api.v1 import admin
 from app.api.v1.endpoints import (
+    allergy,
     auth,
-    users,
-    patients,
-    lab_result_file,
-    lab_result,
-    encounter,
     condition,
+    encounter,
+    export,
+    frontend_logs,
     immunization,
+    lab_result,
+    lab_result_file,
+    medication,
+    patients,
+    pharmacy,
+    practitioner,
     procedure,
     treatment,
-    allergy,
-    practitioner,
-    pharmacy,
-    medication,
+    users,
+    utils,
     vitals,
-    frontend_logs,
 )
-from app.api.v1.endpoints import export
-from app.api.v1 import admin
 
 api_router = APIRouter()
 
@@ -49,9 +50,7 @@ api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])
 api_router.include_router(
     practitioner.router, prefix="/practitioners", tags=["practitioners"]
 )
-api_router.include_router(
-    pharmacy.router, prefix="/pharmacies", tags=["pharmacies"]
-)
+api_router.include_router(pharmacy.router, prefix="/pharmacies", tags=["pharmacies"])
 api_router.include_router(
     medication.router, prefix="/medications", tags=["medications"]
 )
@@ -63,6 +62,9 @@ api_router.include_router(
 
 # Export endpoints
 api_router.include_router(export.router, prefix="/export", tags=["export"])
+
+# Utils endpoints
+api_router.include_router(utils.router)
 
 # Admin endpoints
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
