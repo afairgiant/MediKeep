@@ -594,9 +594,15 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             # Update only fields that exist in the model
             for field, value in update_data.items():
                 if field in obj_data and hasattr(db_obj, field):
+                    old_value = getattr(db_obj, field, None)
                     setattr(db_obj, field, value)
-                    updated_fields.append(field)
-                    self.logger.debug(f"Updated {self.model_name}.{field}")
+
+                    # Only log and count fields that actually changed
+                    if old_value != value:
+                        updated_fields.append(field)
+                        self.logger.debug(
+                            f"Updated {self.model_name}.{field}: {old_value} → {value}"
+                        )
 
             db.add(db_obj)
             db.commit()

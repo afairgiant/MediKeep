@@ -9,9 +9,13 @@ from app.core.middleware import TrailingSlashMiddleware
 from app.core.spa_routing import setup_spa_routing
 from app.core.startup import startup_event
 from app.core.static_files import setup_static_files
+from app.core.uvicorn_logging import configure_uvicorn_logging
 
 # Initialize logging configuration
 logging_config = LoggingConfig()
+
+# Configure Uvicorn logging to match our format
+configure_uvicorn_logging()
 
 # Initialize logger
 logger = get_logger(__name__, "app")

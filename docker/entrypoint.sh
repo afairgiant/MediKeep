@@ -19,4 +19,6 @@ fi
 
 # Start the FastAPI application
 echo "Starting FastAPI server..."
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+# Use LOG_LEVEL environment variable for Uvicorn log level (default to info)
+LOG_LEVEL_LOWER=$(echo "${LOG_LEVEL:-INFO}" | tr '[:upper:]' '[:lower:]')
+exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level "$LOG_LEVEL_LOWER"

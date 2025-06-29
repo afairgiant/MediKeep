@@ -215,7 +215,7 @@ class LoggingConfig:
         logger.handlers.clear()  # Clear existing handlers to prevent duplication
         logger.addHandler(handler)
         logger.setLevel(level)
-        logger.propagate = False  # Don't propagate to root logger
+        logger.propagate = True  # Allow propagation to root logger for console output
 
 
 def get_logger(name: str, category: str = "app") -> logging.Logger:
