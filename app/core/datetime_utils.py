@@ -474,9 +474,9 @@ class DateConverter:
 
 
 # Pre-configured converters for common models
-LAB_RESULT_CONVERTER = DateTimeConverter(
-    ["ordered_date", "completed_date", "created_at", "updated_at"]
-)
+LAB_RESULT_CONVERTER = DateTimeConverter(["created_at", "updated_at"])
+
+LAB_RESULT_DATE_CONVERTER = DateConverter(["ordered_date", "completed_date"])
 
 USER_CONVERTER = DateTimeConverter(["created_at", "updated_at", "last_login"])
 
