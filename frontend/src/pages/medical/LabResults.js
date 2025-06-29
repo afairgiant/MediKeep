@@ -1,14 +1,17 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
 import StatusBadge from '../../components/medical/StatusBadge';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/LabResults.css';
 import '../../styles/pages/MedicationTable.css';
@@ -48,6 +51,45 @@ const LabResults = () => {
   // Get practitioners data
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
+  // Get page configuration for lab results
+  const pageConfig = getMedicalPageConfig('labresults');
+
+  // Data management with filtering and sorting
+  const dataManagement = useDataManagement(labResults || [], pageConfig);
+  const {
+    data: filteredLabResults = [],
+    filters,
+    updateFilter,
+    clearFilters,
+    hasActiveFilters = false,
+    statusOptions = [],
+    categoryOptions = [],
+    dateRangeOptions = [],
+    sortBy = '',
+    sortOrder = 'asc',
+    handleSortChange,
+    totalCount = 0,
+    filteredCount = 0,
+  } = dataManagement || {};
+
+  // Extract individual filter states for component props (keep for backward compatibility)
+  const searchTerm = filters?.search || '';
+  const statusFilter = filters?.status || 'all';
+  const categoryFilter = filters?.category || 'all';
+  const dateRangeFilter = filters?.dateRange || 'all';
+
+  // Filter update handlers (keep for backward compatibility)
+  const setSearchTerm = value => updateFilter && updateFilter('search', value);
+  const setStatusFilter = value =>
+    updateFilter && updateFilter('status', value);
+  const setCategoryFilter = value =>
+    updateFilter && updateFilter('category', value);
+  const setDateRangeFilter = value =>
+    updateFilter && updateFilter('dateRange', value);
+  const setSortBy = value => handleSortChange && handleSortChange(value);
+  const setSortOrder = value =>
+    handleSortChange && handleSortChange(sortBy, value);
+
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
 
@@ -79,8 +121,13 @@ const LabResults = () => {
   });
 
   // Options for dropdowns
-  const statusOptions = ['ordered', 'in-progress', 'completed', 'cancelled'];
-  const categoryOptions = [
+  const formStatusOptions = [
+    'ordered',
+    'in-progress',
+    'completed',
+    'cancelled',
+  ];
+  const formCategoryOptions = [
     'blood work',
     'imaging',
     'pathology',
@@ -148,11 +195,11 @@ const LabResults = () => {
 
   // Load file counts when lab results change
   React.useEffect(() => {
-    if (labResults.length > 0 && labResults.length <= 20) {
+    if (labResults && labResults.length > 0 && labResults.length <= 20) {
       const controller = new AbortController();
       loadFilesCounts(labResults, controller);
       return () => controller.abort();
-    } else {
+    } else if (labResults) {
       // Initialize counts to 0 for large datasets
       const counts = {};
       labResults.forEach(result => {
@@ -494,23 +541,56 @@ const LabResults = () => {
           </div>
 
           <div className="controls-right">
-            {/* Future: Add sort/filter controls */}
+            {/* Filters and sorting handled by MantineFilters component below */}
           </div>
         </div>
 
+        {/* Mantine Filters */}
+        {dataManagement && filters && (
+          <MantineFilters
+            filters={filters}
+            updateFilter={updateFilter}
+            clearFilters={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            statusOptions={statusOptions}
+            categoryOptions={categoryOptions}
+            dateRangeOptions={dateRangeOptions}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            handleSortChange={handleSortChange}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            config={pageConfig}
+          />
+        )}
+
         <div className="medical-items-list">
-          {labResults.length === 0 ? (
+          {filteredLabResults.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🧪</div>
-              <h3>No lab results found</h3>
-              <p>Click "Add New Lab Result" to get started.</p>
-              <button className="add-button" onClick={handleAddLabResult}>
-                Add Your First Lab Result
-              </button>
+              <h3>
+                {!labResults || labResults.length === 0
+                  ? 'No lab results found'
+                  : 'No lab results match your filters'}
+              </h3>
+              <p>
+                {!labResults || labResults.length === 0
+                  ? 'Click "Add New Lab Result" to get started.'
+                  : 'Try adjusting your search or filter criteria.'}
+              </p>
+              {!labResults || labResults.length === 0 ? (
+                <button className="add-button" onClick={handleAddLabResult}>
+                  Add Your First Lab Result
+                </button>
+              ) : (
+                <button className="clear-filters-button" onClick={clearFilters}>
+                  Clear All Filters
+                </button>
+              )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {labResults.map(result => (
+              {filteredLabResults.map(result => (
                 <div key={result.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
@@ -617,7 +697,7 @@ const LabResults = () => {
             </div>
           ) : (
             <MedicalTable
-              data={labResults}
+              data={filteredLabResults}
               columns={[
                 { header: 'Test Name', accessor: 'test_name' },
                 { header: 'Test Code', accessor: 'test_code' },
@@ -706,7 +786,7 @@ const LabResults = () => {
                     onChange={handleInputChange}
                   >
                     <option value="">Select category</option>
-                    {categoryOptions.map(option => (
+                    {formCategoryOptions.map(option => (
                       <option key={option} value={option}>
                         {option.charAt(0).toUpperCase() + option.slice(1)}
                       </option>
@@ -768,7 +848,7 @@ const LabResults = () => {
                     value={formData.status}
                     onChange={handleInputChange}
                   >
-                    {statusOptions.map(option => (
+                    {formStatusOptions.map(option => (
                       <option key={option} value={option}>
                         {option.charAt(0).toUpperCase() + option.slice(1)}
                       </option>

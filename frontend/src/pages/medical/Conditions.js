@@ -4,7 +4,8 @@ import { useMedicalData, useDataManagement } from '../../hooks';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import { PageHeader, FilterControls } from '../../components';
+import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
@@ -175,8 +176,8 @@ const Conditions = () => {
             />
           </div>
         </div>
-        {/* Standardized Filter Controls */}
-        <FilterControls
+        {/* Mantine Filter Controls */}
+        <MantineFilters
           filters={dataManagement.filters}
           updateFilter={dataManagement.updateFilter}
           clearFilters={dataManagement.clearFilters}
@@ -188,7 +189,6 @@ const Conditions = () => {
           sortBy={dataManagement.sortBy}
           sortOrder={dataManagement.sortOrder}
           handleSortChange={dataManagement.handleSortChange}
-          getSortIndicator={dataManagement.getSortIndicator}
           totalCount={dataManagement.totalCount}
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}

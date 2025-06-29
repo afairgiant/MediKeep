@@ -298,6 +298,67 @@ export const medicalPageConfigs = {
       showCategory: true,
     },
   },
+
+  labresults: {
+    filtering: {
+      searchFields: ['test_name', 'test_code', 'facility', 'notes'],
+      statusField: 'status',
+      statusOptions: [
+        { value: 'all', label: 'All Statuses' },
+        { value: 'ordered', label: 'Ordered' },
+        { value: 'in-progress', label: 'In Progress' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'cancelled', label: 'Cancelled' },
+      ],
+      categoryField: 'test_category',
+      categoryLabel: 'Categories',
+      categoryOptions: [
+        { value: 'all', label: 'All Categories' },
+        { value: 'blood work', label: 'Blood Work' },
+        { value: 'imaging', label: 'Imaging' },
+        { value: 'pathology', label: 'Pathology' },
+        { value: 'microbiology', label: 'Microbiology' },
+        { value: 'chemistry', label: 'Chemistry' },
+        { value: 'hematology', label: 'Hematology' },
+        { value: 'immunology', label: 'Immunology' },
+        { value: 'genetics', label: 'Genetics' },
+        { value: 'cardiology', label: 'Cardiology' },
+        { value: 'pulmonology', label: 'Pulmonology' },
+        { value: 'other', label: 'Other' },
+      ],
+      dateField: 'ordered_date',
+      dateRangeOptions: [
+        { value: 'all', label: 'All Time Periods' },
+        { value: 'current', label: 'Current Month' },
+        { value: 'past', label: 'Past 3 Months' },
+        { value: 'future', label: 'Future/Scheduled' },
+      ],
+    },
+    sorting: {
+      defaultSortBy: 'ordered_date',
+      defaultSortOrder: 'desc',
+      sortOptions: [
+        { value: 'ordered_date', label: 'Order Date' },
+        { value: 'test_name', label: 'Test Name' },
+        { value: 'status', label: 'Status' },
+        { value: 'test_category', label: 'Category' },
+        { value: 'completed_date', label: 'Completion Date' },
+      ],
+      sortTypes: {
+        ordered_date: 'date',
+        test_name: 'string',
+        status: 'status',
+        test_category: 'string',
+        completed_date: 'date',
+      },
+    },
+    filterControls: {
+      searchPlaceholder: 'Search lab results, test codes, facilities...',
+      title: 'Filter & Sort Lab Results',
+      showCategory: true,
+      showDateRange: true,
+    },
+  },
 };
 
 /**

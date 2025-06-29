@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -40,11 +43,15 @@ const Allergies = () => {
     requiresPatient: true,
   });
 
+  // Get standardized configuration
+  const config = getMedicalPageConfig('allergies');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(allergies, config);
+
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAllergy, setEditingAllergy] = useState(null);
-  const [sortBy, setSortBy] = useState('severity');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     allergen: '',
     severity: '',
@@ -125,46 +132,8 @@ const Allergies = () => {
     }
   };
 
-  const getSortedAllergies = () => {
-    const sorted = [...allergies].sort((a, b) => {
-      if (sortBy === 'severity') {
-        const severityOrder = {
-          'life-threatening': 4,
-          severe: 3,
-          moderate: 2,
-          mild: 1,
-        };
-        const aVal = severityOrder[a.severity] || 0;
-        const bVal = severityOrder[b.severity] || 0;
-        return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
-      }
-
-      if (sortBy === 'allergen') {
-        return sortOrder === 'asc'
-          ? a.allergen.localeCompare(b.allergen)
-          : b.allergen.localeCompare(a.allergen);
-      }
-
-      if (sortBy === 'onset_date') {
-        const aDate = new Date(a.onset_date || 0);
-        const bDate = new Date(b.onset_date || 0);
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      }
-
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  const handleSortChange = newSortBy => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('desc');
-    }
-  };
+  // Get processed data from data management
+  const processedAllergies = dataManagement.data;
 
   const getSeverityIcon = severity => {
     switch (severity) {
@@ -222,29 +191,24 @@ const Allergies = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
-              >
-                <option value="severity">Severity</option>
-                <option value="allergen">Allergen</option>
-                <option value="onset_date">Onset Date</option>
-              </select>
-              <button
-                className="sort-order-button"
-                onClick={() =>
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                }
-              >
-                {sortOrder === 'asc' ? '↑' : '↓'}
-              </button>
-            </div>
-          </div>
         </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
         {showAddForm && (
           <div
             className="medical-form-overlay"
@@ -364,15 +328,19 @@ const Allergies = () => {
           </div>
         )}{' '}
         <div className="medical-items-list">
-          {getSortedAllergies().length === 0 ? (
+          {processedAllergies.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">⚠️</div>
               <h3>No allergies found</h3>
-              <p>Click "Add New Allergy" to get started.</p>
+              <p>
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Click "Add New Allergy" to get started.'}
+              </p>
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedAllergies().map(allergy => (
+              {processedAllergies.map(allergy => (
                 <div key={allergy.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">
@@ -439,7 +407,7 @@ const Allergies = () => {
             </div>
           ) : (
             <MedicalTable
-              data={getSortedAllergies()}
+              data={processedAllergies}
               columns={[
                 { header: 'Allergen', accessor: 'allergen' },
                 { header: 'Reaction', accessor: 'reaction' },

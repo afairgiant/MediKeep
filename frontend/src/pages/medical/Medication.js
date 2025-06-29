@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
@@ -51,15 +54,15 @@ const Medication = () => {
     requiresPatient: true,
   });
 
+  // Get standardized configuration
+  const config = getMedicalPageConfig('medications');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(medications, config);
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
   const [editingMedication, setEditingMedication] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [routeFilter, setRouteFilter] = useState('all');
-  const [dateRangeFilter, setDateRangeFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('active');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     medication_name: '',
     dosage: '',
@@ -173,128 +176,8 @@ const Medication = () => {
     }));
   };
 
-  // Filtering and sorting logic
-  const getFilteredAndSortedMedications = () => {
-    let filtered = medications;
-
-    // Apply search filter
-    if (searchTerm.trim()) {
-      filtered = filtered.filter(
-        med =>
-          med.medication_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          med.indication?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          med.dosage?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(med => med.status === statusFilter);
-    }
-
-    // Apply route filter
-    if (routeFilter !== 'all') {
-      filtered = filtered.filter(med => med.route === routeFilter);
-    }
-
-    // Apply date range filter
-    if (dateRangeFilter !== 'all') {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      filtered = filtered.filter(med => {
-        const startDate = med.effectivePeriod_start
-          ? new Date(med.effectivePeriod_start)
-          : null;
-        const endDate = med.effectivePeriod_end
-          ? new Date(med.effectivePeriod_end)
-          : null;
-
-        switch (dateRangeFilter) {
-          case 'current':
-            return (
-              (!startDate || startDate <= today) &&
-              (!endDate || endDate >= today)
-            );
-          case 'past':
-            return endDate && endDate < today;
-          case 'future':
-            return startDate && startDate > today;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      if (sortBy === 'active') {
-        const aIsActive = a.status === 'active';
-        const bIsActive = b.status === 'active';
-        if (aIsActive && !bIsActive) return -1;
-        if (!aIsActive && bIsActive) return 1;
-        return a.medication_name.localeCompare(b.medication_name);
-      }
-
-      if (sortBy === 'name') {
-        return sortOrder === 'asc'
-          ? a.medication_name.localeCompare(b.medication_name)
-          : b.medication_name.localeCompare(a.medication_name);
-      }
-
-      if (sortBy === 'start_date') {
-        const aDate = new Date(a.effectivePeriod_start || 0);
-        const bDate = new Date(b.effectivePeriod_start || 0);
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      }
-
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  // Helper functions for filters
-  const getUniqueStatuses = () => {
-    const statuses = [
-      ...new Set(medications.map(med => med.status).filter(Boolean)),
-    ];
-    return statuses.sort();
-  };
-
-  const getUniqueRoutes = () => {
-    const routes = [
-      ...new Set(medications.map(med => med.route).filter(Boolean)),
-    ];
-    return routes.sort();
-  };
-
-  const hasActiveFilters = () => {
-    return (
-      searchTerm.trim() !== '' ||
-      statusFilter !== 'all' ||
-      routeFilter !== 'all' ||
-      dateRangeFilter !== 'all'
-    );
-  };
-
-  const handleSortChange = newSortBy => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('asc');
-    }
-  };
-
-  const clearAllFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('all');
-    setRouteFilter('all');
-    setDateRangeFilter('all');
-  };
+  // Get processed data from data management
+  const filteredMedications = dataManagement.data;
 
   if (loading) {
     return (
@@ -338,144 +221,46 @@ const Medication = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
-              >
-                <option value="active">Status (Active First)</option>
-                <option value="name">Medication Name</option>
-                <option value="start_date">Start Date</option>
-              </select>
-              {sortBy !== 'active' && (
-                <button
-                  className="sort-order-button"
-                  onClick={() =>
-                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                  }
-                >
-                  {sortOrder === 'asc' ? '↑' : '↓'}
-                </button>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Advanced Filtering Section */}
-        <div className="medical-page-filters">
-          <div className="filters-row">
-            <div className="filter-group">
-              <label htmlFor="search">🔍 Search:</label>
-              <input
-                type="text"
-                id="search"
-                placeholder="Search medications, indications, or dosages..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="status-filter">Status:</label>
-              <select
-                id="status-filter"
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All Statuses</option>
-                {getUniqueStatuses().map(status => (
-                  <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="route-filter">Route:</label>
-              <select
-                id="route-filter"
-                value={routeFilter}
-                onChange={e => setRouteFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All Routes</option>
-                {getUniqueRoutes().map(route => (
-                  <option key={route} value={route}>
-                    {route.charAt(0).toUpperCase() + route.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label htmlFor="date-filter">Time Period:</label>
-              <select
-                id="date-filter"
-                value={dateRangeFilter}
-                onChange={e => setDateRangeFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All Time Periods</option>
-                <option value="current">Currently Active</option>
-                <option value="past">Past Medications</option>
-                <option value="future">Future Medications</option>
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <button className="clear-filters-btn" onClick={clearAllFilters}>
-                Clear Filters
-              </button>
-            </div>
-          </div>
-
-          <div className="filter-summary">
-            {hasActiveFilters() && (
-              <span className="active-filters-indicator">
-                🔍 Filters Active •{' '}
-              </span>
-            )}
-            {getFilteredAndSortedMedications().length} of {medications.length}{' '}
-            medications shown
-          </div>
-        </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
 
         <div className="medical-items-list">
-          {getFilteredAndSortedMedications().length === 0 ? (
+          {filteredMedications.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">💊</div>
-              {medications.length === 0 ? (
-                <>
-                  <h3>No medications found</h3>
-                  <p>Click "Add New Medication" to get started.</p>
-                  <button className="add-button" onClick={handleAddMedication}>
-                    Add Your First Medication
-                  </button>
-                </>
-              ) : (
-                <>
-                  <h3>No medications match your filters</h3>
-                  <p>
-                    Try adjusting your search criteria or clear the filters.
-                  </p>
-                  <button
-                    className="secondary-button"
-                    onClick={clearAllFilters}
-                  >
-                    Clear All Filters
-                  </button>
-                </>
+              <h3>No medications found</h3>
+              <p>
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Click "Add New Medication" to get started.'}
+              </p>
+              {!dataManagement.hasActiveFilters && (
+                <button className="add-button" onClick={handleAddMedication}>
+                  Add Your First Medication
+                </button>
               )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getFilteredAndSortedMedications().map(medication => (
+              {filteredMedications.map(medication => (
                 <div key={medication.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
@@ -566,7 +351,7 @@ const Medication = () => {
             </div>
           ) : (
             <MedicalTable
-              data={getFilteredAndSortedMedications()}
+              data={filteredMedications}
               columns={[
                 { header: 'Medication Name', accessor: 'medication_name' },
                 { header: 'Dosage', accessor: 'dosage' },

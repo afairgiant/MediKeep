@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
@@ -45,11 +48,15 @@ const Visits = () => {
     requiresPatient: true,
   });
 
-  // Form and filter state
+  // Get standardized configuration
+  const config = getMedicalPageConfig('visits');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(visits, config);
+
+  // Form state
   const [showModal, setShowModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date');
   const [formData, setFormData] = useState({
     reason: '',
     date: '',
@@ -143,26 +150,6 @@ const Visits = () => {
     return `Practitioner ID: ${practitionerId}`;
   };
 
-  // Enhanced filtering and sorting logic
-  const getFilteredAndSortedVisits = () => {
-    return visits
-      .filter(visit => {
-        const matchesSearch =
-          visit.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          visit.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesSearch;
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case 'reason':
-            return (a.reason || '').localeCompare(b.reason || '');
-          case 'date':
-          default:
-            return new Date(b.date || 0) - new Date(a.date || 0);
-        }
-      });
-  };
-
   if (loading) {
     return (
       <div className="medical-page-container">
@@ -174,7 +161,7 @@ const Visits = () => {
     );
   }
 
-  const filteredVisits = getFilteredAndSortedVisits();
+  const filteredVisits = dataManagement.data;
 
   return (
     <div className="medical-page-container">
@@ -207,33 +194,25 @@ const Visits = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search visits..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          </div>
         </div>
 
-        <div className="filters-container">
-          <div className="filter-group">
-            <label>Sort By</label>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="filter-select"
-            >
-              <option value="date">Date</option>
-              <option value="reason">Reason</option>
-            </select>
-          </div>
-        </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
 
         <div className="medical-items-list">
           {filteredVisits.length === 0 ? (
@@ -241,11 +220,11 @@ const Visits = () => {
               <div className="empty-icon">🏥</div>
               <h3>No Medical Visits Found</h3>
               <p>
-                {searchTerm
-                  ? 'Try adjusting your search criteria.'
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
                   : 'Start by adding your first medical visit.'}
               </p>
-              {!searchTerm && (
+              {!dataManagement.hasActiveFilters && (
                 <button className="add-button" onClick={handleAddVisit}>
                   Add Your First Visit
                 </button>

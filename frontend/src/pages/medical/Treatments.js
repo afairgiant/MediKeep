@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
@@ -43,11 +46,15 @@ const Treatments = () => {
     requiresPatient: true,
   });
 
+  // Get standardized configuration
+  const config = getMedicalPageConfig('treatments');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(treatments, config);
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
-  const [sortBy, setSortBy] = useState('start_date');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     treatment_name: '',
     treatment_type: '',
@@ -154,41 +161,8 @@ const Treatments = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Sorting and filtering
-  const getSortedTreatments = () => {
-    const sorted = [...treatments].sort((a, b) => {
-      if (sortBy === 'start_date') {
-        const aDate = new Date(a.start_date || 0);
-        const bDate = new Date(b.start_date || 0);
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      }
-
-      if (sortBy === 'treatment_name') {
-        return sortOrder === 'asc'
-          ? a.treatment_name.localeCompare(b.treatment_name)
-          : b.treatment_name.localeCompare(a.treatment_name);
-      }
-
-      if (sortBy === 'status') {
-        return sortOrder === 'asc'
-          ? a.status.localeCompare(b.status)
-          : b.status.localeCompare(a.status);
-      }
-
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  const handleSortChange = newSortBy => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('desc');
-    }
-  };
+  // Get processed data from data management
+  const processedTreatments = dataManagement.data;
 
   const getStatusIcon = status => {
     switch (status) {
@@ -249,43 +223,45 @@ const Treatments = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
-              >
-                <option value="start_date">Start Date</option>
-                <option value="treatment_name">Treatment Name</option>
-                <option value="status">Status</option>
-              </select>
-              <button
-                className="sort-order-button"
-                onClick={() =>
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                }
-              >
-                {sortOrder === 'asc' ? '↑' : '↓'}
-              </button>
-            </div>
-          </div>
         </div>
 
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
+
         <div className="medical-items-list">
-          {getSortedTreatments().length === 0 ? (
+          {processedTreatments.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🩹</div>
               <h3>No treatments found</h3>
-              <p>Click "Add New Treatment" to get started.</p>
-              <button className="add-button" onClick={handleAddTreatment}>
-                Add Your First Treatment
-              </button>
+              <p>
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Click "Add New Treatment" to get started.'}
+              </p>
+              {!dataManagement.hasActiveFilters && (
+                <button className="add-button" onClick={handleAddTreatment}>
+                  Add Your First Treatment
+                </button>
+              )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedTreatments().map(treatment => (
+              {processedTreatments.map(treatment => (
                 <div key={treatment.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
@@ -365,7 +341,7 @@ const Treatments = () => {
             </div>
           ) : (
             <MedicalTable
-              data={getSortedTreatments()}
+              data={processedTreatments}
               columns={[
                 { header: 'Treatment Name', accessor: 'treatment_name' },
                 { header: 'Type', accessor: 'treatment_type' },

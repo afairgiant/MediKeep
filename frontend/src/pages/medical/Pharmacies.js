@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import '../../styles/pages/Practitioners.css';
@@ -11,20 +14,8 @@ const Pharmacies = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [brandFilter, setBrandFilter] = useState('all');
-  const [cityFilter, setCityFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
   const [showModal, setShowModal] = useState(false);
   const [editingPharmacy, setEditingPharmacy] = useState(null);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    brand: '',
-    street_address: '',
-    city: '',
-    store_number: '',
-  });
 
   // Use global state for pharmacies data
   const {
@@ -33,6 +24,20 @@ const Pharmacies = () => {
     error: globalError,
     refresh: refreshPharmacies,
   } = usePharmacies();
+
+  // Get standardized configuration
+  const config = getMedicalPageConfig('pharmacies');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(pharmacies || [], config);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    brand: '',
+    street_address: '',
+    city: '',
+    store_number: '',
+  });
 
   // Handle global error
   useEffect(() => {
@@ -121,61 +126,8 @@ const Pharmacies = () => {
     }
   };
 
-  const getFilteredAndSortedPharmacies = () => {
-    if (!pharmacies) return [];
-    let filtered = [...pharmacies];
-
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(
-        pharmacy =>
-          pharmacy.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          pharmacy.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          pharmacy.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          pharmacy.store_number
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply brand filter
-    if (brandFilter !== 'all') {
-      filtered = filtered.filter(pharmacy => pharmacy.brand === brandFilter);
-    }
-
-    // Apply city filter
-    if (cityFilter !== 'all') {
-      filtered = filtered.filter(pharmacy => pharmacy.city === cityFilter);
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return (a.name || '').localeCompare(b.name || '');
-        case 'brand':
-          return (a.brand || '').localeCompare(b.brand || '');
-        case 'city':
-          return (a.city || '').localeCompare(b.city || '');
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  };
-
-  const getUniqueBrands = () => {
-    if (!pharmacies) return [];
-    const brands = [...new Set(pharmacies.map(p => p.brand).filter(Boolean))];
-    return brands.sort();
-  };
-
-  const getUniqueCities = () => {
-    if (!pharmacies) return [];
-    const cities = [...new Set(pharmacies.map(p => p.city).filter(Boolean))];
-    return cities.sort();
-  };
+  // Get processed data from data management
+  const filteredPharmacies = dataManagement.data;
 
   if (loading) {
     return (
@@ -204,90 +156,28 @@ const Pharmacies = () => {
               + Add New Pharmacy
             </button>
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                <option value="name">Name</option>
-                <option value="brand">Brand</option>
-                <option value="city">City</option>
-              </select>
-            </div>
-          </div>
         </div>
 
-        <div className="filters-section">
-          <div className="search-group">
-            <input
-              type="text"
-              placeholder="Search pharmacies..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="brand-filter">Brand:</label>
-            <select
-              id="brand-filter"
-              value={brandFilter}
-              onChange={e => setBrandFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Brands</option>
-              {getUniqueBrands().map(brand => (
-                <option key={brand} value={brand}>
-                  {brand}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="city-filter">City:</label>
-            <select
-              id="city-filter"
-              value={cityFilter}
-              onChange={e => setCityFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Cities</option>
-              {getUniqueCities().map(city => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {(searchTerm || brandFilter !== 'all' || cityFilter !== 'all') && (
-            <button
-              className="clear-filters-btn"
-              onClick={() => {
-                setSearchTerm('');
-                setBrandFilter('all');
-                setCityFilter('all');
-              }}
-            >
-              Clear Filters
-            </button>
-          )}
-        </div>
-
-        <div className="results-summary">
-          <span>
-            {(searchTerm || brandFilter !== 'all' || cityFilter !== 'all') && (
-              <span className="filter-indicator">🔍 Filters Active • </span>
-            )}
-            {getFilteredAndSortedPharmacies().length} of{' '}
-            {pharmacies?.length || 0} pharmacies shown
-          </span>
-        </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
 
         <div className="medical-items-list">
-          {getFilteredAndSortedPharmacies().length === 0 ? (
+          {filteredPharmacies.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🏥</div>
               {(pharmacies?.length || 0) === 0 ? (
@@ -307,7 +197,7 @@ const Pharmacies = () => {
             </div>
           ) : (
             <div className="medical-items-grid">
-              {getFilteredAndSortedPharmacies().map(pharmacy => (
+              {filteredPharmacies.map(pharmacy => (
                 <div key={pharmacy.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">{pharmacy.name}</h3>

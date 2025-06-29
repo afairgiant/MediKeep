@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -41,11 +44,15 @@ const Immunization = () => {
     requiresPatient: true,
   });
 
+  // Get standardized configuration
+  const config = getMedicalPageConfig('immunizations');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(immunizations, config);
+
   // Form and UI state
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingImmunization, setEditingImmunization] = useState(null);
-  const [sortBy, setSortBy] = useState('date_administered');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     vaccine_name: '',
     date_administered: '',
@@ -152,34 +159,8 @@ const Immunization = () => {
     }
   };
 
-  const getSortedImmunizations = () => {
-    const sorted = [...immunizations].sort((a, b) => {
-      if (sortBy === 'date_administered') {
-        const aDate = new Date(a.date_administered || 0);
-        const bDate = new Date(b.date_administered || 0);
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      }
-
-      if (sortBy === 'vaccine_name') {
-        return sortOrder === 'asc'
-          ? a.vaccine_name.localeCompare(b.vaccine_name)
-          : b.vaccine_name.localeCompare(a.vaccine_name);
-      }
-
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  const handleSortChange = newSortBy => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('asc');
-    }
-  };
+  // Get processed data from data management
+  const processedImmunizations = dataManagement.data;
 
   if (loading) {
     return (
@@ -222,28 +203,22 @@ const Immunization = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
-              >
-                <option value="date_administered">Date Administered</option>
-                <option value="vaccine_name">Vaccine Name</option>
-              </select>
-              <button
-                className="sort-order-button"
-                onClick={() =>
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                }
-              >
-                {sortOrder === 'asc' ? '↑' : '↓'}
-              </button>
-            </div>
-          </div>
         </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
         {showAddForm && (
           <div
             className="medical-form-overlay"
@@ -410,7 +385,7 @@ const Immunization = () => {
           </div>
         )}{' '}
         <div className="medical-items-list">
-          {getSortedImmunizations().length === 0 ? (
+          {processedImmunizations.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">💉</div>
               <h3>No immunizations found</h3>
@@ -418,7 +393,7 @@ const Immunization = () => {
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedImmunizations().map(immunization => (
+              {processedImmunizations.map(immunization => (
                 <div key={immunization.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">{immunization.vaccine_name}</h3>
@@ -516,7 +491,7 @@ const Immunization = () => {
             </div>
           ) : (
             <MedicalTable
-              data={getSortedImmunizations()}
+              data={processedImmunizations}
               columns={[
                 { header: 'Vaccine Name', accessor: 'vaccine_name' },
                 { header: 'Date Administered', accessor: 'date_administered' },

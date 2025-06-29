@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 
 /**
  * Universal filtering hook for medical data
@@ -61,6 +61,77 @@ export const useFiltering = (data = [], config = {}) => {
     { value: 'year', label: 'This Year' },
   ];
 
+  // Helper function to get nested object values
+  const getNestedValue = useCallback((obj, path) => {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
+  }, []);
+
+  // Helper function for date range filtering
+  const matchesDateRange = useCallback(
+    (dateValue, range, item = null) => {
+      if (!dateValue) return false;
+
+      const itemDate = new Date(dateValue);
+      const now = new Date();
+
+      switch (range) {
+        case 'today':
+          return itemDate.toDateString() === now.toDateString();
+        case 'week':
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return itemDate >= weekAgo;
+        case 'month':
+          const monthAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            now.getDate()
+          );
+          return itemDate >= monthAgo;
+        case 'year':
+          const yearAgo = new Date(
+            now.getFullYear() - 1,
+            now.getMonth(),
+            now.getDate()
+          );
+          return itemDate >= yearAgo;
+        case 'current':
+          // For active medications/treatments - requires item parameter
+          if (!item) return true;
+          const startDate = getNestedValue(
+            item,
+            config.startDateField || 'start_date'
+          );
+          const endDate = getNestedValue(
+            item,
+            config.endDateField || 'end_date'
+          );
+          return (
+            (!startDate || new Date(startDate) <= now) &&
+            (!endDate || new Date(endDate) >= now)
+          );
+        case 'past':
+          // For past medications/treatments - requires item parameter
+          if (!item) return true;
+          const endField = getNestedValue(
+            item,
+            config.endDateField || 'end_date'
+          );
+          return endField && new Date(endField) < now;
+        case 'future':
+          // For future medications/treatments - requires item parameter
+          if (!item) return true;
+          const startField = getNestedValue(
+            item,
+            config.startDateField || 'start_date'
+          );
+          return startField && new Date(startField) > now;
+        default:
+          return true;
+      }
+    },
+    [getNestedValue, config.startDateField, config.endDateField]
+  );
+
   // Filter data
   const filteredData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -104,72 +175,7 @@ export const useFiltering = (data = [], config = {}) => {
 
       return true;
     });
-  }, [data, filters, searchFields, config]);
-
-  // Helper function to get nested object values
-  const getNestedValue = (obj, path) => {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
-  };
-
-  // Helper function for date range filtering
-  const matchesDateRange = (dateValue, range, item = null) => {
-    if (!dateValue) return false;
-
-    const itemDate = new Date(dateValue);
-    const now = new Date();
-
-    switch (range) {
-      case 'today':
-        return itemDate.toDateString() === now.toDateString();
-      case 'week':
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        return itemDate >= weekAgo;
-      case 'month':
-        const monthAgo = new Date(
-          now.getFullYear(),
-          now.getMonth() - 1,
-          now.getDate()
-        );
-        return itemDate >= monthAgo;
-      case 'year':
-        const yearAgo = new Date(
-          now.getFullYear() - 1,
-          now.getMonth(),
-          now.getDate()
-        );
-        return itemDate >= yearAgo;
-      case 'current':
-        // For active medications/treatments - requires item parameter
-        if (!item) return true;
-        const startDate = getNestedValue(
-          item,
-          config.startDateField || 'start_date'
-        );
-        const endDate = getNestedValue(item, config.endDateField || 'end_date');
-        return (
-          (!startDate || new Date(startDate) <= now) &&
-          (!endDate || new Date(endDate) >= now)
-        );
-      case 'past':
-        // For past medications/treatments - requires item parameter
-        if (!item) return true;
-        const endField = getNestedValue(
-          item,
-          config.endDateField || 'end_date'
-        );
-        return endField && new Date(endField) < now;
-      case 'future':
-        // For future medications/treatments - requires item parameter
-        if (!item) return true;
-        const startField = getNestedValue(
-          item,
-          config.startDateField || 'start_date'
-        );
-        return startField && new Date(startField) > now;
-      default:
-        return true;
-    }
-  };
+  }, [data, filters, searchFields, config, getNestedValue, matchesDateRange]);
 
   // Update specific filter
   const updateFilter = (key, value) => {

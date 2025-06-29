@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import {
-  MedicalCard,
-  StatusBadge,
-  PageHeader,
-  FilterControls,
-} from '../../components';
+import { MedicalCard, StatusBadge, PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import {
   usePractitioners,
   useCacheManager,
@@ -223,8 +219,8 @@ const Practitioners = () => {
           </div>
         </div>
 
-        {/* Standardized Filter Controls */}
-        <FilterControls
+        {/* Mantine Filter Controls */}
+        <MantineFilters
           filters={dataManagement.filters}
           updateFilter={dataManagement.updateFilter}
           clearFilters={dataManagement.clearFilters}
@@ -236,7 +232,6 @@ const Practitioners = () => {
           sortBy={dataManagement.sortBy}
           sortOrder={dataManagement.sortOrder}
           handleSortChange={dataManagement.handleSortChange}
-          getSortIndicator={dataManagement.getSortIndicator}
           totalCount={dataManagement.totalCount}
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}
