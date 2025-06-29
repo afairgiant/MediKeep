@@ -53,6 +53,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 // Components
 import { LoggingTest, ErrorBoundary } from './components';
 import GlobalStateDemo from './components/common/GlobalStateDemo';
+
 import logger from './services/logger';
 import { timezoneService } from './services/timezoneService';
 import './App.css';
