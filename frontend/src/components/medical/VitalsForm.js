@@ -193,6 +193,10 @@ const VitalsForm = ({
   onSave,
   onCancel,
   isEdit = false,
+  createItem,
+  updateItem,
+  error,
+  clearError,
 }) => {
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
@@ -362,10 +366,18 @@ const VitalsForm = ({
 
       let result;
       if (isEdit && vitals?.id) {
-        result = await vitalsService.updateVitals(vitals.id, processedData);
+        if (updateItem) {
+          result = await updateItem(vitals.id, processedData);
+        } else {
+          result = await vitalsService.updateVitals(vitals.id, processedData);
+        }
         toast.success('Vitals updated successfully');
       } else {
-        result = await vitalsService.createVitals(processedData);
+        if (createItem) {
+          result = await createItem(processedData);
+        } else {
+          result = await vitalsService.createVitals(processedData);
+        }
         toast.success('Vitals recorded successfully');
       }
 

@@ -149,15 +149,17 @@ export const useMedicalData = config => {
         }
 
         if (data && isMounted) {
-          setItems(data);
+          // Extract data array from API response if it's wrapped in a response object
+          const extractedData = data?.data || data;
+          setItems(Array.isArray(extractedData) ? extractedData : []);
 
           if (
             config.loadFilesCounts &&
-            data.length <= 20 &&
+            extractedData.length <= 20 &&
             config.apiMethodsConfig.getFiles
           ) {
             const counts = {};
-            for (const item of data) {
+            for (const item of extractedData) {
               try {
                 const files = await config.apiMethodsConfig.getFiles(
                   item.id,
@@ -215,15 +217,17 @@ export const useMedicalData = config => {
         }
 
         if (data) {
-          setItems(data);
+          // Extract data array from API response if it's wrapped in a response object
+          const extractedData = data?.data || data;
+          setItems(Array.isArray(extractedData) ? extractedData : []);
 
           if (
             config.loadFilesCounts &&
-            data.length <= 20 &&
+            extractedData.length <= 20 &&
             config.apiMethodsConfig.getFiles
           ) {
             const counts = {};
-            for (const item of data) {
+            for (const item of extractedData) {
               try {
                 const files = await config.apiMethodsConfig.getFiles(
                   item.id,
@@ -244,7 +248,7 @@ export const useMedicalData = config => {
             setFilesCounts(counts);
           }
         }
-        return data;
+        return extractedData;
       },
       { errorMessage: `Failed to refresh ${config.entityName} data` }
     );

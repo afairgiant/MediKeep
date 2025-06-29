@@ -31,7 +31,7 @@ export const useFiltering = (data = [], config = {}) => {
       return config.categoryOptions;
     }
 
-    if (config.categoryField && data.length > 0) {
+    if (config.categoryField && Array.isArray(data) && data.length > 0) {
       const uniqueCategories = [
         ...new Set(
           data.map(item => item[config.categoryField]).filter(Boolean)
@@ -87,6 +87,13 @@ export const useFiltering = (data = [], config = {}) => {
             now.getDate()
           );
           return itemDate >= monthAgo;
+        case 'quarter':
+          const quarterAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 3,
+            now.getDate()
+          );
+          return itemDate >= quarterAgo;
         case 'year':
           const yearAgo = new Date(
             now.getFullYear() - 1,
@@ -134,7 +141,7 @@ export const useFiltering = (data = [], config = {}) => {
 
   // Filter data
   const filteredData = useMemo(() => {
-    if (!data || data.length === 0) return [];
+    if (!Array.isArray(data) || data.length === 0) return [];
 
     return data.filter(item => {
       // Search filter
@@ -167,8 +174,18 @@ export const useFiltering = (data = [], config = {}) => {
       // Custom filters
       if (config.customFilters) {
         for (const [key, filterFn] of Object.entries(config.customFilters)) {
-          if (filters[key] !== undefined && !filterFn(item, filters[key])) {
-            return false;
+          if (filters[key] !== undefined && filters[key] !== 'all') {
+            console.log(
+              `Custom filter ${key}:`,
+              filters[key],
+              'for item:',
+              item
+            );
+            const result = filterFn(item, filters[key]);
+            console.log(`Filter result:`, result);
+            if (!result) {
+              return false;
+            }
           }
         }
       }
@@ -212,7 +229,7 @@ export const useFiltering = (data = [], config = {}) => {
     statusOptions,
     categoryOptions,
     dateRangeOptions,
-    totalCount: data.length,
+    totalCount: Array.isArray(data) ? data.length : 0,
     filteredCount: filteredData.length,
   };
 };

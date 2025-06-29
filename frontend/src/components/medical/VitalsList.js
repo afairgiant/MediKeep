@@ -16,20 +16,28 @@ const VitalsList = ({
   patientId,
   onEdit,
   onRefresh,
+  vitalsData,
+  loading,
+  error,
   showActions = true,
   limit = 10,
 }) => {
-  const [vitals, setVitals] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Use passed data if available, otherwise load internally
+  const [internalVitals, setInternalVitals] = useState([]);
+  const [internalLoading, setInternalLoading] = useState(true);
+  const [internalError, setInternalError] = useState(null);
   const [sortConfig, setSortConfig] = useState({
     key: 'recorded_date',
     direction: 'desc',
   });
+
   const loadVitals = useCallback(async () => {
+    // Only load internally if no data is passed via props
+    if (vitalsData !== undefined) return;
+
     try {
-      setIsLoading(true);
-      setError(null);
+      setInternalLoading(true);
+      setInternalError(null);
       let response;
       if (patientId) {
         response = await vitalsService.getPatientVitals(patientId, { limit });
@@ -40,24 +48,29 @@ const VitalsList = ({
       // Extract the data array from the response
       const data = response?.data || response;
 
-      setVitals(Array.isArray(data) ? data : []);
+      setInternalVitals(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || 'Failed to load vitals');
-      setVitals([]);
+      setInternalError(err.message || 'Failed to load vitals');
+      setInternalVitals([]);
     } finally {
-      setIsLoading(false);
+      setInternalLoading(false);
     }
-  }, [patientId, limit]);
+  }, [patientId, limit, vitalsData]);
 
   useEffect(() => {
     loadVitals();
   }, [loadVitals]);
 
   useEffect(() => {
-    if (onRefresh) {
+    if (onRefresh && vitalsData === undefined) {
       loadVitals();
     }
-  }, [onRefresh, loadVitals]);
+  }, [onRefresh, loadVitals, vitalsData]);
+
+  // Use passed data or internal data
+  const vitals = vitalsData !== undefined ? vitalsData : internalVitals;
+  const isLoading = loading !== undefined ? loading : internalLoading;
+  const currentError = error !== undefined ? error : internalError;
 
   const handleDelete = async vitalsId => {
     if (
@@ -105,7 +118,8 @@ const VitalsList = ({
   };
 
   const getSortedVitals = () => {
-    if (!sortConfig.key) return vitals;
+    if (!sortConfig.key || !vitals) return vitals || [];
+    if (!Array.isArray(vitals)) return [];
 
     return [...vitals].sort((a, b) => {
       let aValue = a[sortConfig.key];
@@ -167,11 +181,11 @@ const VitalsList = ({
     );
   }
 
-  if (error) {
+  if (currentError) {
     return (
       <div className="vitals-list error">
         <div className="error-message">
-          <p>Error loading vitals: {error}</p>
+          <p>Error loading vitals: {currentError}</p>
           <button onClick={loadVitals} className="retry-btn">
             Try Again
           </button>

@@ -20,11 +20,15 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
 import VitalsChart from '../../components/medical/VitalsChart';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
+import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import '../../styles/shared/MedicalPageShared.css';
 import './Vitals.css';
 
@@ -92,6 +96,9 @@ const STATS_CONFIGS = {
 };
 
 const Vitals = () => {
+  // Page configuration
+  const pageConfig = getMedicalPageConfig('vitals');
+
   // State management
   const [showForm, setShowForm] = useState(false);
   const [editingVitals, setEditingVitals] = useState(null);
@@ -104,6 +111,45 @@ const Vitals = () => {
   // Use global state for patient data
   const { patient: currentPatient, loading: globalDataLoading } =
     useCurrentPatient();
+
+  // Medical data management with filtering and sorting
+  const {
+    items: vitalsData,
+    loading: vitalsLoading,
+    error: vitalsError,
+    createItem,
+    updateItem,
+    deleteItem,
+    refreshData,
+    clearError,
+  } = useMedicalData({
+    entityName: 'vitals',
+    apiMethodsConfig: {
+      getAll: signal => vitalsService.getVitals({}, signal),
+      getByPatient: (patientId, signal) =>
+        vitalsService.getPatientVitals(patientId, {}, signal),
+      create: (data, signal) => vitalsService.createVitals(data, signal),
+      update: (id, data, signal) =>
+        vitalsService.updateVitals(id, data, signal),
+      delete: (id, signal) => vitalsService.deleteVitals(id, signal),
+    },
+    requiresPatient: true,
+  });
+
+  // Data management with filtering and sorting
+  const dataManagement = useDataManagement(vitalsData || [], pageConfig);
+  const {
+    filteredData: filteredVitals = [],
+    filters,
+    updateFilter,
+    clearFilters,
+    hasActiveFilters,
+    sortBy,
+    sortOrder,
+    handleSortChange,
+    totalCount,
+    filteredCount,
+  } = dataManagement || {};
 
   // Load stats with enhanced error handling
   const loadStats = useCallback(async () => {
@@ -127,12 +173,29 @@ const Vitals = () => {
     }
   }, [currentPatient?.id]);
 
-  // Load stats when patient changes
+  // Load stats when patient changes or vitals data changes
   useEffect(() => {
-    if (currentPatient) {
+    if (currentPatient && vitalsData) {
       loadStats();
     }
-  }, [loadStats, currentPatient]);
+  }, [loadStats, currentPatient, vitalsData]);
+
+  // Generate filter options from vitalsData
+  const statusOptions = useMemo(() => {
+    return pageConfig.filtering?.statusOptions || [];
+  }, [pageConfig.filtering?.statusOptions]);
+
+  const categoryOptions = useMemo(() => {
+    return pageConfig.filtering?.categoryOptions || [];
+  }, [pageConfig.filtering?.categoryOptions]);
+
+  const dateRangeOptions = useMemo(() => {
+    return pageConfig.filtering.dateRangeOptions;
+  }, [pageConfig.filtering.dateRangeOptions]);
+
+  const sortOptions = useMemo(() => {
+    return pageConfig.sorting.sortOptions;
+  }, [pageConfig.sorting.sortOptions]);
 
   // Form handlers
   const handleAddNew = useCallback(() => {
@@ -145,12 +208,12 @@ const Vitals = () => {
     setShowForm(true);
   }, []);
 
-  const handleFormSave = useCallback(() => {
+  const handleFormSave = useCallback(async () => {
     setShowForm(false);
     setEditingVitals(null);
-    setRefreshList(prev => prev + 1);
+    await refreshData(); // Refresh vitals data
     loadStats(); // Refresh stats after saving
-  }, [loadStats]);
+  }, [refreshData, loadStats]);
 
   const handleFormCancel = useCallback(() => {
     setShowForm(false);
@@ -258,6 +321,15 @@ const Vitals = () => {
       <PageHeader title="Vital Signs" icon="🩺" />
 
       <div className="medical-page-content">
+        {vitalsError && (
+          <div className="error-message">
+            {vitalsError}
+            <button onClick={clearError} className="error-close">
+              ×
+            </button>
+          </div>
+        )}
+
         <div className="medical-page-controls">
           <div className="controls-left">
             <button className="add-button" onClick={handleAddNew}>
@@ -265,6 +337,26 @@ const Vitals = () => {
             </button>
           </div>
         </div>
+
+        {/* Mantine Filters */}
+        {dataManagement && filters && (
+          <MantineFilters
+            filters={filters}
+            updateFilter={updateFilter}
+            clearFilters={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            statusOptions={statusOptions}
+            categoryOptions={categoryOptions}
+            dateRangeOptions={dateRangeOptions}
+            sortOptions={sortOptions}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            handleSortChange={handleSortChange}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            config={pageConfig.filterControls}
+          />
+        )}
 
         {/* Stats Overview */}
         <motion.div
@@ -367,6 +459,10 @@ const Vitals = () => {
                   onSave={handleFormSave}
                   onCancel={handleFormCancel}
                   isEdit={!!editingVitals}
+                  createItem={createItem}
+                  updateItem={updateItem}
+                  error={vitalsError}
+                  clearError={clearError}
                 />
               </motion.div>
             </motion.div>
@@ -414,7 +510,9 @@ const Vitals = () => {
                 <VitalsList
                   patientId={currentPatient?.id}
                   onEdit={handleEdit}
-                  onRefresh={refreshList}
+                  vitalsData={filteredVitals}
+                  loading={vitalsLoading}
+                  error={vitalsError}
                   showActions={true}
                 />
               )}

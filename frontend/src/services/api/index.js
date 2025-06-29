@@ -209,19 +209,19 @@ class ApiService {
 
   // Patient methods
   getCurrentPatient(signal) {
-    return this.get('/patients/me/', { signal });
+    return this.get('/patients/me', { signal });
   }
 
   createCurrentPatient(patientData, signal) {
-    return this.post('/patients/me/', patientData, { signal });
+    return this.post('/patients/me', patientData, { signal });
   }
 
   updateCurrentPatient(patientData, signal) {
-    return this.put('/patients/me/', patientData, { signal });
+    return this.put('/patients/me', patientData, { signal });
   }
 
   getRecentActivity(signal) {
-    return this.get('/patients/recent-activity/', { signal });
+    return this.get('/patients/me/recent-activity', { signal });
   }
 
   // Lab Result methods
