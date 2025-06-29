@@ -16,6 +16,7 @@ from app.api.v1.endpoints import (
     pharmacy,
     practitioner,
     procedure,
+    system,
     treatment,
     users,
     utils,
@@ -65,6 +66,9 @@ api_router.include_router(export.router, prefix="/export", tags=["export"])
 
 # Utils endpoints
 api_router.include_router(utils.router)
+
+# System endpoints
+api_router.include_router(system.router, prefix="/system", tags=["system"])
 
 # Admin endpoints
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
