@@ -69,5 +69,7 @@ jsconfig.json
 alembic.ini
 migrations/
 
-# Uploads (will be handled by volumes)
+# Uploads, logs and backups (will be handled by volumes)
 uploads/
+logs/
+backups/

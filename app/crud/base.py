@@ -5,10 +5,21 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, asc, desc, or_, text
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.logging_config import get_logger
+from app.core.logging_constants import (
+    LogFields,
+    format_log_message,
+    get_log_category,
+    sanitize_log_input,
+)
+
 # Define the type variables for the Generic class
 ModelType = TypeVar("ModelType")
 CreateSchemaType = TypeVar("CreateSchemaType")
 UpdateSchemaType = TypeVar("UpdateSchemaType")
+
+# Initialize logger for CRUD operations
+logger = get_logger(__name__, "app")
 
 
 class QueryMixin:
@@ -350,6 +361,48 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         self.primary_key = primary_key
         self.timezone_fields = timezone_fields or []
 
+        # Initialize model-specific logger for better traceability
+        self.model_name = model.__name__.lower()
+        self.logger = get_logger(f"crud.{self.model_name}", "app")
+
+    def _sanitize_for_logging(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize sensitive data before logging."""
+        sanitized = {}
+        sensitive_fields = {
+            "password",
+            "token",
+            "secret",
+            "key",
+            "ssn",
+            "social_security",
+        }
+
+        for key, value in data.items():
+            if any(sensitive in key.lower() for sensitive in sensitive_fields):
+                sanitized[key] = "[REDACTED]"
+            elif isinstance(value, str):
+                sanitized[key] = sanitize_log_input(
+                    str(value)[:100]
+                )  # Truncate long strings
+            else:
+                sanitized[key] = str(value)[:100] if value is not None else None
+
+        return sanitized
+
+    def _log_operation(self, operation: str, **context):
+        """Log CRUD operations with consistent format."""
+        log_data = {
+            LogFields.OPERATION: operation,
+            LogFields.MODEL: self.model_name,
+            **context,
+        }
+
+        message = format_log_message(
+            "crud_operation", operation=operation, model=self.model_name, **context
+        )
+
+        self.logger.debug(message, extra=log_data)
+
     def _convert_timezone_fields(self, obj_data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert timezone fields from user input to UTC."""
         from app.core.datetime_utils import to_utc
@@ -360,6 +413,15 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 try:
                     converted_data[field] = to_utc(converted_data[field])
                 except ValueError as e:
+                    self.logger.error(
+                        f"Timezone conversion failed for {self.model_name}.{field}",
+                        extra={
+                            LogFields.MODEL: self.model_name,
+                            LogFields.FIELD: field,
+                            LogFields.ERROR: str(e),
+                            LogFields.VALUE: str(converted_data[field]),
+                        },
+                    )
                     raise ValueError(
                         f"Invalid datetime in field {field}: {obj_data[field]}"
                     )
@@ -368,17 +430,42 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
         """Get a single record by ID."""
-        return db.query(self.model).filter(self.model.id == id).first()
+        try:
+            self.logger.debug(f"Retrieving {self.model_name} record with ID: {id}")
+            result = db.query(self.model).filter(self.model.id == id).first()
+
+            if result:
+                self.logger.debug(
+                    f"Successfully retrieved {self.model_name} record {id}"
+                )
+            else:
+                self.logger.debug(f"{self.model_name} record {id} not found")
+
+            return result
+        except Exception as e:
+            self.logger.error(f"Error retrieving {self.model_name} record {id}: {e}")
+            raise
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
         """Get multiple records with pagination."""
-        return db.query(self.model).offset(skip).limit(limit).all()
+        try:
+            self.logger.debug(
+                f"Retrieving {self.model_name} records (skip={skip}, limit={limit})"
+            )
+            results = db.query(self.model).offset(skip).limit(limit).all()
+            self.logger.debug(f"Retrieved {len(results)} {self.model_name} records")
+            return results
+        except Exception as e:
+            self.logger.error(f"Error retrieving {self.model_name} records: {e}")
+            raise
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """Create a new record with simplified error handling."""
         obj_in_data = jsonable_encoder(obj_in)
+
+        self.logger.info(f"Creating new {self.model_name} record")
 
         # Convert timezone fields
         obj_in_data = self._convert_timezone_fields(obj_in_data)
@@ -386,6 +473,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         # Remove explicit ID if present
         if "id" in obj_in_data:
             del obj_in_data["id"]
+            self.logger.debug(
+                f"Removed explicit ID from {self.model_name} creation data"
+            )
 
         db_obj = self.model(**obj_in_data)
         db.add(db_obj)
@@ -393,15 +483,30 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         try:
             db.commit()
             db.refresh(db_obj)
+            self.logger.info(
+                f"Successfully created {self.model_name} record with ID {db_obj.id}"
+            )
             return db_obj
+
         except Exception as e:
             db.rollback()
+            error_msg = str(e)
+            self.logger.error(f"Failed to create {self.model_name} record: {error_msg}")
+
             # Try sequence fix once, then re-raise
-            if "duplicate key" in str(e) and self._fix_sequence(db):
+            if "duplicate key" in error_msg and self._fix_sequence(db):
+                self.logger.info(
+                    f"Applied sequence fix for {self.model_name}, retrying creation"
+                )
+
                 db_obj = self.model(**obj_in_data)
                 db.add(db_obj)
                 db.commit()
                 db.refresh(db_obj)
+
+                self.logger.info(
+                    f"Successfully created {self.model_name} record {db_obj.id} after sequence fix"
+                )
                 return db_obj
             raise
 
@@ -409,6 +514,16 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         """Simplified sequence fix for PostgreSQL."""
         try:
             table_name = self.model.__tablename__
+
+            self.logger.debug(
+                f"Attempting sequence fix for {self.model_name}",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "sequence_fix",
+                    "table_name": table_name,
+                },
+            )
+
             # Get max ID and reset sequence
             max_id = (
                 db.execute(
@@ -419,9 +534,32 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             sequence_name = f"{table_name}_id_seq"
             db.execute(text(f"SELECT setval('{sequence_name}', {max_id + 1})"))
             db.commit()
+
+            self.logger.info(
+                f"Successfully fixed sequence for {self.model_name}",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "sequence_fix",
+                    "table_name": table_name,
+                    "max_id": max_id,
+                    "new_sequence_value": max_id + 1,
+                },
+            )
+
             return True
-        except Exception:
+
+        except Exception as e:
             db.rollback()
+
+            self.logger.error(
+                f"Sequence fix failed for {self.model_name}",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "sequence_fix",
+                    LogFields.ERROR: str(e),
+                },
+            )
+
             return False
 
     def update(
@@ -432,6 +570,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         obj_in: Union[UpdateSchemaType, Dict[str, Any]],
     ) -> ModelType:
         """Update an existing record."""
+        record_id = str(db_obj.id)  # type: ignore
         obj_data = jsonable_encoder(db_obj)
 
         if isinstance(obj_in, dict):
@@ -443,25 +582,113 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 else jsonable_encoder(obj_in)
             )
 
+        self.logger.info(f"Updating {self.model_name} record {record_id}")
+
         # Convert timezone fields
         update_data = self._convert_timezone_fields(update_data)
 
-        # Update only fields that exist in the model
-        for field, value in update_data.items():
-            if field in obj_data and hasattr(db_obj, field):
-                setattr(db_obj, field, value)
+        # Track what fields are being updated
+        updated_fields = []
 
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
+        try:
+            # Update only fields that exist in the model
+            for field, value in update_data.items():
+                if field in obj_data and hasattr(db_obj, field):
+                    old_value = getattr(db_obj, field, None)
+                    setattr(db_obj, field, value)
+
+                    # Only log and count fields that actually changed
+                    if old_value != value:
+                        updated_fields.append(field)
+                        self.logger.debug(
+                            f"Updated {self.model_name}.{field}: {old_value} → {value}"
+                        )
+
+            db.add(db_obj)
+            db.commit()
+            db.refresh(db_obj)
+
+            self.logger.info(
+                f"Successfully updated {self.model_name} record {record_id} ({len(updated_fields)} fields)"
+            )
+            return db_obj
+
+        except Exception as e:
+            db.rollback()
+            self.logger.error(
+                f"Failed to update {self.model_name} record {record_id}: {e}"
+            )
+            raise
 
     def delete(self, db: Session, *, id: int) -> ModelType:
         """Delete a record by ID."""
-        obj = db.query(self.model).filter(self.model.id == id).first()
-        if obj is None:
-            raise ValueError(f"Record with id {id} not found")
+        record_id = str(id)
 
-        db.delete(obj)
-        db.commit()
-        return obj
+        self.logger.info(
+            f"Deleting {self.model_name} record",
+            extra={
+                LogFields.MODEL: self.model_name,
+                LogFields.OPERATION: "delete",
+                LogFields.RECORD_ID: record_id,
+                LogFields.STATUS: "starting",
+            },
+        )
+
+        try:
+            obj = db.query(self.model).filter(self.model.id == id).first()
+            if obj is None:
+                self.logger.warning(
+                    f"{self.model_name} record not found for deletion",
+                    extra={
+                        LogFields.MODEL: self.model_name,
+                        LogFields.OPERATION: "delete",
+                        LogFields.RECORD_ID: record_id,
+                        LogFields.STATUS: "not_found",
+                    },
+                )
+                raise ValueError(f"Record with id {id} not found")
+
+            # Log some key fields before deletion (for audit purposes)
+            obj_data = jsonable_encoder(obj)
+            sanitized_data = self._sanitize_for_logging(obj_data)
+
+            self.logger.info(
+                f"Deleting {self.model_name} record with data",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "delete",
+                    LogFields.RECORD_ID: record_id,
+                    LogFields.DATA: sanitized_data,
+                    LogFields.STATUS: "confirmed",
+                },
+            )
+
+            db.delete(obj)
+            db.commit()
+
+            self.logger.info(
+                f"Successfully deleted {self.model_name} record",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "delete",
+                    LogFields.RECORD_ID: record_id,
+                    LogFields.STATUS: "success",
+                },
+            )
+
+            return obj
+
+        except Exception as e:
+            db.rollback()
+
+            self.logger.error(
+                f"Failed to delete {self.model_name} record",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "delete",
+                    LogFields.RECORD_ID: record_id,
+                    LogFields.ERROR: str(e),
+                    LogFields.STATUS: "error",
+                },
+            )
+            raise
