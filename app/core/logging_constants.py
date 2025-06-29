@@ -130,6 +130,7 @@ LOG_TEMPLATES: Dict[str, str] = {
     "health_check": "Health check requested",
     "startup": "Application startup completed",
     "shutdown": "Application shutdown initiated",
+    "crud_operation": "CRUD {operation} on {model}",
 }
 
 
@@ -176,6 +177,7 @@ CONTAINER_LOG_DIR: str = "/app/logs"
 class LogFields:
     """Standard field names for consistent structured logging."""
 
+    # Core logging fields
     TIMESTAMP = "time"
     LEVEL = "level"
     LOGGER = "logger"
@@ -183,10 +185,25 @@ class LogFields:
     CORRELATION_ID = "correlation_id"
     CATEGORY = "category"
     EVENT = "event"
+
+    # User and session fields
     USER_ID = "user_id"
     PATIENT_ID = "patient_id"
     IP = "ip"
+
+    # Technical fields
     DURATION = "duration"
     FILE = "file"
     LINE = "line"
     FUNCTION = "function"
+
+    # CRUD operation fields
+    OPERATION = "operation"
+    MODEL = "model"
+    RECORD_ID = "record_id"
+    STATUS = "status"
+    ERROR = "error"
+    DATA = "data"
+    FIELD = "field"
+    VALUE = "value"
+    COUNT = "count"

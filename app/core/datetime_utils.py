@@ -5,14 +5,15 @@ This module provides utilities for handling datetime conversions and validations
 across the Medical Records Management System.
 """
 
-import logging
 import os
 import re
 from datetime import date, datetime, timezone
 from typing import Any, Optional, Union
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-logger = logging.getLogger(__name__)
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__, "app")
 
 # Module-level configuration (simple and effective)
 FACILITY_TIMEZONE = None
