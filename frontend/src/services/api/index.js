@@ -221,7 +221,7 @@ class ApiService {
   }
 
   getRecentActivity(signal) {
-    return this.get('/patients/me/recent-activity', { signal });
+    return this.get('/patients/recent-activity/', { signal });
   }
 
   // Lab Result methods
