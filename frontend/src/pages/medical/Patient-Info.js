@@ -5,6 +5,8 @@ import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
+import { FormInput, FormSelect } from '../../components/forms';
+import { Button, DateInput } from '../../components/ui';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
@@ -79,9 +81,20 @@ const PatientInfo = () => {
 
   const handleInputChange = e => {
     const { name, value } = e.target;
+    let processedValue = value;
+
+    // Handle physician_id - convert empty string to null or empty for Mantine
+    if (name === 'physician_id') {
+      if (value === '') {
+        processedValue = '';
+      } else {
+        processedValue = value; // Keep as string for Mantine compatibility
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
   const handleEdit = () => {
@@ -127,14 +140,22 @@ const PatientInfo = () => {
       setError('');
       setSuccessMessage('');
       let updatedData;
+      // Prepare data for API - convert physician_id to number if present
+      const apiData = {
+        ...formData,
+        physician_id: formData.physician_id
+          ? parseInt(formData.physician_id)
+          : null,
+      };
+
       if (isCreating || !patientExists) {
-        updatedData = await apiService.createCurrentPatient(formData);
+        updatedData = await apiService.createCurrentPatient(apiData);
         setPatientExists(true);
         setIsCreating(false);
         setSuccessMessage('Patient information created successfully!');
       } else {
         // Use the correct API method for updating current patient
-        updatedData = await apiService.updateCurrentPatient(formData);
+        updatedData = await apiService.updateCurrentPatient(apiData);
         setIsEditing(false);
         setSuccessMessage('Patient information updated successfully!');
       }
@@ -203,170 +224,145 @@ const PatientInfo = () => {
           <div className="card-header">
             <h2>Personal Information</h2>
             {!isEditing && (
-              <button className="edit-button" onClick={handleEdit}>
+              <Button variant="primary" onClick={handleEdit}>
                 ✏️ Edit
-              </button>
+              </Button>
             )}
           </div>
 
           {isEditing ? (
             <form className="patient-form">
               <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="first_name">First Name *</label>
-                  <input
-                    type="text"
-                    id="first_name"
-                    name="first_name"
-                    value={formData.first_name}
-                    onChange={handleInputChange}
-                    required
-                    disabled={saving}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="last_name">Last Name *</label>
-                  <input
-                    type="text"
-                    id="last_name"
-                    name="last_name"
-                    value={formData.last_name}
-                    onChange={handleInputChange}
-                    required
-                    disabled={saving}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="birthDate">Birth Date *</label>
-                  <input
-                    type="date"
-                    id="birthDate"
-                    name="birthDate"
-                    value={formData.birthDate}
-                    onChange={handleInputChange}
-                    required
-                    disabled={saving}
-                  />
-                </div>{' '}
-                <div className="form-group">
-                  <label htmlFor="gender">Gender</label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-                </div>
-              </div>{' '}
-              <div className="form-group">
-                <label htmlFor="address">Address</label>
-                <textarea
-                  id="address"
-                  name="address"
-                  value={formData.address}
+                <FormInput
+                  label="First Name"
+                  name="first_name"
+                  value={formData.first_name}
                   onChange={handleInputChange}
+                  required={true}
                   disabled={saving}
-                  rows="3"
+                  placeholder="Enter first name"
+                />
+                <FormInput
+                  label="Last Name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleInputChange}
+                  required={true}
+                  disabled={saving}
+                  placeholder="Enter last name"
                 />
               </div>
               <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="bloodType">Blood Type</label>
-                  <select
-                    id="bloodType"
-                    name="bloodType"
-                    value={formData.bloodType}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                  >
-                    <option value="">Select Blood Type</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="height">Height (inches)</label>
-                  <input
-                    type="number"
-                    id="height"
-                    name="height"
-                    value={formData.height}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                    min="12"
-                    max="120"
-                    placeholder="e.g., 70"
-                  />
-                </div>
+                <DateInput
+                  label="Birth Date"
+                  name="birthDate"
+                  value={formData.birthDate}
+                  onChange={handleInputChange}
+                  firstDayOfWeek={0}
+                  required={true}
+                  disabled={saving}
+                  placeholder="Select birth date"
+                />
+                <FormSelect
+                  useMantine={true}
+                  label="Gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  disabled={saving}
+                  placeholder="Select Gender"
+                  options={[
+                    { value: 'M', label: 'Male' },
+                    { value: 'F', label: 'Female' },
+                    { value: 'OTHER', label: 'Other' },
+                  ]}
+                />
+              </div>
+              <FormInput
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                disabled={saving}
+                placeholder="Enter your address"
+                helpText="Optional: Full address for medical records"
+              />
+              <div className="form-row">
+                <FormSelect
+                  useMantine={true}
+                  label="Blood Type"
+                  name="bloodType"
+                  value={formData.bloodType}
+                  onChange={handleInputChange}
+                  disabled={saving}
+                  placeholder="Select Blood Type"
+                  options={[
+                    { value: 'A+', label: 'A+' },
+                    { value: 'A-', label: 'A-' },
+                    { value: 'B+', label: 'B+' },
+                    { value: 'B-', label: 'B-' },
+                    { value: 'AB+', label: 'AB+' },
+                    { value: 'AB-', label: 'AB-' },
+                    { value: 'O+', label: 'O+' },
+                    { value: 'O-', label: 'O-' },
+                  ]}
+                  helpText="Important for medical emergencies"
+                />
+                <FormInput
+                  label="Height"
+                  name="height"
+                  type="number"
+                  value={formData.height}
+                  onChange={handleInputChange}
+                  disabled={saving}
+                  placeholder="e.g., 70"
+                  helpText="Height in inches"
+                />
               </div>
               <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="weight">Weight (lbs)</label>
-                  <input
-                    type="number"
-                    id="weight"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                    min="1"
-                    max="1000"
-                    placeholder="e.g., 150"
-                  />{' '}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="physician_id">Primary Care Physician</label>
-                  <select
-                    id="physician_id"
-                    name="physician_id"
-                    value={formData.physician_id}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                  >
-                    <option value="">Select Physician (Optional)</option>
-                    {console.log(
-                      'Rendering practitioners dropdown, practitioners:',
-                      practitioners
-                    )}
-                    {practitioners.map(practitioner => (
-                      <option key={practitioner.id} value={practitioner.id}>
-                        {practitioner.name} - {practitioner.specialty}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <FormInput
+                  label="Weight"
+                  name="weight"
+                  type="number"
+                  value={formData.weight}
+                  onChange={handleInputChange}
+                  disabled={saving}
+                  placeholder="e.g., 150"
+                  helpText="Weight in pounds"
+                />
+                <FormSelect
+                  useMantine={true}
+                  label="Primary Care Physician"
+                  name="physician_id"
+                  value={
+                    formData.physician_id ? String(formData.physician_id) : ''
+                  }
+                  onChange={handleInputChange}
+                  disabled={saving}
+                  placeholder="Select Physician (Optional)"
+                  options={practitioners.map(practitioner => ({
+                    value: String(practitioner.id),
+                    label: `${practitioner.name} - ${practitioner.specialty}`,
+                  }))}
+                  helpText="Your primary doctor for ongoing care"
+                />
               </div>
               <div className="form-actions">
-                <button
-                  type="button"
-                  className="cancel-button"
+                <Button
+                  variant="secondary"
                   onClick={handleCancel}
                   disabled={saving}
                 >
                   Cancel
-                </button>
-                <button
-                  type="button"
-                  className="save-button"
+                </Button>
+                <Button
+                  variant="primary"
                   onClick={handleSave}
                   disabled={saving}
+                  loading={saving}
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
-                </button>
+                </Button>
               </div>
             </form>
           ) : (

@@ -12,6 +12,8 @@ import 'react-toastify/dist/ReactToastify.css';
 // Mantine
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+
 import { theme } from './theme';
 
 // Authentication

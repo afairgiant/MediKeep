@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@mantine/core": "^8.1.2",
+    "@mantine/dates": "^8.1.2",
     "@mantine/hooks": "^8.1.2",
     "@tabler/icons-react": "^3.5.0",
     "@testing-library/dom": "^10.4.0",

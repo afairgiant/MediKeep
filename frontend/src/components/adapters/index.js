@@ -7,3 +7,4 @@ export { Card, CardHeader, CardTitle, CardContent } from './Card';
 export { default as FormInput } from './FormInput';
 export { default as FormSelect } from './FormSelect';
 export { default as Select } from './Select';
+export { default as DateInput } from './DateInput';

@@ -247,8 +247,10 @@ export const useMedicalData = config => {
             }
             setFilesCounts(counts);
           }
+
+          return extractedData;
         }
-        return extractedData;
+        return [];
       },
       { errorMessage: `Failed to refresh ${config.entityName} data` }
     );

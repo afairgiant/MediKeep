@@ -13,5 +13,5 @@ export { default as DashboardCard } from './DashboardCard';
 export { default as Select } from '../adapters/Select';
 export { default as Checkbox } from './Checkbox';
 export { default as Alert } from './Alert';
-export { default as DateInput } from './DateInput';
+export { default as DateInput } from '../adapters/DateInput';
 export { default as TimezoneIndicator } from './TimezoneIndicator';
