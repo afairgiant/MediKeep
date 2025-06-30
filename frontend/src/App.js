@@ -54,6 +54,7 @@ import ModelCreate from './pages/admin/ModelCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
+import DataModels from './pages/admin/DataModels';
 
 // Components
 import { LoggingTest, ErrorBoundary } from './components';
@@ -298,6 +299,14 @@ function App() {
                       element={
                         <AdminRoute>
                           <AdminDashboard />
+                        </AdminRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/data-models"
+                      element={
+                        <AdminRoute>
+                          <DataModels />
                         </AdminRoute>
                       }
                     />

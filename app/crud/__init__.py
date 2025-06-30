@@ -8,6 +8,7 @@ from .lab_result import lab_result
 from .lab_result_file import lab_result_file
 from .medication import medication
 from .patient import patient
+from .pharmacy import pharmacy
 from .practitioner import practitioner
 from .procedure import procedure
 from .treatment import treatment
@@ -17,6 +18,7 @@ from .vitals import vitals
 __all__ = [
     "user",
     "patient",
+    "pharmacy",
     "practitioner",
     "medication",
     "lab_result",

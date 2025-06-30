@@ -1127,3 +1127,9 @@
   border-left: 3px solid #dc2626;
   background-color: #fef7f7;
 }
+
+/* Mantine component hover effects */
+.action-button-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

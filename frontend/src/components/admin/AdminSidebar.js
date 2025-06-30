@@ -9,21 +9,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     currentPath,
     hasOnToggle: typeof onToggle === 'function',
   });
-  const models = [
-    { name: 'user', display: 'Users', icon: '👥' },
-    { name: 'patient', display: 'Patients', icon: '🏥' },
-    { name: 'practitioner', display: 'Practitioners', icon: '👨‍⚕️' },
-    { name: 'medication', display: 'Medications', icon: '💊' },
-    { name: 'lab_result', display: 'Lab Results', icon: '🧪' },
-    { name: 'lab_result_file', display: 'Lab Files', icon: '📄' },
-    { name: 'vitals', display: 'Vital Signs', icon: '🩺' },
-    { name: 'condition', display: 'Conditions', icon: '📋' },
-    { name: 'allergy', display: 'Allergies', icon: '⚠️' },
-    { name: 'immunization', display: 'Immunizations', icon: '💉' },
-    { name: 'procedure', display: 'Procedures', icon: '🔬' },
-    { name: 'treatment', display: 'Treatments', icon: '🩹' },
-    { name: 'encounter', display: 'Encounters', icon: '📝' },
-  ];
+  // Models moved to separate Data Models page
 
   const handleToggle = () => {
     console.log('🗂️ AdminSidebar toggle clicked');
@@ -65,18 +51,15 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
         </div>
 
         <div className="nav-section">
-          <h3>Data Models</h3>
-          {models.map(model => (
-            <Link
-              key={model.name}
-              to={`/admin/models/${model.name}`}
-              className={`nav-item ${currentPath.includes(`/admin/models/${model.name}`) ? 'active' : ''}`}
-              onClick={() => handleLinkClick(`/admin/models/${model.name}`)}
-            >
-              <span className="nav-icon">{model.icon}</span>
-              <span className="nav-text">{model.display}</span>
-            </Link>
-          ))}
+          <h3>Data Management</h3>
+          <Link
+            to="/admin/data-models"
+            className={`nav-item ${currentPath.includes('/admin/data-models') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/data-models')}
+          >
+            <span className="nav-icon">🗄️</span>
+            <span className="nav-text">Data Models</span>
+          </Link>
         </div>
 
         <div className="nav-section">
