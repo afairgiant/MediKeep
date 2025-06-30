@@ -1,5 +1,5 @@
 import React from 'react';
-import './Select.css';
+// CSS now handled by Mantine adapter
 
 export const Select = ({
   value,

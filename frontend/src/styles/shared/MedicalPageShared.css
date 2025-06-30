@@ -5,8 +5,7 @@
  */
 
 /* Import consolidated styles */
-@import '../components/buttons.css';
-@import './forms.css';
+/* Buttons and forms now use Mantine styling */
 
 /* Main Container */
 .medical-page-container {

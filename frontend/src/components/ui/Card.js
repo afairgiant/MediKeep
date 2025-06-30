@@ -1,5 +1,5 @@
 import React from 'react';
-import './Card.css';
+// CSS now handled by Mantine adapter
 
 export const Card = ({ children, className = '', ...props }) => {
   return (

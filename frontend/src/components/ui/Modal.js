@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect } from 'react';
-import './Modal.css';
+// CSS now handled by Mantine adapter
 
 const Modal = ({
   isOpen,

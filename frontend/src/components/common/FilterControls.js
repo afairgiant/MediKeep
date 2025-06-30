@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './FilterControls.css';
+// CSS removed - component deprecated in favor of MantineFilters
 
 const FilterControls = ({
   filters,
