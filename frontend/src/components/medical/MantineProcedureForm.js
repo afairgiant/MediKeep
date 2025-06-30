@@ -119,18 +119,18 @@ const MantineProcedureForm = ({
                 data={[
                   {
                     value: 'surgical',
-                    label: '🔬 Surgical - Invasive procedure',
+                    label: 'Surgical - Invasive procedure',
                   },
                   {
                     value: 'diagnostic',
-                    label: '🔍 Diagnostic - Testing/Imaging',
+                    label: 'Diagnostic - Testing/Imaging',
                   },
-                  { value: 'therapeutic', label: '💊 Therapeutic - Treatment' },
+                  { value: 'therapeutic', label: 'Therapeutic - Treatment' },
                   {
                     value: 'preventive',
-                    label: '🛡️ Preventive - Prevention care',
+                    label: 'Preventive - Prevention care',
                   },
-                  { value: 'emergency', label: '🚨 Emergency - Urgent care' },
+                  { value: 'emergency', label: 'Emergency - Urgent care' },
                 ]}
                 description="Category of procedure"
                 clearable
@@ -176,23 +176,23 @@ const MantineProcedureForm = ({
                 data={[
                   {
                     value: 'scheduled',
-                    label: '📅 Scheduled - Planned for future',
+                    label: 'Scheduled - Planned for future',
                   },
                   {
                     value: 'in-progress',
-                    label: '🔄 In Progress - Currently happening',
+                    label: 'In Progress - Currently happening',
                   },
                   {
                     value: 'completed',
-                    label: '✅ Completed - Successfully finished',
+                    label: 'Completed - Successfully finished',
                   },
                   {
                     value: 'postponed',
-                    label: '⏸️ Postponed - Delayed to later date',
+                    label: 'Postponed - Delayed to later date',
                   },
                   {
                     value: 'cancelled',
-                    label: '❌ Cancelled - Not proceeding',
+                    label: 'Cancelled - Not proceeding',
                   },
                 ]}
                 description="Current status of the procedure"
