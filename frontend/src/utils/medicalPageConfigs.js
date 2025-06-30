@@ -45,7 +45,7 @@ export const medicalPageConfigs = {
         { value: 'all', label: 'All Statuses' },
         { value: 'active', label: 'Active' },
         { value: 'completed', label: 'Completed' },
-        { value: 'discontinued', label: 'Discontinued' },
+        { value: 'stopped', label: 'Stopped' },
         { value: 'on-hold', label: 'On Hold' },
       ],
       categoryField: 'route',
