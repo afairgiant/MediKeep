@@ -19,6 +19,9 @@ import {
   Button,
   Notification,
   Alert,
+  TextInput,
+  Box,
+  Flex,
 } from '@mantine/core';
 import {
   IconStethoscope,
@@ -38,6 +41,7 @@ import {
   IconChevronRight,
   IconAlertCircle,
   IconInfoCircle,
+  IconSearch,
 } from '@tabler/icons-react';
 import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { PageHeader } from '../components';
@@ -61,6 +65,7 @@ const Dashboard = () => {
   const [activityLoading, setActivityLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Combine loading states
   const loading = patientLoading || activityLoading;
@@ -120,114 +125,103 @@ const Dashboard = () => {
     }
   };
 
-  // Medical modules configuration - organized by user-centric categories
-  const medicalModules = {
-    // Core medical information - most users need these
-    core: [
-      {
-        title: 'Patient Information',
-        description: 'View and update your personal details',
-        icon: IconStethoscope,
-        color: 'blue',
-        link: '/patients/me',
-      },
-      {
-        title: 'Medications',
-        description: 'Track your current medications',
-        icon: IconPill,
-        color: 'green',
-        link: '/medications',
-      },
-      {
-        title: 'Lab Results',
-        description: 'Access your laboratory test results',
-        icon: IconFlask,
-        color: 'teal',
-        link: '/lab-results',
-      },
-    ],
+  // Placeholder stats data - can be replaced with real data later
+  const dashboardStats = [
+    { label: 'Total Records*', value: '3', color: 'blue' },
+    { label: 'Active Medications*', value: '2', color: 'green' },
+    { label: 'Total Lab Tests*', value: '3', color: 'orange' },
+    { label: 'Total Procedures*', value: '4', color: 'purple' },
+  ];
 
-    // Treatment & medications - for active treatment
-    treatment: [
-      {
-        title: 'Treatments',
-        description: 'Review your treatments',
-        icon: IconClipboardList,
-        color: 'cyan',
-        link: '/treatments',
-      },
-      {
-        title: 'Procedures',
-        description: 'Review your medical procedures',
-        icon: IconMedicalCross,
-        color: 'indigo',
-        link: '/procedures',
-      },
-    ],
+  // Core medical modules - organized in 2x2 grid sections like the schematic
+  const coreModules = [
+    {
+      title: 'Patient Information',
+      icon: IconUser,
+      color: 'blue',
+      link: '/patients/me',
+    },
+    {
+      title: 'Medications',
+      icon: IconPill,
+      color: 'green',
+      link: '/medications',
+    },
+    {
+      title: 'Lab Results',
+      icon: IconFlask,
+      color: 'teal',
+      link: '/lab-results',
+    },
+  ];
 
-    // Health monitoring - for ongoing health tracking
-    monitoring: [
-      {
-        title: 'Vital Signs',
-        description: 'Record and view your vital signs',
-        icon: IconHeartbeat,
-        color: 'red',
-        link: '/vitals',
-      },
-      {
-        title: 'Conditions',
-        description: 'Review your medical conditions',
-        icon: IconBrain,
-        color: 'pink',
-        link: '/conditions',
-      },
-      {
-        title: 'Allergies',
-        description: 'Review your allergies',
-        icon: IconAlertTriangle,
-        color: 'orange',
-        link: '/allergies',
-      },
-    ],
+  const treatmentModules = [
+    {
+      title: 'Treatments',
+      icon: IconClipboardList,
+      color: 'cyan',
+      link: '/treatments',
+    },
+    {
+      title: 'Procedures',
+      icon: IconMedicalCross,
+      color: 'indigo',
+      link: '/procedures',
+    },
+  ];
 
-    // Prevention & history - for preventive care and records
-    prevention: [
-      {
-        title: 'Immunizations',
-        description: 'Check your immunization records',
-        icon: IconVaccine,
-        color: 'purple',
-        link: '/immunizations',
-      },
-      {
-        title: 'Visit History',
-        description: 'Review your medical visits',
-        icon: IconCalendarEvent,
-        color: 'yellow',
-        link: '/visits',
-      },
-    ],
-  };
+  const monitoringModules = [
+    {
+      title: 'Vital Signs',
+      icon: IconHeartbeat,
+      color: 'red',
+      link: '/vitals',
+    },
+    {
+      title: 'Conditions',
+      icon: IconBrain,
+      color: 'pink',
+      link: '/conditions',
+    },
+    {
+      title: 'Allergies',
+      icon: IconAlertTriangle,
+      color: 'orange',
+      link: '/allergies',
+    },
+  ];
 
-  // Secondary modules
-  const secondaryModules = [
+  const preventionModules = [
+    {
+      title: 'Immunizations',
+      icon: IconVaccine,
+      color: 'purple',
+      link: '/immunizations',
+    },
+    {
+      title: 'Visit History',
+      icon: IconCalendarEvent,
+      color: 'yellow',
+      link: '/visits',
+    },
+  ];
+
+  // Additional resources
+  const additionalModules = [
     {
       title: 'Export Records',
-      description: 'Download your medical data',
       icon: IconFileExport,
       color: 'violet',
       link: '/export',
     },
     {
       title: 'Practitioners',
-      description: 'View practitioner information',
       icon: IconUser,
       color: 'blue',
       link: '/practitioners',
     },
     {
       title: 'Pharmacies',
-      description: 'View pharmacy information',
       icon: IconBuilding,
       color: 'green',
       link: '/pharmacies',
@@ -236,57 +230,41 @@ const Dashboard = () => {
 
   // Add admin dashboard if user is admin
   if (isAdmin) {
-    secondaryModules.unshift({
+    additionalModules.unshift({
       title: 'Admin Dashboard',
-      description: 'System administration and management',
       icon: IconSettings,
       color: 'dark',
       link: '/admin',
     });
   }
 
-  // Category descriptions for better UX
-  const categoryInfo = {
-    core: {
-      title: 'Core Medical Information',
-      description: 'Essential records everyone needs',
-      badge: 'Essential',
-      badgeColor: 'blue',
-    },
-    treatment: {
-      title: 'Active Treatments',
-      description: 'Medical treatments and procedures',
-      badge: 'Active Care',
-      badgeColor: 'green',
-    },
-    monitoring: {
-      title: 'Health Monitoring',
-      description: 'Track ongoing health conditions and metrics',
-      badge: 'Monitoring',
-      badgeColor: 'orange',
-    },
-    prevention: {
-      title: 'Prevention & History',
-      description: 'Preventive care and historical records',
-      badge: 'Prevention',
-      badgeColor: 'purple',
-    },
-  };
+  const StatCard = ({ stat }) => (
+    <Card shadow="sm" padding="lg" radius="md" withBorder h={100}>
+      <Stack align="center" justify="center" h="100%">
+        <Text size="xl" fw={700} c={stat.color}>
+          {stat.value}
+        </Text>
+        <Text size="sm" c="dimmed" ta="center">
+          {stat.label}
+        </Text>
+      </Stack>
+    </Card>
+  );
 
-  const MedicalModuleCard = ({ module, size = 'normal' }) => {
+  const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
     return (
       <Card
         shadow="sm"
-        padding={size === 'large' ? 'xl' : 'md'}
+        padding="lg"
         radius="md"
         withBorder
         onClick={() => navigate(module.link)}
         style={{
           cursor: 'pointer',
           transition: 'all 0.2s ease',
-          height: size === 'large' ? '140px' : '120px',
+          height: '120px',
         }}
         styles={{
           root: {
@@ -297,82 +275,65 @@ const Dashboard = () => {
           },
         }}
       >
-        <Group justify="space-between" mb="xs">
+        <Flex direction="column" justify="center" align="center" h="100%">
           <ThemeIcon
             color={module.color}
-            size={size === 'large' ? 40 : 32}
+            size={40}
             radius="md"
             variant="light"
+            mb="xs"
           >
-            <Icon size={size === 'large' ? 24 : 18} />
+            <Icon size={24} />
           </ThemeIcon>
-          <ActionIcon variant="subtle" color="gray" size="sm">
-            <IconChevronRight size={16} />
-          </ActionIcon>
-        </Group>
-
-        <Text size={size === 'large' ? 'lg' : 'md'} fw={600} mb={4}>
-          {module.title}
-        </Text>
-
-        <Text size={size === 'large' ? 'sm' : 'xs'} c="dimmed" lineClamp={2}>
-          {module.description}
-        </Text>
-
-        {module.priority === 'high' && size === 'large' && (
-          <Badge color={module.color} variant="light" size="xs" mt="xs">
-            Essential
-          </Badge>
-        )}
+          <Text size="sm" fw={600} ta="center">
+            {module.title}
+          </Text>
+        </Flex>
       </Card>
     );
   };
 
-  const RecentActivityTimeline = () => (
+  const RecentActivityList = () => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Group justify="space-between" mb="md">
-        <Title order={3} size="h4">
-          Recent Medical Activity
-        </Title>
-        <Badge color="blue" variant="light">
-          {recentActivity.length} items
-        </Badge>
-      </Group>
+      <Title order={3} size="h4" mb="md">
+        Recent Activity
+      </Title>
 
       {recentActivity.length > 0 ? (
-        <Timeline active={recentActivity.length} bulletSize={20} lineWidth={2}>
-          {recentActivity.slice(0, 5).map((activity, index) => (
-            <Timeline.Item
-              key={index}
-              bullet={<IconInfoCircle size={12} />}
-              title={
-                <Text size="sm" fw={500}>
+        <Stack gap="sm">
+          {recentActivity.slice(0, 4).map((activity, index) => (
+            <Group key={index} align="flex-start" gap="sm">
+              <Box
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--mantine-color-blue-6)',
+                  marginTop: 6,
+                  flexShrink: 0,
+                }}
+              />
+              <Stack gap={2} style={{ flex: 1 }}>
+                <Text size="sm" fw={500} lineClamp={2}>
                   {activity.description}
                 </Text>
-              }
-            >
-              <Text size="xs" c="dimmed">
-                {formatDateTime(activity.timestamp)}
-              </Text>
-            </Timeline.Item>
+                <Text size="xs" c="dimmed">
+                  {formatDateTime(activity.timestamp)}
+                </Text>
+              </Stack>
+            </Group>
           ))}
-        </Timeline>
+        </Stack>
       ) : (
         <Paper p="md" radius="md" bg="gray.1">
-          <Group justify="center">
+          <Stack align="center" gap="xs">
             <ThemeIcon color="gray" variant="light" size="lg">
               <IconAlertCircle size={20} />
             </ThemeIcon>
-            <Stack gap={4} align="center">
-              <Text size="sm" fw={500} c="dimmed">
-                No recent medical activity
-              </Text>
-              <Text size="xs" c="dimmed">
-                Start by adding medications, lab results, or other medical
-                information
-              </Text>
-            </Stack>
-          </Group>
+            <Text size="sm" fw={500} c="dimmed" ta="center">
+              No recent activity
+            </Text>
+          </Stack>
         </Paper>
       )}
     </Card>
@@ -431,174 +392,131 @@ const Dashboard = () => {
           </Group>
         </Paper>
 
-        {/* Essential Medical Modules */}
-        <Stack gap="xl">
-          <div>
-            <Group justify="space-between" align="center" mb="md">
+        {/* Search Bar */}
+        <Flex justify="flex-end" mb="xl">
+          <TextInput
+            placeholder="search"
+            leftSection={<IconSearch size={16} />}
+            value={searchQuery}
+            onChange={event => setSearchQuery(event.currentTarget.value)}
+            w={300}
+            radius="md"
+          />
+        </Flex>
+
+        {/* Stats Row */}
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
+          {dashboardStats.map((stat, index) => (
+            <StatCard key={index} stat={stat} />
+          ))}
+        </SimpleGrid>
+
+        {/* Main Content Grid */}
+        <Grid>
+          <Grid.Col span={{ base: 12, md: 8 }}>
+            <Stack gap="xl">
+              {/* Core Medical Information */}
               <div>
-                <Title order={2} size="h3">
-                  {categoryInfo.core.title}
+                <Title order={2} size="h3" mb="md">
+                  Core Medical Information
                 </Title>
-                <Text size="sm" c="dimmed">
-                  {categoryInfo.core.description}
-                </Text>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                  {coreModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
               </div>
-              <Badge color={categoryInfo.core.badgeColor} variant="light">
-                {categoryInfo.core.badge}
-              </Badge>
-            </Group>
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-              {medicalModules.core.map((module, index) => (
-                <MedicalModuleCard key={index} module={module} size="large" />
-              ))}
-            </SimpleGrid>
-          </div>
 
-          {/* Main Content Grid */}
-          <Grid>
-            <Grid.Col span={{ base: 12, md: 8 }}>
-              {/* Treatment & Medications */}
-              <Stack gap="xl">
-                <div>
-                  <Group justify="space-between" align="center" mb="md">
-                    <div>
-                      <Title order={2} size="h3">
-                        {categoryInfo.treatment.title}
-                      </Title>
-                      <Text size="sm" c="dimmed">
-                        {categoryInfo.treatment.description}
-                      </Text>
-                    </div>
-                    <Badge
-                      color={categoryInfo.treatment.badgeColor}
-                      variant="light"
-                    >
-                      {categoryInfo.treatment.badge}
-                    </Badge>
-                  </Group>
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                    {medicalModules.treatment.map((module, index) => (
-                      <MedicalModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
+              {/* Active Treatments */}
+              <div>
+                <Title order={2} size="h3" mb="md">
+                  Active Treatments
+                </Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  {treatmentModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
 
-                <div>
-                  <Group justify="space-between" align="center" mb="md">
-                    <div>
-                      <Title order={2} size="h3">
-                        {categoryInfo.monitoring.title}
-                      </Title>
-                      <Text size="sm" c="dimmed">
-                        {categoryInfo.monitoring.description}
-                      </Text>
-                    </div>
-                    <Badge
-                      color={categoryInfo.monitoring.badgeColor}
-                      variant="light"
-                    >
-                      {categoryInfo.monitoring.badge}
-                    </Badge>
-                  </Group>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    {medicalModules.monitoring.map((module, index) => (
-                      <MedicalModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
+              {/* Health Monitoring */}
+              <div>
+                <Title order={2} size="h3" mb="md">
+                  Health Monitoring
+                </Title>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                  {monitoringModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
 
-                <div>
-                  <Group justify="space-between" align="center" mb="md">
-                    <div>
-                      <Title order={2} size="h3">
-                        {categoryInfo.prevention.title}
-                      </Title>
-                      <Text size="sm" c="dimmed">
-                        {categoryInfo.prevention.description}
-                      </Text>
-                    </div>
-                    <Badge
-                      color={categoryInfo.prevention.badgeColor}
-                      variant="light"
-                    >
-                      {categoryInfo.prevention.badge}
-                    </Badge>
-                  </Group>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    {medicalModules.prevention.map((module, index) => (
-                      <MedicalModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
-              </Stack>
-            </Grid.Col>
+              {/* Prevention & History */}
+              <div>
+                <Title order={2} size="h3" mb="md">
+                  Prevention & History
+                </Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  {preventionModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
+            </Stack>
+          </Grid.Col>
 
-            <Grid.Col span={{ base: 12, md: 4 }}>
-              <Stack gap="md">
-                {/* Recent Activity */}
-                <RecentActivityTimeline />
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <Stack gap="md">
+              {/* Recent Activity */}
+              <RecentActivityList />
 
-                {/* Additional Resources */}
-                <Card shadow="sm" padding="lg" radius="md" withBorder>
-                  <Title order={3} size="h4" mb="md">
-                    Additional Resources
-                  </Title>
-                  <Stack gap="xs">
-                    {secondaryModules.map((module, index) => {
-                      const Icon = module.icon;
-                      return (
-                        <Paper
-                          key={index}
-                          p="sm"
-                          radius="md"
-                          onClick={() => navigate(module.link)}
-                          style={{ cursor: 'pointer' }}
-                          withBorder
-                          styles={{
-                            root: {
-                              '&:hover': {
-                                backgroundColor:
-                                  'var(--mantine-color-gray-light-hover)',
-                                transform: 'translateX(4px)',
-                                transition: 'all 0.2s ease',
-                              },
+              {/* Additional Resources */}
+              <Card shadow="sm" padding="lg" radius="md" withBorder>
+                <Title order={3} size="h4" mb="md">
+                  Additional Resources
+                </Title>
+                <Stack gap="xs">
+                  {additionalModules.map((module, index) => {
+                    const Icon = module.icon;
+                    return (
+                      <Paper
+                        key={index}
+                        p="sm"
+                        radius="md"
+                        onClick={() => navigate(module.link)}
+                        style={{ cursor: 'pointer' }}
+                        withBorder
+                        styles={{
+                          root: {
+                            '&:hover': {
+                              backgroundColor: 'var(--mantine-color-gray-1)',
+                              transform: 'translateX(4px)',
+                              transition: 'all 0.2s ease',
                             },
-                          }}
-                        >
-                          <Group gap="sm">
-                            <ThemeIcon
-                              color={module.color}
-                              size="sm"
-                              variant="light"
-                            >
-                              <Icon size={14} />
-                            </ThemeIcon>
-                            <div style={{ flex: 1 }}>
-                              <Text size="sm" fw={500}>
-                                {module.title}
-                              </Text>
-                              <Text size="xs" c="dimmed">
-                                {module.description}
-                              </Text>
-                            </div>
-                            <IconChevronRight size={14} />
-                          </Group>
-                        </Paper>
-                      );
-                    })}
-                  </Stack>
-                </Card>
-              </Stack>
-            </Grid.Col>
-          </Grid>
-        </Stack>
-
-        {/* Footer */}
-        <Paper p="md" radius="md" mt="xl" bg="gray" c="white" ta="center">
-          <Text size="sm">
-            &copy; 2025 Medical Records System. All rights reserved.
-          </Text>
-        </Paper>
+                          },
+                        }}
+                      >
+                        <Group gap="sm">
+                          <ThemeIcon
+                            color={module.color}
+                            size="sm"
+                            variant="light"
+                          >
+                            <Icon size={14} />
+                          </ThemeIcon>
+                          <Text size="sm" fw={500} style={{ flex: 1 }}>
+                            {module.title}
+                          </Text>
+                          <IconChevronRight size={14} />
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              </Card>
+            </Stack>
+          </Grid.Col>
+        </Grid>
       </Container>
 
       {/* Profile Completion Modal */}

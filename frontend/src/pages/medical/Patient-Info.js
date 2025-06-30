@@ -7,6 +7,7 @@ import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantinePatientForm from '../../components/medical/MantinePatientForm';
+import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
@@ -201,7 +202,7 @@ const PatientInfo = () => {
 
   if (loading) {
     return (
-      <div className="patient-info-container">
+      <div className="medical-page-container">
         <div className="loading">
           <div className="spinner"></div>
           <p>Loading patient information...</p>
@@ -211,10 +212,10 @@ const PatientInfo = () => {
   }
 
   return (
-    <div className="patient-info-container">
+    <div className="medical-page-container">
       <PageHeader title="Patient Information" icon="📋" />
 
-      <div className="patient-info-content">
+      <div className="medical-page-content">
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
