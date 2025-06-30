@@ -1,6 +1,9 @@
 import { createTheme } from '@mantine/core';
 
 export const theme = createTheme({
+  /** Color scheme detection and settings */
+  forceColorScheme: undefined, // Let Mantine handle auto-detection
+
   /** Primary color scheme */
   colors: {
     // Primary blue theme (based on your current --primary-color: #667eea)

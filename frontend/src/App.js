@@ -18,7 +18,10 @@ import { theme } from './theme';
 
 // Authentication
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import {
+  MantineIntegratedThemeProvider,
+  useTheme,
+} from './contexts/ThemeContext';
 import { AppDataProvider } from './contexts/AppDataContext';
 import ProtectedRoute, {
   AdminRoute,
@@ -93,6 +96,26 @@ function NavigationTracker() {
   return null;
 }
 
+// Component to handle theme-aware toast notifications
+function ThemedToastContainer() {
+  const { theme } = useTheme();
+
+  return (
+    <ToastContainer
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme={theme}
+    />
+  );
+}
+
 function App() {
   useEffect(() => {
     // Initialize frontend logging
@@ -125,8 +148,8 @@ function App() {
       <Router>
         <AuthProvider>
           <AppDataProvider>
-            <ThemeProvider>
-              <MantineProvider theme={theme}>
+            <MantineProvider theme={theme}>
+              <MantineIntegratedThemeProvider>
                 <NavigationTracker />
                 <div className="App">
                   <Routes>
@@ -354,20 +377,9 @@ function App() {
                 </div>
 
                 {/* Toast Notifications */}
-                <ToastContainer
-                  position="top-right"
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                  theme="light"
-                />
-              </MantineProvider>
-            </ThemeProvider>
+                <ThemedToastContainer />
+              </MantineIntegratedThemeProvider>
+            </MantineProvider>
           </AppDataProvider>
         </AuthProvider>
       </Router>

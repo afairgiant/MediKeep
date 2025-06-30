@@ -525,9 +525,6 @@ export const medicalPageConfigs = {
       customFilters: {
         files: (item, filterValue, additionalData) => {
           const fileCount = additionalData?.filesCounts?.[item.id] || 0;
-          console.log(
-            `Files filter - Item ${item.id}: fileCount=${fileCount}, filterValue=${filterValue}`
-          );
           switch (filterValue) {
             case 'with_files':
               return fileCount > 0;
