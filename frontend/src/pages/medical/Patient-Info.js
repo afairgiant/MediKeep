@@ -5,8 +5,8 @@ import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
-import { FormInput, FormSelect } from '../../components/forms';
-import { Button, DateInput } from '../../components/ui';
+import { Button } from '../../components/ui';
+import MantinePatientForm from '../../components/medical/MantinePatientForm';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
@@ -231,140 +231,15 @@ const PatientInfo = () => {
           </div>
 
           {isEditing ? (
-            <form className="patient-form">
-              <div className="form-row">
-                <FormInput
-                  label="First Name"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  required={true}
-                  disabled={saving}
-                  placeholder="Enter first name"
-                />
-                <FormInput
-                  label="Last Name"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  required={true}
-                  disabled={saving}
-                  placeholder="Enter last name"
-                />
-              </div>
-              <div className="form-row">
-                <DateInput
-                  label="Birth Date"
-                  name="birthDate"
-                  value={formData.birthDate}
-                  onChange={handleInputChange}
-                  firstDayOfWeek={0}
-                  required={true}
-                  disabled={saving}
-                  placeholder="Select birth date"
-                />
-                <FormSelect
-                  useMantine={true}
-                  label="Gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  placeholder="Select Gender"
-                  options={[
-                    { value: 'M', label: 'Male' },
-                    { value: 'F', label: 'Female' },
-                    { value: 'OTHER', label: 'Other' },
-                  ]}
-                />
-              </div>
-              <FormInput
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                disabled={saving}
-                placeholder="Enter your address"
-                helpText="Optional: Full address for medical records"
-              />
-              <div className="form-row">
-                <FormSelect
-                  useMantine={true}
-                  label="Blood Type"
-                  name="bloodType"
-                  value={formData.bloodType}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  placeholder="Select Blood Type"
-                  options={[
-                    { value: 'A+', label: 'A+' },
-                    { value: 'A-', label: 'A-' },
-                    { value: 'B+', label: 'B+' },
-                    { value: 'B-', label: 'B-' },
-                    { value: 'AB+', label: 'AB+' },
-                    { value: 'AB-', label: 'AB-' },
-                    { value: 'O+', label: 'O+' },
-                    { value: 'O-', label: 'O-' },
-                  ]}
-                  helpText="Important for medical emergencies"
-                />
-                <FormInput
-                  label="Height"
-                  name="height"
-                  type="number"
-                  value={formData.height}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  placeholder="e.g., 70"
-                  helpText="Height in inches"
-                />
-              </div>
-              <div className="form-row">
-                <FormInput
-                  label="Weight"
-                  name="weight"
-                  type="number"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  placeholder="e.g., 150"
-                  helpText="Weight in pounds"
-                />
-                <FormSelect
-                  useMantine={true}
-                  label="Primary Care Physician"
-                  name="physician_id"
-                  value={
-                    formData.physician_id ? String(formData.physician_id) : ''
-                  }
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  placeholder="Select Physician (Optional)"
-                  options={practitioners.map(practitioner => ({
-                    value: String(practitioner.id),
-                    label: `${practitioner.name} - ${practitioner.specialty}`,
-                  }))}
-                  helpText="Your primary doctor for ongoing care"
-                />
-              </div>
-              <div className="form-actions">
-                <Button
-                  variant="secondary"
-                  onClick={handleCancel}
-                  disabled={saving}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleSave}
-                  disabled={saving}
-                  loading={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
-            </form>
+            <MantinePatientForm
+              formData={formData}
+              onInputChange={handleInputChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              practitioners={practitioners}
+              saving={saving}
+              isCreating={isCreating}
+            />
           ) : (
             <div className="patient-details">
               <div className="detail-row">

@@ -9,7 +9,8 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import { Button } from '../../components/ui';
+import MantineTreatmentForm from '../../components/medical/MantineTreatmentForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
@@ -167,17 +168,17 @@ const Treatments = () => {
   const getStatusIcon = status => {
     switch (status) {
       case 'active':
-        return '🔄';
+        return '';
       case 'completed':
-        return '✅';
+        return '';
       case 'planned':
-        return '📋';
+        return '';
       case 'on-hold':
-        return '⏸️';
+        return '';
       case 'cancelled':
-        return '❌';
+        return '';
       default:
-        return '❓';
+        return '';
     }
   };
 
@@ -200,9 +201,9 @@ const Treatments = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -211,9 +212,9 @@ const Treatments = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddTreatment}>
+            <Button variant="primary" onClick={handleAddTreatment}>
               + Add New Treatment
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -254,9 +255,9 @@ const Treatments = () => {
                   : 'Click "Add New Treatment" to get started.'}
               </p>
               {!dataManagement.hasActiveFilters && (
-                <button className="add-button" onClick={handleAddTreatment}>
+                <Button variant="primary" onClick={handleAddTreatment}>
                   Add Your First Treatment
-                </button>
+                </Button>
               )}
             </div>
           ) : viewMode === 'cards' ? (
@@ -323,18 +324,20 @@ const Treatments = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditTreatment(treatment)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteTreatment(treatment.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -379,145 +382,15 @@ const Treatments = () => {
         </div>
       </div>
 
-      <MedicalFormModal
+      <MantineTreatmentForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="treatment_name">Treatment Name *</label>
-              <input
-                type="text"
-                id="treatment_name"
-                name="treatment_name"
-                value={formData.treatment_name}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Physical Therapy, Chemotherapy"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="treatment_type">Treatment Type *</label>
-              <input
-                type="text"
-                id="treatment_type"
-                name="treatment_type"
-                value={formData.treatment_type}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Surgery, Medication"
-              />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="status">Status</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="planned">Planned</option>
-                  <option value="active">Active</option>
-                  <option value="on-hold">On Hold</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="start_date">Start Date *</label>
-                <input
-                  type="date"
-                  id="start_date"
-                  name="start_date"
-                  value={formData.start_date}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="end_date">End Date</label>
-                <input
-                  type="date"
-                  id="end_date"
-                  name="end_date"
-                  value={formData.end_date}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="dosage">Dosage</label>
-                <input
-                  type="text"
-                  id="dosage"
-                  name="dosage"
-                  value={formData.dosage}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 500mg, 2 tablets"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="frequency">Frequency</label>
-                <input
-                  type="text"
-                  id="frequency"
-                  name="frequency"
-                  value={formData.frequency}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Daily, 3 times per week"
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Description of the treatment..."
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="notes">Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Additional notes about the treatment..."
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              {editingTreatment ? 'Update Treatment' : 'Add Treatment'}
-            </button>
-          </div>
-        </form>
-      </MedicalFormModal>
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        editingTreatment={editingTreatment}
+      />
     </div>
   );
 };

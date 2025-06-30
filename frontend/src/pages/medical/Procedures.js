@@ -10,10 +10,12 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import { Button } from '../../components/ui';
+import MantineProcedureForm from '../../components/medical/MantineProcedureForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
+import '../../styles/pages/ProcedureCards.css';
 
 const Procedures = () => {
   const navigate = useNavigate();
@@ -212,9 +214,9 @@ const Procedures = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -223,9 +225,9 @@ const Procedures = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddProcedure}>
+            <Button variant="primary" onClick={handleAddProcedure}>
               + Add Procedure
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -264,9 +266,9 @@ const Procedures = () => {
                   : 'Start by adding your first procedure.'}
               </p>
               {!dataManagement.hasActiveFilters && (
-                <button className="add-button" onClick={handleAddProcedure}>
+                <Button variant="primary" onClick={handleAddProcedure}>
                   Add Your First Procedure
-                </button>
+                </Button>
               )}
             </div>
           ) : viewMode === 'cards' ? (
@@ -332,18 +334,20 @@ const Procedures = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditProcedure(procedure)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteProcedure(procedure.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -404,143 +408,16 @@ const Procedures = () => {
         </div>
       </div>
 
-      <MedicalFormModal
+      <MantineProcedureForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingProcedure ? 'Edit Procedure' : 'Add New Procedure'}
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="procedure_name">Procedure Name *</label>
-              <input
-                type="text"
-                id="procedure_name"
-                name="procedure_name"
-                value={formData.procedure_name}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Appendectomy, MRI Scan"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="procedure_type">Procedure Type</label>
-              <select
-                id="procedure_type"
-                name="procedure_type"
-                value={formData.procedure_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Select Type</option>
-                <option value="surgical">Surgical</option>
-                <option value="diagnostic">Diagnostic</option>
-                <option value="therapeutic">Therapeutic</option>
-                <option value="preventive">Preventive</option>
-                <option value="emergency">Emergency</option>
-              </select>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="procedure_date">Procedure Date *</label>
-                <input
-                  type="date"
-                  id="procedure_date"
-                  name="procedure_date"
-                  value={formData.procedure_date}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="status">Status</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="postponed">Postponed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="facility">Facility</label>
-                <input
-                  type="text"
-                  id="facility"
-                  name="facility"
-                  value={formData.facility || ''}
-                  onChange={handleInputChange}
-                  placeholder="Facility where the procedure was performed"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="practitioner_id">Performing Practitioner</label>
-                <select
-                  id="practitioner_id"
-                  name="practitioner_id"
-                  value={formData.practitioner_id}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select practitioner</option>
-                  {practitioners.map(practitioner => (
-                    <option key={practitioner.id} value={practitioner.id}>
-                      {practitioner.name} - {practitioner.specialty}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Description of the procedure..."
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="notes">Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Additional notes about the procedure..."
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              {editingProcedure ? 'Update Procedure' : 'Add Procedure'}
-            </button>
-          </div>
-        </form>
-      </MedicalFormModal>
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        practitioners={practitioners}
+        editingProcedure={editingProcedure}
+      />
     </div>
   );
 };

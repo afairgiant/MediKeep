@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { MedicalCard, StatusBadge, PageHeader } from '../../components';
+import { MedicalCard, StatusBadge, PageHeader, Button } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
+import MantinePractitionerForm from '../../components/medical/MantinePractitionerForm';
 import {
   usePractitioners,
   useCacheManager,
   useDataManagement,
 } from '../../hooks';
-import {
-  formatPhoneNumber,
-  formatPhoneInput,
-  cleanPhoneNumber,
-} from '../../utils/phoneUtils';
+import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import '../../styles/pages/Practitioners.css';
 import '../../styles/shared/MedicalPageShared.css';
@@ -45,26 +42,6 @@ const Practitioners = () => {
     website: '',
     rating: '',
   });
-
-  // Common specialties for the filter dropdown
-  const commonSpecialties = [
-    'Cardiology',
-    'Dermatology',
-    'Emergency Medicine',
-    'Family Medicine',
-    'Gastroenterology',
-    'General Surgery',
-    'Internal Medicine',
-    'Neurology',
-    'Obstetrics and Gynecology',
-    'Oncology',
-    'Ophthalmology',
-    'Orthopedics',
-    'Pediatrics',
-    'Psychiatry',
-    'Radiology',
-    'Urology',
-  ];
 
   // Handle global error state
   useEffect(() => {
@@ -157,20 +134,10 @@ const Practitioners = () => {
   };
   const handleInputChange = e => {
     const { name, value } = e.target;
-
-    if (name === 'phone_number') {
-      // Format phone number as user types
-      const formattedValue = formatPhoneInput(value);
-      setFormData(prev => ({
-        ...prev,
-        [name]: formattedValue,
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const filteredPractitioners = dataManagement.data;
@@ -213,9 +180,9 @@ const Practitioners = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddPractitioner}>
+            <Button variant="primary" onClick={handleAddPractitioner}>
               + Add Practitioner
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -247,9 +214,9 @@ const Practitioners = () => {
                 : 'Start by adding your first healthcare practitioner.'}
             </p>
             {!dataManagement.hasActiveFilters && (
-              <button className="add-button" onClick={handleAddPractitioner}>
+              <Button variant="primary" onClick={handleAddPractitioner}>
                 Add Your First Practitioner
-              </button>
+              </Button>
             )}
           </div>
         ) : (
@@ -345,117 +312,17 @@ const Practitioners = () => {
         )}
       </div>
 
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">
-                {editingPractitioner
-                  ? 'Edit Practitioner'
-                  : 'Add New Practitioner'}
-              </h2>
-              <button className="close-btn" onClick={() => setShowModal(false)}>
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="name">Full Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Dr. John Smith"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="specialty">Specialty *</label>
-                <input
-                  type="text"
-                  id="specialty"
-                  name="specialty"
-                  value={formData.specialty}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="e.g., Cardiology, Family Medicine"
-                  list="specialties"
-                />
-                <datalist id="specialties">
-                  {commonSpecialties.map(specialty => (
-                    <option key={specialty} value={specialty} />
-                  ))}
-                </datalist>
-              </div>{' '}
-              <div className="form-group">
-                <label htmlFor="practice">Practice/Hospital *</label>
-                <input
-                  type="text"
-                  id="practice"
-                  name="practice"
-                  value={formData.practice}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="e.g., City General Hospital, Private Practice"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="phone_number">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone_number"
-                  name="phone_number"
-                  value={formData.phone_number}
-                  onChange={handleInputChange}
-                  placeholder="e.g., (555) 123-4567"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="website">Website</label>
-                <input
-                  type="url"
-                  id="website"
-                  name="website"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                  placeholder="e.g., https://www.example.com"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="rating">Rating (0-5 stars)</label>
-                <input
-                  type="number"
-                  id="rating"
-                  name="rating"
-                  value={formData.rating}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  placeholder="e.g., 4.5"
-                />
-              </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingPractitioner
-                    ? 'Update Practitioner'
-                    : 'Add Practitioner'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <MantinePractitionerForm
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={
+          editingPractitioner ? 'Edit Practitioner' : 'Add New Practitioner'
+        }
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        editingPractitioner={editingPractitioner}
+      />
     </div>
   );
 };

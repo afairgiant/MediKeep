@@ -10,7 +10,8 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import { Button } from '../../components/ui';
+import MantineVisitForm from '../../components/medical/MantineVisitForm';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 
@@ -171,9 +172,9 @@ const Visits = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -182,9 +183,9 @@ const Visits = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddVisit}>
+            <Button variant="primary" onClick={handleAddVisit}>
               + Add Visit
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -225,9 +226,9 @@ const Visits = () => {
                   : 'Start by adding your first medical visit.'}
               </p>
               {!dataManagement.hasActiveFilters && (
-                <button className="add-button" onClick={handleAddVisit}>
+                <Button variant="primary" onClick={handleAddVisit}>
                   Add Your First Visit
-                </button>
+                </Button>
               )}
             </div>
           ) : viewMode === 'cards' ? (
@@ -260,20 +261,22 @@ const Visits = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditVisit(visit)}
                       title="Edit visit"
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteVisit(visit.id)}
                       title="Delete visit"
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -314,82 +317,16 @@ const Visits = () => {
         </div>
       </div>
 
-      <MedicalFormModal
+      <MantineVisitForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingVisit ? 'Edit Visit' : 'Add New Visit'}
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="reason">Reason for Visit *</label>
-              <input
-                type="text"
-                id="reason"
-                name="reason"
-                value={formData.reason}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Annual Checkup, Follow-up"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="date">Date *</label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="practitioner_id">Practitioner</label>
-              <select
-                id="practitioner_id"
-                name="practitioner_id"
-                value={formData.practitioner_id}
-                onChange={handleInputChange}
-              >
-                <option value="">Select a practitioner (optional)</option>
-                {practitioners.map(practitioner => (
-                  <option key={practitioner.id} value={practitioner.id}>
-                    Dr. {practitioner.name} - {practitioner.specialty}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="notes">Additional Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="4"
-                placeholder="Optional - Any additional notes about the visit"
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              {editingVisit ? 'Update Visit' : 'Add Visit'}
-            </button>
-          </div>
-        </form>
-      </MedicalFormModal>
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        practitioners={practitioners}
+        editingVisit={editingVisit}
+      />
     </div>
   );
 };

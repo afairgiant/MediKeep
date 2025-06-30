@@ -14,18 +14,18 @@ export const medicalPageConfigs = {
         { value: 'chronic', label: 'Chronic' },
         { value: 'inactive', label: 'Inactive' },
       ],
-      dateField: 'onset_date',
+      dateField: 'onsetDate',
     },
     sorting: {
-      defaultSortBy: 'onset_date',
+      defaultSortBy: 'onsetDate',
       defaultSortOrder: 'desc',
       sortOptions: [
-        { value: 'onset_date', label: 'Onset Date' },
+        { value: 'onsetDate', label: 'Onset Date' },
         { value: 'diagnosis', label: 'Diagnosis' },
         { value: 'status', label: 'Status' },
       ],
       sortTypes: {
-        onset_date: 'date',
+        onsetDate: 'date',
         diagnosis: 'string',
         status: 'status',
       },
@@ -218,7 +218,7 @@ export const medicalPageConfigs = {
         { value: 'severe', label: 'Severe' },
         { value: 'life-threatening', label: 'Life-threatening' },
       ],
-      dateField: 'onset_date',
+      dateField: 'onsetDate',
     },
     sorting: {
       defaultSortBy: 'severity',
@@ -226,12 +226,12 @@ export const medicalPageConfigs = {
       sortOptions: [
         { value: 'severity', label: 'Severity' },
         { value: 'allergen', label: 'Allergen' },
-        { value: 'onset_date', label: 'Onset Date' },
+        { value: 'onsetDate', label: 'Onset Date' },
       ],
       sortTypes: {
         severity: 'severity',
         allergen: 'string',
-        onset_date: 'date',
+        onsetDate: 'date',
       },
     },
     filterControls: {

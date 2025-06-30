@@ -6,7 +6,9 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
+import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -169,9 +171,9 @@ const Allergies = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -179,9 +181,9 @@ const Allergies = () => {
         )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddAllergy}>
+            <Button variant="primary" onClick={handleAddAllergy}>
               + Add New Allergy
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -209,124 +211,15 @@ const Allergies = () => {
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}
         />
-        {showAddForm && (
-          <div
-            className="medical-form-overlay"
-            onClick={() => setShowAddForm(false)}
-          >
-            <div
-              className="medical-form-modal"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="form-header">
-                <h3>{editingAllergy ? 'Edit Allergy' : 'Add New Allergy'}</h3>
-                <button className="close-button" onClick={resetForm}>
-                  ×
-                </button>
-              </div>
-
-              <div className="medical-form-content">
-                <form onSubmit={handleSubmit}>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="allergen">Allergen *</label>
-                      <input
-                        type="text"
-                        id="allergen"
-                        name="allergen"
-                        value={formData.allergen}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Penicillin, Peanuts, Latex"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="severity">Severity *</label>
-                      <select
-                        id="severity"
-                        name="severity"
-                        value={formData.severity}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select Severity</option>
-                        <option value="mild">Mild</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="severe">Severe</option>
-                        <option value="life-threatening">
-                          Life-threatening
-                        </option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="reaction">Reaction</label>
-                      <input
-                        type="text"
-                        id="reaction"
-                        name="reaction"
-                        value={formData.reaction}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Rash, Anaphylaxis, Swelling"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="onset_date">Onset Date</label>
-                      <input
-                        type="date"
-                        id="onset_date"
-                        name="onset_date"
-                        value={formData.onset_date}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="status">Status</label>
-                      <select
-                        id="status"
-                        name="status"
-                        value={formData.status}
-                        onChange={handleInputChange}
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group full-width">
-                      <label htmlFor="notes">Notes</label>
-                      <textarea
-                        id="notes"
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        rows="3"
-                        placeholder="Additional notes about the allergy..."
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-actions">
-                    <button
-                      type="button"
-                      className="cancel-button"
-                      onClick={resetForm}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="save-button">
-                      {editingAllergy ? 'Update Allergy' : 'Add Allergy'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}{' '}
+        <MantineAllergyForm
+          isOpen={showAddForm}
+          onClose={resetForm}
+          title={editingAllergy ? 'Edit Allergy' : 'Add New Allergy'}
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          editingAllergy={editingAllergy}
+        />{' '}
         <div className="medical-items-list">
           {processedAllergies.length === 0 ? (
             <div className="empty-state">
@@ -389,18 +282,20 @@ const Allergies = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditAllergy(allergy)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteAllergy(allergy.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

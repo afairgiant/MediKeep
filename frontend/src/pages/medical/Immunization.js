@@ -9,6 +9,8 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import { Button } from '../../components/ui';
+import MantineImmunizationForm from '../../components/medical/MantineImmunizationForm';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 
@@ -181,9 +183,9 @@ const Immunization = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -191,9 +193,9 @@ const Immunization = () => {
         )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddImmunization}>
+            <Button variant="primary" onClick={handleAddImmunization}>
               + Add New Immunization
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -219,171 +221,17 @@ const Immunization = () => {
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}
         />
-        {showAddForm && (
-          <div
-            className="medical-form-overlay"
-            onClick={() => setShowAddForm(false)}
-          >
-            <div
-              className="medical-form-modal"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="form-header">
-                <h3>
-                  {editingImmunization
-                    ? 'Edit Immunization'
-                    : 'Add New Immunization'}
-                </h3>
-                <button className="close-button" onClick={resetForm}>
-                  ×
-                </button>
-              </div>
-
-              <div className="medical-form-content">
-                <form onSubmit={handleSubmit}>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="vaccine_name">Vaccine Name *</label>
-                      <input
-                        type="text"
-                        id="vaccine_name"
-                        name="vaccine_name"
-                        value={formData.vaccine_name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., COVID-19, Influenza, MMR"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="date_administered">
-                        Date Administered *
-                      </label>
-                      <input
-                        type="date"
-                        id="date_administered"
-                        name="date_administered"
-                        value={formData.date_administered}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="dose_number">Dose Number</label>
-                      <input
-                        type="number"
-                        id="dose_number"
-                        name="dose_number"
-                        value={formData.dose_number}
-                        onChange={handleInputChange}
-                        min="1"
-                        placeholder="e.g., 1, 2, 3"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="lot_number">Lot Number</label>
-                      <input
-                        type="text"
-                        id="lot_number"
-                        name="lot_number"
-                        value={formData.lot_number}
-                        onChange={handleInputChange}
-                        placeholder="Vaccine lot number"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="manufacturer">Manufacturer</label>
-                      <input
-                        type="text"
-                        id="manufacturer"
-                        name="manufacturer"
-                        value={formData.manufacturer}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Pfizer, Moderna, Johnson & Johnson"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="site">Injection Site</label>
-                      <select
-                        id="site"
-                        name="site"
-                        value={formData.site}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Site</option>
-                        <option value="left_arm">Left Arm</option>
-                        <option value="right_arm">Right Arm</option>
-                        <option value="left_thigh">Left Thigh</option>
-                        <option value="right_thigh">Right Thigh</option>
-                        <option value="left_deltoid">Left Deltoid</option>
-                        <option value="right_deltoid">Right Deltoid</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="route">Route</label>
-                      <select
-                        id="route"
-                        name="route"
-                        value={formData.route}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Route</option>
-                        <option value="intramuscular">Intramuscular</option>
-                        <option value="subcutaneous">Subcutaneous</option>
-                        <option value="intradermal">Intradermal</option>
-                        <option value="oral">Oral</option>
-                        <option value="nasal">Nasal</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="expiration_date">Expiration Date</label>
-                      <input
-                        type="date"
-                        id="expiration_date"
-                        name="expiration_date"
-                        value={formData.expiration_date}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="form-group full-width">
-                      <label htmlFor="notes">Notes</label>
-                      <textarea
-                        id="notes"
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        rows="3"
-                        placeholder="Any additional notes or reactions"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-actions">
-                    <button
-                      type="button"
-                      className="cancel-button"
-                      onClick={resetForm}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="save-button">
-                      {editingImmunization
-                        ? 'Update Immunization'
-                        : 'Add Immunization'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}{' '}
+        <MantineImmunizationForm
+          isOpen={showAddForm}
+          onClose={resetForm}
+          title={
+            editingImmunization ? 'Edit Immunization' : 'Add New Immunization'
+          }
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          editingImmunization={editingImmunization}
+        />{' '}
         <div className="medical-items-list">
           {processedImmunizations.length === 0 ? (
             <div className="empty-state">
@@ -473,18 +321,20 @@ const Immunization = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditImmunization(immunization)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteImmunization(immunization.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

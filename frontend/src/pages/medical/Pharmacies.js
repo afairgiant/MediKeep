@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import { PageHeader } from '../../components';
+import { PageHeader, Button } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
+import MantinePharmacyForm from '../../components/medical/MantinePharmacyForm';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import '../../styles/pages/Practitioners.css';
@@ -37,6 +38,8 @@ const Pharmacies = () => {
     street_address: '',
     city: '',
     store_number: '',
+    phone_number: '',
+    website: '',
   });
 
   // Handle global error
@@ -61,6 +64,8 @@ const Pharmacies = () => {
       street_address: '',
       city: '',
       store_number: '',
+      phone_number: '',
+      website: '',
     });
     setEditingPharmacy(null);
     setShowModal(false);
@@ -78,6 +83,8 @@ const Pharmacies = () => {
       street_address: pharmacy.street_address || '',
       city: pharmacy.city || '',
       store_number: pharmacy.store_number || '',
+      phone_number: pharmacy.phone_number || '',
+      website: pharmacy.website || '',
     });
     setEditingPharmacy(pharmacy);
     setShowModal(true);
@@ -94,6 +101,8 @@ const Pharmacies = () => {
         street_address: formData.street_address.trim(),
         city: formData.city.trim(),
         store_number: formData.store_number.trim(),
+        phone_number: formData.phone_number.trim() || null,
+        website: formData.website.trim() || null,
       };
 
       if (editingPharmacy) {
@@ -152,9 +161,9 @@ const Pharmacies = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddPharmacy}>
+            <Button variant="primary" onClick={handleAddPharmacy}>
               + Add New Pharmacy
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -233,21 +242,42 @@ const Pharmacies = () => {
                         </span>
                       </div>
                     )}
+                    {pharmacy.website && (
+                      <div className="detail-item">
+                        <span className="label">Website:</span>
+                        <span className="value">
+                          <a
+                            href={
+                              pharmacy.website.startsWith('http')
+                                ? pharmacy.website
+                                : `https://${pharmacy.website}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="website-link"
+                          >
+                            Visit Website ↗
+                          </a>
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditPharmacy(pharmacy)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeletePharmacy(pharmacy.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -255,98 +285,15 @@ const Pharmacies = () => {
           )}
         </div>
 
-        {showModal && (
-          <div className="medical-form-overlay">
-            <div className="medical-form-modal">
-              <div className="form-header">
-                <h3>
-                  {editingPharmacy ? 'Edit Pharmacy' : 'Add New Pharmacy'}
-                </h3>
-                <button className="close-button" onClick={resetForm}>
-                  ×
-                </button>
-              </div>
-
-              <div className="medical-form-content">
-                <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="name">Pharmacy Name *</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="e.g., CVS Pharmacy - Main Street"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="brand">Brand</label>
-                    <input
-                      type="text"
-                      id="brand"
-                      name="brand"
-                      value={formData.brand}
-                      onChange={handleInputChange}
-                      placeholder="e.g., CVS, Walgreens, Independent"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="street_address">Address</label>
-                    <input
-                      type="text"
-                      id="street_address"
-                      name="street_address"
-                      value={formData.street_address}
-                      onChange={handleInputChange}
-                      placeholder="123 Main Street"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="city">City</label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      placeholder="San Francisco"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="store_number">Store Number</label>
-                    <input
-                      type="text"
-                      id="store_number"
-                      name="store_number"
-                      value={formData.store_number}
-                      onChange={handleInputChange}
-                      placeholder="e.g., 1234, Store #5678"
-                    />
-                  </div>
-
-                  <div className="form-actions">
-                    <button
-                      type="button"
-                      className="cancel-button"
-                      onClick={resetForm}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="save-button">
-                      {editingPharmacy ? 'Update Pharmacy' : 'Add Pharmacy'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
+        <MantinePharmacyForm
+          isOpen={showModal}
+          onClose={resetForm}
+          title={editingPharmacy ? 'Edit Pharmacy' : 'Add New Pharmacy'}
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          editingPharmacy={editingPharmacy}
+        />
       </div>
     </div>
   );
