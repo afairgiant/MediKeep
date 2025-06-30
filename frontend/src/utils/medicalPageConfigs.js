@@ -301,62 +301,385 @@ export const medicalPageConfigs = {
 
   labresults: {
     filtering: {
-      searchFields: ['test_name', 'test_code', 'facility', 'notes'],
+      searchFields: [
+        'test_name',
+        'test_code',
+        'facility',
+        'notes',
+        'practitioner_name',
+      ],
       statusField: 'status',
       statusOptions: [
         { value: 'all', label: 'All Statuses' },
-        { value: 'ordered', label: 'Ordered' },
-        { value: 'in-progress', label: 'In Progress' },
-        { value: 'completed', label: 'Completed' },
-        { value: 'cancelled', label: 'Cancelled' },
+        {
+          value: 'ordered',
+          label: 'Ordered',
+          description: 'Tests that have been ordered',
+        },
+        {
+          value: 'in-progress',
+          label: 'In Progress',
+          description: 'Tests currently being processed',
+        },
+        {
+          value: 'completed',
+          label: 'Completed',
+          description: 'Tests with results available',
+        },
+        {
+          value: 'cancelled',
+          label: 'Cancelled',
+          description: 'Cancelled or discontinued tests',
+        },
       ],
       categoryField: 'test_category',
-      categoryLabel: 'Categories',
+      categoryLabel: 'Test Categories',
       categoryOptions: [
         { value: 'all', label: 'All Categories' },
-        { value: 'blood work', label: 'Blood Work' },
-        { value: 'imaging', label: 'Imaging' },
-        { value: 'pathology', label: 'Pathology' },
-        { value: 'microbiology', label: 'Microbiology' },
-        { value: 'chemistry', label: 'Chemistry' },
-        { value: 'hematology', label: 'Hematology' },
-        { value: 'immunology', label: 'Immunology' },
-        { value: 'genetics', label: 'Genetics' },
-        { value: 'cardiology', label: 'Cardiology' },
-        { value: 'pulmonology', label: 'Pulmonology' },
-        { value: 'other', label: 'Other' },
+        {
+          value: 'blood work',
+          label: 'Blood Work',
+          description: 'Blood tests and panels',
+        },
+        {
+          value: 'imaging',
+          label: 'Imaging',
+          description: 'X-rays, CT, MRI, ultrasound',
+        },
+        {
+          value: 'pathology',
+          label: 'Pathology',
+          description: 'Tissue and cell analysis',
+        },
+        {
+          value: 'microbiology',
+          label: 'Microbiology',
+          description: 'Bacterial, viral, fungal cultures',
+        },
+        {
+          value: 'chemistry',
+          label: 'Chemistry',
+          description: 'Metabolic panels, enzymes',
+        },
+        {
+          value: 'hematology',
+          label: 'Hematology',
+          description: 'Blood cell counts and coagulation',
+        },
+        {
+          value: 'immunology',
+          label: 'Immunology',
+          description: 'Immune system and antibody tests',
+        },
+        {
+          value: 'genetics',
+          label: 'Genetics',
+          description: 'Genetic testing and analysis',
+        },
+        {
+          value: 'cardiology',
+          label: 'Cardiology',
+          description: 'Heart-related tests',
+        },
+        {
+          value: 'pulmonology',
+          label: 'Pulmonology',
+          description: 'Lung function tests',
+        },
+        {
+          value: 'other',
+          label: 'Other',
+          description: 'Miscellaneous tests',
+        },
+      ],
+      // Additional filter: Lab Results
+      resultField: 'labs_result',
+      resultLabel: 'Test Results',
+      resultOptions: [
+        { value: 'all', label: 'All Results' },
+        {
+          value: 'normal',
+          label: 'Normal',
+          description: 'Results within normal range',
+        },
+        {
+          value: 'abnormal',
+          label: 'Abnormal',
+          description: 'Results outside normal range',
+        },
+        {
+          value: 'critical',
+          label: 'Critical',
+          description: 'Critical values requiring attention',
+        },
+        { value: 'high', label: 'High', description: 'Above normal range' },
+        { value: 'low', label: 'Low', description: 'Below normal range' },
+        {
+          value: 'borderline',
+          label: 'Borderline',
+          description: 'Near the edge of normal range',
+        },
+        {
+          value: 'inconclusive',
+          label: 'Inconclusive',
+          description: 'Results unclear or incomplete',
+        },
+        {
+          value: 'pending',
+          label: 'Pending',
+          description: 'No results yet available',
+        },
+      ],
+      // Additional filter: Test Type (urgency)
+      typeField: 'test_type',
+      typeLabel: 'Test Priority',
+      typeOptions: [
+        { value: 'all', label: 'All Priorities' },
+        {
+          value: 'routine',
+          label: 'Routine',
+          description: 'Standard scheduling',
+        },
+        {
+          value: 'urgent',
+          label: 'Urgent',
+          description: 'Expedited processing',
+        },
+        {
+          value: 'emergency',
+          label: 'Emergency',
+          description: 'Emergency department priority',
+        },
+        {
+          value: 'follow-up',
+          label: 'Follow-up',
+          description: 'Monitoring or repeat tests',
+        },
+        {
+          value: 'screening',
+          label: 'Screening',
+          description: 'Preventive screening tests',
+        },
+      ],
+      // Additional filter: Files
+      filesField: 'has_files',
+      filesLabel: 'File Attachments',
+      filesOptions: [
+        { value: 'all', label: 'All Records' },
+        {
+          value: 'with_files',
+          label: '📎 With Files',
+          description: 'Has attached files',
+        },
+        {
+          value: 'without_files',
+          label: '📄 No Files',
+          description: 'No files attached',
+        },
       ],
       dateField: 'ordered_date',
       dateRangeOptions: [
         { value: 'all', label: 'All Time Periods' },
-        { value: 'current', label: 'Current Month' },
-        { value: 'past', label: 'Past 3 Months' },
-        { value: 'future', label: 'Future/Scheduled' },
+        {
+          value: 'today',
+          label: 'Today',
+          description: 'Tests ordered today',
+        },
+        {
+          value: 'week',
+          label: 'This Week',
+          description: 'Tests ordered this week',
+        },
+        {
+          value: 'current',
+          label: 'Current Month',
+          description: 'Tests ordered this month',
+        },
+        {
+          value: 'past_month',
+          label: 'Past Month',
+          description: 'Tests from last month',
+        },
+        {
+          value: 'past_3_months',
+          label: 'Past 3 Months',
+          description: 'Tests from last 3 months',
+        },
+        {
+          value: 'past_6_months',
+          label: 'Past 6 Months',
+          description: 'Tests from last 6 months',
+        },
+        {
+          value: 'year',
+          label: 'This Year',
+          description: 'Tests ordered this year',
+        },
+        {
+          value: 'future',
+          label: 'Future/Scheduled',
+          description: 'Scheduled future tests',
+        },
       ],
+      // Custom filter functions for complex logic
+      customFilters: {
+        files: (item, filterValue, additionalData) => {
+          const fileCount = additionalData?.filesCounts?.[item.id] || 0;
+          console.log(
+            `Files filter - Item ${item.id}: fileCount=${fileCount}, filterValue=${filterValue}`
+          );
+          switch (filterValue) {
+            case 'with_files':
+              return fileCount > 0;
+            case 'without_files':
+              return fileCount === 0;
+            default:
+              return true;
+          }
+        },
+        labs_result: (item, filterValue) => {
+          switch (filterValue) {
+            case 'pending':
+              return !item.labs_result || item.labs_result.trim() === '';
+            default:
+              return filterValue === 'all' || item.labs_result === filterValue;
+          }
+        },
+      },
     },
     sorting: {
       defaultSortBy: 'ordered_date',
       defaultSortOrder: 'desc',
       sortOptions: [
-        { value: 'ordered_date', label: 'Order Date' },
-        { value: 'test_name', label: 'Test Name' },
-        { value: 'status', label: 'Status' },
-        { value: 'test_category', label: 'Category' },
-        { value: 'completed_date', label: 'Completion Date' },
+        {
+          value: 'ordered_date',
+          label: 'Order Date',
+          description: 'Sort by when test was ordered',
+        },
+        {
+          value: 'completed_date',
+          label: 'Completion Date',
+          description: 'Sort by when results were available',
+        },
+        {
+          value: 'test_name',
+          label: 'Test Name',
+          description: 'Sort alphabetically by test name',
+        },
+        {
+          value: 'status',
+          label: 'Status',
+          description: 'Sort by test status',
+        },
+        {
+          value: 'test_category',
+          label: 'Category',
+          description: 'Sort by test category',
+        },
+        {
+          value: 'test_type',
+          label: 'Priority',
+          description: 'Sort by test urgency',
+        },
+        {
+          value: 'labs_result',
+          label: 'Result',
+          description: 'Sort by test result',
+        },
+        {
+          value: 'facility',
+          label: 'Facility',
+          description: 'Sort by testing facility',
+        },
+        {
+          value: 'practitioner_name',
+          label: 'Practitioner',
+          description: 'Sort by ordering practitioner',
+        },
       ],
       sortTypes: {
         ordered_date: 'date',
+        completed_date: 'date',
         test_name: 'string',
         status: 'status',
         test_category: 'string',
-        completed_date: 'date',
+        test_type: 'priority',
+        labs_result: 'result',
+        facility: 'string',
+        practitioner_name: 'string',
+      },
+      // Custom sort functions for complex sorting
+      customSortFunctions: {
+        priority: (a, b, sortOrder) => {
+          const priorityOrder = [
+            'emergency',
+            'urgent',
+            'follow-up',
+            'screening',
+            'routine',
+          ];
+          const aIndex =
+            priorityOrder.indexOf(a.test_type) !== -1
+              ? priorityOrder.indexOf(a.test_type)
+              : 999;
+          const bIndex =
+            priorityOrder.indexOf(b.test_type) !== -1
+              ? priorityOrder.indexOf(b.test_type)
+              : 999;
+          return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        },
+        result: (a, b, sortOrder) => {
+          const resultOrder = [
+            'critical',
+            'abnormal',
+            'high',
+            'low',
+            'borderline',
+            'normal',
+            'inconclusive',
+          ];
+          const aResult = a.labs_result || 'pending';
+          const bResult = b.labs_result || 'pending';
+          const aIndex =
+            resultOrder.indexOf(aResult) !== -1
+              ? resultOrder.indexOf(aResult)
+              : 999;
+          const bIndex =
+            resultOrder.indexOf(bResult) !== -1
+              ? resultOrder.indexOf(bResult)
+              : 999;
+          return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        },
+        status: (a, b, sortOrder) => {
+          const statusOrder = [
+            'in-progress',
+            'ordered',
+            'completed',
+            'cancelled',
+          ];
+          const aIndex =
+            statusOrder.indexOf(a.status) !== -1
+              ? statusOrder.indexOf(a.status)
+              : 999;
+          const bIndex =
+            statusOrder.indexOf(b.status) !== -1
+              ? statusOrder.indexOf(b.status)
+              : 999;
+          return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        },
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search lab results, test codes, facilities...',
+      searchPlaceholder:
+        'Search lab results, test codes, facilities, practitioners...',
       title: 'Filter & Sort Lab Results',
       showCategory: true,
       showDateRange: true,
+      showResult: true,
+      showType: true,
+      showFiles: true,
+      description:
+        'Filter lab results by status, category, results, priority, and more',
     },
   },
 

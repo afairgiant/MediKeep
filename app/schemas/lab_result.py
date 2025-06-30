@@ -332,6 +332,14 @@ class LabResultUpdate(BaseModel):
 
         raise ValueError("completed_date must be a date string or date object")
 
+    @model_validator(mode="after")
+    def validate_date_order(self):
+        """Validate that completed date is not before ordered date"""
+        if self.completed_date and self.ordered_date:
+            if self.completed_date < self.ordered_date:
+                raise ValueError("Completed date cannot be before ordered date")
+        return self
+
 
 class LabResultResponse(LabResultBase):
     """Schema for lab result response"""

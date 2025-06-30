@@ -25,6 +25,9 @@ const MantineFilters = ({
   statusOptions,
   categoryOptions,
   dateRangeOptions,
+  resultOptions,
+  typeOptions,
+  filesOptions,
   sortOptions,
   sortBy,
   sortOrder,
@@ -36,9 +39,13 @@ const MantineFilters = ({
   const {
     searchPlaceholder = 'Search...',
     title = 'Filters & Search',
+    description,
     showStatus = true,
     showCategory = false,
     showDateRange = false,
+    showResult = false,
+    showType = false,
+    showFiles = false,
     showSearch = true,
   } = config;
 
@@ -47,9 +54,16 @@ const MantineFilters = ({
       <Stack gap="md">
         {/* Header */}
         <Flex justify="space-between" align="center">
-          <Text size="lg" fw={600}>
-            {title}
-          </Text>
+          <div>
+            <Text size="lg" fw={600}>
+              {title}
+            </Text>
+            {description && (
+              <Text size="sm" c="dimmed">
+                {description}
+              </Text>
+            )}
+          </div>
           <Group gap="xs">
             {hasActiveFilters && (
               <Badge color="blue" variant="light">
@@ -62,7 +76,7 @@ const MantineFilters = ({
           </Group>
         </Flex>
 
-        {/* Filter Controls */}
+        {/* Filter Controls Row 1: Search and Primary Filters */}
         <Group gap="md" grow>
           {/* Search */}
           {showSearch && (
@@ -119,10 +133,67 @@ const MantineFilters = ({
               style={{ minWidth: '150px' }}
             />
           )}
+        </Group>
 
-          {/* Sort */}
-          {sortOptions && sortOptions.length > 1 && (
-            <Group gap="xs" style={{ minWidth: '200px' }}>
+        {/* Filter Controls Row 2: Additional Filters (if any are shown) */}
+        {(showResult || showType || showFiles) && (
+          <Group gap="md" grow>
+            {/* Result Filter */}
+            {showResult && resultOptions && resultOptions.length > 1 && (
+              <Select
+                placeholder="Test Results"
+                value={filters.result}
+                onChange={value => updateFilter('result', value)}
+                data={resultOptions.map(option => ({
+                  value: option.value,
+                  label: option.label,
+                }))}
+                clearable={false}
+                style={{ minWidth: '150px' }}
+              />
+            )}
+
+            {/* Type Filter */}
+            {showType && typeOptions && typeOptions.length > 1 && (
+              <Select
+                placeholder="Test Priority"
+                value={filters.type}
+                onChange={value => updateFilter('type', value)}
+                data={typeOptions.map(option => ({
+                  value: option.value,
+                  label: option.label,
+                }))}
+                clearable={false}
+                style={{ minWidth: '150px' }}
+              />
+            )}
+
+            {/* Files Filter */}
+            {showFiles && filesOptions && filesOptions.length > 1 && (
+              <Select
+                placeholder="File Attachments"
+                value={filters.files}
+                onChange={value => updateFilter('files', value)}
+                data={filesOptions.map(option => ({
+                  value: option.value,
+                  label: option.label,
+                }))}
+                clearable={false}
+                style={{ minWidth: '150px' }}
+              />
+            )}
+
+            {/* Fill remaining space if needed */}
+            {(!showResult || !showType || !showFiles) && (
+              <div style={{ flex: 1 }} />
+            )}
+          </Group>
+        )}
+
+        {/* Sort Controls */}
+        {sortOptions && sortOptions.length > 1 && (
+          <Group gap="md" justify="flex-end">
+            <Group gap="xs">
               <Select
                 placeholder="Sort by"
                 value={sortBy}
@@ -131,7 +202,7 @@ const MantineFilters = ({
                   value: option.value,
                   label: option.label,
                 }))}
-                style={{ flex: 1 }}
+                style={{ minWidth: '200px' }}
               />
               <Button
                 variant="subtle"
@@ -148,8 +219,8 @@ const MantineFilters = ({
                 {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
               </Button>
             </Group>
-          )}
-        </Group>
+          </Group>
+        )}
 
         {/* Clear Filters */}
         {hasActiveFilters && (

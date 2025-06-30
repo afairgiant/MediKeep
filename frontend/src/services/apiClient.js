@@ -336,7 +336,7 @@ export const labResultsAPI = {
   },
   getById: id => apiClient.get(`/lab-results/${id}`),
   create: data => apiClient.post('/lab-results/', data),
-  update: (id, data) => apiClient.patch(`/lab-results/${id}`, data),
+  update: (id, data) => apiClient.put(`/lab-results/${id}`, data),
   delete: id => apiClient.delete(`/lab-results/${id}`),
   uploadFile: (labResultId, file) => {
     return apiClient.uploadFile(

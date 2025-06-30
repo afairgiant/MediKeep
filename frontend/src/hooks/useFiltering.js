@@ -12,6 +12,9 @@ export const useFiltering = (data = [], config = {}) => {
     status: 'all',
     category: 'all',
     dateRange: 'all',
+    result: 'all',
+    type: 'all',
+    files: 'all',
     ...config.initialFilters,
   });
 
@@ -59,6 +62,21 @@ export const useFiltering = (data = [], config = {}) => {
     { value: 'week', label: 'This Week' },
     { value: 'month', label: 'This Month' },
     { value: 'year', label: 'This Year' },
+  ];
+
+  // Result options (for lab results)
+  const resultOptions = config.resultOptions || [
+    { value: 'all', label: 'All Results' },
+  ];
+
+  // Type options (for test types/priorities)
+  const typeOptions = config.typeOptions || [
+    { value: 'all', label: 'All Types' },
+  ];
+
+  // Files options (for file attachments)
+  const filesOptions = config.filesOptions || [
+    { value: 'all', label: 'All Records' },
   ];
 
   // Helper function to get nested object values
@@ -165,6 +183,16 @@ export const useFiltering = (data = [], config = {}) => {
         if (item[config.categoryField] !== filters.category) return false;
       }
 
+      // Result filter (for lab results)
+      if (filters.result !== 'all' && config.resultField) {
+        if (item[config.resultField] !== filters.result) return false;
+      }
+
+      // Type filter (for test types/priorities)
+      if (filters.type !== 'all' && config.typeField) {
+        if (item[config.typeField] !== filters.type) return false;
+      }
+
       // Date range filter
       if (filters.dateRange !== 'all' && config.dateField) {
         if (!matchesDateRange(item[config.dateField], filters.dateRange, item))
@@ -175,14 +203,7 @@ export const useFiltering = (data = [], config = {}) => {
       if (config.customFilters) {
         for (const [key, filterFn] of Object.entries(config.customFilters)) {
           if (filters[key] !== undefined && filters[key] !== 'all') {
-            console.log(
-              `Custom filter ${key}:`,
-              filters[key],
-              'for item:',
-              item
-            );
-            const result = filterFn(item, filters[key]);
-            console.log(`Filter result:`, result);
+            const result = filterFn(item, filters[key], config.additionalData);
             if (!result) {
               return false;
             }
@@ -206,6 +227,9 @@ export const useFiltering = (data = [], config = {}) => {
       status: 'all',
       category: 'all',
       dateRange: 'all',
+      result: 'all',
+      type: 'all',
+      files: 'all',
       ...config.initialFilters,
     });
   };
@@ -229,6 +253,9 @@ export const useFiltering = (data = [], config = {}) => {
     statusOptions,
     categoryOptions,
     dateRangeOptions,
+    resultOptions,
+    typeOptions,
+    filesOptions,
     totalCount: Array.isArray(data) ? data.length : 0,
     filteredCount: filteredData.length,
   };
