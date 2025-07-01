@@ -54,6 +54,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { formatDate, formatDateTime } from '../../utils/helpers';
+import { useTheme } from '../../contexts/ThemeContext';
 import './AdminDashboard.css';
 
 // Register Chart.js components
@@ -71,6 +72,7 @@ ChartJS.register(
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { theme } = useTheme();
 
   // Dashboard Stats with auto-refresh
   const {
@@ -143,16 +145,28 @@ const AdminDashboard = () => {
   };
 
   const getHealthStatusColor = status => {
+    // Get CSS variables from the document root
+    const rootStyles = getComputedStyle(document.documentElement);
+
     switch (status?.toLowerCase()) {
       case 'healthy':
-        return '#10b981';
+        return (
+          rootStyles.getPropertyValue('--color-success').trim() || '#10b981'
+        );
       case 'warning':
-        return '#f59e0b';
+        return (
+          rootStyles.getPropertyValue('--color-warning').trim() || '#f59e0b'
+        );
       case 'error':
       case 'critical':
-        return '#ef4444';
+        return (
+          rootStyles.getPropertyValue('--color-danger').trim() || '#ef4444'
+        );
       default:
-        return '#6b7280';
+        return (
+          rootStyles.getPropertyValue('--color-text-secondary').trim() ||
+          '#6b7280'
+        );
     }
   };
 
@@ -181,59 +195,122 @@ const AdminDashboard = () => {
     return actionIcon ? `${actionIcon} ${baseIcon}` : baseIcon;
   };
 
-  const createChartData = () => ({
-    activity: {
-      labels: analyticsData?.weekly_activity?.labels || [
-        'Mon',
-        'Tue',
-        'Wed',
-        'Thu',
-        'Fri',
-        'Sat',
-        'Sun',
-      ],
-      datasets: [
-        {
-          label: 'User Activity',
-          data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          tension: 0.4,
+  const createChartData = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primaryColor =
+      rootStyles.getPropertyValue('--color-primary').trim() || '#3b82f6';
+
+    return {
+      activity: {
+        labels: analyticsData?.weekly_activity?.labels || [
+          'Mon',
+          'Tue',
+          'Wed',
+          'Thu',
+          'Fri',
+          'Sat',
+          'Sun',
+        ],
+        datasets: [
+          {
+            label: 'User Activity',
+            data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
+            borderColor: primaryColor,
+            backgroundColor: `${primaryColor}1a`, // Add transparency
+            tension: 0.4,
+          },
+        ],
+      },
+      distribution: {
+        labels: [
+          'Patients',
+          'Lab Results',
+          'Medications',
+          'Procedures',
+          'Allergies',
+          'Vitals',
+        ],
+        datasets: [
+          {
+            data: [
+              stats?.total_patients || 0,
+              stats?.total_lab_results || 0,
+              stats?.total_medications || 0,
+              stats?.total_procedures || 0,
+              stats?.total_allergies || 0,
+              stats?.total_vitals || 0,
+            ],
+            backgroundColor: [
+              rootStyles.getPropertyValue('--color-primary').trim() ||
+                '#3b82f6',
+              rootStyles.getPropertyValue('--color-success').trim() ||
+                '#10b981',
+              rootStyles.getPropertyValue('--color-warning').trim() ||
+                '#f59e0b',
+              rootStyles.getPropertyValue('--color-danger').trim() || '#ef4444',
+              '#8b5cf6', // Purple - using hardcoded as no CSS variable defined
+              rootStyles.getPropertyValue('--color-info').trim() || '#06b6d4',
+            ],
+            borderWidth: 0,
+          },
+        ],
+      },
+    };
+  };
+
+  // Chart configuration functions that depend on current theme
+  const createLineChartOptions = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const textColor =
+      rootStyles.getPropertyValue('--color-text-primary').trim() || '#212529';
+    const gridColor =
+      rootStyles.getPropertyValue('--color-border-light').trim() || '#e9ecef';
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: textColor,
+          },
         },
-      ],
-    },
-    distribution: {
-      labels: [
-        'Patients',
-        'Lab Results',
-        'Medications',
-        'Procedures',
-        'Allergies',
-        'Vitals',
-      ],
-      datasets: [
-        {
-          data: [
-            stats?.total_patients || 0,
-            stats?.total_lab_results || 0,
-            stats?.total_medications || 0,
-            stats?.total_procedures || 0,
-            stats?.total_allergies || 0,
-            stats?.total_vitals || 0,
-          ],
-          backgroundColor: [
-            '#3b82f6',
-            '#10b981',
-            '#f59e0b',
-            '#ef4444',
-            '#8b5cf6',
-            '#06b6d4',
-          ],
-          borderWidth: 0,
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Activities', color: textColor },
+          ticks: { color: textColor },
+          grid: { color: gridColor },
         },
-      ],
-    },
-  });
+        x: {
+          title: { display: true, text: 'Day of Week', color: textColor },
+          ticks: { color: textColor },
+          grid: { color: gridColor },
+        },
+      },
+    };
+  };
+
+  const createDoughnutChartOptions = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const textColor =
+      rootStyles.getPropertyValue('--color-text-primary').trim() || '#212529';
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: textColor,
+          },
+        },
+      },
+    };
+  };
 
   if (loading && !stats) {
     return (
@@ -734,22 +811,5 @@ const ActionButton = ({ href, icon: IconComponent, title, desc, color }) => (
     </Stack>
   </Paper>
 );
-
-// Chart Configuration Functions
-const createLineChartOptions = () => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { beginAtZero: true, title: { display: true, text: 'Activities' } },
-    x: { title: { display: true, text: 'Day of Week' } },
-  },
-});
-
-const createDoughnutChartOptions = () => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { position: 'bottom' } },
-});
 
 export default AdminDashboard;

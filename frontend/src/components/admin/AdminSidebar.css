@@ -131,6 +131,46 @@
   margin-right: 0;
 }
 
+/* Dark theme support */
+[data-theme='dark'] .admin-sidebar {
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-secondary) 0%,
+    var(--color-bg-tertiary) 100%
+  );
+  color: var(--color-text-primary);
+  border-right: 1px solid var(--color-border-light);
+}
+
+[data-theme='dark'] .sidebar-header {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+[data-theme='dark'] .sidebar-toggle {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .sidebar-toggle:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+[data-theme='dark'] .nav-item {
+  color: var(--color-text-secondary);
+  border-left-color: transparent;
+}
+
+[data-theme='dark'] .nav-item:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-left-color: var(--color-border-medium);
+}
+
+[data-theme='dark'] .nav-item.active {
+  background-color: var(--color-bg-tertiary);
+  border-left-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
 /* Remove portrait monitor overlay - let normal layout handle it */
 
 /* Responsive design */

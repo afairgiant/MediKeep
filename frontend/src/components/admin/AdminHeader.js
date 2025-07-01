@@ -1,12 +1,16 @@
 import React from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import './AdminHeader.css';
 
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
+  const { theme, toggleTheme } = useTheme();
+
   console.log('🎯 AdminHeader render:', {
     timestamp: new Date().toISOString(),
     user: user?.username,
     hasOnLogout: typeof onLogout === 'function',
     hasOnToggleSidebar: typeof onToggleSidebar === 'function',
+    currentTheme: theme,
   });
 
   const handleLogout = () => {
@@ -28,6 +32,15 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
     } else {
       console.error('❌ onToggleSidebar function not provided to AdminHeader');
     }
+  };
+
+  const handleThemeToggle = () => {
+    console.log('🌓 AdminHeader theme toggle clicked:', {
+      timestamp: new Date().toISOString(),
+      currentTheme: theme,
+      newTheme: theme === 'light' ? 'dark' : 'light',
+    });
+    toggleTheme();
   };
   return (
     <header className="admin-header">
@@ -75,6 +88,14 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           <button className="notification-btn" title="Notifications">
             🔔
             <span className="notification-badge">3</span>
+          </button>
+
+          <button
+            className="theme-toggle-btn"
+            onClick={handleThemeToggle}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
           </button>
 
           <button className="logout-btn" onClick={handleLogout} title="Logout">
