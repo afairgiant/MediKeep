@@ -917,7 +917,7 @@
 .medical-item-notes {
   margin-bottom: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background: var(--mantine-color-gray-0);
   border-radius: 6px;
   border-left: 3px solid #667eea;
 }

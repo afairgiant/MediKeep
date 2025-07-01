@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header from '../components/layout/Header';
+import { Header } from '../components/adapters';
 import Container from '../components/layout/Container';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';

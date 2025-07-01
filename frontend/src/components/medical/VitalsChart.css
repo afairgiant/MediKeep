@@ -670,7 +670,7 @@
 }
 
 .stat-label {
-  color: #718096;
+  color: var(--mantine-color-dimmed) !important;
   font-size: 0.8rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -678,7 +678,7 @@
 }
 
 .stat-value {
-  color: #2d3748;
+  color: var(--mantine-color-text) !important;
   font-size: 1rem;
   font-weight: 600;
 }

@@ -76,8 +76,8 @@ const MantineFilters = ({
           </Group>
         </Flex>
 
-        {/* Filter Controls Row 1: Search and Primary Filters */}
-        <Group gap="md" grow>
+        {/* All Filter Controls in One Row */}
+        <Group gap="md" wrap="nowrap" align="flex-end">
           {/* Search */}
           {showSearch && (
             <TextInput
@@ -85,7 +85,7 @@ const MantineFilters = ({
               value={filters.search || ''}
               onChange={e => updateFilter('search', e.target.value)}
               leftSection={<IconSearch size={16} />}
-              style={{ minWidth: '300px' }}
+              style={{ minWidth: '200px', flexShrink: 0 }}
             />
           )}
 
@@ -100,7 +100,7 @@ const MantineFilters = ({
                 label: option.label,
               }))}
               clearable={false}
-              style={{ minWidth: '150px' }}
+              style={{ minWidth: '120px', flexShrink: 0 }}
             />
           )}
 
@@ -115,7 +115,7 @@ const MantineFilters = ({
                 label: option.label,
               }))}
               clearable={false}
-              style={{ minWidth: '150px' }}
+              style={{ minWidth: '120px', flexShrink: 0 }}
             />
           )}
 
@@ -130,70 +130,58 @@ const MantineFilters = ({
                 label: option.label,
               }))}
               clearable={false}
-              style={{ minWidth: '150px' }}
+              style={{ minWidth: '120px', flexShrink: 0 }}
             />
           )}
-        </Group>
 
-        {/* Filter Controls Row 2: Additional Filters (if any are shown) */}
-        {(showResult || showType || showFiles) && (
-          <Group gap="md" grow>
-            {/* Result Filter */}
-            {showResult && resultOptions && resultOptions.length > 1 && (
-              <Select
-                placeholder="Test Results"
-                value={filters.result}
-                onChange={value => updateFilter('result', value)}
-                data={resultOptions.map(option => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-                clearable={false}
-                style={{ minWidth: '150px' }}
-              />
-            )}
+          {/* Result Filter */}
+          {showResult && resultOptions && resultOptions.length > 1 && (
+            <Select
+              placeholder="Results"
+              value={filters.result}
+              onChange={value => updateFilter('result', value)}
+              data={resultOptions.map(option => ({
+                value: option.value,
+                label: option.label,
+              }))}
+              clearable={false}
+              style={{ minWidth: '120px', flexShrink: 0 }}
+            />
+          )}
 
-            {/* Type Filter */}
-            {showType && typeOptions && typeOptions.length > 1 && (
-              <Select
-                placeholder="Test Priority"
-                value={filters.type}
-                onChange={value => updateFilter('type', value)}
-                data={typeOptions.map(option => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-                clearable={false}
-                style={{ minWidth: '150px' }}
-              />
-            )}
+          {/* Type Filter */}
+          {showType && typeOptions && typeOptions.length > 1 && (
+            <Select
+              placeholder="Priority"
+              value={filters.type}
+              onChange={value => updateFilter('type', value)}
+              data={typeOptions.map(option => ({
+                value: option.value,
+                label: option.label,
+              }))}
+              clearable={false}
+              style={{ minWidth: '120px', flexShrink: 0 }}
+            />
+          )}
 
-            {/* Files Filter */}
-            {showFiles && filesOptions && filesOptions.length > 1 && (
-              <Select
-                placeholder="File Attachments"
-                value={filters.files}
-                onChange={value => updateFilter('files', value)}
-                data={filesOptions.map(option => ({
-                  value: option.value,
-                  label: option.label,
-                }))}
-                clearable={false}
-                style={{ minWidth: '150px' }}
-              />
-            )}
+          {/* Files Filter */}
+          {showFiles && filesOptions && filesOptions.length > 1 && (
+            <Select
+              placeholder="Files"
+              value={filters.files}
+              onChange={value => updateFilter('files', value)}
+              data={filesOptions.map(option => ({
+                value: option.value,
+                label: option.label,
+              }))}
+              clearable={false}
+              style={{ minWidth: '120px', flexShrink: 0 }}
+            />
+          )}
 
-            {/* Fill remaining space if needed */}
-            {(!showResult || !showType || !showFiles) && (
-              <div style={{ flex: 1 }} />
-            )}
-          </Group>
-        )}
-
-        {/* Sort Controls */}
-        {sortOptions && sortOptions.length > 1 && (
-          <Group gap="md" justify="flex-end">
-            <Group gap="xs">
+          {/* Sort Controls */}
+          {sortOptions && sortOptions.length > 1 && (
+            <>
               <Select
                 placeholder="Sort by"
                 value={sortBy}
@@ -202,7 +190,7 @@ const MantineFilters = ({
                   value: option.value,
                   label: option.label,
                 }))}
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: '140px', flexShrink: 0 }}
               />
               <Button
                 variant="subtle"
@@ -215,26 +203,26 @@ const MantineFilters = ({
                     <IconSortDescending size={16} />
                   )
                 }
+                style={{ flexShrink: 0 }}
               >
                 {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
               </Button>
-            </Group>
-          </Group>
-        )}
+            </>
+          )}
 
-        {/* Clear Filters */}
-        {hasActiveFilters && (
-          <Group justify="flex-end">
+          {/* Clear Filters */}
+          {hasActiveFilters && (
             <Button
               variant="subtle"
               color="gray"
               leftSection={<IconClearAll size={16} />}
               onClick={clearFilters}
+              style={{ flexShrink: 0 }}
             >
-              Clear Filters
+              Clear
             </Button>
-          </Group>
-        )}
+          )}
+        </Group>
       </Stack>
     </Card>
   );

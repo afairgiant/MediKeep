@@ -42,6 +42,7 @@ import {
   IconAlertCircle,
   IconInfoCircle,
   IconSearch,
+  IconX,
 } from '@tabler/icons-react';
 import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { PageHeader } from '../components';
@@ -66,6 +67,13 @@ const Dashboard = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showWelcomeBox, setShowWelcomeBox] = useState(() => {
+    // Check if user has dismissed the welcome box for this user
+    const dismissed = localStorage.getItem(
+      `welcomeBox_dismissed_${authUser?.id || 'guest'}`
+    );
+    return dismissed !== 'true';
+  });
 
   // Combine loading states
   const loading = patientLoading || activityLoading;
@@ -78,6 +86,12 @@ const Dashboard = () => {
   useEffect(() => {
     if (authUser && user) {
       checkProfileCompletionModal();
+      // Reset welcome box for new user login (different user)
+      const currentUserId = authUser.id;
+      const dismissed = localStorage.getItem(
+        `welcomeBox_dismissed_${currentUserId}`
+      );
+      setShowWelcomeBox(dismissed !== 'true');
     }
   }, [authUser, user]);
 
@@ -360,7 +374,7 @@ const Dashboard = () => {
   return (
     <div style={{ minHeight: '100vh' }}>
       <PageHeader
-        title="Medical Records Dashboard"
+        title="Medical Records App"
         icon="🏥"
         variant="dashboard"
         showBackButton={false}
@@ -368,29 +382,59 @@ const Dashboard = () => {
 
       <Container size="xl" py="xl">
         {/* Welcome Section */}
-        <Paper
-          p="md"
-          radius="md"
-          mb="xl"
-          bg="var(--mantine-primary-color-filled)"
-          c="white"
-        >
-          <Group justify="space-between" align="center">
-            <div>
-              <Title order={2} size="h3" fw={600} mb={4}>
-                Medical Records Dashboard
-              </Title>
-              <Text size="sm" opacity={0.9}>
-                Manage your health information securely
-              </Text>
-            </div>
-            {user && (
-              <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
-                Hello, {user.first_name} {user.last_name}!
-              </Badge>
-            )}
-          </Group>
-        </Paper>
+        {showWelcomeBox && (
+          <Paper
+            p="md"
+            radius="md"
+            mb="xl"
+            bg="var(--mantine-primary-color-filled)"
+            c="white"
+            pos="relative"
+          >
+            <ActionIcon
+              variant="subtle"
+              color="rgba(255,255,255,0.7)"
+              size="sm"
+              pos="absolute"
+              top={8}
+              right={8}
+              onClick={() => {
+                setShowWelcomeBox(false);
+                // Persist the dismissal for this user
+                if (authUser?.id) {
+                  localStorage.setItem(
+                    `welcomeBox_dismissed_${authUser.id}`,
+                    'true'
+                  );
+                }
+              }}
+              title="Close welcome message"
+              style={{
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                },
+              }}
+            >
+              <IconX size={14} />
+            </ActionIcon>
+
+            <Group justify="space-between" align="center" pr="xl">
+              <div>
+                <Title order={2} size="h3" fw={600} mb={4}>
+                  Medical Records Dashboard
+                </Title>
+                <Text size="sm" opacity={0.9}>
+                  Manage your health information securely
+                </Text>
+              </div>
+              {user && (
+                <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
+                  Hello, {user.first_name} {user.last_name}!
+                </Badge>
+              )}
+            </Group>
+          </Paper>
+        )}
 
         {/* Search Bar */}
         <Flex justify="flex-end" mb="xl">

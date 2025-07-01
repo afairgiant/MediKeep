@@ -1,16 +1,42 @@
 /**
- * VitalsList Component
+ * VitalsList Component - Enhanced Version with Mantine UI
  * Displays a list of patient vital signs with options to edit/delete
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import {
+  Table,
+  Button,
+  Group,
+  Text,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  ActionIcon,
+  Badge,
+  Paper,
+  Box,
+  Flex,
+  UnstyledButton,
+  rem,
+} from '@mantine/core';
+import {
+  IconEdit,
+  IconTrash,
+  IconChevronUp,
+  IconChevronDown,
+  IconSelector,
+  IconAlertTriangle,
+  IconRefresh,
+  IconActivity,
+} from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
 import {
   formatDate as formatDateHelper,
   formatDateTime,
 } from '../../utils/helpers';
-import './VitalsList.css';
 
 const VitalsList = ({
   patientId,
@@ -166,200 +192,270 @@ const VitalsList = ({
 
   const getSortIcon = columnKey => {
     if (sortConfig.key !== columnKey) {
-      return '↕️'; // Both arrows for unsorted
+      return <IconSelector size={14} />;
     }
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+    return sortConfig.direction === 'asc' ? (
+      <IconChevronUp size={14} />
+    ) : (
+      <IconChevronDown size={14} />
+    );
   };
+
+  const ThComponent = ({ children, sorted, onSort }) => (
+    <UnstyledButton
+      onClick={onSort}
+      style={{
+        width: '100%',
+        padding: rem(8),
+        fontWeight: 500,
+        fontSize: rem(14),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        color: 'var(--mantine-color-text)',
+      }}
+    >
+      <Text fw={500} size="sm">
+        {children}
+      </Text>
+      {getSortIcon(sorted)}
+    </UnstyledButton>
+  );
 
   const sortedVitals = getSortedVitals();
 
   if (isLoading) {
     return (
-      <div className="vitals-list loading">
-        <div className="loading-spinner">Loading vitals...</div>
-      </div>
+      <Center py="xl">
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text>Loading vitals...</Text>
+        </Stack>
+      </Center>
     );
   }
 
   if (currentError) {
     return (
-      <div className="vitals-list error">
-        <div className="error-message">
-          <p>Error loading vitals: {currentError}</p>
-          <button onClick={loadVitals} className="retry-btn">
+      <Alert
+        variant="light"
+        color="red"
+        icon={<IconAlertTriangle size={16} />}
+        title="Error Loading Vitals"
+      >
+        <Group justify="space-between" align="center">
+          <Text size="sm">{currentError}</Text>
+          <Button
+            variant="light"
+            size="xs"
+            leftSection={<IconRefresh size={14} />}
+            onClick={loadVitals}
+          >
             Try Again
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Group>
+      </Alert>
     );
   }
 
   if (vitals.length === 0) {
     return (
-      <div className="vitals-list empty">
-        <div className="empty-message">
-          <p>No vitals records found</p>
-          <p className="empty-subtitle">
-            Vital signs will appear here once recorded
-          </p>
-        </div>
-      </div>
+      <Center py="xl">
+        <Stack align="center" gap="md">
+          <IconActivity
+            size={48}
+            stroke={1}
+            color="var(--mantine-color-gray-5)"
+          />
+          <Stack align="center" gap="xs">
+            <Text fw={500}>No vitals records found</Text>
+            <Text c="dimmed" ta="center" size="sm">
+              Vital signs will appear here once recorded
+            </Text>
+          </Stack>
+        </Stack>
+      </Center>
     );
   }
 
+  const rows = sortedVitals.map(vital => (
+    <Table.Tr key={vital.id}>
+      <Table.Td>
+        <Stack gap={2}>
+          <Text size="sm" fw={500}>
+            {formatDate(vital.recorded_date)}
+          </Text>
+          {vital.created_at && (
+            <Text size="xs" c="dimmed">
+              {formatTime(vital.created_at)}
+            </Text>
+          )}
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm" fw={500}>
+          {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
+        </Text>
+      </Table.Td>
+      <Table.Td>
+        {vital.heart_rate ? (
+          <Text size="sm" fw={500}>
+            {vital.heart_rate} BPM
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
+      </Table.Td>
+      <Table.Td>
+        {vital.temperature ? (
+          <Text size="sm" fw={500}>
+            {vital.temperature}°F
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
+      </Table.Td>
+      <Table.Td>
+        {vital.weight ? (
+          <Text size="sm" fw={500}>
+            {vital.weight} lbs
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm" fw={500}>
+          {getBMIDisplay(vital.weight, vital.height)}
+        </Text>
+      </Table.Td>
+      <Table.Td>
+        {vital.oxygen_saturation ? (
+          <Text size="sm" fw={500}>
+            {vital.oxygen_saturation}%
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
+      </Table.Td>
+      {showActions && (
+        <Table.Td>
+          <Group gap="xs">
+            <ActionIcon
+              variant="light"
+              color="blue"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation();
+                onEdit(vital);
+              }}
+              title="Edit vitals"
+            >
+              <IconEdit size={14} />
+            </ActionIcon>
+            <ActionIcon
+              variant="light"
+              color="red"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation();
+                handleDelete(vital.id);
+              }}
+              title="Delete vitals"
+            >
+              <IconTrash size={14} />
+            </ActionIcon>
+          </Group>
+        </Table.Td>
+      )}
+    </Table.Tr>
+  ));
+
   return (
-    <div className="vitals-list">
-      <div className="vitals-table-container">
-        <table className="vitals-table">
-          {' '}
-          <thead>
-            <tr>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('recorded_date')}
-                title="Click to sort by date"
-              >
-                Date {getSortIcon('recorded_date')}
-              </th>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('bp')}
-                title="Click to sort by blood pressure"
-              >
-                Blood Pressure {getSortIcon('bp')}
-              </th>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('heart_rate')}
-                title="Click to sort by heart rate"
-              >
-                Heart Rate {getSortIcon('heart_rate')}
-              </th>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('temperature')}
-                title="Click to sort by temperature"
-              >
-                Temperature {getSortIcon('temperature')}
-              </th>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('weight')}
-                title="Click to sort by weight"
-              >
-                Weight {getSortIcon('weight')}
-              </th>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('bmi')}
-                title="Click to sort by BMI"
-              >
-                BMI {getSortIcon('bmi')}
-              </th>
-              <th
-                className="sortable-header"
-                onClick={() => handleSort('oxygen_saturation')}
-                title="Click to sort by oxygen saturation"
-              >
-                O2 Sat {getSortIcon('oxygen_saturation')}
-              </th>
-              {showActions && <th className="actions-header">Actions</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedVitals.map(vital => (
-              <tr key={vital.id}>
-                <td>
-                  <div className="date-display">
-                    {' '}
-                    <div className="date">
-                      {formatDate(vital.recorded_date)}
-                    </div>
-                    {vital.created_at && (
-                      <div className="time">{formatTime(vital.created_at)}</div>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <span className="vital-value">
-                    {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
-                  </span>
-                </td>
-                <td>
-                  {vital.heart_rate ? (
-                    <span className="vital-value">{vital.heart_rate} BPM</span>
-                  ) : (
-                    <span className="na">N/A</span>
-                  )}
-                </td>
-                <td>
-                  {vital.temperature ? (
-                    <span className="vital-value">{vital.temperature}°F</span>
-                  ) : (
-                    <span className="na">N/A</span>
-                  )}
-                </td>
-                <td>
-                  {vital.weight ? (
-                    <span className="vital-value">{vital.weight} lbs</span>
-                  ) : (
-                    <span className="na">N/A</span>
-                  )}
-                </td>
-                <td>
-                  <span className="bmi-value">
-                    {getBMIDisplay(vital.weight, vital.height)}
-                  </span>
-                </td>
-                <td>
-                  {vital.oxygen_saturation ? (
-                    <span className="vital-value">
-                      {vital.oxygen_saturation}%
-                    </span>
-                  ) : (
-                    <span className="na">N/A</span>
-                  )}
-                </td>
-                {showActions && (
-                  <td>
-                    <div className="actions">
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          onEdit(vital);
-                        }}
-                        className="edit-btn"
-                        title="Edit vitals"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleDelete(vital.id);
-                        }}
-                        className="delete-btn"
-                        title="Delete vitals"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <Stack gap="md">
+      <Paper shadow="sm" withBorder>
+        <Table striped highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>
+                <ThComponent
+                  sorted="recorded_date"
+                  onSort={() => handleSort('recorded_date')}
+                >
+                  Date
+                </ThComponent>
+              </Table.Th>
+              <Table.Th>
+                <ThComponent sorted="bp" onSort={() => handleSort('bp')}>
+                  Blood Pressure
+                </ThComponent>
+              </Table.Th>
+              <Table.Th>
+                <ThComponent
+                  sorted="heart_rate"
+                  onSort={() => handleSort('heart_rate')}
+                >
+                  Heart Rate
+                </ThComponent>
+              </Table.Th>
+              <Table.Th>
+                <ThComponent
+                  sorted="temperature"
+                  onSort={() => handleSort('temperature')}
+                >
+                  Temperature
+                </ThComponent>
+              </Table.Th>
+              <Table.Th>
+                <ThComponent
+                  sorted="weight"
+                  onSort={() => handleSort('weight')}
+                >
+                  Weight
+                </ThComponent>
+              </Table.Th>
+              <Table.Th>
+                <ThComponent sorted="bmi" onSort={() => handleSort('bmi')}>
+                  BMI
+                </ThComponent>
+              </Table.Th>
+              <Table.Th>
+                <ThComponent
+                  sorted="oxygen_saturation"
+                  onSort={() => handleSort('oxygen_saturation')}
+                >
+                  O2 Sat
+                </ThComponent>
+              </Table.Th>
+              {showActions && (
+                <Table.Th>
+                  <Text fw={500} size="sm">
+                    Actions
+                  </Text>
+                </Table.Th>
+              )}
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </Paper>
 
       {vitals.length >= limit && (
-        <div className="load-more">
-          <button onClick={loadVitals} className="load-more-btn">
+        <Center>
+          <Button variant="light" onClick={loadVitals}>
             Load More
-          </button>
-        </div>
+          </Button>
+        </Center>
       )}
-    </div>
+    </Stack>
   );
 };
 
