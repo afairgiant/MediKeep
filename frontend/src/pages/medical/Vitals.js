@@ -130,20 +130,17 @@ const Vitals = () => {
   // State management
   const [showForm, setShowForm] = useState(false);
   const [editingVitals, setEditingVitals] = useState(null);
-  const [refreshList, setRefreshList] = useState(0);
   const [stats, setStats] = useState(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [statsError, setStatsError] = useState(null);
 
-  // Use global state for patient data
-  const { patient: currentPatient, loading: globalDataLoading } =
-    useCurrentPatient();
-
   // Medical data management with filtering and sorting
   const {
     items: vitalsData,
+    currentPatient,
     loading: vitalsLoading,
     error: vitalsError,
+    successMessage,
     createItem,
     updateItem,
     deleteItem,
@@ -202,10 +199,10 @@ const Vitals = () => {
 
   // Load stats when patient changes or vitals data changes
   useEffect(() => {
-    if (currentPatient && vitalsData) {
+    if (currentPatient?.id) {
       loadStats();
     }
-  }, [loadStats, currentPatient, vitalsData]);
+  }, [loadStats, currentPatient?.id, vitalsData?.length]);
 
   // Generate filter options from vitalsData
   const statusOptions = useMemo(() => {
@@ -238,21 +235,26 @@ const Vitals = () => {
   const handleFormSave = useCallback(
     async formData => {
       try {
+        let success;
         if (editingVitals) {
-          await updateItem(editingVitals.id, formData);
+          success = await updateItem(editingVitals.id, formData);
         } else {
-          await createItem(formData);
+          success = await createItem(formData);
         }
-        setShowForm(false);
-        setEditingVitals(null);
-        setRefreshList(prev => prev + 1);
-        await loadStats(); // Refresh stats after save
+
+        if (success) {
+          setShowForm(false);
+          setEditingVitals(null);
+          // Refresh the vitals data list and stats
+          await refreshData();
+          await loadStats();
+        }
       } catch (error) {
         console.error('Error saving vitals:', error);
         throw error; // Let the form handle the error display
       }
     },
-    [editingVitals, updateItem, createItem, loadStats]
+    [editingVitals, updateItem, createItem, refreshData, loadStats]
   );
 
   const handleFormCancel = useCallback(() => {
@@ -260,6 +262,18 @@ const Vitals = () => {
     setEditingVitals(null);
     clearError();
   }, [clearError]);
+
+  const handleDelete = useCallback(
+    async vitalsId => {
+      const success = await deleteItem(vitalsId);
+      if (success) {
+        // Refresh the vitals data list and stats
+        await refreshData();
+        await loadStats();
+      }
+    },
+    [deleteItem, refreshData, loadStats]
+  );
 
   // Render stats card with Mantine components
   const renderStatsCard = (key, config) => {
@@ -316,7 +330,7 @@ const Vitals = () => {
   };
 
   // Loading state
-  if (globalDataLoading || vitalsLoading) {
+  if (vitalsLoading) {
     return (
       <Center h="50vh">
         <Stack align="center" gap="md">
@@ -364,6 +378,17 @@ const Vitals = () => {
             mb="md"
           >
             {vitalsError}
+          </Alert>
+        )}
+        {successMessage && (
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<CheckCircle size={16} />}
+            mb="md"
+          >
+            {successMessage}
           </Alert>
         )}
 
@@ -507,6 +532,7 @@ const Vitals = () => {
           <VitalsList
             patientId={currentPatient?.id}
             onEdit={handleEdit}
+            onDelete={handleDelete}
             vitalsData={filteredVitals}
             loading={vitalsLoading}
             error={vitalsError}

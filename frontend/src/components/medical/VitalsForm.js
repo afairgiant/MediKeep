@@ -235,7 +235,7 @@ const VitalsForm = ({
     weight: '',
     respiratory_rate: '',
     oxygen_saturation: '',
-    notes: '',
+    notes: '', // Ensure notes is always a string, never null
   });
 
   const [errors, setErrors] = useState({});
@@ -256,6 +256,8 @@ const VitalsForm = ({
         recorded_date: vitals.recorded_date
           ? new Date(vitals.recorded_date)
           : new Date(),
+        // Ensure notes is always a string, never null
+        notes: vitals.notes || '',
       });
     }
   }, [vitals, isEdit]);
@@ -358,7 +360,10 @@ const VitalsForm = ({
       // Process data for API
       const processedData = {
         ...formData,
-        recorded_date: formData.recorded_date.toISOString().split('T')[0],
+        recorded_date:
+          formData.recorded_date instanceof Date
+            ? formData.recorded_date.toISOString().split('T')[0]
+            : formData.recorded_date,
         systolic_bp: formData.systolic_bp
           ? parseInt(formData.systolic_bp)
           : null,
@@ -431,7 +436,7 @@ const VitalsForm = ({
           key={fieldName}
           label={config.label}
           placeholder={config.placeholder}
-          value={value}
+          value={value === null || value === undefined ? '' : value}
           onChange={val => handleInputChange(fieldName, val)}
           leftSection={<IconComponent size={16} />}
           rightSection={
@@ -457,7 +462,7 @@ const VitalsForm = ({
           key={fieldName}
           label={config.label}
           placeholder={config.placeholder}
-          value={value}
+          value={value || ''} // Ensure value is never null or undefined
           onChange={e => handleInputChange(fieldName, e.target.value)}
           rows={config.rows}
           error={error}
@@ -470,7 +475,7 @@ const VitalsForm = ({
         key={fieldName}
         label={config.label}
         placeholder={config.placeholder}
-        value={value}
+        value={value || ''} // Ensure value is never null or undefined
         onChange={e => handleInputChange(fieldName, e.target.value)}
         leftSection={<IconComponent size={16} />}
         required={config.required}

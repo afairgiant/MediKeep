@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './useApi';
 import { apiService } from '../services/api';
+import { useCurrentPatient } from './useGlobalData';
 
 export const useMedicalData = config => {
   const {
@@ -11,17 +12,25 @@ export const useMedicalData = config => {
   } = config;
 
   const [items, setItems] = useState([]);
-  const [currentPatient, setCurrentPatient] = useState(null);
   const [filesCounts, setFilesCounts] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
   const isInitialized = useRef(false);
-  const currentPatientRef = useRef(currentPatient);
   const abortControllerRef = useRef(null);
 
-  // Keep ref in sync with state
+  // Use global patient context instead of managing patient state locally
+  const { patient: currentPatient, loading: patientLoading } =
+    useCurrentPatient();
+  const currentPatientRef = useRef(currentPatient);
+
+  // Keep ref in sync with global patient state and reset initialization when patient changes
   useEffect(() => {
     currentPatientRef.current = currentPatient;
-  }, [currentPatient]);
+    // Reset initialization flag when patient changes to allow re-initialization
+    if (currentPatient?.id) {
+      isInitialized.current = false;
+    }
+  }, [currentPatient?.id]);
+
   const { loading, error, execute, clearError, setError, cleanup } = useApi();
 
   // Create item
@@ -122,16 +131,10 @@ export const useMedicalData = config => {
       const config = configRef.current;
 
       try {
-        let patient = null;
-
+        // Wait for patient data to be available if required
         if (config.requiresPatient) {
-          patient = await apiService.getCurrentPatient(abortController.signal);
-          if (patient && isMounted) {
-            console.log('Setting currentPatient:', patient);
-            setCurrentPatient(patient);
-            currentPatientRef.current = patient;
-          } else {
-            console.warn('No patient data received');
+          if (!currentPatient?.id) {
+            console.warn('No patient data available yet, waiting...');
             return;
           }
         }
@@ -139,9 +142,9 @@ export const useMedicalData = config => {
         if (!isMounted) return;
 
         let data = [];
-        if (config.requiresPatient && patient?.id) {
+        if (config.requiresPatient && currentPatient?.id) {
           data = await config.apiMethodsConfig.getByPatient(
-            patient.id,
+            currentPatient.id,
             abortController.signal
           );
         } else if (!config.requiresPatient) {
@@ -200,7 +203,7 @@ export const useMedicalData = config => {
       abortController.abort();
       cleanup();
     };
-  }, [setError, cleanup]); // Only include stable dependencies
+  }, [setError, cleanup, currentPatient?.id]); // Include currentPatient.id to reinitialize when patient loads
   // Refresh data function that uses execute wrapper
   const refreshData = useCallback(async () => {
     const config = configRef.current;
@@ -264,7 +267,7 @@ export const useMedicalData = config => {
     filesCounts,
 
     // State
-    loading,
+    loading: loading || patientLoading, // Combine API loading and patient loading
     error,
     successMessage,
 

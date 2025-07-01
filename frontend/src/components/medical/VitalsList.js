@@ -41,6 +41,7 @@ import {
 const VitalsList = ({
   patientId,
   onEdit,
+  onDelete,
   onRefresh,
   vitalsData,
   loading,
@@ -105,6 +106,18 @@ const VitalsList = ({
       return;
     }
 
+    // If external delete handler is provided and we're using external data, use it
+    if (onDelete && vitalsData !== undefined) {
+      try {
+        await onDelete(vitalsId);
+      } catch (err) {
+        // Error handling is done by the parent component
+        console.error('Delete failed:', err);
+      }
+      return;
+    }
+
+    // Otherwise, handle deletion internally
     try {
       await vitalsService.deleteVitals(vitalsId);
       toast.success('Vitals record deleted successfully');
