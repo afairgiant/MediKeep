@@ -62,10 +62,15 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
       TZ: $(TZ:-America/New_York)
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS - Uncomment if needed
+      #ENABLE_SSL: ${ENABLE_SSL:-false}
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
       - app_backups:/app/backups
+      # Uncomment the line below and create certificates if you want HTTPS
+      # - ./certs:/app/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -113,6 +118,8 @@ APP_PORT=8005
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
 
 TZ=America/New_York
+LOG_LEVEL=INFO #INFO or DEBUG
+ENABLE_SSL=false # false or true
 ```
 
 ### 3️⃣ Start the Containers

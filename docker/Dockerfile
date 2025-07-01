@@ -74,8 +74,8 @@ COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN find /app/app/scripts -type f \( -name "*.py" -o -name "backup_*" -o -name "restore*" \) -exec sed -i 's/\r$//' {} \; && \
     find /app -name "entrypoint.sh" -exec sed -i 's/\r$//' {} \;
 
-# Create directories and set all permissions in one layer
-RUN mkdir -p logs uploads/labwork backups /usr/local/bin && \
+# Create directories including certs mount point and set all permissions in one layer
+RUN mkdir -p logs uploads/labwork backups certs /usr/local/bin && \
     chmod +x /app/entrypoint.sh && \
     chmod +x /app/app/scripts/backup_db && \
     chmod +x /app/app/scripts/backup_files && \
@@ -102,9 +102,9 @@ LABEL maintainer="afairgiant" \
         version="0.7.0" \
         description="Medical Records System - React + FastAPI"
 
-# Health check with better configuration
+# Health check with support for both HTTP and HTTPS
 HEALTHCHECK --interval=120s --timeout=15s --start-period=60s --retries=2 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f -k http://localhost:8000/health || exit 1
 
 # Start the application with migrations (using absolute path)
 CMD ["/app/entrypoint.sh"]
