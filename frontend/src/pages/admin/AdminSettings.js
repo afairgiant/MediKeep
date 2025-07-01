@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { adminApiService } from '../../services/api/adminApi';
-import AdminHeader from '../../components/admin/AdminHeader';
-import '../../components/admin/AdminHeader.css';
+import AdminLayout from '../../components/admin/AdminLayout';
 import './AdminSettings.css';
 
 const AdminSettings = () => {
@@ -13,30 +11,6 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const navigate = useNavigate();
-
-  // Get user info from token for header
-  const getUserFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        username: payload.sub,
-        role: payload.role,
-        fullName: payload.full_name || payload.sub,
-      };
-    } catch (error) {
-      return null;
-    }
-  };
-
-  const user = getUserFromToken();
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
 
   // Load settings on component mount
   useEffect(() => {
@@ -115,22 +89,19 @@ const AdminSettings = () => {
 
   if (loading) {
     return (
-      <div className="admin-settings">
-        <AdminHeader user={user} onLogout={handleLogout} />
+      <AdminLayout>
         <div className="settings-content">
           <div className="settings-loading">
             <div className="loading-spinner"></div>
             <p>Loading settings...</p>
           </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="admin-settings">
-      <AdminHeader user={user} onLogout={handleLogout} />
-
+    <AdminLayout>
       <div className="settings-content">
         <div className="settings-page-header">
           <h1>Admin Settings</h1>
@@ -247,7 +218,7 @@ const AdminSettings = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

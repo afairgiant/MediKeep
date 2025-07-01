@@ -44,13 +44,13 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
   };
   return (
     <header className="admin-header">
-      {' '}
       <div className="header-left">
         <button className="sidebar-toggle-btn" onClick={handleToggleSidebar}>
           ☰
         </button>
         <h1>Medical Records Admin</h1>
       </div>
+      
       <div className="header-center">
         <div className="search-bar">
           <input
@@ -60,14 +60,15 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           />
           <button className="search-btn">🔍</button>
         </div>
-      </div>{' '}
+      </div>
+      
       <div className="header-right">
         <button
           className="back-to-dashboard-btn"
           onClick={() => (window.location.href = '/admin')}
           title="Return to Admin Dashboard"
         >
-          ← Admin Dashboard
+          ← Dashboard
         </button>
 
         <button
@@ -75,7 +76,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           onClick={() => (window.location.href = '/dashboard')}
           title="Return to Normal Dashboard"
         >
-          🏠 Home
+          🏠
         </button>
 
         <div className="admin-user-info">
@@ -85,11 +86,6 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
         </div>
 
         <div className="header-actions">
-          <button className="notification-btn" title="Notifications">
-            🔔
-            <span className="notification-badge">3</span>
-          </button>
-
           <button
             className="theme-toggle-btn"
             onClick={handleThemeToggle}
@@ -99,7 +95,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           </button>
 
           <button className="logout-btn" onClick={handleLogout} title="Logout">
-            🚪 Logout
+            Logout
           </button>
         </div>
       </div>

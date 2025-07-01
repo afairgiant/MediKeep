@@ -22,18 +22,28 @@
 
 .sidebar-toggle-btn {
   display: none;
-  background: none;
-  border: none;
+  background: var(--color-primary);
+  border: 2px solid var(--color-primary);
   font-size: 1.5rem;
-  color: #6b7280;
+  color: white;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-toggle-btn:hover {
-  background-color: #f3f4f6;
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-toggle-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-left h1 {
@@ -278,11 +288,14 @@
 }
 
 [data-theme='dark'] .sidebar-toggle-btn {
-  color: var(--color-text-secondary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
 }
 
 [data-theme='dark'] .sidebar-toggle-btn:hover {
-  background-color: var(--color-bg-tertiary);
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
 [data-theme='dark'] .search-bar {
@@ -371,32 +384,83 @@
   border-color: var(--color-border-medium);
 }
 
-/* Responsive design */
+/* Mobile responsive design */
 @media (max-width: 768px) {
-  .sidebar-toggle-btn {
-    display: block;
+  .admin-header {
+    padding: 8px 12px;
+    height: 60px;
+    gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .sidebar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .header-left h1 {
+    font-size: 16px;
+    margin: 0;
+    flex-shrink: 1;
+  }
+
+  /* Hide search on mobile */
   .header-center {
     display: none;
   }
 
-  .admin-user-info .user-name {
+  /* Hide user info on mobile */
+  .admin-user-info {
     display: none;
   }
 
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .back-to-dashboard-btn,
-  .back-to-home-btn {
-    padding: 6px 8px;
-    font-size: 0.8rem;
-  }
-
-  .back-to-home-btn {
-    display: none; /* Hide home button on mobile to save space */
-  }
-
+  .back-to-home-btn,
+  .theme-toggle-btn,
   .logout-btn {
-    padding: 8px 10px;
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 14px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .back-to-home-btn {
+    width: 36px;
+    padding: 8px;
+  }
+
+  .theme-toggle-btn {
+    width: 36px;
+    padding: 8px;
   }
 }
