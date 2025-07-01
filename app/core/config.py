@@ -27,9 +27,25 @@ class Settings:  # App Info
             else ""
         ),
     )
+
     # SSL Configuration
-    SSL_CERTFILE: str = os.getenv("SSL_CERTFILE", "./certs/localhost.crt")
-    SSL_KEYFILE: str = os.getenv("SSL_KEYFILE", "./certs/localhost.key")
+    # Use standard paths - /app/certs/ for Docker containers, ./certs/ for local development
+    SSL_CERTFILE: str = os.getenv(
+        "SSL_CERTFILE",
+        (
+            "/app/certs/localhost.crt"
+            if os.path.exists("/app")
+            else "./certs/localhost.crt"
+        ),
+    )
+    SSL_KEYFILE: str = os.getenv(
+        "SSL_KEYFILE",
+        (
+            "/app/certs/localhost.key"
+            if os.path.exists("/app")
+            else "./certs/localhost.key"
+        ),
+    )
     ENABLE_SSL: bool = os.getenv("ENABLE_SSL", "False").lower() == "true"
 
     # Security Configuration

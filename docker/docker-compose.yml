@@ -46,13 +46,11 @@ services:
       TZ: ${TZ:-America/New_York}
       # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS
       ENABLE_SSL: ${ENABLE_SSL:-false}
-      SSL_CERTFILE: ${SSL_CERTFILE:-/app/certs/localhost.crt}
-      SSL_KEYFILE: ${SSL_KEYFILE:-/app/certs/localhost.key}
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
       - app_backups:/app/backups
-      # Mount certificates directory (create ./certs/ and place your certificates there)
+
       # Uncomment the line below and create certificates if you want HTTPS
       # - ./certs:/app/certs:ro
     depends_on:
