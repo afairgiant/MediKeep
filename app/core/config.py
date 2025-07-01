@@ -27,6 +27,10 @@ class Settings:  # App Info
             else ""
         ),
     )
+    # SSL Configuration
+    SSL_CERTFILE: str = os.getenv("SSL_CERTFILE", "./certs/localhost.crt")
+    SSL_KEYFILE: str = os.getenv("SSL_KEYFILE", "./certs/localhost.key")
+    ENABLE_SSL: bool = os.getenv("ENABLE_SSL", "False").lower() == "true"
 
     # Security Configuration
     ALGORITHM: str = "HS256"
