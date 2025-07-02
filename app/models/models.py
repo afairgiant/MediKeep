@@ -262,6 +262,7 @@ class Condition(Base):
         Date, nullable=True
     )  # Date when the condition was first diagnosed
     status = Column(String, nullable=False)  # e.g., 'active', 'resolved', 'chronic'
+    endDate = Column(Date, nullable=True)  # Date when the condition was resolved
 
     # Table Relationships
     patient = relationship("Patient", back_populates="conditions")
