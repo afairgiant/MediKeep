@@ -21,12 +21,11 @@ const ModelManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [perPage, setPerPage] = useState(25);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchInput, setSearchInput] = useState(''); // Separate state for input value
 
   // Selection for bulk operations
   const [selectedRecords, setSelectedRecords] = useState(new Set());
   const [showBulkActions, setShowBulkActions] = useState(false);
+
   const loadModelData = useCallback(async () => {
     try {
       setLoading(true);
@@ -38,7 +37,6 @@ const ModelManagement = () => {
         adminApiService.getModelRecords(modelName, {
           page: currentPage,
           per_page: perPage,
-          search: searchQuery || null,
         }),
       ]);
 
@@ -52,7 +50,7 @@ const ModelManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [modelName, currentPage, perPage, searchQuery]);
+  }, [modelName, currentPage, perPage]);
 
   useEffect(() => {
     if (modelName) {
@@ -69,23 +67,6 @@ const ModelManagement = () => {
     setPerPage(newPerPage);
     setCurrentPage(1);
     setSelectedRecords(new Set());
-  };
-
-  // Debounced search effect
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchInput !== searchQuery) {
-        setSearchQuery(searchInput);
-        setCurrentPage(1);
-        setSelectedRecords(new Set());
-      }
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(timeoutId);
-  }, [searchInput, searchQuery]);
-
-  const handleSearchInput = value => {
-    setSearchInput(value);
   };
 
   const handleSelectRecord = recordId => {
@@ -269,16 +250,6 @@ const ModelManagement = () => {
 
         {/* Search and Filters */}
         <div className="model-controls">
-          <div className="search-section">
-            <input
-              type="text"
-              placeholder={`Search ${metadata?.verbose_name_plural || modelName}...`}
-              value={searchInput}
-              onChange={e => handleSearchInput(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
           <div className="pagination-controls">
             <select
               value={perPage}

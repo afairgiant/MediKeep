@@ -13,6 +13,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Request, status
 
+from app.core.config import settings
 from app.core.logging_config import get_logger
 from app.core.logging_constants import (
     CATEGORIES,
@@ -260,6 +261,21 @@ def get_log_level(request: Request) -> Dict[str, Any]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error. Please try again later.",
         )
+
+
+@router.get("/version")
+def get_version() -> Dict[str, Any]:
+    """
+    Get application version information.
+
+    Returns:
+        Dict containing app name, version, and timestamp
+    """
+    return {
+        "app_name": settings.APP_NAME,
+        "version": settings.VERSION,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
 
 
 @router.get("/health")

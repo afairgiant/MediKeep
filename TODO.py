@@ -33,5 +33,6 @@ Improvments:
     Admin:
         User: Make more user info show up on the user page.
         Make the search bar at the top work.
+        Implement search functionality for admin pages (temporarily removed non-functional search bar).
         Make the mobile version of the pages work better with the header 
 """
