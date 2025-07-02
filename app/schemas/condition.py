@@ -17,10 +17,10 @@ class ConditionBase(BaseModel):
     notes: Optional[str] = Field(
         None, max_length=1000, description="Additional notes about the condition"
     )
-    onsetDate: Optional[date] = Field(
+    onset_date: Optional[date] = Field(
         None, description="Date when the condition was first diagnosed"
     )
-    endDate: Optional[date] = Field(
+    end_date: Optional[date] = Field(
         None, description="Date when the condition was resolved"
     )
     status: str = Field(..., description="Status of the condition")
@@ -48,20 +48,20 @@ class ConditionBase(BaseModel):
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
 
-    @validator("onsetDate")
+    @validator("onset_date")
     def validate_onset_date(cls, v):
         if v and v > date.today():
             raise ValueError("Onset date cannot be in the future")
         return v
 
-    @validator("endDate")
+    @validator("end_date")
     def validate_end_date(cls, v, values):
         if v:
             if v > date.today():
                 raise ValueError("End date cannot be in the future")
             if (
-                "onsetDate" in values
-                and values["onsetDate"]
+                "onset_date" in values
+                and values["onset_date"]
                 and v < values["onsetDate"]
             ):
                 raise ValueError("End date cannot be before onset date")
@@ -84,8 +84,8 @@ class ConditionCreate(ConditionBase):
 class ConditionUpdate(BaseModel):
     diagnosis: Optional[str] = Field(None, min_length=2, max_length=500)
     notes: Optional[str] = Field(None, max_length=1000)
-    onsetDate: Optional[date] = None
-    endDate: Optional[date] = None
+    onset_date: Optional[date] = None
+    end_date: Optional[date] = None
     status: Optional[str] = None
     severity: Optional[str] = None
     icd10_code: Optional[str] = Field(None, max_length=10)
@@ -96,33 +96,26 @@ class ConditionUpdate(BaseModel):
     @validator("status")
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = [
-                "active",
-                "resolved",
-                "chronic",
-                "inactive",
-                "recurrence",
-                "relapse",
-            ]
+            valid_statuses = get_all_condition_statuses()
             if v.lower() not in valid_statuses:
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
             return v.lower()
         return v
 
-    @validator("onsetDate")
+    @validator("onset_date")
     def validate_onset_date(cls, v):
         if v and v > date.today():
             raise ValueError("Onset date cannot be in the future")
         return v
 
-    @validator("endDate")
+    @validator("end_date")
     def validate_end_date(cls, v, values):
         if v:
             if v > date.today():
                 raise ValueError("End date cannot be in the future")
             if (
-                "onsetDate" in values
-                and values["onsetDate"]
+                "onset_date" in values
+                and values["onset_date"]
                 and v < values["onsetDate"]
             ):
                 raise ValueError("End date cannot be before onset date")
@@ -159,8 +152,8 @@ class ConditionSummary(BaseModel):
     diagnosis: str
     status: str
     severity: Optional[str]
-    onsetDate: Optional[date]
-    endDate: Optional[date]
+    onset_date: Optional[date]
+    end_date: Optional[date]
     icd10_code: Optional[str]
     snomed_code: Optional[str]
     code_description: Optional[str]

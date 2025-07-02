@@ -132,8 +132,8 @@ const MantineConditionForm = ({
               <DateInput
                 label="Onset Date"
                 placeholder="When did this condition start"
-                value={formData.onsetDate ? new Date(formData.onsetDate) : null}
-                onChange={handleDateChange('onsetDate')}
+                value={formData.onset_date ? new Date(formData.onset_date) : null}
+                onChange={handleDateChange('onset_date')}
                 firstDayOfWeek={0}
                 clearable
                 description="When this condition was first diagnosed"
@@ -144,13 +144,13 @@ const MantineConditionForm = ({
               <DateInput
                 label="End Date"
                 placeholder="When was this condition resolved"
-                value={formData.endDate ? new Date(formData.endDate) : null}
-                onChange={handleDateChange('endDate')}
+                value={formData.end_date ? new Date(formData.end_date) : null}
+                onChange={handleDateChange('end_date')}
                 firstDayOfWeek={0}
                 clearable
                 description="When this condition was resolved (optional)"
                 maxDate={new Date()} // Can't be in the future
-                minDate={formData.onsetDate ? new Date(formData.onsetDate) : undefined} // Can't be before onset
+                minDate={formData.onset_date ? new Date(formData.onset_date) : undefined} // Can't be before onset
               />
             </Grid.Col>
           </Grid>

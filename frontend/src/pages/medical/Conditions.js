@@ -63,8 +63,8 @@ const Conditions = () => {
     icd10_code: '',
     snomed_code: '',
     code_description: '',
-    onsetDate: '', // Form field name
-    endDate: '', // Form field name
+    onset_date: '', // Form field name
+    end_date: '', // Form field name
   });
 
   const handleAddCondition = () => {
@@ -77,8 +77,8 @@ const Conditions = () => {
       icd10_code: '',
       snomed_code: '',
       code_description: '',
-      onsetDate: '',
-      endDate: '',
+      onset_date: '',
+      end_date: '',
     });
     setShowModal(true);
   };
@@ -93,8 +93,8 @@ const Conditions = () => {
       icd10_code: condition.icd10_code || '',
       snomed_code: condition.snomed_code || '',
       code_description: condition.code_description || '',
-      onsetDate: condition.onsetDate ? condition.onsetDate.split('T')[0] : '',
-      endDate: condition.endDate ? condition.endDate.split('T')[0] : '',
+      onset_date: condition.onset_date ? condition.onset_date.split('T')[0] : '',
+      end_date: condition.end_date ? condition.end_date.split('T')[0] : '',
     });
     setShowModal(true);
   };
@@ -122,8 +122,8 @@ const Conditions = () => {
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
-      onsetDate: formData.onsetDate || null, // Use camelCase to match API
-      endDate: formData.endDate || null, // Use camelCase to match API
+      onset_date: formData.onset_date || null, // Use snake_case to match API
+      end_date: formData.end_date || null, // Use snake_case to match API
       patient_id: currentPatient.id,
     };
 
@@ -301,28 +301,28 @@ const Conditions = () => {
 
                   <div className="medical-item-details">
                     {/* Display onset date if available */}
-                    {condition.onsetDate && (
+                    {condition.onset_date && (
                       <>
                         <div className="detail-item">
                           <span className="label">Onset Date:</span>
                           <span className="value">
-                            {formatDate(condition.onsetDate)}
+                            {formatDate(condition.onset_date)}
                           </span>
                         </div>
                         <div className="detail-item">
                           <span className="label">Duration:</span>
                           <span className="value">
-                            {getTimeSinceOnset(condition.onsetDate)}
+                            {getTimeSinceOnset(condition.onset_date)}
                           </span>
                         </div>
                       </>
                     )}
                     {/* Display end date if available */}
-                    {condition.endDate && (
+                    {condition.end_date && (
                       <div className="detail-item">
                         <span className="label">End Date:</span>
                         <span className="value">
-                          {formatDate(condition.endDate)}
+                          {formatDate(condition.end_date)}
                         </span>
                       </div>
                     )}
@@ -398,8 +398,8 @@ const Conditions = () => {
               columns={[
                 { header: 'Condition', accessor: 'diagnosis' },
                 { header: 'Severity', accessor: 'severity' },
-                { header: 'Onset Date', accessor: 'onsetDate' },
-                { header: 'End Date', accessor: 'endDate' },
+                { header: 'Onset Date', accessor: 'onset_date' },
+                { header: 'End Date', accessor: 'end_date' },
                 { header: 'Status', accessor: 'status' },
                 { header: 'ICD-10', accessor: 'icd10_code' },
                 { header: 'Notes', accessor: 'notes' },
@@ -420,8 +420,8 @@ const Conditions = () => {
                     })()}
                   </span>
                 ) : '-',
-                onsetDate: value => (value ? formatDate(value) : '-'),
-                endDate: value => (value ? formatDate(value) : '-'),
+                onset_date: value => (value ? formatDate(value) : '-'),
+                end_date: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
                 icd10_code: value => value || '-',
                 notes: value =>

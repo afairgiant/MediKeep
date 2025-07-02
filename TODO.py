@@ -35,4 +35,10 @@ Improvments:
         Make the search bar at the top work.
         Implement search functionality for admin pages (temporarily removed non-functional search bar).
         Make the mobile version of the pages work better with the header 
+
+Roadmap:
+    - Family member linking of patients.
+    - Emergency Contacts
+    - Document attachments - store all documents in one place?
+    - User roles - (parent/guardian) goes with family member linking.
 """

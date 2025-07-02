@@ -69,13 +69,13 @@ class Patient(Base):
 
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    birthDate = Column(Date, nullable=False)
+    birth_date = Column(Date, nullable=False)
 
     physician_id = Column(
         Integer, ForeignKey("practitioners.id"), nullable=True
     )  # Primary care physician
 
-    bloodType = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
+    blood_type = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
     height = Column(Integer, nullable=True)  # in inches
     weight = Column(Integer, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
@@ -151,8 +151,8 @@ class Medication(Base):
         String, nullable=True
     )  # How it is administered (e.g., oral, injection, etc.)
     indication = Column(String, nullable=True)  # What the medication is prescribed for
-    effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
-    effectivePeriod_end = Column(Date, nullable=True)  # End date of the medication
+    effective_period_start = Column(Date, nullable=True)  # Start date of the medication
+    effective_period_end = Column(Date, nullable=True)  # End date of the medication
     status = Column(String, nullable=True)  # Use MedicationStatus enum: active, inactive, on_hold, completed, cancelled
     pharmacy_id = Column(Integer, ForeignKey("pharmacies.id"), nullable=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -290,11 +290,11 @@ class Condition(Base):
     condition_name = Column(String, nullable=True)  # Name of the condition
     diagnosis = Column(String, nullable=False)
     notes = Column(String, nullable=True)
-    onsetDate = Column(
+    onset_date = Column(
         Date, nullable=True
     )  # Date when the condition was first diagnosed
     status = Column(String, nullable=False)  # Use ConditionStatus enum: active, inactive, resolved, chronic, recurrence, relapse
-    endDate = Column(Date, nullable=True)  # Date when the condition was resolved
+    end_date = Column(Date, nullable=True)  # Date when the condition was resolved
     
     # Severity and medical codes
     severity = Column(String, nullable=True)  # Use SeverityLevel enum: mild, moderate, severe, critical
