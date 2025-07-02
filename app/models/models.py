@@ -263,6 +263,12 @@ class Condition(Base):
     )  # Date when the condition was first diagnosed
     status = Column(String, nullable=False)  # e.g., 'active', 'resolved', 'chronic'
     endDate = Column(Date, nullable=True)  # Date when the condition was resolved
+    
+    # Severity and medical codes
+    severity = Column(String, nullable=True)  # e.g., 'mild', 'moderate', 'severe', 'critical'
+    icd10_code = Column(String, nullable=True)  # ICD-10 diagnosis code
+    snomed_code = Column(String, nullable=True)  # SNOMED CT code
+    code_description = Column(String, nullable=True)  # Description of the medical code
 
     # Table Relationships
     patient = relationship("Patient", back_populates="conditions")

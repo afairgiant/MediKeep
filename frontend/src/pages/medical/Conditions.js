@@ -58,7 +58,12 @@ const Conditions = () => {
     diagnosis: '',
     notes: '',
     status: 'active',
+    severity: '',
+    icd10_code: '',
+    snomed_code: '',
+    code_description: '',
     onsetDate: '', // Form field name
+    endDate: '', // Form field name
   });
 
   const handleAddCondition = () => {
@@ -67,7 +72,12 @@ const Conditions = () => {
       diagnosis: '',
       notes: '',
       status: 'active',
+      severity: '',
+      icd10_code: '',
+      snomed_code: '',
+      code_description: '',
       onsetDate: '',
+      endDate: '',
     });
     setShowModal(true);
   };
@@ -78,7 +88,12 @@ const Conditions = () => {
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
       status: condition.status || 'active',
+      severity: condition.severity || '',
+      icd10_code: condition.icd10_code || '',
+      snomed_code: condition.snomed_code || '',
+      code_description: condition.code_description || '',
       onsetDate: condition.onsetDate ? condition.onsetDate.split('T')[0] : '',
+      endDate: condition.endDate ? condition.endDate.split('T')[0] : '',
     });
     setShowModal(true);
   };
@@ -102,7 +117,12 @@ const Conditions = () => {
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
       status: formData.status,
+      severity: formData.severity || null,
+      icd10_code: formData.icd10_code || null,
+      snomed_code: formData.snomed_code || null,
+      code_description: formData.code_description || null,
       onsetDate: formData.onsetDate || null, // Use camelCase to match API
+      endDate: formData.endDate || null, // Use camelCase to match API
       patient_id: currentPatient.id,
     };
 
@@ -296,6 +316,44 @@ const Conditions = () => {
                         </div>
                       </>
                     )}
+                    {/* Display end date if available */}
+                    {condition.endDate && (
+                      <div className="detail-item">
+                        <span className="label">End Date:</span>
+                        <span className="value">
+                          {formatDate(condition.endDate)}
+                        </span>
+                      </div>
+                    )}
+                    {/* Display severity if available */}
+                    {condition.severity && (
+                      <div className="detail-item">
+                        <span className="label">Severity:</span>
+                        <span className="value">
+                          {condition.severity === 'mild' && '🟢 Mild'}
+                          {condition.severity === 'moderate' && '🟡 Moderate'}
+                          {condition.severity === 'severe' && '🟠 Severe'}
+                          {condition.severity === 'critical' && '🔴 Critical'}
+                        </span>
+                      </div>
+                    )}
+                    {/* Display medical codes if available */}
+                    {(condition.icd10_code || condition.snomed_code) && (
+                      <div className="detail-item">
+                        <span className="label">Medical Codes:</span>
+                        <span className="value">
+                          {condition.icd10_code && `ICD-10: ${condition.icd10_code}`}
+                          {condition.icd10_code && condition.snomed_code && ' | '}
+                          {condition.snomed_code && `SNOMED: ${condition.snomed_code}`}
+                        </span>
+                      </div>
+                    )}
+                    {condition.code_description && (
+                      <div className="detail-item">
+                        <span className="label">Code Description:</span>
+                        <span className="value">{condition.code_description}</span>
+                      </div>
+                    )}
                     <div className="detail-item">
                       <span className="label">Status:</span>
                       <span className="value">
@@ -339,8 +397,11 @@ const Conditions = () => {
               data={filteredConditions}
               columns={[
                 { header: 'Condition', accessor: 'diagnosis' },
+                { header: 'Severity', accessor: 'severity' },
                 { header: 'Onset Date', accessor: 'onsetDate' },
+                { header: 'End Date', accessor: 'endDate' },
                 { header: 'Status', accessor: 'status' },
+                { header: 'ICD-10', accessor: 'icd10_code' },
                 { header: 'Notes', accessor: 'notes' },
               ]}
               patientData={currentPatient}
@@ -351,8 +412,19 @@ const Conditions = () => {
                 diagnosis: value => (
                   <span className="primary-field">{value}</span>
                 ),
+                severity: value => value ? (
+                  <span className={`severity-badge severity-${value}`}>
+                    {value === 'mild' && '🟢'}
+                    {value === 'moderate' && '🟡'}
+                    {value === 'severe' && '🟠'}
+                    {value === 'critical' && '🔴'}
+                    {' '}{value.charAt(0).toUpperCase() + value.slice(1)}
+                  </span>
+                ) : '-',
                 onsetDate: value => (value ? formatDate(value) : '-'),
+                endDate: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
+                icd10_code: value => value || '-',
                 notes: value =>
                   value ? (
                     <span title={value}>
