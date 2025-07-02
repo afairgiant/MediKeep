@@ -24,36 +24,19 @@ const Settings = () => {
   useEffect(() => {
     const fetchVersionInfo = async () => {
       try {
-        console.log('=== SETTINGS COMPONENT: Starting version fetch ===');
         setLoadingVersion(true);
         const version = await getVersionInfo();
-        console.log('=== SETTINGS COMPONENT: Version info received ===');
-        console.log('Version object:', JSON.stringify(version, null, 2));
-        console.log('version.app_name:', version?.app_name);
-        console.log('version.version:', version?.version);
         setVersionInfo(version);
-        console.log('=== SETTINGS COMPONENT: State updated ===');
       } catch (error) {
-        console.error('=== SETTINGS COMPONENT: Failed to load version ===');
-        console.error('Error:', error);
+        console.error('Failed to load version information:', error);
         // Don't show error to user, just fail silently
       } finally {
         setLoadingVersion(false);
-        console.log('=== SETTINGS COMPONENT: Loading complete ===');
       }
     };
 
     fetchVersionInfo();
   }, []);
-
-  // Add debugging for render
-  console.log('=== SETTINGS COMPONENT RENDER ===');
-  console.log('loadingVersion:', loadingVersion);
-  console.log('versionInfo:', versionInfo);
-  if (versionInfo) {
-    console.log('versionInfo.app_name:', versionInfo.app_name);
-    console.log('versionInfo.version:', versionInfo.version);
-  }
 
   if (!user) {
     return (
@@ -122,34 +105,6 @@ const Settings = () => {
                 </div>
               </div>
             </div>
-
-            {/* Debug info - remove this later */}
-            {!loadingVersion && (
-              <div
-                className="settings-option"
-                style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}
-              >
-                <div className="settings-option-info">
-                  <div className="settings-option-title">Debug Info</div>
-                  <div className="settings-option-description">
-                    {versionInfo ? (
-                      <pre
-                        style={{
-                          fontSize: '10px',
-                          background: '#f5f5f5',
-                          padding: '5px',
-                          borderRadius: '3px',
-                        }}
-                      >
-                        {JSON.stringify(versionInfo, null, 2)}
-                      </pre>
-                    ) : (
-                      'No version info available'
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </Card>
 
