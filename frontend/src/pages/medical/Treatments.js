@@ -126,6 +126,11 @@ const Treatments = () => {
       return;
     }
 
+    if (formData.end_date && formData.start_date && new Date(formData.end_date) < new Date(formData.start_date)) {
+      setError('End date cannot be before start date');
+      return;
+    }
+
     if (!currentPatient?.id) {
       setError('Patient information not available');
       return;
@@ -168,17 +173,17 @@ const Treatments = () => {
   const getStatusIcon = status => {
     switch (status) {
       case 'active':
-        return '';
+        return '●';
       case 'completed':
-        return '';
+        return '✓';
       case 'planned':
-        return '';
+        return '○';
       case 'on-hold':
-        return '';
+        return '⏸';
       case 'cancelled':
-        return '';
+        return '✗';
       default:
-        return '';
+        return '?';
     }
   };
 

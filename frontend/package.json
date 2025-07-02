@@ -15,6 +15,7 @@
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "framer-motion": "^10.16.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.294.0",

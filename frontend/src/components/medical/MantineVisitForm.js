@@ -9,6 +9,8 @@ import {
   Stack,
   Grid,
   Text,
+  NumberInput,
+  Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 
@@ -73,6 +75,17 @@ const MantineVisitForm = ({
     onInputChange(syntheticEvent);
   };
 
+  // Handle NumberInput onChange (receives value directly)
+  const handleNumberChange = field => value => {
+    const syntheticEvent = {
+      target: {
+        name: field,
+        value: value || '',
+      },
+    };
+    onInputChange(syntheticEvent);
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
     onSubmit(e);
@@ -87,13 +100,14 @@ const MantineVisitForm = ({
           {title}
         </Text>
       }
-      size="lg"
+      size="xl"
       centered
       styles={{
         body: { padding: '1.5rem', paddingBottom: '2rem' },
         header: { paddingBottom: '1rem' },
       }}
       overflow="inside"
+      scrollAreaComponent="div"
     >
       <form onSubmit={handleSubmit}>
         <Stack spacing="md">
@@ -141,15 +155,143 @@ const MantineVisitForm = ({
             </Grid.Col>
           </Grid>
 
+          {/* Visit Type and Chief Complaint */}
+          <Grid>
+            <Grid.Col span={6}>
+              <Select
+                label="Visit Type"
+                placeholder="Select visit type"
+                value={formData.visit_type || ''}
+                onChange={handleSelectChange('visit_type')}
+                data={[
+                  { value: 'annual checkup', label: 'Annual Checkup' },
+                  { value: 'follow-up', label: 'Follow-up' },
+                  { value: 'consultation', label: 'Consultation' },
+                  { value: 'emergency', label: 'Emergency' },
+                  { value: 'preventive care', label: 'Preventive Care' },
+                  { value: 'routine visit', label: 'Routine Visit' },
+                  {
+                    value: 'specialist referral',
+                    label: 'Specialist Referral',
+                  },
+                ]}
+                description="Type of medical visit"
+                clearable
+                searchable
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                label="Priority"
+                placeholder="Select priority level"
+                value={formData.priority || ''}
+                onChange={handleSelectChange('priority')}
+                data={[
+                  { value: 'routine', label: 'Routine' },
+                  { value: 'urgent', label: 'Urgent' },
+                  { value: 'emergency', label: 'Emergency' },
+                ]}
+                description="Priority level of the visit"
+                clearable
+              />
+            </Grid.Col>
+          </Grid>
+
+          {/* Chief Complaint */}
+          <TextInput
+            label="Chief Complaint"
+            placeholder="Primary concern or symptom reported"
+            value={formData.chief_complaint || ''}
+            onChange={handleTextInputChange('chief_complaint')}
+            description="Main health concern or symptom that prompted the visit"
+          />
+
+          {/* Duration and Location */}
+          <Grid>
+            <Grid.Col span={6}>
+              <NumberInput
+                label="Duration (minutes)"
+                placeholder="Visit duration"
+                value={formData.duration_minutes || ''}
+                onChange={handleNumberChange('duration_minutes')}
+                min={1}
+                max={600}
+                description="How long the visit lasted"
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                label="Location"
+                placeholder="Where the visit occurred"
+                value={formData.location || ''}
+                onChange={handleSelectChange('location')}
+                data={[
+                  { value: 'office', label: "Doctor's Office" },
+                  { value: 'hospital', label: 'Hospital' },
+                  { value: 'clinic', label: 'Clinic' },
+                  { value: 'telehealth', label: 'Telehealth/Virtual' },
+                  { value: 'urgent care', label: 'Urgent Care' },
+                  { value: 'emergency room', label: 'Emergency Room' },
+                  { value: 'home', label: 'Home Visit' },
+                ]}
+                description="Where the visit took place"
+                clearable
+                searchable
+              />
+            </Grid.Col>
+          </Grid>
+
+          <Divider my="md" />
+
+          {/* Clinical Information Section */}
+          <Text size="sm" fw={600} mb="sm">
+            Clinical Information
+          </Text>
+
+          {/* Diagnosis */}
+          <Textarea
+            label="Diagnosis/Assessment"
+            placeholder="Clinical assessment or diagnosis from the visit..."
+            value={formData.diagnosis || ''}
+            onChange={handleTextInputChange('diagnosis')}
+            description="Medical diagnosis or clinical assessment"
+            minRows={2}
+            maxRows={4}
+          />
+
+          {/* Treatment Plan */}
+          <Textarea
+            label="Treatment Plan"
+            placeholder="Recommended treatment or next steps..."
+            value={formData.treatment_plan || ''}
+            onChange={handleTextInputChange('treatment_plan')}
+            description="Treatment recommendations and prescribed interventions"
+            minRows={3}
+            maxRows={6}
+          />
+
+          {/* Follow-up Instructions */}
+          <Textarea
+            label="Follow-up Instructions"
+            placeholder="Follow-up care instructions..."
+            value={formData.follow_up_instructions || ''}
+            onChange={handleTextInputChange('follow_up_instructions')}
+            description="Instructions for ongoing care and follow-up appointments"
+            minRows={2}
+            maxRows={4}
+          />
+
+          <Divider my="md" />
+
           {/* Visit Notes */}
           <Textarea
-            label="Visit Notes"
-            placeholder="Additional details about the visit..."
-            value={formData.notes}
+            label="Additional Notes"
+            placeholder="Any other important details about the visit..."
+            value={formData.notes || ''}
             onChange={handleTextInputChange('notes')}
-            description="Any important details, observations, or follow-up notes"
-            minRows={4}
-            maxRows={8}
+            description="Any additional observations, notes, or important details"
+            minRows={3}
+            maxRows={6}
           />
 
           {/* Form Actions */}

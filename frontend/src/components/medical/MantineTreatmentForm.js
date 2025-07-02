@@ -40,7 +40,7 @@ const MantineTreatmentForm = ({
     { value: 'Medication', label: 'Medication - Drug therapy' },
     {
       value: 'Physical Therapy',
-      label: ' Physical Therapy - Rehabilitation',
+      label: 'Physical Therapy - Rehabilitation',
     },
     { value: 'Chemotherapy', label: 'Chemotherapy - Cancer treatment' },
     { value: 'Radiation', label: 'Radiation - Radiation therapy' },
@@ -74,7 +74,7 @@ const MantineTreatmentForm = ({
     { value: 'Bi-weekly', label: 'Bi-weekly (every 2 weeks)' },
     { value: 'Monthly', label: 'Monthly' },
     { value: 'As needed', label: 'As needed (PRN)' },
-    { value: 'One time', label: '1️One time only' },
+    { value: 'One time', label: 'One time only' },
     { value: 'Continuous', label: 'Continuous/ongoing' },
   ];
 

@@ -1,6 +1,6 @@
 /**
  * VitalsList Component - Enhanced Version with Mantine UI
- * Displays a list of patient vital signs with options to edit/delete
+ * Displays a list of patient vital signs with options to edit/delete/view details
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -21,6 +21,11 @@ import {
   Flex,
   UnstyledButton,
   rem,
+  Modal,
+  Title,
+  Divider,
+  Grid,
+  Card,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -31,6 +36,19 @@ import {
   IconAlertTriangle,
   IconRefresh,
   IconActivity,
+  IconEye,
+  IconCalendar,
+  IconHeart,
+  IconThermometer,
+  IconWeight,
+  IconLungs,
+  IconDroplet,
+  IconNotes,
+  IconMapPin,
+  IconDevices,
+  IconMoodSad,
+  IconTrendingUp,
+  IconUser,
 } from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
 import {
@@ -57,6 +75,8 @@ const VitalsList = ({
     key: 'recorded_date',
     direction: 'desc',
   });
+  const [selectedVital, setSelectedVital] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const loadVitals = useCallback(async () => {
     // Only load internally if no data is passed via props
@@ -127,6 +147,11 @@ const VitalsList = ({
         err.response?.data?.detail || 'Failed to delete vitals record'
       );
     }
+  };
+
+  const handleViewDetails = vital => {
+    setSelectedVital(vital);
+    setShowDetailsModal(true);
   };
 
   const formatDate = dateString => {
@@ -235,6 +260,212 @@ const VitalsList = ({
     </UnstyledButton>
   );
 
+  // Detailed view modal content
+  const renderVitalDetails = () => {
+    if (!selectedVital) return null;
+
+    const vitalSections = [
+      {
+        title: 'Basic Information',
+        icon: IconCalendar,
+        items: [
+          {
+            label: 'Recorded Date',
+            value: formatTime(selectedVital.recorded_date),
+            icon: IconCalendar,
+          },
+          {
+            label: 'Location',
+            value: selectedVital.location || 'Not specified',
+            icon: IconMapPin,
+          },
+          {
+            label: 'Device Used',
+            value: selectedVital.device_used || 'Not specified',
+            icon: IconDevices,
+          },
+        ],
+      },
+      {
+        title: 'Vital Signs',
+        icon: IconHeart,
+        items: [
+          {
+            label: 'Blood Pressure',
+            value: getBPDisplay(
+              selectedVital.systolic_bp,
+              selectedVital.diastolic_bp
+            ),
+            icon: IconHeart,
+            unit: 'mmHg',
+          },
+          {
+            label: 'Heart Rate',
+            value: selectedVital.heart_rate || 'N/A',
+            icon: IconActivity,
+            unit: selectedVital.heart_rate ? 'BPM' : '',
+          },
+          {
+            label: 'Temperature',
+            value: selectedVital.temperature || 'N/A',
+            icon: IconThermometer,
+            unit: selectedVital.temperature ? '°F' : '',
+          },
+          {
+            label: 'Respiratory Rate',
+            value: selectedVital.respiratory_rate || 'N/A',
+            icon: IconLungs,
+            unit: selectedVital.respiratory_rate ? '/min' : '',
+          },
+          {
+            label: 'Oxygen Saturation',
+            value: selectedVital.oxygen_saturation || 'N/A',
+            icon: IconDroplet,
+            unit: selectedVital.oxygen_saturation ? '%' : '',
+          },
+        ],
+      },
+      {
+        title: 'Physical Measurements',
+        icon: IconWeight,
+        items: [
+          {
+            label: 'Weight',
+            value: selectedVital.weight || 'N/A',
+            icon: IconWeight,
+            unit: selectedVital.weight ? 'lbs' : '',
+          },
+          {
+            label: 'Height',
+            value: selectedVital.height || 'N/A',
+            icon: IconTrendingUp,
+            unit: selectedVital.height ? 'inches' : '',
+          },
+          {
+            label: 'BMI',
+            value: getBMIDisplay(selectedVital.weight, selectedVital.height),
+            icon: IconTrendingUp,
+          },
+        ],
+      },
+      {
+        title: 'Additional Measurements',
+        icon: IconDroplet,
+        items: [
+          {
+            label: 'Blood Glucose',
+            value: selectedVital.blood_glucose || 'N/A',
+            icon: IconDroplet,
+            unit: selectedVital.blood_glucose ? 'mg/dL' : '',
+          },
+          {
+            label: 'Pain Scale',
+            value:
+              selectedVital.pain_scale !== null
+                ? `${selectedVital.pain_scale}/10`
+                : 'N/A',
+            icon: IconMoodSad,
+          },
+        ],
+      },
+    ];
+
+    return (
+      <Stack gap="lg">
+        {vitalSections.map((section, index) => {
+          const SectionIcon = section.icon;
+          return (
+            <Paper key={index} shadow="sm" p="md" radius="md">
+              <Group gap="sm" mb="md">
+                <ActionIcon variant="light" size="md" radius="md">
+                  <SectionIcon size={18} />
+                </ActionIcon>
+                <Title order={4}>{section.title}</Title>
+              </Group>
+
+              <Grid>
+                {section.items.map((item, itemIndex) => {
+                  const ItemIcon = item.icon;
+                  return (
+                    <Grid.Col key={itemIndex} span={6}>
+                      <Card shadow="xs" p="sm" radius="md" withBorder>
+                        <Group gap="sm">
+                          <ItemIcon
+                            size={16}
+                            color="var(--mantine-color-blue-6)"
+                          />
+                          <Box flex={1}>
+                            <Text size="xs" c="dimmed" fw={500}>
+                              {item.label}
+                            </Text>
+                            <Group gap="xs" align="baseline">
+                              <Text size="sm" fw={600}>
+                                {item.value}
+                              </Text>
+                              {item.unit && (
+                                <Text size="xs" c="dimmed">
+                                  {item.unit}
+                                </Text>
+                              )}
+                            </Group>
+                          </Box>
+                        </Group>
+                      </Card>
+                    </Grid.Col>
+                  );
+                })}
+              </Grid>
+            </Paper>
+          );
+        })}
+
+        {/* Notes Section */}
+        {selectedVital.notes && (
+          <Paper shadow="sm" p="md" radius="md">
+            <Group gap="sm" mb="md">
+              <ActionIcon variant="light" size="md" radius="md">
+                <IconNotes size={18} />
+              </ActionIcon>
+              <Title order={4}>Notes</Title>
+            </Group>
+            <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+              {selectedVital.notes}
+            </Text>
+          </Paper>
+        )}
+
+        {/* Practitioner Information */}
+        {selectedVital.practitioner_id && (
+          <Paper shadow="sm" p="md" radius="md">
+            <Group gap="sm" mb="md">
+              <ActionIcon variant="light" size="md" radius="md">
+                <IconUser size={18} />
+              </ActionIcon>
+              <Title order={4}>Recorded By</Title>
+            </Group>
+            <Card shadow="xs" p="sm" radius="md" withBorder>
+              {selectedVital.practitioner ? (
+                <>
+                  <Text size="sm" fw={600}>
+                    {selectedVital.practitioner.name}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {selectedVital.practitioner.specialty} •{' '}
+                    {selectedVital.practitioner.practice}
+                  </Text>
+                </>
+              ) : (
+                <Text size="sm" c="dimmed">
+                  Practitioner ID: {selectedVital.practitioner_id}
+                </Text>
+              )}
+            </Card>
+          </Paper>
+        )}
+      </Stack>
+    );
+  };
+
   const sortedVitals = getSortedVitals();
 
   if (isLoading) {
@@ -306,9 +537,15 @@ const VitalsList = ({
         </Stack>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" fw={500}>
-          {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
-        </Text>
+        {vital.systolic_bp && vital.diastolic_bp ? (
+          <Text size="sm" fw={500}>
+            {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
       </Table.Td>
       <Table.Td>
         {vital.heart_rate ? (
@@ -344,9 +581,15 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        <Text size="sm" fw={500}>
-          {getBMIDisplay(vital.weight, vital.height)}
-        </Text>
+        {vital.weight && vital.height ? (
+          <Text size="sm" fw={500}>
+            {getBMIDisplay(vital.weight, vital.height)}
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
       </Table.Td>
       <Table.Td>
         {vital.oxygen_saturation ? (
@@ -362,6 +605,18 @@ const VitalsList = ({
       {showActions && (
         <Table.Td>
           <Group gap="xs">
+            <ActionIcon
+              variant="light"
+              color="green"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation();
+                handleViewDetails(vital);
+              }}
+              title="View details"
+            >
+              <IconEye size={14} />
+            </ActionIcon>
             <ActionIcon
               variant="light"
               color="blue"
@@ -393,82 +648,100 @@ const VitalsList = ({
   ));
 
   return (
-    <Stack gap="md">
-      <Paper shadow="sm" withBorder>
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>
-                <ThComponent
-                  sorted="recorded_date"
-                  onSort={() => handleSort('recorded_date')}
-                >
-                  Date
-                </ThComponent>
-              </Table.Th>
-              <Table.Th>
-                <ThComponent sorted="bp" onSort={() => handleSort('bp')}>
-                  Blood Pressure
-                </ThComponent>
-              </Table.Th>
-              <Table.Th>
-                <ThComponent
-                  sorted="heart_rate"
-                  onSort={() => handleSort('heart_rate')}
-                >
-                  Heart Rate
-                </ThComponent>
-              </Table.Th>
-              <Table.Th>
-                <ThComponent
-                  sorted="temperature"
-                  onSort={() => handleSort('temperature')}
-                >
-                  Temperature
-                </ThComponent>
-              </Table.Th>
-              <Table.Th>
-                <ThComponent
-                  sorted="weight"
-                  onSort={() => handleSort('weight')}
-                >
-                  Weight
-                </ThComponent>
-              </Table.Th>
-              <Table.Th>
-                <ThComponent sorted="bmi" onSort={() => handleSort('bmi')}>
-                  BMI
-                </ThComponent>
-              </Table.Th>
-              <Table.Th>
-                <ThComponent
-                  sorted="oxygen_saturation"
-                  onSort={() => handleSort('oxygen_saturation')}
-                >
-                  O2 Sat
-                </ThComponent>
-              </Table.Th>
-              {showActions && (
+    <>
+      <Stack gap="md">
+        <Paper shadow="sm" withBorder>
+          <Table striped highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
                 <Table.Th>
-                  <Text fw={500} size="sm">
-                    Actions
-                  </Text>
+                  <ThComponent
+                    sorted="recorded_date"
+                    onSort={() => handleSort('recorded_date')}
+                  >
+                    Date
+                  </ThComponent>
                 </Table.Th>
-              )}
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-      </Paper>
+                <Table.Th>
+                  <ThComponent sorted="bp" onSort={() => handleSort('bp')}>
+                    Blood Pressure
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent
+                    sorted="heart_rate"
+                    onSort={() => handleSort('heart_rate')}
+                  >
+                    Heart Rate
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent
+                    sorted="temperature"
+                    onSort={() => handleSort('temperature')}
+                  >
+                    Temperature
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent
+                    sorted="weight"
+                    onSort={() => handleSort('weight')}
+                  >
+                    Weight
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent sorted="bmi" onSort={() => handleSort('bmi')}>
+                    BMI
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent
+                    sorted="oxygen_saturation"
+                    onSort={() => handleSort('oxygen_saturation')}
+                  >
+                    O2 Sat
+                  </ThComponent>
+                </Table.Th>
+                {showActions && (
+                  <Table.Th>
+                    <Text fw={500} size="sm">
+                      Actions
+                    </Text>
+                  </Table.Th>
+                )}
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{rows}</Table.Tbody>
+          </Table>
+        </Paper>
 
-      {vitals.length >= limit && (
-        <Center>
-          <Button variant="light" onClick={loadVitals}>
-            Load More
-          </Button>
-        </Center>
-      )}
-    </Stack>
+        {vitals.length >= limit && (
+          <Center>
+            <Button variant="light" onClick={loadVitals}>
+              Load More
+            </Button>
+          </Center>
+        )}
+      </Stack>
+
+      {/* Detailed View Modal */}
+      <Modal
+        opened={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        title={
+          <Group gap="sm">
+            <IconEye size={20} />
+            <Title order={3}>Vital Signs Details</Title>
+          </Group>
+        }
+        size="xl"
+        centered
+      >
+        {renderVitalDetails()}
+      </Modal>
+    </>
   );
 };
 

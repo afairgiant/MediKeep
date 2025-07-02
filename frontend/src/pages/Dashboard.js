@@ -64,6 +64,8 @@ const Dashboard = () => {
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,10 +78,11 @@ const Dashboard = () => {
   });
 
   // Combine loading states
-  const loading = patientLoading || activityLoading;
+  const loading = patientLoading || activityLoading || statsLoading;
 
   useEffect(() => {
     fetchRecentActivity();
+    fetchDashboardStats();
     checkAdminStatus();
   }, []);
 
@@ -139,13 +142,55 @@ const Dashboard = () => {
     }
   };
 
-  // Placeholder stats data - can be replaced with real data later
-  const dashboardStats = [
-    { label: 'Total Records*', value: '3', color: 'blue' },
-    { label: 'Active Medications*', value: '2', color: 'green' },
-    { label: 'Total Lab Tests*', value: '3', color: 'orange' },
-    { label: 'Total Procedures*', value: '4', color: 'purple' },
-  ];
+  const fetchDashboardStats = async () => {
+    try {
+      setStatsLoading(true);
+      const stats = await apiService.getDashboardStats();
+      setDashboardStats(stats);
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      // Set fallback stats on error
+      setDashboardStats({
+        total_records: 0,
+        active_medications: 0,
+        total_lab_results: 0,
+        total_procedures: 0,
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Dashboard stats data - using real data from API
+  const dashboardStatsCards = dashboardStats
+    ? [
+        {
+          label: 'Total Records',
+          value: dashboardStats.total_records?.toString() || '0',
+          color: 'blue',
+        },
+        {
+          label: 'Active Medications',
+          value: dashboardStats.active_medications?.toString() || '0',
+          color: 'green',
+        },
+        {
+          label: 'Lab Results',
+          value: dashboardStats.total_lab_results?.toString() || '0',
+          color: 'orange',
+        },
+        {
+          label: 'Procedures',
+          value: dashboardStats.total_procedures?.toString() || '0',
+          color: 'purple',
+        },
+      ]
+    : [
+        { label: 'Total Records', value: '0', color: 'blue' },
+        { label: 'Active Medications', value: '0', color: 'green' },
+        { label: 'Lab Results', value: '0', color: 'orange' },
+        { label: 'Procedures', value: '0', color: 'purple' },
+      ];
 
   // Core medical modules - organized in 2x2 grid sections like the schematic
   const coreModules = [
@@ -450,7 +495,7 @@ const Dashboard = () => {
 
         {/* Stats Row */}
         <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
-          {dashboardStats.map((stat, index) => (
+          {dashboardStatsCards.map((stat, index) => (
             <StatCard key={index} stat={stat} />
           ))}
         </SimpleGrid>

@@ -63,6 +63,14 @@ const Visits = () => {
     date: '',
     notes: '',
     practitioner_id: '',
+    visit_type: '',
+    chief_complaint: '',
+    diagnosis: '',
+    treatment_plan: '',
+    follow_up_instructions: '',
+    duration_minutes: '',
+    location: '',
+    priority: '',
   });
 
   const handleAddVisit = () => {
@@ -72,6 +80,14 @@ const Visits = () => {
       date: '',
       notes: '',
       practitioner_id: '',
+      visit_type: '',
+      chief_complaint: '',
+      diagnosis: '',
+      treatment_plan: '',
+      follow_up_instructions: '',
+      duration_minutes: '',
+      location: '',
+      priority: '',
     });
     setShowModal(true);
   };
@@ -83,6 +99,14 @@ const Visits = () => {
       date: visit.date ? visit.date.split('T')[0] : '',
       notes: visit.notes || '',
       practitioner_id: visit.practitioner_id || '',
+      visit_type: visit.visit_type || '',
+      chief_complaint: visit.chief_complaint || '',
+      diagnosis: visit.diagnosis || '',
+      treatment_plan: visit.treatment_plan || '',
+      follow_up_instructions: visit.follow_up_instructions || '',
+      duration_minutes: visit.duration_minutes || '',
+      location: visit.location || '',
+      priority: visit.priority || '',
     });
     setShowModal(true);
   };
@@ -122,6 +146,14 @@ const Visits = () => {
       date: formData.date,
       notes: formData.notes || null,
       practitioner_id: formData.practitioner_id || null,
+      visit_type: formData.visit_type || null,
+      chief_complaint: formData.chief_complaint || null,
+      diagnosis: formData.diagnosis || null,
+      treatment_plan: formData.treatment_plan || null,
+      follow_up_instructions: formData.follow_up_instructions || null,
+      duration_minutes: formData.duration_minutes || null,
+      location: formData.location || null,
+      priority: formData.priority || null,
       patient_id: currentPatient.id,
     };
 
@@ -166,7 +198,7 @@ const Visits = () => {
 
   return (
     <div className="medical-page-container">
-      <PageHeader title="Medical Visits" icon="🏥" />
+      <PageHeader title="Medical Visits" icon="" />
 
       <div className="medical-page-content">
         {error && (
@@ -218,7 +250,7 @@ const Visits = () => {
         <div className="medical-items-list">
           {filteredVisits.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🏥</div>
+              <div className="empty-icon"></div>
               <h3>No Medical Visits Found</h3>
               <p>
                 {dataManagement.hasActiveFilters
@@ -240,7 +272,21 @@ const Visits = () => {
                       <h3 className="item-title">
                         {visit.reason || 'General Visit'}
                       </h3>
-                      <p className="item-subtitle">{formatDate(visit.date)}</p>
+                      <p className="item-subtitle">
+                        {formatDate(visit.date)}
+                        {visit.visit_type && (
+                          <span className="visit-type-badge">
+                            • {visit.visit_type}
+                          </span>
+                        )}
+                        {visit.priority && (
+                          <span
+                            className={`priority-badge priority-${visit.priority}`}
+                          >
+                            • {visit.priority}
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -248,14 +294,64 @@ const Visits = () => {
                     <div className="detail-item">
                       <span className="label">Practitioner:</span>
                       <span className="value">
-                        👨‍⚕️ {getPractitionerDisplay(visit.practitioner_id)}
+                        {getPractitionerDisplay(visit.practitioner_id)}
                       </span>
                     </div>
+
+                    {visit.chief_complaint && (
+                      <div className="detail-item">
+                        <span className="label">Chief Complaint:</span>
+                        <span className="value">{visit.chief_complaint}</span>
+                      </div>
+                    )}
+
+                    {visit.location && (
+                      <div className="detail-item">
+                        <span className="label">Location:</span>
+                        <span className="value">{visit.location}</span>
+                      </div>
+                    )}
+
+                    {visit.duration_minutes && (
+                      <div className="detail-item">
+                        <span className="label">Duration:</span>
+                        <span className="value">
+                          {visit.duration_minutes} minutes
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {visit.diagnosis && (
+                    <div className="medical-item-section">
+                      <div className="section-label">Diagnosis/Assessment</div>
+                      <div className="section-content">{visit.diagnosis}</div>
+                    </div>
+                  )}
+
+                  {visit.treatment_plan && (
+                    <div className="medical-item-section">
+                      <div className="section-label">Treatment Plan</div>
+                      <div className="section-content">
+                        {visit.treatment_plan}
+                      </div>
+                    </div>
+                  )}
+
+                  {visit.follow_up_instructions && (
+                    <div className="medical-item-section">
+                      <div className="section-label">
+                        Follow-up Instructions
+                      </div>
+                      <div className="section-content">
+                        {visit.follow_up_instructions}
+                      </div>
+                    </div>
+                  )}
 
                   {visit.notes && (
                     <div className="medical-item-notes">
-                      <div className="notes-label">Notes</div>
+                      <div className="notes-label">Additional Notes</div>
                       <div className="notes-content">{visit.notes}</div>
                     </div>
                   )}
@@ -267,7 +363,7 @@ const Visits = () => {
                       onClick={() => handleEditVisit(visit)}
                       title="Edit visit"
                     >
-                      ✏️ Edit
+                      Edit
                     </Button>
                     <Button
                       variant="danger"
@@ -275,7 +371,7 @@ const Visits = () => {
                       onClick={() => handleDeleteVisit(visit.id)}
                       title="Delete visit"
                     >
-                      🗑️ Delete
+                      Delete
                     </Button>
                   </div>
                 </div>
@@ -287,8 +383,12 @@ const Visits = () => {
               columns={[
                 { header: 'Visit Date', accessor: 'date' },
                 { header: 'Reason', accessor: 'reason' },
+                { header: 'Visit Type', accessor: 'visit_type' },
+                { header: 'Chief Complaint', accessor: 'chief_complaint' },
                 { header: 'Practitioner', accessor: 'practitioner_name' },
-                { header: 'Notes', accessor: 'notes' },
+                { header: 'Location', accessor: 'location' },
+                { header: 'Priority', accessor: 'priority' },
+                { header: 'Diagnosis', accessor: 'diagnosis' },
               ]}
               patientData={currentPatient}
               tableName="Visit History"
@@ -299,13 +399,33 @@ const Visits = () => {
                   <span className="primary-field">{formatDate(value)}</span>
                 ),
                 reason: value => value || 'General Visit',
-                practitioner_name: (value, item) =>
-                  getPractitionerDisplay(item.practitioner_id),
-                notes: value =>
+                visit_type: value => value || '-',
+                chief_complaint: value =>
                   value ? (
                     <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
+                      {value.length > 30
+                        ? `${value.substring(0, 30)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+                practitioner_name: (value, item) =>
+                  getPractitionerDisplay(item.practitioner_id),
+                location: value => value || '-',
+                priority: value =>
+                  value ? (
+                    <span className={`priority-badge priority-${value}`}>
+                      {value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+                diagnosis: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 40
+                        ? `${value.substring(0, 40)}...`
                         : value}
                     </span>
                   ) : (

@@ -154,9 +154,34 @@ class Encounter(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"))
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"))
 
+    # Basic encounter information
     reason = Column(String, nullable=False)  # Reason for the encounter
     date = Column(Date, nullable=False)  # Date of the encounter
     notes = Column(String, nullable=True)  # Additional notes from the encounter
+
+    # Enhanced encounter details (all optional)
+    visit_type = Column(
+        String, nullable=True
+    )  # e.g., 'annual checkup', 'follow-up', 'consultation', 'emergency'
+    chief_complaint = Column(
+        String, nullable=True
+    )  # Primary concern or symptom reported by patient
+    diagnosis = Column(
+        String, nullable=True
+    )  # Clinical assessment or diagnosis from the visit
+    treatment_plan = Column(
+        String, nullable=True
+    )  # Recommended treatment or next steps
+    follow_up_instructions = Column(
+        String, nullable=True
+    )  # Follow-up care instructions
+    duration_minutes = Column(
+        Integer, nullable=True
+    )  # Duration of the visit in minutes
+    location = Column(
+        String, nullable=True
+    )  # Where visit occurred (office, hospital, telehealth, etc.)
+    priority = Column(String, nullable=True)  # e.g., 'routine', 'urgent', 'emergency'
 
     # Table Relationships
     patient = relationship("Patient", back_populates="encounters")
@@ -315,7 +340,9 @@ class Treatment(Base):
     description = Column(String, nullable=True)  # Description of the treatment
     location = Column(
         String, nullable=True
-    )  # Location where the treatment is administered    # Table Relationships
+    )  # Location where the treatment is administered
+    dosage = Column(String, nullable=True)  # Dosage of the treatment
+    # Table Relationships
     patient = relationship("Patient", back_populates="treatments")
     practitioner = relationship("Practitioner", back_populates="treatments")
     condition = relationship("Condition", back_populates="treatments")

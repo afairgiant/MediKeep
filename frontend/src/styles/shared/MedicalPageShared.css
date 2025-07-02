@@ -917,9 +917,9 @@
 .medical-item-notes {
   margin-bottom: 1rem;
   padding: 1rem;
-  background: var(--mantine-color-gray-0);
+  background: var(--color-bg-secondary);
   border-radius: 6px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid var(--color-primary);
 }
 
 .notes-label {
@@ -931,10 +931,11 @@
   margin-bottom: 0.5rem;
 }
 
-.notes-content {
-  color: var(--color-text-primary, #212529);
+.medical-item-notes .notes-content {
+  color: var(--color-text-primary, #212529) !important;
   line-height: 1.5;
   font-size: 0.9rem;
+  background: transparent !important;
 }
 
 /* Item Actions */
@@ -1107,4 +1108,57 @@
   .item-title {
     font-size: 1.1rem;
   }
+}
+
+/* Enhanced Visit Card Styles */
+.visit-type-badge {
+  color: var(--color-info, #0066cc);
+  font-weight: 500;
+  font-size: 0.85em;
+  text-transform: capitalize;
+}
+
+.priority-badge {
+  font-weight: 600;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.priority-badge.priority-routine {
+  color: var(--color-success, #28a745);
+}
+
+.priority-badge.priority-urgent {
+  color: var(--color-warning, #ffc107);
+}
+
+.priority-badge.priority-emergency {
+  color: var(--color-danger, #dc3545);
+}
+
+.medical-item-section {
+  margin: 1rem 0;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--color-border-light, #e9ecef);
+}
+
+.medical-item-section:first-of-type {
+  border-top: none;
+  margin-top: 0;
+}
+
+.section-label {
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.section-content {
+  color: var(--color-text-secondary, #555);
+  line-height: 1.5;
+  font-size: 0.95rem;
 }

@@ -99,6 +99,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
                 "avg_diastolic_bp": None,
                 "avg_heart_rate": None,
                 "avg_temperature": None,
+                "current_temperature": None,
                 "current_weight": None,
                 "current_bmi": None,
                 "weight_change": None,
@@ -128,6 +129,19 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             .first()
         )
         current_bmi = latest_bmi_reading.bmi if latest_bmi_reading else None
+
+        # Get latest temperature (from latest reading with temperature data)
+        latest_temperature_reading = (
+            db.query(self.model)
+            .filter(Vitals.patient_id == patient_id, Vitals.temperature.isnot(None))
+            .order_by(desc(Vitals.recorded_date))
+            .first()
+        )
+        current_temperature = (
+            latest_temperature_reading.temperature
+            if latest_temperature_reading
+            else None
+        )
 
         # Calculate averages
         systolic_avg = (
@@ -185,6 +199,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             "avg_diastolic_bp": safe_round(diastolic_avg),
             "avg_heart_rate": safe_round(heart_rate_avg),
             "avg_temperature": safe_round(temperature_avg),
+            "current_temperature": safe_round(current_temperature),
             "current_weight": current_weight,
             "current_bmi": current_bmi,
             "weight_change": safe_round(weight_change),

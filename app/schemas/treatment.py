@@ -30,6 +30,9 @@ class TreatmentBase(BaseModel):
     location: Optional[str] = Field(
         None, max_length=200, description="Location where the treatment is administered"
     )
+    dosage: Optional[str] = Field(
+        None, max_length=200, description="Dosage of the treatment"
+    )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     status: Optional[str] = Field("active", description="Status of the treatment")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
@@ -76,6 +79,7 @@ class TreatmentUpdate(BaseModel):
     treatment_category: Optional[str] = Field(None, max_length=200)
     outcome: Optional[str] = Field(None, max_length=200)
     location: Optional[str] = Field(None, max_length=200)
+    dosage: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)

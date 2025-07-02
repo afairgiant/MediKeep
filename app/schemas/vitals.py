@@ -1,11 +1,12 @@
-from pydantic import BaseModel, validator
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, validator
 
 
 class VitalsBase(BaseModel):
     """Base schema for Vitals"""
-    
+
     recorded_date: datetime
     systolic_bp: Optional[int] = None
     diastolic_bp: Optional[int] = None
@@ -136,12 +137,13 @@ class VitalsBase(BaseModel):
 
 class VitalsCreate(VitalsBase):
     """Schema for creating new vitals"""
+
     pass
 
 
 class VitalsUpdate(BaseModel):
     """Schema for updating existing vitals"""
-    
+
     recorded_date: Optional[datetime] = None
     systolic_bp: Optional[int] = None
     diastolic_bp: Optional[int] = None
@@ -162,7 +164,7 @@ class VitalsUpdate(BaseModel):
 
 class VitalsResponse(VitalsBase):
     """Schema for vitals response"""
-    
+
     id: int
     created_at: datetime
     updated_at: datetime
@@ -173,7 +175,7 @@ class VitalsResponse(VitalsBase):
 
 class VitalsWithRelations(VitalsResponse):
     """Schema for vitals with related data"""
-    
+
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
@@ -183,7 +185,7 @@ class VitalsWithRelations(VitalsResponse):
 
 class VitalsSummary(BaseModel):
     """Schema for vitals summary/dashboard display"""
-    
+
     id: int
     recorded_date: datetime
     systolic_bp: Optional[int] = None
@@ -200,13 +202,14 @@ class VitalsSummary(BaseModel):
 
 class VitalsStats(BaseModel):
     """Schema for vitals statistics"""
-    
+
     total_readings: int
     latest_reading_date: Optional[datetime] = None
     avg_systolic_bp: Optional[float] = None
     avg_diastolic_bp: Optional[float] = None
     avg_heart_rate: Optional[float] = None
     avg_temperature: Optional[float] = None
+    current_temperature: Optional[float] = None
     current_weight: Optional[float] = None
     current_bmi: Optional[float] = None
     weight_change: Optional[float] = None  # Change from first to latest reading

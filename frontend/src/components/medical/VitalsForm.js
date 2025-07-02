@@ -26,6 +26,7 @@ import {
   Card,
   Loader,
   Center,
+  Select,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -42,8 +43,12 @@ import {
   IconInfoCircle,
   IconTrendingUp,
   IconUser,
+  IconMapPin,
+  IconDevices,
+  IconMoodSad,
+  IconDropletFilled,
 } from '@tabler/icons-react';
-import { DateInput } from '@mantine/dates';
+import { DateInput, DateTimePicker } from '@mantine/dates';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useTimezone } from '../../hooks';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
@@ -79,6 +84,18 @@ const FORM_FIELDS = {
     ],
     description: 'Core physiological measurements',
   },
+  additional: {
+    title: 'Additional Measurements',
+    icon: IconDropletFilled,
+    fields: ['blood_glucose', 'pain_scale'],
+    description: 'Supplementary health indicators',
+  },
+  metadata: {
+    title: 'Recording Information',
+    icon: IconMapPin,
+    fields: ['location', 'device_used'],
+    description: 'Context about the measurements',
+  },
   notes: {
     title: 'Additional Information',
     icon: IconNotes,
@@ -89,12 +106,12 @@ const FORM_FIELDS = {
 // Field definitions with validation and display metadata
 const FIELD_CONFIGS = {
   recorded_date: {
-    label: 'Measurement Date',
-    type: 'date',
+    label: 'Measurement Date & Time',
+    type: 'datetime',
     required: true,
     icon: IconCalendar,
     validation: {
-      required: 'Measurement date is required',
+      required: 'Measurement date and time is required',
       custom: value => {
         const result = validateDateTime(value, 'Recorded Date');
         return result.isValid ? null : result.error;
@@ -199,12 +216,74 @@ const FIELD_CONFIGS = {
       max: { value: 100, message: 'Oxygen saturation cannot exceed 100%' },
     },
   },
+
+  blood_glucose: {
+    label: 'Blood Glucose',
+    type: 'number',
+    unit: 'mg/dL',
+    placeholder: '100',
+    icon: IconDropletFilled,
+    min: 20,
+    max: 800,
+    step: 1,
+    validation: {
+      min: { value: 20, message: 'Blood glucose must be at least 20 mg/dL' },
+      max: { value: 800, message: 'Blood glucose cannot exceed 800 mg/dL' },
+    },
+  },
+  pain_scale: {
+    label: 'Pain Scale',
+    type: 'number',
+    unit: '(0-10)',
+    placeholder: '0',
+    icon: IconMoodSad,
+    min: 0,
+    max: 10,
+    step: 1,
+    validation: {
+      min: { value: 0, message: 'Pain scale must be at least 0' },
+      max: { value: 10, message: 'Pain scale cannot exceed 10' },
+    },
+  },
+  location: {
+    label: 'Measurement Location',
+    type: 'select',
+    placeholder: 'Where were these readings taken?',
+    icon: IconMapPin,
+    options: [
+      { value: 'home', label: 'Home' },
+      { value: 'clinic', label: 'Clinic' },
+      { value: 'hospital', label: 'Hospital' },
+      { value: 'urgent_care', label: 'Urgent Care' },
+      { value: 'pharmacy', label: 'Pharmacy' },
+      { value: 'ambulatory', label: 'Ambulatory Care' },
+      { value: 'other', label: 'Other' },
+    ],
+  },
+  device_used: {
+    label: 'Device/Equipment Used',
+    type: 'text',
+    placeholder: 'e.g., Digital BP monitor, Thermometer model...',
+    icon: IconDevices,
+    validation: {
+      maxLength: {
+        value: 100,
+        message: 'Device name cannot exceed 100 characters',
+      },
+    },
+  },
   notes: {
     label: 'Notes',
     type: 'textarea',
     placeholder: 'Additional notes about the vital signs measurement...',
     icon: IconNotes,
     rows: 3,
+    validation: {
+      maxLength: {
+        value: 1000,
+        message: 'Notes cannot exceed 1000 characters',
+      },
+    },
   },
 };
 
@@ -235,6 +314,10 @@ const VitalsForm = ({
     weight: '',
     respiratory_rate: '',
     oxygen_saturation: '',
+    blood_glucose: '',
+    pain_scale: '',
+    location: '',
+    device_used: '',
     notes: '', // Ensure notes is always a string, never null
   });
 
@@ -252,15 +335,26 @@ const VitalsForm = ({
   useEffect(() => {
     if (vitals && isEdit) {
       setFormData({
-        ...vitals,
+        patient_id: vitals.patient_id || patientId || '',
+        practitioner_id: vitals.practitioner_id || practitionerId || null,
         recorded_date: vitals.recorded_date
           ? new Date(vitals.recorded_date)
           : new Date(),
-        // Ensure notes is always a string, never null
-        notes: vitals.notes || '',
+        systolic_bp: vitals.systolic_bp || '',
+        diastolic_bp: vitals.diastolic_bp || '',
+        heart_rate: vitals.heart_rate || '',
+        temperature: vitals.temperature || '',
+        weight: vitals.weight || '',
+        respiratory_rate: vitals.respiratory_rate || '',
+        oxygen_saturation: vitals.oxygen_saturation || '',
+        blood_glucose: vitals.blood_glucose || '',
+        pain_scale: vitals.pain_scale || '',
+        location: vitals.location || '',
+        device_used: vitals.device_used || '',
+        notes: vitals.notes || '', // Ensure notes is always a string, never null
       });
     }
-  }, [vitals, isEdit]);
+  }, [vitals, isEdit, patientId, practitionerId]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
@@ -299,6 +393,11 @@ const VitalsForm = ({
       if (validation.max && numValue > validation.max.value) {
         return validation.max.message;
       }
+    }
+
+    // Text length validations
+    if (validation.maxLength && value.length > validation.maxLength.value) {
+      return validation.maxLength.message;
     }
 
     // Custom validation
@@ -362,8 +461,11 @@ const VitalsForm = ({
         ...formData,
         recorded_date:
           formData.recorded_date instanceof Date
-            ? formData.recorded_date.toISOString().split('T')[0]
+            ? formData.recorded_date.toISOString()
             : formData.recorded_date,
+        // Include patient's height from profile for BMI calculation
+        height: patientHeight ? parseFloat(patientHeight) : null,
+        // Process numeric fields
         systolic_bp: formData.systolic_bp
           ? parseInt(formData.systolic_bp)
           : null,
@@ -381,6 +483,14 @@ const VitalsForm = ({
         oxygen_saturation: formData.oxygen_saturation
           ? parseInt(formData.oxygen_saturation)
           : null,
+        blood_glucose: formData.blood_glucose
+          ? parseFloat(formData.blood_glucose)
+          : null,
+        pain_scale: formData.pain_scale ? parseInt(formData.pain_scale) : null,
+        // Text fields
+        location: formData.location || null,
+        device_used: formData.device_used || null,
+        notes: formData.notes || null,
       };
 
       // Remove empty/null values
@@ -430,6 +540,24 @@ const VitalsForm = ({
       );
     }
 
+    if (config.type === 'datetime') {
+      return (
+        <DateTimePicker
+          key={fieldName}
+          label={config.label}
+          placeholder="Select date and time"
+          value={value}
+          onChange={val => handleInputChange(fieldName, val)}
+          leftSection={<IconComponent size={16} />}
+          required={config.required}
+          error={error}
+          maxDate={new Date()}
+          withSeconds={false}
+          clearable
+        />
+      );
+    }
+
     if (config.type === 'number') {
       return (
         <NumberInput
@@ -466,6 +594,23 @@ const VitalsForm = ({
           onChange={e => handleInputChange(fieldName, e.target.value)}
           rows={config.rows}
           error={error}
+        />
+      );
+    }
+
+    if (config.type === 'select') {
+      return (
+        <Select
+          key={fieldName}
+          label={config.label}
+          placeholder={config.placeholder}
+          value={value || null}
+          onChange={val => handleInputChange(fieldName, val)}
+          leftSection={<IconComponent size={16} />}
+          data={config.options}
+          required={config.required}
+          error={error}
+          clearable
         />
       );
     }

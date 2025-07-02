@@ -11,17 +11,15 @@ List of bugs:
         Make procedure type more visable on card.
 
     Vitals Page:
-        Make the bp N/A not bold.
-        Make the BMI N/A not bold.
+
+
         The filter sorting is broken.
-        When adding/editing a vital, change from date to datetime picker.
-        Show additional information on the vital card or have a view button to see the description.
         
 Improvments:
     Conditions:
         Add end date to condition.
     Visits:
-        Could use more information?
+        ✅ Enhanced with additional fields: visit_type, chief_complaint, diagnosis, treatment_plan, follow_up_instructions, duration_minutes, location, priority
 
     Patient Page:
         Don't need to show the patient ID on the patient page.
@@ -34,4 +32,6 @@ Improvments:
 
     Admin:
         User: Make more user info show up on the user page.
+        Make the search bar at the top work.
+        Make the mobile version of the pages work better with the header 
 """

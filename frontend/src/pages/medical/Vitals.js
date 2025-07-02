@@ -89,14 +89,14 @@ const STATS_CONFIGS = {
     color: 'blue',
   },
   temperature: {
-    title: 'Temperature',
+    title: 'Latest Temperature',
     icon: IconTrendingUp,
     getValue: stats =>
-      stats.avg_temperature ? stats.avg_temperature.toFixed(1) : 'N/A',
+      stats.current_temperature ? stats.current_temperature.toFixed(1) : 'N/A',
     getUnit: () => '°F',
     getCategory: stats => {
-      if (!stats.avg_temperature) return null;
-      const temp = stats.avg_temperature;
+      if (!stats.current_temperature) return null;
+      const temp = stats.current_temperature;
       if (temp < 97.0) return 'Low';
       if (temp > 99.5) return 'High';
       return 'Normal';

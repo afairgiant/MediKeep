@@ -224,6 +224,10 @@ class ApiService {
     return this.get('/patients/recent-activity/', { signal });
   }
 
+  getDashboardStats(signal) {
+    return this.get('/patients/me/dashboard-stats', { signal });
+  }
+
   // Lab Result methods
   getLabResults(signal) {
     return this.get('/lab-results/', { signal });
