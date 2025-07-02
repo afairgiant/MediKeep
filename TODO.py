@@ -27,8 +27,8 @@ Improvments:
 
 
     Nav Bar:
-        Add links to all the pages in the nav bar.
-        Shift the title over to the left to make room for links?
+        ✅ Add links to all the pages in the nav bar.
+        ✅ Shift the title over to the left to make room for links?
 
     Admin:
         User: Make more user info show up on the user page.

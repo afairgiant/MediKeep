@@ -284,7 +284,7 @@ const Procedures = () => {
                         {procedure.procedure_name}
                       </h3>
                       {procedure.code && (
-                        <div className="item-subtitle">{procedure.code}</div>
+                        <div className="procedure-type-badge">{procedure.code}</div>
                       )}
                     </div>
                     <div className="status-badges">

@@ -41,7 +41,6 @@
   display: flex !important;
   align-items: center !important;
   gap: 0.5rem !important;
-  text-align: center !important;
 }
 
 /* Medical page title should be white */
@@ -296,4 +295,391 @@
   .dashboard-header .page-title {
     font-size: 1.5rem;
   }
+}
+
+/* Navigation Toggle Button */
+.nav-toggle-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-toggle-btn span {
+  width: 100%;
+  height: 3px;
+  background: var(--color-text-light, white);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  transform-origin: 1px;
+}
+
+.nav-toggle-btn.active span:first-child {
+  transform: rotate(45deg);
+}
+
+.nav-toggle-btn.active span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.nav-toggle-btn.active span:nth-child(3) {
+  transform: rotate(-45deg);
+}
+
+/* Navigation Overlay for Mobile */
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Mobile Navigation Menu */
+.navigation {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 320px;
+  background: var(--color-background-primary, white);
+  border-left: 1px solid var(--color-border, #e9ecef);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.navigation.open {
+  transform: translateX(0);
+}
+
+/* Navigation Header */
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+  background: var(--color-primary, #667eea);
+  color: var(--color-text-light, white);
+}
+
+.nav-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.nav-close {
+  background: none;
+  border: none;
+  color: var(--color-text-light, white);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Navigation Content */
+.nav-content {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+/* Navigation Sections */
+.nav-section {
+  margin-bottom: 1.5rem;
+}
+
+.nav-section-title {
+  margin: 0 0 0.5rem 0;
+  padding: 0 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  color: var(--color-text-primary, #333);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-align: left;
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+  background: var(--color-background-secondary, #f8f9fa);
+  color: var(--color-primary, #667eea);
+}
+
+.nav-link.active {
+  background: var(--color-primary-light, #e8f2ff);
+  color: var(--color-primary, #667eea);
+  border-left-color: var(--color-primary, #667eea);
+  font-weight: 600;
+}
+
+.nav-icon {
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-text {
+  flex: 1;
+}
+
+/* Navigation Footer */
+.nav-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border, #e9ecef);
+  background: var(--color-background-secondary, #f8f9fa);
+}
+
+.nav-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary, #667eea);
+  color: var(--color-text-light, white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.nav-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.nav-user-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-primary, #333);
+}
+
+.nav-user-role {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+}
+
+/* Desktop Navigation Bar */
+.desktop-nav-bar {
+  background: var(--color-background-primary, white);
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: none;
+}
+
+.desktop-nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.5rem 2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.desktop-nav-section {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.desktop-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text-primary, #333);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.desktop-nav-link:hover {
+  background: var(--color-background-secondary, #f8f9fa);
+  color: var(--color-primary, #667eea);
+}
+
+.desktop-nav-link.active {
+  background: var(--color-primary-light, #e8f2ff);
+  color: var(--color-primary, #667eea);
+  border-bottom-color: var(--color-primary, #667eea);
+  font-weight: 600;
+}
+
+.desktop-nav-link .nav-icon {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Show desktop nav on larger screens */
+@media (min-width: 769px) {
+  .nav-toggle-btn {
+    display: none !important;
+  }
+
+  .navigation {
+    display: none !important;
+  }
+
+  .nav-overlay {
+    display: none !important;
+  }
+
+  .desktop-nav-bar {
+    display: block;
+  }
+}
+
+/* Compact desktop mode for smaller screens */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .desktop-nav-link .nav-text {
+    display: none;
+  }
+
+  .desktop-nav-link {
+    padding: 0.5rem;
+    min-width: 40px;
+    justify-content: center;
+  }
+}
+
+/* Mobile Layout */
+@media (max-width: 768px) {
+  .navigation {
+    width: 280px;
+  }
+
+  .desktop-nav-bar {
+    display: none !important;
+  }
+}
+
+/* Theme Support */
+[data-theme='dark'] .navigation {
+  background: var(--color-background-primary, #1a1b1e);
+  border-color: var(--color-border, #373a40);
+}
+
+[data-theme='dark'] .nav-header {
+  background: var(--color-primary, #667eea);
+}
+
+[data-theme='dark'] .nav-link {
+  color: var(--color-text-primary, #c1c2c5);
+}
+
+[data-theme='dark'] .nav-link:hover {
+  background: var(--color-background-secondary, #25262b);
+}
+
+[data-theme='dark'] .nav-footer {
+  background: var(--color-background-secondary, #25262b);
+  border-color: var(--color-border, #373a40);
+}
+
+[data-theme='dark'] .desktop-nav-bar {
+  background: var(--color-background-primary, #1a1b1e);
+  border-color: var(--color-border, #373a40);
+}
+
+[data-theme='dark'] .desktop-nav-link {
+  color: var(--color-text-primary, #c1c2c5);
+}
+
+[data-theme='dark'] .desktop-nav-link:hover {
+  background: var(--color-background-secondary, #25262b);
+}
+
+/* Navigation Dropdown Styles */
+.nav-dropdown-trigger {
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid transparent !important;
+  font-weight: 500;
+}
+
+.nav-dropdown-trigger:hover {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-primary) !important;
+}
+
+.nav-item-active {
+  background: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+  font-weight: 600;
+}
+
+/* Focus states for accessibility */
+.nav-link:focus,
+.nav-toggle-btn:focus,
+.nav-close:focus,
+.desktop-nav-link:focus,
+.nav-dropdown-trigger:focus {
+  outline: 2px solid var(--color-primary, #667eea);
+  outline-offset: 2px;
 }
