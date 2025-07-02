@@ -138,6 +138,12 @@ class Medication(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
     patient = relationship("Patient", back_populates="medications")
     practitioner = relationship("Practitioner", back_populates="medications")
@@ -182,6 +188,12 @@ class Encounter(Base):
         String, nullable=True
     )  # Where visit occurred (office, hospital, telehealth, etc.)
     priority = Column(String, nullable=True)  # e.g., 'routine', 'urgent', 'emergency'
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     patient = relationship("Patient", back_populates="encounters")
@@ -270,6 +282,12 @@ class Condition(Base):
     snomed_code = Column(String, nullable=True)  # SNOMED CT code
     code_description = Column(String, nullable=True)  # Description of the medical code
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
     patient = relationship("Patient", back_populates="conditions")
     practitioner = relationship("Practitioner", back_populates="conditions")
@@ -295,6 +313,12 @@ class Immunization(Base):
     expiration_date = Column(Date, nullable=True)  # Vaccine expiration date
     notes = Column(Text, nullable=True)  # Additional notes
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
     patient = relationship("Patient", back_populates="immunizations")
     practitioner = relationship("Practitioner", back_populates="immunizations")
@@ -317,6 +341,13 @@ class Procedure(Base):
     facility = Column(
         String, nullable=True
     )  # Facility where the procedure was performed
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
     patient = relationship("Patient", back_populates="procedures")
     practitioner = relationship("Practitioner", back_populates="procedures")
@@ -349,6 +380,13 @@ class Treatment(Base):
         String, nullable=True
     )  # Location where the treatment is administered
     dosage = Column(String, nullable=True)  # Dosage of the treatment
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
     patient = relationship("Patient", back_populates="treatments")
     practitioner = relationship("Practitioner", back_populates="treatments")
@@ -367,6 +405,12 @@ class Allergy(Base):
     onset_date = Column(Date, nullable=True)  # Date when the allergy was first noted
     status = Column(String, nullable=True)  # e.g., 'active', 'resolved'
     notes = Column(String, nullable=True)  # Additional notes about the allergy
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     patient = relationship("Patient", back_populates="allergies")
