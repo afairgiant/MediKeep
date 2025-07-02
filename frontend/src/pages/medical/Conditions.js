@@ -11,6 +11,7 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import { Button } from '../../components/ui';
 import MantineConditionForm from '../../components/medical/MantineConditionForm';
 import StatusBadge from '../../components/medical/StatusBadge';
+import { formatStatusDisplay, formatSeverityDisplay } from '../../utils/statusConfig';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 import '../../styles/pages/ConditionCards.css';
@@ -330,10 +331,10 @@ const Conditions = () => {
                       <div className="detail-item">
                         <span className="label">Severity:</span>
                         <span className="value">
-                          {condition.severity === 'mild' && '🟢 Mild'}
-                          {condition.severity === 'moderate' && '🟡 Moderate'}
-                          {condition.severity === 'severe' && '🟠 Severe'}
-                          {condition.severity === 'critical' && '🔴 Critical'}
+                          {(() => {
+                            const display = formatSeverityDisplay(condition.severity);
+                            return `${display.icon} ${display.text}`;
+                          })()}
                         </span>
                       </div>
                     )}
@@ -357,11 +358,10 @@ const Conditions = () => {
                     <div className="detail-item">
                       <span className="label">Status:</span>
                       <span className="value">
-                        {condition.status === 'active' && '🟢 Currently active'}
-                        {condition.status === 'chronic' &&
-                          '🔵 Chronic condition'}
-                        {condition.status === 'resolved' && '✅ Resolved'}
-                        {condition.status === 'inactive' && '⚫ Inactive'}
+                        {(() => {
+                          const display = formatStatusDisplay(condition.status);
+                          return `${display.icon} ${display.text}`;
+                        })()}
                       </span>
                     </div>
                   </div>
@@ -414,11 +414,10 @@ const Conditions = () => {
                 ),
                 severity: value => value ? (
                   <span className={`severity-badge severity-${value}`}>
-                    {value === 'mild' && '🟢'}
-                    {value === 'moderate' && '🟡'}
-                    {value === 'severe' && '🟠'}
-                    {value === 'critical' && '🔴'}
-                    {' '}{value.charAt(0).toUpperCase() + value.slice(1)}
+                    {(() => {
+                      const display = formatSeverityDisplay(value);
+                      return `${display.icon} ${display.text}`;
+                    })()}
                   </span>
                 ) : '-',
                 onsetDate: value => (value ? formatDate(value) : '-'),

@@ -11,6 +11,7 @@ import {
   Text,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { CONDITION_STATUS_OPTIONS, SEVERITY_OPTIONS } from '../../utils/statusConfig';
 
 const MantineConditionForm = ({
   isOpen,
@@ -108,18 +109,7 @@ const MantineConditionForm = ({
                 label="Status"
                 value={formData.status}
                 onChange={handleSelectChange('status')}
-                data={[
-                  {
-                    value: 'active',
-                    label: 'Active - Currently being treated',
-                  },
-                  { value: 'chronic', label: 'Chronic - Long-term condition' },
-                  { value: 'resolved', label: 'Resolved - No longer an issue' },
-                  {
-                    value: 'inactive',
-                    label: 'Inactive - Not currently treated',
-                  },
-                ]}
+                data={CONDITION_STATUS_OPTIONS}
                 description="Current status of this condition"
               />
             </Grid.Col>
@@ -129,12 +119,7 @@ const MantineConditionForm = ({
                 placeholder="Select severity level"
                 value={formData.severity}
                 onChange={handleSelectChange('severity')}
-                data={[
-                  { value: 'mild', label: 'Mild - Minor impact' },
-                  { value: 'moderate', label: 'Moderate - Noticeable impact' },
-                  { value: 'severe', label: 'Severe - Significant impact' },
-                  { value: 'critical', label: 'Critical - Life-threatening' },
-                ]}
+                data={SEVERITY_OPTIONS}
                 description="Severity level of this condition"
                 clearable
               />

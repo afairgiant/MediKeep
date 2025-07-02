@@ -3,6 +3,12 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, validator
 
+# Import status enums for validation
+from ..models.enums import (
+    get_all_condition_statuses,
+    get_all_severity_levels,
+)
+
 
 class ConditionBase(BaseModel):
     diagnosis: str = Field(
@@ -37,14 +43,7 @@ class ConditionBase(BaseModel):
 
     @validator("status")
     def validate_status(cls, v):
-        valid_statuses = [
-            "active",
-            "resolved",
-            "chronic",
-            "inactive",
-            "recurrence",
-            "relapse",
-        ]
+        valid_statuses = get_all_condition_statuses()
         if v.lower() not in valid_statuses:
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
@@ -71,7 +70,7 @@ class ConditionBase(BaseModel):
     @validator("severity")
     def validate_severity(cls, v):
         if v is not None:
-            valid_severities = ["mild", "moderate", "severe", "critical"]
+            valid_severities = get_all_severity_levels()
             if v.lower() not in valid_severities:
                 raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
             return v.lower()
@@ -132,7 +131,7 @@ class ConditionUpdate(BaseModel):
     @validator("severity")
     def validate_severity(cls, v):
         if v is not None:
-            valid_severities = ["mild", "moderate", "severe", "critical"]
+            valid_severities = get_all_severity_levels()
             if v.lower() not in valid_severities:
                 raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
             return v.lower()

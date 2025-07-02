@@ -13,6 +13,26 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship
 
+# Import status enums for consistent status management
+from .enums import (
+    ConditionStatus,
+    MedicationStatus,
+    AllergyStatus,
+    LabResultStatus,
+    ProcedureStatus,
+    TreatmentStatus,
+    EncounterPriority,
+    SeverityLevel,
+    get_all_condition_statuses,
+    get_all_medication_statuses,
+    get_all_allergy_statuses,
+    get_all_lab_result_statuses,
+    get_all_procedure_statuses,
+    get_all_treatment_statuses,
+    get_all_severity_levels,
+    get_all_encounter_priorities,
+)
+
 
 # Timezone-aware datetime function to replace deprecated datetime.utcnow()
 def get_utc_now():
@@ -133,7 +153,7 @@ class Medication(Base):
     indication = Column(String, nullable=True)  # What the medication is prescribed for
     effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
     effectivePeriod_end = Column(Date, nullable=True)  # End date of the medication
-    status = Column(String, nullable=True)  # e.g., 'active', 'stopped, 'on-hold'
+    status = Column(String, nullable=True)  # Use MedicationStatus enum: active, inactive, on_hold, completed, cancelled
     pharmacy_id = Column(Integer, ForeignKey("pharmacies.id"), nullable=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
@@ -187,7 +207,7 @@ class Encounter(Base):
     location = Column(
         String, nullable=True
     )  # Where visit occurred (office, hospital, telehealth, etc.)
-    priority = Column(String, nullable=True)  # e.g., 'routine', 'urgent', 'emergency'
+    priority = Column(String, nullable=True)  # Use EncounterPriority enum: routine, urgent, emergency
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
@@ -218,7 +238,7 @@ class LabResult(Base):
     facility = Column(String, nullable=True)  # Facility where the test was ordered
     status = Column(
         String, nullable=False, default="ordered"
-    )  # 'ordered', 'completed', 'cancelled'
+    )  # Use LabResultStatus enum: ordered, in_progress, completed, cancelled
     labs_result = Column(
         String, nullable=True
     )  # Lab result interpretation: 'normal', 'abnormal', etc.
@@ -273,11 +293,11 @@ class Condition(Base):
     onsetDate = Column(
         Date, nullable=True
     )  # Date when the condition was first diagnosed
-    status = Column(String, nullable=False)  # e.g., 'active', 'resolved', 'chronic'
+    status = Column(String, nullable=False)  # Use ConditionStatus enum: active, inactive, resolved, chronic, recurrence, relapse
     endDate = Column(Date, nullable=True)  # Date when the condition was resolved
     
     # Severity and medical codes
-    severity = Column(String, nullable=True)  # e.g., 'mild', 'moderate', 'severe', 'critical'
+    severity = Column(String, nullable=True)  # Use SeverityLevel enum: mild, moderate, severe, critical
     icd10_code = Column(String, nullable=True)  # ICD-10 diagnosis code
     snomed_code = Column(String, nullable=True)  # SNOMED CT code
     code_description = Column(String, nullable=True)  # Description of the medical code
@@ -336,7 +356,7 @@ class Procedure(Base):
     description = Column(String, nullable=True)  # Description of the procedure
     status = Column(
         String, nullable=True
-    )  # e.g., 'completed', 'in-progress', 'cancelled'
+    )  # Use ProcedureStatus enum: scheduled, in_progress, completed, cancelled
     notes = Column(String, nullable=True)  # Additional notes about the procedure
     facility = Column(
         String, nullable=True
@@ -366,7 +386,7 @@ class Treatment(Base):
     )  # Type of treatment (e.g., 'physical therapy', 'surgery')
     start_date = Column(Date, nullable=False)  # Start date of the treatment
     end_date = Column(Date, nullable=True)  # End date of the treatment (if applicable)
-    status = Column(String, nullable=True)  # e.g., 'ongoing', 'completed', 'cancelled'
+    status = Column(String, nullable=True)  # Use TreatmentStatus enum: active, in_progress, completed, cancelled, on_hold
     treatment_category = Column(
         String, nullable=True
     )  # Category of treatment (e.g., 'inpatient', 'outpatient')
@@ -401,9 +421,9 @@ class Allergy(Base):
     reaction = Column(String, nullable=False)  # Reaction to the allergen
     severity = Column(
         String, nullable=True
-    )  # Severity of the reaction (e.g., 'mild', 'severe')
+    )  # Use SeverityLevel enum: mild, moderate, severe, critical
     onset_date = Column(Date, nullable=True)  # Date when the allergy was first noted
-    status = Column(String, nullable=True)  # e.g., 'active', 'resolved'
+    status = Column(String, nullable=True)  # Use AllergyStatus enum: active, inactive, resolved
     notes = Column(String, nullable=True)  # Additional notes about the allergy
 
     # Audit fields
