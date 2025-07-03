@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { authService } from '../../services/auth/simpleAuthService';
+import frontendLogger from '../../services/frontendLogger';
 import '../../styles/pages/Login.css';
 
 const Login = () => {
@@ -114,8 +115,8 @@ const Login = () => {
 
         if (loginResult.success) {
           setShowCreateUser(false);
-          // Redirect new users to patient info page to complete their profile
-          navigate('/patients/me', { replace: true });
+          const from = location.state?.from?.pathname || '/dashboard';
+          navigate(from, { replace: true });
         } else {
           toast.error(
             'Account created but login failed. Please try logging in manually.'
@@ -153,7 +154,10 @@ const Login = () => {
         setCreateUserError(errorMessage);
       }
     } catch (error) {
-      console.error('Error creating user:', error);
+      frontendLogger.logError('Error creating user', {
+        error: error.message,
+        component: 'Login',
+      });
 
       // Handle different error formats
       let errorMessage = 'Failed to create user. Please try again.';
