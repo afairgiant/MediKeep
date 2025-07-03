@@ -259,7 +259,7 @@ class AdminApiService extends BaseApiService {
 
   // Admin password reset
   async adminResetPassword(userId, newPassword) {
-    return this.post(`/users/${userId}/reset-password`, {
+    return this.post(`/models/users/${userId}/reset-password`, {
       new_password: newPassword,
     });
   }
