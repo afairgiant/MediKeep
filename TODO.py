@@ -38,7 +38,7 @@ Improvments:
 
 Roadmap:
     - Family member linking of patients.
-    - Emergency Contacts
+    - ✅ Emergency Contacts
     - Document attachments - store all documents in one place?
     - User roles - (parent/guardian) goes with family member linking.
 """

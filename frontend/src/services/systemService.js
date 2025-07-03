@@ -34,7 +34,7 @@ export const getVersionInfo = async () => {
     // Fallback if endpoint fails
     return {
       app_name: 'Medical Records Management System',
-      version: '0.10.1', // Fallback version
+      version: '0.11.0', // Fallback version
 
       timestamp: new Date().toISOString(),
     };
@@ -42,7 +42,7 @@ export const getVersionInfo = async () => {
     // Return fallback instead of throwing
     return {
       app_name: 'Medical Records Management System',
-      version: '0.10.1', // Fallback version
+      version: '0.11.0', // Fallback version
 
       timestamp: new Date().toISOString(),
     };
