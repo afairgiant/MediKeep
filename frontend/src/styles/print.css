@@ -1,0 +1,222 @@
+/* Print Styles for Medical Records Application */
+@page {
+  size: landscape;
+  margin: 0.5in;
+}
+
+@media print {
+  /* Hide all interactive and navigation elements */
+  .medical-page-header,
+  .medical-page-controls,
+  .medical-page-filters,
+  .filter-summary,
+  .clear-filters-btn,
+  .no-print,
+  .view-toggle,
+  .view-toggle-container,
+  .print-button,
+  .controls-left,
+  .controls-center,
+  .controls-right,
+  .settings-button,
+  .theme-toggle-btn,
+  .theme-toggle,
+  .logout-btn,
+  .logout-button,
+  .header-actions,
+  .global-actions,
+  .admin-header,
+  .page-header,
+  .header-left,
+  .header-right,
+  .header-center,
+  nav,
+  header,
+  .back-button,
+  /* Hide any elements with settings or theme in class names */
+  [class*="settings"],
+  [class*="theme"],
+  [class*="logout"],
+  [class*="header-action"],
+  [class*="nav-"] {
+    display: none !important;
+  }
+
+  /* Hide all Mantine filter components and action buttons */
+  [data-mantine-component='Card']:has(.mantine-Card-root),
+  .mantine-Card-root,
+  [class*='mantine-Card'],
+  [class*='mantine-TextInput'],
+  [class*='mantine-Select'],
+  [class*='mantine-Button']:not(.print-button),
+  [class*='mantine-ActionIcon'],
+  [class*='mantine-Group']:has([class*='mantine-TextInput']),
+  [class*='mantine-Group']:has([class*='mantine-ActionIcon']),
+  [class*='mantine-Stack']:has([class*='mantine-TextInput']),
+  [class*='mantine-Flex']:has([class*='mantine-TextInput']),
+  [class*='mantine-Flex']:has([class*='mantine-ActionIcon']) {
+    display: none !important;
+  }
+
+  /* Ensure the main container takes full width */
+  .medical-page-container {
+    background: white !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .medical-page-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  /* Table specific styles */
+  .medications-table-container,
+  .medical-table-container {
+    box-shadow: none !important;
+    border: 1px solid #333 !important;
+    break-inside: avoid;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .print-header {
+    background: white !important;
+    border-bottom: 2px solid #333 !important;
+    padding: 1rem !important;
+    text-align: center;
+  }
+
+  .print-header h2 {
+    color: #333 !important;
+    margin: 0 0 0.5rem 0 !important;
+    font-size: 1.2rem !important;
+  }
+
+  .print-header p {
+    color: #666 !important;
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Table styles */
+  .medications-table,
+  .medical-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+    font-size: 10px !important;
+  }
+
+  .medications-table th,
+  .medical-table th {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #333 !important;
+    font-size: 10px !important;
+    padding: 0.4rem 0.2rem !important;
+    font-weight: bold !important;
+  }
+
+  .medications-table td,
+  .medical-table td {
+    border: 1px solid #333 !important;
+    font-size: 9px !important;
+    padding: 0.3rem 0.2rem !important;
+    vertical-align: top !important;
+  }
+
+  .medications-table tr,
+  .medical-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .medications-table thead,
+  .medical-table thead {
+    display: table-header-group;
+  }
+
+  /* Hide action columns */
+  .table-actions,
+  .medical-item-actions,
+  .edit-button-small,
+  .delete-button-small,
+  .view-button-small {
+    display: none !important;
+  }
+
+  /* Style status badges for print */
+  .status-badge-small,
+  .status-badge {
+    border: 1px solid #333 !important;
+    background: white !important;
+    color: #333 !important;
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+  }
+
+  /* Style severity badges for print */
+  .severity-badge {
+    border: 1px solid #333 !important;
+    background: white !important;
+    color: #333 !important;
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+    display: inline-block !important;
+  }
+
+  /* Medication names and important text */
+  .medication-name,
+  .item-title {
+    font-weight: bold !important;
+    color: #000 !important;
+  }
+
+  /* Hide cards view completely in print */
+  .medical-items-grid,
+  .medical-item-card {
+    display: none !important;
+  }
+
+  /* Force table view in print */
+  .medications-table-container,
+  .medical-table-container {
+    display: block !important;
+  }
+
+  /* Remove hover effects and transitions */
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Remove shadows and effects */
+  .medical-item-card,
+  .medications-table-container,
+  .print-header,
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure black text for better printing */
+  body,
+  .medical-page-content,
+  .medications-table,
+  .medical-table {
+    color: #000 !important;
+  }
+
+  /* Page break controls */
+  .medications-table-container,
+  .medical-table-container {
+    page-break-before: auto;
+    page-break-after: auto;
+    page-break-inside: avoid;
+  }
+}

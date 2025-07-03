@@ -50,7 +50,7 @@ const MantineFilters = ({
   } = config;
 
   return (
-    <Card withBorder shadow="sm" p="md" mb="lg">
+    <Card withBorder shadow="sm" p="md" mb="lg" className="no-print">
       <Stack gap="md">
         {/* Header */}
         <Flex justify="space-between" align="center">

@@ -274,9 +274,28 @@
 }
 
 @media print {
+  /* Hide header, controls, and filters */
   .medical-page-header,
   .medical-page-controls,
-  .no-print {
+  .medical-page-filters,
+  .filter-summary,
+  .clear-filters-btn,
+  .no-print,
+  .settings-button,
+  .theme-toggle-btn,
+  .header-actions,
+  .global-actions,
+  [data-mantine-component='Card']:has(.mantine-Card-root),
+  .mantine-Card-root {
+    display: none !important;
+  }
+
+  /* Hide Mantine filter components specifically */
+  [class*='mantine-Card'],
+  [class*='mantine-TextInput'],
+  [class*='mantine-Select'],
+  [class*='mantine-Button'][class*='Filter'],
+  [class*='mantine-Group']:has([class*='mantine-TextInput']) {
     display: none !important;
   }
 
