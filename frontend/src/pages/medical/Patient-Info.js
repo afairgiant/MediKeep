@@ -7,6 +7,7 @@ import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantinePatientForm from '../../components/medical/MantinePatientForm';
+import frontendLogger from '../../services/frontendLogger';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
@@ -153,11 +154,13 @@ const PatientInfo = () => {
         updatedData = await apiService.createCurrentPatient(apiData);
         setPatientExists(true);
         setIsCreating(false);
+        setIsNewUser(false); // No longer a new user
         setSuccessMessage('Patient information created successfully!');
       } else {
         // Use the correct API method for updating current patient
         updatedData = await apiService.updateCurrentPatient(apiData);
         setIsEditing(false);
+        setIsNewUser(false); // No longer a new user
         setSuccessMessage('Patient information updated successfully!');
       }
 
@@ -167,7 +170,10 @@ const PatientInfo = () => {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Error saving patient data:', error);
+      frontendLogger.logError('Error saving patient data', {
+        error: error.message,
+        component: 'Patient-Info',
+      });
       setError(
         error.message || 'Failed to save patient information. Please try again.'
       );
@@ -216,6 +222,28 @@ const PatientInfo = () => {
       <PageHeader title="Patient Information" icon="📋" />
 
       <div className="medical-page-content">
+        {isNewUser && (
+          <div
+            className="welcome-message"
+            style={{
+              background: '#e8f4fd',
+              border: '1px solid #2196f3',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '20px',
+              color: '#1976d2',
+            }}
+          >
+            <h3 style={{ margin: '0 0 8px 0', color: '#1976d2' }}>
+              Welcome to Your Medical Records!
+            </h3>
+            <p style={{ margin: '0', lineHeight: '1.4' }}>
+              Your account has been created successfully. Please complete your
+              patient profile below to get started with managing your medical
+              records.
+            </p>
+          </div>
+        )}
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>

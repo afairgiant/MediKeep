@@ -120,3 +120,4 @@ docs/
 .cursor/rules/venv.mdc
 
 backups/
+.claude/settings.local.json

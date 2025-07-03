@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminApiService } from '../../services/api/adminApi';
 import AdminLayout from '../../components/admin/AdminLayout';
+import frontendLogger from '../../services/frontendLogger';
 import './AdminSettings.css';
 
 const AdminSettings = () => {
@@ -23,7 +24,7 @@ const AdminSettings = () => {
       const data = await adminApiService.getRetentionSettings();
       setSettings(data);
     } catch (error) {
-      console.error('Error loading settings:', error);
+      frontendLogger.logError('Error loading settings', { error: error.message, component: 'AdminSettings' });
       setMessage({
         type: 'error',
         text: 'Failed to load settings: ' + error.message,
@@ -72,7 +73,7 @@ const AdminSettings = () => {
         setMessage({ type: '', text: '' });
       }, 5000);
     } catch (error) {
-      console.error('Error saving settings:', error);
+      frontendLogger.logError('Error saving settings', { error: error.message, component: 'AdminSettings' });
       setMessage({
         type: 'error',
         text: 'Failed to save settings: ' + error.message,

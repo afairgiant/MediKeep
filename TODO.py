@@ -41,4 +41,10 @@ Roadmap:
     - ✅ Emergency Contacts
     - Document attachments - store all documents in one place?
     - User roles - (parent/guardian) goes with family member linking.
+    - Add units to settings page, lb/kg and cm/inches per user.
+    - Condition - medication linking - 1 or multiple medications per condition.
+    - Data integirty protections
+    - Unify form validations (phone, email, dates, etc.)
+    - Insurance tracking of some form? (documents)
+    - More document support for procedures, conditions, visits, etc.
 """
