@@ -128,6 +128,7 @@ class EntityType:
     ALLERGY = "allergy"
     PROCEDURE = "procedure"
     ENCOUNTER = "encounter"
+    EMERGENCY_CONTACT = "emergency_contact"
     
     # System entities
     SYSTEM = "system"
@@ -140,7 +141,7 @@ class EntityType:
             cls.USER, cls.PATIENT, cls.PRACTITIONER,
             cls.MEDICATION, cls.LAB_RESULT, cls.LAB_RESULT_FILE,
             cls.CONDITION, cls.TREATMENT, cls.IMMUNIZATION,
-            cls.ALLERGY, cls.PROCEDURE, cls.ENCOUNTER,
+            cls.ALLERGY, cls.PROCEDURE, cls.ENCOUNTER, cls.EMERGENCY_CONTACT,
             cls.SYSTEM, cls.BACKUP
         ]
 

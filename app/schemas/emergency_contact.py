@@ -1,6 +1,7 @@
-from typing import Optional
-from pydantic import BaseModel, Field, validator
 import re
+from typing import Optional
+
+from pydantic import BaseModel, Field, validator
 
 
 class EmergencyContactBase(BaseModel):
@@ -31,24 +32,37 @@ class EmergencyContactBase(BaseModel):
     notes: Optional[str] = Field(
         None, max_length=1000, description="Additional notes about the contact"
     )
-    patient_id: int = Field(..., gt=0, description="ID of the patient")
 
     @validator("relationship")
     def validate_relationship(cls, v):
         valid_relationships = [
-            "spouse", "parent", "child", "sibling", "grandparent", "grandchild",
-            "aunt", "uncle", "cousin", "friend", "neighbor", "caregiver", 
-            "guardian", "partner", "other"
+            "spouse",
+            "parent",
+            "child",
+            "sibling",
+            "grandparent",
+            "grandchild",
+            "aunt",
+            "uncle",
+            "cousin",
+            "friend",
+            "neighbor",
+            "caregiver",
+            "guardian",
+            "partner",
+            "other",
         ]
         if v.lower() not in valid_relationships:
-            raise ValueError(f"Relationship must be one of: {', '.join(valid_relationships)}")
+            raise ValueError(
+                f"Relationship must be one of: {', '.join(valid_relationships)}"
+            )
         return v.lower()
 
     @validator("phone_number", "secondary_phone")
     def validate_phone_number(cls, v):
         if v is not None and v.strip():
             # Remove all non-digits
-            digits_only = re.sub(r'[^\d]', '', v)
+            digits_only = re.sub(r"[^\d]", "", v)
             # Check if it's a valid length (10 digits for US, allow international)
             if len(digits_only) < 10 or len(digits_only) > 15:
                 raise ValueError("Phone number must be between 10-15 digits")
@@ -58,7 +72,7 @@ class EmergencyContactBase(BaseModel):
     @validator("email")
     def validate_email(cls, v):
         if v is not None and v.strip():
-            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
             if not re.match(email_pattern, v.strip()):
                 raise ValueError("Invalid email format")
             return v.strip().lower()
@@ -84,12 +98,26 @@ class EmergencyContactUpdate(BaseModel):
     def validate_relationship(cls, v):
         if v is not None:
             valid_relationships = [
-                "spouse", "parent", "child", "sibling", "grandparent", "grandchild",
-                "aunt", "uncle", "cousin", "friend", "neighbor", "caregiver", 
-                "guardian", "partner", "other"
+                "spouse",
+                "parent",
+                "child",
+                "sibling",
+                "grandparent",
+                "grandchild",
+                "aunt",
+                "uncle",
+                "cousin",
+                "friend",
+                "neighbor",
+                "caregiver",
+                "guardian",
+                "partner",
+                "other",
             ]
             if v.lower() not in valid_relationships:
-                raise ValueError(f"Relationship must be one of: {', '.join(valid_relationships)}")
+                raise ValueError(
+                    f"Relationship must be one of: {', '.join(valid_relationships)}"
+                )
             return v.lower()
         return v
 
@@ -97,7 +125,7 @@ class EmergencyContactUpdate(BaseModel):
     def validate_phone_number(cls, v):
         if v is not None and v.strip():
             # Remove all non-digits
-            digits_only = re.sub(r'[^\d]', '', v)
+            digits_only = re.sub(r"[^\d]", "", v)
             # Check if it's a valid length (10 digits for US, allow international)
             if len(digits_only) < 10 or len(digits_only) > 15:
                 raise ValueError("Phone number must be between 10-15 digits")
@@ -107,7 +135,7 @@ class EmergencyContactUpdate(BaseModel):
     @validator("email")
     def validate_email(cls, v):
         if v is not None and v.strip():
-            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
             if not re.match(email_pattern, v.strip()):
                 raise ValueError("Invalid email format")
             return v.strip().lower()
@@ -116,6 +144,7 @@ class EmergencyContactUpdate(BaseModel):
 
 class EmergencyContactResponse(EmergencyContactBase):
     id: int
+    patient_id: int = Field(..., gt=0, description="ID of the patient")
 
     class Config:
         from_attributes = True

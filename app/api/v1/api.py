@@ -5,6 +5,7 @@ from app.api.v1.endpoints import (
     allergy,
     auth,
     condition,
+    emergency_contact,
     encounter,
     export,
     frontend_logs,
@@ -39,6 +40,9 @@ api_router.include_router(
 # Medical record endpoints
 api_router.include_router(encounter.router, prefix="/encounters", tags=["encounters"])
 api_router.include_router(condition.router, prefix="/conditions", tags=["conditions"])
+api_router.include_router(
+    emergency_contact.router, prefix="/emergency-contacts", tags=["emergency-contacts"]
+)
 api_router.include_router(
     immunization.router, prefix="/immunizations", tags=["immunizations"]
 )

@@ -71,6 +71,7 @@ const PageHeader = ({
       items: [
         { name: 'Dashboard', path: '/dashboard', icon: '🏥' },
         { name: 'Patient Info', path: '/patients/me', icon: '👤' },
+        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
       ],
     },
     {

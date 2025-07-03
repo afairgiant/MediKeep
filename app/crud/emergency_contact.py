@@ -33,7 +33,7 @@ class CRUDEmergencyContact(
         return self.query(
             db=db,
             filters={"patient_id": patient_id},
-            order_by=[("-is_primary", "name")],
+            order_by="name",
         )
 
     def get_primary_contact(

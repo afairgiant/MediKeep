@@ -43,6 +43,7 @@ import {
   IconInfoCircle,
   IconSearch,
   IconX,
+  IconPhoneCall,
 } from '@tabler/icons-react';
 import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { PageHeader } from '../components';
@@ -267,6 +268,12 @@ const Dashboard = () => {
 
   // Additional resources
   const additionalModules = [
+    {
+      title: 'Emergency Contacts',
+      icon: IconPhoneCall,
+      color: 'red',
+      link: '/emergency-contacts',
+    },
     {
       title: 'Export Records',
       icon: IconFileExport,
