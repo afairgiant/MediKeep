@@ -44,15 +44,20 @@ services:
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       TZ: ${TZ:-America/New_York}
+      # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS
+      ENABLE_SSL: ${ENABLE_SSL:-false}
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
       - app_backups:/app/backups
+
+      # Uncomment the line below and create certificates if you want HTTPS
+      # - ./certs:/app/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+      test: ['CMD', 'curl', '-f', '-k', 'http://localhost:8000/health']
       interval: 120s
       timeout: 15s
       retries: 2

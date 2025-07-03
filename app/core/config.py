@@ -16,6 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
     VERSION: str = "0.9.1"
+
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development    # Database Configuration
@@ -27,6 +28,26 @@ class Settings:  # App Info
             else ""
         ),
     )
+
+    # SSL Configuration
+    # Use standard paths - /app/certs/ for Docker containers, ./certs/ for local development
+    SSL_CERTFILE: str = os.getenv(
+        "SSL_CERTFILE",
+        (
+            "/app/certs/localhost.crt"
+            if os.path.exists("/app")
+            else "./certs/localhost.crt"
+        ),
+    )
+    SSL_KEYFILE: str = os.getenv(
+        "SSL_KEYFILE",
+        (
+            "/app/certs/localhost.key"
+            if os.path.exists("/app")
+            else "./certs/localhost.key"
+        ),
+    )
+    ENABLE_SSL: bool = os.getenv("ENABLE_SSL", "False").lower() == "true"
 
     # Security Configuration
     ALGORITHM: str = "HS256"

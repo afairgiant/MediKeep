@@ -17,8 +17,23 @@ else
     echo "Migrations completed successfully."
 fi
 
-# Start the FastAPI application
+# Start the FastAPI application with conditional SSL support
 echo "Starting FastAPI server..."
-# Use LOG_LEVEL environment variable for Uvicorn log level (default to info)
 LOG_LEVEL_LOWER=$(echo "${LOG_LEVEL:-INFO}" | tr '[:upper:]' '[:lower:]')
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level "$LOG_LEVEL_LOWER"
+
+if [ "$ENABLE_SSL" = "true" ]; then
+    if [ -f "/app/certs/localhost.crt" ] && [ -f "/app/certs/localhost.key" ]; then
+        echo "Starting with HTTPS on port 8000"
+        exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level "$LOG_LEVEL_LOWER" \
+            --ssl-certfile /app/certs/localhost.crt --ssl-keyfile /app/certs/localhost.key
+    else
+        echo "HTTPS enabled but certificates not found at /app/certs/"
+        echo "   Expected: /app/certs/localhost.crt and /app/certs/localhost.key"
+        echo "   Falling back to HTTP mode"
+        echo "Starting with HTTP on port 8000"
+        exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level "$LOG_LEVEL_LOWER"
+    fi
+else
+    echo "Starting with HTTP on port 8000"
+    exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level "$LOG_LEVEL_LOWER"
+fi

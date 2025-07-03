@@ -35,6 +35,7 @@ export const getVersionInfo = async () => {
     return {
       app_name: 'Medical Records Management System',
       version: '0.9.1', // Fallback version
+
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
@@ -42,6 +43,7 @@ export const getVersionInfo = async () => {
     return {
       app_name: 'Medical Records Management System',
       version: '0.9.1', // Fallback version
+
       timestamp: new Date().toISOString(),
     };
   }

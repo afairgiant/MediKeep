@@ -196,6 +196,7 @@ const MantineMedicalForm = ({
                     : null
                 }
                 onChange={handleDateChange('effective_period_start')}
+
                 firstDayOfWeek={0}
                 clearable
                 description="When the medication was started"
@@ -211,6 +212,7 @@ const MantineMedicalForm = ({
                     : null
                 }
                 onChange={handleDateChange('effective_period_end')}
+
                 firstDayOfWeek={0}
                 clearable
                 description="When discontinued (if applicable)"
