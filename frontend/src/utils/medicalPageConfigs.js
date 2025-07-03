@@ -50,9 +50,9 @@ export const medicalPageConfigs = {
       ],
       categoryField: 'route',
       categoryLabel: 'Routes',
-      dateField: 'effectivePeriod_start',
-      startDateField: 'effectivePeriod_start',
-      endDateField: 'effectivePeriod_end',
+      dateField: 'effective_period_start',
+      startDateField: 'effective_period_start',
+      endDateField: 'effective_period_end',
       dateRangeOptions: [
         { value: 'all', label: 'All Time Periods' },
         { value: 'current', label: 'Currently Active' },
@@ -66,7 +66,7 @@ export const medicalPageConfigs = {
       sortOptions: [
         { value: 'active', label: 'Status (Active First)' },
         { value: 'medication_name', label: 'Medication Name' },
-        { value: 'effectivePeriod_start', label: 'Start Date' },
+        { value: 'effective_period_start', label: 'Start Date' },
       ],
       customSortFunctions: {
         active: (a, b, sortOrder) => {

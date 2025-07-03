@@ -70,8 +70,8 @@ const Medication = () => {
     frequency: '',
     route: '',
     indication: '',
-    effectivePeriod_start: '',
-    effectivePeriod_end: '',
+    effective_period_start: '',
+    effective_period_end: '',
     status: 'active',
     practitioner_id: null,
     pharmacy_id: null,
@@ -85,8 +85,8 @@ const Medication = () => {
       frequency: '',
       route: '',
       indication: '',
-      effectivePeriod_start: '',
-      effectivePeriod_end: '',
+      effective_period_start: '',
+      effective_period_end: '',
       status: 'active',
       practitioner_id: null,
       pharmacy_id: null,
@@ -102,8 +102,8 @@ const Medication = () => {
       frequency: medication.frequency || '',
       route: medication.route || '',
       indication: medication.indication || '',
-      effectivePeriod_start: medication.effectivePeriod_start || '',
-      effectivePeriod_end: medication.effectivePeriod_end || '',
+      effective_period_start: medication.effective_period_start || '',
+      effective_period_end: medication.effective_period_end || '',
       status: medication.status || 'active',
       practitioner_id: medication.practitioner_id || null,
       pharmacy_id: medication.pharmacy_id || null,
@@ -141,11 +141,11 @@ const Medication = () => {
     };
 
     // Add dates if provided
-    if (formData.effectivePeriod_start) {
-      medicationData.effectivePeriod_start = formData.effectivePeriod_start;
+    if (formData.effective_period_start) {
+      medicationData.effective_period_start = formData.effective_period_start;
     }
-    if (formData.effectivePeriod_end) {
-      medicationData.effectivePeriod_end = formData.effectivePeriod_end;
+    if (formData.effective_period_end) {
+      medicationData.effective_period_end = formData.effective_period_end;
     }
 
     let success;
@@ -318,19 +318,19 @@ const Medication = () => {
                         </span>
                       </div>
                     )}
-                    {medication.effectivePeriod_start && (
+                    {medication.effective_period_start && (
                       <div className="detail-item">
                         <span className="label">Start Date:</span>
                         <span className="value">
-                          {formatDate(medication.effectivePeriod_start)}
+                          {formatDate(medication.effective_period_start)}
                         </span>
                       </div>
                     )}
-                    {medication.effectivePeriod_end && (
+                    {medication.effective_period_end && (
                       <div className="detail-item">
                         <span className="label">End Date:</span>
                         <span className="value">
-                          {formatDate(medication.effectivePeriod_end)}
+                          {formatDate(medication.effective_period_end)}
                         </span>
                       </div>
                     )}
@@ -366,8 +366,8 @@ const Medication = () => {
                 { header: 'Indication', accessor: 'indication' },
                 { header: 'Prescriber', accessor: 'practitioner_name' },
                 { header: 'Pharmacy', accessor: 'pharmacy_name' },
-                { header: 'Start Date', accessor: 'effectivePeriod_start' },
-                { header: 'End Date', accessor: 'effectivePeriod_end' },
+                { header: 'Start Date', accessor: 'effective_period_start' },
+                { header: 'End Date', accessor: 'effective_period_end' },
                 { header: 'Status', accessor: 'status' },
               ]}
               patientData={currentPatient}
@@ -378,9 +378,10 @@ const Medication = () => {
                 medication_name: value => (
                   <span className="primary-field">{value}</span>
                 ),
-                effectivePeriod_start: value =>
+                effective_period_start: value =>
                   value ? formatDate(value) : '-',
-                effectivePeriod_end: value => (value ? formatDate(value) : '-'),
+                effective_period_end: value =>
+                  value ? formatDate(value) : '-',
                 status: value => <StatusBadge status={value} size="small" />,
                 practitioner_name: (value, item) =>
                   item.practitioner?.name || '-',
