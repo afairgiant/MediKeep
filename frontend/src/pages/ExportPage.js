@@ -1,8 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Paper,
+  Stack,
+  Text,
+  Title,
+  Button,
+  Group,
+  Select,
+  TextInput,
+  Checkbox,
+  Alert,
+  Loader,
+  Grid,
+  Card,
+  Badge,
+  Divider,
+  ActionIcon,
+  Box,
+  Center,
+} from '@mantine/core';
+import {
+  IconDownload,
+  IconFileExport,
+  IconChartBar,
+  IconSettings,
+  IconInfoCircle,
+  IconAlertTriangle,
+  IconCheck,
+  IconX,
+  IconArchive,
+  IconLock,
+} from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { exportService } from '../services/exportService';
-import '../styles/pages/ExportPage.css';
 
 const ExportPage = () => {
   const navigate = useNavigate();
@@ -18,10 +50,11 @@ const ExportPage = () => {
   // Export configuration
   const [exportConfig, setExportConfig] = useState({
     format: 'json',
-    scope: 'all',
+    scope: 'patient',
     startDate: '',
     endDate: '',
     includeFiles: false,
+    includePatientInfo: true,
   });
 
   // Bulk export state
@@ -65,6 +98,7 @@ const ExportPage = () => {
         format: exportConfig.format,
         scope: exportConfig.scope,
         include_files: exportConfig.includeFiles.toString(),
+        include_patient_info: exportConfig.includePatientInfo.toString(),
       };
 
       if (exportConfig.startDate) {
@@ -104,6 +138,7 @@ const ExportPage = () => {
         format: exportConfig.format,
         start_date: exportConfig.startDate || undefined,
         end_date: exportConfig.endDate || undefined,
+        include_patient_info: exportConfig.includePatientInfo,
       };
 
       await exportService.downloadBulkExport(requestData);
@@ -148,161 +183,188 @@ const ExportPage = () => {
 
   if (summaryLoading) {
     return (
-      <div className="export-page">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading export options...</p>
-        </div>
-      </div>
+      <Container size="xl" py="xl">
+        <Center style={{ minHeight: '400px' }}>
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg" c="dimmed">
+              Loading export options...
+            </Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="export-page">
+    <Container size="xl" py="xl">
       {/* Header */}
       <PageHeader
         title="Export Medical Records"
-        icon="📥"
+        icon={<IconFileExport size={24} />}
         backButtonText="← Back to Dashboard"
         backButtonPath="/dashboard"
         variant="medical"
       />
 
-      <div className="export-content">
-        <p className="export-description">
+      <Stack gap="xl" mt="xl">
+        <Text size="lg" c="dimmed">
           Download your medical data in various formats for backup or sharing
           with healthcare providers
-        </p>
+        </Text>
 
         {/* Alerts */}
         {error && (
-          <div className="alert alert-error">
+          <Alert
+            icon={<IconAlertTriangle size={16} />}
+            title="Error"
+            color="red"
+            variant="light"
+            onClose={clearAlerts}
+            withCloseButton
+          >
             {error}
-            <button onClick={clearAlerts} className="alert-close">
-              ×
-            </button>
-          </div>
+          </Alert>
         )}
 
         {success && (
-          <div className="alert alert-success">
+          <Alert
+            icon={<IconCheck size={16} />}
+            title="Success"
+            color="green"
+            variant="light"
+            onClose={clearAlerts}
+            withCloseButton
+          >
             {success}
-            <button onClick={clearAlerts} className="alert-close">
-              ×
-            </button>
-          </div>
+          </Alert>
         )}
 
         {/* Data Summary */}
-        <div className="export-card">
-          <h2>📊 Available Data Summary</h2>
-          <div className="summary-grid">
+        <Paper shadow="sm" p="xl" radius="md" withBorder>
+          <Group mb="lg">
+            <IconChartBar size={20} />
+            <Title order={2}>Available Data Summary</Title>
+          </Group>
+          <Grid>
             {formats.scopes
               ?.filter(scope => scope.value !== 'all')
               .map(scope => (
-                <div key={scope.value} className="summary-item">
-                  <div className="count">{getRecordCount(scope.value)}</div>
-                  <div className="label">{scope.label}</div>
-                </div>
+                <Grid.Col
+                  key={scope.value}
+                  span={{ base: 12, xs: 6, sm: 4, md: 3 }}
+                >
+                  <Card withBorder p="md" radius="md">
+                    <Stack align="center" gap="xs">
+                      <Text size="xl" fw={700} c="primary">
+                        {getRecordCount(scope.value)}
+                      </Text>
+                      <Text size="sm" ta="center" c="dimmed">
+                        {scope.label}
+                      </Text>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
               ))}
-          </div>
-        </div>
+          </Grid>
+        </Paper>
 
         {/* Export Mode Toggle */}
-        <div className="export-card">
-          <h2>📋 Export Mode</h2>
-          <div className="mode-toggle">
-            <button
-              className={`mode-button ${!bulkMode ? 'active' : ''}`}
+        <Paper shadow="sm" p="xl" radius="md" withBorder>
+          <Group mb="lg">
+            <IconSettings size={20} />
+            <Title order={2}>Export Mode</Title>
+          </Group>
+          <Group gap="xs" mb="md">
+            <Button
+              variant={!bulkMode ? 'filled' : 'outline'}
               onClick={() => setBulkMode(false)}
+              leftSection={<IconDownload size={16} />}
             >
               Single Export
-            </button>
-            <button
-              className={`mode-button ${bulkMode ? 'active' : ''}`}
+            </Button>
+            <Button
+              variant={bulkMode ? 'filled' : 'outline'}
               onClick={() => setBulkMode(true)}
+              leftSection={<IconArchive size={16} />}
             >
               Bulk Export
-            </button>
-          </div>
-          <p className="mode-description">
+            </Button>
+          </Group>
+          <Text size="sm" c="dimmed">
             {!bulkMode
               ? 'Export a single data type in your chosen format'
               : 'Export multiple data types together in a ZIP file'}
-          </p>
-        </div>
+          </Text>
+        </Paper>
 
         {/* Export Configuration */}
-        <div className="export-card">
-          <h2>⚙️ Export Configuration</h2>
+        <Paper shadow="sm" p="xl" radius="md" withBorder>
+          <Group mb="lg">
+            <IconSettings size={20} />
+            <Title order={2}>Export Configuration</Title>
+          </Group>
 
-          {/* Format Selection */}
-          <div className="form-group">
-            <label htmlFor="format">Export Format</label>
-            <select
-              id="format"
+          <Stack gap="lg">
+            {/* Format Selection */}
+            <Select
+              label="Export Format"
+              placeholder="Select format"
               value={exportConfig.format}
-              onChange={e =>
-                setExportConfig(prev => ({ ...prev, format: e.target.value }))
+              onChange={value =>
+                setExportConfig(prev => ({ ...prev, format: value }))
               }
-              className="form-control"
-            >
-              {formats.formats?.map(format => (
-                <option key={format.value} value={format.value}>
-                  {format.label} - {format.description}
-                </option>
-              ))}
-            </select>
-          </div>
+              data={
+                formats.formats?.map(format => ({
+                  value: format.value,
+                  label: `${format.label} - ${format.description}`,
+                })) || []
+              }
+            />
 
-          {/* Scope Selection */}
-          {!bulkMode ? (
-            <div className="form-group">
-              <label htmlFor="scope">Data to Export</label>
-              <select
-                id="scope"
+            {/* Scope Selection */}
+            {!bulkMode ? (
+              <Select
+                label="Data to Export"
+                placeholder="Select data type"
                 value={exportConfig.scope}
-                onChange={e =>
-                  setExportConfig(prev => ({ ...prev, scope: e.target.value }))
+                onChange={value =>
+                  setExportConfig(prev => ({ ...prev, scope: value }))
                 }
-                className="form-control"
-              >
-                {formats.scopes?.map(scope => (
-                  <option key={scope.value} value={scope.value}>
-                    {scope.label} ({getRecordCount(scope.value)} records)
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <div className="form-group">
-              <label>Select Data Types for Bulk Export</label>
-              <div className="checkbox-grid">
-                {formats.scopes
-                  ?.filter(scope => scope.value !== 'all')
-                  .map(scope => (
-                    <label key={scope.value} className="checkbox-label">
-                      <input
-                        type="checkbox"
+                data={
+                  formats.scopes
+                    ?.filter(scope => scope.value !== 'all')
+                    .map(scope => ({
+                      value: scope.value,
+                      label: `${scope.label} (${getRecordCount(scope.value)} records)`,
+                    })) || []
+                }
+              />
+            ) : (
+              <Box>
+                <Text fw={500} size="sm" mb="xs">
+                  Select Data Types for Bulk Export
+                </Text>
+                <Stack gap="xs">
+                  {formats.scopes
+                    ?.filter(scope => scope.value !== 'all')
+                    .map(scope => (
+                      <Checkbox
+                        key={scope.value}
+                        label={`${scope.label} (${getRecordCount(scope.value)})`}
                         checked={selectedScopes.includes(scope.value)}
                         onChange={() => handleScopeToggle(scope.value)}
                       />
-                      <span>
-                        {scope.label} ({getRecordCount(scope.value)})
-                      </span>
-                    </label>
-                  ))}
-              </div>
-            </div>
-          )}
+                    ))}
+                </Stack>
+              </Box>
+            )}
 
-          {/* Date Range */}
-          <div className="date-row">
-            <div className="form-group">
-              <label htmlFor="startDate">Start Date (Optional)</label>
-              <input
-                id="startDate"
+            {/* Date Range */}
+            <Group grow>
+              <TextInput
                 type="date"
+                label="Start Date (Optional)"
                 value={exportConfig.startDate}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -310,14 +372,10 @@ const ExportPage = () => {
                     startDate: e.target.value,
                   }))
                 }
-                className="form-control"
               />
-            </div>
-            <div className="form-group">
-              <label htmlFor="endDate">End Date (Optional)</label>
-              <input
-                id="endDate"
+              <TextInput
                 type="date"
+                label="End Date (Optional)"
                 value={exportConfig.endDate}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -325,100 +383,138 @@ const ExportPage = () => {
                     endDate: e.target.value,
                   }))
                 }
-                className="form-control"
               />
-            </div>
-          </div>
+            </Group>
 
-          {/* Include Files Option (PDF only) */}
-          {exportConfig.format === 'pdf' && !bulkMode && (
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={exportConfig.includeFiles}
-                  onChange={e =>
-                    setExportConfig(prev => ({
-                      ...prev,
-                      includeFiles: e.target.checked,
-                    }))
-                  }
-                />
-                <span>Include file attachments (creates ZIP file)</span>
-              </label>
-            </div>
-          )}
-
-          {/* Export Actions */}
-          <div className="export-actions">
-            {!bulkMode ? (
-              <button
-                onClick={handleSingleExport}
-                disabled={loading}
-                className="export-button primary"
-              >
-                {loading ? (
-                  <>
-                    <div className="loading-spinner"></div>
-                    Exporting...
-                  </>
-                ) : (
-                  `📥 Export ${exportConfig.scope} as ${exportConfig.format.toUpperCase()}`
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleBulkExport}
-                disabled={loading || selectedScopes.length === 0}
-                className="export-button primary"
-              >
-                {loading ? (
-                  <>
-                    <div className="loading-spinner"></div>
-                    Creating ZIP...
-                  </>
-                ) : (
-                  `📦 Bulk Export ${selectedScopes.length} types as ZIP`
-                )}
-              </button>
+            {/* Include Files Option (PDF only) */}
+            {exportConfig.format === 'pdf' && !bulkMode && (
+              <Checkbox
+                label="Include file attachments (creates ZIP file)"
+                checked={exportConfig.includeFiles}
+                onChange={e =>
+                  setExportConfig(prev => ({
+                    ...prev,
+                    includeFiles: e.target.checked,
+                  }))
+                }
+              />
             )}
-          </div>
-        </div>
+
+            {/* Include Patient Info Option (PDF only) */}
+            {exportConfig.format === 'pdf' && !bulkMode && (
+              <Checkbox
+                label="Include patient information (name, demographics, etc.)"
+                description="Uncheck to exclude personal patient details for privacy"
+                checked={exportConfig.includePatientInfo}
+                onChange={e =>
+                  setExportConfig(prev => ({
+                    ...prev,
+                    includePatientInfo: e.target.checked,
+                  }))
+                }
+              />
+            )}
+
+            {/* Export Actions */}
+            <Group justify="center" mt="xl">
+              {!bulkMode ? (
+                <Button
+                  size="lg"
+                  leftSection={
+                    loading ? <Loader size="sm" /> : <IconDownload size={20} />
+                  }
+                  onClick={handleSingleExport}
+                  disabled={loading}
+                  loading={loading}
+                >
+                  {loading
+                    ? 'Exporting...'
+                    : `Export ${exportConfig.scope} as ${exportConfig.format.toUpperCase()}`}
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  leftSection={
+                    loading ? <Loader size="sm" /> : <IconArchive size={20} />
+                  }
+                  onClick={handleBulkExport}
+                  disabled={loading || selectedScopes.length === 0}
+                  loading={loading}
+                >
+                  {loading
+                    ? 'Creating ZIP...'
+                    : `Bulk Export ${selectedScopes.length} types as ZIP`}
+                </Button>
+              )}
+            </Group>
+          </Stack>
+        </Paper>
 
         {/* Export Information */}
-        <div className="export-card info">
-          <h2>ℹ️ Export Information</h2>
-          <ul>
-            <li>
-              <strong>JSON Format:</strong> Machine-readable structured data
-              format, ideal for importing into other systems or applications.
-            </li>
-            <li>
-              <strong>CSV Format:</strong> Comma-separated values suitable for
-              spreadsheet applications like Excel or Google Sheets.
-            </li>
-            <li>
-              <strong>PDF Format:</strong> Human-readable document format
-              perfect for printing or sharing with healthcare providers.
-            </li>
-            <li>
-              <strong>Bulk Export:</strong> Creates a ZIP file containing
-              multiple data types in your chosen format for comprehensive data
-              backup.
-            </li>
-            <li>
-              <strong>File Attachments:</strong> When available for PDF exports,
-              lab result files can be included in a ZIP archive.
-            </li>
-          </ul>
-          <p className="privacy-note">
-            🔒 All exports are secured through user authentication. Data is
-            transmitted securely and only accessible to authorized users. Your
-            medical data privacy is our top priority.
-          </p>
-        </div>
-      </div>
-    </div>
+        <Paper shadow="sm" p="xl" radius="md" withBorder variant="outline">
+          <Group mb="lg">
+            <IconInfoCircle size={20} />
+            <Title order={2}>Export Information</Title>
+          </Group>
+          <Stack gap="md">
+            <Box>
+              <Text fw={500} mb="xs">
+                JSON Format:
+              </Text>
+              <Text size="sm" c="dimmed">
+                Machine-readable structured data format, ideal for importing
+                into other systems or applications.
+              </Text>
+            </Box>
+            <Box>
+              <Text fw={500} mb="xs">
+                CSV Format:
+              </Text>
+              <Text size="sm" c="dimmed">
+                Comma-separated values suitable for spreadsheet applications
+                like Excel or Google Sheets.
+              </Text>
+            </Box>
+            <Box>
+              <Text fw={500} mb="xs">
+                PDF Format:
+              </Text>
+              <Text size="sm" c="dimmed">
+                Human-readable document format perfect for printing or sharing
+                with healthcare providers.
+              </Text>
+            </Box>
+            <Box>
+              <Text fw={500} mb="xs">
+                Bulk Export:
+              </Text>
+              <Text size="sm" c="dimmed">
+                Creates a ZIP file containing multiple data types in your chosen
+                format for comprehensive data backup.
+              </Text>
+            </Box>
+            <Box>
+              <Text fw={500} mb="xs">
+                File Attachments:
+              </Text>
+              <Text size="sm" c="dimmed">
+                When available for PDF exports, lab result files can be included
+                in a ZIP archive.
+              </Text>
+            </Box>
+            <Divider />
+            <Group>
+              <IconLock size={16} />
+              <Text size="sm" c="dimmed">
+                All exports are secured through user authentication. Data is
+                transmitted securely and only accessible to authorized users.
+                Your medical data privacy is our top priority.
+              </Text>
+            </Group>
+          </Stack>
+        </Paper>
+      </Stack>
+    </Container>
   );
 };
 

@@ -43,13 +43,17 @@ class ExportScope(str, Enum):
     TREATMENTS = "treatments"
     ENCOUNTERS = "encounters"
     VITALS = "vitals"
+    EMERGENCY_CONTACTS = "emergency_contacts"
+    PRACTITIONERS = "practitioners"
+    PHARMACIES = "pharmacies"
 
 
 class BulkExportRequest(BaseModel):
-    scopes: List[ExportScope]
+    scopes: List[str]
     format: ExportFormat = ExportFormat.JSON
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    include_patient_info: bool = True
 
 
 @router.get("/data")
@@ -65,6 +69,9 @@ async def export_patient_data(
     include_files: bool = Query(
         False, description="Include associated files (PDF only)"
     ),
+    include_patient_info: bool = Query(
+        True, description="Include patient information in export (all formats)"
+    ),
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
@@ -75,7 +82,8 @@ async def export_patient_data(
     - **scope**: What data to include (all, medications, lab_results, etc.)
     - **start_date**: Filter records from this date onwards
     - **end_date**: Filter records up to this date
-    - **include_files**: Whether to include file attachments (PDF exports only)"""
+    - **include_files**: Whether to include file attachments (PDF exports only)
+    - **include_patient_info**: Whether to include patient information in export"""
 
     try:
         logger.info(
@@ -92,6 +100,7 @@ async def export_patient_data(
             start_date=start_date,
             end_date=end_date,
             include_files=include_files,
+            include_patient_info=include_patient_info,
         )
 
         # Determine content type and filename
@@ -347,6 +356,21 @@ async def get_supported_formats():
                 "label": "Vital Signs",
                 "description": "Blood pressure, weight, etc.",
             },
+            {
+                "value": "emergency_contacts",
+                "label": "Emergency Contacts",
+                "description": "Emergency contact information",
+            },
+            {
+                "value": "practitioners",
+                "label": "Healthcare Practitioners",
+                "description": "Healthcare providers and specialists",
+            },
+            {
+                "value": "pharmacies",
+                "label": "Pharmacies",
+                "description": "Pharmacy locations and information",
+            },
         ],
     }
 
@@ -395,10 +419,11 @@ async def create_bulk_export(
                     export_data = await export_service.export_patient_data(
                         user_id=current_user_id,
                         format=request.format.value,
-                        scope=scope.value,
+                        scope=scope,
                         start_date=request.start_date,
                         end_date=request.end_date,
                         include_files=False,  # Files not supported in bulk export
+                        include_patient_info=request.include_patient_info,
                     )
 
                     # Convert to appropriate format
@@ -409,16 +434,14 @@ async def create_bulk_export(
                             indent=2,
                             ensure_ascii=False,
                         )
-                        filename = f"medical_records_{scope.value}_{timestamp}.json"
+                        filename = f"medical_records_{scope}_{timestamp}.json"
                     elif request.format == ExportFormat.CSV:
-                        content = export_service.convert_to_csv(
-                            export_data, scope.value
-                        )
-                        filename = f"medical_records_{scope.value}_{timestamp}.csv"
+                        content = export_service.convert_to_csv(export_data, scope)
+                        filename = f"medical_records_{scope}_{timestamp}.csv"
                     else:
                         # PDF not supported in bulk for complexity reasons
                         logger.warning(
-                            f"PDF format not supported in bulk export for scope {scope.value}"
+                            f"PDF format not supported in bulk export for scope {scope}"
                         )
                         continue
 
@@ -435,7 +458,7 @@ async def create_bulk_export(
 
                 except Exception as e:
                     logger.warning(
-                        f"Failed to export {scope.value} for user {current_user_id}: {str(e)}"
+                        f"Failed to export {scope} for user {current_user_id}: {str(e)}"
                     )
                     continue
 
@@ -446,7 +469,8 @@ async def create_bulk_export(
             )
 
         zip_buffer.seek(0)
-        zip_filename = f"medical_records_bulk_{timestamp}.zip"
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        zip_filename = f"medical_records_bulk_{date_str}.zip"
 
         # Create a generator function for the StreamingResponse
         def generate():

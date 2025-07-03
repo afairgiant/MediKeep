@@ -9,7 +9,7 @@ import csv
 import io
 import json
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -22,11 +22,14 @@ from app.core.logging_config import get_logger
 from app.models.models import (
     Allergy,
     Condition,
+    EmergencyContact,
     Encounter,
     Immunization,
     LabResult,
     Medication,
     Patient,
+    Pharmacy,
+    Practitioner,
     Procedure,
     Treatment,
     Vitals,
@@ -49,7 +52,8 @@ class ExportService:
         start_date: Optional[date] = None,
         end_date: Optional[date] = None,
         include_files: bool = False,
-    ) -> Dict[str, Any]:
+        include_patient_info: bool = True,
+    ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """
         Export patient data based on specified parameters.
 
@@ -71,18 +75,22 @@ class ExportService:
                 raise ValueError("Patient record not found")
 
             export_data = {
-                "patient_info": self._get_patient_info(patient),
                 "export_metadata": {
                     "generated_at": datetime.now().isoformat(),
                     "format": format,  # Use the actual format requested
                     "scope": scope,
                     "include_files": include_files,
+                    "include_patient_info": include_patient_info,
                     "date_range": {
                         "start": start_date.isoformat() if start_date else None,
                         "end": end_date.isoformat() if end_date else None,
                     },
                 },
             }
+
+            # Conditionally include patient info
+            if include_patient_info:
+                export_data["patient_info"] = self._get_patient_info(patient)
 
             # Export based on scope
             if scope == "all":
@@ -135,6 +143,18 @@ class ExportService:
                 export_data["vitals"] = self._export_vitals(
                     patient, start_date, end_date
                 )
+            elif scope == "emergency_contacts":
+                export_data["emergency_contacts"] = self._export_emergency_contacts(
+                    patient, start_date, end_date
+                )
+            elif scope == "practitioners":
+                export_data["practitioners"] = self._export_practitioners(
+                    patient, start_date, end_date
+                )
+            elif scope == "pharmacies":
+                export_data["pharmacies"] = self._export_pharmacies(
+                    patient, start_date, end_date
+                )
             else:
                 raise ValueError(f"Unsupported export scope: {scope}")
 
@@ -184,7 +204,7 @@ class ExportService:
         start_date: Optional[date],
         end_date: Optional[date],
         include_files: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """Export all patient data."""
         return {
             "medications": self._export_medications(patient, start_date, end_date),
@@ -198,6 +218,11 @@ class ExportService:
             "treatments": self._export_treatments(patient, start_date, end_date),
             "encounters": self._export_encounters(patient, start_date, end_date),
             "vitals": self._export_vitals(patient, start_date, end_date),
+            "emergency_contacts": self._export_emergency_contacts(
+                patient, start_date, end_date
+            ),
+            "practitioners": self._export_practitioners(patient, start_date, end_date),
+            "pharmacies": self._export_pharmacies(patient, start_date, end_date),
         }
 
     def _apply_date_filter(
@@ -594,6 +619,168 @@ class ExportService:
             for vital in vitals
         ]
 
+    def _export_emergency_contacts(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export emergency contacts for a patient."""
+        query = (
+            self.db.query(EmergencyContact)
+            .filter(EmergencyContact.patient_id == patient.id)
+            .order_by(EmergencyContact.is_primary.desc(), EmergencyContact.name)
+        )
+
+        # Emergency contacts have created_at field, so we can apply date filtering
+        query = self._apply_date_filter(query, EmergencyContact, start_date, end_date)
+        contacts = query.all()
+
+        return [
+            {
+                "id": contact.id,
+                "name": contact.name,
+                "relationship": contact.relationship,
+                "phone_number": contact.phone_number,
+                "secondary_phone": contact.secondary_phone,
+                "email": contact.email,
+                "is_primary": contact.is_primary,
+                "is_active": contact.is_active,
+                "address": contact.address,
+                "notes": contact.notes,
+                "created_at": (
+                    contact.created_at.isoformat() if contact.created_at else None
+                ),
+                "updated_at": (
+                    contact.updated_at.isoformat() if contact.updated_at else None
+                ),
+            }
+            for contact in contacts
+        ]
+
+    def _export_practitioners(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export practitioners related to a patient's care."""
+        # Get practitioners that are related to this patient through various associations
+        practitioner_ids = set()
+
+        # Primary care physician
+        if patient.physician_id:
+            practitioner_ids.add(patient.physician_id)
+
+        # Practitioners from medications
+        med_practitioners = (
+            self.db.query(Medication.practitioner_id)
+            .filter(
+                Medication.patient_id == patient.id,
+                Medication.practitioner_id.isnot(None),
+            )
+            .distinct()
+        )
+        for (practitioner_id,) in med_practitioners:
+            practitioner_ids.add(practitioner_id)
+
+        # Practitioners from encounters
+        encounter_practitioners = (
+            self.db.query(Encounter.practitioner_id)
+            .filter(
+                Encounter.patient_id == patient.id,
+                Encounter.practitioner_id.isnot(None),
+            )
+            .distinct()
+        )
+        for (practitioner_id,) in encounter_practitioners:
+            practitioner_ids.add(practitioner_id)
+
+        # Practitioners from lab results
+        lab_practitioners = (
+            self.db.query(LabResult.practitioner_id)
+            .filter(
+                LabResult.patient_id == patient.id,
+                LabResult.practitioner_id.isnot(None),
+            )
+            .distinct()
+        )
+        for (practitioner_id,) in lab_practitioners:
+            practitioner_ids.add(practitioner_id)
+
+        # Get all practitioners
+        if not practitioner_ids:
+            return []
+
+        practitioners = (
+            self.db.query(Practitioner)
+            .filter(Practitioner.id.in_(practitioner_ids))
+            .order_by(Practitioner.name)
+            .all()
+        )
+
+        return [
+            {
+                "id": practitioner.id,
+                "name": practitioner.name,
+                "specialty": practitioner.specialty,
+                "practice": practitioner.practice,
+                "phone_number": practitioner.phone_number,
+                "website": practitioner.website,
+                "rating": practitioner.rating,
+                "is_primary_physician": practitioner.id == patient.physician_id,
+            }
+            for practitioner in practitioners
+        ]
+
+    def _export_pharmacies(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export pharmacies related to a patient's medications."""
+        # Get pharmacies that are related to this patient through medications
+        pharmacy_ids = (
+            self.db.query(Medication.pharmacy_id)
+            .filter(
+                Medication.patient_id == patient.id, Medication.pharmacy_id.isnot(None)
+            )
+            .distinct()
+        )
+
+        pharmacy_id_list = [pid for (pid,) in pharmacy_ids]
+
+        if not pharmacy_id_list:
+            return []
+
+        pharmacies = (
+            self.db.query(Pharmacy)
+            .filter(Pharmacy.id.in_(pharmacy_id_list))
+            .order_by(Pharmacy.name)
+            .all()
+        )
+
+        return [
+            {
+                "id": pharmacy.id,
+                "name": pharmacy.name,
+                "brand": pharmacy.brand,
+                "street_address": pharmacy.street_address,
+                "city": pharmacy.city,
+                "state": pharmacy.state,
+                "zip_code": pharmacy.zip_code,
+                "country": pharmacy.country,
+                "store_number": pharmacy.store_number,
+                "phone_number": pharmacy.phone_number,
+                "fax_number": pharmacy.fax_number,
+                "email": pharmacy.email,
+                "website": pharmacy.website,
+                "hours": pharmacy.hours,
+                "drive_through": pharmacy.drive_through,
+                "twenty_four_hour": pharmacy.twenty_four_hour,
+                "specialty_services": pharmacy.specialty_services,
+                "created_at": (
+                    pharmacy.created_at.isoformat() if pharmacy.created_at else None
+                ),
+                "updated_at": (
+                    pharmacy.updated_at.isoformat() if pharmacy.updated_at else None
+                ),
+            }
+            for pharmacy in pharmacies
+        ]
+
     async def get_export_summary(self, user_id: int) -> Dict[str, Any]:
         """Get summary of available data for export."""
         patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
@@ -630,8 +817,70 @@ class ExportService:
                 "vitals": self.db.query(Vitals)
                 .filter(Vitals.patient_id == patient.id)
                 .count(),
+                "emergency_contacts": self.db.query(EmergencyContact)
+                .filter(EmergencyContact.patient_id == patient.id)
+                .count(),
+                "practitioners": len(self._get_related_practitioner_ids(patient)),
+                "pharmacies": len(self._get_related_pharmacy_ids(patient)),
             },
         }
+
+    def _get_related_practitioner_ids(self, patient: Patient) -> List[int]:
+        """Get all practitioner IDs related to a patient."""
+        practitioner_ids = set()
+
+        # Primary care physician
+        if patient.physician_id:
+            practitioner_ids.add(patient.physician_id)
+
+        # Practitioners from medications
+        med_practitioners = (
+            self.db.query(Medication.practitioner_id)
+            .filter(
+                Medication.patient_id == patient.id,
+                Medication.practitioner_id.isnot(None),
+            )
+            .distinct()
+        )
+        for (practitioner_id,) in med_practitioners:
+            practitioner_ids.add(practitioner_id)
+
+        # Practitioners from encounters
+        encounter_practitioners = (
+            self.db.query(Encounter.practitioner_id)
+            .filter(
+                Encounter.patient_id == patient.id,
+                Encounter.practitioner_id.isnot(None),
+            )
+            .distinct()
+        )
+        for (practitioner_id,) in encounter_practitioners:
+            practitioner_ids.add(practitioner_id)
+
+        # Practitioners from lab results
+        lab_practitioners = (
+            self.db.query(LabResult.practitioner_id)
+            .filter(
+                LabResult.patient_id == patient.id,
+                LabResult.practitioner_id.isnot(None),
+            )
+            .distinct()
+        )
+        for (practitioner_id,) in lab_practitioners:
+            practitioner_ids.add(practitioner_id)
+
+        return list(practitioner_ids)
+
+    def _get_related_pharmacy_ids(self, patient: Patient) -> List[int]:
+        """Get all pharmacy IDs related to a patient."""
+        pharmacy_ids = (
+            self.db.query(Medication.pharmacy_id)
+            .filter(
+                Medication.patient_id == patient.id, Medication.pharmacy_id.isnot(None)
+            )
+            .distinct()
+        )
+        return [pid for (pid,) in pharmacy_ids]
 
     def convert_to_csv(self, export_data: Dict[str, Any], scope: str) -> str:
         """Convert export data to CSV format with clean formatting."""
@@ -970,6 +1219,34 @@ class ExportService:
             "recorded_by": "Recorded By",
             "notes": "Notes",
             "attached_files": "Attached Files",
+            # Emergency contacts
+            "name": "Name",
+            "relationship": "Relationship",
+            "phone_number": "Phone Number",
+            "secondary_phone": "Secondary Phone",
+            "email": "Email",
+            "is_primary": "Primary Contact",
+            "is_active": "Active",
+            "address": "Address",
+            # Practitioners
+            "specialty": "Specialty",
+            "practice": "Practice",
+            "website": "Website",
+            "rating": "Rating",
+            "is_primary_physician": "Primary Physician",
+            # Pharmacies
+            "brand": "Brand",
+            "street_address": "Street Address",
+            "city": "City",
+            "state": "State",
+            "zip_code": "ZIP Code",
+            "country": "Country",
+            "store_number": "Store Number",
+            "fax_number": "Fax Number",
+            "hours": "Hours",
+            "drive_through": "Drive Through",
+            "twenty_four_hour": "24 Hour Service",
+            "specialty_services": "Specialty Services",
         }
 
         def format_value(field_name, value):
@@ -990,11 +1267,34 @@ class ExportService:
                 "recorded_date",
                 "date",
                 "onsetDate",
+                "created_at",
+                "updated_at",
             ]:
                 if "T" in str_value:
                     return str_value.split("T")[0]
                 elif len(str_value) > 10 and ":" in str_value:
                     return str_value.split(" ")[0]
+
+            # Format boolean values
+            if field_name in [
+                "is_primary",
+                "is_active",
+                "is_primary_physician",
+                "drive_through",
+                "twenty_four_hour",
+            ]:
+                if isinstance(value, bool):
+                    return "Yes" if value else "No"
+                elif str_value.lower() in ["true", "false"]:
+                    return "Yes" if str_value.lower() == "true" else "No"
+
+            # Format rating
+            if field_name == "rating" and value is not None:
+                try:
+                    rating_num = float(value)
+                    return f"{rating_num:.1f}/5.0"
+                except (ValueError, TypeError):
+                    pass
 
             return str_value
 
