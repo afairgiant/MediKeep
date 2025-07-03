@@ -14,9 +14,10 @@ import {
 } from '@mantine/core';
 import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
 import { useAuth } from '../../contexts/AuthContext';
+import BaseApiService from '../../services/api/baseApi';
 
 const DeleteAccountModal = ({ isOpen, onClose }) => {
-  const { user, logout, token } = useAuth();
+  const { user, logout } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmationText, setConfirmationText] = useState('');
   const [error, setError] = useState(null);
@@ -35,72 +36,12 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
 
     try {
       console.log('Attempting to delete account...');
-      console.log('Token:', token);
 
-      const headers = {
-        'Content-Type': 'application/json',
-      };
+      // Use BaseApiService for proper URL handling and authentication
+      const apiService = new BaseApiService();
+      await apiService.delete('/users/me', 'Failed to delete account');
 
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
-      console.log('Auth headers:', headers);
-
-      // Try direct backend first, then proxy as fallback
-      const urls = [
-        'http://localhost:8000/api/v1/users/me', // Direct backend
-        '/api/v1/users/me', // Proxy
-      ];
-
-      let response;
-      let lastError;
-
-      for (let i = 0; i < urls.length; i++) {
-        const url = urls[i];
-        try {
-          console.log(`Attempting DELETE to: ${url}`);
-          response = await fetch(url, {
-            method: 'DELETE',
-            headers: headers,
-          });
-
-          console.log(`Response from ${url}: ${response.status}`);
-
-          if (response.status !== 404) {
-            // Found a working endpoint (even if auth failed, at least the endpoint exists)
-            break;
-          }
-        } catch (error) {
-          console.warn(`Failed to connect to ${url}:`, error.message);
-          lastError = error;
-          if (i < urls.length - 1) {
-            console.log('Trying next URL...');
-            continue;
-          }
-        }
-      }
-
-      if (!response) {
-        throw new Error(
-          `All endpoints failed. Last error: ${lastError?.message || 'Unknown error'}`
-        );
-      }
-
-      console.log('Delete response status:', response.status);
-      console.log(
-        'Delete response headers:',
-        Object.fromEntries(response.headers.entries())
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Delete failed with error:', errorData);
-        throw new Error(errorData.detail || 'Failed to delete account');
-      }
-
-      const result = await response.json().catch(() => ({}));
-      console.log('Delete successful:', result);
+      console.log('Account deleted successfully');
 
       // Account deleted successfully, logout and redirect
       logout();
