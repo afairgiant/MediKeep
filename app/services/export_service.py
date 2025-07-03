@@ -209,8 +209,8 @@ class ExportService:
         # Determine the appropriate date field based on the model
         if hasattr(model, "date"):
             date_field = model.date
-        elif hasattr(model, "effectivePeriod_start"):  # Medication model
-            date_field = model.effectivePeriod_start
+        elif hasattr(model, "effective_period_start"):  # Medication model
+            date_field = model.effective_period_start
         elif hasattr(model, "date_administered"):  # Immunization model
             date_field = model.date_administered
         elif hasattr(model, "onsetDate"):  # Condition model
@@ -256,13 +256,13 @@ class ExportService:
                 "route": med.route,
                 "indication": med.indication,
                 "start_date": (
-                    med.effectivePeriod_start.isoformat()
-                    if med.effectivePeriod_start is not None
+                    med.effective_period_start.isoformat()
+                    if med.effective_period_start is not None
                     else None
                 ),
                 "end_date": (
-                    med.effectivePeriod_end.isoformat()
-                    if med.effectivePeriod_end is not None
+                    med.effective_period_end.isoformat()
+                    if med.effective_period_end is not None
                     else None
                 ),
                 "status": med.status,

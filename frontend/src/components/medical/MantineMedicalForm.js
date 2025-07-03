@@ -191,11 +191,12 @@ const MantineMedicalForm = ({
                 label="Start Date"
                 placeholder="Select start date"
                 value={
-                  formData.effectivePeriod_start
-                    ? new Date(formData.effectivePeriod_start)
+                  formData.effective_period_start
+                    ? new Date(formData.effective_period_start)
                     : null
                 }
-                onChange={handleDateChange('effectivePeriod_start')}
+                onChange={handleDateChange('effective_period_start')}
+
                 firstDayOfWeek={0}
                 clearable
                 description="When the medication was started"
@@ -206,11 +207,12 @@ const MantineMedicalForm = ({
                 label="End Date"
                 placeholder="Select end date"
                 value={
-                  formData.effectivePeriod_end
-                    ? new Date(formData.effectivePeriod_end)
+                  formData.effective_period_end
+                    ? new Date(formData.effective_period_end)
                     : null
                 }
-                onChange={handleDateChange('effectivePeriod_end')}
+                onChange={handleDateChange('effective_period_end')}
+
                 firstDayOfWeek={0}
                 clearable
                 description="When discontinued (if applicable)"

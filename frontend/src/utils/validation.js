@@ -113,12 +113,12 @@ export const validationSchemas = {
       errors.status = VALIDATION_RULES.REQUIRED;
     }
 
-    if (values.effectivePeriod_end && values.effectivePeriod_start) {
-      const startDate = new Date(values.effectivePeriod_start);
-      const endDate = new Date(values.effectivePeriod_end);
+    if (values.effective_period_end && values.effective_period_start) {
+      const startDate = new Date(values.effective_period_start);
+      const endDate = new Date(values.effective_period_end);
 
       if (endDate < startDate) {
-        errors.effectivePeriod_end = 'End date must be after start date';
+        errors.effective_period_end = 'End date must be after start date';
       }
     }
 
