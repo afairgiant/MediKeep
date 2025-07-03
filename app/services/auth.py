@@ -44,7 +44,7 @@ class AuthService:
             patient_data = PatientCreate(
                 first_name=username.title(),  # Use username as first name
                 last_name="User",  # Default last name
-                birthDate=date(1990, 1, 1),  # Default birth date
+                birth_date=date(1990, 1, 1),  # Default birth date
                 gender="OTHER",  # Neutral default
                 address="Please update your address",  # Placeholder
             )

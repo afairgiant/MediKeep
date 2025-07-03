@@ -4,8 +4,7 @@
  */
 
 import React from 'react';
-import '../../styles/shared/forms.css';
-import '../../styles/components/buttons.css';
+// Forms and buttons now use Mantine styling
 
 const MedicalFormModal = ({
   isOpen,

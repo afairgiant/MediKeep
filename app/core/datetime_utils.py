@@ -304,9 +304,9 @@ def convert_date_fields(data: dict, date_fields: list) -> dict:
         Dictionary with converted date fields
 
     Examples:
-        >>> data = {"name": "Test", "birthDate": "2024-01-15"}
-        >>> convert_date_fields(data, ["birthDate"])
-        {"name": "Test", "birthDate": date(2024, 1, 15)}
+        >>> data = {"name": "Test", "birth_date": "2024-01-15"}
+        >>> convert_date_fields(data, ["birth_date"])
+        {"name": "Test", "birth_date": date(2024, 1, 15)}
     """
     converted_data = data.copy()
 
@@ -483,7 +483,7 @@ USER_CONVERTER = DateTimeConverter(["created_at", "updated_at", "last_login"])
 
 PATIENT_CONVERTER = DateTimeConverter(["created_at", "updated_at"])
 
-PATIENT_DATE_CONVERTER = DateConverter(["birthDate"])
+PATIENT_DATE_CONVERTER = DateConverter(["birth_date"])
 
 FILE_CONVERTER = DateTimeConverter(["uploaded_at", "created_at", "updated_at"])
 

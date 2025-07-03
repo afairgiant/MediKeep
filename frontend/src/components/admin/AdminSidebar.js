@@ -1,29 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  
   console.log('🗂️ AdminSidebar render:', {
     timestamp: new Date().toISOString(),
     isOpen,
     currentPath,
     hasOnToggle: typeof onToggle === 'function',
+    isMobile,
   });
-  const models = [
-    { name: 'user', display: 'Users', icon: '👥' },
-    { name: 'patient', display: 'Patients', icon: '🏥' },
-    { name: 'practitioner', display: 'Practitioners', icon: '👨‍⚕️' },
-    { name: 'medication', display: 'Medications', icon: '💊' },
-    { name: 'lab_result', display: 'Lab Results', icon: '🧪' },
-    { name: 'lab_result_file', display: 'Lab Files', icon: '📄' },
-    { name: 'vitals', display: 'Vital Signs', icon: '🩺' },
-    { name: 'condition', display: 'Conditions', icon: '📋' },
-    { name: 'allergy', display: 'Allergies', icon: '⚠️' },
-    { name: 'immunization', display: 'Immunizations', icon: '💉' },
-    { name: 'procedure', display: 'Procedures', icon: '🔬' },
-    { name: 'treatment', display: 'Treatments', icon: '🩹' },
-    { name: 'encounter', display: 'Encounters', icon: '📝' },
-  ];
+
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleToggle = () => {
     console.log('🗂️ AdminSidebar toggle clicked');
@@ -40,16 +40,49 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
       path,
       currentPath,
     });
+    // Close sidebar on mobile when a link is clicked
+    if (isMobile && isOpen && onToggle) {
+      onToggle();
+    }
   };
 
+  const handleBackdropClick = () => {
+    if (isMobile && isOpen && onToggle) {
+      onToggle();
+    }
+  };
+
+  // Close sidebar on escape key press (mobile)
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && isMobile && isOpen && onToggle) {
+        onToggle();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onToggle, isMobile]);
+
   return (
-    <div className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}>
-      <div className="sidebar-header">
-        <h2>🔧 Admin</h2>
-        <button className="sidebar-toggle" onClick={handleToggle}>
-          {isOpen ? '‹' : '›'}
-        </button>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {isMobile && (
+        <div 
+          className={`mobile-sidebar-backdrop ${isOpen ? 'visible' : ''}`}
+          onClick={handleBackdropClick}
+        />
+      )}
+      
+      <div className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-header">
+          <h2>🔧 Admin</h2>
+          <button className="sidebar-toggle" onClick={handleToggle}>
+            {isOpen ? '‹' : '›'}
+          </button>
+        </div>
 
       <nav className="sidebar-nav">
         <div className="nav-section">
@@ -65,18 +98,15 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
         </div>
 
         <div className="nav-section">
-          <h3>Data Models</h3>
-          {models.map(model => (
-            <Link
-              key={model.name}
-              to={`/admin/models/${model.name}`}
-              className={`nav-item ${currentPath.includes(`/admin/models/${model.name}`) ? 'active' : ''}`}
-              onClick={() => handleLinkClick(`/admin/models/${model.name}`)}
-            >
-              <span className="nav-icon">{model.icon}</span>
-              <span className="nav-text">{model.display}</span>
-            </Link>
-          ))}
+          <h3>Data Management</h3>
+          <Link
+            to="/admin/data-models"
+            className={`nav-item ${currentPath.includes('/admin/data-models') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/data-models')}
+          >
+            <span className="nav-icon">🗄️</span>
+            <span className="nav-text">Data Models</span>
+          </Link>
         </div>
 
         <div className="nav-section">
@@ -116,6 +146,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
         </div>
       </nav>
     </div>
+    </>
   );
 };
 

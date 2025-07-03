@@ -2,7 +2,7 @@
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--color-bg-primary);
   width: 100vw;
   max-width: 100vw;
   overflow-x: hidden;
@@ -36,15 +36,12 @@
   max-width: 100%;
   box-sizing: border-box;
   min-width: 0;
+  margin-top: 0; /* Header is within flex layout, no overlap */
 }
 
 /* Mobile responsive design */
 @media (max-width: 768px) {
-  .admin-main.sidebar-open {
-    width: 100vw;
-    margin-left: 0;
-  }
-
+  .admin-main.sidebar-open,
   .admin-main.sidebar-closed {
     width: 100vw;
     margin-left: 0;
@@ -52,6 +49,11 @@
 
   .admin-content {
     padding: 10px;
+  }
+
+  /* Ensure content doesn't get pushed when sidebar is open on mobile */
+  .admin-layout {
+    overflow-x: hidden;
   }
 }
 
@@ -433,4 +435,41 @@
     grid-template-columns: 1fr !important;
     gap: 8px !important;
   }
+}
+
+/* Dark theme support */
+[data-theme='dark'] .admin-layout {
+  background-color: var(--color-bg-primary);
+}
+
+/* Loading state dark theme */
+[data-theme='dark'] .admin-layout.loading-state {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .loading-container {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .loading-container p {
+  color: var(--color-text-secondary);
+}
+
+/* Error state dark theme */
+[data-theme='dark'] .admin-layout.error-state {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .error-container {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .error-container h2 {
+  color: var(--color-danger);
+}
+
+[data-theme='dark'] .error-container p {
+  color: var(--color-text-secondary);
 }

@@ -154,9 +154,11 @@ class ExportService:
             "first_name": patient.first_name,
             "last_name": patient.last_name,
             "birth_date": (
-                patient.birthDate.isoformat() if patient.birthDate is not None else None
+                patient.birth_date.isoformat()
+                if patient.birth_date is not None
+                else None
             ),
-            "blood_type": patient.bloodType,
+            "blood_type": patient.blood_type,
             "height": patient.height,
             "weight": patient.weight,
             "gender": patient.gender,

@@ -135,7 +135,7 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             patient_data = PatientCreate(
                 first_name="John",
                 last_name="Doe",
-                birthDate="1990-01-01",
+                birth_date="1990-01-01",
                 gender="M",
                 address="123 Main St"
             )

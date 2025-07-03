@@ -1,5 +1,5 @@
 import React from 'react';
-import './DateInput.css';
+// CSS now handled by Mantine adapter
 
 export const DateInput = ({
   value,

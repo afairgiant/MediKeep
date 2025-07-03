@@ -1,14 +1,18 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
-import { PageHeader } from '../../components';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { PageHeader, Button } from '../../components';
+import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
 import StatusBadge from '../../components/medical/StatusBadge';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/LabResults.css';
 import '../../styles/pages/MedicationTable.css';
@@ -48,11 +52,57 @@ const LabResults = () => {
   // Get practitioners data
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
+  // Get page configuration for lab results
+  const pageConfig = getMedicalPageConfig('labresults');
+
+  // File management state (moved up before useDataManagement)
+  const [filesCounts, setFilesCounts] = useState({});
+
+  // Data management with filtering and sorting
+  const dataManagement = useDataManagement(labResults || [], pageConfig, {
+    filesCounts,
+  });
+  const {
+    data: filteredLabResults = [],
+    filters,
+    updateFilter,
+    clearFilters,
+    hasActiveFilters = false,
+    statusOptions = [],
+    categoryOptions = [],
+    dateRangeOptions = [],
+    resultOptions = [],
+    typeOptions = [],
+    filesOptions = [],
+    sortBy = '',
+    sortOrder = 'asc',
+    handleSortChange,
+    totalCount = 0,
+    filteredCount = 0,
+  } = dataManagement || {};
+
+  // Extract individual filter states for component props (keep for backward compatibility)
+  const searchTerm = filters?.search || '';
+  const statusFilter = filters?.status || 'all';
+  const categoryFilter = filters?.category || 'all';
+  const dateRangeFilter = filters?.dateRange || 'all';
+
+  // Filter update handlers (keep for backward compatibility)
+  const setSearchTerm = value => updateFilter && updateFilter('search', value);
+  const setStatusFilter = value =>
+    updateFilter && updateFilter('status', value);
+  const setCategoryFilter = value =>
+    updateFilter && updateFilter('category', value);
+  const setDateRangeFilter = value =>
+    updateFilter && updateFilter('dateRange', value);
+  const setSortBy = value => handleSortChange && handleSortChange(value);
+  const setSortOrder = value =>
+    handleSortChange && handleSortChange(sortBy, value);
+
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
 
-  // File management state (keep complex file functionality)
-  const [filesCounts, setFilesCounts] = useState({});
+  // Additional file management state
   const [selectedLabResult, setSelectedLabResult] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
@@ -77,39 +127,6 @@ const LabResults = () => {
     notes: '',
     practitioner_id: '',
   });
-
-  // Options for dropdowns
-  const statusOptions = ['ordered', 'in-progress', 'completed', 'cancelled'];
-  const categoryOptions = [
-    'blood work',
-    'imaging',
-    'pathology',
-    'microbiology',
-    'chemistry',
-    'hematology',
-    'immunology',
-    'genetics',
-    'cardiology',
-    'pulmonology',
-    'other',
-  ];
-  const testTypeOptions = [
-    'routine',
-    'urgent',
-    'stat',
-    'emergency',
-    'follow-up',
-    'screening',
-  ];
-  const labsResultOptions = [
-    'normal',
-    'abnormal',
-    'critical',
-    'high',
-    'low',
-    'borderline',
-    'inconclusive',
-  ];
 
   // File management functions (preserve complex logic)
   const loadFilesCounts = useCallback(async (results, abortController) => {
@@ -148,11 +165,11 @@ const LabResults = () => {
 
   // Load file counts when lab results change
   React.useEffect(() => {
-    if (labResults.length > 0 && labResults.length <= 20) {
+    if (labResults && labResults.length > 0 && labResults.length <= 20) {
       const controller = new AbortController();
       loadFilesCounts(labResults, controller);
       return () => controller.abort();
-    } else {
+    } else if (labResults) {
       // Initialize counts to 0 for large datasets
       const counts = {};
       labResults.forEach(result => {
@@ -469,9 +486,9 @@ const LabResults = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -480,9 +497,9 @@ const LabResults = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddLabResult}>
+            <Button variant="primary" onClick={handleAddLabResult}>
               + Add New Lab Result
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -494,23 +511,59 @@ const LabResults = () => {
           </div>
 
           <div className="controls-right">
-            {/* Future: Add sort/filter controls */}
+            {/* Filters and sorting handled by MantineFilters component below */}
           </div>
         </div>
 
+        {/* Mantine Filters */}
+        {dataManagement && filters && (
+          <MantineFilters
+            filters={filters}
+            updateFilter={updateFilter}
+            clearFilters={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            statusOptions={statusOptions}
+            categoryOptions={categoryOptions}
+            dateRangeOptions={dateRangeOptions}
+            resultOptions={resultOptions}
+            typeOptions={typeOptions}
+            filesOptions={filesOptions}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            handleSortChange={handleSortChange}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            config={pageConfig.filterControls}
+          />
+        )}
+
         <div className="medical-items-list">
-          {labResults.length === 0 ? (
+          {filteredLabResults.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🧪</div>
-              <h3>No lab results found</h3>
-              <p>Click "Add New Lab Result" to get started.</p>
-              <button className="add-button" onClick={handleAddLabResult}>
-                Add Your First Lab Result
-              </button>
+              <h3>
+                {!labResults || labResults.length === 0
+                  ? 'No lab results found'
+                  : 'No lab results match your filters'}
+              </h3>
+              <p>
+                {!labResults || labResults.length === 0
+                  ? 'Click "Add New Lab Result" to get started.'
+                  : 'Try adjusting your search or filter criteria.'}
+              </p>
+              {!labResults || labResults.length === 0 ? (
+                <Button variant="primary" onClick={handleAddLabResult}>
+                  Add Your First Lab Result
+                </Button>
+              ) : (
+                <Button variant="secondary" onClick={clearFilters}>
+                  Clear All Filters
+                </Button>
+              )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {labResults.map(result => (
+              {filteredLabResults.map(result => (
                 <div key={result.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
@@ -593,31 +646,34 @@ const LabResults = () => {
                   </div>
 
                   <div className="medical-item-actions">
-                    <button
-                      className="view-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleViewDetails(result)}
                     >
                       👁️ View
-                    </button>
-                    <button
-                      className="edit-button"
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditLabResult(result)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteLabResult(result.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <MedicalTable
-              data={labResults}
+              data={filteredLabResults}
               columns={[
                 { header: 'Test Name', accessor: 'test_name' },
                 { header: 'Test Code', accessor: 'test_code' },
@@ -666,301 +722,134 @@ const LabResults = () => {
 
       {/* Create/Edit Form Modal */}
       {showModal && (modalType === 'create' || modalType === 'edit') && (
-        <MedicalFormModal
+        <MantineLabResultForm
           isOpen={showModal}
           onClose={handleCloseModal}
           title={editingLabResult ? 'Edit Lab Result' : 'Add New Lab Result'}
-          maxWidth="800px"
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          practitioners={practitioners}
+          editingLabResult={editingLabResult}
         >
-          <form onSubmit={handleSubmit}>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>Test Name *</label>
-                <input
-                  type="text"
-                  name="test_name"
-                  value={formData.test_name}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="e.g., Complete Blood Count"
-                />
-              </div>
+          {/* File Management Section for Edit Mode */}
+          {editingLabResult && (
+            <div className="file-upload-section">
+              <h4>Manage Files</h4>
 
-              <div className="form-group">
-                <label>Test Code</label>
-                <input
-                  type="text"
-                  name="test_code"
-                  value={formData.test_code}
-                  onChange={handleInputChange}
-                  placeholder="e.g., CBC, LOINC code"
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Test Category</label>
-                  <select
-                    name="test_category"
-                    value={formData.test_category}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select category</option>
-                    {categoryOptions.map(option => (
-                      <option key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Test Type</label>
-                  <select
-                    name="test_type"
-                    value={formData.test_type}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select type</option>
-                    {testTypeOptions.map(option => (
-                      <option key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Facility</label>
-                  <input
-                    type="text"
-                    name="facility"
-                    value={formData.facility}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Main Hospital Lab"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Ordering Practitioner</label>
-                  <select
-                    name="practitioner_id"
-                    value={formData.practitioner_id}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select practitioner</option>
-                    {practitioners.map(practitioner => (
-                      <option key={practitioner.id} value={practitioner.id}>
-                        {practitioner.name} - {practitioner.specialty}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Status</label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                  >
-                    {statusOptions.map(option => (
-                      <option key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Lab Result</label>
-                  <select
-                    name="labs_result"
-                    value={formData.labs_result}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select result</option>
-                    {labsResultOptions.map(option => (
-                      <option key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Ordered Date</label>
-                  <input
-                    type="date"
-                    name="ordered_date"
-                    value={formData.ordered_date}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Completed Date</label>
-                  <input
-                    type="date"
-                    name="completed_date"
-                    value={formData.completed_date}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Notes</label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  placeholder="Additional notes about the test"
-                  rows="3"
-                />
-              </div>
-            </div>
-
-            {/* File Management Section for Edit Mode */}
-            {editingLabResult && (
-              <div className="file-upload-section">
-                <h4>Manage Files</h4>
-
-                {/* Existing Files */}
-                {selectedFiles.length > 0 && (
-                  <div className="existing-files">
-                    <h5>Current Files:</h5>
-                    {selectedFiles.map(file => (
-                      <div
-                        key={file.id}
-                        className={`existing-file-item ${filesToDelete.includes(file.id) ? 'marked-for-deletion' : ''}`}
-                      >
-                        <span className="file-name">{file.file_name}</span>
-                        <span className="file-size">
-                          {(file.file_size / 1024).toFixed(1)} KB
+              {/* Existing Files */}
+              {selectedFiles.length > 0 && (
+                <div className="existing-files">
+                  <h5>Current Files:</h5>
+                  {selectedFiles.map(file => (
+                    <div
+                      key={file.id}
+                      className={`existing-file-item ${filesToDelete.includes(file.id) ? 'marked-for-deletion' : ''}`}
+                    >
+                      <span className="file-name">{file.file_name}</span>
+                      <span className="file-size">
+                        {(file.file_size / 1024).toFixed(1)} KB
+                      </span>
+                      {file.description && (
+                        <span className="file-description">
+                          {file.description}
                         </span>
-                        {file.description && (
-                          <span className="file-description">
-                            {file.description}
-                          </span>
-                        )}
-                        <div className="file-actions">
-                          <button
-                            type="button"
-                            className="download-button"
-                            onClick={() =>
-                              handleDownloadFile(file.id, file.file_name)
-                            }
-                          >
-                            Download
-                          </button>
-                          {filesToDelete.includes(file.id) ? (
-                            <button
-                              type="button"
-                              className="restore-button"
-                              onClick={() =>
-                                handleUnmarkFileForDeletion(file.id)
-                              }
-                            >
-                              Restore
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="delete-button"
-                              onClick={() => handleMarkFileForDeletion(file.id)}
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add New Files */}
-                <div className="file-upload-controls">
-                  <input
-                    type="file"
-                    id="file-input"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif,.txt,.csv,.xml,.json,.doc,.docx,.xls,.xlsx"
-                    onChange={e => {
-                      Array.from(e.target.files).forEach(file => {
-                        handleAddPendingFile(file, '');
-                      });
-                      e.target.value = '';
-                    }}
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor="file-input" className="file-upload-button">
-                    Add New Files
-                  </label>
-                </div>
-
-                {/* Pending Files */}
-                {pendingFiles.length > 0 && (
-                  <div className="pending-files">
-                    <h5>Files to Upload:</h5>
-                    {pendingFiles.map(pendingFile => (
-                      <div key={pendingFile.id} className="pending-file-item">
-                        <span className="file-name">
-                          {pendingFile.file.name}
-                        </span>
-                        <span className="file-size">
-                          {(pendingFile.file.size / 1024).toFixed(1)} KB
-                        </span>
-                        <input
-                          type="text"
-                          placeholder="Description (optional)"
-                          value={pendingFile.description}
-                          onChange={e => {
-                            setPendingFiles(prev =>
-                              prev.map(f =>
-                                f.id === pendingFile.id
-                                  ? { ...f, description: e.target.value }
-                                  : f
-                              )
-                            );
-                          }}
-                        />
-                        <button
+                      )}
+                      <div className="file-actions">
+                        <Button
                           type="button"
-                          className="remove-file-button"
+                          variant="secondary"
+                          size="small"
                           onClick={() =>
-                            handleRemovePendingFile(pendingFile.id)
+                            handleDownloadFile(file.id, file.file_name)
                           }
                         >
-                          Remove
-                        </button>
+                          Download
+                        </Button>
+                        {filesToDelete.includes(file.id) ? (
+                          <Button
+                            type="button"
+                            variant="subtle"
+                            size="small"
+                            onClick={() => handleUnmarkFileForDeletion(file.id)}
+                          >
+                            Restore
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="danger"
+                            size="small"
+                            onClick={() => handleMarkFileForDeletion(file.id)}
+                          >
+                            Delete
+                          </Button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+                    </div>
+                  ))}
+                </div>
+              )}
 
-            <div className="form-actions">
-              <button
-                type="button"
-                className="cancel-button"
-                onClick={handleCloseModal}
-              >
-                Cancel
-              </button>
-              <button type="submit" className="save-button">
-                {editingLabResult ? 'Update Lab Result' : 'Add Lab Result'}
-              </button>
+              {/* Add New Files */}
+              <div className="file-upload-controls">
+                <input
+                  type="file"
+                  id="file-input"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif,.txt,.csv,.xml,.json,.doc,.docx,.xls,.xlsx"
+                  onChange={e => {
+                    Array.from(e.target.files).forEach(file => {
+                      handleAddPendingFile(file, '');
+                    });
+                    e.target.value = '';
+                  }}
+                  style={{ display: 'none' }}
+                />
+                <label htmlFor="file-input" className="file-upload-button">
+                  Add New Files
+                </label>
+              </div>
+
+              {/* Pending Files */}
+              {pendingFiles.length > 0 && (
+                <div className="pending-files">
+                  <h5>Files to Upload:</h5>
+                  {pendingFiles.map(pendingFile => (
+                    <div key={pendingFile.id} className="pending-file-item">
+                      <span className="file-name">{pendingFile.file.name}</span>
+                      <span className="file-size">
+                        {(pendingFile.file.size / 1024).toFixed(1)} KB
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Description (optional)"
+                        value={pendingFile.description}
+                        onChange={e => {
+                          setPendingFiles(prev =>
+                            prev.map(f =>
+                              f.id === pendingFile.id
+                                ? { ...f, description: e.target.value }
+                                : f
+                            )
+                          );
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="small"
+                        onClick={() => handleRemovePendingFile(pendingFile.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </form>
-        </MedicalFormModal>
+          )}
+        </MantineLabResultForm>
       )}
 
       {/* View Details Modal */}

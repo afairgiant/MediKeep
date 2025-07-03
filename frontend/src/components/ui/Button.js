@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import './Button.css';
+// CSS now handled by Mantine adapter
 
 const Button = ({
   children,

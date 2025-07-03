@@ -14,14 +14,14 @@
   align-items: flex-start;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--color-border-light);
 }
 
 .health-title h1 {
   margin: 0 0 8px 0;
   font-size: 2.2rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -29,7 +29,7 @@
 
 .health-title p {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -41,11 +41,11 @@
 
 .last-refresh {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .refresh-btn {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -59,7 +59,7 @@
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
 }
 
@@ -94,14 +94,14 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .status-item:hover {
-  background: #f1f5f9;
+  background: var(--color-bg-tertiary);
   transform: translateY(-1px);
 }
 
@@ -114,7 +114,7 @@
   margin: 0 0 8px 0;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -123,7 +123,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 /* Health Details - Now using AdminCard components */
@@ -148,7 +148,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f9fafb;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .health-item:last-child {
@@ -157,34 +157,34 @@
 
 .health-label {
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-primary);
   flex: 1;
 }
 
 .health-value {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-weight: 500;
   text-align: right;
 }
 
 /* Health status colors using new status-* pattern */
 .health-value.status-healthy {
-  color: #059669;
+  color: var(--color-success);
   font-weight: 600;
 }
 
 .health-value.status-warning {
-  color: #d97706;
+  color: var(--color-warning);
   font-weight: 600;
 }
 
 .health-value.status-error {
-  color: #dc2626;
+  color: var(--color-danger);
   font-weight: 600;
 }
 
 .health-value.status-info {
-  color: #2563eb;
+  color: var(--color-info);
   font-weight: 600;
 }
 
@@ -196,15 +196,15 @@
 
 /* Storage usage colors */
 .health-value.healthy {
-  color: #059669;
+  color: var(--color-success);
 }
 
 .health-value.warning {
-  color: #d97706;
+  color: var(--color-warning);
 }
 
 .health-value.error {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 /* Enhanced Storage Section - AdminCard Compatible */
@@ -217,7 +217,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .disk-usage-info {
@@ -231,7 +231,7 @@
 .disk-usage-bar {
   flex: 1;
   height: 8px;
-  background: #e5e7eb;
+  background: var(--color-border-light);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -244,7 +244,7 @@
 
 .disk-usage-text {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -257,8 +257,8 @@
 }
 
 .directory-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 12px;
   transition: all 0.2s ease;
@@ -266,7 +266,7 @@
 
 .directory-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .directory-header {
@@ -283,7 +283,7 @@
 .directory-name {
   font-weight: 600;
   font-size: 0.85rem;
-  color: #374151;
+  color: var(--color-text-primary);
   flex: 1;
   margin-left: 6px;
 }
@@ -294,11 +294,11 @@
 }
 
 .directory-status.healthy {
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .directory-status.error {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .directory-stats {
@@ -316,14 +316,14 @@
   display: block;
   font-weight: 700;
   font-size: 1.1rem;
-  color: #111827;
+  color: var(--color-text-primary);
   line-height: 1.2;
 }
 
 .stat-label {
   display: block;
   font-size: 0.7rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 2px;
@@ -332,11 +332,11 @@
 .directory-error {
   margin-top: 8px;
   padding: 6px 8px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--color-danger-light);
+  border: 1px solid var(--color-danger);
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #dc2626;
+  color: var(--color-danger-dark);
 }
 
 /* Security Warnings */
@@ -345,12 +345,12 @@
 }
 
 .security-warning {
-  background: #fef2f2;
-  border: 2px solid #ef4444;
+  background: var(--color-danger-light);
+  border: 2px solid var(--color-danger);
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 8px;
-  color: #dc2626;
+  color: var(--color-danger-dark);
   font-weight: 600;
   font-size: 0.9rem;
   display: flex;
@@ -362,20 +362,21 @@
 @keyframes pulse-warning {
   0%,
   100% {
-    background: #fef2f2;
+    background: var(--color-danger-light);
   }
   50% {
-    background: #fee2e2;
+    background: var(--color-danger-light);
+    opacity: 0.8;
   }
 }
 
 /* Quick Actions */
 .health-actions-section {
-  background: white;
+  background: var(--color-bg-primary);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
   margin-bottom: 20px;
 }
 
@@ -383,7 +384,7 @@
   margin: 0 0 20px 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -400,10 +401,10 @@
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
-  color: #374151;
+  color: var(--color-text-primary);
   text-decoration: none;
   font-weight: 500;
   cursor: pointer;
@@ -411,10 +412,10 @@
 }
 
 .action-btn:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .action-icon {
@@ -426,27 +427,27 @@
 .system-health-error {
   text-align: center;
   padding: 60px 20px;
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
   margin: 20px;
 }
 
 .system-health-error h2 {
   margin: 0 0 10px 0;
-  color: #dc2626;
+  color: var(--color-danger);
   font-size: 1.5rem;
 }
 
 .system-health-error p {
   margin: 0 0 20px 0;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
 .retry-btn {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -458,7 +459,7 @@
 }
 
 .retry-btn:hover {
-  background: #2563eb;
+  background: var(--color-primary-dark);
 }
 
 /* Admin Page Loading - Centered within admin content area */
@@ -867,4 +868,62 @@
   .health-actions-section h2 {
     font-size: 0.9rem;
   }
+}
+
+/* Dark theme specific adjustments for SystemHealth */
+[data-theme='dark'] .directory-card {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .directory-card:hover {
+  background: var(--color-bg-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .health-actions-section {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .action-btn {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .action-btn:hover {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border-light);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .system-health-error {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .health-item {
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .disk-usage-bar {
+  background: var(--color-border);
+}
+
+[data-theme='dark'] .status-item {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .status-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+[data-theme='dark'] .health-header {
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .disk-usage-container {
+  border-bottom-color: var(--color-border);
 }

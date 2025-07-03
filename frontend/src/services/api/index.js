@@ -209,19 +209,23 @@ class ApiService {
 
   // Patient methods
   getCurrentPatient(signal) {
-    return this.get('/patients/me/', { signal });
+    return this.get('/patients/me', { signal });
   }
 
   createCurrentPatient(patientData, signal) {
-    return this.post('/patients/me/', patientData, { signal });
+    return this.post('/patients/me', patientData, { signal });
   }
 
   updateCurrentPatient(patientData, signal) {
-    return this.put('/patients/me/', patientData, { signal });
+    return this.put('/patients/me', patientData, { signal });
   }
 
   getRecentActivity(signal) {
     return this.get('/patients/recent-activity/', { signal });
+  }
+
+  getDashboardStats(signal) {
+    return this.get('/patients/me/dashboard-stats', { signal });
   }
 
   // Lab Result methods
@@ -479,6 +483,29 @@ class ApiService {
 
   deleteEncounter(encounterId, signal) {
     return this.delete(`/encounters/${encounterId}`, { signal });
+  }
+
+  // Emergency Contact methods
+  getEmergencyContacts(signal) {
+    return this.get('/emergency-contacts/', { signal });
+  }
+  getPatientEmergencyContacts(patientId, signal) {
+    return this.get(`/emergency-contacts/?patient_id=${patientId}`, { signal });
+  }
+  getEmergencyContact(emergencyContactId, signal) {
+    return this.get(`/emergency-contacts/${emergencyContactId}`, { signal });
+  }
+
+  createEmergencyContact(emergencyContactData, signal) {
+    return this.post('/emergency-contacts/', emergencyContactData, { signal });
+  }
+
+  updateEmergencyContact(emergencyContactId, emergencyContactData, signal) {
+    return this.put(`/emergency-contacts/${emergencyContactId}`, emergencyContactData, { signal });
+  }
+
+  deleteEmergencyContact(emergencyContactId, signal) {
+    return this.delete(`/emergency-contacts/${emergencyContactId}`, { signal });
   }
 }
 

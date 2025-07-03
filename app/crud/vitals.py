@@ -99,6 +99,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
                 "avg_diastolic_bp": None,
                 "avg_heart_rate": None,
                 "avg_temperature": None,
+                "current_temperature": None,
                 "current_weight": None,
                 "current_bmi": None,
                 "weight_change": None,
@@ -111,10 +112,36 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             .scalar()
         )
 
-        # Get current weight and BMI (from latest reading)
-        latest_reading = self.get_latest_by_patient(db, patient_id=patient_id)
-        current_weight = latest_reading.weight if latest_reading else None
-        current_bmi = latest_reading.bmi if latest_reading else None
+        # Get current weight and BMI (from latest reading with weight data)
+        latest_weight_reading = (
+            db.query(self.model)
+            .filter(Vitals.patient_id == patient_id, Vitals.weight.isnot(None))
+            .order_by(desc(Vitals.recorded_date))
+            .first()
+        )
+        current_weight = latest_weight_reading.weight if latest_weight_reading else None
+
+        # Get latest BMI (from latest reading with BMI data)
+        latest_bmi_reading = (
+            db.query(self.model)
+            .filter(Vitals.patient_id == patient_id, Vitals.bmi.isnot(None))
+            .order_by(desc(Vitals.recorded_date))
+            .first()
+        )
+        current_bmi = latest_bmi_reading.bmi if latest_bmi_reading else None
+
+        # Get latest temperature (from latest reading with temperature data)
+        latest_temperature_reading = (
+            db.query(self.model)
+            .filter(Vitals.patient_id == patient_id, Vitals.temperature.isnot(None))
+            .order_by(desc(Vitals.recorded_date))
+            .first()
+        )
+        current_temperature = (
+            latest_temperature_reading.temperature
+            if latest_temperature_reading
+            else None
+        )
 
         # Calculate averages
         systolic_avg = (
@@ -146,17 +173,17 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             .scalar()
         )
 
-        # Calculate weight change
+        # Calculate weight change (latest weight vs first weight)
         weight_change = None
         if current_weight is not None:
-            first_reading = (
+            first_weight_reading = (
                 db.query(self.model)
                 .filter(Vitals.patient_id == patient_id, Vitals.weight.isnot(None))
                 .order_by(asc(Vitals.recorded_date))
                 .first()
             )
-            if first_reading and first_reading.weight is not None:
-                weight_change = current_weight - first_reading.weight
+            if first_weight_reading and first_weight_reading.weight is not None:
+                weight_change = current_weight - first_weight_reading.weight
 
         # Helper function to safely round values
         def safe_round(value, digits=1):
@@ -172,6 +199,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             "avg_diastolic_bp": safe_round(diastolic_avg),
             "avg_heart_rate": safe_round(heart_rate_avg),
             "avg_temperature": safe_round(temperature_avg),
+            "current_temperature": safe_round(current_temperature),
             "current_weight": current_weight,
             "current_bmi": current_bmi,
             "weight_change": safe_round(weight_change),

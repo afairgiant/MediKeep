@@ -14,18 +14,18 @@ export const medicalPageConfigs = {
         { value: 'chronic', label: 'Chronic' },
         { value: 'inactive', label: 'Inactive' },
       ],
-      dateField: 'onset_date',
+      dateField: 'onsetDate',
     },
     sorting: {
-      defaultSortBy: 'onset_date',
+      defaultSortBy: 'onsetDate',
       defaultSortOrder: 'desc',
       sortOptions: [
-        { value: 'onset_date', label: 'Onset Date' },
+        { value: 'onsetDate', label: 'Onset Date' },
         { value: 'diagnosis', label: 'Diagnosis' },
         { value: 'status', label: 'Status' },
       ],
       sortTypes: {
-        onset_date: 'date',
+        onsetDate: 'date',
         diagnosis: 'string',
         status: 'status',
       },
@@ -45,7 +45,7 @@ export const medicalPageConfigs = {
         { value: 'all', label: 'All Statuses' },
         { value: 'active', label: 'Active' },
         { value: 'completed', label: 'Completed' },
-        { value: 'discontinued', label: 'Discontinued' },
+        { value: 'stopped', label: 'Stopped' },
         { value: 'on-hold', label: 'On Hold' },
       ],
       categoryField: 'route',
@@ -218,7 +218,7 @@ export const medicalPageConfigs = {
         { value: 'severe', label: 'Severe' },
         { value: 'life-threatening', label: 'Life-threatening' },
       ],
-      dateField: 'onset_date',
+      dateField: 'onsetDate',
     },
     sorting: {
       defaultSortBy: 'severity',
@@ -226,12 +226,12 @@ export const medicalPageConfigs = {
       sortOptions: [
         { value: 'severity', label: 'Severity' },
         { value: 'allergen', label: 'Allergen' },
-        { value: 'onset_date', label: 'Onset Date' },
+        { value: 'onsetDate', label: 'Onset Date' },
       ],
       sortTypes: {
         severity: 'severity',
         allergen: 'string',
-        onset_date: 'date',
+        onsetDate: 'date',
       },
     },
     filterControls: {
@@ -296,6 +296,549 @@ export const medicalPageConfigs = {
       title: 'Filter & Sort Pharmacies',
       showStatus: false,
       showCategory: true,
+    },
+  },
+
+  labresults: {
+    filtering: {
+      searchFields: [
+        'test_name',
+        'test_code',
+        'facility',
+        'notes',
+        'practitioner_name',
+      ],
+      statusField: 'status',
+      statusOptions: [
+        { value: 'all', label: 'All Statuses' },
+        {
+          value: 'ordered',
+          label: 'Ordered',
+          description: 'Tests that have been ordered',
+        },
+        {
+          value: 'in-progress',
+          label: 'In Progress',
+          description: 'Tests currently being processed',
+        },
+        {
+          value: 'completed',
+          label: 'Completed',
+          description: 'Tests with results available',
+        },
+        {
+          value: 'cancelled',
+          label: 'Cancelled',
+          description: 'Cancelled or discontinued tests',
+        },
+      ],
+      categoryField: 'test_category',
+      categoryLabel: 'Test Categories',
+      categoryOptions: [
+        { value: 'all', label: 'All Categories' },
+        {
+          value: 'blood work',
+          label: 'Blood Work',
+          description: 'Blood tests and panels',
+        },
+        {
+          value: 'imaging',
+          label: 'Imaging',
+          description: 'X-rays, CT, MRI, ultrasound',
+        },
+        {
+          value: 'pathology',
+          label: 'Pathology',
+          description: 'Tissue and cell analysis',
+        },
+        {
+          value: 'microbiology',
+          label: 'Microbiology',
+          description: 'Bacterial, viral, fungal cultures',
+        },
+        {
+          value: 'chemistry',
+          label: 'Chemistry',
+          description: 'Metabolic panels, enzymes',
+        },
+        {
+          value: 'hematology',
+          label: 'Hematology',
+          description: 'Blood cell counts and coagulation',
+        },
+        {
+          value: 'immunology',
+          label: 'Immunology',
+          description: 'Immune system and antibody tests',
+        },
+        {
+          value: 'genetics',
+          label: 'Genetics',
+          description: 'Genetic testing and analysis',
+        },
+        {
+          value: 'cardiology',
+          label: 'Cardiology',
+          description: 'Heart-related tests',
+        },
+        {
+          value: 'pulmonology',
+          label: 'Pulmonology',
+          description: 'Lung function tests',
+        },
+        {
+          value: 'other',
+          label: 'Other',
+          description: 'Miscellaneous tests',
+        },
+      ],
+      // Additional filter: Lab Results
+      resultField: 'labs_result',
+      resultLabel: 'Test Results',
+      resultOptions: [
+        { value: 'all', label: 'All Results' },
+        {
+          value: 'normal',
+          label: 'Normal',
+          description: 'Results within normal range',
+        },
+        {
+          value: 'abnormal',
+          label: 'Abnormal',
+          description: 'Results outside normal range',
+        },
+        {
+          value: 'critical',
+          label: 'Critical',
+          description: 'Critical values requiring attention',
+        },
+        { value: 'high', label: 'High', description: 'Above normal range' },
+        { value: 'low', label: 'Low', description: 'Below normal range' },
+        {
+          value: 'borderline',
+          label: 'Borderline',
+          description: 'Near the edge of normal range',
+        },
+        {
+          value: 'inconclusive',
+          label: 'Inconclusive',
+          description: 'Results unclear or incomplete',
+        },
+        {
+          value: 'pending',
+          label: 'Pending',
+          description: 'No results yet available',
+        },
+      ],
+      // Additional filter: Test Type (urgency)
+      typeField: 'test_type',
+      typeLabel: 'Test Priority',
+      typeOptions: [
+        { value: 'all', label: 'All Priorities' },
+        {
+          value: 'routine',
+          label: 'Routine',
+          description: 'Standard scheduling',
+        },
+        {
+          value: 'urgent',
+          label: 'Urgent',
+          description: 'Expedited processing',
+        },
+        {
+          value: 'emergency',
+          label: 'Emergency',
+          description: 'Emergency department priority',
+        },
+        {
+          value: 'follow-up',
+          label: 'Follow-up',
+          description: 'Monitoring or repeat tests',
+        },
+        {
+          value: 'screening',
+          label: 'Screening',
+          description: 'Preventive screening tests',
+        },
+      ],
+      // Additional filter: Files
+      filesField: 'has_files',
+      filesLabel: 'File Attachments',
+      filesOptions: [
+        { value: 'all', label: 'All Records' },
+        {
+          value: 'with_files',
+          label: '📎 With Files',
+          description: 'Has attached files',
+        },
+        {
+          value: 'without_files',
+          label: '📄 No Files',
+          description: 'No files attached',
+        },
+      ],
+      dateField: 'ordered_date',
+      dateRangeOptions: [
+        { value: 'all', label: 'All Time Periods' },
+        {
+          value: 'today',
+          label: 'Today',
+          description: 'Tests ordered today',
+        },
+        {
+          value: 'week',
+          label: 'This Week',
+          description: 'Tests ordered this week',
+        },
+        {
+          value: 'current',
+          label: 'Current Month',
+          description: 'Tests ordered this month',
+        },
+        {
+          value: 'past_month',
+          label: 'Past Month',
+          description: 'Tests from last month',
+        },
+        {
+          value: 'past_3_months',
+          label: 'Past 3 Months',
+          description: 'Tests from last 3 months',
+        },
+        {
+          value: 'past_6_months',
+          label: 'Past 6 Months',
+          description: 'Tests from last 6 months',
+        },
+        {
+          value: 'year',
+          label: 'This Year',
+          description: 'Tests ordered this year',
+        },
+        {
+          value: 'future',
+          label: 'Future/Scheduled',
+          description: 'Scheduled future tests',
+        },
+      ],
+      // Custom filter functions for complex logic
+      customFilters: {
+        files: (item, filterValue, additionalData) => {
+          const fileCount = additionalData?.filesCounts?.[item.id] || 0;
+          switch (filterValue) {
+            case 'with_files':
+              return fileCount > 0;
+            case 'without_files':
+              return fileCount === 0;
+            default:
+              return true;
+          }
+        },
+        labs_result: (item, filterValue) => {
+          switch (filterValue) {
+            case 'pending':
+              return !item.labs_result || item.labs_result.trim() === '';
+            default:
+              return filterValue === 'all' || item.labs_result === filterValue;
+          }
+        },
+      },
+    },
+    sorting: {
+      defaultSortBy: 'ordered_date',
+      defaultSortOrder: 'desc',
+      sortOptions: [
+        {
+          value: 'ordered_date',
+          label: 'Order Date',
+          description: 'Sort by when test was ordered',
+        },
+        {
+          value: 'completed_date',
+          label: 'Completion Date',
+          description: 'Sort by when results were available',
+        },
+        {
+          value: 'test_name',
+          label: 'Test Name',
+          description: 'Sort alphabetically by test name',
+        },
+        {
+          value: 'status',
+          label: 'Status',
+          description: 'Sort by test status',
+        },
+        {
+          value: 'test_category',
+          label: 'Category',
+          description: 'Sort by test category',
+        },
+        {
+          value: 'test_type',
+          label: 'Priority',
+          description: 'Sort by test urgency',
+        },
+        {
+          value: 'labs_result',
+          label: 'Result',
+          description: 'Sort by test result',
+        },
+        {
+          value: 'facility',
+          label: 'Facility',
+          description: 'Sort by testing facility',
+        },
+        {
+          value: 'practitioner_name',
+          label: 'Practitioner',
+          description: 'Sort by ordering practitioner',
+        },
+      ],
+      sortTypes: {
+        ordered_date: 'date',
+        completed_date: 'date',
+        test_name: 'string',
+        status: 'status',
+        test_category: 'string',
+        test_type: 'priority',
+        labs_result: 'result',
+        facility: 'string',
+        practitioner_name: 'string',
+      },
+      // Custom sort functions for complex sorting
+      customSortFunctions: {
+        priority: (a, b, sortOrder) => {
+          const priorityOrder = [
+            'emergency',
+            'urgent',
+            'follow-up',
+            'screening',
+            'routine',
+          ];
+          const aIndex =
+            priorityOrder.indexOf(a.test_type) !== -1
+              ? priorityOrder.indexOf(a.test_type)
+              : 999;
+          const bIndex =
+            priorityOrder.indexOf(b.test_type) !== -1
+              ? priorityOrder.indexOf(b.test_type)
+              : 999;
+          return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        },
+        result: (a, b, sortOrder) => {
+          const resultOrder = [
+            'critical',
+            'abnormal',
+            'high',
+            'low',
+            'borderline',
+            'normal',
+            'inconclusive',
+          ];
+          const aResult = a.labs_result || 'pending';
+          const bResult = b.labs_result || 'pending';
+          const aIndex =
+            resultOrder.indexOf(aResult) !== -1
+              ? resultOrder.indexOf(aResult)
+              : 999;
+          const bIndex =
+            resultOrder.indexOf(bResult) !== -1
+              ? resultOrder.indexOf(bResult)
+              : 999;
+          return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        },
+        status: (a, b, sortOrder) => {
+          const statusOrder = [
+            'in-progress',
+            'ordered',
+            'completed',
+            'cancelled',
+          ];
+          const aIndex =
+            statusOrder.indexOf(a.status) !== -1
+              ? statusOrder.indexOf(a.status)
+              : 999;
+          const bIndex =
+            statusOrder.indexOf(b.status) !== -1
+              ? statusOrder.indexOf(b.status)
+              : 999;
+          return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        },
+      },
+    },
+    filterControls: {
+      searchPlaceholder:
+        'Search lab results, test codes, facilities, practitioners...',
+      title: 'Filter & Sort Lab Results',
+      showCategory: true,
+      showDateRange: true,
+      showResult: true,
+      showType: true,
+      showFiles: true,
+      description:
+        'Filter lab results by status, category, results, priority, and more',
+    },
+  },
+
+  vitals: {
+    filtering: {
+      searchFields: ['notes', 'practitioner.name'],
+      dateField: 'recorded_date',
+      categoryLabel: 'Record Types',
+      categoryOptions: [
+        { value: 'all', label: 'All Records' },
+        { value: 'with_bp', label: 'With Blood Pressure' },
+        { value: 'with_weight', label: 'With Weight' },
+        { value: 'with_vitals', label: 'With Core Vitals' },
+        { value: 'complete', label: 'Complete Records' },
+      ],
+      customFilters: {
+        category: (item, filterValue) => {
+          switch (filterValue) {
+            case 'with_bp':
+              return item.systolic_bp != null && item.diastolic_bp != null;
+            case 'with_weight':
+              return item.weight != null;
+            case 'with_vitals':
+              return (
+                (item.systolic_bp != null && item.diastolic_bp != null) ||
+                item.heart_rate != null ||
+                item.temperature != null
+              );
+            case 'complete':
+              return (
+                item.systolic_bp != null &&
+                item.diastolic_bp != null &&
+                item.heart_rate != null &&
+                item.temperature != null &&
+                item.weight != null
+              );
+            default:
+              return true;
+          }
+        },
+      },
+      dateRangeOptions: [
+        { value: 'all', label: 'All Time' },
+        { value: 'today', label: 'Today' },
+        { value: 'week', label: 'This Week' },
+        { value: 'month', label: 'This Month' },
+        { value: 'quarter', label: 'Past 3 Months' },
+        { value: 'year', label: 'This Year' },
+      ],
+    },
+    sorting: {
+      defaultSortBy: 'recorded_date',
+      defaultSortOrder: 'desc',
+      sortOptions: [
+        { value: 'recorded_date', label: 'Date Recorded' },
+        { value: 'systolic_bp', label: 'Systolic BP' },
+        { value: 'heart_rate', label: 'Heart Rate' },
+        { value: 'temperature', label: 'Temperature' },
+        { value: 'weight', label: 'Weight' },
+        { value: 'oxygen_saturation', label: 'Oxygen Saturation' },
+      ],
+      sortTypes: {
+        recorded_date: 'date',
+        systolic_bp: 'number',
+        heart_rate: 'number',
+        temperature: 'number',
+        weight: 'number',
+        oxygen_saturation: 'number',
+      },
+    },
+    filterControls: {
+      searchPlaceholder: 'Search vitals notes...',
+      title: 'Filter & Sort Vital Signs',
+      showStatus: false,
+      showCategory: true,
+      showDateRange: true,
+    },
+  },
+
+  emergency_contacts: {
+    filtering: {
+      searchFields: ['name', 'relationship', 'phone_number', 'email'],
+      statusField: 'is_active',
+      statusOptions: [
+        { value: 'all', label: 'All Contacts' },
+        { value: 'true', label: 'Active' },
+        { value: 'false', label: 'Inactive' },
+      ],
+      categoryField: 'relationship',
+      categoryLabel: 'Relationship',
+      categoryOptions: [
+        { value: 'all', label: 'All Relationships' },
+        { value: 'spouse', label: 'Spouse' },
+        { value: 'partner', label: 'Partner' },
+        { value: 'parent', label: 'Parent' },
+        { value: 'child', label: 'Child' },
+        { value: 'sibling', label: 'Sibling' },
+        { value: 'grandparent', label: 'Grandparent' },
+        { value: 'grandchild', label: 'Grandchild' },
+        { value: 'friend', label: 'Friend' },
+        { value: 'neighbor', label: 'Neighbor' },
+        { value: 'caregiver', label: 'Caregiver' },
+        { value: 'guardian', label: 'Guardian' },
+        { value: 'other', label: 'Other' },
+      ],
+      customFilters: {
+        is_active: (item, filterValue) => {
+          if (filterValue === 'all') return true;
+          return item.is_active === (filterValue === 'true');
+        },
+        is_primary: (item, filterValue) => {
+          if (filterValue === 'all') return true;
+          return item.is_primary === (filterValue === 'true');
+        },
+      },
+      additionalFilters: [
+        {
+          field: 'is_primary',
+          label: 'Primary Contact',
+          options: [
+            { value: 'all', label: 'All Contacts' },
+            { value: 'true', label: 'Primary Only' },
+            { value: 'false', label: 'Non-Primary' },
+          ],
+        },
+      ],
+    },
+    sorting: {
+      defaultSortBy: 'priority',
+      defaultSortOrder: 'desc',
+      sortOptions: [
+        { value: 'priority', label: 'Priority (Primary First)' },
+        { value: 'name', label: 'Name' },
+        { value: 'relationship', label: 'Relationship' },
+        { value: 'is_active', label: 'Status' },
+      ],
+      sortTypes: {
+        name: 'string',
+        relationship: 'string',
+        is_active: 'boolean',
+      },
+      customSortFunctions: {
+        priority: (a, b, sortOrder) => {
+          // Primary contacts first
+          if (a.is_primary && !b.is_primary) return -1;
+          if (!a.is_primary && b.is_primary) return 1;
+          // Then active contacts
+          if (a.is_active && !b.is_active) return -1;
+          if (!a.is_active && b.is_active) return 1;
+          // Finally by name
+          return a.name.localeCompare(b.name);
+        },
+      },
+    },
+    filterControls: {
+      searchPlaceholder: 'Search contacts, relationships, phone, email...',
+      title: 'Filter & Sort Emergency Contacts',
+      showCategory: true,
+      showStatus: true,
+      showAdditionalFilters: true,
+      description:
+        'Filter emergency contacts by status, relationship, and priority',
     },
   },
 };

@@ -5,6 +5,9 @@ import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
+import { Button } from '../../components/ui';
+import MantinePatientForm from '../../components/medical/MantinePatientForm';
+import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
@@ -26,7 +29,7 @@ const PatientInfo = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
-    birthDate: '',
+    birth_date: '',
     gender: '',
     address: '',
   });
@@ -41,10 +44,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: patientData.first_name || '',
         last_name: patientData.last_name || '',
-        birthDate: patientData.birthDate || '',
+        birth_date: patientData.birth_date || '',
         gender: patientData.gender || '',
         address: patientData.address || '',
-        bloodType: patientData.bloodType || '',
+        blood_type: patientData.blood_type || '',
         height: patientData.height || '',
         weight: patientData.weight || '',
         physician_id: patientData.physician_id || '',
@@ -57,10 +60,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: '',
         last_name: '',
-        birthDate: '',
+        birth_date: '',
         gender: '',
         address: '',
-        bloodType: '',
+        blood_type: '',
         height: '',
         weight: '',
         physician_id: '',
@@ -79,9 +82,20 @@ const PatientInfo = () => {
 
   const handleInputChange = e => {
     const { name, value } = e.target;
+    let processedValue = value;
+
+    // Handle physician_id - convert empty string to null or empty for Mantine
+    if (name === 'physician_id') {
+      if (value === '') {
+        processedValue = '';
+      } else {
+        processedValue = value; // Keep as string for Mantine compatibility
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
   const handleEdit = () => {
@@ -96,10 +110,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: patientData.first_name || '',
         last_name: patientData.last_name || '',
-        birthDate: patientData.birthDate || '',
+        birth_date: patientData.birth_date || '',
         gender: patientData.gender || '',
         address: patientData.address || '',
-        bloodType: patientData.bloodType || '',
+        blood_type: patientData.blood_type || '',
         height: patientData.height || '',
         weight: patientData.weight || '',
         physician_id: patientData.physician_id || '',
@@ -108,10 +122,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: '',
         last_name: '',
-        birthDate: '',
+        birth_date: '',
         gender: '',
         address: '',
-        bloodType: '',
+        blood_type: '',
         height: '',
         weight: '',
         physician_id: '',
@@ -127,14 +141,22 @@ const PatientInfo = () => {
       setError('');
       setSuccessMessage('');
       let updatedData;
+      // Prepare data for API - convert physician_id to number if present
+      const apiData = {
+        ...formData,
+        physician_id: formData.physician_id
+          ? parseInt(formData.physician_id)
+          : null,
+      };
+
       if (isCreating || !patientExists) {
-        updatedData = await apiService.createCurrentPatient(formData);
+        updatedData = await apiService.createCurrentPatient(apiData);
         setPatientExists(true);
         setIsCreating(false);
         setSuccessMessage('Patient information created successfully!');
       } else {
         // Use the correct API method for updating current patient
-        updatedData = await apiService.updateCurrentPatient(formData);
+        updatedData = await apiService.updateCurrentPatient(apiData);
         setIsEditing(false);
         setSuccessMessage('Patient information updated successfully!');
       }
@@ -180,7 +202,7 @@ const PatientInfo = () => {
 
   if (loading) {
     return (
-      <div className="patient-info-container">
+      <div className="medical-page-container">
         <div className="loading">
           <div className="spinner"></div>
           <p>Loading patient information...</p>
@@ -190,10 +212,10 @@ const PatientInfo = () => {
   }
 
   return (
-    <div className="patient-info-container">
+    <div className="medical-page-container">
       <PageHeader title="Patient Information" icon="📋" />
 
-      <div className="patient-info-content">
+      <div className="medical-page-content">
         {error && <div className="error-message">{error}</div>}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
@@ -203,172 +225,22 @@ const PatientInfo = () => {
           <div className="card-header">
             <h2>Personal Information</h2>
             {!isEditing && (
-              <button className="edit-button" onClick={handleEdit}>
+              <Button variant="primary" onClick={handleEdit}>
                 ✏️ Edit
-              </button>
+              </Button>
             )}
           </div>
 
           {isEditing ? (
-            <form className="patient-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="first_name">First Name *</label>
-                  <input
-                    type="text"
-                    id="first_name"
-                    name="first_name"
-                    value={formData.first_name}
-                    onChange={handleInputChange}
-                    required
-                    disabled={saving}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="last_name">Last Name *</label>
-                  <input
-                    type="text"
-                    id="last_name"
-                    name="last_name"
-                    value={formData.last_name}
-                    onChange={handleInputChange}
-                    required
-                    disabled={saving}
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="birthDate">Birth Date *</label>
-                  <input
-                    type="date"
-                    id="birthDate"
-                    name="birthDate"
-                    value={formData.birthDate}
-                    onChange={handleInputChange}
-                    required
-                    disabled={saving}
-                  />
-                </div>{' '}
-                <div className="form-group">
-                  <label htmlFor="gender">Gender</label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-                </div>
-              </div>{' '}
-              <div className="form-group">
-                <label htmlFor="address">Address</label>
-                <textarea
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  disabled={saving}
-                  rows="3"
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="bloodType">Blood Type</label>
-                  <select
-                    id="bloodType"
-                    name="bloodType"
-                    value={formData.bloodType}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                  >
-                    <option value="">Select Blood Type</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="height">Height (inches)</label>
-                  <input
-                    type="number"
-                    id="height"
-                    name="height"
-                    value={formData.height}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                    min="12"
-                    max="120"
-                    placeholder="e.g., 70"
-                  />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="weight">Weight (lbs)</label>
-                  <input
-                    type="number"
-                    id="weight"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                    min="1"
-                    max="1000"
-                    placeholder="e.g., 150"
-                  />{' '}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="physician_id">Primary Care Physician</label>
-                  <select
-                    id="physician_id"
-                    name="physician_id"
-                    value={formData.physician_id}
-                    onChange={handleInputChange}
-                    disabled={saving}
-                  >
-                    <option value="">Select Physician (Optional)</option>
-                    {console.log(
-                      'Rendering practitioners dropdown, practitioners:',
-                      practitioners
-                    )}
-                    {practitioners.map(practitioner => (
-                      <option key={practitioner.id} value={practitioner.id}>
-                        {practitioner.name} - {practitioner.specialty}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="cancel-button"
-                  onClick={handleCancel}
-                  disabled={saving}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="save-button"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
+            <MantinePatientForm
+              formData={formData}
+              onInputChange={handleInputChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              practitioners={practitioners}
+              saving={saving}
+              isCreating={isCreating}
+            />
           ) : (
             <div className="patient-details">
               <div className="detail-row">
@@ -387,7 +259,7 @@ const PatientInfo = () => {
                   <label>Birth Date:</label>
                   <span>
                     {formatDate(
-                      patientData?.birthDate,
+                      patientData?.birth_date,
                       DATE_FORMATS.DISPLAY_LONG
                     )}
                   </span>
@@ -404,7 +276,7 @@ const PatientInfo = () => {
               <div className="detail-row">
                 <div className="detail-group">
                   <label>Blood Type:</label>
-                  <span>{patientData?.bloodType || 'Not provided'}</span>
+                  <span>{patientData?.blood_type || 'Not provided'}</span>
                 </div>
                 <div className="detail-group">
                   <label>Height:</label>

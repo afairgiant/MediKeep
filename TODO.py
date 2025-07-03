@@ -1,7 +1,44 @@
 # TODO
-#
-# 1. Make sure that when a doctor isn't deleted the other items that have an associated doctor are also not deleted. it should be set to null instead.
-# 2. Add pharmacy to medication model.
-# 3. Add doctor to medication page. Already setup in database model.
-# 4. Make the cards on the main dashboard can have their size adjusted.
-# 5. Make a settings page.
+"""
+List of bugs:
+    treatments page: 
+        Doseage is not being displayed correctly.
+        Doseage is not updating correctly.
+        Treatment description is not being displayed correctly.
+
+
+    Procedure Page:
+        Make procedure type more visable on card.
+
+    Vitals Page:
+
+
+        The filter sorting is broken.
+        
+Improvments:
+    Conditions:
+        Add end date to condition.
+    Visits:
+        ✅ Enhanced with additional fields: visit_type, chief_complaint, diagnosis, treatment_plan, follow_up_instructions, duration_minutes, location, priority
+
+    Patient Page:
+        Don't need to show the patient ID on the patient page.
+        Make the weight in patient page linked to the vitals page for the latest weight.
+
+
+    Nav Bar:
+        ✅ Add links to all the pages in the nav bar.
+        ✅ Shift the title over to the left to make room for links?
+
+    Admin:
+        User: Make more user info show up on the user page.
+        Make the search bar at the top work.
+        Implement search functionality for admin pages (temporarily removed non-functional search bar).
+        Make the mobile version of the pages work better with the header 
+
+Roadmap:
+    - Family member linking of patients.
+    - Emergency Contacts
+    - Document attachments - store all documents in one place?
+    - User roles - (parent/guardian) goes with family member linking.
+"""

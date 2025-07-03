@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import { Button } from '../../components/ui';
+import MantineTreatmentForm from '../../components/medical/MantineTreatmentForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
@@ -43,11 +47,15 @@ const Treatments = () => {
     requiresPatient: true,
   });
 
+  // Get standardized configuration
+  const config = getMedicalPageConfig('treatments');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(treatments, config);
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
-  const [sortBy, setSortBy] = useState('start_date');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     treatment_name: '',
     treatment_type: '',
@@ -118,6 +126,11 @@ const Treatments = () => {
       return;
     }
 
+    if (formData.end_date && formData.start_date && new Date(formData.end_date) < new Date(formData.start_date)) {
+      setError('End date cannot be before start date');
+      return;
+    }
+
     if (!currentPatient?.id) {
       setError('Patient information not available');
       return;
@@ -154,56 +167,23 @@ const Treatments = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Sorting and filtering
-  const getSortedTreatments = () => {
-    const sorted = [...treatments].sort((a, b) => {
-      if (sortBy === 'start_date') {
-        const aDate = new Date(a.start_date || 0);
-        const bDate = new Date(b.start_date || 0);
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      }
-
-      if (sortBy === 'treatment_name') {
-        return sortOrder === 'asc'
-          ? a.treatment_name.localeCompare(b.treatment_name)
-          : b.treatment_name.localeCompare(a.treatment_name);
-      }
-
-      if (sortBy === 'status') {
-        return sortOrder === 'asc'
-          ? a.status.localeCompare(b.status)
-          : b.status.localeCompare(a.status);
-      }
-
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  const handleSortChange = newSortBy => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('desc');
-    }
-  };
+  // Get processed data from data management
+  const processedTreatments = dataManagement.data;
 
   const getStatusIcon = status => {
     switch (status) {
       case 'active':
-        return '🔄';
+        return '●';
       case 'completed':
-        return '✅';
+        return '✓';
       case 'planned':
-        return '📋';
+        return '○';
       case 'on-hold':
-        return '⏸️';
+        return '⏸';
       case 'cancelled':
-        return '❌';
+        return '✗';
       default:
-        return '❓';
+        return '?';
     }
   };
 
@@ -226,9 +206,9 @@ const Treatments = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -237,9 +217,9 @@ const Treatments = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddTreatment}>
+            <Button variant="primary" onClick={handleAddTreatment}>
               + Add New Treatment
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -249,43 +229,45 @@ const Treatments = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
-              >
-                <option value="start_date">Start Date</option>
-                <option value="treatment_name">Treatment Name</option>
-                <option value="status">Status</option>
-              </select>
-              <button
-                className="sort-order-button"
-                onClick={() =>
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                }
-              >
-                {sortOrder === 'asc' ? '↑' : '↓'}
-              </button>
-            </div>
-          </div>
         </div>
 
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
+
         <div className="medical-items-list">
-          {getSortedTreatments().length === 0 ? (
+          {processedTreatments.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🩹</div>
               <h3>No treatments found</h3>
-              <p>Click "Add New Treatment" to get started.</p>
-              <button className="add-button" onClick={handleAddTreatment}>
-                Add Your First Treatment
-              </button>
+              <p>
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Click "Add New Treatment" to get started.'}
+              </p>
+              {!dataManagement.hasActiveFilters && (
+                <Button variant="primary" onClick={handleAddTreatment}>
+                  Add Your First Treatment
+                </Button>
+              )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedTreatments().map(treatment => (
+              {processedTreatments.map(treatment => (
                 <div key={treatment.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
@@ -347,25 +329,27 @@ const Treatments = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditTreatment(treatment)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteTreatment(treatment.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <MedicalTable
-              data={getSortedTreatments()}
+              data={processedTreatments}
               columns={[
                 { header: 'Treatment Name', accessor: 'treatment_name' },
                 { header: 'Type', accessor: 'treatment_type' },
@@ -403,145 +387,15 @@ const Treatments = () => {
         </div>
       </div>
 
-      <MedicalFormModal
+      <MantineTreatmentForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="treatment_name">Treatment Name *</label>
-              <input
-                type="text"
-                id="treatment_name"
-                name="treatment_name"
-                value={formData.treatment_name}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Physical Therapy, Chemotherapy"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="treatment_type">Treatment Type *</label>
-              <input
-                type="text"
-                id="treatment_type"
-                name="treatment_type"
-                value={formData.treatment_type}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Surgery, Medication"
-              />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="status">Status</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="planned">Planned</option>
-                  <option value="active">Active</option>
-                  <option value="on-hold">On Hold</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="start_date">Start Date *</label>
-                <input
-                  type="date"
-                  id="start_date"
-                  name="start_date"
-                  value={formData.start_date}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="end_date">End Date</label>
-                <input
-                  type="date"
-                  id="end_date"
-                  name="end_date"
-                  value={formData.end_date}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="dosage">Dosage</label>
-                <input
-                  type="text"
-                  id="dosage"
-                  name="dosage"
-                  value={formData.dosage}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 500mg, 2 tablets"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="frequency">Frequency</label>
-                <input
-                  type="text"
-                  id="frequency"
-                  name="frequency"
-                  value={formData.frequency}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Daily, 3 times per week"
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Description of the treatment..."
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="notes">Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Additional notes about the treatment..."
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              {editingTreatment ? 'Update Treatment' : 'Add Treatment'}
-            </button>
-          </div>
-        </form>
-      </MedicalFormModal>
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        editingTreatment={editingTreatment}
+      />
     </div>
   );
 };

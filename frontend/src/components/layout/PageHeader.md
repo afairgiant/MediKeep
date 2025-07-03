@@ -40,7 +40,7 @@ import { PageHeader } from '../../components';
 
 ```jsx
 <PageHeader
-  title="Medical Records Dashboard"
+  title="Medical Records App"
   icon="🏥"
   variant="dashboard"
   showBackButton={false}

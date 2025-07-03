@@ -12,12 +12,49 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
+import {
+  Card,
+  Grid,
+  Text,
+  Group,
+  Button,
+  Badge,
+  ActionIcon,
+  Tabs,
+  Stack,
+  SimpleGrid,
+  Paper,
+  Center,
+  Loader,
+  Alert,
+  ThemeIcon,
+  Progress,
+  Divider,
+} from '@mantine/core';
+import {
+  IconRefresh,
+  IconChartBar,
+  IconEye,
+  IconUsers,
+  IconStethoscope,
+  IconFlask,
+  IconPill,
+  IconHeart,
+  IconDatabase,
+  IconActivity,
+  IconSettings,
+  IconReportAnalytics,
+  IconUserCog,
+  IconTrendingUp,
+  IconClock,
+  IconShieldCheck,
+  IconAlertCircle,
+} from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
-import { Loading } from '../../components';
 import { formatDate, formatDateTime } from '../../utils/helpers';
+import { useTheme } from '../../contexts/ThemeContext';
 import './AdminDashboard.css';
 
 // Register Chart.js components
@@ -35,6 +72,7 @@ ChartJS.register(
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { theme } = useTheme();
 
   // Dashboard Stats with auto-refresh
   const {
@@ -107,16 +145,28 @@ const AdminDashboard = () => {
   };
 
   const getHealthStatusColor = status => {
+    // Get CSS variables from the document root
+    const rootStyles = getComputedStyle(document.documentElement);
+
     switch (status?.toLowerCase()) {
       case 'healthy':
-        return '#10b981';
+        return (
+          rootStyles.getPropertyValue('--color-success').trim() || '#10b981'
+        );
       case 'warning':
-        return '#f59e0b';
+        return (
+          rootStyles.getPropertyValue('--color-warning').trim() || '#f59e0b'
+        );
       case 'error':
       case 'critical':
-        return '#ef4444';
+        return (
+          rootStyles.getPropertyValue('--color-danger').trim() || '#ef4444'
+        );
       default:
-        return '#6b7280';
+        return (
+          rootStyles.getPropertyValue('--color-text-secondary').trim() ||
+          '#6b7280'
+        );
     }
   };
 
@@ -145,66 +195,132 @@ const AdminDashboard = () => {
     return actionIcon ? `${actionIcon} ${baseIcon}` : baseIcon;
   };
 
-  const createChartData = () => ({
-    activity: {
-      labels: analyticsData?.weekly_activity?.labels || [
-        'Mon',
-        'Tue',
-        'Wed',
-        'Thu',
-        'Fri',
-        'Sat',
-        'Sun',
-      ],
-      datasets: [
-        {
-          label: 'User Activity',
-          data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          tension: 0.4,
+  const createChartData = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const primaryColor =
+      rootStyles.getPropertyValue('--color-primary').trim() || '#3b82f6';
+
+    return {
+      activity: {
+        labels: analyticsData?.weekly_activity?.labels || [
+          'Mon',
+          'Tue',
+          'Wed',
+          'Thu',
+          'Fri',
+          'Sat',
+          'Sun',
+        ],
+        datasets: [
+          {
+            label: 'User Activity',
+            data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
+            borderColor: primaryColor,
+            backgroundColor: `${primaryColor}1a`, // Add transparency
+            tension: 0.4,
+          },
+        ],
+      },
+      distribution: {
+        labels: [
+          'Patients',
+          'Lab Results',
+          'Medications',
+          'Procedures',
+          'Allergies',
+          'Vitals',
+        ],
+        datasets: [
+          {
+            data: [
+              stats?.total_patients || 0,
+              stats?.total_lab_results || 0,
+              stats?.total_medications || 0,
+              stats?.total_procedures || 0,
+              stats?.total_allergies || 0,
+              stats?.total_vitals || 0,
+            ],
+            backgroundColor: [
+              rootStyles.getPropertyValue('--color-primary').trim() ||
+                '#3b82f6',
+              rootStyles.getPropertyValue('--color-success').trim() ||
+                '#10b981',
+              rootStyles.getPropertyValue('--color-warning').trim() ||
+                '#f59e0b',
+              rootStyles.getPropertyValue('--color-danger').trim() || '#ef4444',
+              '#8b5cf6', // Purple - using hardcoded as no CSS variable defined
+              rootStyles.getPropertyValue('--color-info').trim() || '#06b6d4',
+            ],
+            borderWidth: 0,
+          },
+        ],
+      },
+    };
+  };
+
+  // Chart configuration functions that depend on current theme
+  const createLineChartOptions = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const textColor =
+      rootStyles.getPropertyValue('--color-text-primary').trim() || '#212529';
+    const gridColor =
+      rootStyles.getPropertyValue('--color-border-light').trim() || '#e9ecef';
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: textColor,
+          },
         },
-      ],
-    },
-    distribution: {
-      labels: [
-        'Patients',
-        'Lab Results',
-        'Medications',
-        'Procedures',
-        'Allergies',
-        'Vitals',
-      ],
-      datasets: [
-        {
-          data: [
-            stats?.total_patients || 0,
-            stats?.total_lab_results || 0,
-            stats?.total_medications || 0,
-            stats?.total_procedures || 0,
-            stats?.total_allergies || 0,
-            stats?.total_vitals || 0,
-          ],
-          backgroundColor: [
-            '#3b82f6',
-            '#10b981',
-            '#f59e0b',
-            '#ef4444',
-            '#8b5cf6',
-            '#06b6d4',
-          ],
-          borderWidth: 0,
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Activities', color: textColor },
+          ticks: { color: textColor },
+          grid: { color: gridColor },
         },
-      ],
-    },
-  });
+        x: {
+          title: { display: true, text: 'Day of Week', color: textColor },
+          ticks: { color: textColor },
+          grid: { color: gridColor },
+        },
+      },
+    };
+  };
+
+  const createDoughnutChartOptions = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const textColor =
+      rootStyles.getPropertyValue('--color-text-primary').trim() || '#212529';
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: textColor,
+          },
+        },
+      },
+    };
+  };
 
   if (loading && !stats) {
     return (
       <AdminLayout>
-        <div className="admin-page-loading">
-          <Loading message="Loading comprehensive dashboard..." />
-        </div>
+        <Center h={400}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text c="dimmed">Loading comprehensive dashboard...</Text>
+          </Stack>
+        </Center>
       </AdminLayout>
     );
   }
@@ -215,167 +331,204 @@ const AdminDashboard = () => {
     <AdminLayout>
       <div className="admin-dashboard-modern">
         {/* Dashboard Header */}
-        <AdminCard className="dashboard-header-card">
-          <div className="header-content">
-            <div className="header-title">
-              <h1>🏥 Admin Dashboard</h1>
-              <p>Comprehensive system overview and management</p>
+        <Card shadow="sm" p="xl" mb="xl" withBorder>
+          <Group justify="space-between" align="flex-start">
+            <div>
+              <Group align="center" mb="xs">
+                <ThemeIcon size="xl" variant="light" color="blue">
+                  <IconStethoscope size={24} />
+                </ThemeIcon>
+                <Text size="xl" fw={700}>
+                  Admin Dashboard
+                </Text>
+              </Group>
+              <Text c="dimmed" size="md">
+                Comprehensive system overview and management
+              </Text>
             </div>
-            <div className="header-actions">
-              <button
+            <Group>
+              <Button
+                leftSection={<IconRefresh size={16} />}
                 onClick={handleRefreshAll}
-                className="refresh-btn"
-                disabled={loading}
+                loading={loading}
+                variant="light"
               >
-                <span className={`refresh-icon ${loading ? 'spinning' : ''}`}>
-                  🔄
-                </span>
                 Refresh All
-              </button>
-              <div className="view-tabs">
-                <button
-                  className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('overview')}
-                >
-                  📊 Overview
-                </button>
-                <button
-                  className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('analytics')}
-                >
-                  📈 Analytics
-                </button>
-              </div>
-            </div>
-          </div>
-        </AdminCard>
+              </Button>
+            </Group>
+          </Group>
+        </Card>
 
         {/* Quick Stats Grid */}
-        <div className="quick-stats-grid">
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} mb="xl">
           <StatCard
-            icon="👥"
+            icon={IconUsers}
             value={stats?.total_users || 0}
             label="Total Users"
             change={`+${stats?.recent_registrations || 0} this week`}
-            variant="primary"
-            trend="📈"
+            color="blue"
           />
           <StatCard
-            icon="🏥"
+            icon={IconStethoscope}
             value={stats?.total_patients || 0}
             label="Active Patients"
-            change={`${stats?.active_patients || 0} active`}
-            variant="success"
-            trend="📊"
+            color="green"
           />
           <StatCard
-            icon="🧪"
+            icon={IconFlask}
             value={stats?.total_lab_results || 0}
             label="Lab Results"
-            change={`${stats?.pending_lab_results || 0} pending review`}
-            variant="warning"
-            trend="⏳"
+            color="orange"
           />
           <StatCard
-            icon="💊"
+            icon={IconPill}
             value={stats?.total_medications || 0}
             label="Medications"
             change={`${stats?.active_medications || 0} active prescriptions`}
-            variant="info"
-            trend="💊"
+            color="cyan"
           />
           <StatCard
-            icon="📊"
+            icon={IconHeart}
             value={stats?.total_vitals || 0}
             label="Vital Signs"
-            change="Recent measurements"
-            variant="secondary"
-            trend="❤️"
+            color="red"
           />
-        </div>
+        </SimpleGrid>
 
-        {/* Main Dashboard Content */}
-        {activeTab === 'analytics' && (
-          <div className="charts-section">
-            <AdminCard
-              title="📈 Weekly Activity Trend"
-              subtitle="User interactions over the past week"
-              className="chart-card"
+        {/* Main Dashboard Content with Tabs */}
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List mb="xl">
+            <Tabs.Tab value="overview" leftSection={<IconEye size={16} />}>
+              Overview
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="analytics"
+              leftSection={<IconChartBar size={16} />}
             >
-              {analyticsData?.weekly_activity && (
-                <div className="activity-summary">
-                  <span>
-                    Total: {analyticsData.weekly_activity.total} activities
-                  </span>
-                  {analyticsData.date_range && (
-                    <span>
-                      ({analyticsData.date_range.start} to{' '}
-                      {analyticsData.date_range.end})
-                    </span>
+              Analytics
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="analytics">
+            <Grid>
+              <Grid.Col span={{ base: 12, md: 8 }}>
+                <Card shadow="sm" p="lg" withBorder>
+                  <Group justify="space-between" mb="md">
+                    <div>
+                      <Text size="lg" fw={600}>
+                        Weekly Activity Trend
+                      </Text>
+                      <Text size="sm" c="dimmed">
+                        User interactions over the past week
+                      </Text>
+                    </div>
+                    <Badge variant="light" color="blue">
+                      Analytics
+                    </Badge>
+                  </Group>
+
+                  {analyticsData?.weekly_activity && (
+                    <Group mb="md">
+                      <Text size="sm" c="dimmed">
+                        Total: {analyticsData.weekly_activity.total} activities
+                      </Text>
+                      {analyticsData.date_range && (
+                        <Text size="sm" c="dimmed">
+                          ({analyticsData.date_range.start} to{' '}
+                          {analyticsData.date_range.end})
+                        </Text>
+                      )}
+                    </Group>
                   )}
-                </div>
-              )}
-              <div className="chart-container">
-                <Line
-                  data={chartData.activity}
-                  options={createLineChartOptions()}
+
+                  <div className="chart-container">
+                    <Line
+                      data={chartData.activity}
+                      options={createLineChartOptions()}
+                    />
+                  </div>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={{ base: 12, md: 4 }}>
+                <Card shadow="sm" p="lg" withBorder>
+                  <Group justify="space-between" mb="md">
+                    <div>
+                      <Text size="lg" fw={600}>
+                        Records Distribution
+                      </Text>
+                      <Text size="sm" c="dimmed">
+                        Breakdown by type
+                      </Text>
+                    </div>
+                  </Group>
+
+                  <div className="chart-container doughnut">
+                    <Doughnut
+                      data={chartData.distribution}
+                      options={createDoughnutChartOptions()}
+                    />
+                  </div>
+                </Card>
+              </Grid.Col>
+            </Grid>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="overview">
+            <Grid>
+              <Grid.Col span={{ base: 12, lg: 6 }}>
+                <SystemHealthCard
+                  systemHealth={systemHealth}
+                  loading={healthLoading}
+                  error={healthError}
+                  getHealthStatusColor={getHealthStatusColor}
                 />
-              </div>
-            </AdminCard>
+              </Grid.Col>
 
-            <AdminCard
-              title="📊 Records Distribution"
-              subtitle="Breakdown of medical records by type"
-              className="chart-card"
-            >
-              <div className="chart-container doughnut">
-                <Doughnut
-                  data={chartData.distribution}
-                  options={createDoughnutChartOptions()}
+              <Grid.Col span={{ base: 12, lg: 6 }}>
+                <ActivityCard
+                  activities={recentActivity || []}
+                  loading={activityLoading}
+                  error={activityError}
+                  getActivityIcon={getActivityIcon}
                 />
-              </div>
-            </AdminCard>
-          </div>
-        )}
+              </Grid.Col>
 
-        {activeTab === 'overview' && (
-          <div className="overview-section">
-            {/* System Health Card */}
-            <SystemHealthCard
-              systemHealth={systemHealth}
-              loading={healthLoading}
-              error={healthError}
-              getHealthStatusColor={getHealthStatusColor}
-            />
-
-            {/* Recent Activity Card */}
-            <ActivityCard
-              activities={recentActivity || []}
-              loading={activityLoading}
-              error={activityError}
-              getActivityIcon={getActivityIcon}
-            />
-
-            {/* Quick Actions Panel */}
-            <QuickActionsCard />
-          </div>
-        )}
+              <Grid.Col span={12}>
+                <QuickActionsCard />
+              </Grid.Col>
+            </Grid>
+          </Tabs.Panel>
+        </Tabs>
       </div>
     </AdminLayout>
   );
 };
 
 // Reusable StatCard Component
-const StatCard = ({ icon, value, label, change, variant, trend }) => (
-  <div className={`stat-card-modern ${variant}`}>
-    <div className="stat-icon">{icon}</div>
-    <div className="stat-content">
-      <div className="stat-value">{value}</div>
-      <div className="stat-label">{label}</div>
-      <div className="stat-change">{change}</div>
-    </div>
-    <div className="stat-trend">{trend}</div>
-  </div>
+const StatCard = ({ icon: IconComponent, value, label, change, color }) => (
+  <Card shadow="sm" p="lg" withBorder>
+    <Group justify="space-between" mb="xs">
+      <ThemeIcon size="lg" variant="light" color={color}>
+        <IconComponent size={20} />
+      </ThemeIcon>
+      <Badge variant="light" color={color} size="sm">
+        <IconTrendingUp size={12} />
+      </Badge>
+    </Group>
+
+    <Text size="xl" fw={700} mb="xs">
+      {value}
+    </Text>
+
+    <Text size="sm" fw={500} mb="xs">
+      {label}
+    </Text>
+
+    <Text size="xs" c="dimmed">
+      {change}
+    </Text>
+  </Card>
 );
 
 // Reusable SystemHealthCard Component
@@ -385,206 +538,278 @@ const SystemHealthCard = ({
   error,
   getHealthStatusColor,
 }) => (
-  <AdminCard
-    title="🔍 System Health"
-    loading={loading}
-    error={error}
-    className="health-card"
-    actions={
-      <div className="health-status-indicator">
-        <span
-          className="status-dot"
-          style={{
-            backgroundColor: getHealthStatusColor(
-              systemHealth?.database_status
-            ),
-          }}
-        />
+  <Card shadow="sm" p="lg" withBorder h="100%">
+    <Group justify="space-between" mb="md">
+      <Group>
+        <ThemeIcon size="lg" variant="light" color="blue">
+          <IconShieldCheck size={20} />
+        </ThemeIcon>
+        <div>
+          <Text size="lg" fw={600}>
+            System Health
+          </Text>
+          <Text size="sm" c="dimmed">
+            Current system status
+          </Text>
+        </div>
+      </Group>
+      <Badge
+        color={systemHealth?.database_status === 'healthy' ? 'green' : 'orange'}
+        variant="light"
+      >
         {systemHealth?.database_status || 'Unknown'}
-      </div>
-    }
-  >
-    <div className="health-metrics">
-      <HealthMetric
-        icon="💾"
-        label="Database Status"
-        value={systemHealth?.database_status || 'Unknown'}
-      />
-      <HealthMetric
-        icon="📊"
-        label="Total Records"
-        value={systemHealth?.total_records || 0}
-      />
-      <HealthMetric
-        icon="⏱️"
-        label="Uptime"
-        value={systemHealth?.system_uptime || 'Unknown'}
-      />
-      <HealthMetric
-        icon="💽"
-        label="Last Backup"
-        value={
-          systemHealth?.last_backup
-            ? formatDate(systemHealth.last_backup)
-            : 'No backup'
-        }
-      />
-    </div>
-  </AdminCard>
+      </Badge>
+    </Group>
+
+    {loading && (
+      <Center py="xl">
+        <Loader size="sm" />
+      </Center>
+    )}
+
+    {error && (
+      <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
+        Error loading system health
+      </Alert>
+    )}
+
+    {!loading && !error && (
+      <Stack gap="md">
+        <HealthMetric
+          icon={IconDatabase}
+          label="Database Status"
+          value={systemHealth?.database_status || 'Unknown'}
+          color="blue"
+        />
+        <HealthMetric
+          icon={IconReportAnalytics}
+          label="Total Records"
+          value={systemHealth?.total_records || 0}
+          color="green"
+        />
+        <HealthMetric
+          icon={IconClock}
+          label="Uptime"
+          value={systemHealth?.system_uptime || 'Unknown'}
+          color="orange"
+        />
+        <HealthMetric
+          icon={IconDatabase}
+          label="Last Backup"
+          value={
+            systemHealth?.last_backup
+              ? formatDate(systemHealth.last_backup)
+              : 'No backup'
+          }
+          color="purple"
+        />
+      </Stack>
+    )}
+  </Card>
 );
 
 // Reusable ActivityCard Component
 const ActivityCard = ({ activities, loading, error, getActivityIcon }) => (
-  <AdminCard
-    title="📋 Recent Activity"
-    loading={loading}
-    error={error}
-    className="activity-card"
-    actions={
-      <div className="activity-filter">
-        <small>{activities.length} activities</small>
-      </div>
-    }
-  >
-    <div className="activity-feed">
-      {activities.length > 0 ? (
-        activities.map((activity, index) => (
-          <ActivityItem
-            key={index}
-            activity={activity}
-            icon={getActivityIcon(activity.model_name, activity.action)}
-          />
-        ))
-      ) : (
-        <div className="no-activity-modern">
-          <div className="no-activity-icon">📭</div>
-          <p>No recent activity to display</p>
+  <Card shadow="sm" p="lg" withBorder h="100%">
+    <Group justify="space-between" mb="md">
+      <Group>
+        <ThemeIcon size="lg" variant="light" color="green">
+          <IconActivity size={20} />
+        </ThemeIcon>
+        <div>
+          <Text size="lg" fw={600}>
+            Recent Activity
+          </Text>
+          <Text size="sm" c="dimmed">
+            Latest system events
+          </Text>
         </div>
-      )}
-    </div>
-  </AdminCard>
+      </Group>
+      <Badge variant="light" color="green">
+        {activities.length} activities
+      </Badge>
+    </Group>
+
+    {loading && (
+      <Center py="xl">
+        <Loader size="sm" />
+      </Center>
+    )}
+
+    {error && (
+      <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
+        Error loading activity
+      </Alert>
+    )}
+
+    {!loading && !error && (
+      <Stack gap="sm" mah={300} style={{ overflowY: 'auto' }}>
+        {activities.length > 0 ? (
+          activities.map((activity, index) => (
+            <ActivityItem
+              key={index}
+              activity={activity}
+              icon={getActivityIcon(activity.model_name, activity.action)}
+            />
+          ))
+        ) : (
+          <Center py="xl">
+            <Stack align="center">
+              <ThemeIcon size="xl" variant="light" color="gray">
+                <IconActivity size={24} />
+              </ThemeIcon>
+              <Text c="dimmed" size="sm">
+                No recent activity to display
+              </Text>
+            </Stack>
+          </Center>
+        )}
+      </Stack>
+    )}
+  </Card>
 );
 
 // Reusable QuickActionsCard Component
 const QuickActionsCard = () => (
-  <AdminCard title="⚡ Quick Actions" className="quick-actions-card">
-    <div className="actions-grid">
+  <Card shadow="sm" p="lg" withBorder>
+    <Group mb="md">
+      <ThemeIcon size="lg" variant="light" color="violet">
+        <IconSettings size={20} />
+      </ThemeIcon>
+      <div>
+        <Text size="lg" fw={600}>
+          Quick Actions
+        </Text>
+        <Text size="sm" c="dimmed">
+          Common administrative tasks
+        </Text>
+      </div>
+    </Group>
+
+    <SimpleGrid cols={{ base: 2, sm: 3, md: 6 }} spacing="md">
       <ActionButton
-        href="/admin/models/user"
-        icon="👥"
-        title="Manage Users"
-        desc="View, edit, and manage user accounts"
-        variant="primary"
+        href="/admin/data-models"
+        icon={IconDatabase}
+        title="Data Models"
+        desc="View and manage database tables"
+        color="blue"
       />
       <ActionButton
-        href="/admin/models/patient"
-        icon="🏥"
-        title="Patient Records"
-        desc="Access and manage patient information"
-        variant="success"
+        href="/admin/models/user"
+        icon={IconUserCog}
+        title="Manage Users"
+        desc="User account management"
+        color="green"
       />
       <ActionButton
         href="/admin/system-health"
-        icon="🔍"
+        icon={IconShieldCheck}
         title="System Health"
-        desc="Monitor system performance and status"
-        variant="warning"
+        desc="Monitor system status"
+        color="orange"
       />
       <ActionButton
         href="/admin/bulk-operations"
-        icon="⚡"
+        icon={IconSettings}
         title="Bulk Operations"
-        desc="Perform batch operations on records"
-        variant="info"
+        desc="Batch operations"
+        color="cyan"
       />
       <ActionButton
-        href="/admin/models/lab-result"
-        icon="🧪"
-        title="Lab Results"
-        desc="Review and manage laboratory results"
-        variant="secondary"
+        href="/admin/backup"
+        icon={IconDatabase}
+        title="Backups"
+        desc="Backup management"
+        color="purple"
       />
       <ActionButton
-        href="/admin/reports"
-        icon="📊"
-        title="Generate Reports"
-        desc="Create system and usage reports"
-        variant="tertiary"
+        href="/admin/settings"
+        icon={IconSettings}
+        title="Settings"
+        desc="System configuration"
+        color="gray"
       />
-    </div>
-  </AdminCard>
+    </SimpleGrid>
+  </Card>
 );
 
 // Helper Components
-const HealthMetric = ({ icon, label, value }) => (
-  <div className="health-metric">
-    <div className="metric-icon">{icon}</div>
-    <div className="metric-content">
-      <div className="metric-label">{label}</div>
-      <div className="metric-value">{value}</div>
+const HealthMetric = ({ icon: IconComponent, label, value, color }) => (
+  <Group>
+    <ThemeIcon size="md" variant="light" color={color}>
+      <IconComponent size={16} />
+    </ThemeIcon>
+    <div>
+      <Text size="xs" c="dimmed" fw={500}>
+        {label}
+      </Text>
+      <Text size="sm" fw={600}>
+        {value}
+      </Text>
     </div>
-  </div>
+  </Group>
 );
 
 const ActivityItem = ({ activity, icon }) => (
-  <div
-    className={`activity-item-modern ${activity.action?.toLowerCase() === 'deleted' ? 'deleted' : ''}`}
-  >
-    <div className="activity-icon-modern">{icon}</div>
-    <div className="activity-content-modern">
-      <div className="activity-description">{activity.description}</div>
-      <div className="activity-meta">
-        <span className="activity-time">
-          {formatDateTime(activity.timestamp)}
-        </span>
-        <span className="activity-type">{activity.model_name}</span>
-        <span className={`activity-action ${activity.action?.toLowerCase()}`}>
-          {activity.action || 'created'}
-        </span>
-      </div>
-    </div>
-    <div className="activity-status">
-      <span className="status-badge">
-        {activity.action === 'deleted'
-          ? '🗑️'
-          : activity.action === 'updated'
-            ? '📝'
-            : activity.action === 'viewed'
-              ? '👁️'
-              : '✓'}
-      </span>
-    </div>
-  </div>
+  <Paper p="sm" withBorder>
+    <Group justify="space-between">
+      <Group>
+        <Text size="sm">{icon}</Text>
+        <div>
+          <Text size="sm" fw={500} lineClamp={1}>
+            {activity.description}
+          </Text>
+          <Group gap="xs">
+            <Text size="xs" c="dimmed">
+              {formatDateTime(activity.timestamp)}
+            </Text>
+            <Badge size="xs" variant="light" color="gray">
+              {activity.model_name}
+            </Badge>
+            <Badge
+              size="xs"
+              variant="light"
+              color={
+                activity.action === 'deleted'
+                  ? 'red'
+                  : activity.action === 'updated'
+                    ? 'blue'
+                    : activity.action === 'viewed'
+                      ? 'cyan'
+                      : 'green'
+              }
+            >
+              {activity.action || 'created'}
+            </Badge>
+          </Group>
+        </div>
+      </Group>
+    </Group>
+  </Paper>
 );
 
-const ActionButton = ({ href, icon, title, desc, variant }) => (
-  <button
-    className={`action-btn-modern ${variant}`}
+const ActionButton = ({ href, icon: IconComponent, title, desc, color }) => (
+  <Paper
+    p="md"
+    withBorder
+    style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
     onClick={() => (window.location.href = href)}
+    className="action-button-hover"
   >
-    <div className="action-icon">{icon}</div>
-    <div className="action-content">
-      <div className="action-title">{title}</div>
-      <div className="action-desc">{desc}</div>
-    </div>
-  </button>
+    <Stack align="center" gap="xs">
+      <ThemeIcon size="lg" variant="light" color={color}>
+        <IconComponent size={20} />
+      </ThemeIcon>
+      <div style={{ textAlign: 'center' }}>
+        <Text size="sm" fw={600} mb="xs">
+          {title}
+        </Text>
+        <Text size="xs" c="dimmed" lineClamp={2}>
+          {desc}
+        </Text>
+      </div>
+    </Stack>
+  </Paper>
 );
-
-// Chart Configuration Functions
-const createLineChartOptions = () => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { beginAtZero: true, title: { display: true, text: 'Activities' } },
-    x: { title: { display: true, text: 'Day of Week' } },
-  },
-});
-
-const createDoughnutChartOptions = () => ({
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { position: 'bottom' } },
-});
 
 export default AdminDashboard;

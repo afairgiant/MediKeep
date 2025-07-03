@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import './FormInput.css';
+// CSS now handled by Mantine adapter
 
 const FormInput = ({
   label,

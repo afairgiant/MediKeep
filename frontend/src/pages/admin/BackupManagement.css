@@ -1,5 +1,5 @@
 .backup-management {
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -20,13 +20,13 @@
 }
 
 .backup-page-header h1 {
-  color: #2c3e50;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
   font-size: 2.5rem;
 }
 
 .backup-page-header p {
-  color: #7f8c8d;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -38,15 +38,15 @@
 }
 
 .backup-message.success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+  border: 1px solid var(--color-success);
 }
 
 .backup-message.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+  border: 1px solid var(--color-danger);
 }
 
 .backup-actions {
@@ -64,12 +64,12 @@
 }
 
 .backup-action-card {
-  background: white;
+  background: var(--color-bg-primary);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   text-align: center;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-border-light);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -77,17 +77,17 @@
 
 .backup-action-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .backup-action-card h3 {
-  color: #2c3e50;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
 
 .backup-action-card p {
-  color: #6c757d;
+  color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
@@ -104,35 +104,35 @@
 }
 
 .backup-btn.database {
-  background-color: #3498db;
+  background-color: var(--color-primary);
   color: white;
 }
 
 .backup-btn.database:hover:not(:disabled) {
-  background-color: #2980b9;
+  background-color: var(--color-primary-dark);
 }
 
 .backup-btn.files {
-  background-color: #e67e22;
+  background-color: var(--color-warning);
   color: white;
 }
 
 .backup-btn.files:hover:not(:disabled) {
-  background-color: #d35400;
+  background-color: var(--color-warning-dark);
 }
 
 .backup-btn.full {
-  background-color: #8e44ad;
+  background-color: var(--color-info);
   color: white;
 }
 
 .backup-btn.full:hover:not(:disabled) {
-  background-color: #7d3c98;
+  background-color: var(--color-info-dark);
 }
 
 .backup-btn.cleanup {
   background-color: #ffc107;
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .backup-btn.cleanup:hover:not(:disabled) {
@@ -140,16 +140,16 @@
 }
 
 .backup-btn.cleanup-all {
-  background-color: #dc3545;
+  background-color: var(--color-danger);
   color: white;
 }
 
 .backup-btn.cleanup-all:hover:not(:disabled) {
-  background-color: #c82333;
+  background-color: var(--color-danger-dark);
 }
 
 .backup-btn.upload {
-  background-color: #17a2b8;
+  background-color: var(--color-info);
   color: white;
   display: inline-block;
   text-decoration: none;
@@ -157,13 +157,13 @@
 }
 
 .backup-btn.upload:hover:not(.disabled) {
-  background-color: #138496;
+  background-color: var(--color-info-dark);
 }
 
 .backup-btn.upload.disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background-color: #6c757d;
+  background-color: var(--color-text-secondary);
 }
 
 .backup-btn:disabled {
@@ -172,9 +172,9 @@
 }
 
 .backup-list {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -183,19 +183,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .backup-list-header h2 {
-  color: #2c3e50;
+  color: var(--color-text-primary);
   margin: 0;
   font-size: 1.5rem;
 }
 
 .refresh-btn {
   padding: 0.5rem 1rem;
-  background-color: #6c757d;
+  background-color: var(--color-text-secondary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -205,7 +205,7 @@
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background-color: #5a6268;
+  background-color: var(--color-text-primary);
 }
 
 .refresh-btn:disabled {
@@ -216,7 +216,7 @@
 .backup-loading {
   padding: 3rem;
   text-align: center;
-  color: #6c757d;
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -229,7 +229,7 @@
 .no-backups {
   padding: 2rem;
   text-align: center;
-  color: #6c757d;
+  color: var(--color-text-secondary);
   font-size: 1rem;
 }
 
@@ -241,12 +241,12 @@
 }
 
 .backup-table th {
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-secondary);
   padding: 0.75rem 0.5rem;
   text-align: left;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-border-light);
   white-space: nowrap;
   font-size: 0.85rem;
 }
@@ -255,11 +255,12 @@
 
 .backup-table td {
   padding: 0.75rem 0.5rem;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
   word-wrap: break-word;
   overflow-wrap: break-word;
   font-size: 0.85rem;
+  color: var(--color-text-primary);
 }
 
 .backup-table td:nth-child(2) {
@@ -269,7 +270,7 @@
 }
 
 .backup-table tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-secondary);
 }
 
 .backup-type {
@@ -282,18 +283,18 @@
 }
 
 .backup-type.database {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .backup-type.files {
-  background-color: #fff3e0;
-  color: #f57c00;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
 }
 
 .backup-type.full {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
 }
 
 .backup-status {
@@ -306,43 +307,43 @@
 }
 
 .backup-status.created {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
 }
 
 .backup-status.uploaded {
-  background-color: #e1f5fe;
-  color: #01579b;
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
 }
 
 .backup-status.failed {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
 }
 
 .backup-status.verified {
-  background-color: #cce5ff;
-  color: #004085;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
 }
 
 .backup-status.missing {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
 }
 
 .backup-status.corrupted {
-  background-color: #f5c6cb;
-  color: #721c24;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
 }
 
 .backup-status.size_mismatch {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
 }
 
 .backup-status.checksum_failed {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
 }
 
 .file-exists {
@@ -354,13 +355,13 @@
 }
 
 .file-exists.yes {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
 }
 
 .file-exists.no {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
 }
 
 .backup-actions-cell {
@@ -395,44 +396,44 @@
 }
 
 .action-btn.download {
-  background-color: #28a745;
+  background-color: var(--color-success);
   color: white;
 }
 
 .action-btn.download:hover {
-  background-color: #218838;
+  background-color: var(--color-success-dark);
 }
 
 .action-btn.verify {
-  background-color: #17a2b8;
+  background-color: var(--color-info);
   color: white;
 }
 
 .action-btn.verify:hover {
-  background-color: #138496;
+  background-color: var(--color-info-dark);
 }
 
 .action-btn.restore {
-  background-color: #e74c3c;
+  background-color: var(--color-warning);
   color: white;
 }
 
 .action-btn.restore:hover:not(:disabled) {
-  background-color: #c0392b;
+  background-color: var(--color-warning-dark);
 }
 
 .action-btn.restore:disabled {
-  background-color: #bdc3c7;
+  background-color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 
 .action-btn.delete {
-  background-color: #dc3545;
+  background-color: var(--color-danger);
   color: white;
 }
 
 .action-btn.delete:hover {
-  background-color: #c82333;
+  background-color: var(--color-danger-dark);
 }
 
 .upload-section {
@@ -839,4 +840,45 @@
     font-size: 0.7rem;
     padding: 0.15rem 0.5rem;
   }
+}
+
+/* Dark theme specific adjustments */
+[data-theme='dark'] .backup-action-card {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .backup-action-card:hover {
+  background: var(--color-bg-tertiary);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .backup-list {
+  background: var(--color-bg-secondary);
+}
+
+[data-theme='dark'] .backup-list-header {
+  background-color: var(--color-bg-tertiary);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .backup-table th {
+  background-color: var(--color-bg-tertiary);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .backup-table td {
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .backup-table tr:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+[data-theme='dark'] .backup-btn.cleanup {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .no-backups {
+  color: var(--color-text-muted);
 }

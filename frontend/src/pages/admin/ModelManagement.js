@@ -21,11 +21,11 @@ const ModelManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [perPage, setPerPage] = useState(25);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Selection for bulk operations
   const [selectedRecords, setSelectedRecords] = useState(new Set());
   const [showBulkActions, setShowBulkActions] = useState(false);
+
   const loadModelData = useCallback(async () => {
     try {
       setLoading(true);
@@ -37,7 +37,6 @@ const ModelManagement = () => {
         adminApiService.getModelRecords(modelName, {
           page: currentPage,
           per_page: perPage,
-          search: searchQuery || null,
         }),
       ]);
 
@@ -51,7 +50,7 @@ const ModelManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [modelName, currentPage, perPage, searchQuery]);
+  }, [modelName, currentPage, perPage]);
 
   useEffect(() => {
     if (modelName) {
@@ -66,12 +65,6 @@ const ModelManagement = () => {
 
   const handlePerPageChange = newPerPage => {
     setPerPage(newPerPage);
-    setCurrentPage(1);
-    setSelectedRecords(new Set());
-  };
-
-  const handleSearch = query => {
-    setSearchQuery(query);
     setCurrentPage(1);
     setSelectedRecords(new Set());
   };
@@ -175,7 +168,7 @@ const ModelManagement = () => {
             // Patient fields
             'first_name',
             'last_name',
-            'birthDate',
+            'birth_date',
             // Practitioner fields
             'name',
             'specialty',
@@ -257,16 +250,6 @@ const ModelManagement = () => {
 
         {/* Search and Filters */}
         <div className="model-controls">
-          <div className="search-section">
-            <input
-              type="text"
-              placeholder={`Search ${metadata?.verbose_name_plural || modelName}...`}
-              value={searchQuery}
-              onChange={e => handleSearch(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
           <div className="pagination-controls">
             <select
               value={perPage}

@@ -39,7 +39,7 @@ export const useSorting = (data = [], config = {}) => {
 
   // Sort data
   const sortedData = useMemo(() => {
-    if (!data || data.length === 0) return [];
+    if (!Array.isArray(data) || data.length === 0) return [];
 
     const sorted = [...data].sort((a, b) => {
       // Custom sort function

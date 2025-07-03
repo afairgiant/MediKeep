@@ -25,6 +25,7 @@ from app.crud import (
     lab_result_file,
     medication,
     patient,
+    pharmacy,
     practitioner,
     procedure,
     treatment,
@@ -41,6 +42,7 @@ from app.models.models import (
     LabResultFile,
     Medication,
     Patient,
+    Pharmacy,
     Practitioner,
     Procedure,
     Treatment,
@@ -55,6 +57,7 @@ from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
 from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
+from app.schemas.pharmacy import PharmacyCreate
 from app.schemas.practitioner import PractitionerCreate
 from app.schemas.procedure import ProcedureCreate
 from app.schemas.treatment import TreatmentCreate
@@ -68,6 +71,7 @@ DATETIME_FIELD_MAP = {
     "user": ["created_at", "updated_at", "last_login"],
     "patient": ["created_at", "updated_at"],
     "practitioner": ["created_at", "updated_at"],
+    "pharmacy": ["created_at", "updated_at"],
     "lab_result": [
         "ordered_date",
         "completed_date",
@@ -85,13 +89,66 @@ DATETIME_FIELD_MAP = {
 }
 
 DATE_FIELD_MAP = {
-    "patient": ["birthDate"],
+    "patient": ["birth_date"],
     "immunization": ["date_administered", "expiration_date"],
     "procedure": ["date"],
     "treatment": ["start_date", "end_date"],
     "encounter": ["date"],
     "condition": ["onsetDate"],
     "allergy": ["onset_date"],
+}
+
+# Field display configuration - controls which fields are shown and their order
+FIELD_DISPLAY_CONFIG = {
+    "pharmacy": {
+        "list_fields": [
+            "id",
+            "name",
+            "brand",
+            "city",
+            "state",
+            "phone_number",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "name",
+            "brand",
+            "street_address",
+            "city",
+            "state",
+            "zip_code",
+            "phone_number",
+            "website",
+            "hours",
+            "drive_through",
+            "twenty_four_hour",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["name", "brand", "city", "state"],
+    },
+    "practitioner": {
+        "list_fields": [
+            "id",
+            "name",
+            "specialty",
+            "practice",
+            "phone_number",
+            "rating",
+        ],
+        "detail_fields": [
+            "id",
+            "name",
+            "specialty",
+            "practice",
+            "phone_number",
+            "website",
+            "rating",
+        ],
+        "search_fields": ["name", "specialty", "practice"],
+    },
+    # Add more models as needed
 }
 
 # Model registry mapping model names to their classes and CRUD instances
@@ -102,6 +159,11 @@ MODEL_REGISTRY = {
         "model": Practitioner,
         "crud": practitioner,
         "create_schema": PractitionerCreate,
+    },
+    "pharmacy": {
+        "model": Pharmacy,
+        "crud": pharmacy,
+        "create_schema": PharmacyCreate,
     },
     "medication": {
         "model": Medication,
@@ -366,25 +428,146 @@ def list_model_records(
         # Calculate pagination
         skip = (page - 1) * per_page
 
-        # Get records using CRUD instance
-        if hasattr(crud_instance, "get_multi"):
-            records = crud_instance.get_multi(db, skip=skip, limit=per_page)
-            total = db.query(model_info["model"]).count()
+        # Get records using CRUD instance with search filtering
+        if search and search.strip():
+            # Use the new query method for search functionality
+            if hasattr(crud_instance, "query"):
+                # Determine which field to search in based on model configuration or smart defaults
+                search_field = None
+
+                # Use configured search fields if available
+                if model_name in FIELD_DISPLAY_CONFIG:
+                    search_fields = FIELD_DISPLAY_CONFIG[model_name].get(
+                        "search_fields", []
+                    )
+                    if search_fields:
+                        search_field = search_fields[0]  # Use first search field
+
+                # Fallback to smart defaults if no config
+                if not search_field:
+                    all_columns = [
+                        col.name for col in model_info["model"].__table__.columns
+                    ]
+                    for field in [
+                        "name",
+                        "username",
+                        "title",
+                        "medication_name",
+                        "test_name",
+                        "allergen",
+                        "diagnosis",
+                    ]:
+                        if field in all_columns:
+                            search_field = field
+                            break
+
+                if search_field:
+                    # Use the query method with search
+                    records = crud_instance.query(
+                        db=db,
+                        search={"field": search_field, "term": search.strip()},
+                        skip=skip,
+                        limit=per_page,
+                    )
+
+                    # Get total count for search results
+                    total_records = crud_instance.query(
+                        db=db, search={"field": search_field, "term": search.strip()}
+                    )
+                    total = len(total_records)
+                else:
+                    # No searchable field found, return all records
+                    records = (
+                        crud_instance.get_multi(db, skip=skip, limit=per_page)
+                        if hasattr(crud_instance, "get_multi")
+                        else db.query(model_info["model"])
+                        .offset(skip)
+                        .limit(per_page)
+                        .all()
+                    )
+                    total = db.query(model_info["model"]).count()
+            else:
+                # Fallback if query method not available
+                records = (
+                    crud_instance.get_multi(db, skip=skip, limit=per_page)
+                    if hasattr(crud_instance, "get_multi")
+                    else db.query(model_info["model"])
+                    .offset(skip)
+                    .limit(per_page)
+                    .all()
+                )
+                total = db.query(model_info["model"]).count()
         else:
-            # Fallback for CRUD instances without get_multi
-            records = db.query(model_info["model"]).offset(skip).limit(per_page).all()
-            total = db.query(model_info["model"]).count()
+            # No search, get all records
+            if hasattr(crud_instance, "get_multi"):
+                records = crud_instance.get_multi(db, skip=skip, limit=per_page)
+                total = db.query(model_info["model"]).count()
+            else:
+                # Fallback for CRUD instances without get_multi
+                records = (
+                    db.query(model_info["model"]).offset(skip).limit(per_page).all()
+                )
+                total = db.query(model_info["model"]).count()
 
         # Convert to dictionaries for JSON response
         items = []
         for record in records:
             item = {}
-            # Get all column values
-            for column in model_info["model"].__table__.columns:
-                value = getattr(record, column.name, None)
-                if isinstance(value, datetime):
-                    value = value.isoformat()
-                item[column.name] = value
+
+            # Get fields to display (use config if available, otherwise smart defaults)
+            fields_to_show = None
+            if model_name in FIELD_DISPLAY_CONFIG:
+                fields_to_show = FIELD_DISPLAY_CONFIG[model_name].get("list_fields")
+            else:
+                # Smart default: show common important fields if they exist
+                all_columns = [
+                    col.name for col in model_info["model"].__table__.columns
+                ]
+                smart_defaults = []
+
+                # Always include ID if it exists
+                if "id" in all_columns:
+                    smart_defaults.append("id")
+
+                # Include name-like fields
+                for field in [
+                    "name",
+                    "username",
+                    "title",
+                    "medication_name",
+                    "test_name",
+                ]:
+                    if field in all_columns:
+                        smart_defaults.append(field)
+                        break
+
+                # Include status if it exists
+                if "status" in all_columns:
+                    smart_defaults.append("status")
+
+                # Include created_at if it exists
+                if "created_at" in all_columns:
+                    smart_defaults.append("created_at")
+
+                # If we found smart defaults, use them, otherwise show all
+                if smart_defaults:
+                    fields_to_show = smart_defaults
+
+            if fields_to_show:
+                # Show only configured fields in specified order
+                for field_name in fields_to_show:
+                    if hasattr(record, field_name):
+                        value = getattr(record, field_name, None)
+                        if isinstance(value, datetime):
+                            value = value.isoformat()
+                        item[field_name] = value
+            else:
+                # Show all fields (default behavior)
+                for column in model_info["model"].__table__.columns:
+                    value = getattr(record, column.name, None)
+                    if isinstance(value, datetime):
+                        value = value.isoformat()
+                    item[column.name] = value
             items.append(item)
 
         total_pages = (total + per_page - 1) // per_page
@@ -432,11 +615,27 @@ def get_model_record(
 
         # Convert to dictionary
         result = {}
-        for column in model_info["model"].__table__.columns:
-            value = getattr(record, column.name, None)
-            if isinstance(value, datetime):
-                value = value.isoformat()
-            result[column.name] = value
+
+        # Get fields to display (use config if available, otherwise all fields)
+        fields_to_show = None
+        if model_name in FIELD_DISPLAY_CONFIG:
+            fields_to_show = FIELD_DISPLAY_CONFIG[model_name].get("detail_fields")
+
+        if fields_to_show:
+            # Show only configured fields in specified order
+            for field_name in fields_to_show:
+                if hasattr(record, field_name):
+                    value = getattr(record, field_name, None)
+                    if isinstance(value, datetime):
+                        value = value.isoformat()
+                    result[field_name] = value
+        else:
+            # Show all fields (default behavior)
+            for column in model_info["model"].__table__.columns:
+                value = getattr(record, column.name, None)
+                if isinstance(value, datetime):
+                    value = value.isoformat()
+                result[column.name] = value
 
         return result
 

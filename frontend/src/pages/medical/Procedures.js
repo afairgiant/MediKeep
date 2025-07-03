@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import { Button } from '../../components/ui';
+import MantineProcedureForm from '../../components/medical/MantineProcedureForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
+import '../../styles/pages/ProcedureCards.css';
 
 const Procedures = () => {
   const navigate = useNavigate();
@@ -46,12 +51,15 @@ const Procedures = () => {
     requiresPatient: true,
   });
 
-  // Form and filter state
+  // Get standardized configuration
+  const config = getMedicalPageConfig('procedures');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(procedures, config);
+
+  // Form state
   const [showModal, setShowModal] = useState(false);
   const [editingProcedure, setEditingProcedure] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('procedure_date');
   const [formData, setFormData] = useState({
     procedure_name: '',
     procedure_type: '',
@@ -150,37 +158,8 @@ const Procedures = () => {
     }
   };
 
-  // Enhanced filtering and sorting logic
-  const getFilteredAndSortedProcedures = () => {
-    return procedures
-      .filter(procedure => {
-        const matchesSearch =
-          procedure.procedure_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          procedure.description
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          procedure.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus =
-          statusFilter === 'all' || procedure.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case 'procedure_name':
-            return (a.procedure_name || '').localeCompare(
-              b.procedure_name || ''
-            );
-          case 'status':
-            return (a.status || '').localeCompare(b.status || '');
-          case 'procedure_date':
-          default:
-            return new Date(b.date || 0) - new Date(a.date || 0);
-        }
-      });
-  };
+  // Get processed data from data management
+  const filteredProcedures = dataManagement.data;
 
   const getStatusIcon = status => {
     switch (status) {
@@ -227,8 +206,6 @@ const Procedures = () => {
     );
   }
 
-  const filteredProcedures = getFilteredAndSortedProcedures();
-
   return (
     <div className="medical-page-container">
       <PageHeader title="Procedures" icon="🔬" />
@@ -237,9 +214,9 @@ const Procedures = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -248,9 +225,9 @@ const Procedures = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddProcedure}>
+            <Button variant="primary" onClick={handleAddProcedure}>
               + Add Procedure
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -260,49 +237,23 @@ const Procedures = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search procedures..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          </div>
         </div>
 
-        <div className="filters-container">
-          <div className="filter-group">
-            <label>Status</label>
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Statuses</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="postponed">Postponed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div className="filter-group">
-            <label>Sort By</label>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="filter-select"
-            >
-              <option value="procedure_date">Procedure Date</option>
-              <option value="procedure_name">Procedure Name</option>
-              <option value="status">Status</option>
-            </select>
-          </div>
-        </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
 
         <div className="medical-items-list">
           {filteredProcedures.length === 0 ? (
@@ -310,14 +261,14 @@ const Procedures = () => {
               <div className="empty-icon">🔬</div>
               <h3>No Procedures Found</h3>
               <p>
-                {searchTerm || statusFilter !== 'all'
+                {dataManagement.hasActiveFilters
                   ? 'Try adjusting your search or filter criteria.'
                   : 'Start by adding your first procedure.'}
               </p>
-              {!searchTerm && statusFilter === 'all' && (
-                <button className="add-button" onClick={handleAddProcedure}>
+              {!dataManagement.hasActiveFilters && (
+                <Button variant="primary" onClick={handleAddProcedure}>
                   Add Your First Procedure
-                </button>
+                </Button>
               )}
             </div>
           ) : viewMode === 'cards' ? (
@@ -333,7 +284,7 @@ const Procedures = () => {
                         {procedure.procedure_name}
                       </h3>
                       {procedure.code && (
-                        <div className="item-subtitle">{procedure.code}</div>
+                        <div className="procedure-type-badge">{procedure.code}</div>
                       )}
                     </div>
                     <div className="status-badges">
@@ -383,18 +334,20 @@ const Procedures = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditProcedure(procedure)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteProcedure(procedure.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -455,143 +408,16 @@ const Procedures = () => {
         </div>
       </div>
 
-      <MedicalFormModal
+      <MantineProcedureForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingProcedure ? 'Edit Procedure' : 'Add New Procedure'}
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="procedure_name">Procedure Name *</label>
-              <input
-                type="text"
-                id="procedure_name"
-                name="procedure_name"
-                value={formData.procedure_name}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Appendectomy, MRI Scan"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="procedure_type">Procedure Type</label>
-              <select
-                id="procedure_type"
-                name="procedure_type"
-                value={formData.procedure_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Select Type</option>
-                <option value="surgical">Surgical</option>
-                <option value="diagnostic">Diagnostic</option>
-                <option value="therapeutic">Therapeutic</option>
-                <option value="preventive">Preventive</option>
-                <option value="emergency">Emergency</option>
-              </select>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="procedure_date">Procedure Date *</label>
-                <input
-                  type="date"
-                  id="procedure_date"
-                  name="procedure_date"
-                  value={formData.procedure_date}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="status">Status</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="postponed">Postponed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="facility">Facility</label>
-                <input
-                  type="text"
-                  id="facility"
-                  name="facility"
-                  value={formData.facility || ''}
-                  onChange={handleInputChange}
-                  placeholder="Facility where the procedure was performed"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="practitioner_id">Performing Practitioner</label>
-                <select
-                  id="practitioner_id"
-                  name="practitioner_id"
-                  value={formData.practitioner_id}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select practitioner</option>
-                  {practitioners.map(practitioner => (
-                    <option key={practitioner.id} value={practitioner.id}>
-                      {practitioner.name} - {practitioner.specialty}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Description of the procedure..."
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="notes">Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Additional notes about the procedure..."
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              {editingProcedure ? 'Update Procedure' : 'Add Procedure'}
-            </button>
-          </div>
-        </form>
-      </MedicalFormModal>
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        practitioners={practitioners}
+        editingProcedure={editingProcedure}
+      />
     </div>
   );
 };

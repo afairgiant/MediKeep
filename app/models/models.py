@@ -11,7 +11,28 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import relationship as orm_relationship
+
+# Import status enums for consistent status management
+from .enums import (
+    AllergyStatus,
+    ConditionStatus,
+    EncounterPriority,
+    LabResultStatus,
+    MedicationStatus,
+    ProcedureStatus,
+    SeverityLevel,
+    TreatmentStatus,
+    get_all_allergy_statuses,
+    get_all_condition_statuses,
+    get_all_encounter_priorities,
+    get_all_lab_result_statuses,
+    get_all_medication_statuses,
+    get_all_procedure_statuses,
+    get_all_severity_levels,
+    get_all_treatment_statuses,
+)
 
 
 # Timezone-aware datetime function to replace deprecated datetime.utcnow()
@@ -39,7 +60,7 @@ class User(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
-    patient = relationship("Patient", back_populates="user", uselist=False)
+    patient = orm_relationship("Patient", back_populates="user", uselist=False)
 
 
 class Patient(Base):
@@ -49,47 +70,50 @@ class Patient(Base):
 
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    birthDate = Column(Date, nullable=False)
+    birth_date = Column(Date, nullable=False)
 
     physician_id = Column(
         Integer, ForeignKey("practitioners.id"), nullable=True
     )  # Primary care physician
 
-    bloodType = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
+    blood_type = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
     height = Column(Integer, nullable=True)  # in inches
     weight = Column(Integer, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
     address = Column(String, nullable=True)
 
     # Table Relationships
-    user = relationship("User", back_populates="patient")
-    practitioner = relationship("Practitioner", back_populates="patients")
-    medications = relationship(
+    user = orm_relationship("User", back_populates="patient")
+    practitioner = orm_relationship("Practitioner", back_populates="patients")
+    medications = orm_relationship(
         "Medication", back_populates="patient", cascade="all, delete-orphan"
     )
-    encounters = relationship(
+    encounters = orm_relationship(
         "Encounter", back_populates="patient", cascade="all, delete-orphan"
     )
-    lab_results = relationship(
+    lab_results = orm_relationship(
         "LabResult", back_populates="patient", cascade="all, delete-orphan"
     )
-    immunizations = relationship(
+    immunizations = orm_relationship(
         "Immunization", back_populates="patient", cascade="all, delete-orphan"
     )
-    conditions = relationship(
+    conditions = orm_relationship(
         "Condition", back_populates="patient", cascade="all, delete-orphan"
     )
-    procedures = relationship(
+    procedures = orm_relationship(
         "Procedure", back_populates="patient", cascade="all, delete-orphan"
     )
-    treatments = relationship(
+    treatments = orm_relationship(
         "Treatment", back_populates="patient", cascade="all, delete-orphan"
     )
-    allergies = relationship(
+    allergies = orm_relationship(
         "Allergy", back_populates="patient", cascade="all, delete-orphan"
     )
-    vitals = relationship(
+    vitals = orm_relationship(
         "Vitals", back_populates="patient", cascade="all, delete-orphan"
+    )
+    emergency_contacts = orm_relationship(
+        "EmergencyContact", back_populates="patient", cascade="all, delete-orphan"
     )
 
 
@@ -105,15 +129,15 @@ class Practitioner(Base):
     rating = Column(Float, nullable=True)  # Rating from 0.0 to 5.0
 
     # Table Relationships
-    patients = relationship("Patient", back_populates="practitioner")
-    medications = relationship("Medication", back_populates="practitioner")
-    encounters = relationship("Encounter", back_populates="practitioner")
-    lab_results = relationship("LabResult", back_populates="practitioner")
-    immunizations = relationship("Immunization", back_populates="practitioner")
-    procedures = relationship("Procedure", back_populates="practitioner")
-    treatments = relationship("Treatment", back_populates="practitioner")
-    conditions = relationship("Condition", back_populates="practitioner")
-    vitals = relationship("Vitals", back_populates="practitioner")
+    patients = orm_relationship("Patient", back_populates="practitioner")
+    medications = orm_relationship("Medication", back_populates="practitioner")
+    encounters = orm_relationship("Encounter", back_populates="practitioner")
+    lab_results = orm_relationship("LabResult", back_populates="practitioner")
+    immunizations = orm_relationship("Immunization", back_populates="practitioner")
+    procedures = orm_relationship("Procedure", back_populates="practitioner")
+    treatments = orm_relationship("Treatment", back_populates="practitioner")
+    conditions = orm_relationship("Condition", back_populates="practitioner")
+    vitals = orm_relationship("Vitals", back_populates="practitioner")
 
 
 class Medication(Base):
@@ -131,17 +155,25 @@ class Medication(Base):
         String, nullable=True
     )  # How it is administered (e.g., oral, injection, etc.)
     indication = Column(String, nullable=True)  # What the medication is prescribed for
-    effectivePeriod_start = Column(Date, nullable=True)  # Start date of the medication
-    effectivePeriod_end = Column(Date, nullable=True)  # End date of the medication
-    status = Column(String, nullable=True)  # e.g., 'active', 'stopped, 'on-hold'
+    effective_period_start = Column(Date, nullable=True)  # Start date of the medication
+    effective_period_end = Column(Date, nullable=True)  # End date of the medication
+    status = Column(
+        String, nullable=True
+    )  # Use MedicationStatus enum: active, inactive, on_hold, completed, cancelled
     pharmacy_id = Column(Integer, ForeignKey("pharmacies.id"), nullable=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
-    patient = relationship("Patient", back_populates="medications")
-    practitioner = relationship("Practitioner", back_populates="medications")
-    pharmacy = relationship("Pharmacy", back_populates="medications")
+    patient = orm_relationship("Patient", back_populates="medications")
+    practitioner = orm_relationship("Practitioner", back_populates="medications")
+    pharmacy = orm_relationship("Pharmacy", back_populates="medications")
 
 
 class Encounter(Base):
@@ -154,13 +186,46 @@ class Encounter(Base):
     patient_id = Column(Integer, ForeignKey("patients.id"))
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"))
 
+    # Basic encounter information
     reason = Column(String, nullable=False)  # Reason for the encounter
     date = Column(Date, nullable=False)  # Date of the encounter
     notes = Column(String, nullable=True)  # Additional notes from the encounter
 
+    # Enhanced encounter details (all optional)
+    visit_type = Column(
+        String, nullable=True
+    )  # e.g., 'annual checkup', 'follow-up', 'consultation', 'emergency'
+    chief_complaint = Column(
+        String, nullable=True
+    )  # Primary concern or symptom reported by patient
+    diagnosis = Column(
+        String, nullable=True
+    )  # Clinical assessment or diagnosis from the visit
+    treatment_plan = Column(
+        String, nullable=True
+    )  # Recommended treatment or next steps
+    follow_up_instructions = Column(
+        String, nullable=True
+    )  # Follow-up care instructions
+    duration_minutes = Column(
+        Integer, nullable=True
+    )  # Duration of the visit in minutes
+    location = Column(
+        String, nullable=True
+    )  # Where visit occurred (office, hospital, telehealth, etc.)
+    priority = Column(
+        String, nullable=True
+    )  # Use EncounterPriority enum: routine, urgent, emergency
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
-    patient = relationship("Patient", back_populates="encounters")
-    practitioner = relationship("Practitioner", back_populates="encounters")
+    patient = orm_relationship("Patient", back_populates="encounters")
+    practitioner = orm_relationship("Practitioner", back_populates="encounters")
 
 
 class LabResult(Base):
@@ -181,7 +246,7 @@ class LabResult(Base):
     facility = Column(String, nullable=True)  # Facility where the test was ordered
     status = Column(
         String, nullable=False, default="ordered"
-    )  # 'ordered', 'completed', 'cancelled'
+    )  # Use LabResultStatus enum: ordered, in_progress, completed, cancelled
     labs_result = Column(
         String, nullable=True
     )  # Lab result interpretation: 'normal', 'abnormal', etc.
@@ -196,11 +261,11 @@ class LabResult(Base):
     updated_at = Column(DateTime, nullable=True)
 
     # Table Relationships
-    patient = relationship("Patient", back_populates="lab_results")
-    practitioner = relationship("Practitioner", back_populates="lab_results")
+    patient = orm_relationship("Patient", back_populates="lab_results")
+    practitioner = orm_relationship("Practitioner", back_populates="lab_results")
 
     # One-to-Many relationship with LabResultFile (actual test results: PDFs, images, etc.)
-    files = relationship(
+    files = orm_relationship(
         "LabResultFile", back_populates="lab_result", cascade="all, delete-orphan"
     )
 
@@ -220,7 +285,7 @@ class LabResultFile(Base):
     )  # Timestamp of when the file was uploaded
 
     # Table Relationships
-    lab_result = relationship("LabResult", back_populates="files")
+    lab_result = orm_relationship("LabResult", back_populates="files")
 
 
 class Condition(Base):
@@ -233,15 +298,32 @@ class Condition(Base):
     condition_name = Column(String, nullable=True)  # Name of the condition
     diagnosis = Column(String, nullable=False)
     notes = Column(String, nullable=True)
-    onsetDate = Column(
+    onset_date = Column(
         Date, nullable=True
     )  # Date when the condition was first diagnosed
-    status = Column(String, nullable=False)  # e.g., 'active', 'resolved', 'chronic'
+    status = Column(
+        String, nullable=False
+    )  # Use ConditionStatus enum: active, inactive, resolved, chronic, recurrence, relapse
+    end_date = Column(Date, nullable=True)  # Date when the condition was resolved
+
+    # Severity and medical codes
+    severity = Column(
+        String, nullable=True
+    )  # Use SeverityLevel enum: mild, moderate, severe, critical
+    icd10_code = Column(String, nullable=True)  # ICD-10 diagnosis code
+    snomed_code = Column(String, nullable=True)  # SNOMED CT code
+    code_description = Column(String, nullable=True)  # Description of the medical code
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
-    patient = relationship("Patient", back_populates="conditions")
-    practitioner = relationship("Practitioner", back_populates="conditions")
-    treatments = relationship("Treatment", back_populates="condition")
+    patient = orm_relationship("Patient", back_populates="conditions")
+    practitioner = orm_relationship("Practitioner", back_populates="conditions")
+    treatments = orm_relationship("Treatment", back_populates="condition")
 
 
 class Immunization(Base):
@@ -263,9 +345,15 @@ class Immunization(Base):
     expiration_date = Column(Date, nullable=True)  # Vaccine expiration date
     notes = Column(Text, nullable=True)  # Additional notes
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
-    patient = relationship("Patient", back_populates="immunizations")
-    practitioner = relationship("Practitioner", back_populates="immunizations")
+    patient = orm_relationship("Patient", back_populates="immunizations")
+    practitioner = orm_relationship("Practitioner", back_populates="immunizations")
 
 
 class Procedure(Base):
@@ -280,14 +368,21 @@ class Procedure(Base):
     description = Column(String, nullable=True)  # Description of the procedure
     status = Column(
         String, nullable=True
-    )  # e.g., 'completed', 'in-progress', 'cancelled'
+    )  # Use ProcedureStatus enum: scheduled, in_progress, completed, cancelled
     notes = Column(String, nullable=True)  # Additional notes about the procedure
     facility = Column(
         String, nullable=True
     )  # Facility where the procedure was performed
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
-    patient = relationship("Patient", back_populates="procedures")
-    practitioner = relationship("Practitioner", back_populates="procedures")
+    patient = orm_relationship("Patient", back_populates="procedures")
+    practitioner = orm_relationship("Practitioner", back_populates="procedures")
 
 
 class Treatment(Base):
@@ -303,7 +398,9 @@ class Treatment(Base):
     )  # Type of treatment (e.g., 'physical therapy', 'surgery')
     start_date = Column(Date, nullable=False)  # Start date of the treatment
     end_date = Column(Date, nullable=True)  # End date of the treatment (if applicable)
-    status = Column(String, nullable=True)  # e.g., 'ongoing', 'completed', 'cancelled'
+    status = Column(
+        String, nullable=True
+    )  # Use TreatmentStatus enum: active, in_progress, completed, cancelled, on_hold
     treatment_category = Column(
         String, nullable=True
     )  # Category of treatment (e.g., 'inpatient', 'outpatient')
@@ -315,10 +412,19 @@ class Treatment(Base):
     description = Column(String, nullable=True)  # Description of the treatment
     location = Column(
         String, nullable=True
-    )  # Location where the treatment is administered    # Table Relationships
-    patient = relationship("Patient", back_populates="treatments")
-    practitioner = relationship("Practitioner", back_populates="treatments")
-    condition = relationship("Condition", back_populates="treatments")
+    )  # Location where the treatment is administered
+    dosage = Column(String, nullable=True)  # Dosage of the treatment
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="treatments")
+    practitioner = orm_relationship("Practitioner", back_populates="treatments")
+    condition = orm_relationship("Condition", back_populates="treatments")
 
 
 class Allergy(Base):
@@ -329,13 +435,21 @@ class Allergy(Base):
     reaction = Column(String, nullable=False)  # Reaction to the allergen
     severity = Column(
         String, nullable=True
-    )  # Severity of the reaction (e.g., 'mild', 'severe')
+    )  # Use SeverityLevel enum: mild, moderate, severe, critical
     onset_date = Column(Date, nullable=True)  # Date when the allergy was first noted
-    status = Column(String, nullable=True)  # e.g., 'active', 'resolved'
+    status = Column(
+        String, nullable=True
+    )  # Use AllergyStatus enum: active, inactive, resolved
     notes = Column(String, nullable=True)  # Additional notes about the allergy
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
-    patient = relationship("Patient", back_populates="allergies")
+    patient = orm_relationship("Patient", back_populates="allergies")
 
 
 class Vitals(Base):
@@ -376,8 +490,8 @@ class Vitals(Base):
     )
 
     # Table Relationships
-    patient = relationship("Patient", back_populates="vitals")
-    practitioner = relationship("Practitioner", back_populates="vitals")
+    patient = orm_relationship("Patient", back_populates="vitals")
+    practitioner = orm_relationship("Practitioner", back_populates="vitals")
 
 
 class Pharmacy(Base):
@@ -427,7 +541,43 @@ class Pharmacy(Base):
     )
 
     # Table Relationships
-    medications = relationship("Medication", back_populates="pharmacy")
+    medications = orm_relationship("Medication", back_populates="pharmacy")
+
+
+class EmergencyContact(Base):
+    __tablename__ = "emergency_contacts"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+
+    # Contact Information
+    name = Column(String, nullable=False)  # Full name of emergency contact
+    relationship = Column(
+        String, nullable=False
+    )  # e.g., 'spouse', 'parent', 'child', 'friend', 'sibling'
+    phone_number = Column(String, nullable=False)  # Primary phone number
+    secondary_phone = Column(String, nullable=True)  # Optional secondary phone
+    email = Column(String, nullable=True)  # Optional email address
+
+    # Priority and Status
+    is_primary = Column(
+        Boolean, default=False, nullable=False
+    )  # Primary emergency contact
+    is_active = Column(Boolean, default=True, nullable=False)  # Active/inactive status
+
+    # Additional Details
+    address = Column(String, nullable=True)  # Contact's address
+    notes = Column(
+        String, nullable=True
+    )  # Additional notes (e.g., "Available weekdays only")
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="emergency_contacts")
 
 
 class BackupRecord(Base):

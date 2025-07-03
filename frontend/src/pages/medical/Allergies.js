@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import { Button } from '../../components/ui';
+import MantineFilters from '../../components/mantine/MantineFilters';
+import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import '../../styles/shared/MedicalPageShared.css';
@@ -40,11 +45,15 @@ const Allergies = () => {
     requiresPatient: true,
   });
 
+  // Get standardized configuration
+  const config = getMedicalPageConfig('allergies');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(allergies, config);
+
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAllergy, setEditingAllergy] = useState(null);
-  const [sortBy, setSortBy] = useState('severity');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [formData, setFormData] = useState({
     allergen: '',
     severity: '',
@@ -125,46 +134,8 @@ const Allergies = () => {
     }
   };
 
-  const getSortedAllergies = () => {
-    const sorted = [...allergies].sort((a, b) => {
-      if (sortBy === 'severity') {
-        const severityOrder = {
-          'life-threatening': 4,
-          severe: 3,
-          moderate: 2,
-          mild: 1,
-        };
-        const aVal = severityOrder[a.severity] || 0;
-        const bVal = severityOrder[b.severity] || 0;
-        return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
-      }
-
-      if (sortBy === 'allergen') {
-        return sortOrder === 'asc'
-          ? a.allergen.localeCompare(b.allergen)
-          : b.allergen.localeCompare(a.allergen);
-      }
-
-      if (sortBy === 'onset_date') {
-        const aDate = new Date(a.onset_date || 0);
-        const bDate = new Date(b.onset_date || 0);
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      }
-
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  const handleSortChange = newSortBy => {
-    if (sortBy === newSortBy) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(newSortBy);
-      setSortOrder('desc');
-    }
-  };
+  // Get processed data from data management
+  const processedAllergies = dataManagement.data;
 
   const getSeverityIcon = severity => {
     switch (severity) {
@@ -200,9 +171,9 @@ const Allergies = () => {
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -210,9 +181,9 @@ const Allergies = () => {
         )}{' '}
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddAllergy}>
+            <Button variant="primary" onClick={handleAddAllergy}>
               + Add New Allergy
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -222,157 +193,47 @@ const Allergies = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="sort-controls">
-              <label>Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={e => handleSortChange(e.target.value)}
-              >
-                <option value="severity">Severity</option>
-                <option value="allergen">Allergen</option>
-                <option value="onset_date">Onset Date</option>
-              </select>
-              <button
-                className="sort-order-button"
-                onClick={() =>
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                }
-              >
-                {sortOrder === 'asc' ? '↑' : '↓'}
-              </button>
-            </div>
-          </div>
         </div>
-        {showAddForm && (
-          <div
-            className="medical-form-overlay"
-            onClick={() => setShowAddForm(false)}
-          >
-            <div
-              className="medical-form-modal"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="form-header">
-                <h3>{editingAllergy ? 'Edit Allergy' : 'Add New Allergy'}</h3>
-                <button className="close-button" onClick={resetForm}>
-                  ×
-                </button>
-              </div>
-
-              <div className="medical-form-content">
-                <form onSubmit={handleSubmit}>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="allergen">Allergen *</label>
-                      <input
-                        type="text"
-                        id="allergen"
-                        name="allergen"
-                        value={formData.allergen}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Penicillin, Peanuts, Latex"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="severity">Severity *</label>
-                      <select
-                        id="severity"
-                        name="severity"
-                        value={formData.severity}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select Severity</option>
-                        <option value="mild">Mild</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="severe">Severe</option>
-                        <option value="life-threatening">
-                          Life-threatening
-                        </option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="reaction">Reaction</label>
-                      <input
-                        type="text"
-                        id="reaction"
-                        name="reaction"
-                        value={formData.reaction}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Rash, Anaphylaxis, Swelling"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="onset_date">Onset Date</label>
-                      <input
-                        type="date"
-                        id="onset_date"
-                        name="onset_date"
-                        value={formData.onset_date}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="status">Status</label>
-                      <select
-                        id="status"
-                        name="status"
-                        value={formData.status}
-                        onChange={handleInputChange}
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group full-width">
-                      <label htmlFor="notes">Notes</label>
-                      <textarea
-                        id="notes"
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        rows="3"
-                        placeholder="Additional notes about the allergy..."
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-actions">
-                    <button
-                      type="button"
-                      className="cancel-button"
-                      onClick={resetForm}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="save-button">
-                      {editingAllergy ? 'Update Allergy' : 'Add Allergy'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}{' '}
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
+        <MantineAllergyForm
+          isOpen={showAddForm}
+          onClose={resetForm}
+          title={editingAllergy ? 'Edit Allergy' : 'Add New Allergy'}
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          editingAllergy={editingAllergy}
+        />{' '}
         <div className="medical-items-list">
-          {getSortedAllergies().length === 0 ? (
+          {processedAllergies.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">⚠️</div>
               <h3>No allergies found</h3>
-              <p>Click "Add New Allergy" to get started.</p>
+              <p>
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Click "Add New Allergy" to get started.'}
+              </p>
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
-              {getSortedAllergies().map(allergy => (
+              {processedAllergies.map(allergy => (
                 <div key={allergy.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <h3 className="item-title">
@@ -421,25 +282,27 @@ const Allergies = () => {
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditAllergy(allergy)}
                     >
                       ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteAllergy(allergy.id)}
                     >
                       🗑️ Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <MedicalTable
-              data={getSortedAllergies()}
+              data={processedAllergies}
               columns={[
                 { header: 'Allergen', accessor: 'allergen' },
                 { header: 'Reaction', accessor: 'reaction' },

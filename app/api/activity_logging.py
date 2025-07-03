@@ -12,10 +12,64 @@ from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.core.logging_config import get_logger
+from app.core.logging_constants import sanitize_log_input
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
 
 logger = get_logger(__name__, "activity_logging")
+
+
+def _is_sensitive_field(field_name: str) -> bool:
+    """
+    Check if a field name contains sensitive information that should not be logged.
+
+    Args:
+        field_name: The field name to check
+
+    Returns:
+        True if the field is considered sensitive, False otherwise
+    """
+    sensitive_patterns = {
+        "password",
+        "token",
+        "secret",
+        "key",
+        "ssn",
+        "social_security",
+        "credit_card",
+        "bank_account",
+        "routing_number",
+        "api_key",
+        "private_key",
+        "hash",
+        "salt",
+        "session_id",
+    }
+
+    field_lower = field_name.lower()
+    return any(pattern in field_lower for pattern in sensitive_patterns)
+
+
+def _sanitize_entity_value(field_name: str, value: Any) -> str:
+    """
+    Sanitize entity field values, redacting sensitive information.
+
+    Args:
+        field_name: Name of the field
+        value: Value to sanitize
+
+    Returns:
+        Sanitized string representation of the value
+    """
+    if value is None:
+        return "None"
+
+    # Check if this is a sensitive field
+    if _is_sensitive_field(field_name):
+        return "[REDACTED]"
+
+    # For non-sensitive fields, sanitize the value
+    return sanitize_log_input(str(value))
 
 
 def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> str:
@@ -65,9 +119,17 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         if hasattr(entity_obj, field_name):
             entity_name = getattr(entity_obj, field_name, None)
             if entity_name:  # Only use if it's not None or empty
+                # Sanitize the entity name before logging
+                entity_name = _sanitize_entity_value(field_name, entity_name)
+
                 # Special handling for patient names
                 if entity_type == "patient" and field_name == "first_name":
                     last_name = getattr(entity_obj, "last_name", "")
+                    last_name = (
+                        _sanitize_entity_value("last_name", last_name)
+                        if last_name
+                        else ""
+                    )
                     entity_name = f"{entity_name} {last_name}".strip()
                 # Special handling for encounters - include both reason and date
                 elif entity_type == EntityType.ENCOUNTER and field_name == "reason":
@@ -76,7 +138,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
                         if hasattr(encounter_date, "strftime"):
                             date_str = encounter_date.strftime("%Y-%m-%d")
                         else:
-                            date_str = str(encounter_date)
+                            date_str = _sanitize_entity_value("date", encounter_date)
                         entity_name = f"{entity_name} on {date_str}"
 
                 # Use friendly display names
@@ -109,7 +171,11 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         if recorded_date and hasattr(recorded_date, "strftime"):
             date_str = recorded_date.strftime("%Y-%m-%d")
         else:
-            date_str = "Unknown date"
+            date_str = (
+                _sanitize_entity_value("recorded_date", recorded_date)
+                if recorded_date
+                else "Unknown date"
+            )
         return f"{action_word} vitals recorded on {date_str}"
 
     # Fallback to generic description with friendly names
@@ -162,20 +228,33 @@ def log_crud_activity(
         True if logging succeeded, False otherwise
     """
     try:
-        # Generate description if not provided
+        # Generate description if not provided, otherwise sanitize the provided description
         if not description:
             description = get_entity_description(entity_obj, entity_type, action)
+        else:
+            description = sanitize_log_input(description)
 
         # Extract entity details
         entity_id = getattr(entity_obj, "id", None)
         patient_id = getattr(entity_obj, "patient_id", None)
 
-        # Extract request details if available
+        # Extract and sanitize request details if available
         ip_address = None
         user_agent = None
         if request:
             ip_address = request.client.host if request.client else None
-            user_agent = request.headers.get("user-agent")
+            raw_user_agent = request.headers.get("user-agent")
+            user_agent = sanitize_log_input(raw_user_agent) if raw_user_agent else None
+
+        # Sanitize metadata to prevent sensitive data exposure
+        safe_metadata = None
+        if metadata:
+            safe_metadata = {}
+            for key, value in metadata.items():
+                # Sanitize both keys and values
+                safe_key = sanitize_log_input(str(key))
+                safe_value = _sanitize_entity_value(key, value)
+                safe_metadata[safe_key] = safe_value
 
         # Log the activity using the CRUD method
         activity_log.log_activity(
@@ -186,7 +265,7 @@ def log_crud_activity(
             user_id=user_id,
             patient_id=patient_id,
             entity_id=entity_id,
-            metadata=metadata,
+            metadata=safe_metadata,
             ip_address=ip_address,
             user_agent=user_agent,
         )
@@ -194,12 +273,17 @@ def log_crud_activity(
         return True
 
     except Exception as e:
+        # Sanitize error message to prevent sensitive data exposure
+        safe_error_msg = sanitize_log_input(str(e))
+        sanitized_entity_type = (
+            "[REDACTED]" if _is_sensitive_field(entity_type) else entity_type
+        )
         logger.error(
             f"Failed to log activity: {action} {entity_type}",
             extra={
-                "error": str(e),
+                "error": safe_error_msg,
                 "user_id": user_id,
-                "entity_type": entity_type,
+                "entity_type": sanitized_entity_type,
                 "action": action,
             },
         )
@@ -244,14 +328,18 @@ def safe_log_activity(
             request=request,
         )
     except Exception as e:
-        # Log the error but don't break the main operation
+        # Sanitize error message to prevent sensitive data exposure in logs
+        safe_error_msg = sanitize_log_input(str(e))
+        sanitized_entity_type = (
+            "[REDACTED]" if _is_sensitive_field(entity_type) else entity_type
+        )
         logger.warning(
-            f"Activity logging failed for {action} {entity_type}: {str(e)}",
+            f"Activity logging failed for {action} {entity_type}: {safe_error_msg}",
             extra={
                 "user_id": user_id,
-                "entity_type": entity_type,
+                "entity_type": sanitized_entity_type,
                 "action": action,
-                "error": str(e),
+                "error": safe_error_msg,
             },
         )
         # Rollback any partial transaction that might have been started

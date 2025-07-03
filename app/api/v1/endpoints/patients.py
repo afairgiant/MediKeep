@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
@@ -23,11 +23,27 @@ medical_logger = get_logger(__name__, "medical")
 class UserRecentActivity(BaseModel):
     """Recent activity item schema for regular users"""
 
-    id: int
-    type: str
-    action: str
-    description: str
-    timestamp: datetime
+    id: int = Field(..., description="The ID of the record")
+    model_name: str = Field(..., description="The type of medical record")
+    action: str = Field(..., description="The action performed")
+    description: str = Field(..., description="Description of the activity")
+    timestamp: datetime = Field(..., description="When the activity occurred")
+
+
+class PatientDashboardStats(BaseModel):
+    """Dashboard statistics for a patient"""
+
+    patient_id: int
+    total_records: int
+    active_medications: int
+    total_lab_results: int
+    total_procedures: int
+    total_treatments: int
+    total_conditions: int
+    total_allergies: int
+    total_immunizations: int
+    total_encounters: int
+    total_vitals: int
 
 
 @router.get("/me", response_model=Patient)
@@ -41,7 +57,7 @@ def get_my_patient_record(
 
     Returns the patient record with all basic information:
     - first_name, last_name
-    - birthDate
+    - birth_date
     - gender
     - address"""
     user_ip = request.client.host if request.client else "unknown"
@@ -90,7 +106,7 @@ def create_my_patient_record(
     Required fields:
     - first_name
     - last_name
-    - birthDate (YYYY-MM-DD format)
+    - birth_date (YYYY-MM-DD format)
     - gender
     - address
     """
@@ -160,7 +176,7 @@ def update_my_patient_record(
     All fields are optional for updates:
     - first_name
     - last_name
-    - birthDate
+    - birth_date
     - gender
     - address
     """
@@ -491,6 +507,66 @@ def get_my_recent_activity(
         raise
 
 
+@router.get("/me/dashboard-stats", response_model=PatientDashboardStats)
+async def get_my_dashboard_stats(
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """
+    Get dashboard statistics for the current patient.
+
+    Returns counts of all medical records for the authenticated user:
+    - Total records count
+    - Active medications count
+    - Lab results count
+    - Procedures count
+    - Treatments count
+    - Conditions count
+    - Allergies count
+    - Immunizations count
+    - Encounters count
+    - Vitals count
+    """
+    try:
+        # Import ExportService here to avoid circular imports
+        from app.services.export_service import ExportService
+
+        # Initialize export service and get summary
+        export_service = ExportService(db)
+        summary = await export_service.get_export_summary(current_user_id)
+
+        counts = summary.get("counts", {})
+
+        # Calculate total records
+        total_records = sum(counts.values())
+
+        # For active medications, we can use the medications count as a placeholder
+        # since we don't have a status field yet. This can be refined later.
+        active_medications = counts.get("medications", 0)
+
+        return PatientDashboardStats(
+            patient_id=summary["patient_id"],
+            total_records=total_records,
+            active_medications=active_medications,
+            total_lab_results=counts.get("lab_results", 0),
+            total_procedures=counts.get("procedures", 0),
+            total_treatments=counts.get("treatments", 0),
+            total_conditions=counts.get("conditions", 0),
+            total_allergies=counts.get("allergies", 0),
+            total_immunizations=counts.get("immunizations", 0),
+            total_encounters=counts.get("encounters", 0),
+            total_vitals=counts.get("vitals", 0),
+        )
+
+    except Exception as e:
+        logger.error(
+            f"Error fetching dashboard stats for user {current_user_id}: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=500, detail="Error fetching dashboard statistics"
+        )
+
+
 @router.get("/recent-activity/", response_model=List[UserRecentActivity])
 def get_user_recent_activity(
     limit: int = Query(default=10, le=50),
@@ -626,7 +702,7 @@ def get_user_recent_activity(
             recent_activities.append(
                 UserRecentActivity(
                     id=entity_id or 0,
-                    type=activity_type,
+                    model_name=activity_type,
                     action=action,
                     description=description,
                     timestamp=getattr(log, "timestamp", datetime.utcnow()),

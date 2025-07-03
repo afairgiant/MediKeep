@@ -1,5 +1,5 @@
 /**
- * VitalsForm Component - Enhanced Version
+ * VitalsForm Component - Enhanced Version with Mantine UI
  * Modern form for creating and editing patient vital signs with improved UX
  */
 
@@ -7,48 +7,75 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
-  Save,
-  X,
-  AlertTriangle,
-  Info,
-  Heart,
-  Activity,
-  Thermometer,
-  Weight,
-  Zap,
-  Calendar,
-  User,
-  FileText,
-  TrendingUp,
-} from 'lucide-react';
+  TextInput,
+  NumberInput,
+  Textarea,
+  Button,
+  Group,
+  Stack,
+  Paper,
+  Title,
+  Text,
+  Alert,
+  Divider,
+  Grid,
+  Badge,
+  ActionIcon,
+  Box,
+  Flex,
+  Card,
+  Loader,
+  Center,
+  Select,
+} from '@mantine/core';
+import {
+  IconCalendar,
+  IconHeart,
+  IconWeight,
+  IconActivity,
+  IconThermometer,
+  IconLungs,
+  IconDroplet,
+  IconNotes,
+  IconDeviceFloppy,
+  IconX,
+  IconAlertTriangle,
+  IconInfoCircle,
+  IconTrendingUp,
+  IconUser,
+  IconMapPin,
+  IconDevices,
+  IconMoodSad,
+  IconDropletFilled,
+} from '@tabler/icons-react';
+import { DateInput, DateTimePicker } from '@mantine/dates';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useTimezone } from '../../hooks';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
 import { validateDateTime } from '../../utils/helpers';
-import './VitalsForm.css';
 
 // Form field configurations with enhanced metadata
 const FORM_FIELDS = {
   basic: {
     title: 'Basic Information',
-    icon: Calendar,
+    icon: IconCalendar,
     fields: ['recorded_date'],
   },
   bloodPressure: {
     title: 'Blood Pressure',
-    icon: Heart,
+    icon: IconHeart,
     fields: ['systolic_bp', 'diastolic_bp'],
     description: 'Measured in mmHg',
   },
   physical: {
     title: 'Physical Measurements',
-    icon: Weight,
+    icon: IconWeight,
     fields: ['weight'],
     description: 'Weight in lbs',
   },
   vitals: {
     title: 'Vital Signs',
-    icon: Activity,
+    icon: IconActivity,
     fields: [
       'heart_rate',
       'temperature',
@@ -57,9 +84,21 @@ const FORM_FIELDS = {
     ],
     description: 'Core physiological measurements',
   },
+  additional: {
+    title: 'Additional Measurements',
+    icon: IconDropletFilled,
+    fields: ['blood_glucose', 'pain_scale'],
+    description: 'Supplementary health indicators',
+  },
+  metadata: {
+    title: 'Recording Information',
+    icon: IconMapPin,
+    fields: ['location', 'device_used'],
+    description: 'Context about the measurements',
+  },
   notes: {
     title: 'Additional Information',
-    icon: FileText,
+    icon: IconNotes,
     fields: ['notes'],
   },
 };
@@ -67,12 +106,12 @@ const FORM_FIELDS = {
 // Field definitions with validation and display metadata
 const FIELD_CONFIGS = {
   recorded_date: {
-    label: 'Measurement Date',
-    type: 'date',
+    label: 'Measurement Date & Time',
+    type: 'datetime',
     required: true,
-    icon: Calendar,
+    icon: IconCalendar,
     validation: {
-      required: 'Measurement date is required',
+      required: 'Measurement date and time is required',
       custom: value => {
         const result = validateDateTime(value, 'Recorded Date');
         return result.isValid ? null : result.error;
@@ -84,7 +123,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: 'mmHg',
     placeholder: '120',
-    icon: Heart,
+    icon: IconHeart,
     min: 50,
     max: 300,
     step: 1,
@@ -98,7 +137,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: 'mmHg',
     placeholder: '80',
-    icon: Heart,
+    icon: IconHeart,
     min: 30,
     max: 200,
     step: 1,
@@ -112,7 +151,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: 'BPM',
     placeholder: '72',
-    icon: Activity,
+    icon: IconActivity,
     min: 30,
     max: 250,
     step: 1,
@@ -126,7 +165,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: '°F',
     placeholder: '98.6',
-    icon: Thermometer,
+    icon: IconThermometer,
     min: 90,
     max: 110,
     step: 0.1,
@@ -140,7 +179,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: 'lbs',
     placeholder: '150',
-    icon: Weight,
+    icon: IconWeight,
     min: 0.1,
     max: 2200,
     step: 0.1,
@@ -154,7 +193,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: '/min',
     placeholder: '16',
-    icon: Activity,
+    icon: IconLungs,
     min: 5,
     max: 100,
     step: 1,
@@ -168,7 +207,7 @@ const FIELD_CONFIGS = {
     type: 'number',
     unit: '%',
     placeholder: '98',
-    icon: Zap,
+    icon: IconDroplet,
     min: 50,
     max: 100,
     step: 1,
@@ -177,12 +216,74 @@ const FIELD_CONFIGS = {
       max: { value: 100, message: 'Oxygen saturation cannot exceed 100%' },
     },
   },
+
+  blood_glucose: {
+    label: 'Blood Glucose',
+    type: 'number',
+    unit: 'mg/dL',
+    placeholder: '100',
+    icon: IconDropletFilled,
+    min: 20,
+    max: 800,
+    step: 1,
+    validation: {
+      min: { value: 20, message: 'Blood glucose must be at least 20 mg/dL' },
+      max: { value: 800, message: 'Blood glucose cannot exceed 800 mg/dL' },
+    },
+  },
+  pain_scale: {
+    label: 'Pain Scale',
+    type: 'number',
+    unit: '(0-10)',
+    placeholder: '0',
+    icon: IconMoodSad,
+    min: 0,
+    max: 10,
+    step: 1,
+    validation: {
+      min: { value: 0, message: 'Pain scale must be at least 0' },
+      max: { value: 10, message: 'Pain scale cannot exceed 10' },
+    },
+  },
+  location: {
+    label: 'Measurement Location',
+    type: 'select',
+    placeholder: 'Where were these readings taken?',
+    icon: IconMapPin,
+    options: [
+      { value: 'home', label: 'Home' },
+      { value: 'clinic', label: 'Clinic' },
+      { value: 'hospital', label: 'Hospital' },
+      { value: 'urgent_care', label: 'Urgent Care' },
+      { value: 'pharmacy', label: 'Pharmacy' },
+      { value: 'ambulatory', label: 'Ambulatory Care' },
+      { value: 'other', label: 'Other' },
+    ],
+  },
+  device_used: {
+    label: 'Device/Equipment Used',
+    type: 'text',
+    placeholder: 'e.g., Digital BP monitor, Thermometer model...',
+    icon: IconDevices,
+    validation: {
+      maxLength: {
+        value: 100,
+        message: 'Device name cannot exceed 100 characters',
+      },
+    },
+  },
   notes: {
     label: 'Notes',
     type: 'textarea',
     placeholder: 'Additional notes about the vital signs measurement...',
-    icon: FileText,
+    icon: IconNotes,
     rows: 3,
+    validation: {
+      maxLength: {
+        value: 1000,
+        message: 'Notes cannot exceed 1000 characters',
+      },
+    },
   },
 };
 
@@ -193,6 +294,10 @@ const VitalsForm = ({
   onSave,
   onCancel,
   isEdit = false,
+  createItem,
+  updateItem,
+  error,
+  clearError,
 }) => {
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
@@ -201,7 +306,7 @@ const VitalsForm = ({
   const [formData, setFormData] = useState({
     patient_id: patientId || '',
     practitioner_id: practitionerId || null,
-    recorded_date: getCurrentTime().split('T')[0],
+    recorded_date: new Date(),
     systolic_bp: '',
     diastolic_bp: '',
     heart_rate: '',
@@ -209,13 +314,16 @@ const VitalsForm = ({
     weight: '',
     respiratory_rate: '',
     oxygen_saturation: '',
-    notes: '',
+    blood_glucose: '',
+    pain_scale: '',
+    location: '',
+    device_used: '',
+    notes: '', // Ensure notes is always a string, never null
   });
 
   const [errors, setErrors] = useState({});
   const [warnings, setWarnings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
   const [touchedFields, setTouchedFields] = useState(new Set());
 
   // Get height from patient profile
@@ -227,13 +335,26 @@ const VitalsForm = ({
   useEffect(() => {
     if (vitals && isEdit) {
       setFormData({
-        ...vitals,
+        patient_id: vitals.patient_id || patientId || '',
+        practitioner_id: vitals.practitioner_id || practitionerId || null,
         recorded_date: vitals.recorded_date
-          ? new Date(vitals.recorded_date).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0],
+          ? new Date(vitals.recorded_date)
+          : new Date(),
+        systolic_bp: vitals.systolic_bp || '',
+        diastolic_bp: vitals.diastolic_bp || '',
+        heart_rate: vitals.heart_rate || '',
+        temperature: vitals.temperature || '',
+        weight: vitals.weight || '',
+        respiratory_rate: vitals.respiratory_rate || '',
+        oxygen_saturation: vitals.oxygen_saturation || '',
+        blood_glucose: vitals.blood_glucose || '',
+        pain_scale: vitals.pain_scale || '',
+        location: vitals.location || '',
+        device_used: vitals.device_used || '',
+        notes: vitals.notes || '', // Ensure notes is always a string, never null
       });
     }
-  }, [vitals, isEdit]);
+  }, [vitals, isEdit, patientId, practitionerId]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
@@ -274,6 +395,11 @@ const VitalsForm = ({
       }
     }
 
+    // Text length validations
+    if (validation.maxLength && value.length > validation.maxLength.value) {
+      return validation.maxLength.message;
+    }
+
     // Custom validation
     if (validation.custom) {
       return validation.custom(value);
@@ -285,7 +411,6 @@ const VitalsForm = ({
   // Real-time validation
   const validateForm = useCallback(() => {
     const newErrors = {};
-    const newWarnings = [];
 
     Object.keys(FIELD_CONFIGS).forEach(fieldName => {
       const error = validateField(fieldName, formData[fieldName]);
@@ -294,11 +419,7 @@ const VitalsForm = ({
       }
     });
 
-    // No longer generating warnings for normal ranges
-    // Healthcare providers will interpret values within individual patient context
-
     setErrors(newErrors);
-    setWarnings(newWarnings);
     return Object.keys(newErrors).length === 0;
   }, [formData, validateField]);
 
@@ -310,15 +431,14 @@ const VitalsForm = ({
   }, [formData, validateForm, touchedFields]);
 
   // Handle input changes
-  const handleInputChange = useCallback(e => {
-    const { name, value } = e.target;
+  const handleInputChange = useCallback((fieldName, value) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [fieldName]: value,
     }));
 
     // Mark field as touched
-    setTouchedFields(prev => new Set([...prev, name]));
+    setTouchedFields(prev => new Set([...prev, fieldName]));
   }, []);
 
   // Handle form submission
@@ -336,9 +456,16 @@ const VitalsForm = ({
     setIsLoading(true);
 
     try {
-      // Process data for API - include height from patient profile
+      // Process data for API
       const processedData = {
         ...formData,
+        recorded_date:
+          formData.recorded_date instanceof Date
+            ? formData.recorded_date.toISOString()
+            : formData.recorded_date,
+        // Include patient's height from profile for BMI calculation
+        height: patientHeight ? parseFloat(patientHeight) : null,
+        // Process numeric fields
         systolic_bp: formData.systolic_bp
           ? parseInt(formData.systolic_bp)
           : null,
@@ -350,275 +477,310 @@ const VitalsForm = ({
           ? parseFloat(formData.temperature)
           : null,
         weight: formData.weight ? parseFloat(formData.weight) : null,
-        height: patientHeight ? parseFloat(patientHeight) : null, // Use height from patient profile
         respiratory_rate: formData.respiratory_rate
           ? parseInt(formData.respiratory_rate)
           : null,
         oxygen_saturation: formData.oxygen_saturation
           ? parseInt(formData.oxygen_saturation)
           : null,
-        practitioner_id: formData.practitioner_id || null,
+        blood_glucose: formData.blood_glucose
+          ? parseFloat(formData.blood_glucose)
+          : null,
+        pain_scale: formData.pain_scale ? parseInt(formData.pain_scale) : null,
+        // Text fields
+        location: formData.location || null,
+        device_used: formData.device_used || null,
+        notes: formData.notes || null,
       };
 
-      let result;
-      if (isEdit && vitals?.id) {
-        result = await vitalsService.updateVitals(vitals.id, processedData);
-        toast.success('Vitals updated successfully');
-      } else {
-        result = await vitalsService.createVitals(processedData);
-        toast.success('Vitals recorded successfully');
-      }
+      // Remove empty/null values
+      Object.keys(processedData).forEach(key => {
+        if (
+          processedData[key] === '' ||
+          processedData[key] === null ||
+          processedData[key] === undefined
+        ) {
+          delete processedData[key];
+        }
+      });
 
-      if (onSave) {
-        onSave(result);
-      }
+      await onSave(processedData);
+      toast.success(`Vitals ${isEdit ? 'updated' : 'recorded'} successfully!`);
     } catch (error) {
       console.error('Error saving vitals:', error);
-      toast.error(error.response?.data?.detail || 'Failed to save vitals');
+      toast.error(`Failed to ${isEdit ? 'update' : 'save'} vitals`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Form steps for better organization
+  // Form steps
   const formSteps = Object.entries(FORM_FIELDS);
 
-  // Render field function
+  // Render field with Mantine components
   const renderField = fieldName => {
     const config = FIELD_CONFIGS[fieldName];
     const value = formData[fieldName];
     const error = touchedFields.has(fieldName) ? errors[fieldName] : null;
+    const IconComponent = config.icon;
 
-    const Icon = config.icon;
+    if (config.type === 'date') {
+      return (
+        <DateInput
+          key={fieldName}
+          label={config.label}
+          placeholder="Select date"
+          value={value}
+          onChange={val => handleInputChange(fieldName, val)}
+          leftSection={<IconComponent size={16} />}
+          required={config.required}
+          error={error}
+          maxDate={new Date()}
+        />
+      );
+    }
+
+    if (config.type === 'datetime') {
+      return (
+        <DateTimePicker
+          key={fieldName}
+          label={config.label}
+          placeholder="Select date and time"
+          value={value}
+          onChange={val => handleInputChange(fieldName, val)}
+          leftSection={<IconComponent size={16} />}
+          required={config.required}
+          error={error}
+          maxDate={new Date()}
+          withSeconds={false}
+          clearable
+        />
+      );
+    }
+
+    if (config.type === 'number') {
+      return (
+        <NumberInput
+          key={fieldName}
+          label={config.label}
+          placeholder={config.placeholder}
+          value={value === null || value === undefined ? '' : value}
+          onChange={val => handleInputChange(fieldName, val)}
+          leftSection={<IconComponent size={16} />}
+          rightSection={
+            config.unit && (
+              <Text size="sm" c="dimmed">
+                {config.unit}
+              </Text>
+            )
+          }
+          min={config.min}
+          max={config.max}
+          step={config.step}
+          precision={config.step < 1 ? 1 : 0}
+          required={config.required}
+          error={error}
+        />
+      );
+    }
+
+    if (config.type === 'textarea') {
+      return (
+        <Textarea
+          key={fieldName}
+          label={config.label}
+          placeholder={config.placeholder}
+          value={value || ''} // Ensure value is never null or undefined
+          onChange={e => handleInputChange(fieldName, e.target.value)}
+          rows={config.rows}
+          error={error}
+        />
+      );
+    }
+
+    if (config.type === 'select') {
+      return (
+        <Select
+          key={fieldName}
+          label={config.label}
+          placeholder={config.placeholder}
+          value={value || null}
+          onChange={val => handleInputChange(fieldName, val)}
+          leftSection={<IconComponent size={16} />}
+          data={config.options}
+          required={config.required}
+          error={error}
+          clearable
+        />
+      );
+    }
 
     return (
-      <motion.div
+      <TextInput
         key={fieldName}
-        className={`form-field ${error ? 'error' : ''}`}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        <label htmlFor={fieldName} className="field-label">
-          <div className="label-content">
-            <Icon size={16} className="label-icon" />
-            <span>
-              {config.label}
-              {config.required && <span className="required">*</span>}
-            </span>
-            {config.unit && <span className="unit">({config.unit})</span>}
-          </div>
-        </label>
-
-        <div className="field-input-container">
-          {config.type === 'textarea' ? (
-            <textarea
-              id={fieldName}
-              name={fieldName}
-              value={value}
-              onChange={handleInputChange}
-              placeholder={config.placeholder}
-              rows={config.rows}
-              className="field-input"
-            />
-          ) : (
-            <input
-              type={config.type}
-              id={fieldName}
-              name={fieldName}
-              value={value}
-              onChange={handleInputChange}
-              placeholder={config.placeholder}
-              min={config.min}
-              max={config.max}
-              step={config.step}
-              required={config.required}
-              className="field-input"
-            />
-          )}
-        </div>
-
-        {/* Field error */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              className="field-error"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <AlertTriangle size={14} />
-              <span>{error}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        label={config.label}
+        placeholder={config.placeholder}
+        value={value || ''} // Ensure value is never null or undefined
+        onChange={e => handleInputChange(fieldName, e.target.value)}
+        leftSection={<IconComponent size={16} />}
+        required={config.required}
+        error={error}
+      />
     );
   };
 
-  // Render calculated values
-  const renderCalculatedValues = () => (
-    <motion.div
-      className="calculated-values"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <h4>Calculated Values</h4>
-      <div className="calculated-grid">
-        {calculatedBMI && (
-          <div className="calculated-item">
-            <label>BMI</label>
-            <div className="calculated-value">
-              <span className="value">{calculatedBMI}</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
-
   return (
-    <motion.div
-      className="vitals-form-container"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="form-header">
-        <div className="header-content">
-          <h2>{isEdit ? 'Edit Vitals' : 'Record New Vitals'}</h2>
-          {isReady && (
-            <div className="timezone-info">
-              <Info size={14} />
-              <span>Times shown in {facilityTimezone}</span>
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="close-btn"
-          disabled={isLoading}
+    <Stack gap="lg">
+      {/* Header */}
+      {isReady && (
+        <Alert
+          variant="light"
+          color="blue"
+          icon={<IconInfoCircle size={16} />}
+          title="Timezone Information"
         >
-          <X size={20} />
-        </button>
-      </div>
+          Times shown in {facilityTimezone}
+        </Alert>
+      )}
 
       {/* Warnings */}
-      <AnimatePresence>
-        {warnings.length > 0 && (
-          <motion.div
-            className="warnings-section"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <div className="warnings-header">
-              <AlertTriangle size={16} />
-              <span>Health Alerts</span>
-            </div>
-            <div className="warnings-list">
-              {warnings.map((warning, index) => (
-                <div key={index} className="warning-item">
-                  {warning}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {warnings.length > 0 && (
+        <Alert
+          variant="light"
+          color="orange"
+          icon={<IconAlertTriangle size={16} />}
+          title="Health Alerts"
+        >
+          <Stack gap="xs">
+            {warnings.map((warning, index) => (
+              <Text key={index} size="sm">
+                {warning}
+              </Text>
+            ))}
+          </Stack>
+        </Alert>
+      )}
 
-      <form onSubmit={handleSubmit} className="vitals-form">
-        <div className="form-sections">
+      <form onSubmit={handleSubmit}>
+        <Stack gap="lg">
+          {/* Form Sections */}
           {formSteps.map(([sectionKey, section], index) => {
             const SectionIcon = section.icon;
             return (
-              <motion.div
-                key={sectionKey}
-                className="form-section"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <div className="section-header">
-                  <div className="section-title">
-                    <SectionIcon size={20} />
-                    <h3>{section.title}</h3>
-                  </div>
-                  {section.description && (
-                    <p className="section-description">{section.description}</p>
-                  )}
-                </div>
+              <Paper key={sectionKey} shadow="sm" p="md" radius="md">
+                <Stack gap="md">
+                  <Group gap="sm">
+                    <ActionIcon variant="light" size="md" radius="md">
+                      <SectionIcon size={18} />
+                    </ActionIcon>
+                    <Box>
+                      <Title order={4}>{section.title}</Title>
+                      {section.description && (
+                        <Text size="sm" c="dimmed">
+                          {section.description}
+                        </Text>
+                      )}
+                    </Box>
+                  </Group>
 
-                <div className="section-fields">
-                  {section.fields.map(fieldName => renderField(fieldName))}
-                </div>
-              </motion.div>
+                  <Grid>
+                    {section.fields.map(fieldName => (
+                      <Grid.Col
+                        key={fieldName}
+                        span={
+                          fieldName === 'notes'
+                            ? 12
+                            : fieldName === 'recorded_date'
+                              ? 12
+                              : 6
+                        }
+                      >
+                        {renderField(fieldName)}
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </Stack>
+              </Paper>
             );
           })}
-        </div>
 
-        {/* Patient Height Info */}
-        {patientHeight ? (
-          <motion.div
-            className="patient-height-info"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="height-info-content">
-              <TrendingUp size={16} />
-              <span>Patient Height: {patientHeight} inches (from profile)</span>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            className="patient-height-warning"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="height-warning-content">
-              <AlertTriangle size={16} />
-              <span>
-                Height not set in patient profile - BMI calculation unavailable
-              </span>
-            </div>
-          </motion.div>
-        )}
+          {/* Patient Height Info */}
+          {patientHeight ? (
+            <Alert
+              variant="light"
+              color="green"
+              icon={<IconUser size={16} />}
+              title="Patient Information"
+            >
+              Patient Height: {patientHeight} inches (from profile)
+            </Alert>
+          ) : (
+            <Alert
+              variant="light"
+              color="orange"
+              icon={<IconAlertTriangle size={16} />}
+              title="Missing Patient Information"
+            >
+              Height not set in patient profile - BMI calculation unavailable
+            </Alert>
+          )}
 
-        {/* Calculated values */}
-        {calculatedBMI && renderCalculatedValues()}
+          {/* Calculated Values */}
+          {calculatedBMI && (
+            <Paper shadow="sm" p="md" radius="md">
+              <Stack gap="md">
+                <Group gap="sm">
+                  <ActionIcon
+                    variant="light"
+                    size="md"
+                    radius="md"
+                    color="blue"
+                  >
+                    <IconTrendingUp size={18} />
+                  </ActionIcon>
+                  <Title order={4}>Calculated Values</Title>
+                </Group>
 
-        {/* Form actions */}
-        <div className="form-actions">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn-secondary"
-            disabled={isLoading}
-          >
-            <X size={16} />
-            Cancel
-          </button>
+                <Card shadow="xs" p="sm" radius="md" withBorder>
+                  <Group justify="space-between">
+                    <Text fw={500}>BMI</Text>
+                    <Badge size="lg" variant="light" color="blue">
+                      {calculatedBMI}
+                    </Badge>
+                  </Group>
+                </Card>
+              </Stack>
+            </Paper>
+          )}
 
-          <button type="submit" className="btn-primary" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <div className="loading-spinner" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                {isEdit ? 'Update Vitals' : 'Save Vitals'}
-              </>
-            )}
-          </button>
-        </div>
+          {/* Form Actions */}
+          <Group justify="flex-end" gap="md">
+            <Button
+              variant="light"
+              leftSection={<IconX size={16} />}
+              onClick={onCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              leftSection={
+                isLoading ? (
+                  <Loader size={16} />
+                ) : (
+                  <IconDeviceFloppy size={16} />
+                )
+              }
+              loading={isLoading}
+            >
+              {isEdit ? 'Update Vitals' : 'Save Vitals'}
+            </Button>
+          </Group>
+        </Stack>
       </form>
-    </motion.div>
+    </Stack>
   );
 };
 

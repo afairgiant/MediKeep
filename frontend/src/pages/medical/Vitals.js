@@ -1,5 +1,5 @@
 /**
- * Vitals Page Component - Enhanced Version
+ * Vitals Page Component - Enhanced Version with Mantine UI
  * Main page for managing patient vital signs with modern UX
  */
 
@@ -19,31 +19,63 @@ import {
   Download,
   RefreshCw,
 } from 'lucide-react';
+import {
+  Button,
+  Modal,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  ActionIcon,
+  Badge,
+  Grid,
+  Card,
+  Flex,
+  Box,
+  Divider,
+} from '@mantine/core';
+import {
+  IconHeart,
+  IconActivity,
+  IconTrendingUp,
+  IconChartBar,
+  IconRefresh,
+  IconPlus,
+  IconAlertTriangle,
+  IconX,
+} from '@tabler/icons-react';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
-import VitalsChart from '../../components/medical/VitalsChart';
+
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
+import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import '../../styles/shared/MedicalPageShared.css';
-import './Vitals.css';
 
-// Quick stats card configurations
+// Quick stats card configurations with Mantine icons
 const STATS_CONFIGS = {
   blood_pressure: {
     title: 'Blood Pressure',
-    icon: Heart,
+    icon: IconHeart,
     getValue: stats =>
       stats.avg_systolic_bp && stats.avg_diastolic_bp
         ? `${Math.round(stats.avg_systolic_bp)}/${Math.round(stats.avg_diastolic_bp)}`
         : 'N/A',
     getUnit: () => 'mmHg',
     getCategory: () => null,
-    color: '#e53e3e',
+    color: 'red',
   },
   heart_rate: {
     title: 'Heart Rate',
-    icon: Activity,
+    icon: IconActivity,
     getValue: stats =>
       stats.avg_heart_rate ? Math.round(stats.avg_heart_rate) : 'N/A',
     getUnit: () => 'BPM',
@@ -54,56 +86,94 @@ const STATS_CONFIGS = {
       if (hr > 100) return 'High';
       return 'Normal';
     },
-    color: '#4299e1',
+    color: 'blue',
   },
   temperature: {
-    title: 'Temperature',
-    icon: TrendingUp,
+    title: 'Latest Temperature',
+    icon: IconTrendingUp,
     getValue: stats =>
-      stats.avg_temperature ? stats.avg_temperature.toFixed(1) : 'N/A',
+      stats.current_temperature ? stats.current_temperature.toFixed(1) : 'N/A',
     getUnit: () => '°F',
     getCategory: stats => {
-      if (!stats.avg_temperature) return null;
-      const temp = stats.avg_temperature;
+      if (!stats.current_temperature) return null;
+      const temp = stats.current_temperature;
       if (temp < 97.0) return 'Low';
       if (temp > 99.5) return 'High';
       return 'Normal';
     },
-    color: '#38a169',
+    color: 'green',
   },
   weight: {
     title: 'Latest Weight',
-    icon: TrendingUp,
+    icon: IconTrendingUp,
     getValue: stats =>
       stats.current_weight ? stats.current_weight.toFixed(1) : 'N/A',
     getUnit: () => 'lbs',
     getCategory: () => null,
-    color: '#805ad5',
+    color: 'violet',
   },
   bmi: {
     title: 'BMI',
-    icon: BarChart3,
+    icon: IconChartBar,
     getValue: stats =>
       stats.current_bmi ? stats.current_bmi.toFixed(1) : 'N/A',
     getUnit: () => '',
     getCategory: () => null,
-    color: '#d69e2e',
+    color: 'yellow',
   },
 };
 
 const Vitals = () => {
+  // Page configuration
+  const pageConfig = getMedicalPageConfig('vitals');
+
   // State management
   const [showForm, setShowForm] = useState(false);
   const [editingVitals, setEditingVitals] = useState(null);
-  const [refreshList, setRefreshList] = useState(0);
   const [stats, setStats] = useState(null);
-  const [activeTab, setActiveTab] = useState('list');
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [statsError, setStatsError] = useState(null);
 
-  // Use global state for patient data
-  const { patient: currentPatient, loading: globalDataLoading } =
-    useCurrentPatient();
+  // Medical data management with filtering and sorting
+  const {
+    items: vitalsData,
+    currentPatient,
+    loading: vitalsLoading,
+    error: vitalsError,
+    successMessage,
+    createItem,
+    updateItem,
+    deleteItem,
+    refreshData,
+    clearError,
+  } = useMedicalData({
+    entityName: 'vitals',
+    apiMethodsConfig: {
+      getAll: signal => vitalsService.getVitals({}, signal),
+      getByPatient: (patientId, signal) =>
+        vitalsService.getPatientVitals(patientId, {}, signal),
+      create: (data, signal) => vitalsService.createVitals(data, signal),
+      update: (id, data, signal) =>
+        vitalsService.updateVitals(id, data, signal),
+      delete: (id, signal) => vitalsService.deleteVitals(id, signal),
+    },
+    requiresPatient: true,
+  });
+
+  // Data management with filtering and sorting
+  const dataManagement = useDataManagement(vitalsData || [], pageConfig);
+  const {
+    filteredData: filteredVitals = [],
+    filters,
+    updateFilter,
+    clearFilters,
+    hasActiveFilters,
+    sortBy,
+    sortOrder,
+    handleSortChange,
+    totalCount,
+    filteredCount,
+  } = dataManagement || {};
 
   // Load stats with enhanced error handling
   const loadStats = useCallback(async () => {
@@ -127,12 +197,29 @@ const Vitals = () => {
     }
   }, [currentPatient?.id]);
 
-  // Load stats when patient changes
+  // Load stats when patient changes or vitals data changes
   useEffect(() => {
-    if (currentPatient) {
+    if (currentPatient?.id) {
       loadStats();
     }
-  }, [loadStats, currentPatient]);
+  }, [loadStats, currentPatient?.id, vitalsData?.length]);
+
+  // Generate filter options from vitalsData
+  const statusOptions = useMemo(() => {
+    return pageConfig.filtering?.statusOptions || [];
+  }, [pageConfig.filtering?.statusOptions]);
+
+  const categoryOptions = useMemo(() => {
+    return pageConfig.filtering?.categoryOptions || [];
+  }, [pageConfig.filtering?.categoryOptions]);
+
+  const dateRangeOptions = useMemo(() => {
+    return pageConfig.filtering.dateRangeOptions;
+  }, [pageConfig.filtering.dateRangeOptions]);
+
+  const sortOptions = useMemo(() => {
+    return pageConfig.sorting.sortOptions;
+  }, [pageConfig.sorting.sortOptions]);
 
   // Form handlers
   const handleAddNew = useCallback(() => {
@@ -145,112 +232,134 @@ const Vitals = () => {
     setShowForm(true);
   }, []);
 
-  const handleFormSave = useCallback(() => {
-    setShowForm(false);
-    setEditingVitals(null);
-    setRefreshList(prev => prev + 1);
-    loadStats(); // Refresh stats after saving
-  }, [loadStats]);
+  const handleFormSave = useCallback(
+    async formData => {
+      try {
+        let success;
+        if (editingVitals) {
+          success = await updateItem(editingVitals.id, formData);
+        } else {
+          success = await createItem(formData);
+        }
+
+        if (success) {
+          setShowForm(false);
+          setEditingVitals(null);
+          // Refresh the vitals data list and stats
+          await refreshData();
+          await loadStats();
+        }
+      } catch (error) {
+        console.error('Error saving vitals:', error);
+        throw error; // Let the form handle the error display
+      }
+    },
+    [editingVitals, updateItem, createItem, refreshData, loadStats]
+  );
 
   const handleFormCancel = useCallback(() => {
     setShowForm(false);
     setEditingVitals(null);
-  }, []);
+    clearError();
+  }, [clearError]);
 
-  // Tab handlers
-  const handleTabChange = useCallback(tab => {
-    setActiveTab(tab);
-  }, []);
+  const handleDelete = useCallback(
+    async vitalsId => {
+      const success = await deleteItem(vitalsId);
+      if (success) {
+        // Refresh the vitals data list and stats
+        await refreshData();
+        await loadStats();
+      }
+    },
+    [deleteItem, refreshData, loadStats]
+  );
 
-  // Render stats card
+  // Render stats card with Mantine components
   const renderStatsCard = (key, config) => {
-    const value = config.getValue(stats || {});
-    const unit = config.getUnit();
-    const category = config.getCategory(stats || {});
-    const Icon = config.icon;
-
-    const getCategoryColor = cat => {
-      if (!cat) return '';
-      if (cat.toLowerCase().includes('normal')) return 'normal';
-      if (
-        cat.toLowerCase().includes('high') ||
-        cat.toLowerCase().includes('hypertension') ||
-        cat.toLowerCase().includes('crisis')
-      )
-        return 'high';
-      if (
-        cat.toLowerCase().includes('low') ||
-        cat.toLowerCase().includes('underweight')
-      )
-        return 'low';
-      if (
-        cat.toLowerCase().includes('elevated') ||
-        cat.toLowerCase().includes('overweight')
-      )
-        return 'elevated';
-      return 'other';
-    };
+    const IconComponent = config.icon;
+    const value = config.getValue(stats);
+    const unit = config.getUnit(stats);
+    const category = config.getCategory(stats);
 
     return (
-      <motion.div
-        key={key}
-        className="stat-card"
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          duration: 0.3,
-          delay: Object.keys(STATS_CONFIGS).indexOf(key) * 0.05,
-        }}
-        whileHover={{ y: -2, boxShadow: '0 8px 25px rgba(0,0,0,0.15)' }}
-      >
-        <div className="stat-icon" style={{ color: config.color }}>
-          <Icon size={24} />
-        </div>
-        <div className="stat-content">
-          <div className="stat-label">{config.title}</div>
-          <div className="stat-value">
-            {value} {unit && <span className="stat-unit">{unit}</span>}
-          </div>
-          {category && (
-            <div className={`stat-category ${getCategoryColor(category)}`}>
-              {category === 'Normal' && <CheckCircle size={12} />}
-              {category !== 'Normal' && <AlertTriangle size={12} />}
-              <span>{category}</span>
-            </div>
-          )}
-        </div>
-      </motion.div>
+      <Card key={key} shadow="sm" padding="lg" radius="md" withBorder>
+        <Flex align="center" gap="md">
+          <ActionIcon
+            size="xl"
+            variant="light"
+            color={config.color}
+            radius="md"
+          >
+            <IconComponent size={24} />
+          </ActionIcon>
+          <Box flex={1}>
+            <Text size="sm" c="dimmed" fw={500}>
+              {config.title}
+            </Text>
+            <Group gap="xs" align="baseline">
+              <Text size="xl" fw={700}>
+                {value}
+              </Text>
+              {unit && (
+                <Text size="sm" c="dimmed">
+                  {unit}
+                </Text>
+              )}
+            </Group>
+            {category && (
+              <Badge
+                size="sm"
+                variant="light"
+                color={
+                  category === 'High'
+                    ? 'red'
+                    : category === 'Low'
+                      ? 'orange'
+                      : 'green'
+                }
+                mt={4}
+              >
+                {category}
+              </Badge>
+            )}
+          </Box>
+        </Flex>
+      </Card>
     );
   };
 
   // Loading state
-  if (globalDataLoading) {
+  if (vitalsLoading) {
     return (
-      <div className="vitals-page loading">
-        <div className="loading-content">
-          <Activity className="loading-spinner" size={32} />
-          <p>Loading patient information...</p>
-        </div>
-      </div>
+      <Center h="50vh">
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text>Loading vital signs...</Text>
+        </Stack>
+      </Center>
     );
   }
 
   // No patient selected
   if (!currentPatient) {
     return (
-      <div className="vitals-page no-patient">
-        <div className="no-patient-content">
-          <Heart size={64} className="no-patient-icon" />
-          <h2>No Patient Selected</h2>
-          <p>Please select a patient to view and manage vital signs.</p>
-        </div>
-      </div>
+      <Center h="50vh">
+        <Stack align="center" gap="lg">
+          <IconHeart size={64} stroke={1} color="var(--mantine-color-gray-5)" />
+          <Stack align="center" gap="xs">
+            <Title order={3}>No Patient Selected</Title>
+            <Text c="dimmed" ta="center">
+              Please select a patient to view and manage vital signs.
+            </Text>
+          </Stack>
+        </Stack>
+      </Center>
     );
   }
 
   return (
     <motion.div
-      className="vitals-page"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -258,182 +367,177 @@ const Vitals = () => {
       <PageHeader title="Vital Signs" icon="🩺" />
 
       <div className="medical-page-content">
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <button className="add-button" onClick={handleAddNew}>
-              + Add New Vital Signs
-            </button>
-          </div>
-        </div>
+        {vitalsError && (
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
+            {vitalsError}
+          </Alert>
+        )}
+        {successMessage && (
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<CheckCircle size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
+        )}
+
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddNew}
+            size="md"
+          >
+            Add New Vital Signs
+          </Button>
+        </Group>
 
         {/* Stats Overview */}
         <motion.div
-          className="stats-overview"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <div className="stats-header">
-            <div className="stats-title">
-              <h3>Health Summary</h3>
-              <p>Latest readings and averages</p>
-            </div>
-            <div className="stats-actions">
-              <motion.button
+          <Paper shadow="sm" p="lg" radius="md" mb="lg">
+            <Group justify="space-between" mb="md">
+              <Box>
+                <Title order={3}>Health Summary</Title>
+                <Text c="dimmed" size="sm">
+                  Latest readings and averages
+                </Text>
+              </Box>
+              <Button
+                variant="light"
+                leftSection={<IconRefresh size={16} />}
                 onClick={loadStats}
-                className="refresh-btn"
-                disabled={isLoadingStats}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                loading={isLoadingStats}
+                size="sm"
               >
-                <RefreshCw
-                  size={16}
-                  className={isLoadingStats ? 'spinning' : ''}
-                />
                 Refresh
-              </motion.button>
-            </div>
-          </div>
+              </Button>
+            </Group>
 
-          {isLoadingStats ? (
-            <div className="stats-loading">
-              <div className="loading-spinner">
-                <Activity size={20} />
-              </div>
-              <span>Loading statistics...</span>
-            </div>
-          ) : statsError ? (
-            <motion.div
-              className="stats-error"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <AlertTriangle size={20} />
-              <span>{statsError}</span>
-              <button onClick={loadStats} className="retry-btn">
-                Try Again
-              </button>
-            </motion.div>
-          ) : stats ? (
-            <div className="stats-grid">
-              {Object.entries(STATS_CONFIGS).map(([key, config]) =>
-                renderStatsCard(key, config)
-              )}
-            </div>
-          ) : (
-            <motion.div
-              className="stats-empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <BarChart3 size={32} />
-              <h4>No Data Available</h4>
-              <p>Record some vitals to see statistics here</p>
-            </motion.div>
-          )}
+            {isLoadingStats ? (
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <Loader size="md" />
+                  <Text size="sm" c="dimmed">
+                    Loading statistics...
+                  </Text>
+                </Stack>
+              </Center>
+            ) : statsError ? (
+              <Alert
+                variant="light"
+                color="red"
+                icon={<IconAlertTriangle size={16} />}
+                title="Failed to load statistics"
+              >
+                <Group justify="space-between" align="center">
+                  <Text size="sm">{statsError}</Text>
+                  <Button variant="light" size="xs" onClick={loadStats}>
+                    Try Again
+                  </Button>
+                </Group>
+              </Alert>
+            ) : stats ? (
+              <Grid>
+                {Object.entries(STATS_CONFIGS).map(([key, config]) => (
+                  <Grid.Col
+                    key={key}
+                    span={{ base: 12, xs: 6, sm: 4, md: 2.4 }}
+                  >
+                    {renderStatsCard(key, config)}
+                  </Grid.Col>
+                ))}
+              </Grid>
+            ) : (
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconChartBar
+                    size={48}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={4}>No Data Available</Title>
+                    <Text c="dimmed" ta="center">
+                      Record some vitals to see statistics here
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            )}
+          </Paper>
         </motion.div>
 
-        {/* Form Modal */}
-        <AnimatePresence>
-          {showForm && (
-            <motion.div
-              className="form-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={e => {
-                if (e.target === e.currentTarget) {
-                  handleFormCancel();
-                }
-              }}
-            >
-              <motion.div
-                className="form-container"
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={{
-                  duration: 0.3,
-                  type: 'spring',
-                  damping: 25,
-                  stiffness: 300,
-                }}
-              >
-                <VitalsForm
-                  vitals={editingVitals}
-                  patientId={currentPatient?.id}
-                  practitionerId={null}
-                  onSave={handleFormSave}
-                  onCancel={handleFormCancel}
-                  isEdit={!!editingVitals}
-                />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Mantine Filters */}
+        {dataManagement && filters && (
+          <MantineFilters
+            filters={filters}
+            updateFilter={updateFilter}
+            clearFilters={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            statusOptions={statusOptions}
+            categoryOptions={categoryOptions}
+            dateRangeOptions={dateRangeOptions}
+            sortOptions={sortOptions}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            handleSortChange={handleSortChange}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            config={pageConfig.filterControls}
+          />
+        )}
 
-        {/* Content Tabs */}
+        {/* Form Modal */}
+        <Modal
+          opened={showForm}
+          onClose={handleFormCancel}
+          title={editingVitals ? 'Edit Vital Signs' : 'Add New Vital Signs'}
+          size="lg"
+          centered
+        >
+          <VitalsForm
+            vitals={editingVitals}
+            patientId={currentPatient?.id}
+            practitionerId={null}
+            onSave={handleFormSave}
+            onCancel={handleFormCancel}
+            isEdit={!!editingVitals}
+            createItem={createItem}
+            updateItem={updateItem}
+            error={vitalsError}
+            clearError={clearError}
+          />
+        </Modal>
+
+        {/* Content */}
         <motion.div
-          className="content-tabs"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="tab-buttons">
-            <motion.button
-              className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
-              onClick={() => handleTabChange('list')}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <BarChart3 size={18} />
-              <span>Records</span>
-            </motion.button>
-            <motion.button
-              className={`tab-button ${activeTab === 'chart' ? 'active' : ''}`}
-              onClick={() => handleTabChange('chart')}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <TrendingUp size={18} />
-              <span>Trends</span>
-            </motion.button>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              className="tab-content"
-              initial={{ opacity: 0, x: activeTab === 'chart' ? 20 : -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: activeTab === 'chart' ? -20 : 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {activeTab === 'list' && (
-                <VitalsList
-                  patientId={currentPatient?.id}
-                  onEdit={handleEdit}
-                  onRefresh={refreshList}
-                  showActions={true}
-                />
-              )}
-
-              {activeTab === 'chart' && (
-                <VitalsChart
-                  patientId={currentPatient?.id}
-                  height={500}
-                  showControls={true}
-                  defaultMetrics={[
-                    'weight',
-                    'systolic_bp',
-                    'diastolic_bp',
-                    'heart_rate',
-                  ]}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <VitalsList
+            patientId={currentPatient?.id}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            vitalsData={filteredVitals}
+            loading={vitalsLoading}
+            error={vitalsError}
+            showActions={true}
+          />
         </motion.div>
       </div>
     </motion.div>

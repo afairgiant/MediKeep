@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+import { Button } from '../../components/ui';
+import MantineVisitForm from '../../components/medical/MantineVisitForm';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 
@@ -45,16 +49,28 @@ const Visits = () => {
     requiresPatient: true,
   });
 
-  // Form and filter state
+  // Get standardized configuration
+  const config = getMedicalPageConfig('visits');
+
+  // Use standardized data management
+  const dataManagement = useDataManagement(visits, config);
+
+  // Form state
   const [showModal, setShowModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date');
   const [formData, setFormData] = useState({
     reason: '',
     date: '',
     notes: '',
     practitioner_id: '',
+    visit_type: '',
+    chief_complaint: '',
+    diagnosis: '',
+    treatment_plan: '',
+    follow_up_instructions: '',
+    duration_minutes: '',
+    location: '',
+    priority: '',
   });
 
   const handleAddVisit = () => {
@@ -64,6 +80,14 @@ const Visits = () => {
       date: '',
       notes: '',
       practitioner_id: '',
+      visit_type: '',
+      chief_complaint: '',
+      diagnosis: '',
+      treatment_plan: '',
+      follow_up_instructions: '',
+      duration_minutes: '',
+      location: '',
+      priority: '',
     });
     setShowModal(true);
   };
@@ -75,6 +99,14 @@ const Visits = () => {
       date: visit.date ? visit.date.split('T')[0] : '',
       notes: visit.notes || '',
       practitioner_id: visit.practitioner_id || '',
+      visit_type: visit.visit_type || '',
+      chief_complaint: visit.chief_complaint || '',
+      diagnosis: visit.diagnosis || '',
+      treatment_plan: visit.treatment_plan || '',
+      follow_up_instructions: visit.follow_up_instructions || '',
+      duration_minutes: visit.duration_minutes || '',
+      location: visit.location || '',
+      priority: visit.priority || '',
     });
     setShowModal(true);
   };
@@ -114,6 +146,14 @@ const Visits = () => {
       date: formData.date,
       notes: formData.notes || null,
       practitioner_id: formData.practitioner_id || null,
+      visit_type: formData.visit_type || null,
+      chief_complaint: formData.chief_complaint || null,
+      diagnosis: formData.diagnosis || null,
+      treatment_plan: formData.treatment_plan || null,
+      follow_up_instructions: formData.follow_up_instructions || null,
+      duration_minutes: formData.duration_minutes || null,
+      location: formData.location || null,
+      priority: formData.priority || null,
       patient_id: currentPatient.id,
     };
 
@@ -143,26 +183,6 @@ const Visits = () => {
     return `Practitioner ID: ${practitionerId}`;
   };
 
-  // Enhanced filtering and sorting logic
-  const getFilteredAndSortedVisits = () => {
-    return visits
-      .filter(visit => {
-        const matchesSearch =
-          visit.reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          visit.notes?.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesSearch;
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case 'reason':
-            return (a.reason || '').localeCompare(b.reason || '');
-          case 'date':
-          default:
-            return new Date(b.date || 0) - new Date(a.date || 0);
-        }
-      });
-  };
-
   if (loading) {
     return (
       <div className="medical-page-container">
@@ -174,19 +194,19 @@ const Visits = () => {
     );
   }
 
-  const filteredVisits = getFilteredAndSortedVisits();
+  const filteredVisits = dataManagement.data;
 
   return (
     <div className="medical-page-container">
-      <PageHeader title="Medical Visits" icon="🏥" />
+      <PageHeader title="Medical Visits" icon="" />
 
       <div className="medical-page-content">
         {error && (
           <div className="error-message">
             {error}
-            <button onClick={clearError} className="error-close">
+            <Button variant="ghost" size="small" onClick={clearError}>
               ×
-            </button>
+            </Button>
           </div>
         )}
         {successMessage && (
@@ -195,9 +215,9 @@ const Visits = () => {
 
         <div className="medical-page-controls">
           <div className="controls-left">
-            <button className="add-button" onClick={handleAddVisit}>
+            <Button variant="primary" onClick={handleAddVisit}>
               + Add Visit
-            </button>
+            </Button>
           </div>
 
           <div className="controls-center">
@@ -207,48 +227,40 @@ const Visits = () => {
               showPrint={true}
             />
           </div>
-
-          <div className="controls-right">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search visits..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-          </div>
         </div>
 
-        <div className="filters-container">
-          <div className="filter-group">
-            <label>Sort By</label>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="filter-select"
-            >
-              <option value="date">Date</option>
-              <option value="reason">Reason</option>
-            </select>
-          </div>
-        </div>
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          categoryOptions={dataManagement.categoryOptions}
+          dateRangeOptions={dataManagement.dateRangeOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
 
         <div className="medical-items-list">
           {filteredVisits.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🏥</div>
+              <div className="empty-icon"></div>
               <h3>No Medical Visits Found</h3>
               <p>
-                {searchTerm
-                  ? 'Try adjusting your search criteria.'
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
                   : 'Start by adding your first medical visit.'}
               </p>
-              {!searchTerm && (
-                <button className="add-button" onClick={handleAddVisit}>
+              {!dataManagement.hasActiveFilters && (
+                <Button variant="primary" onClick={handleAddVisit}>
                   Add Your First Visit
-                </button>
+                </Button>
               )}
             </div>
           ) : viewMode === 'cards' ? (
@@ -260,7 +272,21 @@ const Visits = () => {
                       <h3 className="item-title">
                         {visit.reason || 'General Visit'}
                       </h3>
-                      <p className="item-subtitle">{formatDate(visit.date)}</p>
+                      <p className="item-subtitle">
+                        {formatDate(visit.date)}
+                        {visit.visit_type && (
+                          <span className="visit-type-badge">
+                            • {visit.visit_type}
+                          </span>
+                        )}
+                        {visit.priority && (
+                          <span
+                            className={`priority-badge priority-${visit.priority}`}
+                          >
+                            • {visit.priority}
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -268,33 +294,85 @@ const Visits = () => {
                     <div className="detail-item">
                       <span className="label">Practitioner:</span>
                       <span className="value">
-                        👨‍⚕️ {getPractitionerDisplay(visit.practitioner_id)}
+                        {getPractitionerDisplay(visit.practitioner_id)}
                       </span>
                     </div>
+
+                    {visit.chief_complaint && (
+                      <div className="detail-item">
+                        <span className="label">Chief Complaint:</span>
+                        <span className="value">{visit.chief_complaint}</span>
+                      </div>
+                    )}
+
+                    {visit.location && (
+                      <div className="detail-item">
+                        <span className="label">Location:</span>
+                        <span className="value">{visit.location}</span>
+                      </div>
+                    )}
+
+                    {visit.duration_minutes && (
+                      <div className="detail-item">
+                        <span className="label">Duration:</span>
+                        <span className="value">
+                          {visit.duration_minutes} minutes
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {visit.diagnosis && (
+                    <div className="medical-item-section">
+                      <div className="section-label">Diagnosis/Assessment</div>
+                      <div className="section-content">{visit.diagnosis}</div>
+                    </div>
+                  )}
+
+                  {visit.treatment_plan && (
+                    <div className="medical-item-section">
+                      <div className="section-label">Treatment Plan</div>
+                      <div className="section-content">
+                        {visit.treatment_plan}
+                      </div>
+                    </div>
+                  )}
+
+                  {visit.follow_up_instructions && (
+                    <div className="medical-item-section">
+                      <div className="section-label">
+                        Follow-up Instructions
+                      </div>
+                      <div className="section-content">
+                        {visit.follow_up_instructions}
+                      </div>
+                    </div>
+                  )}
 
                   {visit.notes && (
                     <div className="medical-item-notes">
-                      <div className="notes-label">Notes</div>
+                      <div className="notes-label">Additional Notes</div>
                       <div className="notes-content">{visit.notes}</div>
                     </div>
                   )}
 
                   <div className="medical-item-actions">
-                    <button
-                      className="edit-button"
+                    <Button
+                      variant="secondary"
+                      size="small"
                       onClick={() => handleEditVisit(visit)}
                       title="Edit visit"
                     >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      className="delete-button"
+                      Edit
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
                       onClick={() => handleDeleteVisit(visit.id)}
                       title="Delete visit"
                     >
-                      🗑️ Delete
-                    </button>
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -305,8 +383,12 @@ const Visits = () => {
               columns={[
                 { header: 'Visit Date', accessor: 'date' },
                 { header: 'Reason', accessor: 'reason' },
+                { header: 'Visit Type', accessor: 'visit_type' },
+                { header: 'Chief Complaint', accessor: 'chief_complaint' },
                 { header: 'Practitioner', accessor: 'practitioner_name' },
-                { header: 'Notes', accessor: 'notes' },
+                { header: 'Location', accessor: 'location' },
+                { header: 'Priority', accessor: 'priority' },
+                { header: 'Diagnosis', accessor: 'diagnosis' },
               ]}
               patientData={currentPatient}
               tableName="Visit History"
@@ -317,13 +399,33 @@ const Visits = () => {
                   <span className="primary-field">{formatDate(value)}</span>
                 ),
                 reason: value => value || 'General Visit',
-                practitioner_name: (value, item) =>
-                  getPractitionerDisplay(item.practitioner_id),
-                notes: value =>
+                visit_type: value => value || '-',
+                chief_complaint: value =>
                   value ? (
                     <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
+                      {value.length > 30
+                        ? `${value.substring(0, 30)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+                practitioner_name: (value, item) =>
+                  getPractitionerDisplay(item.practitioner_id),
+                location: value => value || '-',
+                priority: value =>
+                  value ? (
+                    <span className={`priority-badge priority-${value}`}>
+                      {value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
+                diagnosis: value =>
+                  value ? (
+                    <span title={value}>
+                      {value.length > 40
+                        ? `${value.substring(0, 40)}...`
                         : value}
                     </span>
                   ) : (
@@ -335,82 +437,16 @@ const Visits = () => {
         </div>
       </div>
 
-      <MedicalFormModal
+      <MantineVisitForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingVisit ? 'Edit Visit' : 'Add New Visit'}
-      >
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="reason">Reason for Visit *</label>
-              <input
-                type="text"
-                id="reason"
-                name="reason"
-                value={formData.reason}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Annual Checkup, Follow-up"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="date">Date *</label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="practitioner_id">Practitioner</label>
-              <select
-                id="practitioner_id"
-                name="practitioner_id"
-                value={formData.practitioner_id}
-                onChange={handleInputChange}
-              >
-                <option value="">Select a practitioner (optional)</option>
-                {practitioners.map(practitioner => (
-                  <option key={practitioner.id} value={practitioner.id}>
-                    Dr. {practitioner.name} - {practitioner.specialty}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="notes">Additional Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="4"
-                placeholder="Optional - Any additional notes about the visit"
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => setShowModal(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              {editingVisit ? 'Update Visit' : 'Add Visit'}
-            </button>
-          </div>
-        </form>
-      </MedicalFormModal>
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        practitioners={practitioners}
+        editingVisit={editingVisit}
+      />
     </div>
   );
 };

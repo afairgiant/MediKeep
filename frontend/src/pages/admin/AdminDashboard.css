@@ -1,21 +1,29 @@
 /* Modern Admin Dashboard Styles */
 :root {
-  --admin-primary: #3b82f6;
-  --admin-primary-dark: #2563eb;
-  --admin-success: #10b981;
-  --admin-warning: #f59e0b;
-  --admin-danger: #ef4444;
-  --admin-info: #06b6d4;
-  --admin-secondary: #6b7280;
-  --admin-light: #f8fafc;
-  --admin-dark: #1e293b;
-  --admin-border: #e2e8f0;
-  --admin-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --admin-shadow-lg:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --admin-radius: 12px;
-  --admin-radius-lg: 16px;
+  /* Use global theme variables instead of hardcoded admin-specific ones */
+  --admin-primary: var(--color-primary);
+  --admin-primary-dark: var(--color-primary-dark);
+  --admin-success: var(--color-success);
+  --admin-warning: var(--color-warning);
+  --admin-danger: var(--color-danger);
+  --admin-info: var(--color-info);
+  --admin-secondary: var(--color-text-secondary);
+  --admin-light: var(--color-bg-secondary);
+  --admin-dark: var(--color-text-primary);
+  --admin-border: var(--color-border-light);
+  --admin-shadow: var(--shadow-md);
+  --admin-shadow-lg: var(--shadow-lg);
+  --admin-radius: var(--border-radius-lg);
+  --admin-radius-lg: var(--border-radius-xl);
+}
+
+/* Dark theme overrides for admin dashboard */
+[data-theme='dark'] {
+  /* Admin colors adjusted for dark theme */
+  --admin-light: var(--color-bg-secondary);
+  --admin-dark: var(--color-text-primary);
+  --admin-border: var(--color-border-light);
+  --admin-secondary: var(--color-text-secondary);
 }
 
 /* Main Dashboard Container */
@@ -24,16 +32,17 @@
   max-width: 1400px;
   margin: 0 auto;
   min-height: calc(100vh - 120px);
-  background: var(--admin-light);
+  background: var(--color-bg-primary);
 }
 
 /* Dashboard Header */
 .dashboard-header-modern {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
   box-shadow: var(--admin-shadow);
   margin-bottom: 24px;
   overflow: hidden;
+  border: 1px solid var(--admin-border);
 }
 
 .header-content {
@@ -135,7 +144,7 @@
 }
 
 .tab-btn.active {
-  background: white;
+  background: var(--color-bg-primary);
   color: var(--admin-primary);
   box-shadow: var(--admin-shadow);
 }
@@ -153,14 +162,13 @@
 }
 
 .stat-card-modern {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
   padding: 24px;
   box-shadow: var(--admin-shadow);
   border: 1px solid var(--admin-border);
   display: flex;
   align-items: center;
-
   gap: 20px;
   position: relative;
   overflow: hidden;
@@ -267,7 +275,7 @@
 }
 
 .chart-card {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
   padding: 24px;
   box-shadow: var(--admin-shadow);
@@ -330,7 +338,7 @@
 
 /* Dashboard Cards */
 .dashboard-card-modern {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
   padding: 24px;
   box-shadow: var(--admin-shadow);
@@ -416,7 +424,8 @@
   padding: 8px 12px;
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius);
-  background: white;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-size: 0.875rem;
 }
 
@@ -439,7 +448,7 @@
 }
 
 .activity-item-modern:hover {
-  background: var(--admin-light);
+  background: var(--color-bg-secondary);
   margin: 0 -12px;
   padding: 16px 12px;
   border-radius: var(--admin-radius);
@@ -449,7 +458,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--admin-light);
+  background: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -476,7 +485,7 @@
 }
 
 .activity-type {
-  background: var(--admin-light);
+  background: var(--color-bg-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 500;
@@ -531,7 +540,7 @@
 
 /* Quick Actions */
 .quick-actions-modern {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
   padding: 24px;
   box-shadow: var(--admin-shadow);
@@ -556,7 +565,7 @@
   align-items: center;
   gap: 16px;
   padding: 20px;
-  background: white;
+  background: var(--color-bg-primary);
   border: 2px solid var(--admin-border);
   border-radius: var(--admin-radius);
   cursor: pointer;
@@ -635,7 +644,7 @@
 }
 
 .admin-error {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
   padding: 40px;
   text-align: center;
@@ -683,7 +692,7 @@
 }
 
 .retry-btn.secondary {
-  background: var(--admin-light);
+  background: var(--color-bg-secondary);
   color: var(--admin-secondary);
   border: 1px solid var(--admin-border);
 }
@@ -1044,16 +1053,16 @@
 
 .admin-error h2 {
   margin: 0 0 10px 0;
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .admin-error p {
   margin: 0 0 20px 0;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .retry-btn {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1064,7 +1073,7 @@
 }
 
 .retry-btn:hover {
-  background: #2563eb;
+  background: var(--color-primary-dark);
 }
 
 /* Responsive Design */
@@ -1103,27 +1112,60 @@
 }
 
 .activity-action.created {
-  background-color: #dcfce7;
-  color: #16a34a;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .activity-action.updated {
-  background-color: #dbeafe;
-  color: #2563eb;
+  background-color: var(--color-info-light);
+  color: var(--color-info);
 }
 
 .activity-action.deleted {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .activity-action.viewed {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+/* Dark theme activity action overrides */
+[data-theme='dark'] .activity-action.created {
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+[data-theme='dark'] .activity-action.updated {
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
+}
+
+[data-theme='dark'] .activity-action.deleted {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+[data-theme='dark'] .activity-action.viewed {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
 }
 
 /* Enhance activity items for deleted items */
 .activity-item-modern.deleted {
-  border-left: 3px solid #dc2626;
-  background-color: #fef7f7;
+  border-left: 3px solid var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+/* Dark theme deleted activity items */
+[data-theme='dark'] .activity-item-modern.deleted {
+  border-left: 3px solid var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+/* Mantine component hover effects */
+.action-button-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
