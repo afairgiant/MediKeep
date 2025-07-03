@@ -275,13 +275,15 @@ def log_crud_activity(
     except Exception as e:
         # Sanitize error message to prevent sensitive data exposure
         safe_error_msg = sanitize_log_input(str(e))
-
+        sanitized_entity_type = (
+            "[REDACTED]" if _is_sensitive_field(entity_type) else entity_type
+        )
         logger.error(
             f"Failed to log activity: {action} {entity_type}",
             extra={
                 "error": safe_error_msg,
                 "user_id": user_id,
-                "entity_type": entity_type,
+                "entity_type": sanitized_entity_type,
                 "action": action,
             },
         )
@@ -328,12 +330,14 @@ def safe_log_activity(
     except Exception as e:
         # Sanitize error message to prevent sensitive data exposure in logs
         safe_error_msg = sanitize_log_input(str(e))
-
+        sanitized_entity_type = (
+            "[REDACTED]" if _is_sensitive_field(entity_type) else entity_type
+        )
         logger.warning(
             f"Activity logging failed for {action} {entity_type}: {safe_error_msg}",
             extra={
                 "user_id": user_id,
-                "entity_type": entity_type,
+                "entity_type": sanitized_entity_type,
                 "action": action,
                 "error": safe_error_msg,
             },
