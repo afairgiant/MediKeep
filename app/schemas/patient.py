@@ -251,7 +251,7 @@ class PatientCreate(PatientBase):
             user_id=5,
             first_name="John",
             last_name="Doe",
-            birthDate=date(1990, 1, 15),
+            birth_date=date(1990, 1, 15),
             gender="M",
             address="123 Main St, City, State 12345"
         )

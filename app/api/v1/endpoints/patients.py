@@ -57,7 +57,7 @@ def get_my_patient_record(
 
     Returns the patient record with all basic information:
     - first_name, last_name
-    - birthDate
+    - birth_date
     - gender
     - address"""
     user_ip = request.client.host if request.client else "unknown"
@@ -106,7 +106,7 @@ def create_my_patient_record(
     Required fields:
     - first_name
     - last_name
-    - birthDate (YYYY-MM-DD format)
+    - birth_date (YYYY-MM-DD format)
     - gender
     - address
     """
@@ -176,7 +176,7 @@ def update_my_patient_record(
     All fields are optional for updates:
     - first_name
     - last_name
-    - birthDate
+    - birth_date
     - gender
     - address
     """

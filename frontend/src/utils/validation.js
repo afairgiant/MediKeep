@@ -21,13 +21,13 @@ export const validationSchemas = {
       errors.last_name = VALIDATION_RULES.REQUIRED;
     }
 
-    if (!values.birthDate) {
-      errors.birthDate = VALIDATION_RULES.REQUIRED;
+    if (!values.birth_date) {
+      errors.birth_date = VALIDATION_RULES.REQUIRED;
     } else {
-      const birthDate = new Date(values.birthDate);
+      const birth_date = new Date(values.birth_date);
       const today = new Date();
-      if (birthDate > today) {
-        errors.birthDate = 'Birth date cannot be in the future';
+      if (birth_date > today) {
+        errors.birth_date = 'Birth date cannot be in the future';
       }
     }
 
@@ -43,12 +43,12 @@ export const validationSchemas = {
 
     // Blood type validation (optional)
     if (
-      values.bloodType &&
+      values.blood_type &&
       !['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(
-        values.bloodType
+        values.blood_type
       )
     ) {
-      errors.bloodType = 'Please select a valid blood type';
+      errors.blood_type = 'Please select a valid blood type';
     }
 
     // Height validation (optional)

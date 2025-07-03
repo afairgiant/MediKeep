@@ -168,7 +168,7 @@ const ModelManagement = () => {
             // Patient fields
             'first_name',
             'last_name',
-            'birthDate',
+            'birth_date',
             // Practitioner fields
             'name',
             'specialty',

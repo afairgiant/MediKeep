@@ -30,7 +30,7 @@ export const checkPatientProfileCompletion = patient => {
         val && val.trim() !== '' && val.toLowerCase() !== 'last name',
     },
     {
-      key: 'birthDate',
+      key: 'birth_date',
       label: 'Birth Date',
       check: val => val && val !== '1990-01-01', // Check for default placeholder date
     },
@@ -89,7 +89,7 @@ export const checkForPatientPlaceholderValues = patient => {
   }
 
   // Check for default birth date
-  if (patient.birthDate === '1990-01-01') {
+  if (patient.birth_date === '1990-01-01') {
     placeholderFields.push('Birth Date (default)');
   }
 

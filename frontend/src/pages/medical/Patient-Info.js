@@ -29,7 +29,7 @@ const PatientInfo = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
-    birthDate: '',
+    birth_date: '',
     gender: '',
     address: '',
   });
@@ -44,10 +44,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: patientData.first_name || '',
         last_name: patientData.last_name || '',
-        birthDate: patientData.birthDate || '',
+        birth_date: patientData.birth_date || '',
         gender: patientData.gender || '',
         address: patientData.address || '',
-        bloodType: patientData.bloodType || '',
+        blood_type: patientData.blood_type || '',
         height: patientData.height || '',
         weight: patientData.weight || '',
         physician_id: patientData.physician_id || '',
@@ -60,10 +60,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: '',
         last_name: '',
-        birthDate: '',
+        birth_date: '',
         gender: '',
         address: '',
-        bloodType: '',
+        blood_type: '',
         height: '',
         weight: '',
         physician_id: '',
@@ -110,10 +110,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: patientData.first_name || '',
         last_name: patientData.last_name || '',
-        birthDate: patientData.birthDate || '',
+        birth_date: patientData.birth_date || '',
         gender: patientData.gender || '',
         address: patientData.address || '',
-        bloodType: patientData.bloodType || '',
+        blood_type: patientData.blood_type || '',
         height: patientData.height || '',
         weight: patientData.weight || '',
         physician_id: patientData.physician_id || '',
@@ -122,10 +122,10 @@ const PatientInfo = () => {
       setFormData({
         first_name: '',
         last_name: '',
-        birthDate: '',
+        birth_date: '',
         gender: '',
         address: '',
-        bloodType: '',
+        blood_type: '',
         height: '',
         weight: '',
         physician_id: '',
@@ -259,7 +259,7 @@ const PatientInfo = () => {
                   <label>Birth Date:</label>
                   <span>
                     {formatDate(
-                      patientData?.birthDate,
+                      patientData?.birth_date,
                       DATE_FORMATS.DISPLAY_LONG
                     )}
                   </span>
@@ -276,7 +276,7 @@ const PatientInfo = () => {
               <div className="detail-row">
                 <div className="detail-group">
                   <label>Blood Type:</label>
-                  <span>{patientData?.bloodType || 'Not provided'}</span>
+                  <span>{patientData?.blood_type || 'Not provided'}</span>
                 </div>
                 <div className="detail-group">
                   <label>Height:</label>
