@@ -8,7 +8,7 @@ with automatic discovery of model metadata, relationships, and validation.
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy import inspect as sql_inspect
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.activity_logging import safe_log_activity
 from app.core.datetime_utils import convert_date_fields, convert_datetime_fields
+from app.core.logging_config import get_logger
 from app.crud import (
     allergy,
     condition,
@@ -879,6 +880,99 @@ def create_model_record(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error creating {model_name} record: {str(e)}",
+        )
+
+
+# Initialize logger
+logger = get_logger(__name__, "app")
+
+
+class AdminResetPasswordRequest(BaseModel):
+    new_password: str
+
+
+@router.post("/users/{user_id}/reset-password")
+def admin_reset_password(
+    *,
+    user_id: int,
+    password_data: AdminResetPasswordRequest,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+) -> Any:
+    """
+    Admin endpoint to reset any user's password.
+
+    Requires admin privileges.
+    """
+    user_ip = request.client.host if request.client else "unknown"
+
+    # Get the target user
+    target_user = user.get(db, id=user_id)
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    # Validate new password
+    if len(password_data.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 6 characters long",
+        )
+
+    # Check if password contains at least one letter and one number
+    has_letter = any(c.isalpha() for c in password_data.new_password)
+    has_number = any(c.isdigit() for c in password_data.new_password)
+    if not (has_letter and has_number):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must contain at least one letter and one number",
+        )
+
+    try:
+        # Update password using the CRUD method
+        updated_user = user.update_password(
+            db, user_id=user_id, new_password=password_data.new_password
+        )
+
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+
+        logger.info(
+            f"Admin {current_user.username} reset password for user {target_user.username}",
+            extra={
+                "category": "security",
+                "event": "admin_password_reset",
+                "admin_user_id": current_user.id,
+                "admin_username": current_user.username,
+                "target_user_id": user_id,
+                "target_username": target_user.username,
+                "ip": user_ip,
+            },
+        )
+
+        return {"message": "Password reset successfully"}
+
+    except Exception as e:
+        logger.error(
+            f"Failed to reset password for user {target_user.username}: {str(e)}",
+            extra={
+                "category": "security",
+                "event": "admin_password_reset_failed",
+                "admin_user_id": current_user.id,
+                "admin_username": current_user.username,
+                "target_user_id": user_id,
+                "target_username": target_user.username,
+                "ip": user_ip,
+                "error": str(e),
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reset password. Please try again.",
         )
 
 

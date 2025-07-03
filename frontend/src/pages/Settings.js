@@ -3,6 +3,7 @@ import { Header } from '../components/adapters';
 import Container from '../components/layout/Container';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
+import DeleteAccountModal from '../components/auth/DeleteAccountModal';
 import { useAuth } from '../contexts/AuthContext';
 import { getVersionInfo } from '../services/systemService';
 import '../styles/pages/Settings.css';
@@ -10,6 +11,8 @@ import '../styles/pages/Settings.css';
 const Settings = () => {
   const { user } = useAuth();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
+    useState(false);
   const [versionInfo, setVersionInfo] = useState(null);
   const [loadingVersion, setLoadingVersion] = useState(true);
 
@@ -19,6 +22,14 @@ const Settings = () => {
 
   const handleClosePasswordModal = () => {
     setIsPasswordModalOpen(false);
+  };
+
+  const handleOpenDeleteAccountModal = () => {
+    setIsDeleteAccountModalOpen(true);
+  };
+
+  const handleCloseDeleteAccountModal = () => {
+    setIsDeleteAccountModalOpen(false);
   };
 
   useEffect(() => {
@@ -76,6 +87,28 @@ const Settings = () => {
           </div>
         </Card>
 
+        {/* Account Management Section */}
+        <Card>
+          <div className="settings-section">
+            <h3 className="settings-section-title">Account Management</h3>
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">Delete Account</div>
+                <div className="settings-option-description">
+                  Permanently delete your account and all associated medical
+                  data. This action cannot be undone.
+                </div>
+              </div>
+              <div className="settings-option-control">
+                <Button variant="danger" onClick={handleOpenDeleteAccountModal}>
+                  Delete Account
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {/* System Information Section */}
         <Card>
           <div className="settings-section">
@@ -123,6 +156,12 @@ const Settings = () => {
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={handleClosePasswordModal}
+      />
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={isDeleteAccountModalOpen}
+        onClose={handleCloseDeleteAccountModal}
       />
     </Container>
   );

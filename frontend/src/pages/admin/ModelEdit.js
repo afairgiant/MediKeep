@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
+import { AdminResetPasswordModal } from '../../components/auth';
 import { Loading } from '../../components';
 import './ModelEdit.css';
 
@@ -16,6 +17,9 @@ const ModelEdit = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [resetUserId, setResetUserId] = useState(null);
+  const [resetUsername, setResetUsername] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -151,41 +155,18 @@ const ModelEdit = () => {
     }
   };
 
-  const handleChangePassword = async userId => {
-    const newPassword = prompt(
-      'Enter new password for this user:\n\n' +
-        'Password requirements:\n' +
-        '- At least 6 characters\n' +
-        '- Must contain at least one letter and one number'
-    );
+  const handleChangePassword = userId => {
+    // Get the username from the form data
+    const username = formData.username || `User ${userId}`;
+    setResetUserId(userId);
+    setResetUsername(username);
+    setShowPasswordModal(true);
+  };
 
-    if (!newPassword) {
-      return; // User cancelled
-    }
-
-    // Basic client-side validation
-    if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters long');
-      return;
-    }
-
-    const hasLetter = /[a-zA-Z]/.test(newPassword);
-    const hasNumber = /\d/.test(newPassword);
-    if (!hasLetter || !hasNumber) {
-      alert('Password must contain at least one letter and one number');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await adminApiService.adminResetPassword(userId, newPassword);
-      alert('Password reset successfully!');
-    } catch (err) {
-      console.error('Error resetting password:', err);
-      alert('Failed to reset password: ' + (err.message || 'Unknown error'));
-    } finally {
-      setSaving(false);
-    }
+  const handleClosePasswordModal = () => {
+    setShowPasswordModal(false);
+    setResetUserId(null);
+    setResetUsername('');
   };
 
   const handleCancel = () => {
@@ -430,6 +411,13 @@ const ModelEdit = () => {
           </div>
         </form>
       </div>
+
+      <AdminResetPasswordModal
+        isOpen={showPasswordModal}
+        onClose={handleClosePasswordModal}
+        userId={resetUserId}
+        username={resetUsername}
+      />
     </AdminLayout>
   );
 };
