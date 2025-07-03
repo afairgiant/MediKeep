@@ -483,7 +483,7 @@ USER_CONVERTER = DateTimeConverter(["created_at", "updated_at", "last_login"])
 
 PATIENT_CONVERTER = DateTimeConverter(["created_at", "updated_at"])
 
-PATIENT_DATE_CONVERTER = DateConverter(["birthDate"])
+PATIENT_DATE_CONVERTER = DateConverter(["birth_date"])
 
 FILE_CONVERTER = DateTimeConverter(["uploaded_at", "created_at", "updated_at"])
 

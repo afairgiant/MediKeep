@@ -123,8 +123,8 @@ const MantinePatientForm = ({
           <DateInput
             label="Birth Date"
             placeholder="Select birth date"
-            value={formData.birthDate ? new Date(formData.birthDate) : null}
-            onChange={handleDateChange('birthDate')}
+            value={formData.birth_date ? new Date(formData.birth_date) : null}
+            onChange={handleDateChange('birth_date')}
             firstDayOfWeek={0}
             required
             withAsterisk
@@ -173,8 +173,8 @@ const MantinePatientForm = ({
           <Select
             label="Blood Type"
             placeholder="Select blood type"
-            value={formData.bloodType}
-            onChange={handleSelectChange('bloodType')}
+            value={formData.blood_type}
+            onChange={handleSelectChange('blood_type')}
             disabled={saving}
             data={[
               { value: 'A+', label: 'A+' },

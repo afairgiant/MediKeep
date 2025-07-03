@@ -4,10 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, validator
 
 # Import status enums for validation
-from ..models.enums import (
-    get_all_condition_statuses,
-    get_all_severity_levels,
-)
+from ..models.enums import get_all_condition_statuses, get_all_severity_levels
 
 
 class ConditionBase(BaseModel):
@@ -24,9 +21,7 @@ class ConditionBase(BaseModel):
         None, description="Date when the condition was resolved"
     )
     status: str = Field(..., description="Status of the condition")
-    severity: Optional[str] = Field(
-        None, description="Severity of the condition"
-    )
+    severity: Optional[str] = Field(None, description="Severity of the condition")
     icd10_code: Optional[str] = Field(
         None, max_length=10, description="ICD-10 diagnosis code"
     )
@@ -62,7 +57,7 @@ class ConditionBase(BaseModel):
             if (
                 "onset_date" in values
                 and values["onset_date"]
-                and v < values["onsetDate"]
+                and v < values["onset_date"]
             ):
                 raise ValueError("End date cannot be before onset date")
         return v
@@ -72,7 +67,9 @@ class ConditionBase(BaseModel):
         if v is not None:
             valid_severities = get_all_severity_levels()
             if v.lower() not in valid_severities:
-                raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
+                raise ValueError(
+                    f"Severity must be one of: {', '.join(valid_severities)}"
+                )
             return v.lower()
         return v
 
@@ -116,7 +113,7 @@ class ConditionUpdate(BaseModel):
             if (
                 "onset_date" in values
                 and values["onset_date"]
-                and v < values["onsetDate"]
+                and v < values["onset_date"]
             ):
                 raise ValueError("End date cannot be before onset date")
         return v
@@ -126,7 +123,9 @@ class ConditionUpdate(BaseModel):
         if v is not None:
             valid_severities = get_all_severity_levels()
             if v.lower() not in valid_severities:
-                raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
+                raise ValueError(
+                    f"Severity must be one of: {', '.join(valid_severities)}"
+                )
             return v.lower()
         return v
 

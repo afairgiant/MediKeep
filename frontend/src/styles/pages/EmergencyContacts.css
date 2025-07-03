@@ -1,0 +1,118 @@
+/* Emergency Contacts - Mantine-based Styling */
+
+/* Primary contact highlighting using Mantine colors */
+.primary-contact {
+  border-left: 4px solid var(--mantine-color-orange-6) !important;
+  background-color: var(--mantine-color-orange-0);
+}
+
+/* Primary badge using Mantine Badge styling principles */
+.primary-badge {
+  background-color: var(--mantine-color-orange-6);
+  color: var(--mantine-color-white);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-xl);
+  margin-left: var(--mantine-spacing-xs);
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Contact icon spacing using Mantine spacing */
+.contact-icon {
+  margin-right: var(--mantine-spacing-xs);
+  font-size: 1.1em;
+}
+
+/* Links using Mantine link styles */
+.medical-item-card .detail-item .value a {
+  color: var(--mantine-color-blue-6);
+  text-decoration: none;
+}
+
+.medical-item-card .detail-item .value a:hover {
+  color: var(--mantine-color-blue-7);
+  text-decoration: underline;
+}
+
+/* Status badges using Mantine color scheme */
+.status-badge.active {
+  background-color: var(--mantine-color-green-1);
+  color: var(--mantine-color-green-8);
+  border: 1px solid var(--mantine-color-green-3);
+}
+
+.status-badge.inactive {
+  background-color: var(--mantine-color-gray-1);
+  color: var(--mantine-color-gray-7);
+  border: 1px solid var(--mantine-color-gray-3);
+}
+
+/* Emergency header using Mantine flex utilities */
+.emergency-header {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.emergency-icon {
+  font-size: 1.2em;
+  color: var(--mantine-color-red-6);
+}
+
+/* Quick actions using Mantine spacing */
+.quick-actions {
+  display: flex;
+  gap: var(--mantine-spacing-xs);
+  margin-top: var(--mantine-spacing-xs);
+}
+
+/* Quick action buttons using Mantine Button styling */
+.quick-call-btn {
+  background-color: var(--mantine-color-green-6);
+  color: var(--mantine-color-white);
+  border: none;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+.quick-call-btn:hover {
+  background-color: var(--mantine-color-green-7);
+  color: var(--mantine-color-white);
+  text-decoration: none;
+}
+
+.quick-email-btn {
+  background-color: var(--mantine-color-blue-6);
+  color: var(--mantine-color-white);
+  border: none;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+.quick-email-btn:hover {
+  background-color: var(--mantine-color-blue-7);
+  color: var(--mantine-color-white);
+  text-decoration: none;
+}
+
+/* Table styles using Mantine color variables */
+.emergency-contacts-table .primary-contact-row {
+  background-color: var(--mantine-color-orange-0);
+}
+
+.emergency-contacts-table .primary-contact-row td {
+  border-left: 4px solid var(--mantine-color-orange-6);
+}

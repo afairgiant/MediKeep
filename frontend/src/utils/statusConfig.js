@@ -71,6 +71,25 @@ export const ENCOUNTER_PRIORITY_OPTIONS = [
   { value: 'emergency', label: 'Emergency - Immediate care required' },
 ];
 
+// Emergency Contact Relationship Options
+export const EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS = [
+  { value: 'spouse', label: 'Spouse' },
+  { value: 'partner', label: 'Partner' },
+  { value: 'parent', label: 'Parent' },
+  { value: 'child', label: 'Child' },
+  { value: 'sibling', label: 'Sibling' },
+  { value: 'grandparent', label: 'Grandparent' },
+  { value: 'grandchild', label: 'Grandchild' },
+  { value: 'aunt', label: 'Aunt' },
+  { value: 'uncle', label: 'Uncle' },
+  { value: 'cousin', label: 'Cousin' },
+  { value: 'friend', label: 'Friend' },
+  { value: 'neighbor', label: 'Neighbor' },
+  { value: 'caregiver', label: 'Caregiver' },
+  { value: 'guardian', label: 'Guardian' },
+  { value: 'other', label: 'Other' },
+];
+
 // Status Badge Colors and Icons
 export const STATUS_STYLES = {
   // Active states - Green

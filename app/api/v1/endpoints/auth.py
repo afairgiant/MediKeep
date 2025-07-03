@@ -62,7 +62,7 @@ def register(
     default_patient_data = PatientCreate(
         first_name="First Name",
         last_name="Last Name",
-        birthDate=date(1990, 1, 1),  # Default birth date
+        birth_date=date(1990, 1, 1),  # Default birth date
         gender="OTHER",  # Neutral default
         address="Please update your address",  # Placeholder address
     )

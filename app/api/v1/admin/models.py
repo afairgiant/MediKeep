@@ -89,7 +89,7 @@ DATETIME_FIELD_MAP = {
 }
 
 DATE_FIELD_MAP = {
-    "patient": ["birthDate"],
+    "patient": ["birth_date"],
     "immunization": ["date_administered", "expiration_date"],
     "procedure": ["date"],
     "treatment": ["start_date", "end_date"],

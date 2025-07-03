@@ -1,6 +1,7 @@
-from pydantic import BaseModel, validator, root_validator
-from typing import Optional, TYPE_CHECKING
 from datetime import date
+from typing import TYPE_CHECKING, Optional
+
+from pydantic import BaseModel, root_validator, validator
 
 if TYPE_CHECKING:
     from schemas.user import User
@@ -17,10 +18,10 @@ class PatientBase(BaseModel):
 
     first_name: str
     last_name: str
-    birthDate: date
+    birth_date: date
     gender: Optional[str] = None
     address: Optional[str] = None
-    bloodType: Optional[str] = None
+    blood_type: Optional[str] = None
     height: Optional[int] = None  # in inches
     weight: Optional[int] = None  # in pounds
     physician_id: Optional[int] = None
@@ -32,7 +33,7 @@ class PatientBase(BaseModel):
             for field in [
                 "gender",
                 "address",
-                "bloodType",
+                "blood_type",
                 "height",
                 "weight",
                 "physician_id",
@@ -105,7 +106,7 @@ class PatientBase(BaseModel):
             return gender_map.get(v.upper(), v.upper())
         return v
 
-    @validator("birthDate")
+    @validator("birth_date")
     def validate_birth_date(cls, v):
         """
         Validate birth date is reasonable.
@@ -153,7 +154,7 @@ class PatientBase(BaseModel):
             return v.strip()
         return v
 
-    @validator("bloodType")
+    @validator("blood_type")
     def validate_blood_type(cls, v):
         """
         Validate blood type format.
@@ -270,7 +271,7 @@ class PatientUpdate(BaseModel):
         update_data = PatientUpdate(
             address="456 New St, City, State 12345",
             gender="M",
-            bloodType="A+",
+            blood_type="A+",
             height=70,
             weight=180
         )
@@ -278,10 +279,10 @@ class PatientUpdate(BaseModel):
 
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    birthDate: Optional[date] = None
+    birth_date: Optional[date] = None
     gender: Optional[str] = None
     address: Optional[str] = None
-    bloodType: Optional[str] = None
+    blood_type: Optional[str] = None
     height: Optional[int] = None
     weight: Optional[int] = None
     physician_id: Optional[int] = None
@@ -293,9 +294,10 @@ class PatientUpdate(BaseModel):
             for field in [
                 "first_name",
                 "last_name",
+                "birth_date",
                 "gender",
                 "address",
-                "bloodType",
+                "blood_type",
                 "height",
                 "weight",
                 "physician_id",
@@ -338,7 +340,7 @@ class PatientUpdate(BaseModel):
             return gender_map.get(v.upper(), v.upper())
         return v
 
-    @validator("birthDate")
+    @validator("birth_date")
     def validate_birth_date(cls, v):
         """Validate birth date if provided."""
         if v is not None:
@@ -363,7 +365,7 @@ class PatientUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("bloodType")
+    @validator("blood_type")
     def validate_blood_type(cls, v):
         """Validate blood type if provided."""
         if v is not None:
@@ -416,7 +418,7 @@ class Patient(PatientBase):
             "user_id": 5,
             "first_name": "John",
             "last_name": "Doe",
-            "birthDate": "1990-01-15",
+            "birth_date": "1990-01-15",
             "gender": "M",
             "address": "123 Main St, City, State 12345"
         }
