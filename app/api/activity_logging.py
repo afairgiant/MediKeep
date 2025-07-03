@@ -12,6 +12,7 @@ from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.core.logging_config import get_logger
+from app.core.logging_constants import sanitize_log_input
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
 
@@ -65,9 +66,13 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         if hasattr(entity_obj, field_name):
             entity_name = getattr(entity_obj, field_name, None)
             if entity_name:  # Only use if it's not None or empty
+                # Sanitize the entity name before logging
+                entity_name = sanitize_log_input(str(entity_name))
+
                 # Special handling for patient names
                 if entity_type == "patient" and field_name == "first_name":
                     last_name = getattr(entity_obj, "last_name", "")
+                    last_name = sanitize_log_input(str(last_name)) if last_name else ""
                     entity_name = f"{entity_name} {last_name}".strip()
                 # Special handling for encounters - include both reason and date
                 elif entity_type == EntityType.ENCOUNTER and field_name == "reason":
@@ -76,7 +81,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
                         if hasattr(encounter_date, "strftime"):
                             date_str = encounter_date.strftime("%Y-%m-%d")
                         else:
-                            date_str = str(encounter_date)
+                            date_str = sanitize_log_input(str(encounter_date))
                         entity_name = f"{entity_name} on {date_str}"
 
                 # Use friendly display names
@@ -109,7 +114,11 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         if recorded_date and hasattr(recorded_date, "strftime"):
             date_str = recorded_date.strftime("%Y-%m-%d")
         else:
-            date_str = "Unknown date"
+            date_str = (
+                sanitize_log_input(str(recorded_date))
+                if recorded_date
+                else "Unknown date"
+            )
         return f"{action_word} vitals recorded on {date_str}"
 
     # Fallback to generic description with friendly names
@@ -177,6 +186,18 @@ def log_crud_activity(
             ip_address = request.client.host if request.client else None
             user_agent = request.headers.get("user-agent")
 
+        # Sanitize metadata to prevent sensitive data exposure
+        safe_metadata = None
+        if metadata:
+            safe_metadata = {}
+            for key, value in metadata.items():
+                # Sanitize both keys and values
+                safe_key = sanitize_log_input(str(key))
+                safe_value = (
+                    sanitize_log_input(str(value)) if value is not None else None
+                )
+                safe_metadata[safe_key] = safe_value
+
         # Log the activity using the CRUD method
         activity_log.log_activity(
             db=db,
@@ -186,7 +207,7 @@ def log_crud_activity(
             user_id=user_id,
             patient_id=patient_id,
             entity_id=entity_id,
-            metadata=metadata,
+            metadata=safe_metadata,
             ip_address=ip_address,
             user_agent=user_agent,
         )
@@ -194,10 +215,13 @@ def log_crud_activity(
         return True
 
     except Exception as e:
+        # Sanitize error message to prevent sensitive data exposure
+        safe_error_msg = sanitize_log_input(str(e))
+
         logger.error(
             f"Failed to log activity: {action} {entity_type}",
             extra={
-                "error": str(e),
+                "error": safe_error_msg,
                 "user_id": user_id,
                 "entity_type": entity_type,
                 "action": action,
@@ -244,14 +268,16 @@ def safe_log_activity(
             request=request,
         )
     except Exception as e:
-        # Log the error but don't break the main operation
+        # Sanitize error message to prevent sensitive data exposure in logs
+        safe_error_msg = sanitize_log_input(str(e))
+
         logger.warning(
-            f"Activity logging failed for {action} {entity_type}: {str(e)}",
+            f"Activity logging failed for {action} {entity_type}: {safe_error_msg}",
             extra={
                 "user_id": user_id,
                 "entity_type": entity_type,
                 "action": action,
-                "error": str(e),
+                "error": safe_error_msg,
             },
         )
         # Rollback any partial transaction that might have been started

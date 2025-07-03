@@ -175,7 +175,18 @@ export const useFiltering = (data = [], config = {}) => {
       // Status filter
       if (filters.status !== 'all') {
         const statusField = config.statusField || 'status';
-        if (item[statusField] !== filters.status) return false;
+        // Check if there's a custom filter for this status field
+        if (config.customFilters && config.customFilters[statusField]) {
+          const result = config.customFilters[statusField](
+            item,
+            filters.status,
+            config.additionalData
+          );
+          if (!result) return false;
+        } else {
+          // Default status filtering
+          if (item[statusField] !== filters.status) return false;
+        }
       }
 
       // Category filter

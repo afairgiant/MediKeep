@@ -210,22 +210,45 @@ const EmergencyContacts = () => {
           </div>
         </div>
 
+        {/* Mantine Filter Controls */}
+        <MantineFilters
+          filters={dataManagement.filters}
+          updateFilter={dataManagement.updateFilter}
+          clearFilters={dataManagement.clearFilters}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          statusOptions={dataManagement.statusOptions}
+          sortOptions={dataManagement.sortOptions}
+          sortBy={dataManagement.sortBy}
+          sortOrder={dataManagement.sortOrder}
+          handleSortChange={dataManagement.handleSortChange}
+          totalCount={dataManagement.totalCount}
+          filteredCount={dataManagement.filteredCount}
+          config={config.filterControls}
+        />
+
         <div className="medical-items-list">
           {filteredContacts.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🚨</div>
               <h3>No Emergency Contacts Found</h3>
               <p>
-                It's important to have emergency contacts available in case of medical emergencies.
+                {dataManagement.hasActiveFilters
+                  ? 'Try adjusting your search or filter criteria.'
+                  : "It's important to have emergency contacts available in case of medical emergencies."}
               </p>
-              <Button variant="primary" onClick={handleAddContact}>
-                Add Your First Emergency Contact
-              </Button>
+              {!dataManagement.hasActiveFilters && (
+                <Button variant="primary" onClick={handleAddContact}>
+                  Add Your First Emergency Contact
+                </Button>
+              )}
             </div>
           ) : viewMode === 'cards' ? (
             <div className="medical-items-grid">
               {filteredContacts.map(contact => (
-                <div key={contact.id} className={`medical-item-card ${contact.is_primary ? 'primary-contact' : ''}`}>
+                <div
+                  key={contact.id}
+                  className={`medical-item-card ${contact.is_primary ? 'primary-contact' : ''}`}
+                >
                   <div className="medical-item-header">
                     <div className="item-info">
                       <h3 className="item-title">
@@ -233,11 +256,15 @@ const EmergencyContacts = () => {
                           {getRelationshipIcon(contact.relationship)}
                         </span>
                         {contact.name}
-                        {contact.is_primary && <span className="primary-badge">PRIMARY</span>}
+                        {contact.is_primary && (
+                          <span className="primary-badge">PRIMARY</span>
+                        )}
                       </h3>
                     </div>
                     <div className="status-badges">
-                      <span className={`status-badge ${contact.is_active ? 'active' : 'inactive'}`}>
+                      <span
+                        className={`status-badge ${contact.is_active ? 'active' : 'inactive'}`}
+                      >
                         {contact.is_active ? '✅ Active' : '⏸️ Inactive'}
                       </span>
                     </div>
@@ -246,19 +273,26 @@ const EmergencyContacts = () => {
                   <div className="medical-item-details">
                     <div className="detail-item">
                       <span className="label">Relationship:</span>
-                      <span className="value">{contact.relationship.charAt(0).toUpperCase() + contact.relationship.slice(1)}</span>
+                      <span className="value">
+                        {contact.relationship.charAt(0).toUpperCase() +
+                          contact.relationship.slice(1)}
+                      </span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Phone:</span>
                       <span className="value">
-                        <a href={`tel:${contact.phone_number}`}>{contact.phone_number}</a>
+                        <a href={`tel:${contact.phone_number}`}>
+                          {contact.phone_number}
+                        </a>
                       </span>
                     </div>
                     {contact.secondary_phone && (
                       <div className="detail-item">
                         <span className="label">Secondary Phone:</span>
                         <span className="value">
-                          <a href={`tel:${contact.secondary_phone}`}>{contact.secondary_phone}</a>
+                          <a href={`tel:${contact.secondary_phone}`}>
+                            {contact.secondary_phone}
+                          </a>
                         </span>
                       </div>
                     )}
@@ -266,7 +300,9 @@ const EmergencyContacts = () => {
                       <div className="detail-item">
                         <span className="label">Email:</span>
                         <span className="value">
-                          <a href={`mailto:${contact.email}`}>{contact.email}</a>
+                          <a href={`mailto:${contact.email}`}>
+                            {contact.email}
+                          </a>
                         </span>
                       </div>
                     )}
@@ -314,19 +350,18 @@ const EmergencyContacts = () => {
               onEdit={handleEditContact}
               onDelete={handleDeleteContact}
               formatters={{
-                name: value => (
-                  <span className="primary-field">{value}</span>
-                ),
-                relationship: value => value.charAt(0).toUpperCase() + value.slice(1),
-                phone_number: value => value ? (
-                  <a href={`tel:${value}`}>{value}</a>
-                ) : '-',
-                email: value => value ? (
-                  <a href={`mailto:${value}`}>{value}</a>
-                ) : '-',
-                is_primary: value => value ? '⭐ Primary' : '',
+                name: value => <span className="primary-field">{value}</span>,
+                relationship: value =>
+                  value.charAt(0).toUpperCase() + value.slice(1),
+                phone_number: value =>
+                  value ? <a href={`tel:${value}`}>{value}</a> : '-',
+                email: value =>
+                  value ? <a href={`mailto:${value}`}>{value}</a> : '-',
+                is_primary: value => (value ? '⭐ Primary' : ''),
                 is_active: value => (
-                  <span className={`status-badge ${value ? 'active' : 'inactive'}`}>
+                  <span
+                    className={`status-badge ${value ? 'active' : 'inactive'}`}
+                  >
                     {value ? '✅ Active' : '⏸️ Inactive'}
                   </span>
                 ),
@@ -339,7 +374,9 @@ const EmergencyContacts = () => {
       <MantineEmergencyContactForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editingContact ? 'Edit Emergency Contact' : 'Add Emergency Contact'}
+        title={
+          editingContact ? 'Edit Emergency Contact' : 'Add Emergency Contact'
+        }
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
