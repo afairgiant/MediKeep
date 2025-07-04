@@ -161,40 +161,6 @@ const Procedures = () => {
   // Get processed data from data management
   const filteredProcedures = dataManagement.data;
 
-  const getStatusIcon = status => {
-    switch (status) {
-      case 'scheduled':
-        return '📅';
-      case 'in-progress':
-        return '🔄';
-      case 'completed':
-        return '✅';
-      case 'cancelled':
-        return '❌';
-      case 'postponed':
-        return '⏸️';
-      default:
-        return '❓';
-    }
-  };
-
-  const getProcedureTypeIcon = type => {
-    switch (type?.toLowerCase()) {
-      case 'surgical':
-        return '🔬';
-      case 'diagnostic':
-        return '🔍';
-      case 'therapeutic':
-        return '💊';
-      case 'preventive':
-        return '🛡️';
-      case 'emergency':
-        return '🚨';
-      default:
-        return '🏥';
-    }
-  };
-
   if (loading) {
     return (
       <div className="medical-page-container">
@@ -277,14 +243,11 @@ const Procedures = () => {
                 <div key={procedure.id} className="medical-item-card">
                   <div className="medical-item-header">
                     <div className="item-info">
-                      <h3 className="item-title">
-                        <span className="type-icon">
-                          {getProcedureTypeIcon(procedure.code)}
-                        </span>
-                        {procedure.procedure_name}
-                      </h3>
+                      <h3 className="item-title">{procedure.procedure_name}</h3>
                       {procedure.code && (
-                        <div className="procedure-type-badge">{procedure.code}</div>
+                        <div className="procedure-type-prominent">
+                          <span className="type-value">{procedure.code}</span>
+                        </div>
                       )}
                     </div>
                     <div className="status-badges">
@@ -357,7 +320,7 @@ const Procedures = () => {
               data={filteredProcedures}
               columns={[
                 { header: 'Procedure Name', accessor: 'procedure_name' },
-                { header: 'Code', accessor: 'code' },
+                { header: 'Procedure Type', accessor: 'code' },
                 { header: 'Date', accessor: 'date' },
                 { header: 'Status', accessor: 'status' },
                 { header: 'Facility', accessor: 'facility' },
@@ -373,6 +336,12 @@ const Procedures = () => {
                 procedure_name: value => (
                   <span className="primary-field">{value}</span>
                 ),
+                code: value =>
+                  value ? (
+                    <span className="procedure-type-table">{value}</span>
+                  ) : (
+                    '-'
+                  ),
                 date: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
                 practitioner_name: (value, item) => {

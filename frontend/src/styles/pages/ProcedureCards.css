@@ -3,3 +3,56 @@
   margin-right: 8px;
   font-size: 1.1em;
 }
+
+/* Enhanced Procedure Type Styling */
+.procedure-type-prominent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+.procedure-type-prominent .type-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.85em;
+}
+
+.procedure-type-prominent .type-value {
+  font-weight: 600;
+  color: #2196f3;
+  font-size: 0.95em;
+  background: rgba(33, 150, 243, 0.08);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+/* Table view procedure type styling */
+.procedure-type-table {
+  display: inline-block;
+  background: #2196f3;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85em;
+  box-shadow: 0 1px 2px rgba(33, 150, 243, 0.2);
+}
+
+/* Dark theme adjustments */
+[data-theme='dark'] .procedure-type-prominent .type-label {
+  color: #bbb;
+}
+
+[data-theme='dark'] .procedure-type-prominent .type-value {
+  color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+  border-color: rgba(100, 181, 246, 0.3);
+}
+
+[data-theme='dark'] .procedure-type-table {
+  background: #42a5f5;
+  box-shadow: 0 1px 2px rgba(66, 165, 245, 0.3);
+}
