@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -19,22 +18,18 @@ import {
   Group,
   Stack,
   Text,
-  ActionIcon,
   Grid,
   Container,
   Alert,
   Loader,
   Center,
   Divider,
-  Flex,
-  ThemeIcon,
 } from '@mantine/core';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
 import '../../styles/pages/ProcedureCards.css';
 
 const Procedures = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners data
@@ -184,6 +179,9 @@ const Procedures = () => {
           <Stack align="center">
             <Loader size="lg" />
             <Text>Loading procedures...</Text>
+            <Text size="sm" c="dimmed">
+              If this takes too long, please refresh the page
+            </Text>
           </Stack>
         </Center>
       </Container>
