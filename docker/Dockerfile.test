@@ -2,7 +2,7 @@
 # This builds the application with testing dependencies and runs tests
 
 # Stage 1: Build React frontend for testing
-FROM node:20-alpine AS frontend-test
+FROM node:18-alpine AS frontend-test
 
 ENV NODE_ENV=test
 ENV CI=true
