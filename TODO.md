@@ -20,7 +20,7 @@
 
 ### Conditions
 
-- Add end date to condition
+- ✅ Add end date to condition
 
 ### Visits
 
@@ -50,7 +50,6 @@
 - Family member linking of patients
 - ✅ Emergency Contacts
 - Document attachments
-- Store all documents in one place
 - User roles (parent/guardian) - goes with family member linking
 - Add units to settings page: lb/kg and cm/inches per user
 - Condition - medication linking (1 or multiple medications per condition)
