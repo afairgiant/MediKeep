@@ -1,0 +1,86 @@
+# Test Dockerfile for Medical Records Application
+# This builds the application with testing dependencies and runs tests
+
+# Stage 1: Build React frontend for testing
+FROM node:20-alpine AS frontend-test
+
+ENV NODE_ENV=test
+ENV CI=true
+
+WORKDIR /frontend
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install all dependencies (including dev dependencies for testing)
+RUN npm ci --include=dev
+
+# Copy frontend source
+COPY frontend/ ./
+
+# Run frontend tests
+RUN npm test -- --coverage --watchAll=false
+
+# Build the React app for integration testing
+RUN npm run build
+
+# Stage 2: Backend with testing
+FROM python:3.12-slim AS backend-test
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TESTING=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    bash \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies + testing dependencies
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+    pytest \
+    pytest-asyncio \
+    pytest-cov \
+    httpx \
+    faker
+
+# Copy backend source
+COPY app/ ./app/
+COPY tests/ ./tests/
+COPY alembic/ ./alembic/
+COPY pytest.ini .
+COPY run.py .
+
+# Copy built React app
+COPY --from=frontend-test /frontend/build ./static
+
+# Create test directories
+RUN mkdir -p logs uploads/labwork backups
+
+# Run backend tests
+RUN SKIP_MIGRATIONS=true pytest tests/ -v --cov=app --cov-report=xml --cov-report=html
+
+# Stage 3: Integration test environment
+FROM backend-test AS integration-test
+
+# Copy test environment setup
+COPY docker/test-entrypoint.sh /app/test-entrypoint.sh
+RUN chmod +x /app/test-entrypoint.sh
+
+# Expose port for integration testing
+EXPOSE 8000
+
+# Health check for integration tests
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Start application for integration testing
+CMD ["/app/test-entrypoint.sh"]

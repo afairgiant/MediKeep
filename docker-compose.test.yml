@@ -1,0 +1,202 @@
+version: '3.8'
+
+services:
+  # Test database service
+  postgres-test:
+    image: postgres:15.8-alpine
+    container_name: medical-records-test-db
+    environment:
+      POSTGRES_DB: medical_records_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    ports:
+      - '5433:5432'  # Different port to avoid conflicts
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test_user -d medical_records_test']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - test-network
+
+  # Backend unit tests (SQLite)
+  backend-unit-tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.test
+      target: backend-test
+    container_name: medical-records-unit-tests
+    environment:
+      TESTING: "1"
+      DATABASE_URL: "sqlite:///./test.db"
+      SECRET_KEY: "test-secret-key"
+      LOG_LEVEL: "WARNING"
+      SKIP_MIGRATIONS: "true"
+      TEST_SUITE: "unit"
+    volumes:
+      - ./tests:/app/tests:ro
+      - ./coverage:/app/coverage
+    networks:
+      - test-network
+
+  # Backend integration tests (PostgreSQL)
+  backend-integration-tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.test
+      target: backend-test
+    container_name: medical-records-integration-tests
+    environment:
+      TESTING: "1"
+      DATABASE_URL: "postgresql://test_user:test_password@postgres-test:5432/medical_records_test"
+      SECRET_KEY: "test-secret-key"
+      LOG_LEVEL: "WARNING"
+      TEST_SUITE: "integration"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    volumes:
+      - ./tests:/app/tests:ro
+      - ./coverage:/app/coverage
+    networks:
+      - test-network
+
+  # Full application for E2E tests
+  app-e2e:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.test
+      target: integration-test
+    container_name: medical-records-e2e-app
+    ports:
+      - '8001:8000'  # Different port for E2E testing
+    environment:
+      DATABASE_URL: "postgresql://test_user:test_password@postgres-test:5432/medical_records_test"
+      SECRET_KEY: "test-secret-key"
+      LOG_LEVEL: "WARNING"
+      RUN_SERVER: "true"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    volumes:
+      - test_uploads:/app/uploads
+      - test_logs:/app/logs
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - test-network
+
+  # End-to-end tests
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.test
+      target: backend-test
+    container_name: medical-records-e2e-tests
+    environment:
+      TESTING: "1"
+      API_BASE_URL: "http://app-e2e:8000"
+      TEST_SUITE: "e2e"
+    depends_on:
+      app-e2e:
+        condition: service_healthy
+    volumes:
+      - ./tests:/app/tests:ro
+    networks:
+      - test-network
+
+  # Container security scanning
+  security-scan:
+    image: aquasec/trivy:latest
+    container_name: medical-records-security-scan
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./security-reports:/reports
+    command: >
+      sh -c "
+        trivy image --format json --output /reports/backend-security-report.json medical-records-app:latest || true &&
+        trivy fs --format json --output /reports/source-security-report.json /app || true
+      "
+    networks:
+      - test-network
+
+  # Performance testing
+  performance-tests:
+    image: loadimpact/k6:latest
+    container_name: medical-records-performance-tests
+    environment:
+      API_BASE_URL: "http://app-e2e:8000"
+    volumes:
+      - ./tests/performance:/scripts:ro
+      - ./performance-reports:/reports
+    depends_on:
+      app-e2e:
+        condition: service_healthy
+    command: run --out influxdb=http://influxdb:8086/k6 /scripts/load-test.js
+    networks:
+      - test-network
+
+  # Test results aggregator
+  test-reporter:
+    image: alpine:latest
+    container_name: medical-records-test-reporter
+    volumes:
+      - ./coverage:/coverage:ro
+      - ./test-reports:/reports
+      - ./security-reports:/security:ro
+      - ./performance-reports:/performance:ro
+    command: >
+      sh -c "
+        echo 'Aggregating test results...' &&
+        mkdir -p /reports &&
+        cp -r /coverage/* /reports/ 2>/dev/null || true &&
+        echo 'Test results aggregated in /reports'
+      "
+    depends_on:
+      - backend-unit-tests
+      - backend-integration-tests
+      - e2e-tests
+    networks:
+      - test-network
+
+volumes:
+  postgres_test_data:
+    driver: local
+  test_uploads:
+    driver: local
+  test_logs:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge
+
+# Test execution profiles
+x-test-profiles:
+  # Quick tests (unit only)
+  quick: &quick-profile
+    services:
+      - postgres-test
+      - backend-unit-tests
+  
+  # Full test suite
+  full: &full-profile
+    services:
+      - postgres-test
+      - backend-unit-tests
+      - backend-integration-tests
+      - app-e2e
+      - e2e-tests
+      - test-reporter
+  
+  # Security and performance
+  security: &security-profile
+    services:
+      - security-scan
+      - performance-tests
