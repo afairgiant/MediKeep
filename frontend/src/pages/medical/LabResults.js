@@ -10,7 +10,7 @@ import { PageHeader } from '../../components';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MedicalFormModal from '../../components/medical/MedicalFormModal';
+// import MedicalFormModal from '../../components/medical/MedicalFormModal'; // Replaced with Mantine Modal
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { Button } from '../../components/ui';
@@ -26,8 +26,27 @@ import {
   Loader,
   Center,
   Divider,
+  Paper,
+  FileInput,
+  TextInput,
+  ActionIcon,
+  Title,
+  SimpleGrid,
+  List,
+  ThemeIcon,
+  Anchor,
+  Modal,
+  ScrollArea,
 } from '@mantine/core';
-import '../../styles/pages/LabResults.css';
+import {
+  IconDownload,
+  IconTrash,
+  IconFile,
+  IconFileText,
+  IconUpload,
+  IconX,
+  IconRestore,
+} from '@tabler/icons-react';
 
 const LabResults = () => {
   const navigate = useNavigate();
@@ -635,22 +654,20 @@ const LabResults = () => {
                           <Text size="sm" fw={500} c="dimmed" w={120}>
                             Files:
                           </Text>
-                          <Text size="sm">
-                            {filesCounts[result.id] > 0 ? (
-                              <Badge
-                                variant="light"
-                                color="green"
-                                size="sm"
-                                leftSection="📎"
-                              >
-                                {filesCounts[result.id]} attached
-                              </Badge>
-                            ) : (
-                              <Text c="dimmed" size="sm">
-                                No files
-                              </Text>
-                            )}
-                          </Text>
+                          {filesCounts[result.id] > 0 ? (
+                            <Badge
+                              variant="light"
+                              color="green"
+                              size="sm"
+                              leftSection={<IconFile size={12} />}
+                            >
+                              {filesCounts[result.id]} attached
+                            </Badge>
+                          ) : (
+                            <Text c="dimmed" size="sm">
+                              No files
+                            </Text>
+                          )}
                         </Group>
                       </Stack>
 
@@ -704,7 +721,6 @@ const LabResults = () => {
               data={filteredLabResults}
               columns={[
                 { header: 'Test Name', accessor: 'test_name' },
-                { header: 'Test Code', accessor: 'test_code' },
                 { header: 'Category', accessor: 'test_category' },
                 { header: 'Type', accessor: 'test_type' },
                 { header: 'Facility', accessor: 'facility' },
@@ -738,11 +754,18 @@ const LabResults = () => {
                 completed_date: value => (value ? formatDate(value) : '-'),
                 files: (value, item) =>
                   filesCounts[item.id] > 0 ? (
-                    <span className="file-indicator">
-                      📎 {filesCounts[item.id]}
-                    </span>
+                    <Badge
+                      variant="light"
+                      color="green"
+                      size="sm"
+                      leftSection={<IconFile size={12} />}
+                    >
+                      {filesCounts[item.id]}
+                    </Badge>
                   ) : (
-                    <span className="no-files">None</span>
+                    <Text size="sm" c="dimmed" fs="italic">
+                      None
+                    </Text>
                   ),
               }}
             />
@@ -764,269 +787,383 @@ const LabResults = () => {
         >
           {/* File Management Section for Edit Mode */}
           {editingLabResult && (
-            <div className="file-upload-section">
-              <h4>Manage Files</h4>
+            <Paper withBorder p="md" mt="md">
+              <Title order={4} mb="md">
+                Manage Files
+              </Title>
 
               {/* Existing Files */}
               {selectedFiles.length > 0 && (
-                <div className="existing-files">
-                  <h5>Current Files:</h5>
-                  {selectedFiles.map(file => (
-                    <div
-                      key={file.id}
-                      className={`existing-file-item ${filesToDelete.includes(file.id) ? 'marked-for-deletion' : ''}`}
-                    >
-                      <span className="file-name">{file.file_name}</span>
-                      <span className="file-size">
-                        {(file.file_size / 1024).toFixed(1)} KB
-                      </span>
-                      {file.description && (
-                        <span className="file-description">
-                          {file.description}
-                        </span>
-                      )}
-                      <div className="file-actions">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="small"
-                          onClick={() =>
-                            handleDownloadFile(file.id, file.file_name)
-                          }
-                        >
-                          Download
-                        </Button>
-                        {filesToDelete.includes(file.id) ? (
-                          <Button
-                            type="button"
-                            variant="subtle"
-                            size="small"
-                            onClick={() => handleUnmarkFileForDeletion(file.id)}
-                          >
-                            Restore
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="danger"
-                            size="small"
-                            onClick={() => handleMarkFileForDeletion(file.id)}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Stack gap="md" mb="md">
+                  <Title order={5}>Current Files:</Title>
+                  <Stack gap="sm">
+                    {selectedFiles.map(file => (
+                      <Paper
+                        key={file.id}
+                        withBorder
+                        p="sm"
+                        bg={filesToDelete.includes(file.id) ? 'red.0' : 'white'}
+                        style={{
+                          opacity: filesToDelete.includes(file.id) ? 0.7 : 1,
+                          borderColor: filesToDelete.includes(file.id)
+                            ? 'var(--mantine-color-red-3)'
+                            : undefined,
+                        }}
+                      >
+                        <Group justify="space-between" align="center">
+                          <Group gap="xs" style={{ flex: 1 }}>
+                            <ThemeIcon variant="light" size="sm">
+                              <IconFile size={14} />
+                            </ThemeIcon>
+                            <Stack gap={2} style={{ flex: 1 }}>
+                              <Text fw={500} size="sm">
+                                {file.file_name}
+                              </Text>
+                              <Group gap="md">
+                                <Text size="xs" c="dimmed">
+                                  {(file.file_size / 1024).toFixed(1)} KB
+                                </Text>
+                                {file.description && (
+                                  <Text size="xs" c="dimmed" fs="italic">
+                                    {file.description}
+                                  </Text>
+                                )}
+                              </Group>
+                            </Stack>
+                          </Group>
+                          <Group gap="xs">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              size="sm"
+                              onClick={() =>
+                                handleDownloadFile(file.id, file.file_name)
+                              }
+                            >
+                              <IconDownload size={14} />
+                            </ActionIcon>
+                            {filesToDelete.includes(file.id) ? (
+                              <ActionIcon
+                                variant="light"
+                                color="green"
+                                size="sm"
+                                onClick={() =>
+                                  handleUnmarkFileForDeletion(file.id)
+                                }
+                              >
+                                <IconRestore size={14} />
+                              </ActionIcon>
+                            ) : (
+                              <ActionIcon
+                                variant="light"
+                                color="red"
+                                size="sm"
+                                onClick={() =>
+                                  handleMarkFileForDeletion(file.id)
+                                }
+                              >
+                                <IconTrash size={14} />
+                              </ActionIcon>
+                            )}
+                          </Group>
+                        </Group>
+                      </Paper>
+                    ))}
+                  </Stack>
+                </Stack>
               )}
 
               {/* Add New Files */}
-              <div className="file-upload-controls">
-                <input
-                  type="file"
-                  id="file-input"
+              <Group mb="md">
+                <FileInput
+                  placeholder="Select files to upload"
                   multiple
                   accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif,.txt,.csv,.xml,.json,.doc,.docx,.xls,.xlsx"
-                  onChange={e => {
-                    Array.from(e.target.files).forEach(file => {
-                      handleAddPendingFile(file, '');
-                    });
-                    e.target.value = '';
+                  onChange={files => {
+                    if (files) {
+                      files.forEach(file => {
+                        handleAddPendingFile(file, '');
+                      });
+                    }
                   }}
-                  style={{ display: 'none' }}
+                  leftSection={<IconUpload size={16} />}
+                  style={{ flex: 1 }}
                 />
-                <label htmlFor="file-input" className="file-upload-button">
-                  Add New Files
-                </label>
-              </div>
+              </Group>
 
               {/* Pending Files */}
               {pendingFiles.length > 0 && (
-                <div className="pending-files">
-                  <h5>Files to Upload:</h5>
-                  {pendingFiles.map(pendingFile => (
-                    <div key={pendingFile.id} className="pending-file-item">
-                      <span className="file-name">{pendingFile.file.name}</span>
-                      <span className="file-size">
-                        {(pendingFile.file.size / 1024).toFixed(1)} KB
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Description (optional)"
-                        value={pendingFile.description}
-                        onChange={e => {
-                          setPendingFiles(prev =>
-                            prev.map(f =>
-                              f.id === pendingFile.id
-                                ? { ...f, description: e.target.value }
-                                : f
-                            )
-                          );
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="danger"
-                        size="small"
-                        onClick={() => handleRemovePendingFile(pendingFile.id)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                <Stack gap="md">
+                  <Title order={5}>Files to Upload:</Title>
+                  <Stack gap="sm">
+                    {pendingFiles.map(pendingFile => (
+                      <Paper key={pendingFile.id} withBorder p="sm" bg="blue.0">
+                        <Group justify="space-between" align="flex-start">
+                          <Group gap="xs" style={{ flex: 1 }}>
+                            <ThemeIcon variant="light" color="blue" size="sm">
+                              <IconFileText size={14} />
+                            </ThemeIcon>
+                            <Stack gap="xs" style={{ flex: 1 }}>
+                              <Group gap="md">
+                                <Text fw={500} size="sm">
+                                  {pendingFile.file.name}
+                                </Text>
+                                <Text size="xs" c="dimmed">
+                                  {(pendingFile.file.size / 1024).toFixed(1)} KB
+                                </Text>
+                              </Group>
+                              <TextInput
+                                placeholder="Description (optional)"
+                                value={pendingFile.description}
+                                onChange={e => {
+                                  setPendingFiles(prev =>
+                                    prev.map(f =>
+                                      f.id === pendingFile.id
+                                        ? { ...f, description: e.target.value }
+                                        : f
+                                    )
+                                  );
+                                }}
+                                size="xs"
+                              />
+                            </Stack>
+                          </Group>
+                          <ActionIcon
+                            variant="light"
+                            color="red"
+                            size="sm"
+                            onClick={() =>
+                              handleRemovePendingFile(pendingFile.id)
+                            }
+                          >
+                            <IconX size={14} />
+                          </ActionIcon>
+                        </Group>
+                      </Paper>
+                    ))}
+                  </Stack>
+                </Stack>
               )}
-            </div>
+            </Paper>
           )}
         </MantineLabResultForm>
       )}
 
       {/* View Details Modal */}
-      {showModal && modalType === 'view' && selectedLabResult && (
-        <MedicalFormModal
-          isOpen={showModal}
-          onClose={handleCloseModal}
-          title={selectedLabResult.test_name}
-          maxWidth="900px"
-        >
-          <div className="details-section">
-            <h3>Lab Result Details</h3>
-            <div className="details-grid">
-              <div className="detail-item">
-                <strong>Test Name:</strong> {selectedLabResult.test_name}
-              </div>
-              <div className="detail-item">
-                <strong>Test Code:</strong>{' '}
-                {selectedLabResult.test_code || 'N/A'}
-              </div>
-              <div className="detail-item">
-                <strong>Category:</strong>{' '}
-                {selectedLabResult.test_category || 'N/A'}
-              </div>
-              {selectedLabResult.test_type && (
-                <div className="detail-item">
-                  <strong>Test Type:</strong> {selectedLabResult.test_type}
-                </div>
-              )}
-              {selectedLabResult.facility && (
-                <div className="detail-item">
-                  <strong>Facility:</strong> {selectedLabResult.facility}
-                </div>
-              )}
-              <div className="detail-item">
-                <strong>Status:</strong>
-                <StatusBadge status={selectedLabResult.status} />
-              </div>
-              {selectedLabResult.labs_result && (
-                <div className="detail-item">
-                  <strong>Lab Result:</strong>
-                  <StatusBadge status={selectedLabResult.labs_result} />
-                </div>
-              )}
-              {selectedLabResult.practitioner_id && (
-                <div className="detail-item">
-                  <strong>Ordering Practitioner:</strong>
-                  {practitioners.find(
-                    p => p.id === selectedLabResult.practitioner_id
-                  )?.name ||
-                    `Practitioner ID: ${selectedLabResult.practitioner_id}`}
-                </div>
-              )}
-              <div className="detail-item">
-                <strong>Ordered Date:</strong>{' '}
-                {formatDate(selectedLabResult.ordered_date)}
-              </div>
-              {selectedLabResult.completed_date && (
-                <div className="detail-item">
-                  <strong>Completed Date:</strong>{' '}
-                  {formatDate(selectedLabResult.completed_date)}
-                </div>
-              )}
+      <Modal
+        opened={showModal && modalType === 'view' && selectedLabResult}
+        onClose={handleCloseModal}
+        title={selectedLabResult?.test_name || 'Lab Result Details'}
+        size="xl"
+        scrollAreaComponent={ScrollArea.Autosize}
+        centered
+      >
+        {selectedLabResult && (
+          <>
+            <Stack gap="lg" mb="lg">
+              <Title order={3}>Lab Result Details</Title>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Test Name
+                  </Text>
+                  <Text>{selectedLabResult.test_name}</Text>
+                </Stack>
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Test Code
+                  </Text>
+                  <Text>{selectedLabResult.test_code || 'N/A'}</Text>
+                </Stack>
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Category
+                  </Text>
+                  <Text>{selectedLabResult.test_category || 'N/A'}</Text>
+                </Stack>
+                {selectedLabResult.test_type && (
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">
+                      Test Type
+                    </Text>
+                    <Text>{selectedLabResult.test_type}</Text>
+                  </Stack>
+                )}
+                {selectedLabResult.facility && (
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">
+                      Facility
+                    </Text>
+                    <Text>{selectedLabResult.facility}</Text>
+                  </Stack>
+                )}
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Status
+                  </Text>
+                  <StatusBadge status={selectedLabResult.status} />
+                </Stack>
+                {selectedLabResult.labs_result && (
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">
+                      Lab Result
+                    </Text>
+                    <StatusBadge status={selectedLabResult.labs_result} />
+                  </Stack>
+                )}
+                {selectedLabResult.practitioner_id && (
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">
+                      Ordering Practitioner
+                    </Text>
+                    <Text>
+                      {practitioners.find(
+                        p => p.id === selectedLabResult.practitioner_id
+                      )?.name ||
+                        `Practitioner ID: ${selectedLabResult.practitioner_id}`}
+                    </Text>
+                  </Stack>
+                )}
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Ordered Date
+                  </Text>
+                  <Text>{formatDate(selectedLabResult.ordered_date)}</Text>
+                </Stack>
+                {selectedLabResult.completed_date && (
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">
+                      Completed Date
+                    </Text>
+                    <Text>{formatDate(selectedLabResult.completed_date)}</Text>
+                  </Stack>
+                )}
+              </SimpleGrid>
               {selectedLabResult.notes && (
-                <div className="detail-item full-width">
-                  <strong>Notes:</strong>
-                  <div className="notes-content">{selectedLabResult.notes}</div>
-                </div>
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Notes
+                  </Text>
+                  <Paper withBorder p="sm" bg="gray.0">
+                    <Text style={{ whiteSpace: 'pre-wrap' }}>
+                      {selectedLabResult.notes}
+                    </Text>
+                  </Paper>
+                </Stack>
               )}
-            </div>
-          </div>
+            </Stack>
 
-          <div className="files-section">
-            <h3>Associated Files</h3>
+            <Stack gap="lg">
+              <Title order={3}>Associated Files</Title>
 
-            {/* File Upload Form */}
-            <form onSubmit={handleFileUpload} className="file-upload-form">
-              <div className="upload-inputs">
-                <input
-                  type="file"
-                  onChange={e =>
-                    setFileUpload(prev => ({
-                      ...prev,
-                      file: e.target.files[0],
-                    }))
-                  }
-                  accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif"
-                />
-                <input
-                  type="text"
-                  placeholder="File description (optional)"
-                  value={fileUpload.description}
-                  onChange={e =>
-                    setFileUpload(prev => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                />
-                <button type="submit" disabled={!fileUpload.file}>
-                  Upload
-                </button>
-              </div>
-            </form>
-
-            {/* Files List */}
-            <div className="files-list">
-              {selectedFiles.length === 0 ? (
-                <p>No files attached to this lab result.</p>
-              ) : (
-                selectedFiles.map(file => (
-                  <div key={file.id} className="file-item">
-                    <div className="file-info">
-                      <span className="file-name">{file.file_name}</span>
-                      <span className="file-size">
-                        {(file.file_size / 1024).toFixed(1)} KB
-                      </span>
-                      <span className="file-type">{file.file_type}</span>
-                      {file.description && (
-                        <span className="file-description">
-                          {file.description}
-                        </span>
-                      )}
-                    </div>
-                    <div className="file-actions">
-                      <button
-                        className="view-button"
-                        onClick={() =>
-                          handleDownloadFile(file.id, file.file_name)
+              {/* File Upload Form */}
+              <Paper withBorder p="md" bg="gray.0">
+                <form onSubmit={handleFileUpload}>
+                  <Stack gap="md">
+                    <Group align="flex-end">
+                      <FileInput
+                        placeholder="Select a file to upload"
+                        value={fileUpload.file}
+                        onChange={file =>
+                          setFileUpload(prev => ({
+                            ...prev,
+                            file: file,
+                          }))
                         }
+                        accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif"
+                        leftSection={<IconUpload size={16} />}
+                        style={{ flex: 1 }}
+                      />
+                      <TextInput
+                        placeholder="File description (optional)"
+                        value={fileUpload.description}
+                        onChange={e =>
+                          setFileUpload(prev => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        style={{ flex: 1 }}
+                      />
+                      <Button
+                        type="submit"
+                        disabled={!fileUpload.file}
+                        leftSection={<IconUpload size={16} />}
                       >
-                        Download
-                      </button>
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeleteFile(file.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </MedicalFormModal>
-      )}
+                        Upload
+                      </Button>
+                    </Group>
+                  </Stack>
+                </form>
+              </Paper>
+
+              {/* Files List */}
+              <Stack gap="md">
+                {selectedFiles.length === 0 ? (
+                  <Paper withBorder p="md" ta="center">
+                    <Stack align="center" gap="sm">
+                      <ThemeIcon size="xl" variant="light" color="gray">
+                        <IconFile size={24} />
+                      </ThemeIcon>
+                      <Text c="dimmed">
+                        No files attached to this lab result.
+                      </Text>
+                    </Stack>
+                  </Paper>
+                ) : (
+                  <Stack gap="sm">
+                    {selectedFiles.map(file => (
+                      <Paper key={file.id} withBorder p="md">
+                        <Group justify="space-between" align="center">
+                          <Group gap="md" style={{ flex: 1 }}>
+                            <ThemeIcon variant="light" color="blue">
+                              <IconFile size={20} />
+                            </ThemeIcon>
+                            <Stack gap={2} style={{ flex: 1 }}>
+                              <Text fw={500}>{file.file_name}</Text>
+                              <Group gap="md">
+                                <Text size="sm" c="dimmed">
+                                  {(file.file_size / 1024).toFixed(1)} KB
+                                </Text>
+                                <Text size="sm" c="dimmed">
+                                  {file.file_type}
+                                </Text>
+                                {file.description && (
+                                  <Text size="sm" c="dimmed" fs="italic">
+                                    {file.description}
+                                  </Text>
+                                )}
+                              </Group>
+                            </Stack>
+                          </Group>
+                          <Group gap="xs">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              onClick={() =>
+                                handleDownloadFile(file.id, file.file_name)
+                              }
+                            >
+                              <IconDownload size={16} />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              onClick={() => handleDeleteFile(file.id)}
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </Group>
+                        </Group>
+                      </Paper>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            </Stack>
+          </>
+        )}
+      </Modal>
     </>
   );
 };

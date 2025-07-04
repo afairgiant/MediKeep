@@ -167,6 +167,15 @@ span.status-badge.status-unknown {
   border-color: #dee2e6 !important;
 }
 
+.medical-page-container .status-inconclusive,
+.medical-item-card .status-inconclusive,
+.medical-items-grid .status-inconclusive,
+span.status-badge.status-inconclusive {
+  background-color: #e9ecef !important;
+  color: #495057 !important;
+  border-color: #ced4da !important;
+}
+
 /* Legacy color support for backward compatibility */
 .medical-page-container .status-success,
 .medical-item-card .status-success,
