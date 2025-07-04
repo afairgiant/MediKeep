@@ -2,9 +2,9 @@ name: Test Suite
 
 on:
   push:
-    branches: [ main, develop, version-* ]
+    branches: [main, develop, version-*]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run tests daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -18,115 +18,121 @@ jobs:
   frontend-tests:
     runs-on: ubuntu-latest
     name: Frontend Tests
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-        
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm ci
-        
-    - name: Run frontend linting
-      run: |
-        cd frontend
-        echo "Linting step - currently disabled (no lint script configured)"
-        # npm run lint || true  # Don't fail on lint errors for now
-        
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm test -- --coverage --watchAll=false --testTimeout=30000 --maxWorkers=2
-        
-    - name: Upload frontend coverage
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./frontend/coverage/lcov.info
-        flags: frontend
-        name: frontend-coverage
-        fail_ci_if_error: false
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run frontend linting
+        run: |
+          cd frontend
+          echo "Linting step - currently disabled (no lint script configured)"
+          # npm run lint || true  # Don't fail on lint errors for now
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test -- --coverage --watchAll=false --testTimeout=30000 --maxWorkers=2
+
+      - name: Upload frontend coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+          fail_ci_if_error: false
 
   # Backend unit tests
   backend-tests:
     runs-on: ubuntu-latest
     name: Backend Tests
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
-        
-    - name: Install backend dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest-cov httpx faker
-        
-    - name: Run backend linting
-      run: |
-        pip install flake8 black isort
-        flake8 app tests --max-line-length=88 --extend-ignore=E203,W503 || true
-        black --check app tests || true
-        isort --check-only app tests || true
-        
-    - name: Run backend unit tests
-      env:
-        TESTING: 1
-        SECRET_KEY: test-secret-key-for-github-actions
-        DATABASE_URL: sqlite:///./test.db
-        LOG_LEVEL: WARNING
-      run: |
-        # Create test directory if it doesn't exist
-        mkdir -p tests/unit tests/api || true
-        # Run existing tests
-        pytest tests/ -v --cov=app --cov-report=xml --cov-report=html || true
-        
-    - name: Upload backend coverage
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: backend
-        name: backend-coverage
-        fail_ci_if_error: false
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install backend dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-cov httpx faker
+
+      - name: Run backend linting
+        run: |
+          pip install flake8 black isort
+          flake8 app tests --max-line-length=88 --extend-ignore=E203,W503 || true
+          black --check app tests || true
+          isort --check-only app tests || true
+
+      - name: Run backend unit tests
+        env:
+          TESTING: 1
+          SECRET_KEY: test-secret-key-for-github-actions
+          DATABASE_URL: sqlite:///./test.db
+          LOG_LEVEL: WARNING
+        run: |
+          # Create test directory if it doesn't exist
+          mkdir -p tests/unit tests/api || true
+          # Run existing tests
+          pytest tests/ -v --cov=app --cov-report=xml --cov-report=html || true
+
+      - name: Upload backend coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
 
   # Security scanning (non-blocking)
   security-scan:
     runs-on: ubuntu-latest
     name: Security Scan
     continue-on-error: true
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      continue-on-error: true
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      continue-on-error: true
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        continue-on-error: true
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: 'trivy-results.sarif'
 
   # Container build and integration tests (simplified)
   container-tests:
@@ -134,113 +140,37 @@ jobs:
     name: Container Integration Tests
     needs: [frontend-tests, backend-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Build test image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile.test
-        target: backend-test
-        tags: medical-records:test
-        load: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: Test Docker build success
-      run: |
-        echo "Docker image built successfully"
-        docker images medical-records:test
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile.test
+          target: backend-test
+          tags: medical-records:test
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker build success
+        run: |
+          echo "Docker image built successfully"
+          docker images medical-records:test
 
   # End-to-end tests (disabled for now)
   e2e-tests:
     runs-on: ubuntu-latest
     name: End-to-End Tests
     needs: [container-tests]
-    if: false  # Disabled until container tests are working
-    
-    services:
-      postgres:
-        image: postgres:15.8-alpine
-        env:
-          POSTGRES_DB: medical_records_test
-          POSTGRES_USER: test_user  
-          POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Build application image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile.test
-        target: integration-test
-        tags: medical-records:e2e
-        load: true
-        cache-from: type=gha
-        
-    - name: Start application for E2E tests
-      run: |
-        docker run -d \
-          --name e2e-app \
-          -p 8000:8000 \
-          -e DATABASE_URL="postgresql://test_user:test_password@localhost:5432/medical_records_test" \
-          -e SECRET_KEY=test-secret-key \
-          -e TESTING=1 \
-          -e RUN_SERVER=true \
-          medical-records:e2e
-          
-        # Wait for application to be ready
-        timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
-        
-    - name: Setup Python for E2E tests
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install E2E test dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest requests
-        
-    - name: Run E2E tests
-      env:
-        API_BASE_URL: http://localhost:8000
-      run: |
-        pytest tests/e2e/ -v --tb=short
-        
-    - name: Cleanup E2E environment
-      if: always()
-      run: |
-        docker stop e2e-app || true
-        docker rm e2e-app || true
+    if: false # Disabled until container tests are working
 
-  # Performance tests (disabled for now)
-  performance-tests:
-    runs-on: ubuntu-latest
-    name: Performance Tests
-    needs: [container-tests]
-    if: false  # Disabled until basic tests are working
-    
     services:
       postgres:
         image: postgres:15.8-alpine
@@ -255,59 +185,135 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Build application image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile.test
-        target: integration-test
-        tags: medical-records:perf
-        load: true
-        cache-from: type=gha
-        
-    - name: Start application for performance tests
-      run: |
-        docker run -d \
-          --name perf-app \
-          -p 8000:8000 \
-          -e DATABASE_URL="postgresql://test_user:test_password@localhost:5432/medical_records_test" \
-          -e SECRET_KEY=test-secret-key \
-          -e TESTING=1 \
-          -e RUN_SERVER=true \
-          medical-records:perf
-          
-        # Wait for application to be ready
-        timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
-        
-    - name: Run basic performance tests
-      run: |
-        # Simple load test using curl
-        echo "Running basic performance tests..."
-        
-        # Test health endpoint response time
-        time curl -f http://localhost:8000/health
-        
-        # Test API endpoint response time
-        time curl -f http://localhost:8000/api/v1/system/version
-        
-        # Test static file serving
-        time curl -f http://localhost:8000/ > /dev/null
-        
-        echo "Basic performance tests completed"
-        
-    - name: Cleanup performance environment
-      if: always()
-      run: |
-        docker stop perf-app || true
-        docker rm perf-app || true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build application image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile.test
+          target: integration-test
+          tags: medical-records:e2e
+          load: true
+          cache-from: type=gha
+
+      - name: Start application for E2E tests
+        run: |
+          docker run -d \
+            --name e2e-app \
+            -p 8000:8000 \
+            -e DATABASE_URL="postgresql://test_user:test_password@localhost:5432/medical_records_test" \
+            -e SECRET_KEY=test-secret-key \
+            -e TESTING=1 \
+            -e RUN_SERVER=true \
+            medical-records:e2e
+            
+          # Wait for application to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+
+      - name: Setup Python for E2E tests
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install E2E test dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest requests
+
+      - name: Run E2E tests
+        env:
+          API_BASE_URL: http://localhost:8000
+        run: |
+          pytest tests/e2e/ -v --tb=short
+
+      - name: Cleanup E2E environment
+        if: always()
+        run: |
+          docker stop e2e-app || true
+          docker rm e2e-app || true
+
+  # Performance tests (disabled for now)
+  performance-tests:
+    runs-on: ubuntu-latest
+    name: Performance Tests
+    needs: [container-tests]
+    if: false # Disabled until basic tests are working
+
+    services:
+      postgres:
+        image: postgres:15.8-alpine
+        env:
+          POSTGRES_DB: medical_records_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build application image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile.test
+          target: integration-test
+          tags: medical-records:perf
+          load: true
+          cache-from: type=gha
+
+      - name: Start application for performance tests
+        run: |
+          docker run -d \
+            --name perf-app \
+            -p 8000:8000 \
+            -e DATABASE_URL="postgresql://test_user:test_password@localhost:5432/medical_records_test" \
+            -e SECRET_KEY=test-secret-key \
+            -e TESTING=1 \
+            -e RUN_SERVER=true \
+            medical-records:perf
+            
+          # Wait for application to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+
+      - name: Run basic performance tests
+        run: |
+          # Simple load test using curl
+          echo "Running basic performance tests..."
+
+          # Test health endpoint response time
+          time curl -f http://localhost:8000/health
+
+          # Test API endpoint response time
+          time curl -f http://localhost:8000/api/v1/system/version
+
+          # Test static file serving
+          time curl -f http://localhost:8000/ > /dev/null
+
+          echo "Basic performance tests completed"
+
+      - name: Cleanup performance environment
+        if: always()
+        run: |
+          docker stop perf-app || true
+          docker rm perf-app || true
 
   # Test result aggregation
   test-summary:
@@ -315,23 +321,23 @@ jobs:
     name: Test Summary
     needs: [frontend-tests, backend-tests, security-scan]
     if: always()
-    
+
     steps:
-    - name: Check test results
-      run: |
-        echo "Test Results Summary:"
-        echo "Frontend Tests: ${{ needs.frontend-tests.result }}"
-        echo "Backend Tests: ${{ needs.backend-tests.result }}"
-        echo "Security Scan: ${{ needs.security-scan.result }}"
-        
-        # Fail if any critical tests failed
-        if [[ "${{ needs.frontend-tests.result }}" == "failure" ]] || \
-           [[ "${{ needs.backend-tests.result }}" == "failure" ]]; then
-          echo "Critical tests failed!"
-          exit 1
-        fi
-        
-        echo "All critical tests passed!"
+      - name: Check test results
+        run: |
+          echo "Test Results Summary:"
+          echo "Frontend Tests: ${{ needs.frontend-tests.result }}"
+          echo "Backend Tests: ${{ needs.backend-tests.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+
+          # Fail if any critical tests failed
+          if [[ "${{ needs.frontend-tests.result }}" == "failure" ]] || \
+             [[ "${{ needs.backend-tests.result }}" == "failure" ]]; then
+            echo "Critical tests failed!"
+            exit 1
+          fi
+
+          echo "All critical tests passed!"
 
   # Docker image build and push (only on main branch)
   build-and-push:
@@ -339,40 +345,40 @@ jobs:
     name: Build and Push Docker Image
     needs: [test-summary]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ github.repository }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
-          
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
