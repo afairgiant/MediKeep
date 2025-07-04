@@ -6,16 +6,28 @@ import { apiService } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import { PageHeader, Button } from '../../components';
+import { PageHeader } from '../../components';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalFormModal from '../../components/medical/MedicalFormModal';
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import '../../styles/shared/MedicalPageShared.css';
+import { Button } from '../../components/ui';
+import {
+  Badge,
+  Card,
+  Group,
+  Stack,
+  Text,
+  Grid,
+  Container,
+  Alert,
+  Loader,
+  Center,
+  Divider,
+} from '@mantine/core';
 import '../../styles/pages/LabResults.css';
-import '../../styles/pages/MedicationTable.css';
 
 const LabResults = () => {
   const navigate = useNavigate();
@@ -52,52 +64,19 @@ const LabResults = () => {
   // Get practitioners data
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
-  // Get page configuration for lab results
-  const pageConfig = getMedicalPageConfig('labresults');
+  // Get standardized configuration
+  const config = getMedicalPageConfig('labresults');
 
   // File management state (moved up before useDataManagement)
   const [filesCounts, setFilesCounts] = useState({});
 
-  // Data management with filtering and sorting
-  const dataManagement = useDataManagement(labResults || [], pageConfig, {
+  // Use standardized data management
+  const dataManagement = useDataManagement(labResults || [], config, {
     filesCounts,
   });
-  const {
-    data: filteredLabResults = [],
-    filters,
-    updateFilter,
-    clearFilters,
-    hasActiveFilters = false,
-    statusOptions = [],
-    categoryOptions = [],
-    dateRangeOptions = [],
-    resultOptions = [],
-    typeOptions = [],
-    filesOptions = [],
-    sortBy = '',
-    sortOrder = 'asc',
-    handleSortChange,
-    totalCount = 0,
-    filteredCount = 0,
-  } = dataManagement || {};
 
-  // Extract individual filter states for component props (keep for backward compatibility)
-  const searchTerm = filters?.search || '';
-  const statusFilter = filters?.status || 'all';
-  const categoryFilter = filters?.category || 'all';
-  const dateRangeFilter = filters?.dateRange || 'all';
-
-  // Filter update handlers (keep for backward compatibility)
-  const setSearchTerm = value => updateFilter && updateFilter('search', value);
-  const setStatusFilter = value =>
-    updateFilter && updateFilter('status', value);
-  const setCategoryFilter = value =>
-    updateFilter && updateFilter('category', value);
-  const setDateRangeFilter = value =>
-    updateFilter && updateFilter('dateRange', value);
-  const setSortBy = value => handleSortChange && handleSortChange(value);
-  const setSortOrder = value =>
-    handleSortChange && handleSortChange(sortBy, value);
+  // Get processed data from data management
+  const filteredLabResults = dataManagement.data;
 
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
@@ -469,208 +448,257 @@ const LabResults = () => {
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading lab results...</p>
-        </div>
-      </div>
+      <Container size="xl" py="xl">
+        <Center h={200}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text>Loading lab results...</Text>
+            <Text size="sm" c="dimmed">
+              If this takes too long, please refresh the page
+            </Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
-      <PageHeader title="Lab Results" icon="🧪" />
+    <>
+      <Container size="xl" py="md">
+        <PageHeader title="Lab Results" icon="🧪" />
 
-      <div className="medical-page-content">
-        {error && (
-          <div className="error-message">
-            {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
-        )}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}
+        <Stack gap="lg">
+          {error && (
+            <Alert
+              variant="light"
+              color="red"
+              title="Error"
+              withCloseButton
+              onClose={clearError}
+            >
+              {error}
+            </Alert>
+          )}
+          {successMessage && (
+            <Alert variant="light" color="green" title="Success">
+              {successMessage}
+            </Alert>
+          )}
 
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddLabResult}>
+          <Group justify="space-between" align="center">
+            <Button variant="filled" onClick={handleAddLabResult}>
               + Add New Lab Result
             </Button>
-          </div>
 
-          <div className="controls-center">
             <ViewToggle
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               showPrint={true}
             />
-          </div>
+          </Group>
 
-          <div className="controls-right">
-            {/* Filters and sorting handled by MantineFilters component below */}
-          </div>
-        </div>
-
-        {/* Mantine Filters */}
-        {dataManagement && filters && (
+          {/* Mantine Filter Controls */}
           <MantineFilters
-            filters={filters}
-            updateFilter={updateFilter}
-            clearFilters={clearFilters}
-            hasActiveFilters={hasActiveFilters}
-            statusOptions={statusOptions}
-            categoryOptions={categoryOptions}
-            dateRangeOptions={dateRangeOptions}
-            resultOptions={resultOptions}
-            typeOptions={typeOptions}
-            filesOptions={filesOptions}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            handleSortChange={handleSortChange}
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-            config={pageConfig.filterControls}
+            filters={dataManagement.filters}
+            updateFilter={dataManagement.updateFilter}
+            clearFilters={dataManagement.clearFilters}
+            hasActiveFilters={dataManagement.hasActiveFilters}
+            statusOptions={dataManagement.statusOptions}
+            categoryOptions={dataManagement.categoryOptions}
+            dateRangeOptions={dataManagement.dateRangeOptions}
+            orderedDateOptions={dataManagement.orderedDateOptions}
+            completedDateOptions={dataManagement.completedDateOptions}
+            resultOptions={dataManagement.resultOptions}
+            typeOptions={dataManagement.typeOptions}
+            filesOptions={dataManagement.filesOptions}
+            sortOptions={dataManagement.sortOptions}
+            sortBy={dataManagement.sortBy}
+            sortOrder={dataManagement.sortOrder}
+            handleSortChange={dataManagement.handleSortChange}
+            totalCount={dataManagement.totalCount}
+            filteredCount={dataManagement.filteredCount}
+            config={config.filterControls}
           />
-        )}
 
-        <div className="medical-items-list">
           {filteredLabResults.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🧪</div>
-              <h3>
-                {!labResults || labResults.length === 0
-                  ? 'No lab results found'
-                  : 'No lab results match your filters'}
-              </h3>
-              <p>
-                {!labResults || labResults.length === 0
-                  ? 'Click "Add New Lab Result" to get started.'
-                  : 'Try adjusting your search or filter criteria.'}
-              </p>
-              {!labResults || labResults.length === 0 ? (
-                <Button variant="primary" onClick={handleAddLabResult}>
-                  Add Your First Lab Result
-                </Button>
-              ) : (
-                <Button variant="secondary" onClick={clearFilters}>
-                  Clear All Filters
-                </Button>
-              )}
-            </div>
+            <Card withBorder p="xl">
+              <Stack align="center" gap="md">
+                <Text size="3rem">🧪</Text>
+                <Text size="xl" fw={600}>
+                  No Lab Results Found
+                </Text>
+                <Text ta="center" c="dimmed">
+                  {dataManagement.hasActiveFilters
+                    ? 'Try adjusting your search or filter criteria.'
+                    : 'Start by adding your first lab result.'}
+                </Text>
+                {!dataManagement.hasActiveFilters && (
+                  <Button variant="filled" onClick={handleAddLabResult}>
+                    Add Your First Lab Result
+                  </Button>
+                )}
+              </Stack>
+            </Card>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
+            <Grid>
               {filteredLabResults.map(result => (
-                <div key={result.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">{result.test_name}</h3>
-                    </div>
-                    <div className="status-badges">
-                      <StatusBadge status={result.status} />
-                    </div>
-                  </div>
+                <Grid.Col key={result.id} span={{ base: 12, sm: 6, lg: 4 }}>
+                  <Card
+                    withBorder
+                    shadow="sm"
+                    radius="md"
+                    h="100%"
+                    style={{ display: 'flex', flexDirection: 'column' }}
+                  >
+                    <Stack gap="sm" style={{ flex: 1 }}>
+                      <Group justify="space-between" align="flex-start">
+                        <Stack gap="xs" style={{ flex: 1 }}>
+                          <Text fw={600} size="lg">
+                            {result.test_name}
+                          </Text>
+                          {result.test_category && (
+                            <Badge variant="light" color="blue" size="md">
+                              {result.test_category}
+                            </Badge>
+                          )}
+                        </Stack>
+                        <StatusBadge status={result.status} />
+                      </Group>
 
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Test Code:</span>
-                      <span className="value">{result.test_code || 'N/A'}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">Category:</span>
-                      <span className="value">
-                        {result.test_category || 'N/A'}
-                      </span>
-                    </div>
-                    {result.test_type && (
-                      <div className="detail-item">
-                        <span className="label">Type:</span>
-                        <span className="value">{result.test_type}</span>
-                      </div>
-                    )}
-                    {result.facility && (
-                      <div className="detail-item">
-                        <span className="label">Facility:</span>
-                        <span className="value">{result.facility}</span>
-                      </div>
-                    )}
-                    <div className="detail-item">
-                      <span className="label">Ordered:</span>
-                      <span className="value">
-                        {formatDate(result.ordered_date)}
-                      </span>
-                    </div>
-                    {result.completed_date && (
-                      <div className="detail-item">
-                        <span className="label">Completed:</span>
-                        <span className="value">
-                          {formatDate(result.completed_date)}
-                        </span>
-                      </div>
-                    )}
-                    {result.labs_result && (
-                      <div className="detail-item">
-                        <span className="label">Result:</span>
-                        <StatusBadge status={result.labs_result} />
-                      </div>
-                    )}
-                    {result.practitioner_id && (
-                      <div className="detail-item">
-                        <span className="label">Ordering Practitioner:</span>
-                        <span className="value">
-                          {practitioners.find(
-                            p => p.id === result.practitioner_id
-                          )?.name ||
-                            `Practitioner ID: ${result.practitioner_id}`}
-                        </span>
-                      </div>
-                    )}
-                    <div className="detail-item">
-                      <span className="label">Files:</span>
-                      <span className="value">
-                        {filesCounts[result.id] > 0 ? (
-                          <span
-                            className="file-indicator"
-                            title={`${filesCounts[result.id]} file(s) attached`}
-                          >
-                            📎 {filesCounts[result.id]} attached
-                          </span>
-                        ) : (
-                          <span className="no-files">No files attached</span>
+                      <Stack gap="xs">
+                        {result.test_code && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Test Code:
+                            </Text>
+                            <Text size="sm">{result.test_code}</Text>
+                          </Group>
                         )}
-                      </span>
-                    </div>
-                  </div>
+                        {result.test_type && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Type:
+                            </Text>
+                            <Badge variant="light" color="cyan" size="sm">
+                              {result.test_type}
+                            </Badge>
+                          </Group>
+                        )}
+                        {result.facility && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Facility:
+                            </Text>
+                            <Text size="sm">{result.facility}</Text>
+                          </Group>
+                        )}
+                        <Group>
+                          <Text size="sm" fw={500} c="dimmed" w={120}>
+                            Ordered:
+                          </Text>
+                          <Text size="sm">
+                            {formatDate(result.ordered_date)}
+                          </Text>
+                        </Group>
+                        {result.completed_date && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Completed:
+                            </Text>
+                            <Text size="sm">
+                              {formatDate(result.completed_date)}
+                            </Text>
+                          </Group>
+                        )}
+                        {result.labs_result && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Result:
+                            </Text>
+                            <StatusBadge status={result.labs_result} />
+                          </Group>
+                        )}
+                        {result.practitioner_id && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Doctor:
+                            </Text>
+                            <Text size="sm">
+                              {practitioners.find(
+                                p => p.id === result.practitioner_id
+                              )?.name ||
+                                `Practitioner ID: ${result.practitioner_id}`}
+                            </Text>
+                          </Group>
+                        )}
+                        <Group>
+                          <Text size="sm" fw={500} c="dimmed" w={120}>
+                            Files:
+                          </Text>
+                          <Text size="sm">
+                            {filesCounts[result.id] > 0 ? (
+                              <Badge
+                                variant="light"
+                                color="green"
+                                size="sm"
+                                leftSection="📎"
+                              >
+                                {filesCounts[result.id]} attached
+                              </Badge>
+                            ) : (
+                              <Text c="dimmed" size="sm">
+                                No files
+                              </Text>
+                            )}
+                          </Text>
+                        </Group>
+                      </Stack>
 
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleViewDetails(result)}
-                    >
-                      👁️ View
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditLabResult(result)}
-                    >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteLabResult(result.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
+                      {result.notes && (
+                        <Stack gap="xs">
+                          <Divider />
+                          <Stack gap="xs">
+                            <Text size="sm" fw={500} c="dimmed">
+                              Notes
+                            </Text>
+                            <Text size="sm">{result.notes}</Text>
+                          </Stack>
+                        </Stack>
+                      )}
+                    </Stack>
+
+                    {/* Buttons always at bottom */}
+                    <Stack gap={0} mt="auto">
+                      <Divider />
+                      <Group justify="flex-end" gap="xs" pt="sm">
+                        <Button
+                          variant="light"
+                          size="xs"
+                          onClick={() => handleViewDetails(result)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="light"
+                          size="xs"
+                          onClick={() => handleEditLabResult(result)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="light"
+                          color="red"
+                          size="xs"
+                          onClick={() => handleDeleteLabResult(result.id)}
+                        >
+                          Delete
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
               ))}
-            </div>
+            </Grid>
           ) : (
             <MedicalTable
               data={filteredLabResults}
@@ -696,7 +724,9 @@ const LabResults = () => {
               onDelete={handleDeleteLabResult}
               formatters={{
                 test_name: value => (
-                  <span className="primary-field">{value}</span>
+                  <Text fw={600} style={{ minWidth: 150 }}>
+                    {value}
+                  </Text>
                 ),
                 status: value => <StatusBadge status={value} size="small" />,
                 practitioner_id: (value, item) => {
@@ -717,8 +747,8 @@ const LabResults = () => {
               }}
             />
           )}
-        </div>
-      </div>
+        </Stack>
+      </Container>
 
       {/* Create/Edit Form Modal */}
       {showModal && (modalType === 'create' || modalType === 'edit') && (
@@ -997,7 +1027,7 @@ const LabResults = () => {
           </div>
         </MedicalFormModal>
       )}
-    </div>
+    </>
   );
 };
 

@@ -477,48 +477,86 @@ export const medicalPageConfigs = {
           description: 'No files attached',
         },
       ],
-      dateField: 'ordered_date',
-      dateRangeOptions: [
-        { value: 'all', label: 'All Time Periods' },
+      // Ordered Date Filter
+      orderedDateField: 'ordered_date',
+      orderedDateLabel: 'Ordered Date',
+      orderedDateOptions: [
+        { value: 'all', label: 'All Ordered Dates' },
         {
           value: 'today',
-          label: 'Today',
+          label: 'Ordered Today',
           description: 'Tests ordered today',
         },
         {
           value: 'week',
-          label: 'This Week',
+          label: 'Ordered This Week',
           description: 'Tests ordered this week',
         },
         {
-          value: 'current',
-          label: 'Current Month',
+          value: 'current_month',
+          label: 'Ordered This Month',
           description: 'Tests ordered this month',
         },
         {
           value: 'past_month',
-          label: 'Past Month',
-          description: 'Tests from last month',
+          label: 'Ordered Last Month',
+          description: 'Tests ordered last month',
         },
         {
           value: 'past_3_months',
-          label: 'Past 3 Months',
-          description: 'Tests from last 3 months',
+          label: 'Ordered Past 3 Months',
+          description: 'Tests ordered in last 3 months',
         },
         {
           value: 'past_6_months',
-          label: 'Past 6 Months',
-          description: 'Tests from last 6 months',
+          label: 'Ordered Past 6 Months',
+          description: 'Tests ordered in last 6 months',
         },
         {
           value: 'year',
-          label: 'This Year',
+          label: 'Ordered This Year',
           description: 'Tests ordered this year',
         },
+      ],
+      // Completed Date Filter
+      completedDateField: 'completed_date',
+      completedDateLabel: 'Completed Date',
+      completedDateOptions: [
+        { value: 'all', label: 'All Completed Dates' },
         {
-          value: 'future',
-          label: 'Future/Scheduled',
-          description: 'Scheduled future tests',
+          value: 'today',
+          label: 'Completed Today',
+          description: 'Tests completed today',
+        },
+        {
+          value: 'week',
+          label: 'Completed This Week',
+          description: 'Tests completed this week',
+        },
+        {
+          value: 'current_month',
+          label: 'Completed This Month',
+          description: 'Tests completed this month',
+        },
+        {
+          value: 'past_month',
+          label: 'Completed Last Month',
+          description: 'Tests completed last month',
+        },
+        {
+          value: 'past_3_months',
+          label: 'Completed Past 3 Months',
+          description: 'Tests completed in last 3 months',
+        },
+        {
+          value: 'past_6_months',
+          label: 'Completed Past 6 Months',
+          description: 'Tests completed in last 6 months',
+        },
+        {
+          value: 'year',
+          label: 'Completed This Year',
+          description: 'Tests completed this year',
         },
       ],
       // Custom filter functions for complex logic
@@ -545,7 +583,7 @@ export const medicalPageConfigs = {
       },
     },
     sorting: {
-      defaultSortBy: 'ordered_date',
+      defaultSortBy: 'completed_date',
       defaultSortOrder: 'desc',
       sortOptions: [
         {
@@ -671,7 +709,8 @@ export const medicalPageConfigs = {
         'Search lab results, test codes, facilities, practitioners...',
       title: 'Filter & Sort Lab Results',
       showCategory: true,
-      showDateRange: true,
+      showOrderedDate: true,
+      showCompletedDate: true,
       showResult: true,
       showType: true,
       showFiles: true,

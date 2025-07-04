@@ -25,8 +25,6 @@ import {
   Center,
   Divider,
 } from '@mantine/core';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
 
 const Procedures = () => {
   const [viewMode, setViewMode] = useState('cards');
@@ -443,7 +441,9 @@ const Procedures = () => {
               onDelete={handleDeleteProcedure}
               formatters={{
                 procedure_name: value => (
-                  <span className="primary-field">{value}</span>
+                  <Text fw={600} style={{ minWidth: 150 }}>
+                    {value}
+                  </Text>
                 ),
                 procedure_type: value =>
                   value ? (

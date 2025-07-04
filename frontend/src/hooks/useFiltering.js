@@ -12,6 +12,8 @@ export const useFiltering = (data = [], config = {}) => {
     status: 'all',
     category: 'all',
     dateRange: 'all',
+    orderedDate: 'all',
+    completedDate: 'all',
     result: 'all',
     type: 'all',
     files: 'all',
@@ -79,6 +81,16 @@ export const useFiltering = (data = [], config = {}) => {
     { value: 'all', label: 'All Records' },
   ];
 
+  // Ordered date options
+  const orderedDateOptions = config.orderedDateOptions || [
+    { value: 'all', label: 'All Ordered Dates' },
+  ];
+
+  // Completed date options
+  const completedDateOptions = config.completedDateOptions || [
+    { value: 'all', label: 'All Completed Dates' },
+  ];
+
   // Helper function to get nested object values
   const getNestedValue = useCallback((obj, path) => {
     return path.split('.').reduce((current, key) => current?.[key], obj);
@@ -119,6 +131,45 @@ export const useFiltering = (data = [], config = {}) => {
             now.getDate()
           );
           return itemDate >= yearAgo;
+        case 'current_month':
+          // For current calendar month
+          const currentMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+          );
+          const currentMonthEnd = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0
+          );
+
+          return itemDate >= currentMonthStart && itemDate <= currentMonthEnd;
+        case 'past_month':
+          // For previous calendar month
+          const lastMonthStart = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            1
+          );
+          const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+          return itemDate >= lastMonthStart && itemDate <= lastMonthEnd;
+        case 'past_3_months':
+          // For past 3 months
+          const threeMonthsAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 3,
+            now.getDate()
+          );
+          return itemDate >= threeMonthsAgo;
+        case 'past_6_months':
+          // For past 6 months
+          const sixMonthsAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 6,
+            now.getDate()
+          );
+          return itemDate >= sixMonthsAgo;
         case 'current':
           // For active medications/treatments - requires item parameter
           if (!item) return true;
@@ -210,6 +261,30 @@ export const useFiltering = (data = [], config = {}) => {
           return false;
       }
 
+      // Ordered date filter
+      if (filters.orderedDate !== 'all' && config.orderedDateField) {
+        if (
+          !matchesDateRange(
+            item[config.orderedDateField],
+            filters.orderedDate,
+            item
+          )
+        )
+          return false;
+      }
+
+      // Completed date filter
+      if (filters.completedDate !== 'all' && config.completedDateField) {
+        if (
+          !matchesDateRange(
+            item[config.completedDateField],
+            filters.completedDate,
+            item
+          )
+        )
+          return false;
+      }
+
       // Custom filters
       if (config.customFilters) {
         for (const [key, filterFn] of Object.entries(config.customFilters)) {
@@ -238,6 +313,8 @@ export const useFiltering = (data = [], config = {}) => {
       status: 'all',
       category: 'all',
       dateRange: 'all',
+      orderedDate: 'all',
+      completedDate: 'all',
       result: 'all',
       type: 'all',
       files: 'all',
@@ -264,6 +341,8 @@ export const useFiltering = (data = [], config = {}) => {
     statusOptions,
     categoryOptions,
     dateRangeOptions,
+    orderedDateOptions,
+    completedDateOptions,
     resultOptions,
     typeOptions,
     filesOptions,
