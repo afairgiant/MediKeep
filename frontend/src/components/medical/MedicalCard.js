@@ -1,9 +1,19 @@
 import React from 'react';
 import { formatDate, formatDateTime } from '../../utils/helpers';
-import './MedicalCard.css';
+import {
+  Card,
+  Group,
+  Text,
+  Stack,
+  Badge,
+  Button,
+  ActionIcon,
+  Box,
+} from '@mantine/core';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
 
 /**
- * Reusable card component for medical records
+ * Reusable card component for medical records using Mantine
  */
 const MedicalCard = ({
   title,
@@ -19,123 +29,157 @@ const MedicalCard = ({
   onDelete,
   ...props
 }) => {
-  const cardClass = [
-    'medical-card',
-    onClick && 'medical-card-clickable',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const getStatusColor = (status, type) => {
+    if (!status) return 'gray';
 
-  return (
-    <div className={cardClass} onClick={onClick} {...props}>
-      <div className="medical-card-header">
-        <div className="card-title-section">
-          <h3 className="card-title">{title}</h3>
-          {subtitle && <p className="card-subtitle">{subtitle}</p>}
-        </div>
+    const statusLower = status.toLowerCase();
 
-        {status && (
-          <span
-            className={`status-badge status-${getStatusClass(status, statusType)}`}
-          >
-            {status}
-          </span>
-        )}
-      </div>
+    if (type === 'medication') {
+      switch (statusLower) {
+        case 'active':
+          return 'green';
+        case 'stopped':
+          return 'red';
+        case 'on-hold':
+          return 'yellow';
+        case 'completed':
+          return 'blue';
+        case 'cancelled':
+          return 'gray';
+        default:
+          return 'gray';
+      }
+    }
 
-      {children && <div className="medical-card-body">{children}</div>}
+    if (type === 'lab-result') {
+      switch (statusLower) {
+        case 'completed':
+          return 'green';
+        case 'in-progress':
+          return 'blue';
+        case 'ordered':
+          return 'yellow';
+        case 'cancelled':
+          return 'red';
+        default:
+          return 'gray';
+      }
+    }
 
-      {dateInfo && (
-        <div className="medical-card-dates">
-          {dateInfo.created && (
-            <span className="date-item">
-              Created: {formatDate(dateInfo.created)}
-            </span>
-          )}
-          {dateInfo.updated && (
-            <span className="date-item">
-              Updated: {formatDateTime(dateInfo.updated)}
-            </span>
-          )}
-          {dateInfo.custom && (
-            <span className="date-item">
-              {dateInfo.custom.label}: {formatDate(dateInfo.custom.date)}
-            </span>
-          )}
-        </div>
-      )}
-
-      {(onEdit || onDelete || actions) && (
-        <div className="medical-card-actions">
-          {onEdit && (
-            <button
-              className="edit-button"
-              onClick={e => {
-                e.stopPropagation();
-                onEdit();
-              }}
-            >
-              ✏️ Edit
-            </button>
-          )}
-          {onDelete && (
-            <button
-              className="delete-button"
-              onClick={e => {
-                e.stopPropagation();
-                onDelete();
-              }}
-            >
-              🗑️ Delete
-            </button>
-          )}
-          {actions}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Helper function to get status class
-const getStatusClass = (status, type) => {
-  if (!status) return 'unknown';
-
-  const statusLower = status.toLowerCase();
-
-  if (type === 'medication') {
+    // General status colors
     switch (statusLower) {
       case 'active':
-        return 'active';
-      case 'stopped':
-        return 'stopped';
-      case 'on-hold':
-        return 'on-hold';
       case 'completed':
-        return 'completed';
+      case 'normal':
+        return 'green';
+      case 'inactive':
       case 'cancelled':
-        return 'cancelled';
-      default:
-        return 'unknown';
-    }
-  }
-
-  if (type === 'lab-result') {
-    switch (statusLower) {
-      case 'completed':
-        return 'completed';
+        return 'red';
+      case 'pending':
+      case 'scheduled':
+        return 'yellow';
       case 'in-progress':
-        return 'in-progress';
-      case 'ordered':
-        return 'ordered';
-      case 'cancelled':
-        return 'cancelled';
+        return 'blue';
       default:
-        return 'unknown';
+        return 'gray';
     }
-  }
+  };
 
-  return statusLower;
+  return (
+    <Card
+      withBorder
+      shadow="sm"
+      radius="md"
+      p="md"
+      className={className}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
+      {...props}
+    >
+      <Stack gap="sm">
+        {/* Header */}
+        <Group justify="space-between" align="flex-start">
+          <Box style={{ flex: 1 }}>
+            <Text fw={600} size="lg">
+              {title}
+            </Text>
+            {subtitle && (
+              <Text size="sm" c="dimmed">
+                {subtitle}
+              </Text>
+            )}
+          </Box>
+
+          {status && (
+            <Badge
+              variant="light"
+              color={getStatusColor(status, statusType)}
+              size="md"
+            >
+              {status}
+            </Badge>
+          )}
+        </Group>
+
+        {/* Body */}
+        {children && <Box>{children}</Box>}
+
+        {/* Date Information */}
+        {dateInfo && (
+          <Stack gap="xs">
+            {dateInfo.created && (
+              <Text size="xs" c="dimmed">
+                Created: {formatDate(dateInfo.created)}
+              </Text>
+            )}
+            {dateInfo.updated && (
+              <Text size="xs" c="dimmed">
+                Updated: {formatDateTime(dateInfo.updated)}
+              </Text>
+            )}
+            {dateInfo.custom && (
+              <Text size="xs" c="dimmed">
+                {dateInfo.custom.label}: {formatDate(dateInfo.custom.date)}
+              </Text>
+            )}
+          </Stack>
+        )}
+
+        {/* Actions */}
+        {(onEdit || onDelete || actions) && (
+          <Group justify="flex-end" gap="xs" mt="sm">
+            {onEdit && (
+              <ActionIcon
+                variant="light"
+                color="blue"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+              >
+                <IconEdit size={16} />
+              </ActionIcon>
+            )}
+            {onDelete && (
+              <ActionIcon
+                variant="light"
+                color="red"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <IconTrash size={16} />
+              </ActionIcon>
+            )}
+            {actions}
+          </Group>
+        )}
+      </Stack>
+    </Card>
+  );
 };
 
 export default MedicalCard;

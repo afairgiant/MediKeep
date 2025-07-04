@@ -1,18 +1,47 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Container,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  Button,
+  ActionIcon,
+  Badge,
+  Grid,
+  Card,
+  Flex,
+  Box,
+  Divider,
+  Modal,
+} from '@mantine/core';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+  IconEdit,
+  IconTrash,
+  IconExclamationCircle,
+  IconShieldCheck,
+  IconAlertCircle,
+  IconShield,
+} from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
 
 const Allergies = () => {
   const navigate = useNavigate();
@@ -140,60 +169,110 @@ const Allergies = () => {
   const getSeverityIcon = severity => {
     switch (severity) {
       case 'life-threatening':
-        return '🚨';
+        return IconExclamationCircle;
       case 'severe':
-        return '⚠️';
+        return IconAlertTriangle;
       case 'moderate':
-        return '⚡';
+        return IconAlertCircle;
       case 'mild':
-        return '💛';
+        return IconShield;
       default:
-        return '❓';
+        return IconShieldCheck;
+    }
+  };
+
+  const getSeverityColor = severity => {
+    switch (severity) {
+      case 'life-threatening':
+        return 'red';
+      case 'severe':
+        return 'orange';
+      case 'moderate':
+        return 'yellow';
+      case 'mild':
+        return 'blue';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getStatusColor = status => {
+    switch (status) {
+      case 'active':
+        return 'red';
+      case 'inactive':
+        return 'gray';
+      case 'resolved':
+        return 'green';
+      default:
+        return 'gray';
     }
   };
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading allergies...</p>
-        </div>
-      </div>
+      <Container size="xl" py="lg">
+        <Center py="xl">
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg">Loading allergies...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <PageHeader title="Allergies" icon="⚠️" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {error && (
-          <div className="error-message">
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
             {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
+          </Alert>
         )}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}{' '}
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddAllergy}>
-              + Add New Allergy
-            </Button>
-          </div>
 
-          <div className="controls-center">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </div>
-        </div>
+        {successMessage && (
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
+        )}
+
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddAllergy}
+            size="md"
+          >
+            Add New Allergy
+          </Button>
+
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
+
         {/* Mantine Filter Controls */}
         <MantineFilters
           filters={dataManagement.filters}
@@ -211,6 +290,8 @@ const Allergies = () => {
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}
         />
+
+        {/* Form Modal */}
         <MantineAllergyForm
           isOpen={showAddForm}
           onClose={resetForm}
@@ -219,133 +300,200 @@ const Allergies = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingAllergy={editingAllergy}
-        />{' '}
-        <div className="medical-items-list">
+        />
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {processedAllergies.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">⚠️</div>
-              <h3>No allergies found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Click "Add New Allergy" to get started.'}
-              </p>
-            </div>
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconAlertTriangle
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No allergies found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Click "Add New Allergy" to get started.'}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {processedAllergies.map(allergy => (
-                <div key={allergy.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <h3 className="item-title">
-                      <span className="severity-icon">
-                        {getSeverityIcon(allergy.severity)}
-                      </span>
-                      {allergy.allergen}
-                    </h3>
-                    <span className={`status-badge status-${allergy.status}`}>
-                      {allergy.status}
-                    </span>
-                  </div>
+            <Grid>
+              <AnimatePresence>
+                {processedAllergies.map((allergy, index) => {
+                  const SeverityIcon = getSeverityIcon(allergy.severity);
 
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Severity:</span>
-                      <span
-                        className={`value status-badge status-${allergy.severity}`}
+                  return (
+                    <Grid.Col
+                      key={allergy.id}
+                      span={{ base: 12, md: 6, lg: 4 }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
                       >
-                        {getSeverityIcon(allergy.severity)} {allergy.severity}
-                      </span>
-                    </div>
+                        <Card shadow="sm" padding="lg" radius="md" withBorder>
+                          <Card.Section withBorder inheritPadding py="xs">
+                            <Group justify="space-between">
+                              <Group gap="xs">
+                                <SeverityIcon
+                                  size={20}
+                                  color={`var(--mantine-color-${getSeverityColor(allergy.severity)}-6)`}
+                                />
+                                <Text fw={600} size="lg">
+                                  {allergy.allergen}
+                                </Text>
+                              </Group>
+                              <Badge
+                                color={getStatusColor(allergy.status)}
+                                variant="light"
+                              >
+                                {allergy.status}
+                              </Badge>
+                            </Group>
+                          </Card.Section>
 
-                    {allergy.reaction && (
-                      <div className="detail-item">
-                        <span className="label">Reaction:</span>
-                        <span className="value">{allergy.reaction}</span>
-                      </div>
-                    )}
+                          <Stack gap="md" mt="md">
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Severity:
+                              </Text>
+                              <Badge
+                                color={getSeverityColor(allergy.severity)}
+                                variant="filled"
+                                leftSection={<SeverityIcon size={12} />}
+                              >
+                                {allergy.severity}
+                              </Badge>
+                            </Group>
 
-                    {allergy.onset_date && (
-                      <div className="detail-item">
-                        <span className="label">Onset Date:</span>
-                        <span className="value">
-                          {formatDate(allergy.onset_date)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                            {allergy.reaction && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Reaction:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {allergy.reaction}
+                                </Text>
+                              </Group>
+                            )}
 
-                  {allergy.notes && (
-                    <div className="medical-item-notes">
-                      <div className="notes-label">Notes</div>
-                      <div className="notes-content">{allergy.notes}</div>
-                    </div>
-                  )}
+                            {allergy.onset_date && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Onset Date:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {formatDate(allergy.onset_date)}
+                                </Text>
+                              </Group>
+                            )}
 
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditAllergy(allergy)}
-                    >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteAllergy(allergy.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                            {allergy.notes && (
+                              <Box>
+                                <Text size="sm" c="dimmed" mb="xs">
+                                  Notes:
+                                </Text>
+                                <Text size="sm" c="gray.7">
+                                  {allergy.notes}
+                                </Text>
+                              </Box>
+                            )}
+                          </Stack>
+
+                          <Group justify="flex-end" mt="md" pt="md">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              onClick={() => handleEditAllergy(allergy)}
+                            >
+                              <IconEdit size={16} />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              onClick={() => handleDeleteAllergy(allergy.id)}
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </Group>
+                        </Card>
+                      </motion.div>
+                    </Grid.Col>
+                  );
+                })}
+              </AnimatePresence>
+            </Grid>
           ) : (
-            <MedicalTable
-              data={processedAllergies}
-              columns={[
-                { header: 'Allergen', accessor: 'allergen' },
-                { header: 'Reaction', accessor: 'reaction' },
-                { header: 'Severity', accessor: 'severity' },
-                { header: 'Onset Date', accessor: 'onset_date' },
-                { header: 'Status', accessor: 'status' },
-                { header: 'Notes', accessor: 'notes' },
-              ]}
-              patientData={currentPatient}
-              tableName="Allergies"
-              onEdit={handleEditAllergy}
-              onDelete={handleDeleteAllergy}
-              formatters={{
-                allergen: value => (
-                  <span className="primary-field">{value}</span>
-                ),
-                severity: value => (
-                  <span className={`status-badge-small status-${value}`}>
-                    {getSeverityIcon(value)} {value}
-                  </span>
-                ),
-                status: value => (
-                  <span className={`status-badge-small status-${value}`}>
-                    {value}
-                  </span>
-                ),
-                onset_date: value => (value ? formatDate(value) : '-'),
-                notes: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={processedAllergies}
+                columns={[
+                  { header: 'Allergen', accessor: 'allergen' },
+                  { header: 'Reaction', accessor: 'reaction' },
+                  { header: 'Severity', accessor: 'severity' },
+                  { header: 'Onset Date', accessor: 'onset_date' },
+                  { header: 'Status', accessor: 'status' },
+                  { header: 'Notes', accessor: 'notes' },
+                ]}
+                patientData={currentPatient}
+                tableName="Allergies"
+                onEdit={handleEditAllergy}
+                onDelete={handleDeleteAllergy}
+                formatters={{
+                  allergen: value => (
+                    <Text fw={600} c="blue">
+                      {value}
+                    </Text>
                   ),
-              }}
-            />
+                  severity: value => {
+                    const SeverityIcon = getSeverityIcon(value);
+                    return (
+                      <Badge
+                        color={getSeverityColor(value)}
+                        variant="filled"
+                        leftSection={<SeverityIcon size={12} />}
+                      >
+                        {value}
+                      </Badge>
+                    );
+                  },
+                  status: value => (
+                    <Badge color={getStatusColor(value)} variant="light">
+                      {value}
+                    </Badge>
+                  ),
+                  onset_date: value => (value ? formatDate(value) : '-'),
+                  notes: value =>
+                    value ? (
+                      <Text size="sm" title={value}>
+                        {value.length > 50
+                          ? `${value.substring(0, 50)}...`
+                          : value}
+                      </Text>
+                    ) : (
+                      '-'
+                    ),
+                }}
+              />
+            </Paper>
           )}
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </Container>
+    </motion.div>
   );
 };
 

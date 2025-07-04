@@ -274,17 +274,141 @@
     background: inherit !important;
   }
 
-  /* Specifically restore common badge colors */
-  .medications-table [class*='mantine-Badge'][data-variant='filled'],
-  .medical-table [class*='mantine-Badge'][data-variant='filled'] {
-    background: #228be6 !important;
-    color: white !important;
+  /* Force all badges to use print colors by overriding CSS custom properties */
+  .medications-table [class*='mantine-Badge'],
+  .medical-table [class*='mantine-Badge'],
+  .medications-table-container [class*='mantine-Badge'],
+  .medical-table-container [class*='mantine-Badge'] {
+    --mantine-color-red-6: #fa5252 !important;
+    --mantine-color-red-1: #ffe0e1 !important;
+    --mantine-color-red-9: #c92a2a !important;
+    --mantine-color-orange-6: #fd7e14 !important;
+    --mantine-color-orange-1: #ffe8cc !important;
+    --mantine-color-orange-9: #d9480f !important;
+    --mantine-color-yellow-6: #fab005 !important;
+    --mantine-color-yellow-1: #fff3bf !important;
+    --mantine-color-yellow-9: #e67700 !important;
+    --mantine-color-blue-6: #228be6 !important;
+    --mantine-color-blue-1: #e7f5ff !important;
+    --mantine-color-blue-9: #1971c2 !important;
+    --mantine-color-green-6: #51cf66 !important;
+    --mantine-color-green-1: #d3f9d8 !important;
+    --mantine-color-green-9: #2f9e44 !important;
+    --mantine-color-gray-6: #868e96 !important;
+    --mantine-color-gray-1: #f1f3f4 !important;
+    --mantine-color-gray-9: #495057 !important;
   }
 
-  .medications-table [class*='mantine-Badge'][data-variant='light'],
-  .medical-table [class*='mantine-Badge'][data-variant='light'] {
-    background: #e7f5ff !important;
-    color: #228be6 !important;
+  /* Specific color overrides for different severity levels */
+
+  /* Red badges (life-threatening, active) */
+  .medications-table [class*='mantine-Badge'][class*='mantine-red'],
+  .medical-table [class*='mantine-Badge'][class*='mantine-red'],
+  .medications-table-container [class*='mantine-Badge'][class*='mantine-red'],
+  .medical-table-container [class*='mantine-Badge'][class*='mantine-red'] {
+    background: #fa5252 !important;
+    color: white !important;
+    border: 1px solid #fa5252 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+  }
+
+  /* Orange badges (severe) */
+  .medications-table [class*='mantine-Badge'][class*='mantine-orange'],
+  .medical-table [class*='mantine-Badge'][class*='mantine-orange'],
+  .medications-table-container
+    [class*='mantine-Badge'][class*='mantine-orange'],
+  .medical-table-container [class*='mantine-Badge'][class*='mantine-orange'] {
+    background: #fd7e14 !important;
+    color: white !important;
+    border: 1px solid #fd7e14 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+  }
+
+  /* Yellow badges (moderate) */
+  .medications-table [class*='mantine-Badge'][class*='mantine-yellow'],
+  .medical-table [class*='mantine-Badge'][class*='mantine-yellow'],
+  .medications-table-container
+    [class*='mantine-Badge'][class*='mantine-yellow'],
+  .medical-table-container [class*='mantine-Badge'][class*='mantine-yellow'] {
+    background: #fab005 !important;
+    color: #212529 !important;
+    border: 1px solid #fab005 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+  }
+
+  /* Blue badges (mild) */
+  .medications-table [class*='mantine-Badge'][class*='mantine-blue'],
+  .medical-table [class*='mantine-Badge'][class*='mantine-blue'],
+  .medications-table-container [class*='mantine-Badge'][class*='mantine-blue'],
+  .medical-table-container [class*='mantine-Badge'][class*='mantine-blue'] {
+    background: #228be6 !important;
+    color: white !important;
+    border: 1px solid #228be6 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+  }
+
+  /* Green badges (resolved) */
+  .medications-table [class*='mantine-Badge'][class*='mantine-green'],
+  .medical-table [class*='mantine-Badge'][class*='mantine-green'],
+  .medications-table-container [class*='mantine-Badge'][class*='mantine-green'],
+  .medical-table-container [class*='mantine-Badge'][class*='mantine-green'] {
+    background: #51cf66 !important;
+    color: white !important;
+    border: 1px solid #51cf66 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+  }
+
+  /* Gray badges (inactive, unknown) */
+  .medications-table [class*='mantine-Badge'][class*='mantine-gray'],
+  .medical-table [class*='mantine-Badge'][class*='mantine-gray'],
+  .medications-table-container [class*='mantine-Badge'][class*='mantine-gray'],
+  .medical-table-container [class*='mantine-Badge'][class*='mantine-gray'] {
+    background: #868e96 !important;
+    color: white !important;
+    border: 1px solid #868e96 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+  }
+
+  /* Force all Mantine badges to have proper styling in print */
+  .medications-table [class*='mantine-Badge'],
+  .medical-table [class*='mantine-Badge'],
+  .medications-table-container [class*='mantine-Badge'],
+  .medical-table-container [class*='mantine-Badge'] {
+    box-shadow: none !important;
+    outline: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    display: inline-block !important;
+    text-align: center !important;
+    min-width: 60px !important;
   }
 
   /* Status badges - preserve their specific colors */
