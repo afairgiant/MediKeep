@@ -106,17 +106,87 @@ export const useFiltering = (data = [], config = {}) => {
 
       switch (range) {
         case 'today':
+          // If item has both start and end dates, check for overlap with today
+          if (item && config.startDateField && config.endDateField) {
+            const startDate = getNestedValue(item, config.startDateField);
+            const endDate = getNestedValue(item, config.endDateField);
+
+            if (startDate) {
+              const itemStartDate = new Date(startDate);
+              // If no end date, treat as ongoing (ending today)
+              const itemEndDate = endDate ? new Date(endDate) : now;
+              const todayStart = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+              );
+              const todayEnd = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                23,
+                59,
+                59
+              );
+
+              // Check if the item's date range overlaps with today
+              return itemStartDate <= todayEnd && itemEndDate >= todayStart;
+            }
+          }
+          // Fallback to single date check
           return itemDate.toDateString() === now.toDateString();
         case 'week':
           const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+          // If item has both start and end dates, check for overlap with this week
+          if (item && config.startDateField && config.endDateField) {
+            const startDate = getNestedValue(item, config.startDateField);
+            const endDate = getNestedValue(item, config.endDateField);
+
+            if (startDate) {
+              const itemStartDate = new Date(startDate);
+              // If no end date, treat as ongoing (ending today)
+              const itemEndDate = endDate ? new Date(endDate) : now;
+
+              // Check if the item's date range overlaps with this week
+              return itemStartDate <= now && itemEndDate >= weekAgo;
+            }
+          }
+          // Fallback to single date check
           return itemDate >= weekAgo;
         case 'month':
-          const monthAgo = new Date(
+          // For current calendar month - check if date range overlaps with current month
+          const currentMonthStart = new Date(
             now.getFullYear(),
-            now.getMonth() - 1,
-            now.getDate()
+            now.getMonth(),
+            1
           );
-          return itemDate >= monthAgo;
+          const currentMonthEnd = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0
+          );
+
+          // If item has both start and end dates, check for overlap
+          if (item && config.startDateField && config.endDateField) {
+            const startDate = getNestedValue(item, config.startDateField);
+            const endDate = getNestedValue(item, config.endDateField);
+
+            if (startDate) {
+              const itemStartDate = new Date(startDate);
+              // If no end date, treat as ongoing (ending today)
+              const itemEndDate = endDate ? new Date(endDate) : now;
+
+              // Check if the item's date range overlaps with current month
+              return (
+                itemStartDate <= currentMonthEnd &&
+                itemEndDate >= currentMonthStart
+              );
+            }
+          }
+
+          // Fallback to single date check
+          return itemDate >= currentMonthStart && itemDate <= currentMonthEnd;
         case 'quarter':
           const quarterAgo = new Date(
             now.getFullYear(),
@@ -131,20 +201,7 @@ export const useFiltering = (data = [], config = {}) => {
             now.getDate()
           );
           return itemDate >= yearAgo;
-        case 'current_month':
-          // For current calendar month
-          const currentMonthStart = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            1
-          );
-          const currentMonthEnd = new Date(
-            now.getFullYear(),
-            now.getMonth() + 1,
-            0
-          );
 
-          return itemDate >= currentMonthStart && itemDate <= currentMonthEnd;
         case 'past_month':
           // For previous calendar month
           const lastMonthStart = new Date(
