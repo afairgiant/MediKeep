@@ -39,7 +39,11 @@ jobs:
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Run frontend linting
         run: |
