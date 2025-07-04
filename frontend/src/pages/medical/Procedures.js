@@ -74,11 +74,15 @@ const Procedures = () => {
   const [formData, setFormData] = useState({
     procedure_name: '',
     procedure_type: '',
+    procedure_code: '',
     description: '',
     procedure_date: '',
     status: 'scheduled',
     notes: '',
     facility: '',
+    procedure_setting: '',
+    procedure_complications: '',
+    procedure_duration: '',
     practitioner_id: '',
   });
 
@@ -87,11 +91,15 @@ const Procedures = () => {
     setFormData({
       procedure_name: '',
       procedure_type: '',
+      procedure_code: '',
       description: '',
       procedure_date: '',
       status: 'scheduled',
       notes: '',
       facility: '',
+      procedure_setting: '',
+      procedure_complications: '',
+      procedure_duration: '',
       practitioner_id: '',
     });
     setShowModal(true);
@@ -101,12 +109,16 @@ const Procedures = () => {
     setEditingProcedure(procedure);
     setFormData({
       procedure_name: procedure.procedure_name || '',
-      procedure_type: procedure.code || '',
+      procedure_type: procedure.procedure_type || '',
+      procedure_code: procedure.procedure_code || '',
       description: procedure.description || '',
       procedure_date: procedure.date || '',
       status: procedure.status || 'scheduled',
       notes: procedure.notes || '',
       facility: procedure.facility || '',
+      procedure_setting: procedure.procedure_setting || '',
+      procedure_complications: procedure.procedure_complications || '',
+      procedure_duration: procedure.procedure_duration || '',
       practitioner_id: procedure.practitioner_id || '',
     });
     setShowModal(true);
@@ -144,12 +156,18 @@ const Procedures = () => {
 
     const procedureData = {
       procedure_name: formData.procedure_name,
-      code: formData.procedure_type || null,
+      procedure_type: formData.procedure_type || null,
+      procedure_code: formData.procedure_code || null,
       description: formData.description,
       date: formData.procedure_date || null,
       status: formData.status,
       notes: formData.notes || null,
       facility: formData.facility || null,
+      procedure_setting: formData.procedure_setting || null,
+      procedure_complications: formData.procedure_complications || null,
+      procedure_duration: formData.procedure_duration
+        ? parseInt(formData.procedure_duration)
+        : null,
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id)
         : null,
@@ -275,9 +293,9 @@ const Procedures = () => {
                           <Text fw={600} size="lg">
                             {procedure.procedure_name}
                           </Text>
-                          {procedure.code && (
+                          {procedure.procedure_type && (
                             <Badge variant="light" color="blue" size="md">
-                              {procedure.code}
+                              {procedure.procedure_type}
                             </Badge>
                           )}
                         </Stack>
@@ -293,6 +311,34 @@ const Procedures = () => {
                             <Text size="sm">{formatDate(procedure.date)}</Text>
                           </Group>
                         )}
+                        {procedure.procedure_code && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Code:
+                            </Text>
+                            <Text size="sm">{procedure.procedure_code}</Text>
+                          </Group>
+                        )}
+                        {procedure.procedure_setting && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Setting:
+                            </Text>
+                            <Badge variant="light" color="cyan" size="sm">
+                              {procedure.procedure_setting}
+                            </Badge>
+                          </Group>
+                        )}
+                        {procedure.procedure_duration && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Duration:
+                            </Text>
+                            <Text size="sm">
+                              {procedure.procedure_duration} minutes
+                            </Text>
+                          </Group>
+                        )}
                         {procedure.facility && (
                           <Group>
                             <Text size="sm" fw={500} c="dimmed" w={120}>
@@ -304,7 +350,7 @@ const Procedures = () => {
                         {procedure.practitioner_id && (
                           <Group>
                             <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Practitioner:
+                              Doctor:
                             </Text>
                             <Text size="sm">
                               {practitioners.find(
@@ -321,6 +367,19 @@ const Procedures = () => {
                             </Text>
                             <Text size="sm" style={{ flex: 1 }}>
                               {procedure.description}
+                            </Text>
+                          </Group>
+                        )}
+                        {procedure.procedure_complications && (
+                          <Group align="flex-start">
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Complications:
+                            </Text>
+                            <Text
+                              size="sm"
+                              style={{ flex: 1, color: '#d63384' }}
+                            >
+                              {procedure.procedure_complications}
                             </Text>
                           </Group>
                         )}
@@ -369,13 +428,15 @@ const Procedures = () => {
               data={filteredProcedures}
               columns={[
                 { header: 'Procedure Name', accessor: 'procedure_name' },
-                { header: 'Procedure Type', accessor: 'code' },
+                { header: 'Type', accessor: 'procedure_type' },
+                { header: 'Code', accessor: 'procedure_code' },
                 { header: 'Date', accessor: 'date' },
                 { header: 'Status', accessor: 'status' },
+                { header: 'Setting', accessor: 'procedure_setting' },
+                { header: 'Duration (min)', accessor: 'procedure_duration' },
                 { header: 'Facility', accessor: 'facility' },
                 { header: 'Practitioner', accessor: 'practitioner_name' },
                 { header: 'Description', accessor: 'description' },
-                { header: 'Notes', accessor: 'notes' },
               ]}
               patientData={currentPatient}
               tableName="Procedures"
@@ -385,7 +446,7 @@ const Procedures = () => {
                 procedure_name: value => (
                   <span className="primary-field">{value}</span>
                 ),
-                code: value =>
+                procedure_type: value =>
                   value ? (
                     <Badge variant="filled" color="blue" size="sm">
                       {value}
@@ -393,8 +454,28 @@ const Procedures = () => {
                   ) : (
                     '-'
                   ),
+                procedure_code: value => value || '-',
                 date: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
+                procedure_setting: value =>
+                  value ? (
+                    <Badge variant="light" color="cyan" size="sm">
+                      {value}
+                    </Badge>
+                  ) : (
+                    '-'
+                  ),
+                procedure_duration: value => (value ? `${value} min` : '-'),
+                procedure_complications: value =>
+                  value ? (
+                    <span title={value} style={{ color: '#d63384' }}>
+                      {value.length > 30
+                        ? `${value.substring(0, 30)}...`
+                        : value}
+                    </span>
+                  ) : (
+                    '-'
+                  ),
                 practitioner_name: (value, item) => {
                   if (!item.practitioner_id) return '-';
                   return (

@@ -363,7 +363,12 @@ class Procedure(Base):
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
 
     procedure_name = Column(String, nullable=False)  # Name of the procedure
-    code = Column(String, nullable=True)  # Code for the procedure (e.g., CPT code)
+    procedure_type = Column(
+        String, nullable=True
+    )  # Type of procedure (e.g., surgical, diagnostic, etc.)
+    procedure_code = Column(
+        String, nullable=True
+    )  # Code for the procedure (e.g., CPT code)
     date = Column(Date, nullable=False)  # Date when the procedure was performed
     description = Column(String, nullable=True)  # Description of the procedure
     status = Column(
@@ -373,6 +378,15 @@ class Procedure(Base):
     facility = Column(
         String, nullable=True
     )  # Facility where the procedure was performed
+    procedure_setting = Column(
+        String, nullable=True
+    )  # Setting of procedure (e.g., outpatient, inpatient, office, etc)
+    procedure_complications = Column(
+        String, nullable=True
+    )  # Any complications that occured during the procedure
+    procedure_duration = Column(
+        Integer, nullable=True
+    )  # Duration of the procedure in minutes
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
