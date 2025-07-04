@@ -27,7 +27,6 @@ import {
 } from '@mantine/core';
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/MedicationTable.css';
-import '../../styles/pages/ProcedureCards.css';
 
 const Procedures = () => {
   const [viewMode, setViewMode] = useState('cards');
