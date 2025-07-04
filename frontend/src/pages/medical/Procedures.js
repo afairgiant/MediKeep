@@ -245,6 +245,7 @@ const Procedures = () => {
             clearFilters={dataManagement.clearFilters}
             hasActiveFilters={dataManagement.hasActiveFilters}
             statusOptions={dataManagement.statusOptions}
+            dateRangeOptions={dataManagement.dateRangeOptions}
             sortOptions={dataManagement.sortOptions}
             sortBy={dataManagement.sortBy}
             sortOrder={dataManagement.sortOrder}

@@ -99,6 +99,8 @@ export const medicalPageConfigs = {
         { value: 'cancelled', label: 'Cancelled' },
       ],
       dateField: 'date',
+      startDateField: 'date',
+      endDateField: 'date',
     },
     sorting: {
       defaultSortBy: 'date',
