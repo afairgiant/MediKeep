@@ -24,6 +24,8 @@ import {
   Loader,
   Center,
   Divider,
+  Modal,
+  Title,
 } from '@mantine/core';
 
 const Medication = () => {
@@ -71,6 +73,8 @@ const Medication = () => {
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingMedication, setViewingMedication] = useState(null);
   const [editingMedication, setEditingMedication] = useState(null);
   const [formData, setFormData] = useState({
     medication_name: '',
@@ -117,6 +121,11 @@ const Medication = () => {
       pharmacy_id: medication.pharmacy_id || null,
     });
     setShowModal(true);
+  };
+
+  const handleViewMedication = medication => {
+    setViewingMedication(medication);
+    setShowViewModal(true);
   };
 
   const handleDeleteMedication = async medicationId => {
@@ -382,6 +391,13 @@ const Medication = () => {
                         <Button
                           variant="light"
                           size="xs"
+                          onClick={() => handleViewMedication(medication)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="light"
+                          size="xs"
                           onClick={() => handleEditMedication(medication)}
                         >
                           Edit
@@ -417,6 +433,7 @@ const Medication = () => {
               ]}
               patientData={currentPatient}
               tableName="Medications"
+              onView={handleViewMedication}
               onEdit={handleEditMedication}
               onDelete={handleDeleteMedication}
               formatters={{
@@ -477,6 +494,188 @@ const Medication = () => {
         pharmacies={pharmacies}
         editingMedication={editingMedication}
       />
+
+      {/* Medication View Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title={
+          <Group>
+            <Text size="lg" fw={600}>
+              Medication Details
+            </Text>
+            {viewingMedication && (
+              <StatusBadge status={viewingMedication.status} />
+            )}
+          </Group>
+        }
+        size="lg"
+        centered
+      >
+        {viewingMedication && (
+          <Stack gap="md">
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Title order={3}>{viewingMedication.medication_name}</Title>
+                    {viewingMedication.dosage && (
+                      <Badge variant="light" color="blue" size="lg">
+                        {viewingMedication.dosage}
+                      </Badge>
+                    )}
+                  </Stack>
+                </Group>
+
+                {viewingMedication.indication && (
+                  <Stack gap="xs">
+                    <Text fw={500} c="dimmed" size="sm">
+                      Indication
+                    </Text>
+                    <Text>{viewingMedication.indication}</Text>
+                  </Stack>
+                )}
+              </Stack>
+            </Card>
+
+            <Grid>
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      DOSAGE & FREQUENCY
+                    </Text>
+                    <Divider />
+                    {viewingMedication.dosage && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Dosage:
+                        </Text>
+                        <Text size="sm">{viewingMedication.dosage}</Text>
+                      </Group>
+                    )}
+                    {viewingMedication.frequency && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Frequency:
+                        </Text>
+                        <Text size="sm">{viewingMedication.frequency}</Text>
+                      </Group>
+                    )}
+                    {viewingMedication.route && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Route:
+                        </Text>
+                        <Badge variant="light" color="cyan" size="sm">
+                          {viewingMedication.route}
+                        </Badge>
+                      </Group>
+                    )}
+                    {!viewingMedication.dosage &&
+                      !viewingMedication.frequency &&
+                      !viewingMedication.route && (
+                        <Text size="sm" c="dimmed">
+                          No dosage information
+                        </Text>
+                      )}
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      PRESCRIBER & PHARMACY
+                    </Text>
+                    <Divider />
+                    {viewingMedication.practitioner && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Prescriber:
+                        </Text>
+                        <Text size="sm">
+                          {viewingMedication.practitioner.name}
+                        </Text>
+                      </Group>
+                    )}
+                    {viewingMedication.pharmacy && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Pharmacy:
+                        </Text>
+                        <Text size="sm">{viewingMedication.pharmacy.name}</Text>
+                      </Group>
+                    )}
+                    {!viewingMedication.practitioner &&
+                      !viewingMedication.pharmacy && (
+                        <Text size="sm" c="dimmed">
+                          No prescriber or pharmacy information
+                        </Text>
+                      )}
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
+
+            {(viewingMedication.effective_period_start ||
+              viewingMedication.effective_period_end) && (
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Text fw={600} size="sm" c="dimmed">
+                    EFFECTIVE PERIOD
+                  </Text>
+                  <Divider />
+                  <Grid>
+                    {viewingMedication.effective_period_start && (
+                      <Grid.Col span={6}>
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Start Date:
+                          </Text>
+                          <Text size="sm">
+                            {formatDate(
+                              viewingMedication.effective_period_start
+                            )}
+                          </Text>
+                        </Group>
+                      </Grid.Col>
+                    )}
+                    {viewingMedication.effective_period_end && (
+                      <Grid.Col span={6}>
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            End Date:
+                          </Text>
+                          <Text size="sm">
+                            {formatDate(viewingMedication.effective_period_end)}
+                          </Text>
+                        </Group>
+                      </Grid.Col>
+                    )}
+                  </Grid>
+                </Stack>
+              </Card>
+            )}
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="light"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleEditMedication(viewingMedication);
+                }}
+              >
+                Edit Medication
+              </Button>
+              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+                Close
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </>
   );
 };
