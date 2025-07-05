@@ -1,20 +1,42 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Container,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  Badge,
+  Grid,
+  Card,
+  Box,
+  Divider,
+  Anchor,
+} from '@mantine/core';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+  IconShieldCheck,
+  IconStar,
+} from '@tabler/icons-react';
 import { useMedicalData, useDataManagement } from '../../hooks';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import { Button } from '../../components/ui';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/EmergencyContacts.css';
+import { formatPhoneNumber } from '../../utils/phoneUtils';
 
 const EmergencyContacts = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -166,49 +188,87 @@ const EmergencyContacts = () => {
     return icons[relationship] || '👤';
   };
 
+  const getRelationshipColor = relationship => {
+    const colors = {
+      spouse: 'pink',
+      partner: 'pink',
+      parent: 'blue',
+      child: 'green',
+      sibling: 'cyan',
+      grandparent: 'orange',
+      grandchild: 'lime',
+      friend: 'grape',
+      neighbor: 'teal',
+      caregiver: 'violet',
+      guardian: 'indigo',
+      other: 'gray',
+    };
+    return colors[relationship] || 'gray';
+  };
+
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading emergency contacts...</p>
-        </div>
-      </div>
+      <Container size="xl" py="lg">
+        <Center py="xl">
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg">Loading emergency contacts...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <PageHeader title="Emergency Contacts" icon="🚨" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {error && (
-          <div className="error-message">
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
             {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
+          </Alert>
         )}
+
         {successMessage && (
-          <div className="success-message">{successMessage}</div>
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
         )}
 
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddContact}>
-              + Add Emergency Contact
-            </Button>
-          </div>
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddContact}
+            size="md"
+          >
+            Add Emergency Contact
+          </Button>
 
-          <div className="controls-center">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </div>
-        </div>
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
 
         {/* Mantine Filter Controls */}
         <MantineFilters
@@ -226,150 +286,276 @@ const EmergencyContacts = () => {
           config={config.filterControls}
         />
 
-        <div className="medical-items-list">
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {filteredContacts.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🚨</div>
-              <h3>No Emergency Contacts Found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : "It's important to have emergency contacts available in case of medical emergencies."}
-              </p>
-              {!dataManagement.hasActiveFilters && (
-                <Button variant="primary" onClick={handleAddContact}>
-                  Add Your First Emergency Contact
-                </Button>
-              )}
-            </div>
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconShieldCheck
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No emergency contacts found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : "It's important to have emergency contacts available in case of medical emergencies."}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {filteredContacts.map(contact => (
-                <div
-                  key={contact.id}
-                  className={`medical-item-card ${contact.is_primary ? 'primary-contact' : ''}`}
-                >
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">
-                        <span className="contact-icon">
-                          {getRelationshipIcon(contact.relationship)}
-                        </span>
-                        {contact.name}
-                        {contact.is_primary && (
-                          <span className="primary-badge">PRIMARY</span>
-                        )}
-                      </h3>
-                    </div>
-                    <div className="status-badges">
-                      <span
-                        className={`status-badge ${contact.is_active ? 'active' : 'inactive'}`}
+            <Grid>
+              <AnimatePresence>
+                {filteredContacts.map((contact, index) => (
+                  <Grid.Col key={contact.id} span={{ base: 12, md: 6, lg: 4 }}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Card
+                        shadow="sm"
+                        padding="lg"
+                        radius="md"
+                        withBorder
+                        style={{
+                          borderColor: contact.is_primary
+                            ? 'var(--mantine-color-yellow-4)'
+                            : undefined,
+                          borderWidth: contact.is_primary ? '2px' : undefined,
+                        }}
                       >
-                        {contact.is_active ? '✅ Active' : '⏸️ Inactive'}
-                      </span>
-                    </div>
-                  </div>
+                        <Card.Section withBorder inheritPadding py="xs">
+                          <Group justify="space-between">
+                            <Group gap="xs">
+                              <Text size="lg">
+                                {getRelationshipIcon(contact.relationship)}
+                              </Text>
+                              <Text fw={600} size="lg">
+                                {contact.name}
+                              </Text>
+                            </Group>
+                            <Group gap="xs">
+                              {contact.is_primary && (
+                                <Badge
+                                  color="yellow"
+                                  variant="filled"
+                                  size="sm"
+                                >
+                                  <Group gap="xs">
+                                    <IconStar size={12} />
+                                    PRIMARY
+                                  </Group>
+                                </Badge>
+                              )}
+                              <Badge
+                                color={contact.is_active ? 'green' : 'gray'}
+                                variant="light"
+                                size="sm"
+                              >
+                                {contact.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </Group>
+                          </Group>
+                        </Card.Section>
 
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Relationship:</span>
-                      <span className="value">
-                        {contact.relationship.charAt(0).toUpperCase() +
-                          contact.relationship.slice(1)}
-                      </span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">Phone:</span>
-                      <span className="value">
-                        <a href={`tel:${contact.phone_number}`}>
-                          {contact.phone_number}
-                        </a>
-                      </span>
-                    </div>
-                    {contact.secondary_phone && (
-                      <div className="detail-item">
-                        <span className="label">Secondary Phone:</span>
-                        <span className="value">
-                          <a href={`tel:${contact.secondary_phone}`}>
-                            {contact.secondary_phone}
-                          </a>
-                        </span>
-                      </div>
-                    )}
-                    {contact.email && (
-                      <div className="detail-item">
-                        <span className="label">Email:</span>
-                        <span className="value">
-                          <a href={`mailto:${contact.email}`}>
-                            {contact.email}
-                          </a>
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                        <Stack gap="md" mt="md">
+                          <Group justify="space-between">
+                            <Text size="sm" c="dimmed">
+                              Relationship:
+                            </Text>
+                            <Badge
+                              color={getRelationshipColor(contact.relationship)}
+                              variant="light"
+                              size="sm"
+                            >
+                              {contact.relationship.charAt(0).toUpperCase() +
+                                contact.relationship.slice(1)}
+                            </Badge>
+                          </Group>
 
-                  {contact.notes && (
-                    <div className="medical-item-notes">
-                      <div className="notes-label">📝 Notes</div>
-                      <div className="notes-content">{contact.notes}</div>
-                    </div>
-                  )}
+                          <Group justify="space-between">
+                            <Text size="sm" c="dimmed">
+                              Phone:
+                            </Text>
+                            <Anchor
+                              href={`tel:${contact.phone_number}`}
+                              size="sm"
+                              c="blue"
+                            >
+                              {formatPhoneNumber(contact.phone_number)}
+                            </Anchor>
+                          </Group>
 
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditContact(contact)}
-                    >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteContact(contact.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                          {contact.secondary_phone && (
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Secondary Phone:
+                              </Text>
+                              <Anchor
+                                href={`tel:${contact.secondary_phone}`}
+                                size="sm"
+                                c="blue"
+                              >
+                                {formatPhoneNumber(contact.secondary_phone)}
+                              </Anchor>
+                            </Group>
+                          )}
+
+                          {contact.email && (
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Email:
+                              </Text>
+                              <Anchor
+                                href={`mailto:${contact.email}`}
+                                size="sm"
+                                c="blue"
+                              >
+                                {contact.email}
+                              </Anchor>
+                            </Group>
+                          )}
+
+                          {contact.address && (
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Address:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {contact.address}
+                              </Text>
+                            </Group>
+                          )}
+                        </Stack>
+
+                        {contact.notes && (
+                          <Box
+                            mt="md"
+                            pt="md"
+                            style={{
+                              borderTop:
+                                '1px solid var(--mantine-color-gray-3)',
+                            }}
+                          >
+                            <Text size="sm" c="dimmed" mb="xs">
+                              📝 Notes
+                            </Text>
+                            <Text size="sm" c="gray.7">
+                              {contact.notes}
+                            </Text>
+                          </Box>
+                        )}
+
+                        <Stack gap={0} mt="auto">
+                          <Divider />
+                          <Group justify="flex-end" gap="xs" pt="sm">
+                            <Button
+                              variant="light"
+                              size="xs"
+                              onClick={() => handleEditContact(contact)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="light"
+                              color="red"
+                              size="xs"
+                              onClick={() => handleDeleteContact(contact.id)}
+                            >
+                              Delete
+                            </Button>
+                          </Group>
+                        </Stack>
+                      </Card>
+                    </motion.div>
+                  </Grid.Col>
+                ))}
+              </AnimatePresence>
+            </Grid>
           ) : (
-            <MedicalTable
-              data={filteredContacts}
-              columns={[
-                { header: 'Name', accessor: 'name' },
-                { header: 'Relationship', accessor: 'relationship' },
-                { header: 'Phone', accessor: 'phone_number' },
-                { header: 'Email', accessor: 'email' },
-                { header: 'Primary', accessor: 'is_primary' },
-                { header: 'Status', accessor: 'is_active' },
-              ]}
-              patientData={currentPatient}
-              tableName="Emergency Contacts"
-              onEdit={handleEditContact}
-              onDelete={handleDeleteContact}
-              formatters={{
-                name: value => <span className="primary-field">{value}</span>,
-                relationship: value =>
-                  value.charAt(0).toUpperCase() + value.slice(1),
-                phone_number: value =>
-                  value ? <a href={`tel:${value}`}>{value}</a> : '-',
-                email: value =>
-                  value ? <a href={`mailto:${value}`}>{value}</a> : '-',
-                is_primary: value => (value ? '⭐ Primary' : ''),
-                is_active: value => (
-                  <span
-                    className={`status-badge ${value ? 'active' : 'inactive'}`}
-                  >
-                    {value ? '✅ Active' : '⏸️ Inactive'}
-                  </span>
-                ),
-              }}
-            />
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={filteredContacts}
+                columns={[
+                  { header: 'Name', accessor: 'name' },
+                  { header: 'Relationship', accessor: 'relationship' },
+                  { header: 'Phone', accessor: 'phone_number' },
+                  { header: 'Email', accessor: 'email' },
+                  { header: 'Primary', accessor: 'is_primary' },
+                  { header: 'Status', accessor: 'is_active' },
+                ]}
+                patientData={currentPatient}
+                tableName="Emergency Contacts"
+                onEdit={handleEditContact}
+                onDelete={handleDeleteContact}
+                formatters={{
+                  name: value => (
+                    <Text fw={600} c="blue">
+                      {value}
+                    </Text>
+                  ),
+                  relationship: value => (
+                    <Badge
+                      color={getRelationshipColor(value)}
+                      variant="light"
+                      size="sm"
+                    >
+                      {value.charAt(0).toUpperCase() + value.slice(1)}
+                    </Badge>
+                  ),
+                  phone_number: value =>
+                    value ? (
+                      <Anchor href={`tel:${value}`} size="sm" c="blue">
+                        {formatPhoneNumber(value)}
+                      </Anchor>
+                    ) : (
+                      '-'
+                    ),
+                  email: value =>
+                    value ? (
+                      <Anchor href={`mailto:${value}`} size="sm" c="blue">
+                        {value}
+                      </Anchor>
+                    ) : (
+                      '-'
+                    ),
+                  is_primary: value =>
+                    value ? (
+                      <Badge color="yellow" variant="filled" size="sm">
+                        <Group gap="xs">
+                          <IconStar size={12} />
+                          Primary
+                        </Group>
+                      </Badge>
+                    ) : (
+                      '-'
+                    ),
+                  is_active: value => (
+                    <Badge
+                      color={value ? 'green' : 'gray'}
+                      variant="light"
+                      size="sm"
+                    >
+                      {value ? 'Active' : 'Inactive'}
+                    </Badge>
+                  ),
+                }}
+              />
+            </Paper>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </Container>
 
       <MantineEmergencyContactForm
         isOpen={showModal}
@@ -382,7 +568,7 @@ const EmergencyContacts = () => {
         onSubmit={handleSubmit}
         editingContact={editingContact}
       />
-    </div>
+    </motion.div>
   );
 };
 

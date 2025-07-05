@@ -1,6 +1,6 @@
 /**
  * Frontend Error Logging Service for Medical Records Management System
- * Phase 5: Frontend Logger Refactor Implementation
+ *   Frontend Logger Refactor Implementation
  *
  * This service provides comprehensive frontend error logging capabilities including:
  * - JavaScript error capture
@@ -26,7 +26,7 @@ class FrontendLogger {
     this.errorQueue = [];
     this.isOnline = navigator.onLine;
 
-    // Phase 5: Log level management
+    //   Log level management
     this.currentLogLevel = 'INFO'; // Default fallback
     this.logLevelConfig = null;
     this.logLevelNumeric = this.getLogLevelNumeric(this.currentLogLevel);
@@ -36,7 +36,7 @@ class FrontendLogger {
       maxAge: 300000, // 5 minutes cache
     };
 
-    // Phase 5: Log level numeric mapping for filtering
+    //   Log level numeric mapping for filtering
     this.LOG_LEVELS = {
       DEBUG: 10,
       INFO: 20,
@@ -49,7 +49,7 @@ class FrontendLogger {
     this.setupPerformanceMonitoring();
     this.setupNetworkMonitoring();
 
-    // Phase 5: Initialize log level fetching
+    //   Initialize log level fetching
     this.initializeLogLevel();
   }
 
@@ -57,7 +57,7 @@ class FrontendLogger {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Phase 5: Initialize log level from backend
+  //   Initialize log level from backend
   async initializeLogLevel() {
     try {
       await this.fetchLogLevel();
@@ -74,7 +74,7 @@ class FrontendLogger {
     }
   }
 
-  // Phase 5: Fetch log level configuration from backend
+  //   Fetch log level configuration from backend
   async fetchLogLevel() {
     try {
       // Check cache first
@@ -151,7 +151,7 @@ class FrontendLogger {
     }
   }
 
-  // Phase 5: Check if log level cache is still valid
+  //   Check if log level cache is still valid
   isLogLevelCacheValid() {
     if (!this.logLevelCache.level || !this.logLevelCache.timestamp) {
       return false;
@@ -161,18 +161,18 @@ class FrontendLogger {
     return age < this.logLevelCache.maxAge;
   }
 
-  // Phase 5: Get numeric value for log level
+  //   Get numeric value for log level
   getLogLevelNumeric(level) {
     return this.LOG_LEVELS[level?.toUpperCase()] || this.LOG_LEVELS.INFO;
   }
 
-  // Phase 5: Check if message should be logged based on current log level
+  //   Check if message should be logged based on current log level
   shouldLog(level) {
     const messageLevel = this.getLogLevelNumeric(level);
     return messageLevel >= this.logLevelNumeric;
   }
 
-  // Phase 5: Dual output logging methods
+  //   Dual output logging methods
   logDebug(message, additionalData = {}) {
     this.log('DEBUG', message, additionalData);
   }
@@ -193,7 +193,7 @@ class FrontendLogger {
     this.log('CRITICAL', message, additionalData);
   }
 
-  // Phase 5: Unified logging method with dual output
+  //   Unified logging method with dual output
   log(level, message, additionalData = {}) {
     // Client-side filtering based on backend log level
     if (!this.shouldLog(level)) {
@@ -219,7 +219,7 @@ class FrontendLogger {
     this.sendToBackend('log', logData);
   }
 
-  // Phase 5: Readable console output for browser developer tools
+  //   Readable console output for browser developer tools
   outputToConsole(level, message, logData) {
     const timestamp = new Date().toLocaleTimeString();
     const prefix = `[${timestamp}] ${level}`;
@@ -442,7 +442,7 @@ class FrontendLogger {
     this.sendToBackend('event', enrichedEvent);
   }
 
-  // Phase 5: Refresh log level configuration
+  //   Refresh log level configuration
   async refreshLogLevel() {
     try {
       // Clear cache to force fresh fetch
@@ -456,7 +456,7 @@ class FrontendLogger {
     }
   }
 
-  // Phase 5: Get current log level information
+  //   Get current log level information
   getLogLevelInfo() {
     return {
       currentLevel: this.currentLogLevel,

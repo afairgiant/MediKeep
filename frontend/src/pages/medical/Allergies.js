@@ -11,22 +11,17 @@ import {
   Alert,
   Loader,
   Center,
-  Button,
-  ActionIcon,
   Badge,
   Grid,
   Card,
-  Flex,
   Box,
   Divider,
-  Modal,
 } from '@mantine/core';
+import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
   IconPlus,
-  IconEdit,
-  IconTrash,
   IconExclamationCircle,
   IconShieldCheck,
   IconAlertCircle,
@@ -199,11 +194,11 @@ const Allergies = () => {
   const getStatusColor = status => {
     switch (status) {
       case 'active':
-        return 'red';
+        return 'green';
       case 'inactive':
         return 'gray';
       case 'resolved':
-        return 'green';
+        return 'blue';
       default:
         return 'gray';
     }
@@ -414,22 +409,26 @@ const Allergies = () => {
                             )}
                           </Stack>
 
-                          <Group justify="flex-end" mt="md" pt="md">
-                            <ActionIcon
-                              variant="light"
-                              color="blue"
-                              onClick={() => handleEditAllergy(allergy)}
-                            >
-                              <IconEdit size={16} />
-                            </ActionIcon>
-                            <ActionIcon
-                              variant="light"
-                              color="red"
-                              onClick={() => handleDeleteAllergy(allergy.id)}
-                            >
-                              <IconTrash size={16} />
-                            </ActionIcon>
-                          </Group>
+                          <Stack gap={0} mt="auto">
+                            <Divider />
+                            <Group justify="flex-end" gap="xs" pt="sm">
+                              <Button
+                                variant="light"
+                                size="xs"
+                                onClick={() => handleEditAllergy(allergy)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="light"
+                                color="red"
+                                size="xs"
+                                onClick={() => handleDeleteAllergy(allergy.id)}
+                              >
+                                Delete
+                              </Button>
+                            </Group>
+                          </Stack>
                         </Card>
                       </motion.div>
                     </Grid.Col>

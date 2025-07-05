@@ -1,5 +1,28 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Container,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  Badge,
+  Grid,
+  Card,
+  Box,
+  Divider,
+} from '@mantine/core';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+  IconCalendar,
+  IconShieldCheck,
+} from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -7,16 +30,13 @@ import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import { Button } from '../../components/ui';
 import MantineVisitForm from '../../components/medical/MantineVisitForm';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
 
 const Visits = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners data
@@ -183,51 +203,103 @@ const Visits = () => {
     return `Practitioner ID: ${practitionerId}`;
   };
 
+  const getPriorityColor = priority => {
+    switch (priority) {
+      case 'urgent':
+        return 'red';
+      case 'high':
+        return 'orange';
+      case 'medium':
+        return 'yellow';
+      case 'low':
+        return 'blue';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getVisitTypeColor = visitType => {
+    switch (visitType?.toLowerCase()) {
+      case 'emergency':
+        return 'red';
+      case 'urgent care':
+        return 'orange';
+      case 'follow-up':
+        return 'blue';
+      case 'routine':
+        return 'green';
+      case 'consultation':
+        return 'purple';
+      default:
+        return 'gray';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading visits...</p>
-        </div>
-      </div>
+      <Container size="xl" py="lg">
+        <Center py="xl">
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg">Loading visits...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   const filteredVisits = dataManagement.data;
 
   return (
-    <div className="medical-page-container">
-      <PageHeader title="Medical Visits" icon="" />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <PageHeader title="Medical Visits" icon="🏥" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {error && (
-          <div className="error-message">
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
             {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
+          </Alert>
         )}
+
         {successMessage && (
-          <div className="success-message">{successMessage}</div>
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
         )}
 
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddVisit}>
-              + Add Visit
-            </Button>
-          </div>
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddVisit}
+            size="md"
+          >
+            Add New Visit
+          </Button>
 
-          <div className="controls-center">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </div>
-        </div>
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
 
         {/* Mantine Filter Controls */}
         <MantineFilters
@@ -247,195 +319,307 @@ const Visits = () => {
           config={config.filterControls}
         />
 
-        <div className="medical-items-list">
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {filteredVisits.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon"></div>
-              <h3>No Medical Visits Found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Start by adding your first medical visit.'}
-              </p>
-              {!dataManagement.hasActiveFilters && (
-                <Button variant="primary" onClick={handleAddVisit}>
-                  Add Your First Visit
-                </Button>
-              )}
-            </div>
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconShieldCheck
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No medical visits found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Click "Add New Visit" to get started.'}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {filteredVisits.map(visit => (
-                <div key={visit.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">
-                        {visit.reason || 'General Visit'}
-                      </h3>
-                      <p className="item-subtitle">
-                        {formatDate(visit.date)}
-                        {visit.visit_type && (
-                          <span className="visit-type-badge">
-                            • {visit.visit_type}
-                          </span>
-                        )}
-                        {visit.priority && (
-                          <span
-                            className={`priority-badge priority-${visit.priority}`}
+            <Grid>
+              <AnimatePresence>
+                {filteredVisits.map((visit, index) => (
+                  <Grid.Col key={visit.id} span={{ base: 12, md: 6, lg: 4 }}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Card shadow="sm" padding="lg" radius="md" withBorder>
+                        <Card.Section withBorder inheritPadding py="xs">
+                          <Group justify="space-between">
+                            <Group gap="xs">
+                              <IconCalendar
+                                size={20}
+                                color="var(--mantine-color-blue-6)"
+                              />
+                              <Text fw={600} size="lg">
+                                {visit.reason || 'General Visit'}
+                              </Text>
+                            </Group>
+                            <Group gap="xs">
+                              {visit.visit_type && (
+                                <Badge
+                                  color={getVisitTypeColor(visit.visit_type)}
+                                  variant="light"
+                                  size="sm"
+                                >
+                                  {visit.visit_type}
+                                </Badge>
+                              )}
+                              {visit.priority && (
+                                <Badge
+                                  color={getPriorityColor(visit.priority)}
+                                  variant="filled"
+                                  size="sm"
+                                >
+                                  {visit.priority}
+                                </Badge>
+                              )}
+                            </Group>
+                          </Group>
+                        </Card.Section>
+
+                        <Stack gap="md" mt="md">
+                          <Group justify="space-between">
+                            <Text size="sm" c="dimmed">
+                              Date:
+                            </Text>
+                            <Text size="sm" fw={500}>
+                              {formatDate(visit.date)}
+                            </Text>
+                          </Group>
+
+                          <Group justify="space-between">
+                            <Text size="sm" c="dimmed">
+                              Practitioner:
+                            </Text>
+                            <Text size="sm" fw={500}>
+                              {getPractitionerDisplay(visit.practitioner_id)}
+                            </Text>
+                          </Group>
+
+                          {visit.chief_complaint && (
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Chief Complaint:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {visit.chief_complaint}
+                              </Text>
+                            </Group>
+                          )}
+
+                          {visit.location && (
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Location:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {visit.location}
+                              </Text>
+                            </Group>
+                          )}
+
+                          {visit.duration_minutes && (
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Duration:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {visit.duration_minutes} minutes
+                              </Text>
+                            </Group>
+                          )}
+                        </Stack>
+
+                        {visit.diagnosis && (
+                          <Box
+                            mt="md"
+                            pt="md"
+                            style={{
+                              borderTop:
+                                '1px solid var(--mantine-color-gray-3)',
+                            }}
                           >
-                            • {visit.priority}
-                          </span>
+                            <Text size="sm" c="dimmed" mb="xs">
+                              📋 Diagnosis/Assessment
+                            </Text>
+                            <Text size="sm" c="gray.7">
+                              {visit.diagnosis}
+                            </Text>
+                          </Box>
                         )}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Practitioner:</span>
-                      <span className="value">
-                        {getPractitionerDisplay(visit.practitioner_id)}
-                      </span>
-                    </div>
+                        {visit.treatment_plan && (
+                          <Box
+                            mt="md"
+                            pt="md"
+                            style={{
+                              borderTop:
+                                '1px solid var(--mantine-color-gray-3)',
+                            }}
+                          >
+                            <Text size="sm" c="dimmed" mb="xs">
+                              💊 Treatment Plan
+                            </Text>
+                            <Text size="sm" c="gray.7">
+                              {visit.treatment_plan}
+                            </Text>
+                          </Box>
+                        )}
 
-                    {visit.chief_complaint && (
-                      <div className="detail-item">
-                        <span className="label">Chief Complaint:</span>
-                        <span className="value">{visit.chief_complaint}</span>
-                      </div>
-                    )}
+                        {visit.follow_up_instructions && (
+                          <Box
+                            mt="md"
+                            pt="md"
+                            style={{
+                              borderTop:
+                                '1px solid var(--mantine-color-gray-3)',
+                            }}
+                          >
+                            <Text size="sm" c="dimmed" mb="xs">
+                              📅 Follow-up Instructions
+                            </Text>
+                            <Text size="sm" c="gray.7">
+                              {visit.follow_up_instructions}
+                            </Text>
+                          </Box>
+                        )}
 
-                    {visit.location && (
-                      <div className="detail-item">
-                        <span className="label">Location:</span>
-                        <span className="value">{visit.location}</span>
-                      </div>
-                    )}
+                        {visit.notes && (
+                          <Box
+                            mt="md"
+                            pt="md"
+                            style={{
+                              borderTop:
+                                '1px solid var(--mantine-color-gray-3)',
+                            }}
+                          >
+                            <Text size="sm" c="dimmed" mb="xs">
+                              📝 Additional Notes
+                            </Text>
+                            <Text size="sm" c="gray.7">
+                              {visit.notes}
+                            </Text>
+                          </Box>
+                        )}
 
-                    {visit.duration_minutes && (
-                      <div className="detail-item">
-                        <span className="label">Duration:</span>
-                        <span className="value">
-                          {visit.duration_minutes} minutes
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {visit.diagnosis && (
-                    <div className="medical-item-section">
-                      <div className="section-label">Diagnosis/Assessment</div>
-                      <div className="section-content">{visit.diagnosis}</div>
-                    </div>
-                  )}
-
-                  {visit.treatment_plan && (
-                    <div className="medical-item-section">
-                      <div className="section-label">Treatment Plan</div>
-                      <div className="section-content">
-                        {visit.treatment_plan}
-                      </div>
-                    </div>
-                  )}
-
-                  {visit.follow_up_instructions && (
-                    <div className="medical-item-section">
-                      <div className="section-label">
-                        Follow-up Instructions
-                      </div>
-                      <div className="section-content">
-                        {visit.follow_up_instructions}
-                      </div>
-                    </div>
-                  )}
-
-                  {visit.notes && (
-                    <div className="medical-item-notes">
-                      <div className="notes-label">Additional Notes</div>
-                      <div className="notes-content">{visit.notes}</div>
-                    </div>
-                  )}
-
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditVisit(visit)}
-                      title="Edit visit"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteVisit(visit.id)}
-                      title="Delete visit"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                        <Stack gap={0} mt="auto">
+                          <Divider />
+                          <Group justify="flex-end" gap="xs" pt="sm">
+                            <Button
+                              variant="light"
+                              size="xs"
+                              onClick={() => handleEditVisit(visit)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="light"
+                              color="red"
+                              size="xs"
+                              onClick={() => handleDeleteVisit(visit.id)}
+                            >
+                              Delete
+                            </Button>
+                          </Group>
+                        </Stack>
+                      </Card>
+                    </motion.div>
+                  </Grid.Col>
+                ))}
+              </AnimatePresence>
+            </Grid>
           ) : (
-            <MedicalTable
-              data={filteredVisits}
-              columns={[
-                { header: 'Visit Date', accessor: 'date' },
-                { header: 'Reason', accessor: 'reason' },
-                { header: 'Visit Type', accessor: 'visit_type' },
-                { header: 'Chief Complaint', accessor: 'chief_complaint' },
-                { header: 'Practitioner', accessor: 'practitioner_name' },
-                { header: 'Location', accessor: 'location' },
-                { header: 'Priority', accessor: 'priority' },
-                { header: 'Diagnosis', accessor: 'diagnosis' },
-              ]}
-              patientData={currentPatient}
-              tableName="Visit History"
-              onEdit={handleEditVisit}
-              onDelete={handleDeleteVisit}
-              formatters={{
-                date: value => (
-                  <span className="primary-field">{formatDate(value)}</span>
-                ),
-                reason: value => value || 'General Visit',
-                visit_type: value => value || '-',
-                chief_complaint: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 30
-                        ? `${value.substring(0, 30)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={filteredVisits}
+                columns={[
+                  { header: 'Visit Date', accessor: 'date' },
+                  { header: 'Reason', accessor: 'reason' },
+                  { header: 'Visit Type', accessor: 'visit_type' },
+                  { header: 'Chief Complaint', accessor: 'chief_complaint' },
+                  { header: 'Practitioner', accessor: 'practitioner_name' },
+                  { header: 'Location', accessor: 'location' },
+                  { header: 'Priority', accessor: 'priority' },
+                  { header: 'Diagnosis', accessor: 'diagnosis' },
+                ]}
+                patientData={currentPatient}
+                tableName="Visit History"
+                onEdit={handleEditVisit}
+                onDelete={handleDeleteVisit}
+                formatters={{
+                  date: value => (
+                    <Text fw={600} c="blue">
+                      {formatDate(value)}
+                    </Text>
                   ),
-                practitioner_name: (value, item) =>
-                  getPractitionerDisplay(item.practitioner_id),
-                location: value => value || '-',
-                priority: value =>
-                  value ? (
-                    <span className={`priority-badge priority-${value}`}>
-                      {value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
-                diagnosis: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 40
-                        ? `${value.substring(0, 40)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
-              }}
-            />
+                  reason: value => value || 'General Visit',
+                  visit_type: value =>
+                    value ? (
+                      <Badge
+                        color={getVisitTypeColor(value)}
+                        variant="light"
+                        size="sm"
+                      >
+                        {value}
+                      </Badge>
+                    ) : (
+                      '-'
+                    ),
+                  chief_complaint: value =>
+                    value ? (
+                      <Text size="sm" title={value}>
+                        {value.length > 30
+                          ? `${value.substring(0, 30)}...`
+                          : value}
+                      </Text>
+                    ) : (
+                      '-'
+                    ),
+                  practitioner_name: (value, item) =>
+                    getPractitionerDisplay(item.practitioner_id),
+                  location: value => value || '-',
+                  priority: value =>
+                    value ? (
+                      <Badge
+                        color={getPriorityColor(value)}
+                        variant="filled"
+                        size="sm"
+                      >
+                        {value}
+                      </Badge>
+                    ) : (
+                      '-'
+                    ),
+                  diagnosis: value =>
+                    value ? (
+                      <Text size="sm" title={value}>
+                        {value.length > 40
+                          ? `${value.substring(0, 40)}...`
+                          : value}
+                      </Text>
+                    ) : (
+                      '-'
+                    ),
+                }}
+              />
+            </Paper>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </Container>
 
       <MantineVisitForm
         isOpen={showModal}
@@ -447,7 +631,7 @@ const Visits = () => {
         practitioners={practitioners}
         editingVisit={editingVisit}
       />
-    </div>
+    </motion.div>
   );
 };
 

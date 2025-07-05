@@ -1,5 +1,28 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Container,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  Badge,
+  Grid,
+  Card,
+  Divider,
+} from '@mantine/core';
+import { Button } from '../../components/ui';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+  IconShieldCheck,
+  IconVaccine,
+} from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -9,13 +32,9 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import { Button } from '../../components/ui';
 import MantineImmunizationForm from '../../components/medical/MantineImmunizationForm';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
 
 const Immunization = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -164,48 +183,110 @@ const Immunization = () => {
   // Get processed data from data management
   const processedImmunizations = dataManagement.data;
 
+  // Helper function to get immunization icon based on vaccine name
+  const getImmunizationIcon = vaccineName => {
+    const vaccineLower = vaccineName.toLowerCase();
+    if (vaccineLower.includes('covid') || vaccineLower.includes('corona'))
+      return IconShieldCheck;
+    if (vaccineLower.includes('flu') || vaccineLower.includes('influenza'))
+      return IconVaccine;
+    if (vaccineLower.includes('tetanus') || vaccineLower.includes('diphtheria'))
+      return IconShieldCheck;
+    if (
+      vaccineLower.includes('measles') ||
+      vaccineLower.includes('mumps') ||
+      vaccineLower.includes('rubella')
+    )
+      return IconVaccine;
+    if (vaccineLower.includes('hepatitis')) return IconVaccine;
+    if (
+      vaccineLower.includes('pneumonia') ||
+      vaccineLower.includes('pneumococcal')
+    )
+      return IconVaccine;
+    return IconVaccine; // Default immunization icon
+  };
+
+  // Helper function to get dose color
+  const getDoseColor = doseNumber => {
+    switch (doseNumber) {
+      case 1:
+        return 'blue';
+      case 2:
+        return 'green';
+      case 3:
+        return 'orange';
+      case 4:
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading immunizations...</p>
-        </div>
-      </div>
+      <Container size="xl" py="lg">
+        <Center py="xl">
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg">Loading immunizations...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <PageHeader title="Immunizations" icon="💉" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {error && (
-          <div className="error-message">
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
             {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
+          </Alert>
         )}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}{' '}
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddImmunization}>
-              + Add New Immunization
-            </Button>
-          </div>
 
-          <div className="controls-center">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </div>
-        </div>
+        {successMessage && (
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
+        )}
+
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddImmunization}
+            size="md"
+          >
+            Add New Immunization
+          </Button>
+
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
+
         {/* Mantine Filter Controls */}
         <MantineFilters
           filters={dataManagement.filters}
@@ -221,6 +302,8 @@ const Immunization = () => {
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}
         />
+
+        {/* Form Modal */}
         <MantineImmunizationForm
           isOpen={showAddForm}
           onClose={resetForm}
@@ -231,161 +314,264 @@ const Immunization = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingImmunization={editingImmunization}
-        />{' '}
-        <div className="medical-items-list">
+        />
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {processedImmunizations.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">💉</div>
-              <h3>No immunizations found</h3>
-              <p>Click "Add New Immunization" to get started.</p>
-            </div>
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconVaccine
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No immunizations found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Click "Add New Immunization" to get started.'}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {processedImmunizations.map(immunization => (
-                <div key={immunization.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <h3 className="item-title">{immunization.vaccine_name}</h3>
-                    {immunization.dose_number && (
-                      <span className="status-badge">
-                        Dose {immunization.dose_number}
-                      </span>
-                    )}
-                  </div>
+            <Grid>
+              <AnimatePresence>
+                {processedImmunizations.map((immunization, index) => {
+                  const ImmunizationIcon = getImmunizationIcon(
+                    immunization.vaccine_name
+                  );
 
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Date Administered:</span>
-                      <span className="value">
-                        {formatDate(immunization.date_administered)}
-                      </span>
-                    </div>
-
-                    {immunization.manufacturer && (
-                      <div className="detail-item">
-                        <span className="label">Manufacturer:</span>
-                        <span className="value">
-                          {immunization.manufacturer}
-                        </span>
-                      </div>
-                    )}
-
-                    {immunization.site && (
-                      <div className="detail-item">
-                        <span className="label">Site:</span>
-                        <span className="value">
-                          {immunization.site
-                            .replace(/_/g, ' ')
-                            .replace(/\b\w/g, l => l.toUpperCase())}
-                        </span>
-                      </div>
-                    )}
-
-                    {immunization.route && (
-                      <div className="detail-item">
-                        <span className="label">Route:</span>
-                        <span className="value">{immunization.route}</span>
-                      </div>
-                    )}
-
-                    {immunization.lot_number && (
-                      <div className="detail-item">
-                        <span className="label">Lot Number:</span>
-                        <span className="value">{immunization.lot_number}</span>
-                      </div>
-                    )}
-
-                    {immunization.expiration_date && (
-                      <div className="detail-item">
-                        <span className="label">Expiration Date:</span>
-                        <span className="value">
-                          {formatDate(immunization.expiration_date)}
-                        </span>
-                      </div>
-                    )}
-
-                    {immunization.practitioner_id && (
-                      <div className="detail-item">
-                        <span className="label">Practitioner ID:</span>
-                        <span className="value">
-                          {immunization.practitioner_id}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {immunization.notes && (
-                    <div className="medical-item-notes">
-                      <div className="notes-label">Notes</div>
-                      <div className="notes-content">{immunization.notes}</div>
-                    </div>
-                  )}
-
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditImmunization(immunization)}
+                  return (
+                    <Grid.Col
+                      key={immunization.id}
+                      span={{ base: 12, md: 6, lg: 4 }}
                     >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteImmunization(immunization.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                      >
+                        <Card
+                          withBorder
+                          shadow="sm"
+                          radius="md"
+                          h="100%"
+                          style={{ display: 'flex', flexDirection: 'column' }}
+                        >
+                          <Stack gap="sm" style={{ flex: 1 }}>
+                            <Group justify="space-between" align="flex-start">
+                              <Group gap="xs">
+                                <ImmunizationIcon
+                                  size={20}
+                                  color="var(--mantine-color-blue-6)"
+                                />
+                                <Text fw={600} size="lg">
+                                  {immunization.vaccine_name}
+                                </Text>
+                              </Group>
+                              {immunization.dose_number && (
+                                <Badge
+                                  color={getDoseColor(immunization.dose_number)}
+                                  variant="filled"
+                                >
+                                  Dose {immunization.dose_number}
+                                </Badge>
+                              )}
+                            </Group>
+
+                            <Stack gap="xs">
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Date Administered:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {formatDate(immunization.date_administered)}
+                                </Text>
+                              </Group>
+
+                              {immunization.manufacturer && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Manufacturer:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {immunization.manufacturer}
+                                  </Text>
+                                </Group>
+                              )}
+
+                              {immunization.site && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Site:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {immunization.site
+                                      .replace(/_/g, ' ')
+                                      .replace(/\b\w/g, l => l.toUpperCase())}
+                                  </Text>
+                                </Group>
+                              )}
+
+                              {immunization.route && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Route:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {immunization.route}
+                                  </Text>
+                                </Group>
+                              )}
+
+                              {immunization.lot_number && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Lot Number:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {immunization.lot_number}
+                                  </Text>
+                                </Group>
+                              )}
+
+                              {immunization.expiration_date && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Expiration Date:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {formatDate(immunization.expiration_date)}
+                                  </Text>
+                                </Group>
+                              )}
+
+                              {immunization.practitioner_id && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Practitioner ID:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {immunization.practitioner_id}
+                                  </Text>
+                                </Group>
+                              )}
+                              {immunization.notes && (
+                                <Group align="flex-start">
+                                  <Text size="sm" fw={500} c="dimmed" w={120}>
+                                    Notes:
+                                  </Text>
+                                  <Text size="sm" style={{ flex: 1 }}>
+                                    {immunization.notes}
+                                  </Text>
+                                </Group>
+                              )}
+                            </Stack>
+                          </Stack>
+
+                          {/* Buttons always at bottom */}
+                          <Stack gap={0} mt="auto">
+                            <Divider />
+                            <Group justify="flex-end" gap="xs" pt="sm">
+                              <Button
+                                variant="light"
+                                size="xs"
+                                onClick={() =>
+                                  handleEditImmunization(immunization)
+                                }
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="light"
+                                color="red"
+                                size="xs"
+                                onClick={() =>
+                                  handleDeleteImmunization(immunization.id)
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </Group>
+                          </Stack>
+                        </Card>
+                      </motion.div>
+                    </Grid.Col>
+                  );
+                })}
+              </AnimatePresence>
+            </Grid>
           ) : (
-            <MedicalTable
-              data={processedImmunizations}
-              columns={[
-                { header: 'Vaccine Name', accessor: 'vaccine_name' },
-                { header: 'Date Administered', accessor: 'date_administered' },
-                { header: 'Dose Number', accessor: 'dose_number' },
-                { header: 'Manufacturer', accessor: 'manufacturer' },
-                { header: 'Site', accessor: 'site' },
-                { header: 'Route', accessor: 'route' },
-                { header: 'Lot Number', accessor: 'lot_number' },
-                { header: 'Expiration Date', accessor: 'expiration_date' },
-                { header: 'Notes', accessor: 'notes' },
-              ]}
-              patientData={currentPatient}
-              tableName="Immunizations"
-              onEdit={handleEditImmunization}
-              onDelete={handleDeleteImmunization}
-              formatters={{
-                vaccine_name: value => (
-                  <span className="primary-field">{value}</span>
-                ),
-                date_administered: value => formatDate(value),
-                expiration_date: value => (value ? formatDate(value) : '-'),
-                site: value =>
-                  value
-                    ? value
-                        .replace(/_/g, ' ')
-                        .replace(/\b\w/g, l => l.toUpperCase())
-                    : '-',
-                dose_number: value => (value ? `Dose ${value}` : '-'),
-                notes: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={processedImmunizations}
+                columns={[
+                  { header: 'Vaccine Name', accessor: 'vaccine_name' },
+                  {
+                    header: 'Date Administered',
+                    accessor: 'date_administered',
+                  },
+                  { header: 'Dose Number', accessor: 'dose_number' },
+                  { header: 'Manufacturer', accessor: 'manufacturer' },
+                  { header: 'Site', accessor: 'site' },
+                  { header: 'Route', accessor: 'route' },
+                  { header: 'Lot Number', accessor: 'lot_number' },
+                  { header: 'Expiration Date', accessor: 'expiration_date' },
+                  { header: 'Notes', accessor: 'notes' },
+                ]}
+                patientData={currentPatient}
+                tableName="Immunizations"
+                onEdit={handleEditImmunization}
+                onDelete={handleDeleteImmunization}
+                formatters={{
+                  vaccine_name: value => (
+                    <Text fw={600} c="blue">
+                      {value}
+                    </Text>
                   ),
-              }}
-            />
+                  date_administered: value => formatDate(value),
+                  expiration_date: value => (value ? formatDate(value) : '-'),
+                  site: value =>
+                    value
+                      ? value
+                          .replace(/_/g, ' ')
+                          .replace(/\b\w/g, l => l.toUpperCase())
+                      : '-',
+                  dose_number: value =>
+                    value ? (
+                      <Badge color={getDoseColor(value)} variant="filled">
+                        Dose {value}
+                      </Badge>
+                    ) : (
+                      '-'
+                    ),
+                  notes: value =>
+                    value ? (
+                      <Text size="sm" title={value}>
+                        {value.length > 50
+                          ? `${value.substring(0, 50)}...`
+                          : value}
+                      </Text>
+                    ) : (
+                      '-'
+                    ),
+                }}
+              />
+            </Paper>
           )}
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </Container>
+    </motion.div>
   );
 };
 

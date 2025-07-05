@@ -1,5 +1,34 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Container,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  Badge,
+  Grid,
+  Card,
+  Box,
+  Divider,
+} from '@mantine/core';
+import { Button } from '../../components/ui';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+  IconShieldCheck,
+  IconHeart,
+  IconBrain,
+  IconLungs,
+  IconBone,
+  IconDroplet,
+  IconAward,
+} from '@tabler/icons-react';
 import { useMedicalData, useDataManagement } from '../../hooks';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
@@ -8,16 +37,9 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import { Button } from '../../components/ui';
 import MantineConditionForm from '../../components/medical/MantineConditionForm';
-import StatusBadge from '../../components/medical/StatusBadge';
-import { formatStatusDisplay, formatSeverityDisplay } from '../../utils/statusConfig';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
-import '../../styles/pages/ConditionCards.css';
 
 const Conditions = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -93,7 +115,9 @@ const Conditions = () => {
       icd10_code: condition.icd10_code || '',
       snomed_code: condition.snomed_code || '',
       code_description: condition.code_description || '',
-      onset_date: condition.onset_date ? condition.onset_date.split('T')[0] : '',
+      onset_date: condition.onset_date
+        ? condition.onset_date.split('T')[0]
+        : '',
       end_date: condition.end_date ? condition.end_date.split('T')[0] : '',
     });
     setShowModal(true);
@@ -173,81 +197,133 @@ const Conditions = () => {
   // Helper function to get condition icon based on diagnosis
   const getConditionIcon = diagnosis => {
     const diagnosisLower = diagnosis.toLowerCase();
-    if (diagnosisLower.includes('diabetes')) return '🩸';
+    if (diagnosisLower.includes('diabetes')) return IconDroplet;
     if (
       diagnosisLower.includes('hypertension') ||
       diagnosisLower.includes('blood pressure')
     )
-      return '💗';
+      return IconHeart;
     if (
       diagnosisLower.includes('asthma') ||
       diagnosisLower.includes('respiratory')
     )
-      return '🫁';
+      return IconLungs;
     if (
       diagnosisLower.includes('arthritis') ||
       diagnosisLower.includes('joint')
     )
-      return '🦴';
+      return IconBone;
     if (diagnosisLower.includes('heart') || diagnosisLower.includes('cardiac'))
-      return '❤️';
+      return IconHeart;
     if (diagnosisLower.includes('cancer') || diagnosisLower.includes('tumor'))
-      return '🎗️';
+      return IconAward;
     if (
       diagnosisLower.includes('migraine') ||
       diagnosisLower.includes('headache')
     )
-      return '🧠';
+      return IconBrain;
     if (
       diagnosisLower.includes('allergy') ||
       diagnosisLower.includes('allergic')
     )
-      return '⚠️';
-    return '🏥'; // Default medical icon
+      return IconAlertTriangle;
+    return IconShieldCheck; // Default medical icon
+  };
+
+  const getSeverityColor = severity => {
+    switch (severity) {
+      case 'critical':
+        return 'red';
+      case 'severe':
+        return 'orange';
+      case 'moderate':
+        return 'yellow';
+      case 'mild':
+        return 'blue';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getStatusColor = status => {
+    switch (status) {
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'gray';
+      case 'resolved':
+        return 'blue';
+      case 'chronic':
+        return 'orange';
+      default:
+        return 'gray';
+    }
   };
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading conditions...</p>
-        </div>
-      </div>
+      <Container size="xl" py="lg">
+        <Center py="xl">
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg">Loading conditions...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <PageHeader title="Medical Conditions" icon="🏥" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {error && (
-          <div className="error-message">
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
             {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
+          </Alert>
         )}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}{' '}
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddCondition}>
-              + Add Condition
-            </Button>
-          </div>
 
-          <div className="controls-center">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </div>
-        </div>
+        {successMessage && (
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
+        )}
+
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddCondition}
+            size="md"
+          >
+            Add New Condition
+          </Button>
+
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
+
         {/* Mantine Filter Controls */}
         <MantineFilters
           filters={dataManagement.filters}
@@ -265,191 +341,278 @@ const Conditions = () => {
           filteredCount={dataManagement.filteredCount}
           config={config.filterControls}
         />
-        <div className="medical-items-list">
+
+        {/* Form Modal */}
+        <MantineConditionForm
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingCondition ? 'Edit Condition' : 'Add New Condition'}
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          editingCondition={editingCondition}
+        />
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {filteredConditions.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🏥</div>
-              <h3>No Medical Conditions Found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Start by adding your first medical condition.'}
-              </p>
-              {!dataManagement.hasActiveFilters && (
-                <Button variant="primary" onClick={handleAddCondition}>
-                  Add Your First Condition
-                </Button>
-              )}
-            </div>
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconShieldCheck
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No medical conditions found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Click "Add New Condition" to get started.'}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {filteredConditions.map(condition => (
-                <div key={condition.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">
-                        <span className="condition-icon">
-                          {getConditionIcon(condition.diagnosis)}
-                        </span>
-                        {condition.diagnosis}
-                      </h3>
-                    </div>
-                    <div className="status-badges">
-                      <StatusBadge status={condition.status} />
-                    </div>
-                  </div>
+            <Grid>
+              <AnimatePresence>
+                {filteredConditions.map((condition, index) => {
+                  const ConditionIcon = getConditionIcon(condition.diagnosis);
 
-                  <div className="medical-item-details">
-                    {/* Display onset date if available */}
-                    {condition.onset_date && (
-                      <>
-                        <div className="detail-item">
-                          <span className="label">Onset Date:</span>
-                          <span className="value">
-                            {formatDate(condition.onset_date)}
-                          </span>
-                        </div>
-                        <div className="detail-item">
-                          <span className="label">Duration:</span>
-                          <span className="value">
-                            {getTimeSinceOnset(condition.onset_date)}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    {/* Display end date if available */}
-                    {condition.end_date && (
-                      <div className="detail-item">
-                        <span className="label">End Date:</span>
-                        <span className="value">
-                          {formatDate(condition.end_date)}
-                        </span>
-                      </div>
-                    )}
-                    {/* Display severity if available */}
-                    {condition.severity && (
-                      <div className="detail-item">
-                        <span className="label">Severity:</span>
-                        <span className="value">
-                          {(() => {
-                            const display = formatSeverityDisplay(condition.severity);
-                            return `${display.icon} ${display.text}`;
-                          })()}
-                        </span>
-                      </div>
-                    )}
-                    {/* Display medical codes if available */}
-                    {(condition.icd10_code || condition.snomed_code) && (
-                      <div className="detail-item">
-                        <span className="label">Medical Codes:</span>
-                        <span className="value">
-                          {condition.icd10_code && `ICD-10: ${condition.icd10_code}`}
-                          {condition.icd10_code && condition.snomed_code && ' | '}
-                          {condition.snomed_code && `SNOMED: ${condition.snomed_code}`}
-                        </span>
-                      </div>
-                    )}
-                    {condition.code_description && (
-                      <div className="detail-item">
-                        <span className="label">Code Description:</span>
-                        <span className="value">{condition.code_description}</span>
-                      </div>
-                    )}
-                    <div className="detail-item">
-                      <span className="label">Status:</span>
-                      <span className="value">
-                        {(() => {
-                          const display = formatStatusDisplay(condition.status);
-                          return `${display.icon} ${display.text}`;
-                        })()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {condition.notes && (
-                    <div className="medical-item-notes">
-                      <div className="notes-label">📝 Clinical Notes</div>
-                      <div className="notes-content">{condition.notes}</div>
-                    </div>
-                  )}
-
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditCondition(condition)}
+                  return (
+                    <Grid.Col
+                      key={condition.id}
+                      span={{ base: 12, md: 6, lg: 4 }}
                     >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteCondition(condition.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                      >
+                        <Card shadow="sm" padding="lg" radius="md" withBorder>
+                          <Card.Section withBorder inheritPadding py="xs">
+                            <Group justify="space-between">
+                              <Group gap="xs">
+                                <ConditionIcon
+                                  size={20}
+                                  color="var(--mantine-color-blue-6)"
+                                />
+                                <Text fw={600} size="lg">
+                                  {condition.diagnosis}
+                                </Text>
+                              </Group>
+                              <Badge
+                                color={getStatusColor(condition.status)}
+                                variant="light"
+                              >
+                                {condition.status}
+                              </Badge>
+                            </Group>
+                          </Card.Section>
+
+                          <Stack gap="md" mt="md">
+                            {/* Display onset date if available */}
+                            {condition.onset_date && (
+                              <>
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Onset Date:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {formatDate(condition.onset_date)}
+                                  </Text>
+                                </Group>
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Duration:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {getTimeSinceOnset(condition.onset_date)}
+                                  </Text>
+                                </Group>
+                              </>
+                            )}
+
+                            {/* Display end date if available */}
+                            {condition.end_date && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  End Date:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {formatDate(condition.end_date)}
+                                </Text>
+                              </Group>
+                            )}
+
+                            {/* Display severity if available */}
+                            {condition.severity && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Severity:
+                                </Text>
+                                <Badge
+                                  color={getSeverityColor(condition.severity)}
+                                  variant="filled"
+                                >
+                                  {condition.severity}
+                                </Badge>
+                              </Group>
+                            )}
+
+                            {/* Display medical codes if available */}
+                            {(condition.icd10_code ||
+                              condition.snomed_code) && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Medical Codes:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {condition.icd10_code &&
+                                    `ICD-10: ${condition.icd10_code}`}
+                                  {condition.icd10_code &&
+                                    condition.snomed_code &&
+                                    ' | '}
+                                  {condition.snomed_code &&
+                                    `SNOMED: ${condition.snomed_code}`}
+                                </Text>
+                              </Group>
+                            )}
+
+                            {condition.code_description && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Code Description:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {condition.code_description}
+                                </Text>
+                              </Group>
+                            )}
+
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Status:
+                              </Text>
+                              <Badge
+                                color={getStatusColor(condition.status)}
+                                variant="light"
+                              >
+                                {condition.status}
+                              </Badge>
+                            </Group>
+                          </Stack>
+
+                          {condition.notes && (
+                            <Box
+                              mt="md"
+                              pt="md"
+                              style={{
+                                borderTop:
+                                  '1px solid var(--mantine-color-gray-3)',
+                              }}
+                            >
+                              <Text size="sm" c="dimmed" mb="xs">
+                                📝 Clinical Notes
+                              </Text>
+                              <Text size="sm" c="gray.7">
+                                {condition.notes}
+                              </Text>
+                            </Box>
+                          )}
+
+                          <Stack gap={0} mt="auto">
+                            <Divider />
+                            <Group justify="flex-end" gap="xs" pt="sm">
+                              <Button
+                                variant="light"
+                                size="xs"
+                                onClick={() => handleEditCondition(condition)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="light"
+                                color="red"
+                                size="xs"
+                                onClick={() =>
+                                  handleDeleteCondition(condition.id)
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </Group>
+                          </Stack>
+                        </Card>
+                      </motion.div>
+                    </Grid.Col>
+                  );
+                })}
+              </AnimatePresence>
+            </Grid>
           ) : (
-            <MedicalTable
-              data={filteredConditions}
-              columns={[
-                { header: 'Condition', accessor: 'diagnosis' },
-                { header: 'Severity', accessor: 'severity' },
-                { header: 'Onset Date', accessor: 'onset_date' },
-                { header: 'End Date', accessor: 'end_date' },
-                { header: 'Status', accessor: 'status' },
-                { header: 'ICD-10', accessor: 'icd10_code' },
-                { header: 'Notes', accessor: 'notes' },
-              ]}
-              patientData={currentPatient}
-              tableName="Conditions"
-              onEdit={handleEditCondition}
-              onDelete={handleDeleteCondition}
-              formatters={{
-                diagnosis: value => (
-                  <span className="primary-field">{value}</span>
-                ),
-                severity: value => value ? (
-                  <span className={`severity-badge severity-${value}`}>
-                    {(() => {
-                      const display = formatSeverityDisplay(value);
-                      return `${display.icon} ${display.text}`;
-                    })()}
-                  </span>
-                ) : '-',
-                onset_date: value => (value ? formatDate(value) : '-'),
-                end_date: value => (value ? formatDate(value) : '-'),
-                status: value => <StatusBadge status={value} size="small" />,
-                icd10_code: value => value || '-',
-                notes: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={filteredConditions}
+                columns={[
+                  { header: 'Condition', accessor: 'diagnosis' },
+                  { header: 'Severity', accessor: 'severity' },
+                  { header: 'Onset Date', accessor: 'onset_date' },
+                  { header: 'End Date', accessor: 'end_date' },
+                  { header: 'Status', accessor: 'status' },
+                  { header: 'ICD-10', accessor: 'icd10_code' },
+                  { header: 'Notes', accessor: 'notes' },
+                ]}
+                patientData={currentPatient}
+                tableName="Conditions"
+                onEdit={handleEditCondition}
+                onDelete={handleDeleteCondition}
+                formatters={{
+                  diagnosis: value => (
+                    <Text fw={600} c="blue">
+                      {value}
+                    </Text>
                   ),
-              }}
-            />
+                  severity: value =>
+                    value ? (
+                      <Badge color={getSeverityColor(value)} variant="filled">
+                        {value}
+                      </Badge>
+                    ) : (
+                      '-'
+                    ),
+                  onset_date: value => (value ? formatDate(value) : '-'),
+                  end_date: value => (value ? formatDate(value) : '-'),
+                  status: value => (
+                    <Badge color={getStatusColor(value)} variant="light">
+                      {value}
+                    </Badge>
+                  ),
+                  icd10_code: value => value || '-',
+                  notes: value =>
+                    value ? (
+                      <Text size="sm" title={value}>
+                        {value.length > 50
+                          ? `${value.substring(0, 50)}...`
+                          : value}
+                      </Text>
+                    ) : (
+                      '-'
+                    ),
+                }}
+              />
+            </Paper>
           )}
-        </div>
-      </div>
-
-      <MantineConditionForm
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={editingCondition ? 'Edit Condition' : 'Add New Condition'}
-        formData={formData}
-        onInputChange={handleInputChange}
-        onSubmit={handleSubmit}
-        editingCondition={editingCondition}
-      />
-    </div>
+        </motion.div>
+      </Container>
+    </motion.div>
   );
 };
 

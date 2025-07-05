@@ -318,7 +318,9 @@ export const medicalPageConfigs = {
         { value: 'severe', label: 'Severe' },
         { value: 'life-threatening', label: 'Life-threatening' },
       ],
-      dateField: 'onsetDate',
+      dateField: 'onset_date',
+      startDateField: 'onset_date',
+      endDateField: 'onset_date',
     },
     sorting: {
       defaultSortBy: 'severity',
@@ -326,12 +328,12 @@ export const medicalPageConfigs = {
       sortOptions: [
         { value: 'severity', label: 'Severity' },
         { value: 'allergen', label: 'Allergen' },
-        { value: 'onsetDate', label: 'Onset Date' },
+        { value: 'onset_date', label: 'Onset Date' },
       ],
       sortTypes: {
         severity: 'severity',
         allergen: 'string',
-        onsetDate: 'date',
+        onset_date: 'date',
       },
     },
     filterControls: {
