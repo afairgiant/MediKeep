@@ -1,16 +1,14 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
-import { formatDate, formatDateTime } from '../../utils/helpers';
+import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-// import MedicalFormModal from '../../components/medical/MedicalFormModal'; // Replaced with Mantine Modal
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { Button } from '../../components/ui';
@@ -32,7 +30,6 @@ import {
   ActionIcon,
   Title,
   SimpleGrid,
-  List,
   ThemeIcon,
   Anchor,
   Modal,
@@ -49,7 +46,6 @@ import {
 } from '@tabler/icons-react';
 
 const LabResults = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards');
 
   // Modern data management with useMedicalData

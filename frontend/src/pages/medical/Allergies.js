@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -39,7 +38,6 @@ import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 
 const Allergies = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -54,7 +52,6 @@ const Allergies = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'allergy',
