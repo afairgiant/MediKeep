@@ -26,6 +26,15 @@ class FrontendLogger {
     this.errorQueue = [];
     this.isOnline = navigator.onLine;
 
+    //   Log level numeric mapping for filtering
+    this.LOG_LEVELS = {
+      DEBUG: 10,
+      INFO: 20,
+      WARNING: 30,
+      ERROR: 40,
+      CRITICAL: 50,
+    };
+
     //   Log level management
     this.currentLogLevel = 'INFO'; // Default fallback
     this.logLevelConfig = null;
@@ -34,15 +43,6 @@ class FrontendLogger {
       level: null,
       timestamp: null,
       maxAge: 300000, // 5 minutes cache
-    };
-
-    //   Log level numeric mapping for filtering
-    this.LOG_LEVELS = {
-      DEBUG: 10,
-      INFO: 20,
-      WARNING: 30,
-      ERROR: 40,
-      CRITICAL: 50,
     };
 
     this.setupErrorHandlers();
