@@ -99,6 +99,8 @@ export const medicalPageConfigs = {
         { value: 'cancelled', label: 'Cancelled' },
       ],
       dateField: 'date',
+      startDateField: 'date',
+      endDateField: 'date',
     },
     sorting: {
       defaultSortBy: 'date',
@@ -134,6 +136,104 @@ export const medicalPageConfigs = {
         { value: 'cancelled', label: 'Cancelled' },
       ],
       dateField: 'start_date',
+      startDateField: 'start_date',
+      endDateField: 'end_date',
+      customFilters: {
+        dateRange: (item, dateRange, additionalData) => {
+          if (dateRange === 'all') return true;
+
+          const now = new Date();
+          const startDate = item.start_date ? new Date(item.start_date) : null;
+          const endDate = item.end_date ? new Date(item.end_date) : null;
+
+          switch (dateRange) {
+            case 'today':
+              const today = now.toDateString();
+              const effectiveEndDateToday = endDate || now;
+              return (
+                (startDate && startDate.toDateString() === today) ||
+                effectiveEndDateToday.toDateString() === today ||
+                (startDate && startDate <= now && effectiveEndDateToday >= now)
+              );
+
+            case 'week':
+              const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+              const effectiveEndDateWeek = endDate || now;
+              return (
+                (startDate && startDate >= weekAgo) ||
+                effectiveEndDateWeek >= weekAgo ||
+                (startDate &&
+                  startDate <= now &&
+                  effectiveEndDateWeek >= weekAgo)
+              );
+
+            case 'month':
+              // Current calendar month
+              const currentMonthStart = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                1
+              );
+              const currentMonthEnd = new Date(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                0
+              );
+
+              // If no end date, treat as ongoing (ending today)
+              const effectiveEndDate = endDate || now;
+
+              // Treatment overlaps with current month if:
+              // 1. Start date is in current month, OR
+              // 2. End date (or today if no end date) is in current month, OR
+              // 3. Treatment spans across current month (starts before, ends after)
+              return (
+                (startDate &&
+                  startDate >= currentMonthStart &&
+                  startDate <= currentMonthEnd) ||
+                (effectiveEndDate >= currentMonthStart &&
+                  effectiveEndDate <= currentMonthEnd) ||
+                (startDate &&
+                  startDate <= currentMonthStart &&
+                  effectiveEndDate >= currentMonthEnd)
+              );
+
+            case 'year':
+              const yearAgo = new Date(
+                now.getFullYear() - 1,
+                now.getMonth(),
+                now.getDate()
+              );
+              const effectiveEndDateYear = endDate || now;
+              return (
+                (startDate && startDate >= yearAgo) ||
+                effectiveEndDateYear >= yearAgo ||
+                (startDate &&
+                  startDate <= now &&
+                  effectiveEndDateYear >= yearAgo)
+              );
+
+            case 'current':
+              // Currently active treatments
+              const effectiveEndDateCurrent = endDate || now;
+              return (
+                (!startDate || startDate <= now) &&
+                effectiveEndDateCurrent >= now
+              );
+
+            case 'past':
+              // Past treatments (ended)
+              return endDate && endDate < now;
+
+            case 'future':
+              // Future treatments (not started yet)
+              return startDate && startDate > now;
+
+            default:
+              return true;
+          }
+        },
+      },
     },
     sorting: {
       defaultSortBy: 'start_date',
@@ -218,7 +318,9 @@ export const medicalPageConfigs = {
         { value: 'severe', label: 'Severe' },
         { value: 'life-threatening', label: 'Life-threatening' },
       ],
-      dateField: 'onsetDate',
+      dateField: 'onset_date',
+      startDateField: 'onset_date',
+      endDateField: 'onset_date',
     },
     sorting: {
       defaultSortBy: 'severity',
@@ -226,12 +328,12 @@ export const medicalPageConfigs = {
       sortOptions: [
         { value: 'severity', label: 'Severity' },
         { value: 'allergen', label: 'Allergen' },
-        { value: 'onsetDate', label: 'Onset Date' },
+        { value: 'onset_date', label: 'Onset Date' },
       ],
       sortTypes: {
         severity: 'severity',
         allergen: 'string',
-        onsetDate: 'date',
+        onset_date: 'date',
       },
     },
     filterControls: {
@@ -477,48 +579,86 @@ export const medicalPageConfigs = {
           description: 'No files attached',
         },
       ],
-      dateField: 'ordered_date',
-      dateRangeOptions: [
-        { value: 'all', label: 'All Time Periods' },
+      // Ordered Date Filter
+      orderedDateField: 'ordered_date',
+      orderedDateLabel: 'Ordered Date',
+      orderedDateOptions: [
+        { value: 'all', label: 'All Ordered Dates' },
         {
           value: 'today',
-          label: 'Today',
+          label: 'Ordered Today',
           description: 'Tests ordered today',
         },
         {
           value: 'week',
-          label: 'This Week',
+          label: 'Ordered This Week',
           description: 'Tests ordered this week',
         },
         {
-          value: 'current',
-          label: 'Current Month',
+          value: 'current_month',
+          label: 'Ordered This Month',
           description: 'Tests ordered this month',
         },
         {
           value: 'past_month',
-          label: 'Past Month',
-          description: 'Tests from last month',
+          label: 'Ordered Last Month',
+          description: 'Tests ordered last month',
         },
         {
           value: 'past_3_months',
-          label: 'Past 3 Months',
-          description: 'Tests from last 3 months',
+          label: 'Ordered Past 3 Months',
+          description: 'Tests ordered in last 3 months',
         },
         {
           value: 'past_6_months',
-          label: 'Past 6 Months',
-          description: 'Tests from last 6 months',
+          label: 'Ordered Past 6 Months',
+          description: 'Tests ordered in last 6 months',
         },
         {
           value: 'year',
-          label: 'This Year',
+          label: 'Ordered This Year',
           description: 'Tests ordered this year',
         },
+      ],
+      // Completed Date Filter
+      completedDateField: 'completed_date',
+      completedDateLabel: 'Completed Date',
+      completedDateOptions: [
+        { value: 'all', label: 'All Completed Dates' },
         {
-          value: 'future',
-          label: 'Future/Scheduled',
-          description: 'Scheduled future tests',
+          value: 'today',
+          label: 'Completed Today',
+          description: 'Tests completed today',
+        },
+        {
+          value: 'week',
+          label: 'Completed This Week',
+          description: 'Tests completed this week',
+        },
+        {
+          value: 'current_month',
+          label: 'Completed This Month',
+          description: 'Tests completed this month',
+        },
+        {
+          value: 'past_month',
+          label: 'Completed Last Month',
+          description: 'Tests completed last month',
+        },
+        {
+          value: 'past_3_months',
+          label: 'Completed Past 3 Months',
+          description: 'Tests completed in last 3 months',
+        },
+        {
+          value: 'past_6_months',
+          label: 'Completed Past 6 Months',
+          description: 'Tests completed in last 6 months',
+        },
+        {
+          value: 'year',
+          label: 'Completed This Year',
+          description: 'Tests completed this year',
         },
       ],
       // Custom filter functions for complex logic
@@ -545,7 +685,7 @@ export const medicalPageConfigs = {
       },
     },
     sorting: {
-      defaultSortBy: 'ordered_date',
+      defaultSortBy: 'completed_date',
       defaultSortOrder: 'desc',
       sortOptions: [
         {
@@ -671,7 +811,8 @@ export const medicalPageConfigs = {
         'Search lab results, test codes, facilities, practitioners...',
       title: 'Filter & Sort Lab Results',
       showCategory: true,
-      showDateRange: true,
+      showOrderedDate: true,
+      showCompletedDate: true,
       showResult: true,
       showType: true,
       showFiles: true,

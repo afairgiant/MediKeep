@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -13,11 +12,21 @@ import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineMedicalForm from '../../components/medical/MantineMedicalForm';
 import StatusBadge from '../../components/medical/StatusBadge';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
+import {
+  Badge,
+  Card,
+  Group,
+  Stack,
+  Text,
+  Grid,
+  Container,
+  Alert,
+  Loader,
+  Center,
+  Divider,
+} from '@mantine/core';
 
 const Medication = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners and pharmacies data
@@ -39,7 +48,6 @@ const Medication = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'medication',
@@ -185,176 +193,213 @@ const Medication = () => {
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading medications...</p>
-        </div>
-      </div>
+      <Container size="xl" py="xl">
+        <Center h={200}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text>Loading medications...</Text>
+            <Text size="sm" c="dimmed">
+              If this takes too long, please refresh the page
+            </Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
-      <PageHeader title="Medications" icon="💊" />
+    <>
+      <Container size="xl" py="md">
+        <PageHeader title="Medications" icon="💊" />
 
-      <div className="medical-page-content">
-        {error && (
-          <div className="error-message">
-            {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
-            </Button>
-          </div>
-        )}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}
+        <Stack gap="lg">
+          {error && (
+            <Alert
+              variant="light"
+              color="red"
+              title="Error"
+              withCloseButton
+              onClose={clearError}
+            >
+              {error}
+            </Alert>
+          )}
+          {successMessage && (
+            <Alert variant="light" color="green" title="Success">
+              {successMessage}
+            </Alert>
+          )}
 
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddMedication}>
+          <Group justify="space-between" align="center">
+            <Button variant="filled" onClick={handleAddMedication}>
               + Add New Medication
             </Button>
-          </div>
 
-          <div className="controls-center">
             <ViewToggle
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               showPrint={true}
             />
-          </div>
-        </div>
+          </Group>
 
-        {/* Advanced Filtering Section */}
-        {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+          {/* Mantine Filter Controls */}
+          <MantineFilters
+            filters={dataManagement.filters}
+            updateFilter={dataManagement.updateFilter}
+            clearFilters={dataManagement.clearFilters}
+            hasActiveFilters={dataManagement.hasActiveFilters}
+            statusOptions={dataManagement.statusOptions}
+            categoryOptions={dataManagement.categoryOptions}
+            dateRangeOptions={dataManagement.dateRangeOptions}
+            sortOptions={dataManagement.sortOptions}
+            sortBy={dataManagement.sortBy}
+            sortOrder={dataManagement.sortOrder}
+            handleSortChange={dataManagement.handleSortChange}
+            totalCount={dataManagement.totalCount}
+            filteredCount={dataManagement.filteredCount}
+            config={config.filterControls}
+          />
 
-        <div className="medical-items-list">
           {filteredMedications.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">💊</div>
-              <h3>No medications found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Click "Add New Medication" to get started.'}
-              </p>
-              {!dataManagement.hasActiveFilters && (
-                <Button variant="primary" onClick={handleAddMedication}>
-                  Add Your First Medication
-                </Button>
-              )}
-            </div>
+            <Card withBorder p="xl">
+              <Stack align="center" gap="md">
+                <Text size="3rem">💊</Text>
+                <Text size="xl" fw={600}>
+                  No Medications Found
+                </Text>
+                <Text ta="center" c="dimmed">
+                  {dataManagement.hasActiveFilters
+                    ? 'Try adjusting your search or filter criteria.'
+                    : 'Start by adding your first medication.'}
+                </Text>
+                {!dataManagement.hasActiveFilters && (
+                  <Button variant="filled" onClick={handleAddMedication}>
+                    Add Your First Medication
+                  </Button>
+                )}
+              </Stack>
+            </Card>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
+            <Grid>
               {filteredMedications.map(medication => (
-                <div key={medication.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">
-                        {medication.medication_name}
-                      </h3>
-                    </div>
-                    <div className="status-badges">
-                      <StatusBadge status={medication.status} />
-                    </div>
-                  </div>
+                <Grid.Col key={medication.id} span={{ base: 12, sm: 6, lg: 4 }}>
+                  <Card
+                    withBorder
+                    shadow="sm"
+                    radius="md"
+                    h="100%"
+                    style={{ display: 'flex', flexDirection: 'column' }}
+                  >
+                    <Stack gap="sm" style={{ flex: 1 }}>
+                      <Group justify="space-between" align="flex-start">
+                        <Stack gap="xs" style={{ flex: 1 }}>
+                          <Text fw={600} size="lg">
+                            {medication.medication_name}
+                          </Text>
+                          {medication.dosage && (
+                            <Badge variant="light" color="blue" size="md">
+                              {medication.dosage}
+                            </Badge>
+                          )}
+                        </Stack>
+                        <StatusBadge status={medication.status} />
+                      </Group>
 
-                  <div className="medical-item-details">
-                    {medication.dosage && (
-                      <div className="detail-item">
-                        <span className="label">Dosage:</span>
-                        <span className="value">{medication.dosage}</span>
-                      </div>
-                    )}
-                    {medication.frequency && (
-                      <div className="detail-item">
-                        <span className="label">Frequency:</span>
-                        <span className="value">{medication.frequency}</span>
-                      </div>
-                    )}
-                    {medication.route && (
-                      <div className="detail-item">
-                        <span className="label">Route:</span>
-                        <span className="value">{medication.route}</span>
-                      </div>
-                    )}
-                    {medication.indication && (
-                      <div className="detail-item">
-                        <span className="label">Indication:</span>
-                        <span className="value">{medication.indication}</span>
-                      </div>
-                    )}
-                    {medication.practitioner && (
-                      <div className="detail-item">
-                        <span className="label">Prescriber:</span>
-                        <span className="value">
-                          {medication.practitioner.name}
-                        </span>
-                      </div>
-                    )}
-                    {medication.pharmacy && (
-                      <div className="detail-item">
-                        <span className="label">Pharmacy:</span>
-                        <span className="value">
-                          {medication.pharmacy.name}
-                        </span>
-                      </div>
-                    )}
-                    {medication.effective_period_start && (
-                      <div className="detail-item">
-                        <span className="label">Start Date:</span>
-                        <span className="value">
-                          {formatDate(medication.effective_period_start)}
-                        </span>
-                      </div>
-                    )}
-                    {medication.effective_period_end && (
-                      <div className="detail-item">
-                        <span className="label">End Date:</span>
-                        <span className="value">
-                          {formatDate(medication.effective_period_end)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                      <Stack gap="xs">
+                        {medication.frequency && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Frequency:
+                            </Text>
+                            <Text size="sm">{medication.frequency}</Text>
+                          </Group>
+                        )}
+                        {medication.route && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Route:
+                            </Text>
+                            <Badge variant="light" color="cyan" size="sm">
+                              {medication.route}
+                            </Badge>
+                          </Group>
+                        )}
+                        {medication.indication && (
+                          <Group align="flex-start">
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Indication:
+                            </Text>
+                            <Text size="sm" style={{ flex: 1 }}>
+                              {medication.indication}
+                            </Text>
+                          </Group>
+                        )}
+                        {medication.practitioner && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Prescriber:
+                            </Text>
+                            <Text size="sm">
+                              {medication.practitioner.name}
+                            </Text>
+                          </Group>
+                        )}
+                        {medication.pharmacy && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Pharmacy:
+                            </Text>
+                            <Text size="sm">{medication.pharmacy.name}</Text>
+                          </Group>
+                        )}
+                        {medication.effective_period_start && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Start Date:
+                            </Text>
+                            <Text size="sm">
+                              {formatDate(medication.effective_period_start)}
+                            </Text>
+                          </Group>
+                        )}
+                        {medication.effective_period_end && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              End Date:
+                            </Text>
+                            <Text size="sm">
+                              {formatDate(medication.effective_period_end)}
+                            </Text>
+                          </Group>
+                        )}
+                      </Stack>
+                    </Stack>
 
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditMedication(medication)}
-                    >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteMedication(medication.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
+                    {/* Buttons always at bottom */}
+                    <Stack gap={0} mt="auto">
+                      <Divider />
+                      <Group justify="flex-end" gap="xs" pt="sm">
+                        <Button
+                          variant="light"
+                          size="xs"
+                          onClick={() => handleEditMedication(medication)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="light"
+                          color="red"
+                          size="xs"
+                          onClick={() => handleDeleteMedication(medication.id)}
+                        >
+                          Delete
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
               ))}
-            </div>
+            </Grid>
           ) : (
             <MedicalTable
               data={filteredMedications}
@@ -376,19 +421,27 @@ const Medication = () => {
               onDelete={handleDeleteMedication}
               formatters={{
                 medication_name: value => (
-                  <span className="primary-field">{value}</span>
+                  <Text fw={600} style={{ minWidth: 150 }}>
+                    {value}
+                  </Text>
                 ),
-                effective_period_start: value =>
-                  value ? formatDate(value) : '-',
-                effective_period_end: value =>
-                  value ? formatDate(value) : '-',
-                status: value => <StatusBadge status={value} size="small" />,
-                practitioner_name: (value, item) =>
-                  item.practitioner?.name || '-',
-                pharmacy_name: (value, item) => item.pharmacy?.name || '-',
-                dosage: value => value || '-',
+                dosage: value =>
+                  value ? (
+                    <Badge variant="filled" color="blue" size="sm">
+                      {value}
+                    </Badge>
+                  ) : (
+                    '-'
+                  ),
                 frequency: value => value || '-',
-                route: value => value || '-',
+                route: value =>
+                  value ? (
+                    <Badge variant="light" color="cyan" size="sm">
+                      {value}
+                    </Badge>
+                  ) : (
+                    '-'
+                  ),
                 indication: value =>
                   value ? (
                     <span title={value}>
@@ -399,11 +452,19 @@ const Medication = () => {
                   ) : (
                     '-'
                   ),
+                effective_period_start: value =>
+                  value ? formatDate(value) : '-',
+                effective_period_end: value =>
+                  value ? formatDate(value) : '-',
+                status: value => <StatusBadge status={value} size="small" />,
+                practitioner_name: (value, item) =>
+                  item.practitioner?.name || '-',
+                pharmacy_name: (value, item) => item.pharmacy?.name || '-',
               }}
             />
           )}
-        </div>
-      </div>
+        </Stack>
+      </Container>
 
       <MantineMedicalForm
         isOpen={showModal}
@@ -416,7 +477,7 @@ const Medication = () => {
         pharmacies={pharmacies}
         editingMedication={editingMedication}
       />
-    </div>
+    </>
   );
 };
 

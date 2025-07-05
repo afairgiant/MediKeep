@@ -12,8 +12,21 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import { Button } from '../../components/ui';
 import MantineTreatmentForm from '../../components/medical/MantineTreatmentForm';
 import StatusBadge from '../../components/medical/StatusBadge';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
+import {
+  Badge,
+  Card,
+  Group,
+  Stack,
+  Text,
+  Grid,
+  Container,
+  Alert,
+  Loader,
+  Center,
+  Divider,
+  Modal,
+  Title,
+} from '@mantine/core';
 
 const Treatments = () => {
   const navigate = useNavigate();
@@ -55,6 +68,8 @@ const Treatments = () => {
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingTreatment, setViewingTreatment] = useState(null);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [formData, setFormData] = useState({
     treatment_name: '',
@@ -100,6 +115,11 @@ const Treatments = () => {
     setShowModal(true);
   };
 
+  const handleViewTreatment = treatment => {
+    setViewingTreatment(treatment);
+    setShowViewModal(true);
+  };
+
   const handleDeleteTreatment = async treatmentId => {
     const success = await deleteItem(treatmentId);
     if (success) {
@@ -126,7 +146,11 @@ const Treatments = () => {
       return;
     }
 
-    if (formData.end_date && formData.start_date && new Date(formData.end_date) < new Date(formData.start_date)) {
+    if (
+      formData.end_date &&
+      formData.start_date &&
+      new Date(formData.end_date) < new Date(formData.start_date)
+    ) {
       setError('End date cannot be before start date');
       return;
     }
@@ -168,188 +192,219 @@ const Treatments = () => {
   };
 
   // Get processed data from data management
-  const processedTreatments = dataManagement.data;
-
-  const getStatusIcon = status => {
-    switch (status) {
-      case 'active':
-        return '●';
-      case 'completed':
-        return '✓';
-      case 'planned':
-        return '○';
-      case 'on-hold':
-        return '⏸';
-      case 'cancelled':
-        return '✗';
-      default:
-        return '?';
-    }
-  };
+  const filteredTreatments = dataManagement.data;
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading treatments...</p>
-        </div>
-      </div>
+      <Container size="xl" py="xl">
+        <Center h={200}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text>Loading treatments...</Text>
+            <Text size="sm" c="dimmed">
+              If this takes too long, please refresh the page
+            </Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
-      <PageHeader title="Treatments" icon="🩹" />
+    <>
+      <Container size="xl" py="md">
+        <PageHeader title="Treatments" icon="🩹" />
 
-      <div className="medical-page-content">
-        {error && (
-          <div className="error-message">
-            {error}
-            <Button variant="ghost" size="small" onClick={clearError}>
-              ×
+        <Stack gap="lg">
+          {error && (
+            <Alert
+              variant="light"
+              color="red"
+              title="Error"
+              withCloseButton
+              onClose={clearError}
+            >
+              {error}
+            </Alert>
+          )}
+          {successMessage && (
+            <Alert variant="light" color="green" title="Success">
+              {successMessage}
+            </Alert>
+          )}
+
+          <Group justify="space-between" align="center">
+            <Button variant="filled" onClick={handleAddTreatment}>
+              + Add Treatment
             </Button>
-          </div>
-        )}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}
 
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddTreatment}>
-              + Add New Treatment
-            </Button>
-          </div>
-
-          <div className="controls-center">
             <ViewToggle
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               showPrint={true}
             />
-          </div>
-        </div>
+          </Group>
 
-        {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+          {/* Mantine Filter Controls */}
+          <MantineFilters
+            filters={dataManagement.filters}
+            updateFilter={dataManagement.updateFilter}
+            clearFilters={dataManagement.clearFilters}
+            hasActiveFilters={dataManagement.hasActiveFilters}
+            statusOptions={dataManagement.statusOptions}
+            categoryOptions={dataManagement.categoryOptions}
+            dateRangeOptions={dataManagement.dateRangeOptions}
+            sortOptions={dataManagement.sortOptions}
+            sortBy={dataManagement.sortBy}
+            sortOrder={dataManagement.sortOrder}
+            handleSortChange={dataManagement.handleSortChange}
+            totalCount={dataManagement.totalCount}
+            filteredCount={dataManagement.filteredCount}
+            config={config.filterControls}
+          />
 
-        <div className="medical-items-list">
-          {processedTreatments.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🩹</div>
-              <h3>No treatments found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Click "Add New Treatment" to get started.'}
-              </p>
-              {!dataManagement.hasActiveFilters && (
-                <Button variant="primary" onClick={handleAddTreatment}>
-                  Add Your First Treatment
-                </Button>
-              )}
-            </div>
+          {filteredTreatments.length === 0 ? (
+            <Card withBorder p="xl">
+              <Stack align="center" gap="md">
+                <Text size="3rem">🩹</Text>
+                <Text size="xl" fw={600}>
+                  No Treatments Found
+                </Text>
+                <Text ta="center" c="dimmed">
+                  {dataManagement.hasActiveFilters
+                    ? 'Try adjusting your search or filter criteria.'
+                    : 'Start by adding your first treatment.'}
+                </Text>
+                {!dataManagement.hasActiveFilters && (
+                  <Button variant="filled" onClick={handleAddTreatment}>
+                    Add Your First Treatment
+                  </Button>
+                )}
+              </Stack>
+            </Card>
           ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {processedTreatments.map(treatment => (
-                <div key={treatment.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">
-                        <span className="status-icon">
-                          {getStatusIcon(treatment.status)}
-                        </span>
-                        {treatment.treatment_name}
-                      </h3>
-                      {treatment.description && (
-                        <p className="item-subtitle">{treatment.description}</p>
+            <Grid>
+              {filteredTreatments.map(treatment => (
+                <Grid.Col key={treatment.id} span={{ base: 12, sm: 6, lg: 4 }}>
+                  <Card
+                    withBorder
+                    shadow="sm"
+                    radius="md"
+                    h="100%"
+                    style={{ display: 'flex', flexDirection: 'column' }}
+                  >
+                    <Stack gap="sm" style={{ flex: 1 }}>
+                      <Group justify="space-between" align="flex-start">
+                        <Stack gap="xs" style={{ flex: 1 }}>
+                          <Text fw={600} size="lg">
+                            {treatment.treatment_name}
+                          </Text>
+                          {treatment.treatment_type && (
+                            <Badge variant="light" color="blue" size="md">
+                              {treatment.treatment_type}
+                            </Badge>
+                          )}
+                        </Stack>
+                        <StatusBadge status={treatment.status} />
+                      </Group>
+
+                      <Stack gap="xs">
+                        {treatment.start_date && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Start Date:
+                            </Text>
+                            <Text size="sm">
+                              {formatDate(treatment.start_date)}
+                            </Text>
+                          </Group>
+                        )}
+                        {treatment.end_date && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              End Date:
+                            </Text>
+                            <Text size="sm">
+                              {formatDate(treatment.end_date)}
+                            </Text>
+                          </Group>
+                        )}
+                        {treatment.dosage && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Dosage:
+                            </Text>
+                            <Text size="sm">{treatment.dosage}</Text>
+                          </Group>
+                        )}
+                        {treatment.frequency && (
+                          <Group>
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Frequency:
+                            </Text>
+                            <Text size="sm">{treatment.frequency}</Text>
+                          </Group>
+                        )}
+                        {treatment.description && (
+                          <Group align="flex-start">
+                            <Text size="sm" fw={500} c="dimmed" w={120}>
+                              Description:
+                            </Text>
+                            <Text size="sm" style={{ flex: 1 }}>
+                              {treatment.description}
+                            </Text>
+                          </Group>
+                        )}
+                      </Stack>
+
+                      {treatment.notes && (
+                        <Stack gap="xs">
+                          <Divider />
+                          <Stack gap="xs">
+                            <Text size="sm" fw={500} c="dimmed">
+                              Notes
+                            </Text>
+                            <Text size="sm">{treatment.notes}</Text>
+                          </Stack>
+                        </Stack>
                       )}
-                    </div>
-                    <div className="status-badges">
-                      <StatusBadge status={treatment.status} />
-                    </div>
-                  </div>
+                    </Stack>
 
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Type:</span>
-                      <span className="value">{treatment.treatment_type}</span>
-                    </div>
-                    {treatment.start_date && (
-                      <div className="detail-item">
-                        <span className="label">Start Date:</span>
-                        <span className="value">
-                          {formatDate(treatment.start_date)}
-                        </span>
-                      </div>
-                    )}
-                    {treatment.end_date && (
-                      <div className="detail-item">
-                        <span className="label">End Date:</span>
-                        <span className="value">
-                          {formatDate(treatment.end_date)}
-                        </span>
-                      </div>
-                    )}
-                    {treatment.dosage && (
-                      <div className="detail-item">
-                        <span className="label">Dosage:</span>
-                        <span className="value">{treatment.dosage}</span>
-                      </div>
-                    )}
-                    {treatment.frequency && (
-                      <div className="detail-item">
-                        <span className="label">Frequency:</span>
-                        <span className="value">{treatment.frequency}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {treatment.notes && (
-                    <div className="medical-item-notes">
-                      <div className="notes-label">Notes</div>
-                      <div className="notes-content">{treatment.notes}</div>
-                    </div>
-                  )}
-
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditTreatment(treatment)}
-                    >
-                      ✏️ Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeleteTreatment(treatment.id)}
-                    >
-                      🗑️ Delete
-                    </Button>
-                  </div>
-                </div>
+                    {/* Buttons always at bottom */}
+                    <Stack gap={0} mt="auto">
+                      <Divider />
+                      <Group justify="flex-end" gap="xs" pt="sm">
+                        <Button
+                          variant="light"
+                          size="xs"
+                          onClick={() => handleViewTreatment(treatment)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="light"
+                          size="xs"
+                          onClick={() => handleEditTreatment(treatment)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="light"
+                          color="red"
+                          size="xs"
+                          onClick={() => handleDeleteTreatment(treatment.id)}
+                        >
+                          Delete
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
               ))}
-            </div>
+            </Grid>
           ) : (
             <MedicalTable
-              data={processedTreatments}
+              data={filteredTreatments}
               columns={[
                 { header: 'Treatment Name', accessor: 'treatment_name' },
                 { header: 'Type', accessor: 'treatment_type' },
@@ -362,15 +417,24 @@ const Treatments = () => {
               ]}
               patientData={currentPatient}
               tableName="Treatments"
+              onView={handleViewTreatment}
               onEdit={handleEditTreatment}
               onDelete={handleDeleteTreatment}
               formatters={{
-                treatment_name: value => (
-                  <span className="primary-field">{value}</span>
-                ),
+                treatment_name: value => value,
+                treatment_type: value =>
+                  value ? (
+                    <Badge variant="filled" color="blue" size="sm">
+                      {value}
+                    </Badge>
+                  ) : (
+                    '-'
+                  ),
                 start_date: value => (value ? formatDate(value) : '-'),
                 end_date: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
+                dosage: value => value || '-',
+                frequency: value => value || '-',
                 notes: value =>
                   value ? (
                     <span title={value}>
@@ -384,9 +448,10 @@ const Treatments = () => {
               }}
             />
           )}
-        </div>
-      </div>
+        </Stack>
+      </Container>
 
+      {/* Treatment Form Modal */}
       <MantineTreatmentForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -396,7 +461,152 @@ const Treatments = () => {
         onSubmit={handleSubmit}
         editingTreatment={editingTreatment}
       />
-    </div>
+
+      {/* Treatment View Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title={
+          <Group>
+            <Text size="lg" fw={600}>
+              Treatment Details
+            </Text>
+            {viewingTreatment && (
+              <StatusBadge status={viewingTreatment.status} />
+            )}
+          </Group>
+        }
+        size="lg"
+        centered
+      >
+        {viewingTreatment && (
+          <Stack gap="md">
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Title order={3}>{viewingTreatment.treatment_name}</Title>
+                    {viewingTreatment.treatment_type && (
+                      <Badge variant="light" color="blue" size="lg">
+                        {viewingTreatment.treatment_type}
+                      </Badge>
+                    )}
+                  </Stack>
+                </Group>
+
+                {viewingTreatment.description && (
+                  <Stack gap="xs">
+                    <Text fw={500} c="dimmed" size="sm">
+                      Description
+                    </Text>
+                    <Text>{viewingTreatment.description}</Text>
+                  </Stack>
+                )}
+              </Stack>
+            </Card>
+
+            <Grid>
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      SCHEDULE
+                    </Text>
+                    <Divider />
+                    {viewingTreatment.start_date && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Start:
+                        </Text>
+                        <Text size="sm">
+                          {formatDate(viewingTreatment.start_date)}
+                        </Text>
+                      </Group>
+                    )}
+                    {viewingTreatment.end_date && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          End:
+                        </Text>
+                        <Text size="sm">
+                          {formatDate(viewingTreatment.end_date)}
+                        </Text>
+                      </Group>
+                    )}
+                    {!viewingTreatment.start_date &&
+                      !viewingTreatment.end_date && (
+                        <Text size="sm" c="dimmed">
+                          No schedule information
+                        </Text>
+                      )}
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      DOSAGE & FREQUENCY
+                    </Text>
+                    <Divider />
+                    {viewingTreatment.dosage && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Dosage:
+                        </Text>
+                        <Text size="sm">{viewingTreatment.dosage}</Text>
+                      </Group>
+                    )}
+                    {viewingTreatment.frequency && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Frequency:
+                        </Text>
+                        <Text size="sm">{viewingTreatment.frequency}</Text>
+                      </Group>
+                    )}
+                    {!viewingTreatment.dosage &&
+                      !viewingTreatment.frequency && (
+                        <Text size="sm" c="dimmed">
+                          No dosage information
+                        </Text>
+                      )}
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
+
+            {viewingTreatment.notes && (
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Text fw={600} size="sm" c="dimmed">
+                    NOTES
+                  </Text>
+                  <Divider />
+                  <Text size="sm">{viewingTreatment.notes}</Text>
+                </Stack>
+              </Card>
+            )}
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="light"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleEditTreatment(viewingTreatment);
+                }}
+              >
+                Edit Treatment
+              </Button>
+              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+                Close
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+    </>
   );
 };
 

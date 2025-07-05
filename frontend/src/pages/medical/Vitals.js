@@ -6,20 +6,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus,
-  Activity,
-  TrendingUp,
-  BarChart3,
-  Heart,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Maximize2,
-  Filter,
-  Download,
-  RefreshCw,
-} from 'lucide-react';
-import {
   Button,
   Modal,
   Paper,
@@ -37,6 +23,7 @@ import {
   Flex,
   Box,
   Divider,
+  Container,
 } from '@mantine/core';
 import {
   IconHeart,
@@ -46,7 +33,7 @@ import {
   IconRefresh,
   IconPlus,
   IconAlertTriangle,
-  IconX,
+  IconCheck,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -58,7 +45,6 @@ import { useCurrentPatient } from '../../hooks/useGlobalData';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import '../../styles/shared/MedicalPageShared.css';
 
 // Quick stats card configurations with Mantine icons
 const STATS_CONFIGS = {
@@ -366,7 +352,7 @@ const Vitals = () => {
     >
       <PageHeader title="Vital Signs" icon="🩺" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {vitalsError && (
           <Alert
             variant="light"
@@ -385,7 +371,7 @@ const Vitals = () => {
             variant="light"
             color="green"
             title="Success"
-            icon={<CheckCircle size={16} />}
+            icon={<IconCheck size={16} />}
             mb="md"
           >
             {successMessage}
@@ -539,7 +525,7 @@ const Vitals = () => {
             showActions={true}
           />
         </motion.div>
-      </div>
+      </Container>
     </motion.div>
   );
 };
