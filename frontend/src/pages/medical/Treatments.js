@@ -494,14 +494,14 @@ const Treatments = () => {
                   </Stack>
                 </Group>
 
-                {viewingTreatment.description && (
-                  <Stack gap="xs">
-                    <Text fw={500} c="dimmed" size="sm">
-                      Description
-                    </Text>
-                    <Text>{viewingTreatment.description}</Text>
-                  </Stack>
-                )}
+                <Stack gap="xs">
+                  <Text fw={500} c="dimmed" size="sm">
+                    Description
+                  </Text>
+                  <Text c={viewingTreatment.description ? 'inherit' : 'dimmed'}>
+                    {viewingTreatment.description || 'Not specified'}
+                  </Text>
+                </Stack>
               </Stack>
             </Card>
 
@@ -513,32 +513,32 @@ const Treatments = () => {
                       SCHEDULE
                     </Text>
                     <Divider />
-                    {viewingTreatment.start_date && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Start:
-                        </Text>
-                        <Text size="sm">
-                          {formatDate(viewingTreatment.start_date)}
-                        </Text>
-                      </Group>
-                    )}
-                    {viewingTreatment.end_date && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          End:
-                        </Text>
-                        <Text size="sm">
-                          {formatDate(viewingTreatment.end_date)}
-                        </Text>
-                      </Group>
-                    )}
-                    {!viewingTreatment.start_date &&
-                      !viewingTreatment.end_date && (
-                        <Text size="sm" c="dimmed">
-                          No schedule information
-                        </Text>
-                      )}
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Start:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.start_date ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.start_date
+                          ? formatDate(viewingTreatment.start_date)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        End:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.end_date ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.end_date
+                          ? formatDate(viewingTreatment.end_date)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
                   </Stack>
                 </Card>
               </Grid.Col>
@@ -550,44 +550,47 @@ const Treatments = () => {
                       DOSAGE & FREQUENCY
                     </Text>
                     <Divider />
-                    {viewingTreatment.dosage && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Dosage:
-                        </Text>
-                        <Text size="sm">{viewingTreatment.dosage}</Text>
-                      </Group>
-                    )}
-                    {viewingTreatment.frequency && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Frequency:
-                        </Text>
-                        <Text size="sm">{viewingTreatment.frequency}</Text>
-                      </Group>
-                    )}
-                    {!viewingTreatment.dosage &&
-                      !viewingTreatment.frequency && (
-                        <Text size="sm" c="dimmed">
-                          No dosage information
-                        </Text>
-                      )}
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Dosage:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.dosage ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.dosage || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Frequency:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.frequency ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.frequency || 'Not specified'}
+                      </Text>
+                    </Group>
                   </Stack>
                 </Card>
               </Grid.Col>
             </Grid>
 
-            {viewingTreatment.notes && (
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    NOTES
-                  </Text>
-                  <Divider />
-                  <Text size="sm">{viewingTreatment.notes}</Text>
-                </Stack>
-              </Card>
-            )}
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  NOTES
+                </Text>
+                <Divider />
+                <Text
+                  size="sm"
+                  c={viewingTreatment.notes ? 'inherit' : 'dimmed'}
+                >
+                  {viewingTreatment.notes || 'No notes available'}
+                </Text>
+              </Stack>
+            </Card>
 
             <Group justify="flex-end" mt="md">
               <Button

@@ -977,76 +977,85 @@ const LabResults = () => {
                   </Text>
                   <Text>{selectedLabResult.test_category || 'N/A'}</Text>
                 </Stack>
-                {selectedLabResult.test_type && (
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">
-                      Test Type
-                    </Text>
-                    <Text>{selectedLabResult.test_type}</Text>
-                  </Stack>
-                )}
-                {selectedLabResult.facility && (
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">
-                      Facility
-                    </Text>
-                    <Text>{selectedLabResult.facility}</Text>
-                  </Stack>
-                )}
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Test Type
+                  </Text>
+                  <Text c={selectedLabResult.test_type ? 'inherit' : 'dimmed'}>
+                    {selectedLabResult.test_type || 'Not specified'}
+                  </Text>
+                </Stack>
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Facility
+                  </Text>
+                  <Text c={selectedLabResult.facility ? 'inherit' : 'dimmed'}>
+                    {selectedLabResult.facility || 'Not specified'}
+                  </Text>
+                </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Status
                   </Text>
                   <StatusBadge status={selectedLabResult.status} />
                 </Stack>
-                {selectedLabResult.labs_result && (
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">
-                      Lab Result
-                    </Text>
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Lab Result
+                  </Text>
+                  {selectedLabResult.labs_result ? (
                     <StatusBadge status={selectedLabResult.labs_result} />
-                  </Stack>
-                )}
-                {selectedLabResult.practitioner_id && (
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">
-                      Ordering Practitioner
-                    </Text>
-                    <Text>
-                      {practitioners.find(
-                        p => p.id === selectedLabResult.practitioner_id
-                      )?.name ||
-                        `Practitioner ID: ${selectedLabResult.practitioner_id}`}
-                    </Text>
-                  </Stack>
-                )}
+                  ) : (
+                    <Text c="dimmed">Not specified</Text>
+                  )}
+                </Stack>
+                <Stack gap="xs">
+                  <Text fw={500} size="sm" c="dimmed">
+                    Ordering Practitioner
+                  </Text>
+                  <Text
+                    c={selectedLabResult.practitioner_id ? 'inherit' : 'dimmed'}
+                  >
+                    {selectedLabResult.practitioner_id
+                      ? practitioners.find(
+                          p => p.id === selectedLabResult.practitioner_id
+                        )?.name ||
+                        `Practitioner ID: ${selectedLabResult.practitioner_id}`
+                      : 'Not specified'}
+                  </Text>
+                </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Ordered Date
                   </Text>
                   <Text>{formatDate(selectedLabResult.ordered_date)}</Text>
                 </Stack>
-                {selectedLabResult.completed_date && (
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">
-                      Completed Date
-                    </Text>
-                    <Text>{formatDate(selectedLabResult.completed_date)}</Text>
-                  </Stack>
-                )}
-              </SimpleGrid>
-              {selectedLabResult.notes && (
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
-                    Notes
+                    Completed Date
                   </Text>
-                  <Paper withBorder p="sm" bg="gray.0">
-                    <Text style={{ whiteSpace: 'pre-wrap' }}>
-                      {selectedLabResult.notes}
-                    </Text>
-                  </Paper>
+                  <Text
+                    c={selectedLabResult.completed_date ? 'inherit' : 'dimmed'}
+                  >
+                    {selectedLabResult.completed_date
+                      ? formatDate(selectedLabResult.completed_date)
+                      : 'Not specified'}
+                  </Text>
                 </Stack>
-              )}
+              </SimpleGrid>
+              <Stack gap="xs">
+                <Text fw={500} size="sm" c="dimmed">
+                  Notes
+                </Text>
+                <Paper withBorder p="sm" bg="gray.0">
+                  <Text
+                    style={{ whiteSpace: 'pre-wrap' }}
+                    c={selectedLabResult.notes ? 'inherit' : 'dimmed'}
+                  >
+                    {selectedLabResult.notes || 'No notes available'}
+                  </Text>
+                </Paper>
+              </Stack>
             </Stack>
 
             <Stack gap="lg">

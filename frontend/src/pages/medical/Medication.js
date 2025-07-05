@@ -527,14 +527,14 @@ const Medication = () => {
                   </Stack>
                 </Group>
 
-                {viewingMedication.indication && (
-                  <Stack gap="xs">
-                    <Text fw={500} c="dimmed" size="sm">
-                      Indication
-                    </Text>
-                    <Text>{viewingMedication.indication}</Text>
-                  </Stack>
-                )}
+                <Stack gap="xs">
+                  <Text fw={500} c="dimmed" size="sm">
+                    Indication
+                  </Text>
+                  <Text c={viewingMedication.indication ? 'inherit' : 'dimmed'}>
+                    {viewingMedication.indication || 'Not specified'}
+                  </Text>
+                </Stack>
               </Stack>
             </Card>
 
@@ -546,39 +546,42 @@ const Medication = () => {
                       DOSAGE & FREQUENCY
                     </Text>
                     <Divider />
-                    {viewingMedication.dosage && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Dosage:
-                        </Text>
-                        <Text size="sm">{viewingMedication.dosage}</Text>
-                      </Group>
-                    )}
-                    {viewingMedication.frequency && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Frequency:
-                        </Text>
-                        <Text size="sm">{viewingMedication.frequency}</Text>
-                      </Group>
-                    )}
-                    {viewingMedication.route && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Route:
-                        </Text>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Dosage:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingMedication.dosage ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingMedication.dosage || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Frequency:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingMedication.frequency ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingMedication.frequency || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Route:
+                      </Text>
+                      {viewingMedication.route ? (
                         <Badge variant="light" color="cyan" size="sm">
                           {viewingMedication.route}
                         </Badge>
-                      </Group>
-                    )}
-                    {!viewingMedication.dosage &&
-                      !viewingMedication.frequency &&
-                      !viewingMedication.route && (
+                      ) : (
                         <Text size="sm" c="dimmed">
-                          No dosage information
+                          Not specified
                         </Text>
                       )}
+                    </Group>
                   </Stack>
                 </Card>
               </Grid.Col>
@@ -590,74 +593,84 @@ const Medication = () => {
                       PRESCRIBER & PHARMACY
                     </Text>
                     <Divider />
-                    {viewingMedication.practitioner && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Prescriber:
-                        </Text>
-                        <Text size="sm">
-                          {viewingMedication.practitioner.name}
-                        </Text>
-                      </Group>
-                    )}
-                    {viewingMedication.pharmacy && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Pharmacy:
-                        </Text>
-                        <Text size="sm">{viewingMedication.pharmacy.name}</Text>
-                      </Group>
-                    )}
-                    {!viewingMedication.practitioner &&
-                      !viewingMedication.pharmacy && (
-                        <Text size="sm" c="dimmed">
-                          No prescriber or pharmacy information
-                        </Text>
-                      )}
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Prescriber:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingMedication.practitioner ? 'inherit' : 'dimmed'
+                        }
+                      >
+                        {viewingMedication.practitioner?.name ||
+                          'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Pharmacy:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingMedication.pharmacy ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingMedication.pharmacy?.name || 'Not specified'}
+                      </Text>
+                    </Group>
                   </Stack>
                 </Card>
               </Grid.Col>
             </Grid>
 
-            {(viewingMedication.effective_period_start ||
-              viewingMedication.effective_period_end) && (
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    EFFECTIVE PERIOD
-                  </Text>
-                  <Divider />
-                  <Grid>
-                    {viewingMedication.effective_period_start && (
-                      <Grid.Col span={6}>
-                        <Group>
-                          <Text size="sm" fw={500} w={80}>
-                            Start Date:
-                          </Text>
-                          <Text size="sm">
-                            {formatDate(
-                              viewingMedication.effective_period_start
-                            )}
-                          </Text>
-                        </Group>
-                      </Grid.Col>
-                    )}
-                    {viewingMedication.effective_period_end && (
-                      <Grid.Col span={6}>
-                        <Group>
-                          <Text size="sm" fw={500} w={80}>
-                            End Date:
-                          </Text>
-                          <Text size="sm">
-                            {formatDate(viewingMedication.effective_period_end)}
-                          </Text>
-                        </Group>
-                      </Grid.Col>
-                    )}
-                  </Grid>
-                </Stack>
-              </Card>
-            )}
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  EFFECTIVE PERIOD
+                </Text>
+                <Divider />
+                <Grid>
+                  <Grid.Col span={6}>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Start Date:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingMedication.effective_period_start
+                            ? 'inherit'
+                            : 'dimmed'
+                        }
+                      >
+                        {viewingMedication.effective_period_start
+                          ? formatDate(viewingMedication.effective_period_start)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Grid.Col>
+                  <Grid.Col span={6}>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        End Date:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingMedication.effective_period_end
+                            ? 'inherit'
+                            : 'dimmed'
+                        }
+                      >
+                        {viewingMedication.effective_period_end
+                          ? formatDate(viewingMedication.effective_period_end)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Grid.Col>
+                </Grid>
+              </Stack>
+            </Card>
 
             <Group justify="flex-end" mt="md">
               <Button

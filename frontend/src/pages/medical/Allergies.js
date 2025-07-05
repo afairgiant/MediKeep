@@ -15,6 +15,7 @@ import {
   Card,
   Box,
   Divider,
+  Modal,
 } from '@mantine/core';
 import { Button } from '../../components/ui';
 import {
@@ -74,6 +75,8 @@ const Allergies = () => {
 
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingAllergy, setViewingAllergy] = useState(null);
   const [editingAllergy, setEditingAllergy] = useState(null);
   const [formData, setFormData] = useState({
     allergen: '',
@@ -105,6 +108,11 @@ const Allergies = () => {
   const handleAddAllergy = () => {
     resetForm();
     setShowAddForm(true);
+  };
+
+  const handleViewAllergy = allergy => {
+    setViewingAllergy(allergy);
+    setShowViewModal(true);
   };
 
   const handleEditAllergy = allergy => {
@@ -412,6 +420,13 @@ const Allergies = () => {
                               <Button
                                 variant="light"
                                 size="xs"
+                                onClick={() => handleViewAllergy(allergy)}
+                              >
+                                View
+                              </Button>
+                              <Button
+                                variant="light"
+                                size="xs"
                                 onClick={() => handleEditAllergy(allergy)}
                               >
                                 Edit
@@ -447,6 +462,7 @@ const Allergies = () => {
                 ]}
                 patientData={currentPatient}
                 tableName="Allergies"
+                onView={handleViewAllergy}
                 onEdit={handleEditAllergy}
                 onDelete={handleDeleteAllergy}
                 formatters={{
@@ -488,6 +504,166 @@ const Allergies = () => {
             </Paper>
           )}
         </motion.div>
+
+        {/* Allergy View Modal */}
+        <Modal
+          opened={showViewModal}
+          onClose={() => setShowViewModal(false)}
+          title={
+            <Group>
+              <Text size="lg" fw={600}>
+                Allergy Details
+              </Text>
+              {viewingAllergy && (
+                <Badge
+                  color={getStatusColor(viewingAllergy.status)}
+                  variant="light"
+                >
+                  {viewingAllergy.status}
+                </Badge>
+              )}
+            </Group>
+          }
+          size="lg"
+          centered
+        >
+          {viewingAllergy && (
+            <Stack gap="md">
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Group justify="space-between" align="flex-start">
+                    <Stack gap="xs" style={{ flex: 1 }}>
+                      <Title order={3}>{viewingAllergy.allergen}</Title>
+                      {viewingAllergy.severity && (
+                        <Badge
+                          color={getSeverityColor(viewingAllergy.severity)}
+                          variant="filled"
+                          leftSection={<SeverityIcon size={16} />}
+                        >
+                          {viewingAllergy.severity}
+                        </Badge>
+                      )}
+                    </Stack>
+                  </Group>
+                </Stack>
+              </Card>
+
+              <Grid>
+                <Grid.Col span={6}>
+                  <Card withBorder p="md" h="100%">
+                    <Stack gap="sm">
+                      <Text fw={600} size="sm" c="dimmed">
+                        ALLERGY INFORMATION
+                      </Text>
+                      <Divider />
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Allergen:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingAllergy.allergen ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingAllergy.allergen || 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Severity:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingAllergy.severity ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingAllergy.severity || 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Reaction:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingAllergy.reaction ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingAllergy.reaction || 'Not specified'}
+                        </Text>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+
+                <Grid.Col span={6}>
+                  <Card withBorder p="md" h="100%">
+                    <Stack gap="sm">
+                      <Text fw={600} size="sm" c="dimmed">
+                        TIMELINE
+                      </Text>
+                      <Divider />
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Onset Date:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingAllergy.onset_date ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingAllergy.onset_date
+                            ? formatDate(viewingAllergy.onset_date)
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Status:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingAllergy.status ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingAllergy.status || 'Not specified'}
+                        </Text>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+              </Grid>
+
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Text fw={600} size="sm" c="dimmed">
+                    NOTES
+                  </Text>
+                  <Divider />
+                  <Text
+                    size="sm"
+                    c={viewingAllergy.notes ? 'inherit' : 'dimmed'}
+                  >
+                    {viewingAllergy.notes || 'No notes available'}
+                  </Text>
+                </Stack>
+              </Card>
+
+              <Group justify="flex-end" mt="md">
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleEditAllergy(viewingAllergy);
+                  }}
+                >
+                  Edit Allergy
+                </Button>
+                <Button
+                  variant="filled"
+                  onClick={() => setShowViewModal(false)}
+                >
+                  Close
+                </Button>
+              </Group>
+            </Stack>
+          )}
+        </Modal>
       </Container>
     </motion.div>
   );
