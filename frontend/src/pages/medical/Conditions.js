@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -92,6 +92,7 @@ const Conditions = () => {
     end_date: '', // Form field name
   });
 
+
   const handleAddCondition = () => {
     setEditingCondition(null);
     setFormData({
@@ -112,6 +113,18 @@ const Conditions = () => {
     setViewingCondition(condition);
     setShowViewModal(true);
   };
+
+  // Check for condition ID to auto-open from other pages
+  useEffect(() => {
+    const conditionIdToOpen = sessionStorage.getItem('openConditionId');
+    if (conditionIdToOpen && conditions.length > 0) {
+      const conditionToView = conditions.find(c => c.id === parseInt(conditionIdToOpen));
+      if (conditionToView) {
+        handleViewCondition(conditionToView);
+        sessionStorage.removeItem('openConditionId'); // Clean up
+      }
+    }
+  }, [conditions]); // Re-run when conditions data loads
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);

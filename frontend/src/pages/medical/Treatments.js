@@ -220,6 +220,16 @@ const Treatments = () => {
     return condition ? condition.diagnosis || condition.name : null;
   };
 
+  // Handler to navigate to condition page and open view modal
+  const handleConditionClick = conditionId => {
+    if (conditionId) {
+      // Store the condition ID in sessionStorage so the conditions page can auto-open the modal
+      sessionStorage.setItem('openConditionId', conditionId.toString());
+      // Navigate to conditions page
+      navigate('/conditions');
+    }
+  };
+
   // Get processed data from data management
   const filteredTreatments = dataManagement.data;
 
@@ -344,7 +354,13 @@ const Treatments = () => {
                               </Badge>
                             )}
                             {treatment.condition_id && (
-                              <Badge variant="light" color="teal" size="md">
+                              <Badge 
+                                variant="light" 
+                                color="teal" 
+                                size="md"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleConditionClick(treatment.condition_id)}
+                              >
                                 {treatment.condition?.diagnosis || getConditionName(treatment.condition_id) || `Condition #${treatment.condition_id}`}
                               </Badge>
                             )}
@@ -480,7 +496,13 @@ const Treatments = () => {
                 condition: (value, row) => {
                   if (row.condition_id) {
                     return (
-                      <Badge variant="light" color="teal" size="sm">
+                      <Badge 
+                        variant="light" 
+                        color="teal" 
+                        size="sm"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleConditionClick(row.condition_id)}
+                      >
                         {row.condition?.diagnosis || getConditionName(row.condition_id) || `Condition #${row.condition_id}`}
                       </Badge>
                     );
@@ -556,7 +578,13 @@ const Treatments = () => {
                         </Badge>
                       )}
                       {viewingTreatment.condition_id && (
-                        <Badge variant="light" color="teal" size="lg">
+                        <Badge 
+                          variant="light" 
+                          color="teal" 
+                          size="lg"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleConditionClick(viewingTreatment.condition_id)}
+                        >
                           Related to: {viewingTreatment.condition?.diagnosis || getConditionName(viewingTreatment.condition_id) || `Condition #${viewingTreatment.condition_id}`}
                         </Badge>
                       )}
@@ -659,7 +687,12 @@ const Treatments = () => {
                           <Text size="sm" fw={500} w={80}>
                             Diagnosis:
                           </Text>
-                          <Text size="sm" fw={600}>
+                          <Text 
+                            size="sm" 
+                            fw={600}
+                            style={{ cursor: 'pointer', color: 'var(--mantine-color-blue-6)' }}
+                            onClick={() => handleConditionClick(viewingTreatment.condition_id)}
+                          >
                             {viewingTreatment.condition?.diagnosis || getConditionName(viewingTreatment.condition_id) || `Condition #${viewingTreatment.condition_id}`}
                           </Text>
                         </Group>
