@@ -142,7 +142,7 @@ const Practitioners = () => {
             ? formData.website.trim()
             : null,
         rating:
-          formData.rating && formData.rating.trim() !== ''
+          formData.rating && formData.rating !== 0
             ? parseFloat(formData.rating)
             : null,
       };

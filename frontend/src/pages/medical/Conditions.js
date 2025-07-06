@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -15,6 +15,7 @@ import {
   Card,
   Box,
   Divider,
+  Modal,
 } from '@mantine/core';
 import { Button } from '../../components/ui';
 import {
@@ -76,6 +77,8 @@ const Conditions = () => {
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingCondition, setViewingCondition] = useState(null);
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
     diagnosis: '',
@@ -88,6 +91,7 @@ const Conditions = () => {
     onset_date: '', // Form field name
     end_date: '', // Form field name
   });
+
 
   const handleAddCondition = () => {
     setEditingCondition(null);
@@ -104,6 +108,23 @@ const Conditions = () => {
     });
     setShowModal(true);
   };
+
+  const handleViewCondition = condition => {
+    setViewingCondition(condition);
+    setShowViewModal(true);
+  };
+
+  // Check for condition ID to auto-open from other pages
+  useEffect(() => {
+    const conditionIdToOpen = sessionStorage.getItem('openConditionId');
+    if (conditionIdToOpen && conditions.length > 0) {
+      const conditionToView = conditions.find(c => c.id === parseInt(conditionIdToOpen));
+      if (conditionToView) {
+        handleViewCondition(conditionToView);
+        sessionStorage.removeItem('openConditionId'); // Clean up
+      }
+    }
+  }, [conditions]); // Re-run when conditions data loads
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
@@ -534,6 +555,13 @@ const Conditions = () => {
                               <Button
                                 variant="light"
                                 size="xs"
+                                onClick={() => handleViewCondition(condition)}
+                              >
+                                View
+                              </Button>
+                              <Button
+                                variant="light"
+                                size="xs"
                                 onClick={() => handleEditCondition(condition)}
                               >
                                 Edit
@@ -572,6 +600,7 @@ const Conditions = () => {
                 ]}
                 patientData={currentPatient}
                 tableName="Conditions"
+                onView={handleViewCondition}
                 onEdit={handleEditCondition}
                 onDelete={handleDeleteCondition}
                 formatters={{
@@ -611,6 +640,231 @@ const Conditions = () => {
             </Paper>
           )}
         </motion.div>
+
+        {/* Condition View Modal */}
+        <Modal
+          opened={showViewModal}
+          onClose={() => setShowViewModal(false)}
+          title={
+            <Group>
+              <Text size="lg" fw={600}>
+                Condition Details
+              </Text>
+              {viewingCondition && (
+                <Badge
+                  color={getStatusColor(viewingCondition.status)}
+                  variant="light"
+                >
+                  {viewingCondition.status}
+                </Badge>
+              )}
+            </Group>
+          }
+          size="lg"
+          centered
+        >
+          {viewingCondition && (
+            <Stack gap="md">
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Group justify="space-between" align="flex-start">
+                    <Stack gap="xs" style={{ flex: 1 }}>
+                      <Title order={3}>{viewingCondition.diagnosis}</Title>
+                      {viewingCondition.severity && (
+                        <Badge
+                          color={getSeverityColor(viewingCondition.severity)}
+                          variant="filled"
+                        >
+                          {viewingCondition.severity}
+                        </Badge>
+                      )}
+                    </Stack>
+                  </Group>
+                </Stack>
+              </Card>
+
+              <Grid>
+                <Grid.Col span={6}>
+                  <Card withBorder p="md" h="100%">
+                    <Stack gap="sm">
+                      <Text fw={600} size="sm" c="dimmed">
+                        DIAGNOSIS INFORMATION
+                      </Text>
+                      <Divider />
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Diagnosis:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingCondition.diagnosis ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingCondition.diagnosis || 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Severity:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingCondition.severity ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingCondition.severity || 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Status:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingCondition.status ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingCondition.status || 'Not specified'}
+                        </Text>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+
+                <Grid.Col span={6}>
+                  <Card withBorder p="md" h="100%">
+                    <Stack gap="sm">
+                      <Text fw={600} size="sm" c="dimmed">
+                        TIMELINE
+                      </Text>
+                      <Divider />
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Onset Date:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingCondition.onset_date ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingCondition.onset_date
+                            ? formatDate(viewingCondition.onset_date)
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          End Date:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingCondition.end_date ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingCondition.end_date
+                            ? formatDate(viewingCondition.end_date)
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                      {viewingCondition.onset_date && (
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Duration:
+                          </Text>
+                          <Text size="sm" c="inherit">
+                            {getTimeSinceOnset(viewingCondition.onset_date)}
+                          </Text>
+                        </Group>
+                      )}
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+              </Grid>
+
+              {(viewingCondition.icd10_code ||
+                viewingCondition.snomed_code ||
+                viewingCondition.code_description) && (
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      MEDICAL CODES
+                    </Text>
+                    <Divider />
+                    <Grid>
+                      {viewingCondition.icd10_code && (
+                        <Grid.Col span={6}>
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              ICD-10:
+                            </Text>
+                            <Text size="sm">{viewingCondition.icd10_code}</Text>
+                          </Group>
+                        </Grid.Col>
+                      )}
+                      {viewingCondition.snomed_code && (
+                        <Grid.Col span={6}>
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              SNOMED:
+                            </Text>
+                            <Text size="sm">
+                              {viewingCondition.snomed_code}
+                            </Text>
+                          </Group>
+                        </Grid.Col>
+                      )}
+                    </Grid>
+                    {viewingCondition.code_description && (
+                      <Group>
+                        <Text size="sm" fw={500} w={80}>
+                          Description:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={
+                            viewingCondition.code_description
+                              ? 'inherit'
+                              : 'dimmed'
+                          }
+                        >
+                          {viewingCondition.code_description || 'Not specified'}
+                        </Text>
+                      </Group>
+                    )}
+                  </Stack>
+                </Card>
+              )}
+
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Text fw={600} size="sm" c="dimmed">
+                    CLINICAL NOTES
+                  </Text>
+                  <Divider />
+                  <Text
+                    size="sm"
+                    c={viewingCondition.notes ? 'inherit' : 'dimmed'}
+                  >
+                    {viewingCondition.notes || 'No notes available'}
+                  </Text>
+                </Stack>
+              </Card>
+
+              <Group justify="flex-end" mt="md">
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleEditCondition(viewingCondition);
+                  }}
+                >
+                  Edit Condition
+                </Button>
+                <Button
+                  variant="filled"
+                  onClick={() => setShowViewModal(false)}
+                >
+                  Close
+                </Button>
+              </Group>
+            </Stack>
+          )}
+        </Modal>
       </Container>
     </motion.div>
   );

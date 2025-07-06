@@ -15,6 +15,7 @@ import {
   Card,
   Box,
   Divider,
+  Modal,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -77,6 +78,8 @@ const Visits = () => {
 
   // Form state
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingVisit, setViewingVisit] = useState(null);
   const [editingVisit, setEditingVisit] = useState(null);
   const [formData, setFormData] = useState({
     reason: '',
@@ -110,6 +113,11 @@ const Visits = () => {
       priority: '',
     });
     setShowModal(true);
+  };
+
+  const handleViewVisit = visit => {
+    setViewingVisit(visit);
+    setShowViewModal(true);
   };
 
   const handleEditVisit = visit => {
@@ -198,7 +206,7 @@ const Visits = () => {
       p => p.id === parseInt(practitionerId)
     );
     if (practitioner) {
-      return `Dr. ${practitioner.name} - ${practitioner.specialty}`;
+      return `${practitioner.name} - ${practitioner.specialty}`;
     }
     return `Practitioner ID: ${practitionerId}`;
   };
@@ -522,6 +530,13 @@ const Visits = () => {
                             <Button
                               variant="light"
                               size="xs"
+                              onClick={() => handleViewVisit(visit)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              variant="light"
+                              size="xs"
                               onClick={() => handleEditVisit(visit)}
                             >
                               Edit
@@ -558,6 +573,7 @@ const Visits = () => {
                 ]}
                 patientData={currentPatient}
                 tableName="Visit History"
+                onView={handleViewVisit}
                 onEdit={handleEditVisit}
                 onDelete={handleDeleteVisit}
                 formatters={{
@@ -631,6 +647,273 @@ const Visits = () => {
         practitioners={practitioners}
         editingVisit={editingVisit}
       />
+
+      {/* Visit View Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title={
+          <Group>
+            <Text size="lg" fw={600}>
+              Visit Details
+            </Text>
+            {viewingVisit && (
+              <Group gap="xs">
+                {viewingVisit.visit_type && (
+                  <Badge
+                    color={getVisitTypeColor(viewingVisit.visit_type)}
+                    variant="light"
+                    size="sm"
+                  >
+                    {viewingVisit.visit_type}
+                  </Badge>
+                )}
+                {viewingVisit.priority && (
+                  <Badge
+                    color={getPriorityColor(viewingVisit.priority)}
+                    variant="filled"
+                    size="sm"
+                  >
+                    {viewingVisit.priority}
+                  </Badge>
+                )}
+              </Group>
+            )}
+          </Group>
+        }
+        size="lg"
+        centered
+      >
+        {viewingVisit && (
+          <Stack gap="md">
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Title order={3}>
+                      {viewingVisit.reason || 'General Visit'}
+                    </Title>
+                    <Text size="sm" c="dimmed">
+                      {formatDate(viewingVisit.date)}
+                    </Text>
+                  </Stack>
+                </Group>
+              </Stack>
+            </Card>
+
+            <Grid>
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      VISIT INFORMATION
+                    </Text>
+                    <Divider />
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Reason:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.reason ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.reason || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Visit Type:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.visit_type ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.visit_type || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Priority:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.priority ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.priority || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Location:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.location ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.location || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Duration:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.duration_minutes ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.duration_minutes
+                          ? `${viewingVisit.duration_minutes} minutes`
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      CLINICAL DETAILS
+                    </Text>
+                    <Divider />
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Practitioner:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.practitioner_id ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.practitioner_id
+                          ? practitioners.find(
+                              p =>
+                                p.id === parseInt(viewingVisit.practitioner_id)
+                            )?.name ||
+                            `Practitioner ID: ${viewingVisit.practitioner_id}`
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Practice:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingVisit.practitioner_id &&
+                          practitioners.find(
+                            p => p.id === parseInt(viewingVisit.practitioner_id)
+                          )?.specialty
+                            ? 'inherit'
+                            : 'dimmed'
+                        }
+                      >
+                        {viewingVisit.practitioner_id &&
+                        practitioners.find(
+                          p => p.id === parseInt(viewingVisit.practitioner_id)
+                        )?.specialty
+                          ? practitioners.find(
+                              p =>
+                                p.id === parseInt(viewingVisit.practitioner_id)
+                            )?.specialty
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Chief Complaint:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.chief_complaint ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.chief_complaint || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Diagnosis:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingVisit.diagnosis ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingVisit.diagnosis || 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
+
+            {viewingVisit.treatment_plan && (
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Text fw={600} size="sm" c="dimmed">
+                    TREATMENT PLAN
+                  </Text>
+                  <Divider />
+                  <Text
+                    size="sm"
+                    c={viewingVisit.treatment_plan ? 'inherit' : 'dimmed'}
+                  >
+                    {viewingVisit.treatment_plan ||
+                      'No treatment plan available'}
+                  </Text>
+                </Stack>
+              </Card>
+            )}
+
+            {viewingVisit.follow_up_instructions && (
+              <Card withBorder p="md">
+                <Stack gap="sm">
+                  <Text fw={600} size="sm" c="dimmed">
+                    FOLLOW-UP INSTRUCTIONS
+                  </Text>
+                  <Divider />
+                  <Text
+                    size="sm"
+                    c={
+                      viewingVisit.follow_up_instructions ? 'inherit' : 'dimmed'
+                    }
+                  >
+                    {viewingVisit.follow_up_instructions ||
+                      'No follow-up instructions available'}
+                  </Text>
+                </Stack>
+              </Card>
+            )}
+
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  ADDITIONAL NOTES
+                </Text>
+                <Divider />
+                <Text size="sm" c={viewingVisit.notes ? 'inherit' : 'dimmed'}>
+                  {viewingVisit.notes || 'No notes available'}
+                </Text>
+              </Stack>
+            </Card>
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="light"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleEditVisit(viewingVisit);
+                }}
+              >
+                Edit Visit
+              </Button>
+              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+                Close
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </motion.div>
   );
 };

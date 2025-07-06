@@ -462,6 +462,11 @@ class ApiService {
     return this.delete(`/conditions/${conditionId}`, { signal });
   }
 
+  getConditionsDropdown(activeOnly = true, signal) {
+    const url = `/conditions/dropdown?active_only=${activeOnly}`;
+    return this.get(url, { signal });
+  }
+
   // Encounter methods
   getEncounters(signal) {
     return this.get('/encounters/', { signal });
@@ -501,7 +506,11 @@ class ApiService {
   }
 
   updateEmergencyContact(emergencyContactId, emergencyContactData, signal) {
-    return this.put(`/emergency-contacts/${emergencyContactId}`, emergencyContactData, { signal });
+    return this.put(
+      `/emergency-contacts/${emergencyContactId}`,
+      emergencyContactData,
+      { signal }
+    );
   }
 
   deleteEmergencyContact(emergencyContactId, signal) {

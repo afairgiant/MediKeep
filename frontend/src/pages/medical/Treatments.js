@@ -6,6 +6,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -50,14 +51,42 @@ const Treatments = () => {
     entityName: 'treatment',
     apiMethodsConfig: {
       getAll: signal => apiService.getTreatments(signal),
-      getByPatient: (patientId, signal) =>
-        apiService.getPatientTreatments(patientId, signal),
+      getByPatient: (patientId, signal) => apiService.getTreatments(signal),
       create: (data, signal) => apiService.createTreatment(data, signal),
       update: (id, data, signal) =>
         apiService.updateTreatment(id, data, signal),
       delete: (id, signal) => apiService.deleteTreatment(id, signal),
     },
     requiresPatient: true,
+  });
+
+  // Conditions data for dropdown - following DRY principles with existing pattern
+  const {
+    items: conditionsOptions,
+    loading: conditionsLoading,
+    error: conditionsError,
+  } = useMedicalData({
+    entityName: 'conditionsDropdown',
+    apiMethodsConfig: {
+      getAll: signal => apiService.getConditionsDropdown(false, signal), // false to get all conditions, not just active
+      getByPatient: (patientId, signal) =>
+        apiService.getConditionsDropdown(false, signal), // Use same method for consistency
+    },
+    requiresPatient: false, // The endpoint handles patient context automatically
+  });
+
+  // Practitioners data for dropdown
+  const {
+    items: practitionersOptions,
+    loading: practitionersLoading,
+    error: practitionersError,
+  } = useMedicalData({
+    entityName: 'practitioners',
+    apiMethodsConfig: {
+      getAll: signal => apiService.getPractitioners(signal),
+      getByPatient: (patientId, signal) => apiService.getPractitioners(signal),
+    },
+    requiresPatient: false,
   });
 
   // Get standardized configuration
@@ -81,6 +110,8 @@ const Treatments = () => {
     dosage: '',
     frequency: '',
     notes: '',
+    condition_id: '',
+    practitioner_id: '',
   });
 
   const handleAddTreatment = () => {
@@ -95,6 +126,8 @@ const Treatments = () => {
       dosage: '',
       frequency: '',
       notes: '',
+      condition_id: '',
+      practitioner_id: '',
     });
     setShowModal(true);
   };
@@ -111,11 +144,14 @@ const Treatments = () => {
       dosage: treatment.dosage || '',
       frequency: treatment.frequency || '',
       notes: treatment.notes || '',
+      condition_id: treatment.condition_id || '',
+      practitioner_id: treatment.practitioner_id || '',
     });
     setShowModal(true);
   };
 
   const handleViewTreatment = treatment => {
+    // Use existing treatment data - no need to fetch again
     setViewingTreatment(treatment);
     setShowViewModal(true);
   };
@@ -171,6 +207,8 @@ const Treatments = () => {
       frequency: formData.frequency || null,
       notes: formData.notes || null,
       patient_id: currentPatient.id,
+      condition_id: formData.condition_id || null,
+      practitioner_id: formData.practitioner_id || null,
     };
 
     let success;
@@ -189,6 +227,40 @@ const Treatments = () => {
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Helper function to get condition name from ID
+  const getConditionName = conditionId => {
+    if (!conditionId || !conditionsOptions || conditionsOptions.length === 0) {
+      return null;
+    }
+    const condition = conditionsOptions.find(c => c.id === conditionId);
+    return condition ? condition.diagnosis || condition.name : null;
+  };
+
+  // Helper function to get practitioner information from ID
+  const getPractitionerInfo = practitionerId => {
+    if (
+      !practitionerId ||
+      !practitionersOptions ||
+      practitionersOptions.length === 0
+    ) {
+      return null;
+    }
+    const practitioner = practitionersOptions.find(
+      p => p.id === practitionerId
+    );
+    return practitioner;
+  };
+
+  // Handler to navigate to condition page and open view modal
+  const handleConditionClick = conditionId => {
+    if (conditionId) {
+      // Store the condition ID in sessionStorage so the conditions page can auto-open the modal
+      sessionStorage.setItem('openConditionId', conditionId.toString());
+      // Navigate to conditions page
+      navigate('/conditions');
+    }
   };
 
   // Get processed data from data management
@@ -225,6 +297,24 @@ const Treatments = () => {
               onClose={clearError}
             >
               {error}
+            </Alert>
+          )}
+          {conditionsError && (
+            <Alert
+              variant="light"
+              color="orange"
+              title="Conditions Loading Error"
+            >
+              {conditionsError}
+            </Alert>
+          )}
+          {practitionersError && (
+            <Alert
+              variant="light"
+              color="orange"
+              title="Practitioners Loading Error"
+            >
+              {practitionersError}
             </Alert>
           )}
           {successMessage && (
@@ -299,11 +389,28 @@ const Treatments = () => {
                           <Text fw={600} size="lg">
                             {treatment.treatment_name}
                           </Text>
-                          {treatment.treatment_type && (
-                            <Badge variant="light" color="blue" size="md">
-                              {treatment.treatment_type}
-                            </Badge>
-                          )}
+                          <Group gap="xs">
+                            {treatment.treatment_type && (
+                              <Badge variant="light" color="blue" size="md">
+                                {treatment.treatment_type}
+                              </Badge>
+                            )}
+                            {treatment.condition_id && (
+                              <Badge
+                                variant="light"
+                                color="teal"
+                                size="md"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() =>
+                                  handleConditionClick(treatment.condition_id)
+                                }
+                              >
+                                {treatment.condition?.diagnosis ||
+                                  getConditionName(treatment.condition_id) ||
+                                  `Condition #${treatment.condition_id}`}
+                              </Badge>
+                            )}
+                          </Group>
                         </Stack>
                         <StatusBadge status={treatment.status} />
                       </Group>
@@ -406,8 +513,10 @@ const Treatments = () => {
             <MedicalTable
               data={filteredTreatments}
               columns={[
-                { header: 'Treatment Name', accessor: 'treatment_name' },
+                { header: 'Treatment', accessor: 'treatment_name' },
                 { header: 'Type', accessor: 'treatment_type' },
+                { header: 'Practitioner', accessor: 'practitioner' },
+                { header: 'Related Condition', accessor: 'condition' },
                 { header: 'Start Date', accessor: 'start_date' },
                 { header: 'End Date', accessor: 'end_date' },
                 { header: 'Status', accessor: 'status' },
@@ -430,6 +539,48 @@ const Treatments = () => {
                   ) : (
                     '-'
                   ),
+                practitioner: (value, row) => {
+                  if (row.practitioner_id) {
+                    const practitionerInfo = getPractitionerInfo(
+                      row.practitioner_id
+                    );
+                    return (
+                      <Badge variant="light" color="green" size="sm">
+                        Dr.{' '}
+                        {row.practitioner?.name ||
+                          practitionerInfo?.name ||
+                          `#${row.practitioner_id}`}
+                      </Badge>
+                    );
+                  }
+                  return (
+                    <Text size="sm" c="dimmed">
+                      No practitioner
+                    </Text>
+                  );
+                },
+                condition: (value, row) => {
+                  if (row.condition_id) {
+                    return (
+                      <Badge
+                        variant="light"
+                        color="teal"
+                        size="sm"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleConditionClick(row.condition_id)}
+                      >
+                        {row.condition?.diagnosis ||
+                          getConditionName(row.condition_id) ||
+                          `Condition #${row.condition_id}`}
+                      </Badge>
+                    );
+                  }
+                  return (
+                    <Text size="sm" c="dimmed">
+                      No condition linked
+                    </Text>
+                  );
+                },
                 start_date: value => (value ? formatDate(value) : '-'),
                 end_date: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
@@ -460,6 +611,10 @@ const Treatments = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingTreatment={editingTreatment}
+        conditionsOptions={conditionsOptions}
+        conditionsLoading={conditionsLoading}
+        practitionersOptions={practitionersOptions}
+        practitionersLoading={practitionersLoading}
       />
 
       {/* Treatment View Modal */}
@@ -486,22 +641,40 @@ const Treatments = () => {
                 <Group justify="space-between" align="flex-start">
                   <Stack gap="xs" style={{ flex: 1 }}>
                     <Title order={3}>{viewingTreatment.treatment_name}</Title>
-                    {viewingTreatment.treatment_type && (
-                      <Badge variant="light" color="blue" size="lg">
-                        {viewingTreatment.treatment_type}
-                      </Badge>
-                    )}
+                    <Group gap="xs">
+                      {viewingTreatment.treatment_type && (
+                        <Badge variant="light" color="blue" size="lg">
+                          {viewingTreatment.treatment_type}
+                        </Badge>
+                      )}
+                      {viewingTreatment.condition_id && (
+                        <Badge
+                          variant="light"
+                          color="teal"
+                          size="lg"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() =>
+                            handleConditionClick(viewingTreatment.condition_id)
+                          }
+                        >
+                          Related to:{' '}
+                          {viewingTreatment.condition?.diagnosis ||
+                            getConditionName(viewingTreatment.condition_id) ||
+                            `Condition #${viewingTreatment.condition_id}`}
+                        </Badge>
+                      )}
+                    </Group>
                   </Stack>
                 </Group>
 
-                {viewingTreatment.description && (
-                  <Stack gap="xs">
-                    <Text fw={500} c="dimmed" size="sm">
-                      Description
-                    </Text>
-                    <Text>{viewingTreatment.description}</Text>
-                  </Stack>
-                )}
+                <Stack gap="xs">
+                  <Text fw={500} c="dimmed" size="sm">
+                    Description
+                  </Text>
+                  <Text c={viewingTreatment.description ? 'inherit' : 'dimmed'}>
+                    {viewingTreatment.description || 'Not specified'}
+                  </Text>
+                </Stack>
               </Stack>
             </Card>
 
@@ -513,32 +686,32 @@ const Treatments = () => {
                       SCHEDULE
                     </Text>
                     <Divider />
-                    {viewingTreatment.start_date && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Start:
-                        </Text>
-                        <Text size="sm">
-                          {formatDate(viewingTreatment.start_date)}
-                        </Text>
-                      </Group>
-                    )}
-                    {viewingTreatment.end_date && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          End:
-                        </Text>
-                        <Text size="sm">
-                          {formatDate(viewingTreatment.end_date)}
-                        </Text>
-                      </Group>
-                    )}
-                    {!viewingTreatment.start_date &&
-                      !viewingTreatment.end_date && (
-                        <Text size="sm" c="dimmed">
-                          No schedule information
-                        </Text>
-                      )}
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Start:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.start_date ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.start_date
+                          ? formatDate(viewingTreatment.start_date)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        End:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.end_date ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.end_date
+                          ? formatDate(viewingTreatment.end_date)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
                   </Stack>
                 </Card>
               </Grid.Col>
@@ -550,44 +723,169 @@ const Treatments = () => {
                       DOSAGE & FREQUENCY
                     </Text>
                     <Divider />
-                    {viewingTreatment.dosage && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Dosage:
-                        </Text>
-                        <Text size="sm">{viewingTreatment.dosage}</Text>
-                      </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Dosage:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.dosage ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.dosage || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Frequency:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingTreatment.frequency ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingTreatment.frequency || 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      PRACTITIONER
+                    </Text>
+                    <Divider />
+                    {viewingTreatment.practitioner_id ? (
+                      <Stack gap="xs">
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Doctor:
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {viewingTreatment.practitioner?.name ||
+                              getPractitionerInfo(
+                                viewingTreatment.practitioner_id
+                              )?.name ||
+                              `Practitioner #${viewingTreatment.practitioner_id}`}
+                          </Text>
+                        </Group>
+                        {(viewingTreatment.practitioner?.practice ||
+                          getPractitionerInfo(viewingTreatment.practitioner_id)
+                            ?.practice) && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Practice:
+                            </Text>
+                            <Text size="sm">
+                              {viewingTreatment.practitioner?.practice ||
+                                getPractitionerInfo(
+                                  viewingTreatment.practitioner_id
+                                )?.practice}
+                            </Text>
+                          </Group>
+                        )}
+                        {(viewingTreatment.practitioner?.specialty ||
+                          getPractitionerInfo(viewingTreatment.practitioner_id)
+                            ?.specialty) && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Specialty:
+                            </Text>
+                            <Badge variant="light" color="green" size="sm">
+                              {viewingTreatment.practitioner?.specialty ||
+                                getPractitionerInfo(
+                                  viewingTreatment.practitioner_id
+                                )?.specialty}
+                            </Badge>
+                          </Group>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        No practitioner assigned
+                      </Text>
                     )}
-                    {viewingTreatment.frequency && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Frequency:
-                        </Text>
-                        <Text size="sm">{viewingTreatment.frequency}</Text>
-                      </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      RELATED CONDITION
+                    </Text>
+                    <Divider />
+                    {viewingTreatment.condition_id ? (
+                      <Stack gap="xs">
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Diagnosis:
+                          </Text>
+                          <Text
+                            size="sm"
+                            fw={600}
+                            style={{
+                              cursor: 'pointer',
+                              color: 'var(--mantine-color-blue-6)',
+                            }}
+                            onClick={() =>
+                              handleConditionClick(
+                                viewingTreatment.condition_id
+                              )
+                            }
+                          >
+                            {viewingTreatment.condition?.diagnosis ||
+                              getConditionName(viewingTreatment.condition_id) ||
+                              `Condition #${viewingTreatment.condition_id}`}
+                          </Text>
+                        </Group>
+                        {viewingTreatment.condition?.severity && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Severity:
+                            </Text>
+                            <Badge variant="light" color="orange" size="sm">
+                              {viewingTreatment.condition.severity}
+                            </Badge>
+                          </Group>
+                        )}
+                        {viewingTreatment.condition?.status && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Status:
+                            </Text>
+                            <Badge variant="light" color="blue" size="sm">
+                              {viewingTreatment.condition.status}
+                            </Badge>
+                          </Group>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        No condition linked
+                      </Text>
                     )}
-                    {!viewingTreatment.dosage &&
-                      !viewingTreatment.frequency && (
-                        <Text size="sm" c="dimmed">
-                          No dosage information
-                        </Text>
-                      )}
                   </Stack>
                 </Card>
               </Grid.Col>
             </Grid>
 
-            {viewingTreatment.notes && (
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    NOTES
-                  </Text>
-                  <Divider />
-                  <Text size="sm">{viewingTreatment.notes}</Text>
-                </Stack>
-              </Card>
-            )}
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  NOTES
+                </Text>
+                <Divider />
+                <Text
+                  size="sm"
+                  c={viewingTreatment.notes ? 'inherit' : 'dimmed'}
+                >
+                  {viewingTreatment.notes || 'No notes available'}
+                </Text>
+              </Stack>
+            </Card>
 
             <Group justify="flex-end" mt="md">
               <Button
