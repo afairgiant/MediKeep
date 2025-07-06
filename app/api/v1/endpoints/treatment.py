@@ -43,6 +43,7 @@ def create_treatment(
     )
 
 
+# @router.get("/", response_model=List[TreatmentWithRelations])
 @router.get("/", response_model=List[TreatmentResponse])
 def read_treatments(
     *,
@@ -54,11 +55,13 @@ def read_treatments(
     status: Optional[str] = Query(None),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
-    """Retrieve treatments for the current user with optional filtering."""
+    """Retrieve treatments for the current user with optional filtering and related data."""
     # Filter treatments by the user's patient_id (ignore any provided patient_id for security)
     if status:
         treatments = treatment.get_by_status(
-            db, status=status, patient_id=current_user_patient_id
+            db,
+            status=status,
+            patient_id=current_user_patient_id,
         )
     elif condition_id:
         treatments = treatment.get_by_condition(
@@ -70,7 +73,10 @@ def read_treatments(
         )
     else:
         treatments = treatment.get_by_patient(
-            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db,
+            patient_id=current_user_patient_id,
+            skip=skip,
+            limit=limit,
         )
     return treatments
 

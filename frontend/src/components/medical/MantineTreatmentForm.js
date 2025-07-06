@@ -21,6 +21,10 @@ const MantineTreatmentForm = ({
   onInputChange,
   onSubmit,
   editingTreatment = null,
+  conditionsOptions = [], // Dropdown conditions data
+  conditionsLoading = false, // Loading state for conditions
+  practitionersOptions = [], // Dropdown practitioners data
+  practitionersLoading = false, // Loading state for practitioners
 }) => {
   // Treatment status options with workflow indicators
   const statusOptions = [
@@ -189,6 +193,56 @@ const MantineTreatmentForm = ({
                 searchable
                 required
                 withAsterisk
+              />
+            </Grid.Col>
+          </Grid>
+
+          {/* Related Condition and Practitioner Selection */}
+          <Grid>
+            <Grid.Col span={6}>
+              <Select
+                label="Related Condition"
+                placeholder={
+                  conditionsLoading
+                    ? 'Loading conditions...'
+                    : 'Select condition (optional)'
+                }
+                value={formData.condition_id ? String(formData.condition_id) : ''}
+                onChange={handleSelectChange('condition_id')}
+                data={conditionsOptions.map(condition => ({
+                  value: String(condition.id),
+                  label: `${condition.diagnosis}${condition.severity ? ` (${condition.severity})` : ''}${condition.status ? ` - ${condition.status}` : ''}`,
+                }))}
+                description="Link this treatment to a specific medical condition"
+                searchable
+                clearable
+                disabled={conditionsLoading}
+                nothingFound={
+                  conditionsLoading ? 'Loading...' : 'No conditions found'
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                label="Practitioner"
+                placeholder={
+                  practitionersLoading
+                    ? 'Loading practitioners...'
+                    : 'Select practitioner (optional)'
+                }
+                value={formData.practitioner_id ? String(formData.practitioner_id) : ''}
+                onChange={handleSelectChange('practitioner_id')}
+                data={practitionersOptions.map(practitioner => ({
+                  value: String(practitioner.id),
+                  label: `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}${practitioner.practice ? ` (${practitioner.practice})` : ''}`,
+                }))}
+                description="Assign a practitioner to this treatment"
+                searchable
+                clearable
+                disabled={practitionersLoading}
+                nothingFound={
+                  practitionersLoading ? 'Loading...' : 'No practitioners found'
+                }
               />
             </Grid.Col>
           </Grid>

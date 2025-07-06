@@ -161,3 +161,16 @@ class ConditionSummary(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ConditionDropdownOption(BaseModel):
+    """Minimal condition data for dropdown selections in forms."""
+
+    id: int
+    diagnosis: str
+    status: str
+    severity: Optional[str] = None
+    onset_date: Optional[date] = None
+
+    class Config:
+        from_attributes = True

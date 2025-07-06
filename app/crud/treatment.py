@@ -21,7 +21,8 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
         condition_id: int,
         patient_id: Optional[int] = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
+        load_relations: Optional[List[str]] = None
     ) -> List[Treatment]:
         """
         Retrieve all treatments for a specific condition.
@@ -47,6 +48,7 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
             limit=limit,
             order_by="start_date",
             order_desc=True,
+            load_relations=load_relations,
         )
 
     def get_active_treatments(self, db: Session, *, patient_id: int) -> List[Treatment]:

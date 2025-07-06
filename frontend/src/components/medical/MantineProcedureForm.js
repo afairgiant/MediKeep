@@ -138,6 +138,51 @@ const MantineProcedureForm = ({
             </Grid.Col>
           </Grid>
 
+          {/* Procedure Code and Setting */}
+          <Grid>
+            <Grid.Col span={6}>
+              <TextInput
+                label="Procedure Code"
+                placeholder="e.g., CPT-12345, ICD-10-PCS"
+                value={formData.procedure_code}
+                onChange={handleTextInputChange('procedure_code')}
+                description="Medical coding (CPT, ICD-10-PCS, etc.)"
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Select
+                label="Procedure Setting"
+                placeholder="Select setting"
+                value={formData.procedure_setting}
+                onChange={handleSelectChange('procedure_setting')}
+                data={[
+                  {
+                    value: 'outpatient',
+                    label: 'Outpatient - Same day discharge',
+                  },
+                  {
+                    value: 'inpatient',
+                    label: 'Inpatient - Hospital stay required',
+                  },
+                  {
+                    value: 'office',
+                    label: 'Office - Doctor office/clinic',
+                  },
+                  {
+                    value: 'emergency',
+                    label: 'Emergency - ER/urgent care',
+                  },
+                  {
+                    value: 'home',
+                    label: 'Home - At patient home',
+                  },
+                ]}
+                description="Where the procedure takes place"
+                clearable
+              />
+            </Grid.Col>
+          </Grid>
+
           {/* Description */}
           <Textarea
             label="Description"
@@ -149,9 +194,9 @@ const MantineProcedureForm = ({
             maxRows={5}
           />
 
-          {/* Date and Status */}
+          {/* Date, Status, and Duration */}
           <Grid>
-            <Grid.Col span={6}>
+            <Grid.Col span={4}>
               <DateInput
                 label="Procedure Date"
                 placeholder="Select procedure date"
@@ -168,7 +213,7 @@ const MantineProcedureForm = ({
                 clearable
               />
             </Grid.Col>
-            <Grid.Col span={6}>
+            <Grid.Col span={4}>
               <Select
                 label="Status"
                 value={formData.status}
@@ -196,6 +241,17 @@ const MantineProcedureForm = ({
                   },
                 ]}
                 description="Current status of the procedure"
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <TextInput
+                label="Duration (minutes)"
+                placeholder="e.g., 30, 120"
+                value={formData.procedure_duration}
+                onChange={handleTextInputChange('procedure_duration')}
+                description="How long the procedure took/will take"
+                type="number"
+                min="1"
               />
             </Grid.Col>
           </Grid>
@@ -229,16 +285,66 @@ const MantineProcedureForm = ({
             </Grid.Col>
           </Grid>
 
+          {/* Complications */}
+          <Textarea
+            label="Complications"
+            placeholder="Any complications that occurred during the procedure..."
+            value={formData.procedure_complications}
+            onChange={handleTextInputChange('procedure_complications')}
+            description="Document any complications, adverse events, or unexpected outcomes"
+            minRows={2}
+            maxRows={4}
+          />
+
           {/* Notes */}
           <Textarea
             label="Clinical Notes"
             placeholder="Additional notes about the procedure..."
             value={formData.notes}
             onChange={handleTextInputChange('notes')}
-            description="Any additional clinical notes, complications, or observations"
+            description="Any additional clinical notes or observations"
             minRows={3}
             maxRows={6}
           />
+
+          {/* Anesthesia Information */}
+          <Grid>
+            <Grid.Col span={6}>
+              <Select
+                label="Anesthesia Type"
+                placeholder="Select anesthesia type"
+                value={formData.anesthesia_type}
+                onChange={handleSelectChange('anesthesia_type')}
+                data={[
+                  {
+                    value: 'general',
+                    label: 'General - Complete unconsciousness',
+                  },
+                  { value: 'local', label: 'Local - Numbing specific area' },
+                  {
+                    value: 'regional',
+                    label: 'Regional - Numbing larger area',
+                  },
+                  {
+                    value: 'sedation',
+                    label: 'Sedation - Relaxed but conscious',
+                  },
+                  { value: 'none', label: 'None - No anesthesia required' },
+                ]}
+                description="Type of anesthesia used"
+                clearable
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <TextInput
+                label="Anesthesia Notes"
+                placeholder="Anesthesia-related notes..."
+                value={formData.anesthesia_notes}
+                onChange={handleTextInputChange('anesthesia_notes')}
+                description="Any notes about anesthesia administration"
+              />
+            </Grid.Col>
+          </Grid>
 
           {/* Form Actions */}
           <Group justify="flex-end" mt="lg" mb="sm">

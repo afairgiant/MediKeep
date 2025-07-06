@@ -1,73 +1,88 @@
 /**
  * StatusBadge component for medical entities
- * Provides consistent status display across all medical pages
+ * Provides consistent status display across all medical pages using Mantine Badge
  */
 
 import React from 'react';
-import './StatusBadge.css';
+import { Badge, Group } from '@mantine/core';
 
 const StatusBadge = ({
   status,
-  size = 'normal',
+  size = 'md',
   className = '',
   showIcon = false,
   color, // Legacy prop for backward compatibility
+  variant = 'light',
+  ...props
 }) => {
   if (!status) return null;
 
   const getStatusConfig = status => {
     const configs = {
       // Common statuses
-      active: { icon: '🟢', label: 'Active' },
-      inactive: { icon: '⚪', label: 'Inactive' },
-      completed: { icon: '✅', label: 'Completed' },
-      cancelled: { icon: '❌', label: 'Cancelled' },
-      pending: { icon: '⏳', label: 'Pending' },
+      active: { icon: '🟢', label: 'Active', color: 'green' },
+      inactive: { icon: '⚪', label: 'Inactive', color: 'gray' },
+      completed: { icon: '✅', label: 'Completed', color: 'blue' },
+      cancelled: { icon: '❌', label: 'Cancelled', color: 'red' },
+      pending: { icon: '⏳', label: 'Pending', color: 'yellow' },
 
       // Medical condition statuses
-      resolved: { icon: '✅', label: 'Resolved' },
-      chronic: { icon: '🔄', label: 'Chronic' },
+      resolved: { icon: '✅', label: 'Resolved', color: 'green' },
+      chronic: { icon: '🔄', label: 'Chronic', color: 'orange' },
 
       // Treatment statuses
-      planned: { icon: '📋', label: 'Planned' },
-      'on-hold': { icon: '⏸️', label: 'On Hold' },
+      planned: { icon: '📋', label: 'Planned', color: 'blue' },
+      'on-hold': { icon: '⏸️', label: 'On Hold', color: 'yellow' },
 
       // Medication statuses
-      stopped: { icon: '⏹️', label: 'Stopped' },
+      stopped: { icon: '⏹️', label: 'Stopped', color: 'red' },
 
       // Allergy severity
-      severe: { icon: '🔴', label: 'Severe' },
-      moderate: { icon: '🟡', label: 'Moderate' },
-      mild: { icon: '🟢', label: 'Mild' },
+      severe: { icon: '🔴', label: 'Severe', color: 'red' },
+      moderate: { icon: '🟡', label: 'Moderate', color: 'yellow' },
+      mild: { icon: '🟢', label: 'Mild', color: 'green' },
 
       // Lab result statuses
-      normal: { icon: '✅', label: 'Normal' },
-      abnormal: { icon: '⚠️', label: 'Abnormal' },
-      critical: { icon: '🔴', label: 'Critical' },
+      normal: { icon: '✅', label: 'Normal', color: 'green' },
+      abnormal: { icon: '⚠️', label: 'Abnormal', color: 'yellow' },
+      critical: { icon: '🔴', label: 'Critical', color: 'red' },
+
+      // General statuses
+      scheduled: { icon: '📅', label: 'Scheduled', color: 'blue' },
+      'in-progress': { icon: '🔄', label: 'In Progress', color: 'blue' },
+      ordered: { icon: '📋', label: 'Ordered', color: 'cyan' },
     };
 
     return (
       configs[status?.toLowerCase()] || {
         icon: '❓',
         label: status,
+        color: 'gray',
       }
     );
   };
 
   const statusConfig = getStatusConfig(status);
-  const sizeClass = size === 'small' ? 'status-badge-small' : 'status-badge';
-  const statusClass = `status-${status?.toLowerCase().replace(/\s+/g, '-')}`;
 
-  // Legacy color support for backward compatibility
-  const colorClass = color ? `status-${color}` : '';
+  // Use legacy color prop if provided, otherwise use status-based color
+  const badgeColor = color || statusConfig.color;
 
   return (
-    <span className={`${sizeClass} ${statusClass} ${colorClass} ${className}`}>
+    <Badge
+      variant={variant}
+      color={badgeColor}
+      size={size}
+      className={className}
+      {...props}
+    >
       {showIcon && statusConfig.icon && (
-        <span className="status-icon">{statusConfig.icon}</span>
+        <Group gap={4} wrap="nowrap">
+          <span>{statusConfig.icon}</span>
+          <span>{statusConfig.label}</span>
+        </Group>
       )}
-      {statusConfig.label}
-    </span>
+      {!showIcon && statusConfig.label}
+    </Badge>
   );
 };
 

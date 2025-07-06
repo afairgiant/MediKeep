@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  Group,
+  Text,
   Button,
   Select,
   Checkbox,
-  DateInput,
   Alert,
   Loader,
-} from '../ui';
+  Center,
+  Stack,
+  Grid,
+  Paper,
+  Title,
+  Box,
+  Container,
+  Badge,
+  Divider,
+} from '@mantine/core';
+import { DateInput } from '@mantine/dates';
+import {
+  IconDownload,
+  IconFileExport,
+  IconDatabase,
+} from '@tabler/icons-react';
 import { exportService } from '../../services/exportService';
-import './DataExport.css';
 
 const DataExport = () => {
   const [loading, setLoading] = useState(false);
@@ -25,8 +37,8 @@ const DataExport = () => {
   // Form state
   const [selectedFormat, setSelectedFormat] = useState('json');
   const [selectedScope, setSelectedScope] = useState('all');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [includeFiles, setIncludeFiles] = useState(false);
   const [bulkExport, setBulkExport] = useState(false);
   const [selectedScopes, setSelectedScopes] = useState([]);
@@ -34,6 +46,7 @@ const DataExport = () => {
   useEffect(() => {
     loadInitialData();
   }, []);
+
   const loadInitialData = async () => {
     try {
       setLoading(true);
@@ -113,165 +126,211 @@ const DataExport = () => {
 
   if (loading && !summary) {
     return (
-      <div className="export-loading">
-        <Loader />
-        <p>Loading export options...</p>
-      </div>
+      <Container size="lg" py="xl">
+        <Center>
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text>Loading export options...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <div className="data-export">
-      <Card>
-        <CardHeader>
-          <CardTitle>Export Medical Records</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <Container size="lg" py="xl">
+      <Card withBorder shadow="sm" radius="md" p="xl">
+        <Stack gap="lg">
+          {/* Header */}
+          <Group justify="space-between" align="center">
+            <Title order={2} fw={600}>
+              <Group gap="sm">
+                <IconFileExport size={24} />
+                Export Medical Records
+              </Group>
+            </Title>
+          </Group>
+
+          {/* Alerts */}
           {error && (
-            <Alert type="error" className="mb-4">
+            <Alert
+              color="red"
+              title="Error"
+              withCloseButton
+              onClose={() => setError(null)}
+            >
               {error}
             </Alert>
           )}
 
           {success && (
-            <Alert type="success" className="mb-4">
+            <Alert
+              color="green"
+              title="Success"
+              withCloseButton
+              onClose={() => setSuccess(null)}
+            >
               {success}
             </Alert>
           )}
 
           {/* Data Summary */}
           {summary && (
-            <div className="export-summary mb-6">
-              <h3 className="text-lg font-semibold mb-3">Available Data</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {Object.entries(summary.counts).map(([type, count]) => (
-                  <div key={type} className="summary-item">
-                    <div className="count">{count}</div>
-                    <div className="label">{type.replace('_', ' ')}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Paper withBorder p="md" radius="md">
+              <Stack gap="md">
+                <Group gap="sm">
+                  <IconDatabase size={20} />
+                  <Text fw={500} size="lg">
+                    Available Data
+                  </Text>
+                </Group>
+                <Grid>
+                  {Object.entries(summary.counts).map(([type, count]) => (
+                    <Grid.Col key={type} span={{ base: 6, sm: 4, md: 2.4 }}>
+                      <Paper withBorder p="sm" radius="sm" ta="center">
+                        <Text fw={600} size="xl" c="blue">
+                          {count}
+                        </Text>
+                        <Text size="sm" c="dimmed" tt="capitalize">
+                          {type.replace('_', ' ')}
+                        </Text>
+                      </Paper>
+                    </Grid.Col>
+                  ))}
+                </Grid>
+              </Stack>
+            </Paper>
           )}
 
           {/* Export Type Toggle */}
-          <div className="export-type-toggle mb-6">
-            <div className="flex gap-4">
-              <Button
-                variant={!bulkExport ? 'primary' : 'secondary'}
-                onClick={() => setBulkExport(false)}
-              >
-                Single Export
-              </Button>
-              <Button
-                variant={bulkExport ? 'primary' : 'secondary'}
-                onClick={() => setBulkExport(true)}
-              >
-                Bulk Export
-              </Button>
-            </div>
-          </div>
+          <Group justify="center" gap="md">
+            <Button
+              variant={!bulkExport ? 'filled' : 'outline'}
+              onClick={() => setBulkExport(false)}
+              size="md"
+            >
+              Single Export
+            </Button>
+            <Button
+              variant={bulkExport ? 'filled' : 'outline'}
+              onClick={() => setBulkExport(true)}
+              size="md"
+            >
+              Bulk Export
+            </Button>
+          </Group>
+
+          <Divider />
 
           {/* Export Options */}
-          <div className="export-options space-y-6">
+          <Stack gap="lg">
             {/* Format Selection */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <Box>
+              <Text fw={500} size="sm" mb="xs">
                 Export Format
-              </label>
+              </Text>
               <Select
                 value={selectedFormat}
                 onChange={setSelectedFormat}
-                options={formats.map(f => ({ value: f.value, label: f.label }))}
+                data={formats.map(f => ({ value: f.value, label: f.label }))}
+                placeholder="Select format"
               />
-              <p className="text-sm text-gray-600 mt-1">
+              <Text size="xs" c="dimmed" mt="xs">
                 {formats.find(f => f.value === selectedFormat)?.description}
-              </p>
-            </div>
+              </Text>
+            </Box>
 
             {/* Scope Selection */}
             {!bulkExport ? (
-              <div>
-                <label className="block text-sm font-medium mb-2">
+              <Box>
+                <Text fw={500} size="sm" mb="xs">
                   Data to Export
-                </label>
+                </Text>
                 <Select
                   value={selectedScope}
                   onChange={setSelectedScope}
-                  options={scopes.map(s => ({
+                  data={scopes.map(s => ({
                     value: s.value,
                     label: s.label,
                   }))}
+                  placeholder="Select data type"
                 />
-                <p className="text-sm text-gray-600 mt-1">
+                <Text size="xs" c="dimmed" mt="xs">
                   {scopes.find(s => s.value === selectedScope)?.description}
-                </p>
-              </div>
+                </Text>
+              </Box>
             ) : (
-              <div>
-                <label className="block text-sm font-medium mb-2">
+              <Box>
+                <Text fw={500} size="sm" mb="xs">
                   Select Data Types (Bulk Export)
-                </label>
-                <div className="grid grid-cols-2 gap-2">
+                </Text>
+                <Grid>
                   {scopes
                     .filter(s => s.value !== 'all')
                     .map(scope => (
-                      <Checkbox
-                        key={scope.value}
-                        checked={selectedScopes.includes(scope.value)}
-                        onChange={() => handleScopeToggle(scope.value)}
-                        label={scope.label}
-                      />
+                      <Grid.Col key={scope.value} span={{ base: 12, sm: 6 }}>
+                        <Checkbox
+                          checked={selectedScopes.includes(scope.value)}
+                          onChange={() => handleScopeToggle(scope.value)}
+                          label={scope.label}
+                        />
+                      </Grid.Col>
                     ))}
-                </div>
-              </div>
+                </Grid>
+              </Box>
             )}
 
             {/* Date Range */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
+            <Grid>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
+                <Text fw={500} size="sm" mb="xs">
                   Start Date (Optional)
-                </label>
+                </Text>
                 <DateInput
                   value={startDate}
                   onChange={setStartDate}
                   placeholder="Filter from date"
+                  clearable
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
+                <Text fw={500} size="sm" mb="xs">
                   End Date (Optional)
-                </label>
+                </Text>
                 <DateInput
                   value={endDate}
                   onChange={setEndDate}
                   placeholder="Filter to date"
+                  clearable
                 />
-              </div>
-            </div>
+              </Grid.Col>
+            </Grid>
 
             {/* PDF Options */}
             {selectedFormat === 'pdf' && !bulkExport && (
-              <div>
+              <Box>
                 <Checkbox
                   checked={includeFiles}
-                  onChange={setIncludeFiles}
+                  onChange={event =>
+                    setIncludeFiles(event.currentTarget.checked)
+                  }
                   label="Include attached files in PDF export"
                 />
-                <p className="text-sm text-gray-600 mt-1">
+                <Text size="xs" c="dimmed" mt="xs">
                   This may significantly increase export time and file size
-                </p>
-              </div>
+                </Text>
+              </Box>
             )}
 
             {/* Export Buttons */}
-            <div className="export-actions">
+            <Box>
               {!bulkExport ? (
                 <Button
                   onClick={handleSingleExport}
-                  disabled={loading}
-                  className="w-full"
+                  loading={loading}
+                  fullWidth
+                  size="md"
+                  leftSection={<IconDownload size={16} />}
                 >
                   {loading
                     ? 'Exporting...'
@@ -280,33 +339,48 @@ const DataExport = () => {
               ) : (
                 <Button
                   onClick={handleBulkExport}
-                  disabled={loading || selectedScopes.length === 0}
-                  className="w-full"
+                  loading={loading}
+                  disabled={selectedScopes.length === 0}
+                  fullWidth
+                  size="md"
+                  leftSection={<IconDownload size={16} />}
                 >
                   {loading
                     ? 'Exporting...'
                     : `Bulk Export ${selectedScopes.length} types as ${selectedFormat.toUpperCase()}`}
                 </Button>
               )}
-            </div>
-          </div>
+            </Box>
+          </Stack>
 
           {/* Export Information */}
-          <div className="export-info mt-6 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">
-              Export Information
-            </h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• JSON format provides complete machine-readable data</li>
-              <li>• CSV format is ideal for spreadsheet applications</li>
-              <li>• PDF format creates human-readable documents</li>
-              <li>• Date filters apply to record dates where available</li>
-              <li>• Bulk exports are packaged in ZIP files for convenience</li>
-            </ul>
-          </div>
-        </CardContent>
+          <Paper withBorder p="md" radius="md" bg="blue.0">
+            <Stack gap="sm">
+              <Text fw={500} c="blue.9">
+                Export Information
+              </Text>
+              <Stack gap="xs">
+                <Text size="sm" c="blue.8">
+                  • JSON format provides complete machine-readable data
+                </Text>
+                <Text size="sm" c="blue.8">
+                  • CSV format is ideal for spreadsheet applications
+                </Text>
+                <Text size="sm" c="blue.8">
+                  • PDF format creates human-readable documents
+                </Text>
+                <Text size="sm" c="blue.8">
+                  • Date filters apply to record dates where available
+                </Text>
+                <Text size="sm" c="blue.8">
+                  • Bulk exports are packaged in ZIP files for convenience
+                </Text>
+              </Stack>
+            </Stack>
+          </Paper>
+        </Stack>
       </Card>
-    </div>
+    </Container>
   );
 };
 

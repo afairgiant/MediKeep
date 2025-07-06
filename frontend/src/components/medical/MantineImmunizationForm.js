@@ -24,33 +24,33 @@ const MantineImmunizationForm = ({
 }) => {
   // Injection site options with descriptions
   const siteOptions = [
-    { value: 'left_arm', label: '💪 Left Arm' },
-    { value: 'right_arm', label: '💪 Right Arm' },
-    { value: 'left_deltoid', label: '🎯 Left Deltoid' },
-    { value: 'right_deltoid', label: '🎯 Right Deltoid' },
-    { value: 'left_thigh', label: '🦵 Left Thigh' },
-    { value: 'right_thigh', label: '🦵 Right Thigh' },
+    { value: 'left_arm', label: 'Left Arm' },
+    { value: 'right_arm', label: 'Right Arm' },
+    { value: 'left_deltoid', label: 'Left Deltoid' },
+    { value: 'right_deltoid', label: 'Right Deltoid' },
+    { value: 'left_thigh', label: 'Left Thigh' },
+    { value: 'right_thigh', label: 'Right Thigh' },
   ];
 
   // Route options with medical descriptions
   const routeOptions = [
-    { value: 'intramuscular', label: '💉 Intramuscular (IM)' },
-    { value: 'subcutaneous', label: '🔸 Subcutaneous (SC)' },
-    { value: 'intradermal', label: '📍 Intradermal (ID)' },
-    { value: 'oral', label: '💊 Oral' },
-    { value: 'nasal', label: '👃 Nasal' },
+    { value: 'intramuscular', label: 'Intramuscular (IM)' },
+    { value: 'subcutaneous', label: 'Subcutaneous (SC)' },
+    { value: 'intradermal', label: 'Intradermal (ID)' },
+    { value: 'oral', label: 'Oral' },
+    { value: 'nasal', label: 'Nasal' },
   ];
 
   // Common vaccine manufacturers
   const manufacturerOptions = [
-    { value: 'Pfizer-BioNTech', label: '🏭 Pfizer-BioNTech' },
-    { value: 'Moderna', label: '🏭 Moderna' },
-    { value: 'Johnson & Johnson', label: '🏭 Johnson & Johnson' },
-    { value: 'AstraZeneca', label: '🏭 AstraZeneca' },
-    { value: 'Merck', label: '🏭 Merck' },
-    { value: 'GlaxoSmithKline', label: '🏭 GlaxoSmithKline' },
-    { value: 'Sanofi', label: '🏭 Sanofi' },
-    { value: 'Other', label: '🏭 Other' },
+    { value: 'Pfizer-BioNTech', label: 'Pfizer-BioNTech' },
+    { value: 'Moderna', label: 'Moderna' },
+    { value: 'Johnson & Johnson', label: 'Johnson & Johnson' },
+    { value: 'AstraZeneca', label: 'AstraZeneca' },
+    { value: 'Merck', label: 'Merck' },
+    { value: 'GlaxoSmithKline', label: 'GlaxoSmithKline' },
+    { value: 'Sanofi', label: 'Sanofi' },
+    { value: 'Other', label: 'Other' },
   ];
 
   // Handle TextInput onChange (receives event object)

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
@@ -37,7 +36,7 @@ const PatientInfo = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const navigate = useNavigate();
+
   // Initialize form data when patient data becomes available or changes
   useEffect(() => {
     if (patientData) {

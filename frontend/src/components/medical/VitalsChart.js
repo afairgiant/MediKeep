@@ -1,6 +1,6 @@
 /**
  * VitalsChart Component - Enhanced Version
- * Modern chart visualization for patient vital signs trends using Recharts
+ * Modern chart visualization for patient vital signs trends using Recharts and Mantine
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -23,26 +23,50 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar,
-  Activity,
-  Heart,
-  Thermometer,
-  Weight,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  LineChart as LineChartIcon,
-  AreaChart as AreaIcon,
-  ScatterChart as ScatterIcon,
-  Settings,
-  Download,
-  Maximize2,
-  Filter,
-} from 'lucide-react';
+  Paper,
+  Group,
+  Button,
+  Select,
+  Checkbox,
+  Stack,
+  Text,
+  Title,
+  Alert,
+  Loader,
+  Center,
+  ActionIcon,
+  Badge,
+  Grid,
+  Box,
+  Collapse,
+  Divider,
+  Card,
+  UnstyledButton,
+  rem,
+} from '@mantine/core';
+import {
+  IconCalendar,
+  IconActivity,
+  IconHeart,
+  IconTemperature,
+  IconWeight,
+  IconBolt,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconChartBar,
+  IconChartLine,
+  IconChartArea,
+  IconChartDots,
+  IconSettings,
+  IconDownload,
+  IconMaximize,
+  IconFilter,
+  IconRefresh,
+  IconAlertTriangle,
+  IconChartHistogram,
+} from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { formatDate } from '../../utils/helpers';
-import './VitalsChart.css';
 
 // Chart type constants
 const CHART_TYPES = {
@@ -59,7 +83,7 @@ const VITAL_CONFIGS = {
     unit: 'mmHg',
     color: '#e53e3e',
     gradient: ['#e53e3e', '#fc8181'],
-    icon: Heart,
+    icon: IconHeart,
     normalRange: { min: 90, max: 120 },
     dangerThreshold: { min: 60, max: 180 },
   },
@@ -68,7 +92,7 @@ const VITAL_CONFIGS = {
     unit: 'mmHg',
     color: '#dd6b20',
     gradient: ['#dd6b20', '#f6ad55'],
-    icon: Heart,
+    icon: IconHeart,
     normalRange: { min: 60, max: 80 },
     dangerThreshold: { min: 40, max: 120 },
   },
@@ -77,7 +101,7 @@ const VITAL_CONFIGS = {
     unit: 'BPM',
     color: '#4299e1',
     gradient: ['#4299e1', '#63b3ed'],
-    icon: Activity,
+    icon: IconActivity,
     normalRange: { min: 60, max: 100 },
     dangerThreshold: { min: 40, max: 150 },
   },
@@ -86,7 +110,7 @@ const VITAL_CONFIGS = {
     unit: '°F',
     color: '#38a169',
     gradient: ['#38a169', '#68d391'],
-    icon: Thermometer,
+    icon: IconTemperature,
     normalRange: { min: 97.0, max: 99.5 },
     dangerThreshold: { min: 95.0, max: 104.0 },
   },
@@ -95,7 +119,7 @@ const VITAL_CONFIGS = {
     unit: 'lbs',
     color: '#805ad5',
     gradient: ['#805ad5', '#b794f6'],
-    icon: Weight,
+    icon: IconWeight,
     normalRange: null, // Varies by person
     dangerThreshold: null,
   },
@@ -104,7 +128,7 @@ const VITAL_CONFIGS = {
     unit: '%',
     color: '#00b5d8',
     gradient: ['#00b5d8', '#0bc5ea'],
-    icon: Zap,
+    icon: IconBolt,
     normalRange: { min: 95, max: 100 },
     dangerThreshold: { min: 85, max: 100 },
   },
@@ -113,7 +137,7 @@ const VITAL_CONFIGS = {
     unit: '/min',
     color: '#d69e2e',
     gradient: ['#d69e2e', '#ecc94b'],
-    icon: Activity,
+    icon: IconActivity,
     normalRange: { min: 12, max: 20 },
     dangerThreshold: { min: 8, max: 30 },
   },
@@ -204,106 +228,60 @@ const VitalsChart = ({
 
   // Memoized chart data processing
   const chartData = useMemo(() => {
-    if (!vitals.length) return [];
+    if (!vitals.length || !selectedMetrics.length) return [];
 
-    const processedData = vitals.map(vital => {
+    return vitals.map(vital => {
       const dataPoint = {
         date: vital.displayDate,
         timestamp: vital.timestamp,
-        ...vital,
+        fullDate: vital.recorded_date,
       };
 
-      // Calculate additional derived metrics
-      if (vital.weight && vital.height) {
-        dataPoint.bmi = vitalsService.calculateBMI(vital.weight, vital.height);
-      }
-
-      if (vital.systolic_bp && vital.diastolic_bp) {
-        dataPoint.pulse_pressure = vital.systolic_bp - vital.diastolic_bp;
-        dataPoint.mean_arterial_pressure =
-          vital.diastolic_bp + dataPoint.pulse_pressure / 3;
-      }
+      selectedMetrics.forEach(metric => {
+        if (vital[metric] != null) {
+          dataPoint[metric] = Number(vital[metric]);
+        }
+      });
 
       return dataPoint;
     });
+  }, [vitals, selectedMetrics]);
 
-    // Debug: log the data to see what we're working with
-    console.log('Chart data:', processedData);
-    console.log('First data point:', processedData[0]);
-
-    return processedData;
-  }, [vitals]);
-
-  // Chart rendering functions
+  // Chart rendering logic
   const renderChart = () => {
-    if (!chartData.length) {
-      console.log('No chart data available');
-      return null;
-    }
-
-    console.log('Rendering chart with data points:', chartData.length);
+    if (!chartData.length) return null;
 
     const commonProps = {
       data: chartData,
-      margin: { top: 20, right: 30, left: 20, bottom: 90 },
+      margin: { top: 20, right: 30, left: 20, bottom: 20 },
     };
 
     switch (chartType) {
       case CHART_TYPES.AREA:
         return (
           <AreaChart {...commonProps}>
-            <defs>
-              {selectedMetrics.map(metric => {
-                const config = VITAL_CONFIGS[metric];
-                return (
-                  <linearGradient
-                    key={metric}
-                    id={`gradient-${metric}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor={config.color}
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor={config.color}
-                      stopOpacity={0.1}
-                    />
-                  </linearGradient>
-                );
-              })}
-            </defs>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
             {renderNormalRanges()}
-            {selectedMetrics.map(metric => (
-              <Area
-                key={metric}
-                type="monotone"
-                dataKey={metric}
-                stroke={VITAL_CONFIGS[metric].color}
-                fill={`url(#gradient-${metric})`}
-                strokeWidth={2}
-                dot={{
-                  fill: VITAL_CONFIGS[metric].color,
-                  strokeWidth: 2,
-                  r: 4,
-                }}
-                activeDot={{
-                  r: 6,
-                  stroke: VITAL_CONFIGS[metric].color,
-                  strokeWidth: 2,
-                }}
-                animationDuration={animationEnabled ? 1000 : 0}
-              />
-            ))}
+            {selectedMetrics.map(metric => {
+              const config = VITAL_CONFIGS[metric];
+              return (
+                <Area
+                  key={metric}
+                  type="monotone"
+                  dataKey={metric}
+                  stroke={config.color}
+                  fill={config.color}
+                  fillOpacity={0.3}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                  isAnimationActive={animationEnabled}
+                />
+              );
+            })}
           </AreaChart>
         );
 
@@ -311,19 +289,22 @@ const VitalsChart = ({
         return (
           <BarChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
-            {selectedMetrics.map(metric => (
-              <Bar
-                key={metric}
-                dataKey={metric}
-                fill={VITAL_CONFIGS[metric].color}
-                opacity={0.8}
-                radius={[2, 2, 0, 0]}
-                animationDuration={animationEnabled ? 800 : 0}
-              />
-            ))}
+            {renderNormalRanges()}
+            {selectedMetrics.map(metric => {
+              const config = VITAL_CONFIGS[metric];
+              return (
+                <Bar
+                  key={metric}
+                  dataKey={metric}
+                  fill={config.color}
+                  opacity={0.8}
+                  isAnimationActive={animationEnabled}
+                />
+              );
+            })}
           </BarChart>
         );
 
@@ -331,17 +312,21 @@ const VitalsChart = ({
         return (
           <ScatterChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
-            {selectedMetrics.map(metric => (
-              <Scatter
-                key={metric}
-                dataKey={metric}
-                fill={VITAL_CONFIGS[metric].color}
-                opacity={0.7}
-              />
-            ))}
+            {renderNormalRanges()}
+            {selectedMetrics.map(metric => {
+              const config = VITAL_CONFIGS[metric];
+              return (
+                <Scatter
+                  key={metric}
+                  dataKey={metric}
+                  fill={config.color}
+                  isAnimationActive={animationEnabled}
+                />
+              );
+            })}
           </ScatterChart>
         );
 
@@ -349,87 +334,56 @@ const VitalsChart = ({
         return (
           <LineChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
             {renderNormalRanges()}
-            {selectedMetrics.map(metric => (
-              <Line
-                key={metric}
-                type="monotone"
-                dataKey={metric}
-                stroke={VITAL_CONFIGS[metric].color}
-                strokeWidth={2}
-                dot={{
-                  fill: VITAL_CONFIGS[metric].color,
-                  strokeWidth: 2,
-                  r: 4,
-                }}
-                activeDot={{
-                  r: 6,
-                  stroke: VITAL_CONFIGS[metric].color,
-                  strokeWidth: 2,
-                }}
-                animationDuration={animationEnabled ? 1000 : 0}
-                connectNulls={false}
-              />
-            ))}
+            {selectedMetrics.map(metric => {
+              const config = VITAL_CONFIGS[metric];
+              return (
+                <Line
+                  key={metric}
+                  type="monotone"
+                  dataKey={metric}
+                  stroke={config.color}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                  isAnimationActive={animationEnabled}
+                />
+              );
+            })}
           </LineChart>
         );
     }
   };
 
-  // Render axes with dynamic domains
+  // Render chart axes
   const renderAxes = () => {
-    // Calculate appropriate interval based on data points and date range
     const getInterval = () => {
-      const dataLength = chartData.length;
-
-      // For different date ranges, show different numbers of ticks
-      if (dateRange <= 7) {
-        return 0; // Show all dates for week view
-      } else if (dateRange <= 30) {
-        return Math.max(1, Math.floor(dataLength / 8)); // Show ~8 ticks for month
-      } else if (dateRange <= 90) {
-        return Math.max(1, Math.floor(dataLength / 6)); // Show ~6 ticks for 3 months
-      } else if (dateRange <= 365) {
-        return Math.max(1, Math.floor(dataLength / 5)); // Show ~5 ticks for year
-      } else {
-        return Math.max(1, Math.floor(dataLength / 4)); // Show ~4 ticks for longer periods
-      }
+      if (chartData.length <= 7) return 0;
+      if (chartData.length <= 30) return Math.ceil(chartData.length / 7);
+      return Math.ceil(chartData.length / 10);
     };
 
     return (
       <>
         <XAxis
           dataKey="date"
+          interval={getInterval()}
           tick={{ fontSize: 12 }}
-          tickLine
-          axisLine
-          height={80}
+          tickMargin={10}
         />
         <YAxis
-          tick={{
-            fontSize: 11,
-            fill: '#4a5568',
-            fontWeight: 500,
-          }}
-          tickLine={{
-            stroke: '#4a5568',
-            strokeWidth: 1,
-          }}
-          axisLine={{
-            stroke: '#4a5568',
-            strokeWidth: 1,
-          }}
+          tick={{ fontSize: 12 }}
+          tickMargin={10}
           domain={['dataMin - 5', 'dataMax + 5']}
-          width={60}
         />
       </>
     );
   };
 
-  // Render normal range reference lines
+  // Render normal ranges as reference lines
   const renderNormalRanges = () => {
     if (!showNormalRanges) return null;
 
@@ -438,122 +392,90 @@ const VitalsChart = ({
       if (!config.normalRange) return null;
 
       return (
-        <React.Fragment key={`range-${metric}`}>
+        <g key={`${metric}-range`}>
           <ReferenceLine
             y={config.normalRange.min}
             stroke={config.color}
             strokeDasharray="5 5"
-            opacity={0.5}
-            label={{
-              value: `${config.label} Min: ${config.normalRange.min}`,
-              position: 'topLeft',
-            }}
+            strokeOpacity={0.5}
           />
           <ReferenceLine
             y={config.normalRange.max}
             stroke={config.color}
             strokeDasharray="5 5"
-            opacity={0.5}
-            label={{
-              value: `${config.label} Max: ${config.normalRange.max}`,
-              position: 'topLeft',
-            }}
+            strokeOpacity={0.5}
           />
-        </React.Fragment>
+        </g>
       );
     });
   };
 
   // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (active && payload && payload.length) {
+      return (
+        <Paper withBorder p="sm" shadow="md">
+          <Text fw={500} size="sm" mb="xs">
+            {label}
+          </Text>
+          <Stack gap="xs">
+            {payload.map((entry, index) => {
+              const config = VITAL_CONFIGS[entry.dataKey];
+              if (!config) return null;
 
-    return (
-      <motion.div
-        className="vitals-tooltip"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-      >
-        <div className="tooltip-header">
-          <Calendar size={14} />
-          <span>{label}</span>
-        </div>
-        <div className="tooltip-content">
-          {payload.map((entry, index) => {
-            const config = VITAL_CONFIGS[entry.dataKey];
-            if (!config || entry.value == null) return null;
-
-            const Icon = config.icon;
-            const isAbnormal =
-              config.normalRange &&
-              (entry.value < config.normalRange.min ||
-                entry.value > config.normalRange.max);
-
-            return (
-              <div
-                key={index}
-                className={`tooltip-item ${isAbnormal ? 'abnormal' : ''}`}
-              >
-                <div className="tooltip-icon">
-                  <Icon size={14} color={config.color} />
-                </div>
-                <span className="tooltip-label">{config.label}:</span>
-                <span className="tooltip-value" style={{ color: config.color }}>
-                  {typeof entry.value === 'number'
-                    ? entry.value.toFixed(1)
-                    : entry.value}{' '}
-                  {config.unit}
-                </span>
-                {isAbnormal && <span className="abnormal-indicator">⚠️</span>}
-              </div>
-            );
-          })}
-        </div>
-      </motion.div>
-    );
+              return (
+                <Group key={index} gap="xs">
+                  <Box
+                    w={12}
+                    h={12}
+                    style={{
+                      backgroundColor: entry.color,
+                      borderRadius: '50%',
+                    }}
+                  />
+                  <Text size="sm">
+                    {config.label}: {entry.value} {config.unit}
+                  </Text>
+                </Group>
+              );
+            })}
+          </Stack>
+        </Paper>
+      );
+    }
+    return null;
   };
 
   // Custom legend component
   const CustomLegend = ({ payload }) => (
-    <div className="chart-legend">
+    <Group justify="center" gap="md" mt="md">
       {payload?.map((entry, index) => {
         const config = VITAL_CONFIGS[entry.dataKey];
         if (!config) return null;
 
         const Icon = config.icon;
         return (
-          <div
-            key={index}
-            className="legend-item"
-            style={{ color: entry.color }}
-          >
-            <Icon size={16} />
-            <span>
-              {config.label} ({config.unit})
-            </span>
-          </div>
+          <Group key={index} gap="xs">
+            <Icon size={16} color={entry.color} />
+            <Text size="sm" c={entry.color}>
+              {config.label}
+            </Text>
+          </Group>
         );
       })}
-    </div>
+    </Group>
   );
 
-  // Metric selection handlers
+  // Metric selection helpers
   const toggleMetric = metric => {
-    // Check if metric has data before allowing selection
     const hasData = vitals.some(v => v[metric] != null);
+    if (!hasData) return;
 
     setSelectedMetrics(prev => {
-      const isSelected = prev.includes(metric);
-      if (isSelected) {
-        // Always allow deselection
+      if (prev.includes(metric)) {
         return prev.filter(m => m !== metric);
       } else {
-        // Only allow selection if metric has data
-        if (hasData) {
-          return [...prev, metric];
-        }
-        return prev; // Don't add if no data
+        return [...prev, metric];
       }
     });
   };
@@ -570,313 +492,322 @@ const VitalsChart = ({
   };
 
   // Chart type selection
-  const ChartTypeSelector = () => (
-    <div className="chart-type-selector">
-      {[
-        { type: CHART_TYPES.LINE, icon: LineChartIcon, label: 'Line' },
-        { type: CHART_TYPES.AREA, icon: AreaIcon, label: 'Area' },
-        { type: CHART_TYPES.BAR, icon: BarChart3, label: 'Bar' },
-        { type: CHART_TYPES.SCATTER, icon: ScatterIcon, label: 'Scatter' },
-      ].map(({ type, icon: Icon, label }) => (
-        <button
-          key={type}
-          className={`chart-type-btn ${chartType === type ? 'active' : ''}`}
-          onClick={() => setChartType(type)}
-          title={`${label} Chart`}
-        >
-          <Icon size={16} />
-          <span>{label}</span>
-        </button>
-      ))}
-    </div>
-  );
+  const chartTypeOptions = [
+    { value: CHART_TYPES.LINE, label: 'Line', icon: IconChartLine },
+    { value: CHART_TYPES.AREA, label: 'Area', icon: IconChartArea },
+    { value: CHART_TYPES.BAR, label: 'Bar', icon: IconChartBar },
+    { value: CHART_TYPES.SCATTER, label: 'Scatter', icon: IconChartDots },
+  ];
 
   // Date range options
   const dateRangeOptions = [
-    { value: 7, label: 'Last 7 Days' },
-    { value: 30, label: 'Last 30 Days' },
-    { value: 90, label: 'Last 3 Months' },
-    { value: 180, label: 'Last 6 Months' },
-    { value: 365, label: 'Last Year' },
-    { value: 730, label: 'Last 2 Years' },
+    { value: '7', label: 'Last 7 Days' },
+    { value: '30', label: 'Last 30 Days' },
+    { value: '90', label: 'Last 3 Months' },
+    { value: '180', label: 'Last 6 Months' },
+    { value: '365', label: 'Last Year' },
+    { value: '730', label: 'Last 2 Years' },
   ];
 
   // Loading state
   if (isLoading) {
     return (
-      <motion.div
-        className="vitals-chart loading"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <div className="loading-content">
-          <div className="loading-spinner">
-            <Activity className="animate-pulse" size={24} />
-          </div>
-          <p>Loading vitals data...</p>
-        </div>
-      </motion.div>
+      <Paper withBorder p="xl" radius="md">
+        <Center>
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text>Loading vitals data...</Text>
+          </Stack>
+        </Center>
+      </Paper>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <motion.div
-        className="vitals-chart error"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <div className="error-content">
-          <div className="error-icon">⚠️</div>
-          <h3>Unable to load chart data</h3>
-          <p>{error}</p>
-          <button onClick={loadVitalsData} className="retry-btn">
-            <TrendingUp size={16} />
-            Try Again
-          </button>
-        </div>
-      </motion.div>
+      <Paper withBorder p="xl" radius="md">
+        <Alert
+          color="red"
+          title="Unable to load chart data"
+          icon={<IconAlertTriangle size={16} />}
+        >
+          <Stack gap="md">
+            <Text>{error}</Text>
+            <Button
+              leftSection={<IconRefresh size={16} />}
+              onClick={loadVitalsData}
+              variant="light"
+            >
+              Try Again
+            </Button>
+          </Stack>
+        </Alert>
+      </Paper>
     );
   }
 
   // Empty state
   if (!vitals.length) {
     return (
-      <motion.div
-        className="vitals-chart empty"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <div className="empty-content">
-          <div className="empty-icon">
-            <BarChart3 size={48} />
-          </div>
-          <h3>No vitals data available</h3>
-          <p>Chart will appear once vitals are recorded</p>
-        </div>
-      </motion.div>
+      <Paper withBorder p="xl" radius="md">
+        <Center>
+          <Stack align="center" gap="md">
+            <IconChartHistogram size={48} color="gray" />
+            <Title order={3} c="dimmed">
+              No vitals data available
+            </Title>
+            <Text c="dimmed" ta="center">
+              Chart will appear once vitals are recorded
+            </Text>
+          </Stack>
+        </Center>
+      </Paper>
     );
   }
 
   return (
-    <motion.div
-      className={`vitals-chart ${isFullscreen ? 'fullscreen' : ''}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {showControls && (
-        <div className="chart-controls">
-          {/* Collapsible Controls Header */}
-          <motion.div
-            className="controls-header"
-            onClick={() => setControlsExpanded(!controlsExpanded)}
-            whileHover={{ backgroundColor: 'rgba(66, 153, 225, 0.05)' }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="controls-header-content">
-              <div className="controls-title">
-                <Filter size={18} />
-                <span>Chart Filters & Options</span>
-              </div>
-              <div className="controls-summary">
-                <span className="active-filters">
-                  {selectedMetrics.length} metrics selected
-                </span>
-                <span className="time-range-summary">
-                  {dateRangeOptions.find(opt => opt.value === dateRange)?.label}
-                </span>
-                <motion.div
-                  className="expand-icon"
-                  animate={{ rotate: controlsExpanded ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <TrendingDown size={16} />
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Expandable Controls Content */}
-          <AnimatePresence>
-            {controlsExpanded && (
-              <motion.div
-                className="controls-content"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
+    <Paper withBorder radius="md" p="md">
+      <Stack gap="md">
+        {showControls && (
+          <Card withBorder>
+            <Stack gap="md">
+              {/* Controls Header */}
+              <UnstyledButton
+                onClick={() => setControlsExpanded(!controlsExpanded)}
+                w="100%"
               >
-                <div className="controls-grid">
-                  <div className="controls-section">
-                    <h4>Chart Type</h4>
-                    <ChartTypeSelector />
-                  </div>
+                <Group justify="space-between" align="center">
+                  <Group gap="sm">
+                    <IconFilter size={18} />
+                    <Text fw={500}>Chart Filters & Options</Text>
+                  </Group>
+                  <Group gap="md">
+                    <Badge variant="light" size="sm">
+                      {selectedMetrics.length} metrics selected
+                    </Badge>
+                    <Badge variant="light" size="sm">
+                      {
+                        dateRangeOptions.find(
+                          opt => opt.value === dateRange.toString()
+                        )?.label
+                      }
+                    </Badge>
+                    <ActionIcon variant="subtle" size="sm">
+                      <IconTrendingDown
+                        size={16}
+                        style={{
+                          transform: controlsExpanded
+                            ? 'rotate(180deg)'
+                            : 'rotate(0deg)',
+                          transition: 'transform 0.2s',
+                        }}
+                      />
+                    </ActionIcon>
+                  </Group>
+                </Group>
+              </UnstyledButton>
 
-                  <div className="controls-section">
-                    <h4>Time Range</h4>
-                    <select
-                      value={dateRange}
-                      onChange={e => setDateRange(Number(e.target.value))}
-                      className="time-range-select"
-                    >
-                      {dateRangeOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="controls-section metrics-section">
-                    <h4>
-                      Metrics
-                      <div className="metric-controls">
-                        <button
-                          onClick={selectAllMetrics}
-                          className="control-btn"
-                        >
-                          All
-                        </button>
-                        <button
-                          onClick={clearAllMetrics}
-                          className="control-btn"
-                        >
-                          None
-                        </button>
-                      </div>
-                    </h4>
-                    <div className="metrics-grid">
-                      {Object.entries(VITAL_CONFIGS).map(([key, config]) => {
-                        const Icon = config.icon;
-                        const isSelected = selectedMetrics.includes(key);
-                        const hasData = vitals.some(v => v[key] != null);
-
-                        return (
-                          <motion.label
-                            key={key}
-                            className={`metric-checkbox ${isSelected ? 'selected' : ''} ${!hasData ? 'no-data' : ''}`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleMetric(key)}
-                              disabled={!hasData}
-                            />
-                            <div
-                              className="metric-icon"
-                              style={{ color: config.color }}
+              {/* Collapsible Controls */}
+              <Collapse in={controlsExpanded}>
+                <Stack gap="md">
+                  <Divider />
+                  <Grid>
+                    {/* Chart Type */}
+                    <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+                      <Text fw={500} size="sm" mb="xs">
+                        Chart Type
+                      </Text>
+                      <Group gap="xs">
+                        {chartTypeOptions.map(
+                          ({ value, label, icon: Icon }) => (
+                            <Button
+                              key={value}
+                              variant={chartType === value ? 'filled' : 'light'}
+                              size="xs"
+                              leftSection={<Icon size={14} />}
+                              onClick={() => setChartType(value)}
                             >
-                              <Icon size={16} />
-                            </div>
-                            <span className="metric-label">
-                              {config.label}
-                              {!hasData && (
-                                <span className="no-data-indicator">
-                                  {' '}
-                                  (No data)
-                                </span>
-                              )}
-                            </span>
-                          </motion.label>
-                        );
-                      })}
-                    </div>
-                  </div>
+                              {label}
+                            </Button>
+                          )
+                        )}
+                      </Group>
+                    </Grid.Col>
 
-                  <div className="controls-section">
-                    <h4>Options</h4>
-                    <div className="chart-options">
-                      <label className="option-checkbox">
-                        <input
-                          type="checkbox"
+                    {/* Time Range */}
+                    <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+                      <Text fw={500} size="sm" mb="xs">
+                        Time Range
+                      </Text>
+                      <Select
+                        value={dateRange.toString()}
+                        onChange={value => setDateRange(Number(value))}
+                        data={dateRangeOptions}
+                        size="xs"
+                      />
+                    </Grid.Col>
+
+                    {/* Metrics */}
+                    <Grid.Col span={{ base: 12, lg: 4 }}>
+                      <Group justify="space-between" mb="xs">
+                        <Text fw={500} size="sm">
+                          Metrics
+                        </Text>
+                        <Group gap="xs">
+                          <Button
+                            size="xs"
+                            variant="light"
+                            onClick={selectAllMetrics}
+                          >
+                            All
+                          </Button>
+                          <Button
+                            size="xs"
+                            variant="light"
+                            onClick={clearAllMetrics}
+                          >
+                            None
+                          </Button>
+                        </Group>
+                      </Group>
+                      <Grid>
+                        {Object.entries(VITAL_CONFIGS).map(([key, config]) => {
+                          const Icon = config.icon;
+                          const isSelected = selectedMetrics.includes(key);
+                          const hasData = vitals.some(v => v[key] != null);
+
+                          return (
+                            <Grid.Col key={key} span={6}>
+                              <Checkbox
+                                checked={isSelected}
+                                onChange={() => toggleMetric(key)}
+                                disabled={!hasData}
+                                label={
+                                  <Group gap="xs">
+                                    <Icon size={14} color={config.color} />
+                                    <Text size="sm">
+                                      {config.label}
+                                      {!hasData && (
+                                        <Text size="xs" c="dimmed">
+                                          {' '}
+                                          (No data)
+                                        </Text>
+                                      )}
+                                    </Text>
+                                  </Group>
+                                }
+                              />
+                            </Grid.Col>
+                          );
+                        })}
+                      </Grid>
+                    </Grid.Col>
+
+                    {/* Options */}
+                    <Grid.Col span={{ base: 12, lg: 2 }}>
+                      <Text fw={500} size="sm" mb="xs">
+                        Options
+                      </Text>
+                      <Stack gap="xs">
+                        <Checkbox
                           checked={showNormalRanges}
-                          onChange={e => setShowNormalRanges(e.target.checked)}
+                          onChange={event =>
+                            setShowNormalRanges(event.currentTarget.checked)
+                          }
+                          label="Show Normal Ranges"
+                          size="sm"
                         />
-                        <span>Show Normal Ranges</span>
-                      </label>
-                      <label className="option-checkbox">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={animationEnabled}
-                          onChange={e => setAnimationEnabled(e.target.checked)}
+                          onChange={event =>
+                            setAnimationEnabled(event.currentTarget.checked)
+                          }
+                          label="Enable Animations"
+                          size="sm"
                         />
-                        <span>Enable Animations</span>
-                      </label>
-                    </div>
-                  </div>
+                      </Stack>
+                    </Grid.Col>
+                  </Grid>
 
-                  <div className="controls-section">
-                    <h4>Actions</h4>
-                    <div className="action-buttons">
-                      <button
-                        className="action-btn"
-                        onClick={() => setIsFullscreen(!isFullscreen)}
-                        title="Toggle Fullscreen"
-                      >
-                        <Maximize2 size={16} />
-                        <span>Fullscreen</span>
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={() => window.print()}
-                        title="Print Chart"
-                      >
-                        <Download size={16} />
-                        <span>Export</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                  {/* Action Buttons */}
+                  <Group justify="flex-end" gap="xs">
+                    <Button
+                      variant="light"
+                      size="xs"
+                      leftSection={<IconMaximize size={14} />}
+                      onClick={() => setIsFullscreen(!isFullscreen)}
+                    >
+                      Fullscreen
+                    </Button>
+                    <Button
+                      variant="light"
+                      size="xs"
+                      leftSection={<IconDownload size={14} />}
+                      onClick={() => window.print()}
+                    >
+                      Export
+                    </Button>
+                  </Group>
+                </Stack>
+              </Collapse>
+            </Stack>
+          </Card>
+        )}
+
+        {/* Chart Container */}
+        <Box
+          style={{
+            height: isFullscreen ? '80vh' : height,
+            width: '100%',
+          }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={chartType}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                {renderChart()}
+              </ResponsiveContainer>
+            </motion.div>
           </AnimatePresence>
-        </div>
-      )}
+        </Box>
 
-      <div
-        className="chart-container"
-        style={{ height: isFullscreen ? '80vh' : height }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={chartType}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            style={{ width: '100%', height: '100%' }}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              {renderChart()}
-            </ResponsiveContainer>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="chart-summary">
-        <div className="summary-stats">
-          <div className="stat-item">
-            <span className="stat-label">Data Points:</span>
-            <span className="stat-value">{vitals.length}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Date Range:</span>
-            <span className="stat-value">
-              {vitals.length > 0 &&
-                `${formatDate(vitals[0].recorded_date)} - ${formatDate(vitals[vitals.length - 1].recorded_date)}`}
-            </span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Selected Metrics:</span>
-            <span className="stat-value">{selectedMetrics.length}</span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+        {/* Chart Summary */}
+        <Card withBorder>
+          <Group justify="space-between" align="center">
+            <Group gap="xl">
+              <Box>
+                <Text size="xs" c="dimmed">
+                  Data Points
+                </Text>
+                <Text fw={500}>{vitals.length}</Text>
+              </Box>
+              <Box>
+                <Text size="xs" c="dimmed">
+                  Date Range
+                </Text>
+                <Text fw={500} size="sm">
+                  {vitals.length > 0 &&
+                    `${formatDate(vitals[0].recorded_date)} - ${formatDate(vitals[vitals.length - 1].recorded_date)}`}
+                </Text>
+              </Box>
+              <Box>
+                <Text size="xs" c="dimmed">
+                  Selected Metrics
+                </Text>
+                <Text fw={500}>{selectedMetrics.length}</Text>
+              </Box>
+            </Group>
+          </Group>
+        </Card>
+      </Stack>
+    </Paper>
   );
 };
 

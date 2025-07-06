@@ -1,5 +1,6 @@
 from datetime import date as DateType
 from typing import Optional
+
 from pydantic import BaseModel, Field, validator
 
 
@@ -7,7 +8,12 @@ class ProcedureBase(BaseModel):
     procedure_name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the procedure"
     )
-    code: Optional[str] = Field(
+    procedure_type: Optional[str] = Field(
+        None,
+        max_length=50,
+        description="Type of procedure (e.g., surgical, diagnostic)",
+    )
+    procedure_code: Optional[str] = Field(
         None, max_length=50, description="Code for the procedure (e.g., CPT code)"
     )
     description: Optional[str] = Field(
@@ -19,9 +25,28 @@ class ProcedureBase(BaseModel):
     facility: Optional[str] = Field(
         None, max_length=300, description="Facility where the procedure was performed"
     )
+    procedure_setting: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Setting of procedure (outpatient, inpatient, office)",
+    )
+    procedure_complications: Optional[str] = Field(
+        None,
+        max_length=500,
+        description="Any complications that occurred during the procedure",
+    )
+    procedure_duration: Optional[int] = Field(
+        None, gt=0, description="Duration of the procedure in minutes"
+    )
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the performing practitioner"
+    )
+    anesthesia_type: Optional[str] = Field(
+        None, max_length=100, description="Type of Anethesia used during the procedure"
+    )
+    anesthesia_notes: Optional[str] = Field(
+        None, max_length=1000, description="Additional notes about the anesthesia"
     )
 
     @validator("date")
@@ -50,13 +75,19 @@ class ProcedureCreate(ProcedureBase):
 
 class ProcedureUpdate(BaseModel):
     procedure_name: Optional[str] = Field(None, min_length=2, max_length=300)
-    code: Optional[str] = Field(None, max_length=50)
+    procedure_type: Optional[str] = Field(None, max_length=50)
+    procedure_code: Optional[str] = Field(None, max_length=50)
     description: Optional[str] = Field(None, max_length=1000)
     date: Optional[DateType] = None
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
     facility: Optional[str] = Field(None, max_length=300)
+    procedure_setting: Optional[str] = Field(None, max_length=100)
+    procedure_complications: Optional[str] = Field(None, max_length=500)
+    procedure_duration: Optional[int] = Field(None, gt=0)
     practitioner_id: Optional[int] = Field(None, gt=0)
+    anesthesia_type: Optional[str] = Field(None, max_length=100)
+    anesthesia_notes: Optional[str] = Field(None, max_length=1000)
 
     @validator("date")
     def validate_date(cls, v):

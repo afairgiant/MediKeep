@@ -10,7 +10,8 @@
 
 ### Procedure Page
 
-- Make procedure type more visible on card
+- ✅ Make procedure type more visible on card
+- ✅ Remove emojis from card
 
 ### Vitals Page
 

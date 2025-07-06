@@ -1,11 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Container,
+  Paper,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Alert,
+  Loader,
+  Center,
+  Badge,
+  Grid,
+  Card,
+  Divider,
+  Anchor,
+} from '@mantine/core';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+  IconUser,
+  IconStethoscope,
+  IconStar,
+  IconShieldCheck,
+} from '@tabler/icons-react';
 import { apiService } from '../../services/api';
-import { PageHeader, Button } from '../../components';
+import { PageHeader } from '../../components';
+import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import StatusBadge from '../../components/medical/StatusBadge';
 import MantinePractitionerForm from '../../components/medical/MantinePractitionerForm';
 import {
   usePractitioners,
@@ -14,11 +39,10 @@ import {
 } from '../../hooks';
 import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import '../../styles/shared/MedicalPageShared.css';
-import '../../styles/pages/MedicationTable.css';
+import { getEntityFormatters } from '../../utils/tableFormatters';
+import frontendLogger from '../../services/frontendLogger';
 
 const Practitioners = () => {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Using global state for practitioners data
@@ -55,6 +79,7 @@ const Practitioners = () => {
       setError('');
     }
   }, [practitionersError]);
+
   const handleAddPractitioner = () => {
     setEditingPractitioner(null);
     setFormData({
@@ -95,10 +120,17 @@ const Practitioners = () => {
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
         setError('Failed to delete practitioner. Please try again.');
-        console.error('Error deleting practitioner:', err);
+        frontendLogger.logError('Failed to delete practitioner', {
+          practitionerId,
+          error: err.message,
+          stack: err.stack,
+          page: 'Practitioners',
+          action: 'delete',
+        });
       }
     }
   };
+
   const handleSubmit = async e => {
     e.preventDefault();
     try {
@@ -111,7 +143,7 @@ const Practitioners = () => {
             ? formData.website.trim()
             : null,
         rating:
-          formData.rating && formData.rating.trim() !== ''
+          formData.rating && formData.rating !== 0
             ? parseFloat(formData.rating)
             : null,
       };
@@ -133,9 +165,17 @@ const Practitioners = () => {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError('Failed to save practitioner. Please try again.');
-      console.error('Error saving practitioner:', err);
+      frontendLogger.logError('Failed to save practitioner', {
+        practitionerId: editingPractitioner?.id,
+        action: editingPractitioner ? 'update' : 'create',
+        formData: { ...formData, phone_number: '[REDACTED]' }, // Don't log sensitive data
+        error: err.message,
+        stack: err.stack,
+        page: 'Practitioners',
+      });
     }
   };
+
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -149,67 +189,99 @@ const Practitioners = () => {
   const getSpecialtyColor = specialty => {
     // Color coding for different specialties
     const specialtyColors = {
-      Cardiology: 'error',
-      'Emergency Medicine': 'error',
-      'Family Medicine': 'success',
-      'Internal Medicine': 'success',
-      Pediatrics: 'info',
-      Surgery: 'warning',
-      'General Surgery': 'warning',
-      Psychiatry: 'info',
-      Neurology: 'warning',
+      Cardiology: 'red',
+      'Emergency Medicine': 'red',
+      'Family Medicine': 'green',
+      'Internal Medicine': 'green',
+      Pediatrics: 'blue',
+      Surgery: 'orange',
+      'General Surgery': 'orange',
+      Psychiatry: 'purple',
+      Neurology: 'yellow',
     };
 
-    return specialtyColors[specialty] || 'info';
+    return specialtyColors[specialty] || 'gray';
   };
 
   const getSpecialtyIcon = specialty => {
-    // Return empty string to remove icons
-    return '';
+    const specialtyIcons = {
+      Cardiology: IconStethoscope,
+      'Emergency Medicine': IconStethoscope,
+      'Family Medicine': IconUser,
+      'Internal Medicine': IconUser,
+      Pediatrics: IconUser,
+      Surgery: IconStethoscope,
+      'General Surgery': IconStethoscope,
+      Psychiatry: IconUser,
+      Neurology: IconStethoscope,
+    };
+
+    return specialtyIcons[specialty] || IconUser;
   };
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading practitioners...</p>
-        </div>
-      </div>
+      <Container size="xl" py="lg">
+        <Center py="xl">
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text size="lg">Loading practitioners...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
+
   return (
-    <div className="medical-page-container">
-      <PageHeader title="Practitioners" />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <PageHeader title="Healthcare Practitioners" icon="👨‍⚕️" />
 
-      <div className="medical-page-content">
+      <Container size="xl" py="lg">
         {error && (
-          <div className="error-message">
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={() => setError('')}
+            mb="md"
+          >
             {error}
-            <Button variant="ghost" size="small" onClick={() => setError('')}>
-              ×
-            </Button>
-          </div>
+          </Alert>
         )}
+
         {successMessage && (
-          <div className="success-message">{successMessage}</div>
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
         )}
 
-        <div className="medical-page-controls">
-          <div className="controls-left">
-            <Button variant="primary" onClick={handleAddPractitioner}>
-              + Add Practitioner
-            </Button>
-          </div>
+        <Group justify="space-between" mb="lg">
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddPractitioner}
+            size="md"
+          >
+            Add New Practitioner
+          </Button>
 
-          <div className="controls-center">
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </div>
-        </div>
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
 
         {/* Mantine Filter Controls */}
         <MantineFilters
@@ -229,144 +301,191 @@ const Practitioners = () => {
           config={config.filterControls}
         />
 
-        <div className="medical-items-list">
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {filteredPractitioners.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">MD</div>
-              <h3>No Healthcare Practitioners Found</h3>
-              <p>
-                {dataManagement.hasActiveFilters
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Start by adding your first healthcare practitioner.'}
-              </p>
-              {!dataManagement.hasActiveFilters && (
-                <Button variant="primary" onClick={handleAddPractitioner}>
-                  Add Your First Practitioner
-                </Button>
-              )}
-            </div>
-          ) : viewMode === 'cards' ? (
-            <div className="medical-items-grid">
-              {filteredPractitioners.map(practitioner => (
-                <div key={practitioner.id} className="medical-item-card">
-                  <div className="medical-item-header">
-                    <div className="item-info">
-                      <h3 className="item-title">
-                        <span className="practitioner-icon">
-                          {getSpecialtyIcon(practitioner.specialty)}
-                        </span>
-                        {practitioner.name}
-                      </h3>
-                      <p className="item-subtitle">{practitioner.practice}</p>
-                    </div>
-                    <div className="status-badges">
-                      <StatusBadge
-                        status={practitioner.specialty}
-                        color={getSpecialtyColor(practitioner.specialty)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="medical-item-details">
-                    <div className="detail-item">
-                      <span className="label">Specialty:</span>
-                      <span className="value">{practitioner.specialty}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">Practice:</span>
-                      <span className="value">{practitioner.practice}</span>
-                    </div>
-                    {practitioner.phone_number && (
-                      <div className="detail-item">
-                        <span className="label">Phone:</span>
-                        <span className="value">
-                          {formatPhoneNumber(practitioner.phone_number)}
-                        </span>
-                      </div>
-                    )}
-                    {practitioner.website && (
-                      <div className="detail-item">
-                        <span className="label">Website:</span>
-                        <span className="value">
-                          <a
-                            href={practitioner.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="website-link"
-                          >
-                            Visit Website
-                          </a>
-                        </span>
-                      </div>
-                    )}
-                    {practitioner.rating !== null &&
-                      practitioner.rating !== undefined && (
-                        <div className="detail-item">
-                          <span className="label">Rating:</span>
-                          <span className="value">
-                            <div className="rating-display">
-                              <span className="rating-number">
-                                {practitioner.rating}/5 stars
-                              </span>
-                            </div>
-                          </span>
-                        </div>
-                      )}
-                  </div>
-
-                  <div className="medical-item-actions">
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleEditPractitioner(practitioner)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="small"
-                      onClick={() => handleDeletePractitioner(practitioner.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <MedicalTable
-              data={filteredPractitioners}
-              columns={[
-                { header: 'Name', accessor: 'name' },
-                { header: 'Specialty', accessor: 'specialty' },
-                { header: 'Practice', accessor: 'practice' },
-                { header: 'Phone', accessor: 'phone_number' },
-                { header: 'Rating', accessor: 'rating' },
-              ]}
-              tableName="Healthcare Practitioners"
-              onEdit={handleEditPractitioner}
-              onDelete={handleDeletePractitioner}
-              formatters={{
-                name: value => <span className="primary-field">{value}</span>,
-                specialty: value => (
-                  <StatusBadge
-                    status={value}
-                    color={getSpecialtyColor(value)}
-                    size="small"
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconShieldCheck
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
                   />
-                ),
-                phone_number: value => (value ? formatPhoneNumber(value) : '-'),
-                rating: value =>
-                  value !== null && value !== undefined ? (
-                    <span className="rating-number">{value}/5 stars</span>
-                  ) : (
-                    '-'
-                  ),
-              }}
-            />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No healthcare practitioners found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Click "Add New Practitioner" to get started.'}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
+          ) : viewMode === 'cards' ? (
+            <Grid>
+              <AnimatePresence>
+                {filteredPractitioners.map((practitioner, index) => {
+                  const SpecialtyIcon = getSpecialtyIcon(
+                    practitioner.specialty
+                  );
+
+                  return (
+                    <Grid.Col
+                      key={practitioner.id}
+                      span={{ base: 12, md: 6, lg: 4 }}
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                      >
+                        <Card shadow="sm" padding="lg" radius="md" withBorder>
+                          <Card.Section withBorder inheritPadding py="xs">
+                            <Group justify="space-between">
+                              <Group gap="xs">
+                                <SpecialtyIcon
+                                  size={20}
+                                  color={`var(--mantine-color-${getSpecialtyColor(practitioner.specialty)}-6)`}
+                                />
+                                <Text fw={600} size="lg">
+                                  {practitioner.name}
+                                </Text>
+                              </Group>
+                              <Badge
+                                color={getSpecialtyColor(
+                                  practitioner.specialty
+                                )}
+                                variant="light"
+                              >
+                                {practitioner.specialty}
+                              </Badge>
+                            </Group>
+                          </Card.Section>
+
+                          <Stack gap="md" mt="md">
+                            <Group justify="space-between">
+                              <Text size="sm" c="dimmed">
+                                Practice:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {practitioner.practice}
+                              </Text>
+                            </Group>
+
+                            {practitioner.phone_number && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Phone:
+                                </Text>
+                                <Text size="sm" fw={500}>
+                                  {formatPhoneNumber(practitioner.phone_number)}
+                                </Text>
+                              </Group>
+                            )}
+
+                            {practitioner.website && (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Website:
+                                </Text>
+                                <Anchor
+                                  href={practitioner.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  size="sm"
+                                  c="blue"
+                                >
+                                  Visit Website
+                                </Anchor>
+                              </Group>
+                            )}
+
+                            {practitioner.rating !== null &&
+                              practitioner.rating !== undefined && (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Rating:
+                                  </Text>
+                                  <Group gap="xs">
+                                    <IconStar
+                                      size={16}
+                                      color="var(--mantine-color-yellow-6)"
+                                      fill="var(--mantine-color-yellow-6)"
+                                    />
+                                    <Text size="sm" fw={500}>
+                                      {practitioner.rating}/5
+                                    </Text>
+                                  </Group>
+                                </Group>
+                              )}
+                          </Stack>
+
+                          <Stack gap={0} mt="auto">
+                            <Divider />
+                            <Group justify="flex-end" gap="xs" pt="sm">
+                              <Button
+                                variant="light"
+                                size="xs"
+                                onClick={() =>
+                                  handleEditPractitioner(practitioner)
+                                }
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="light"
+                                color="red"
+                                size="xs"
+                                onClick={() =>
+                                  handleDeletePractitioner(practitioner.id)
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </Group>
+                          </Stack>
+                        </Card>
+                      </motion.div>
+                    </Grid.Col>
+                  );
+                })}
+              </AnimatePresence>
+            </Grid>
+          ) : (
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={filteredPractitioners}
+                columns={[
+                  { header: 'Name', accessor: 'name' },
+                  { header: 'Specialty', accessor: 'specialty' },
+                  { header: 'Practice', accessor: 'practice' },
+                  { header: 'Phone', accessor: 'phone_number' },
+                  { header: 'Rating', accessor: 'rating' },
+                ]}
+                tableName="Healthcare Practitioners"
+                onEdit={handleEditPractitioner}
+                onDelete={handleDeletePractitioner}
+                formatters={{
+                  name: getEntityFormatters('default').primaryName,
+                  specialty: getEntityFormatters('default').simple,
+                  practice: getEntityFormatters('default').simple,
+                  phone_number: value =>
+                    value ? formatPhoneNumber(value) : '-',
+                  rating: value =>
+                    value !== null && value !== undefined ? `${value}/5` : '-',
+                }}
+              />
+            </Paper>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </Container>
 
       <MantinePractitionerForm
         isOpen={showModal}
@@ -379,7 +498,7 @@ const Practitioners = () => {
         onSubmit={handleSubmit}
         editingPractitioner={editingPractitioner}
       />
-    </div>
+    </motion.div>
   );
 };
 
