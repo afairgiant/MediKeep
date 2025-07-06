@@ -1181,3 +1181,10 @@
   line-height: 1.5;
   font-size: 0.95rem;
 }
+
+/* View Toggle Container - Fix for procedures page layout */
+.view-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

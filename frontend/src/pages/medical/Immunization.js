@@ -28,6 +28,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -526,7 +527,7 @@ const Immunization = () => {
                   { header: 'Site', accessor: 'site' },
                   { header: 'Route', accessor: 'route' },
                   { header: 'Lot Number', accessor: 'lot_number' },
-                  { header: 'Expiration Date', accessor: 'expiration_date' },
+                  { header: 'Next Due Date', accessor: 'next_due_date' },
                   { header: 'Notes', accessor: 'notes' },
                 ]}
                 patientData={currentPatient}
@@ -534,37 +535,15 @@ const Immunization = () => {
                 onEdit={handleEditImmunization}
                 onDelete={handleDeleteImmunization}
                 formatters={{
-                  vaccine_name: value => (
-                    <Text fw={600} c="blue">
-                      {value}
-                    </Text>
-                  ),
-                  date_administered: value => formatDate(value),
-                  expiration_date: value => (value ? formatDate(value) : '-'),
-                  site: value =>
-                    value
-                      ? value
-                          .replace(/_/g, ' ')
-                          .replace(/\b\w/g, l => l.toUpperCase())
-                      : '-',
-                  dose_number: value =>
-                    value ? (
-                      <Badge color={getDoseColor(value)} variant="filled">
-                        Dose {value}
-                      </Badge>
-                    ) : (
-                      '-'
-                    ),
-                  notes: value =>
-                    value ? (
-                      <Text size="sm" title={value}>
-                        {value.length > 50
-                          ? `${value.substring(0, 50)}...`
-                          : value}
-                      </Text>
-                    ) : (
-                      '-'
-                    ),
+                  vaccine_name: (value, item) => getEntityFormatters('immunizations').immunization_name(value, item),
+                  date_administered: getEntityFormatters('immunizations').administration_date,
+                  next_due_date: getEntityFormatters('immunizations').next_due_date,
+                  site: getEntityFormatters('immunizations').simple,
+                  dose_number: getEntityFormatters('immunizations').simple,
+                  manufacturer: getEntityFormatters('immunizations').simple,
+                  route: getEntityFormatters('immunizations').simple,
+                  lot_number: getEntityFormatters('immunizations').lot_number,
+                  notes: getEntityFormatters('immunizations').notes,
                 }}
               />
             </Paper>

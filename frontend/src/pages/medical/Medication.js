@@ -5,6 +5,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -37,6 +38,9 @@ const Medication = () => {
 
   const practitioners = practitionersObject?.practitioners || [];
   const pharmacies = pharmaciesObject?.pharmacies || [];
+
+  // Get standardized formatters for medications
+  const formatters = getEntityFormatters('medications', practitioners);
 
   // Modern data management with useMedicalData
   const {
@@ -436,48 +440,7 @@ const Medication = () => {
               onView={handleViewMedication}
               onEdit={handleEditMedication}
               onDelete={handleDeleteMedication}
-              formatters={{
-                medication_name: value => (
-                  <Text fw={600} style={{ minWidth: 150 }}>
-                    {value}
-                  </Text>
-                ),
-                dosage: value =>
-                  value ? (
-                    <Badge variant="filled" color="blue" size="sm">
-                      {value}
-                    </Badge>
-                  ) : (
-                    '-'
-                  ),
-                frequency: value => value || '-',
-                route: value =>
-                  value ? (
-                    <Badge variant="light" color="cyan" size="sm">
-                      {value}
-                    </Badge>
-                  ) : (
-                    '-'
-                  ),
-                indication: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
-                effective_period_start: value =>
-                  value ? formatDate(value) : '-',
-                effective_period_end: value =>
-                  value ? formatDate(value) : '-',
-                status: value => <StatusBadge status={value} size="small" />,
-                practitioner_name: (value, item) =>
-                  item.practitioner?.name || '-',
-                pharmacy_name: (value, item) => item.pharmacy?.name || '-',
-              }}
+              formatters={formatters}
             />
           )}
         </Stack>

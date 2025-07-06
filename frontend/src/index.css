@@ -4,6 +4,17 @@
 /* Import Component Styles */
 @import './styles/components/timezone.css';
 
+/* Import Medical Page Styles */
+@import './styles/shared/MedicalPageShared.css';
+@import './styles/pages/MedicationTable.css';
+@import './styles/pages/Medication.css';
+@import './styles/pages/Allergies.css';
+@import './styles/pages/Conditions.css';
+@import './styles/pages/Immunization.css';
+@import './styles/pages/Visits.css';
+@import './styles/pages/Practitioners.css';
+@import './styles/pages/EmergencyContacts.css';
+
 /* Import Print Styles */
 @import './styles/print.css';
 

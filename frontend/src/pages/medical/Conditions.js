@@ -34,6 +34,7 @@ import { useMedicalData, useDataManagement } from '../../hooks';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -92,7 +93,6 @@ const Conditions = () => {
     end_date: '', // Form field name
   });
 
-
   const handleAddCondition = () => {
     setEditingCondition(null);
     setFormData({
@@ -118,7 +118,9 @@ const Conditions = () => {
   useEffect(() => {
     const conditionIdToOpen = sessionStorage.getItem('openConditionId');
     if (conditionIdToOpen && conditions.length > 0) {
-      const conditionToView = conditions.find(c => c.id === parseInt(conditionIdToOpen));
+      const conditionToView = conditions.find(
+        c => c.id === parseInt(conditionIdToOpen)
+      );
       if (conditionToView) {
         handleViewCondition(conditionToView);
         sessionStorage.removeItem('openConditionId'); // Clean up
@@ -604,37 +606,13 @@ const Conditions = () => {
                 onEdit={handleEditCondition}
                 onDelete={handleDeleteCondition}
                 formatters={{
-                  diagnosis: value => (
-                    <Text fw={600} c="blue">
-                      {value}
-                    </Text>
-                  ),
-                  severity: value =>
-                    value ? (
-                      <Badge color={getSeverityColor(value)} variant="filled">
-                        {value}
-                      </Badge>
-                    ) : (
-                      '-'
-                    ),
-                  onset_date: value => (value ? formatDate(value) : '-'),
-                  end_date: value => (value ? formatDate(value) : '-'),
-                  status: value => (
-                    <Badge color={getStatusColor(value)} variant="light">
-                      {value}
-                    </Badge>
-                  ),
-                  icd10_code: value => value || '-',
-                  notes: value =>
-                    value ? (
-                      <Text size="sm" title={value}>
-                        {value.length > 50
-                          ? `${value.substring(0, 50)}...`
-                          : value}
-                      </Text>
-                    ) : (
-                      '-'
-                    ),
+                  diagnosis: getEntityFormatters('conditions').condition_name,
+                  severity: getEntityFormatters('conditions').severity,
+                  onset_date: getEntityFormatters('conditions').onset_date,
+                  end_date: getEntityFormatters('conditions').end_date,
+                  status: getEntityFormatters('conditions').status,
+                  icd10_code: getEntityFormatters('conditions').simple,
+                  notes: getEntityFormatters('conditions').notes,
                 }}
               />
             </Paper>

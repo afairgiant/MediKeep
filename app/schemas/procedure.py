@@ -42,6 +42,12 @@ class ProcedureBase(BaseModel):
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the performing practitioner"
     )
+    anesthesia_type: Optional[str] = Field(
+        None, max_length=100, description="Type of Anethesia used during the procedure"
+    )
+    anesthesia_notes: Optional[str] = Field(
+        None, max_length=1000, description="Additional notes about the anesthesia"
+    )
 
     @validator("date")
     def validate_date(cls, v):
@@ -80,6 +86,8 @@ class ProcedureUpdate(BaseModel):
     procedure_complications: Optional[str] = Field(None, max_length=500)
     procedure_duration: Optional[int] = Field(None, gt=0)
     practitioner_id: Optional[int] = Field(None, gt=0)
+    anesthesia_type: Optional[str] = Field(None, max_length=100)
+    anesthesia_notes: Optional[str] = Field(None, max_length=1000)
 
     @validator("date")
     def validate_date(cls, v):

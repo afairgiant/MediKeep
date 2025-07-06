@@ -307,6 +307,45 @@ const MantineProcedureForm = ({
             maxRows={6}
           />
 
+          {/* Anesthesia Information */}
+          <Grid>
+            <Grid.Col span={6}>
+              <Select
+                label="Anesthesia Type"
+                placeholder="Select anesthesia type"
+                value={formData.anesthesia_type}
+                onChange={handleSelectChange('anesthesia_type')}
+                data={[
+                  {
+                    value: 'general',
+                    label: 'General - Complete unconsciousness',
+                  },
+                  { value: 'local', label: 'Local - Numbing specific area' },
+                  {
+                    value: 'regional',
+                    label: 'Regional - Numbing larger area',
+                  },
+                  {
+                    value: 'sedation',
+                    label: 'Sedation - Relaxed but conscious',
+                  },
+                  { value: 'none', label: 'None - No anesthesia required' },
+                ]}
+                description="Type of anesthesia used"
+                clearable
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <TextInput
+                label="Anesthesia Notes"
+                placeholder="Anesthesia-related notes..."
+                value={formData.anesthesia_notes}
+                onChange={handleTextInputChange('anesthesia_notes')}
+                description="Any notes about anesthesia administration"
+              />
+            </Grid.Col>
+          </Grid>
+
           {/* Form Actions */}
           <Group justify="flex-end" mt="lg" mb="sm">
             <Button

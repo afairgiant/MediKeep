@@ -388,6 +388,13 @@ class Procedure(Base):
         Integer, nullable=True
     )  # Duration of the procedure in minutes
 
+    anesthesia_type = Column(
+        String, nullable=True
+    )  # Type of anesthesia used (e.g., local, regional, general)
+    anesthesia_notes = Column(
+        String, nullable=True
+    )  # Additional notes about the anesthesia
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
