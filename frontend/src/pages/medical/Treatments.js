@@ -6,6 +6,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -133,6 +134,7 @@ const Treatments = () => {
   };
 
   const handleViewTreatment = treatment => {
+    // Use existing treatment data - no need to fetch again
     setViewingTreatment(treatment);
     setShowViewModal(true);
   };
@@ -207,6 +209,15 @@ const Treatments = () => {
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Helper function to get condition name from ID
+  const getConditionName = conditionId => {
+    if (!conditionId || !conditionsOptions || conditionsOptions.length === 0) {
+      return null;
+    }
+    const condition = conditionsOptions.find(c => c.id === conditionId);
+    return condition ? condition.diagnosis || condition.name : null;
   };
 
   // Get processed data from data management
@@ -332,12 +343,11 @@ const Treatments = () => {
                                 {treatment.treatment_type}
                               </Badge>
                             )}
-                            {treatment.condition &&
-                              treatment.condition.diagnosis && (
-                                <Badge variant="light" color="teal" size="md">
-                                  {treatment.condition.diagnosis}
-                                </Badge>
-                              )}
+                            {treatment.condition_id && (
+                              <Badge variant="light" color="teal" size="md">
+                                {treatment.condition?.diagnosis || getConditionName(treatment.condition_id) || `Condition #${treatment.condition_id}`}
+                              </Badge>
+                            )}
                           </Group>
                         </Stack>
                         <StatusBadge status={treatment.status} />
@@ -403,6 +413,7 @@ const Treatments = () => {
                           </Stack>
                         </Stack>
                       )}
+
                     </Stack>
 
                     {/* Buttons always at bottom */}
@@ -466,11 +477,11 @@ const Treatments = () => {
                   ) : (
                     '-'
                   ),
-                condition: value => {
-                  if (value && value.diagnosis) {
+                condition: (value, row) => {
+                  if (row.condition_id) {
                     return (
                       <Badge variant="light" color="teal" size="sm">
-                        {value.diagnosis}
+                        {row.condition?.diagnosis || getConditionName(row.condition_id) || `Condition #${row.condition_id}`}
                       </Badge>
                     );
                   }
@@ -544,12 +555,11 @@ const Treatments = () => {
                           {viewingTreatment.treatment_type}
                         </Badge>
                       )}
-                      {viewingTreatment.condition &&
-                        viewingTreatment.condition.diagnosis && (
-                          <Badge variant="light" color="teal" size="lg">
-                            Related to: {viewingTreatment.condition.diagnosis}
-                          </Badge>
-                        )}
+                      {viewingTreatment.condition_id && (
+                        <Badge variant="light" color="teal" size="lg">
+                          Related to: {viewingTreatment.condition?.diagnosis || getConditionName(viewingTreatment.condition_id) || `Condition #${viewingTreatment.condition_id}`}
+                        </Badge>
+                      )}
                     </Group>
                   </Stack>
                 </Group>
@@ -632,6 +642,53 @@ const Treatments = () => {
                         {viewingTreatment.frequency || 'Not specified'}
                       </Text>
                     </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={12}>
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      RELATED CONDITION
+                    </Text>
+                    <Divider />
+                    {viewingTreatment.condition_id ? (
+                      <Stack gap="xs">
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Diagnosis:
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {viewingTreatment.condition?.diagnosis || getConditionName(viewingTreatment.condition_id) || `Condition #${viewingTreatment.condition_id}`}
+                          </Text>
+                        </Group>
+                        {viewingTreatment.condition?.severity && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Severity:
+                            </Text>
+                            <Badge variant="light" color="orange" size="sm">
+                              {viewingTreatment.condition.severity}
+                            </Badge>
+                          </Group>
+                        )}
+                        {viewingTreatment.condition?.status && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Status:
+                            </Text>
+                            <Badge variant="light" color="blue" size="sm">
+                              {viewingTreatment.condition.status}
+                            </Badge>
+                          </Group>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        No condition linked
+                      </Text>
+                    )}
                   </Stack>
                 </Card>
               </Grid.Col>
