@@ -21,6 +21,8 @@ const MantineTreatmentForm = ({
   onInputChange,
   onSubmit,
   editingTreatment = null,
+  conditionsOptions = [], // Dropdown conditions data
+  conditionsLoading = false, // Loading state for conditions
 }) => {
   // Treatment status options with workflow indicators
   const statusOptions = [
@@ -192,6 +194,29 @@ const MantineTreatmentForm = ({
               />
             </Grid.Col>
           </Grid>
+
+          {/* Related Condition Selection */}
+          <Select
+            label="Related Condition"
+            placeholder={
+              conditionsLoading
+                ? 'Loading conditions...'
+                : 'Select condition (optional)'
+            }
+            value={formData.condition_id ? String(formData.condition_id) : ''}
+            onChange={handleSelectChange('condition_id')}
+            data={conditionsOptions.map(condition => ({
+              value: String(condition.id),
+              label: `${condition.diagnosis}${condition.severity ? ` (${condition.severity})` : ''}${condition.status ? ` - ${condition.status}` : ''}`,
+            }))}
+            description="Link this treatment to a specific medical condition"
+            searchable
+            clearable
+            disabled={conditionsLoading}
+            nothingFound={
+              conditionsLoading ? 'Loading...' : 'No conditions found'
+            }
+          />
 
           {/* Status with Visual Indicator */}
           <div>

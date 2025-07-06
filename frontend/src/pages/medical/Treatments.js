@@ -50,14 +50,28 @@ const Treatments = () => {
     entityName: 'treatment',
     apiMethodsConfig: {
       getAll: signal => apiService.getTreatments(signal),
-      getByPatient: (patientId, signal) =>
-        apiService.getPatientTreatments(patientId, signal),
+      getByPatient: (patientId, signal) => apiService.getTreatments(signal),
       create: (data, signal) => apiService.createTreatment(data, signal),
       update: (id, data, signal) =>
         apiService.updateTreatment(id, data, signal),
       delete: (id, signal) => apiService.deleteTreatment(id, signal),
     },
     requiresPatient: true,
+  });
+
+  // Conditions data for dropdown - following DRY principles with existing pattern
+  const {
+    items: conditionsOptions,
+    loading: conditionsLoading,
+    error: conditionsError,
+  } = useMedicalData({
+    entityName: 'conditionsDropdown',
+    apiMethodsConfig: {
+      getAll: signal => apiService.getConditionsDropdown(false, signal), // false to get all conditions, not just active
+      getByPatient: (patientId, signal) =>
+        apiService.getConditionsDropdown(false, signal), // Use same method for consistency
+    },
+    requiresPatient: false, // The endpoint handles patient context automatically
   });
 
   // Get standardized configuration
@@ -81,6 +95,7 @@ const Treatments = () => {
     dosage: '',
     frequency: '',
     notes: '',
+    condition_id: '',
   });
 
   const handleAddTreatment = () => {
@@ -95,6 +110,7 @@ const Treatments = () => {
       dosage: '',
       frequency: '',
       notes: '',
+      condition_id: '',
     });
     setShowModal(true);
   };
@@ -111,6 +127,7 @@ const Treatments = () => {
       dosage: treatment.dosage || '',
       frequency: treatment.frequency || '',
       notes: treatment.notes || '',
+      condition_id: treatment.condition_id || '',
     });
     setShowModal(true);
   };
@@ -171,6 +188,7 @@ const Treatments = () => {
       frequency: formData.frequency || null,
       notes: formData.notes || null,
       patient_id: currentPatient.id,
+      condition_id: formData.condition_id || null,
     };
 
     let success;
@@ -225,6 +243,15 @@ const Treatments = () => {
               onClose={clearError}
             >
               {error}
+            </Alert>
+          )}
+          {conditionsError && (
+            <Alert
+              variant="light"
+              color="orange"
+              title="Conditions Loading Error"
+            >
+              {conditionsError}
             </Alert>
           )}
           {successMessage && (
@@ -299,11 +326,19 @@ const Treatments = () => {
                           <Text fw={600} size="lg">
                             {treatment.treatment_name}
                           </Text>
-                          {treatment.treatment_type && (
-                            <Badge variant="light" color="blue" size="md">
-                              {treatment.treatment_type}
-                            </Badge>
-                          )}
+                          <Group gap="xs">
+                            {treatment.treatment_type && (
+                              <Badge variant="light" color="blue" size="md">
+                                {treatment.treatment_type}
+                              </Badge>
+                            )}
+                            {treatment.condition &&
+                              treatment.condition.diagnosis && (
+                                <Badge variant="light" color="teal" size="md">
+                                  {treatment.condition.diagnosis}
+                                </Badge>
+                              )}
+                          </Group>
                         </Stack>
                         <StatusBadge status={treatment.status} />
                       </Group>
@@ -406,8 +441,9 @@ const Treatments = () => {
             <MedicalTable
               data={filteredTreatments}
               columns={[
-                { header: 'Treatment Name', accessor: 'treatment_name' },
+                { header: 'Treatment', accessor: 'treatment_name' },
                 { header: 'Type', accessor: 'treatment_type' },
+                { header: 'Related Condition', accessor: 'condition' },
                 { header: 'Start Date', accessor: 'start_date' },
                 { header: 'End Date', accessor: 'end_date' },
                 { header: 'Status', accessor: 'status' },
@@ -430,6 +466,20 @@ const Treatments = () => {
                   ) : (
                     '-'
                   ),
+                condition: value => {
+                  if (value && value.diagnosis) {
+                    return (
+                      <Badge variant="light" color="teal" size="sm">
+                        {value.diagnosis}
+                      </Badge>
+                    );
+                  }
+                  return (
+                    <Text size="sm" c="dimmed">
+                      No condition linked
+                    </Text>
+                  );
+                },
                 start_date: value => (value ? formatDate(value) : '-'),
                 end_date: value => (value ? formatDate(value) : '-'),
                 status: value => <StatusBadge status={value} size="small" />,
@@ -460,6 +510,8 @@ const Treatments = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingTreatment={editingTreatment}
+        conditionsOptions={conditionsOptions}
+        conditionsLoading={conditionsLoading}
       />
 
       {/* Treatment View Modal */}
@@ -486,11 +538,19 @@ const Treatments = () => {
                 <Group justify="space-between" align="flex-start">
                   <Stack gap="xs" style={{ flex: 1 }}>
                     <Title order={3}>{viewingTreatment.treatment_name}</Title>
-                    {viewingTreatment.treatment_type && (
-                      <Badge variant="light" color="blue" size="lg">
-                        {viewingTreatment.treatment_type}
-                      </Badge>
-                    )}
+                    <Group gap="xs">
+                      {viewingTreatment.treatment_type && (
+                        <Badge variant="light" color="blue" size="lg">
+                          {viewingTreatment.treatment_type}
+                        </Badge>
+                      )}
+                      {viewingTreatment.condition &&
+                        viewingTreatment.condition.diagnosis && (
+                          <Badge variant="light" color="teal" size="lg">
+                            Related to: {viewingTreatment.condition.diagnosis}
+                          </Badge>
+                        )}
+                    </Group>
                   </Stack>
                 </Group>
 

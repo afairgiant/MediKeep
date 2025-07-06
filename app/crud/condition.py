@@ -28,7 +28,7 @@ class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate]):
         return self.query(
             db=db,
             filters={"status": "active", "patient_id": patient_id},
-            order_by="onsetDate",
+            order_by="onset_date",
             order_desc=True,
         )
 

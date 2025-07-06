@@ -15,6 +15,7 @@ from app.crud.condition import condition
 from app.models.activity_log import EntityType
 from app.schemas.condition import (
     ConditionCreate,
+    ConditionDropdownOption,
     ConditionResponse,
     ConditionUpdate,
     ConditionWithRelations,
@@ -63,6 +64,24 @@ def read_conditions(
         conditions = condition.get_by_patient(
             db, patient_id=current_user_patient_id, skip=skip, limit=limit
         )
+    return conditions
+
+
+@router.get("/dropdown", response_model=List[ConditionDropdownOption])
+def get_conditions_for_dropdown(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    active_only: bool = Query(False, description="Only return active conditions"),
+) -> Any:
+    """Get conditions formatted for dropdown selection in forms."""
+    if active_only:
+        conditions = condition.get_active_conditions(
+            db, patient_id=current_user_patient_id
+        )
+    else:
+        conditions = condition.get_by_patient(db, patient_id=current_user_patient_id)
+
     return conditions
 
 
