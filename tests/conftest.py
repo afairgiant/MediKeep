@@ -4,6 +4,7 @@ Pytest configuration and fixtures for Medical Records application tests.
 import asyncio
 import os
 import tempfile
+from datetime import date
 from typing import AsyncGenerator, Generator
 
 import pytest
@@ -21,6 +22,7 @@ from app.models.models import User, Patient
 from app.crud.user import user as user_crud
 from app.crud.patient import patient as patient_crud
 from app.schemas.user import UserCreate
+from app.schemas.patient import PatientCreate
 from app.core.security import create_access_token
 from tests.utils.user import create_random_user, create_user_authentication_headers
 
@@ -98,18 +100,7 @@ def test_user(db_session: Session) -> User:
     )
     user = user_crud.create(db_session, obj_in=user_data)
     
-    # Create associated patient record
-    patient_crud.create_for_user(
-        db_session,
-        user_id=user.id,
-        patient_data={
-            "first_name": "Test",
-            "last_name": "User",
-            "birth_date": "1990-01-01",
-            "gender": "M",
-            "address": "123 Test St"
-        }
-    )
+# Don't create patient automatically - let tests create as needed
     
     return user
 
@@ -129,8 +120,19 @@ def test_admin_user(db_session: Session) -> User:
 
 @pytest.fixture(scope="function")
 def test_patient(db_session: Session, test_user: User) -> Patient:
-    """Get the patient record for the test user."""
-    return patient_crud.get_by_user_id(db_session, user_id=test_user.id)
+    """Create a patient record for the test user."""
+    patient_data = PatientCreate(
+        first_name="Test",
+        last_name="User",
+        birth_date=date(1990, 1, 1),
+        gender="M",
+        address="123 Test St"
+    )
+    return patient_crud.create_for_user(
+        db_session,
+        user_id=test_user.id,
+        patient_data=patient_data
+    )
 
 
 @pytest.fixture(scope="function")
