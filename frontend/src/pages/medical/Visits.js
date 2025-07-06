@@ -563,10 +563,10 @@ const Visits = () => {
               <MedicalTable
                 data={filteredVisits}
                 columns={[
-                  { header: 'Visit Date', accessor: 'visit_date' },
+                  { header: 'Visit Date', accessor: 'date' },
                   { header: 'Reason', accessor: 'reason' },
                   { header: 'Visit Type', accessor: 'visit_type' },
-                  { header: 'Facility', accessor: 'facility' },
+                  { header: 'Facility', accessor: 'location' },
                   { header: 'Practitioner', accessor: 'practitioner_name' },
                   { header: 'Diagnosis', accessor: 'diagnosis' },
                   { header: 'Notes', accessor: 'notes' },
@@ -577,13 +577,13 @@ const Visits = () => {
                 onEdit={handleEditVisit}
                 onDelete={handleDeleteVisit}
                 formatters={{
-                  visit_date: (value, item) => getEntityFormatters('visits').visit_date(item.date, item),
-                  reason: getEntityFormatters('visits').reason,
-                  visit_type: getEntityFormatters('visits').visit_type,
-                  facility: (value, item) => getEntityFormatters('visits').facility(item.location, item),
+                  date: getEntityFormatters('visits').date,
+                  reason: getEntityFormatters('visits').text,
+                  visit_type: getEntityFormatters('visits').simple,
+                  location: getEntityFormatters('visits').simple,
                   practitioner_name: (value, item) => getEntityFormatters('visits', practitioners).practitioner_name(value, item),
-                  diagnosis: getEntityFormatters('visits').diagnosis,
-                  notes: getEntityFormatters('visits').notes,
+                  diagnosis: getEntityFormatters('visits').text,
+                  notes: getEntityFormatters('visits').text,
                 }}
               />
             </Paper>

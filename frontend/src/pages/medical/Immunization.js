@@ -527,7 +527,7 @@ const Immunization = () => {
                   { header: 'Site', accessor: 'site' },
                   { header: 'Route', accessor: 'route' },
                   { header: 'Lot Number', accessor: 'lot_number' },
-                  { header: 'Next Due Date', accessor: 'next_due_date' },
+                  { header: 'Expiration Date', accessor: 'expiration_date' },
                   { header: 'Notes', accessor: 'notes' },
                 ]}
                 patientData={currentPatient}
@@ -537,7 +537,7 @@ const Immunization = () => {
                 formatters={{
                   vaccine_name: (value, item) => getEntityFormatters('immunizations').immunization_name(value, item),
                   date_administered: getEntityFormatters('immunizations').administration_date,
-                  next_due_date: getEntityFormatters('immunizations').next_due_date,
+                  expiration_date: getEntityFormatters('immunizations').date,
                   site: getEntityFormatters('immunizations').simple,
                   dose_number: getEntityFormatters('immunizations').simple,
                   manufacturer: getEntityFormatters('immunizations').simple,
