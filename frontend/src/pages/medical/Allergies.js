@@ -32,6 +32,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
@@ -72,6 +73,9 @@ const Allergies = () => {
 
   // Use standardized data management
   const dataManagement = useDataManagement(allergies, config);
+
+  // Get standardized formatters for allergies
+  const formatters = getEntityFormatters('allergies');
 
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
@@ -465,41 +469,7 @@ const Allergies = () => {
                 onView={handleViewAllergy}
                 onEdit={handleEditAllergy}
                 onDelete={handleDeleteAllergy}
-                formatters={{
-                  allergen: value => (
-                    <Text fw={600} c="blue">
-                      {value}
-                    </Text>
-                  ),
-                  severity: value => {
-                    const SeverityIcon = getSeverityIcon(value);
-                    return (
-                      <Badge
-                        color={getSeverityColor(value)}
-                        variant="filled"
-                        leftSection={<SeverityIcon size={12} />}
-                      >
-                        {value}
-                      </Badge>
-                    );
-                  },
-                  status: value => (
-                    <Badge color={getStatusColor(value)} variant="light">
-                      {value}
-                    </Badge>
-                  ),
-                  onset_date: value => (value ? formatDate(value) : '-'),
-                  notes: value =>
-                    value ? (
-                      <Text size="sm" title={value}>
-                        {value.length > 50
-                          ? `${value.substring(0, 50)}...`
-                          : value}
-                      </Text>
-                    ) : (
-                      '-'
-                    ),
-                }}
+                formatters={formatters}
               />
             </Paper>
           )}

@@ -5,6 +5,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -530,72 +531,33 @@ const Treatments = () => {
               onEdit={handleEditTreatment}
               onDelete={handleDeleteTreatment}
               formatters={{
-                treatment_name: value => value,
-                treatment_type: value =>
-                  value ? (
-                    <Badge variant="filled" color="blue" size="sm">
-                      {value}
-                    </Badge>
-                  ) : (
-                    '-'
-                  ),
+                treatment_name: getEntityFormatters('treatments').treatment_name,
+                treatment_type: getEntityFormatters('treatments').treatment_type,
                 practitioner: (value, row) => {
                   if (row.practitioner_id) {
                     const practitionerInfo = getPractitionerInfo(
                       row.practitioner_id
                     );
-                    return (
-                      <Badge variant="light" color="green" size="sm">
-                        Dr.{' '}
-                        {row.practitioner?.name ||
-                          practitionerInfo?.name ||
-                          `#${row.practitioner_id}`}
-                      </Badge>
-                    );
+                    return `Dr. ${row.practitioner?.name ||
+                      practitionerInfo?.name ||
+                      `#${row.practitioner_id}`}`;
                   }
-                  return (
-                    <Text size="sm" c="dimmed">
-                      No practitioner
-                    </Text>
-                  );
+                  return 'No practitioner';
                 },
                 condition: (value, row) => {
                   if (row.condition_id) {
-                    return (
-                      <Badge
-                        variant="light"
-                        color="teal"
-                        size="sm"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => handleConditionClick(row.condition_id)}
-                      >
-                        {row.condition?.diagnosis ||
-                          getConditionName(row.condition_id) ||
-                          `Condition #${row.condition_id}`}
-                      </Badge>
-                    );
+                    return row.condition?.diagnosis ||
+                      getConditionName(row.condition_id) ||
+                      `Condition #${row.condition_id}`;
                   }
-                  return (
-                    <Text size="sm" c="dimmed">
-                      No condition linked
-                    </Text>
-                  );
+                  return 'No condition linked';
                 },
-                start_date: value => (value ? formatDate(value) : '-'),
-                end_date: value => (value ? formatDate(value) : '-'),
-                status: value => <StatusBadge status={value} size="small" />,
-                dosage: value => value || '-',
-                frequency: value => value || '-',
-                notes: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
+                start_date: getEntityFormatters('treatments').start_date,
+                end_date: getEntityFormatters('treatments').end_date,
+                status: getEntityFormatters('treatments').status,
+                dosage: getEntityFormatters('treatments').dosage,
+                frequency: getEntityFormatters('treatments').frequency,
+                notes: getEntityFormatters('treatments').notes,
               }}
             />
           )}

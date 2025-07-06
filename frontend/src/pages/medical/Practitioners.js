@@ -39,6 +39,7 @@ import {
 } from '../../hooks';
 import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import frontendLogger from '../../services/frontendLogger';
 
 const Practitioners = () => {
@@ -472,36 +473,13 @@ const Practitioners = () => {
                 onEdit={handleEditPractitioner}
                 onDelete={handleDeletePractitioner}
                 formatters={{
-                  name: value => (
-                    <Text fw={600} c="blue">
-                      {value}
-                    </Text>
-                  ),
-                  specialty: value => (
-                    <Badge
-                      color={getSpecialtyColor(value)}
-                      variant="light"
-                      size="sm"
-                    >
-                      {value}
-                    </Badge>
-                  ),
-                  practice: value => value || '-',
+                  name: getEntityFormatters('default').primaryName,
+                  specialty: getEntityFormatters('default').simple,
+                  practice: getEntityFormatters('default').simple,
                   phone_number: value =>
                     value ? formatPhoneNumber(value) : '-',
                   rating: value =>
-                    value !== null && value !== undefined ? (
-                      <Group gap="xs">
-                        <IconStar
-                          size={14}
-                          color="var(--mantine-color-yellow-6)"
-                          fill="var(--mantine-color-yellow-6)"
-                        />
-                        <Text size="sm">{value}/5</Text>
-                      </Group>
-                    ) : (
-                      '-'
-                    ),
+                    value !== null && value !== undefined ? `${value}/5` : '-',
                 }}
               />
             </Paper>

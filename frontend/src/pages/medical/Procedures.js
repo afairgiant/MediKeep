@@ -5,6 +5,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -24,6 +25,8 @@ import {
   Loader,
   Center,
   Divider,
+  Modal,
+  Title,
 } from '@mantine/core';
 
 const Procedures = () => {
@@ -31,6 +34,9 @@ const Procedures = () => {
 
   // Get practitioners data
   const { practitioners } = usePractitioners();
+
+  // Get standardized formatters for procedures
+  const formatters = getEntityFormatters('procedures', practitioners);
 
   // Modern data management with useMedicalData
   const {
@@ -67,6 +73,8 @@ const Procedures = () => {
 
   // Form state
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingProcedure, setViewingProcedure] = useState(null);
   const [editingProcedure, setEditingProcedure] = useState(null);
   const [formData, setFormData] = useState({
     procedure_name: '',
@@ -81,6 +89,8 @@ const Procedures = () => {
     procedure_complications: '',
     procedure_duration: '',
     practitioner_id: '',
+    anesthesia_type: '',
+    anesthesia_notes: '',
   });
 
   const handleAddProcedure = () => {
@@ -98,8 +108,15 @@ const Procedures = () => {
       procedure_complications: '',
       procedure_duration: '',
       practitioner_id: '',
+      anesthesia_type: '',
+      anesthesia_notes: '',
     });
     setShowModal(true);
+  };
+
+  const handleViewProcedure = procedure => {
+    setViewingProcedure(procedure);
+    setShowViewModal(true);
   };
 
   const handleEditProcedure = procedure => {
@@ -117,6 +134,8 @@ const Procedures = () => {
       procedure_complications: procedure.procedure_complications || '',
       procedure_duration: procedure.procedure_duration || '',
       practitioner_id: procedure.practitioner_id || '',
+      anesthesia_type: procedure.anesthesia_type || '',
+      anesthesia_notes: procedure.anesthesia_notes || '',
     });
     setShowModal(true);
   };
@@ -168,6 +187,8 @@ const Procedures = () => {
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id)
         : null,
+      anesthesia_type: formData.anesthesia_type || null,
+      anesthesia_notes: formData.anesthesia_notes || null,
       patient_id: currentPatient.id,
     };
 
@@ -403,6 +424,13 @@ const Procedures = () => {
                         <Button
                           variant="light"
                           size="xs"
+                          onClick={() => handleViewProcedure(procedure)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="light"
+                          size="xs"
                           onClick={() => handleEditProcedure(procedure)}
                         >
                           Edit
@@ -431,79 +459,16 @@ const Procedures = () => {
                 { header: 'Date', accessor: 'date' },
                 { header: 'Status', accessor: 'status' },
                 { header: 'Setting', accessor: 'procedure_setting' },
-                { header: 'Duration (min)', accessor: 'procedure_duration' },
                 { header: 'Facility', accessor: 'facility' },
                 { header: 'Practitioner', accessor: 'practitioner_name' },
                 { header: 'Description', accessor: 'description' },
               ]}
               patientData={currentPatient}
               tableName="Procedures"
+              onView={handleViewProcedure}
               onEdit={handleEditProcedure}
               onDelete={handleDeleteProcedure}
-              formatters={{
-                procedure_name: value => (
-                  <Text fw={600} style={{ minWidth: 150 }}>
-                    {value}
-                  </Text>
-                ),
-                procedure_type: value =>
-                  value ? (
-                    <Badge variant="filled" color="blue" size="sm">
-                      {value}
-                    </Badge>
-                  ) : (
-                    '-'
-                  ),
-                procedure_code: value => value || '-',
-                date: value => (value ? formatDate(value) : '-'),
-                status: value => <StatusBadge status={value} size="small" />,
-                procedure_setting: value =>
-                  value ? (
-                    <Badge variant="light" color="cyan" size="sm">
-                      {value}
-                    </Badge>
-                  ) : (
-                    '-'
-                  ),
-                procedure_duration: value => (value ? `${value} min` : '-'),
-                procedure_complications: value =>
-                  value ? (
-                    <span title={value} style={{ color: '#d63384' }}>
-                      {value.length > 30
-                        ? `${value.substring(0, 30)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
-                practitioner_name: (value, item) => {
-                  if (!item.practitioner_id) return '-';
-                  return (
-                    practitioners.find(p => p.id === item.practitioner_id)
-                      ?.name || `Practitioner ID: ${item.practitioner_id}`
-                  );
-                },
-                description: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
-                notes: value =>
-                  value ? (
-                    <span title={value}>
-                      {value.length > 50
-                        ? `${value.substring(0, 50)}...`
-                        : value}
-                    </span>
-                  ) : (
-                    '-'
-                  ),
-              }}
+              formatters={formatters}
             />
           )}
         </Stack>
@@ -519,6 +484,277 @@ const Procedures = () => {
         practitioners={practitioners}
         editingProcedure={editingProcedure}
       />
+
+      {/* Procedure View Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title={
+          <Group>
+            <Text size="lg" fw={600}>
+              Procedure Details
+            </Text>
+            {viewingProcedure && (
+              <StatusBadge status={viewingProcedure.status} />
+            )}
+          </Group>
+        }
+        size="lg"
+        centered
+      >
+        {viewingProcedure && (
+          <Stack gap="md">
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Title order={3}>{viewingProcedure.procedure_name}</Title>
+                    <Group gap="xs">
+                      {viewingProcedure.procedure_type && (
+                        <Badge variant="light" color="blue" size="lg">
+                          {viewingProcedure.procedure_type}
+                        </Badge>
+                      )}
+                      {viewingProcedure.procedure_code && (
+                        <Badge variant="light" color="teal" size="lg">
+                          {viewingProcedure.procedure_code}
+                        </Badge>
+                      )}
+                    </Group>
+                  </Stack>
+                </Group>
+              </Stack>
+            </Card>
+
+            <Grid>
+              <Grid.Col span={6}>
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      PROCEDURE INFORMATION
+                    </Text>
+                    <Divider />
+                    <Stack gap="xs">
+                      <Group>
+                        <Text size="sm" fw={500} w={100}>
+                          Date:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingProcedure.date ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingProcedure.date
+                            ? formatDate(viewingProcedure.date)
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={100}>
+                          Setting:
+                        </Text>
+                        {viewingProcedure.procedure_setting ? (
+                          <Badge variant="light" color="cyan" size="sm">
+                            {viewingProcedure.procedure_setting}
+                          </Badge>
+                        ) : (
+                          <Text size="sm" c="dimmed">
+                            Not specified
+                          </Text>
+                        )}
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={100}>
+                          Duration:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={
+                            viewingProcedure.procedure_duration
+                              ? 'inherit'
+                              : 'dimmed'
+                          }
+                        >
+                          {viewingProcedure.procedure_duration
+                            ? `${viewingProcedure.procedure_duration} minutes`
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={100}>
+                          Facility:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={viewingProcedure.facility ? 'inherit' : 'dimmed'}
+                        >
+                          {viewingProcedure.facility || 'Not specified'}
+                        </Text>
+                      </Group>
+                    </Stack>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      PRACTITIONER INFORMATION
+                    </Text>
+                    <Divider />
+                    <Stack gap="xs">
+                      <Group>
+                        <Text size="sm" fw={500} w={100}>
+                          Doctor:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={
+                            viewingProcedure.practitioner_id
+                              ? 'inherit'
+                              : 'dimmed'
+                          }
+                        >
+                          {viewingProcedure.practitioner_id
+                            ? practitioners.find(
+                                p => p.id === viewingProcedure.practitioner_id
+                              )?.name ||
+                              `Practitioner ID: ${viewingProcedure.practitioner_id}`
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                      <Group>
+                        <Text size="sm" fw={500} w={100}>
+                          Specialty:
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={
+                            viewingProcedure.practitioner_id
+                              ? 'inherit'
+                              : 'dimmed'
+                          }
+                        >
+                          {viewingProcedure.practitioner_id
+                            ? practitioners.find(
+                                p => p.id === viewingProcedure.practitioner_id
+                              )?.specialty || 'Not specified'
+                            : 'Not specified'}
+                        </Text>
+                      </Group>
+                    </Stack>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
+
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  PROCEDURE DESCRIPTION
+                </Text>
+                <Divider />
+                <Text
+                  size="sm"
+                  c={viewingProcedure.description ? 'inherit' : 'dimmed'}
+                >
+                  {viewingProcedure.description || 'No description available'}
+                </Text>
+              </Stack>
+            </Card>
+
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  COMPLICATIONS
+                </Text>
+                <Divider />
+                <Text
+                  size="sm"
+                  c={
+                    viewingProcedure.procedure_complications
+                      ? '#d63384'
+                      : 'dimmed'
+                  }
+                >
+                  {viewingProcedure.procedure_complications ||
+                    'No complications reported'}
+                </Text>
+              </Stack>
+            </Card>
+
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  ANESTHESIA INFORMATION
+                </Text>
+                <Divider />
+                <Stack gap="xs">
+                  <Group>
+                    <Text size="sm" fw={500} w={100}>
+                      Type:
+                    </Text>
+                    {viewingProcedure.anesthesia_type ? (
+                      <Badge variant="light" color="purple" size="sm">
+                        {viewingProcedure.anesthesia_type}
+                      </Badge>
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        Not specified
+                      </Text>
+                    )}
+                  </Group>
+                  <Group align="flex-start">
+                    <Text size="sm" fw={500} w={100}>
+                      Notes:
+                    </Text>
+                    <Text
+                      size="sm"
+                      style={{ flex: 1 }}
+                      c={
+                        viewingProcedure.anesthesia_notes ? 'inherit' : 'dimmed'
+                      }
+                    >
+                      {viewingProcedure.anesthesia_notes ||
+                        'No anesthesia notes available'}
+                    </Text>
+                  </Group>
+                </Stack>
+              </Stack>
+            </Card>
+
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  CLINICAL NOTES
+                </Text>
+                <Divider />
+                <Text
+                  size="sm"
+                  c={viewingProcedure.notes ? 'inherit' : 'dimmed'}
+                >
+                  {viewingProcedure.notes || 'No clinical notes available'}
+                </Text>
+              </Stack>
+            </Card>
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="light"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleEditProcedure(viewingProcedure);
+                }}
+              >
+                Edit Procedure
+              </Button>
+              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+                Close
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </>
   );
 };

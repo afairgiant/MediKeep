@@ -30,6 +30,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -562,14 +563,13 @@ const Visits = () => {
               <MedicalTable
                 data={filteredVisits}
                 columns={[
-                  { header: 'Visit Date', accessor: 'date' },
+                  { header: 'Visit Date', accessor: 'visit_date' },
                   { header: 'Reason', accessor: 'reason' },
                   { header: 'Visit Type', accessor: 'visit_type' },
-                  { header: 'Chief Complaint', accessor: 'chief_complaint' },
+                  { header: 'Facility', accessor: 'facility' },
                   { header: 'Practitioner', accessor: 'practitioner_name' },
-                  { header: 'Location', accessor: 'location' },
-                  { header: 'Priority', accessor: 'priority' },
                   { header: 'Diagnosis', accessor: 'diagnosis' },
+                  { header: 'Notes', accessor: 'notes' },
                 ]}
                 patientData={currentPatient}
                 tableName="Visit History"
@@ -577,59 +577,13 @@ const Visits = () => {
                 onEdit={handleEditVisit}
                 onDelete={handleDeleteVisit}
                 formatters={{
-                  date: value => (
-                    <Text fw={600} c="blue">
-                      {formatDate(value)}
-                    </Text>
-                  ),
-                  reason: value => value || 'General Visit',
-                  visit_type: value =>
-                    value ? (
-                      <Badge
-                        color={getVisitTypeColor(value)}
-                        variant="light"
-                        size="sm"
-                      >
-                        {value}
-                      </Badge>
-                    ) : (
-                      '-'
-                    ),
-                  chief_complaint: value =>
-                    value ? (
-                      <Text size="sm" title={value}>
-                        {value.length > 30
-                          ? `${value.substring(0, 30)}...`
-                          : value}
-                      </Text>
-                    ) : (
-                      '-'
-                    ),
-                  practitioner_name: (value, item) =>
-                    getPractitionerDisplay(item.practitioner_id),
-                  location: value => value || '-',
-                  priority: value =>
-                    value ? (
-                      <Badge
-                        color={getPriorityColor(value)}
-                        variant="filled"
-                        size="sm"
-                      >
-                        {value}
-                      </Badge>
-                    ) : (
-                      '-'
-                    ),
-                  diagnosis: value =>
-                    value ? (
-                      <Text size="sm" title={value}>
-                        {value.length > 40
-                          ? `${value.substring(0, 40)}...`
-                          : value}
-                      </Text>
-                    ) : (
-                      '-'
-                    ),
+                  visit_date: (value, item) => getEntityFormatters('visits').visit_date(item.date, item),
+                  reason: getEntityFormatters('visits').reason,
+                  visit_type: getEntityFormatters('visits').visit_type,
+                  facility: (value, item) => getEntityFormatters('visits').facility(item.location, item),
+                  practitioner_name: (value, item) => getEntityFormatters('visits', practitioners).practitioner_name(value, item),
+                  diagnosis: getEntityFormatters('visits').diagnosis,
+                  notes: getEntityFormatters('visits').notes,
                 }}
               />
             </Paper>

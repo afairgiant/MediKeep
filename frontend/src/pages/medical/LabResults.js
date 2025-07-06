@@ -5,6 +5,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -81,6 +82,9 @@ const LabResults = () => {
 
   // Get standardized configuration
   const config = getMedicalPageConfig('labresults');
+
+  // Get standardized formatters for lab results
+  const formatters = getEntityFormatters('lab_results', practitioners);
 
   // File management state (moved up before useDataManagement)
   const [filesCounts, setFilesCounts] = useState({});
@@ -735,33 +739,24 @@ const LabResults = () => {
               onEdit={handleEditLabResult}
               onDelete={handleDeleteLabResult}
               formatters={{
-                test_name: value => (
-                  <Text fw={600} style={{ minWidth: 150 }}>
-                    {value}
-                  </Text>
-                ),
-                status: value => <StatusBadge status={value} size="small" />,
+                ...formatters,
+                // Custom practitioner formatter for lab results (using practitioner_id)
                 practitioner_id: (value, item) => {
                   if (!value) return '-';
                   const practitioner = practitioners.find(p => p.id === value);
                   return practitioner ? practitioner.name : `ID: ${value}`;
                 },
-                ordered_date: value => formatDate(value),
-                completed_date: value => (value ? formatDate(value) : '-'),
+                // Custom files formatter for lab results
                 files: (value, item) =>
                   filesCounts[item.id] > 0 ? (
-                    <Badge
-                      variant="light"
-                      color="green"
-                      size="sm"
-                      leftSection={<IconFile size={12} />}
-                    >
-                      {filesCounts[item.id]}
-                    </Badge>
+                    <span style={{ color: '#2e7d32', fontWeight: 500 }}>
+                      {filesCounts[item.id]} file
+                      {filesCounts[item.id] !== 1 ? 's' : ''}
+                    </span>
                   ) : (
-                    <Text size="sm" c="dimmed" fs="italic">
+                    <span style={{ color: '#9e9e9e', fontStyle: 'italic' }}>
                       None
-                    </Text>
+                    </span>
                   ),
               }}
             />
