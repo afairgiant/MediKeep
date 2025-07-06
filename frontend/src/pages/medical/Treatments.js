@@ -75,6 +75,20 @@ const Treatments = () => {
     requiresPatient: false, // The endpoint handles patient context automatically
   });
 
+  // Practitioners data for dropdown
+  const {
+    items: practitionersOptions,
+    loading: practitionersLoading,
+    error: practitionersError,
+  } = useMedicalData({
+    entityName: 'practitioners',
+    apiMethodsConfig: {
+      getAll: signal => apiService.getPractitioners(signal),
+      getByPatient: (patientId, signal) => apiService.getPractitioners(signal),
+    },
+    requiresPatient: false,
+  });
+
   // Get standardized configuration
   const config = getMedicalPageConfig('treatments');
 
@@ -97,6 +111,7 @@ const Treatments = () => {
     frequency: '',
     notes: '',
     condition_id: '',
+    practitioner_id: '',
   });
 
   const handleAddTreatment = () => {
@@ -112,6 +127,7 @@ const Treatments = () => {
       frequency: '',
       notes: '',
       condition_id: '',
+      practitioner_id: '',
     });
     setShowModal(true);
   };
@@ -129,6 +145,7 @@ const Treatments = () => {
       frequency: treatment.frequency || '',
       notes: treatment.notes || '',
       condition_id: treatment.condition_id || '',
+      practitioner_id: treatment.practitioner_id || '',
     });
     setShowModal(true);
   };
@@ -191,6 +208,7 @@ const Treatments = () => {
       notes: formData.notes || null,
       patient_id: currentPatient.id,
       condition_id: formData.condition_id || null,
+      practitioner_id: formData.practitioner_id || null,
     };
 
     let success;
@@ -218,6 +236,21 @@ const Treatments = () => {
     }
     const condition = conditionsOptions.find(c => c.id === conditionId);
     return condition ? condition.diagnosis || condition.name : null;
+  };
+
+  // Helper function to get practitioner information from ID
+  const getPractitionerInfo = practitionerId => {
+    if (
+      !practitionerId ||
+      !practitionersOptions ||
+      practitionersOptions.length === 0
+    ) {
+      return null;
+    }
+    const practitioner = practitionersOptions.find(
+      p => p.id === practitionerId
+    );
+    return practitioner;
   };
 
   // Handler to navigate to condition page and open view modal
@@ -273,6 +306,15 @@ const Treatments = () => {
               title="Conditions Loading Error"
             >
               {conditionsError}
+            </Alert>
+          )}
+          {practitionersError && (
+            <Alert
+              variant="light"
+              color="orange"
+              title="Practitioners Loading Error"
+            >
+              {practitionersError}
             </Alert>
           )}
           {successMessage && (
@@ -354,14 +396,18 @@ const Treatments = () => {
                               </Badge>
                             )}
                             {treatment.condition_id && (
-                              <Badge 
-                                variant="light" 
-                                color="teal" 
+                              <Badge
+                                variant="light"
+                                color="teal"
                                 size="md"
                                 style={{ cursor: 'pointer' }}
-                                onClick={() => handleConditionClick(treatment.condition_id)}
+                                onClick={() =>
+                                  handleConditionClick(treatment.condition_id)
+                                }
                               >
-                                {treatment.condition?.diagnosis || getConditionName(treatment.condition_id) || `Condition #${treatment.condition_id}`}
+                                {treatment.condition?.diagnosis ||
+                                  getConditionName(treatment.condition_id) ||
+                                  `Condition #${treatment.condition_id}`}
                               </Badge>
                             )}
                           </Group>
@@ -429,7 +475,6 @@ const Treatments = () => {
                           </Stack>
                         </Stack>
                       )}
-
                     </Stack>
 
                     {/* Buttons always at bottom */}
@@ -470,6 +515,7 @@ const Treatments = () => {
               columns={[
                 { header: 'Treatment', accessor: 'treatment_name' },
                 { header: 'Type', accessor: 'treatment_type' },
+                { header: 'Practitioner', accessor: 'practitioner' },
                 { header: 'Related Condition', accessor: 'condition' },
                 { header: 'Start Date', accessor: 'start_date' },
                 { header: 'End Date', accessor: 'end_date' },
@@ -493,17 +539,39 @@ const Treatments = () => {
                   ) : (
                     '-'
                   ),
+                practitioner: (value, row) => {
+                  if (row.practitioner_id) {
+                    const practitionerInfo = getPractitionerInfo(
+                      row.practitioner_id
+                    );
+                    return (
+                      <Badge variant="light" color="green" size="sm">
+                        Dr.{' '}
+                        {row.practitioner?.name ||
+                          practitionerInfo?.name ||
+                          `#${row.practitioner_id}`}
+                      </Badge>
+                    );
+                  }
+                  return (
+                    <Text size="sm" c="dimmed">
+                      No practitioner
+                    </Text>
+                  );
+                },
                 condition: (value, row) => {
                   if (row.condition_id) {
                     return (
-                      <Badge 
-                        variant="light" 
-                        color="teal" 
+                      <Badge
+                        variant="light"
+                        color="teal"
                         size="sm"
                         style={{ cursor: 'pointer' }}
                         onClick={() => handleConditionClick(row.condition_id)}
                       >
-                        {row.condition?.diagnosis || getConditionName(row.condition_id) || `Condition #${row.condition_id}`}
+                        {row.condition?.diagnosis ||
+                          getConditionName(row.condition_id) ||
+                          `Condition #${row.condition_id}`}
                       </Badge>
                     );
                   }
@@ -545,6 +613,8 @@ const Treatments = () => {
         editingTreatment={editingTreatment}
         conditionsOptions={conditionsOptions}
         conditionsLoading={conditionsLoading}
+        practitionersOptions={practitionersOptions}
+        practitionersLoading={practitionersLoading}
       />
 
       {/* Treatment View Modal */}
@@ -578,14 +648,19 @@ const Treatments = () => {
                         </Badge>
                       )}
                       {viewingTreatment.condition_id && (
-                        <Badge 
-                          variant="light" 
-                          color="teal" 
+                        <Badge
+                          variant="light"
+                          color="teal"
                           size="lg"
                           style={{ cursor: 'pointer' }}
-                          onClick={() => handleConditionClick(viewingTreatment.condition_id)}
+                          onClick={() =>
+                            handleConditionClick(viewingTreatment.condition_id)
+                          }
                         >
-                          Related to: {viewingTreatment.condition?.diagnosis || getConditionName(viewingTreatment.condition_id) || `Condition #${viewingTreatment.condition_id}`}
+                          Related to:{' '}
+                          {viewingTreatment.condition?.diagnosis ||
+                            getConditionName(viewingTreatment.condition_id) ||
+                            `Condition #${viewingTreatment.condition_id}`}
                         </Badge>
                       )}
                     </Group>
@@ -674,7 +749,68 @@ const Treatments = () => {
                 </Card>
               </Grid.Col>
 
-              <Grid.Col span={12}>
+              <Grid.Col span={6}>
+                <Card withBorder p="md">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      PRACTITIONER
+                    </Text>
+                    <Divider />
+                    {viewingTreatment.practitioner_id ? (
+                      <Stack gap="xs">
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Doctor:
+                          </Text>
+                          <Text size="sm" fw={600}>
+                            {viewingTreatment.practitioner?.name ||
+                              getPractitionerInfo(
+                                viewingTreatment.practitioner_id
+                              )?.name ||
+                              `Practitioner #${viewingTreatment.practitioner_id}`}
+                          </Text>
+                        </Group>
+                        {(viewingTreatment.practitioner?.practice ||
+                          getPractitionerInfo(viewingTreatment.practitioner_id)
+                            ?.practice) && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Practice:
+                            </Text>
+                            <Text size="sm">
+                              {viewingTreatment.practitioner?.practice ||
+                                getPractitionerInfo(
+                                  viewingTreatment.practitioner_id
+                                )?.practice}
+                            </Text>
+                          </Group>
+                        )}
+                        {(viewingTreatment.practitioner?.specialty ||
+                          getPractitionerInfo(viewingTreatment.practitioner_id)
+                            ?.specialty) && (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Specialty:
+                            </Text>
+                            <Badge variant="light" color="green" size="sm">
+                              {viewingTreatment.practitioner?.specialty ||
+                                getPractitionerInfo(
+                                  viewingTreatment.practitioner_id
+                                )?.specialty}
+                            </Badge>
+                          </Group>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        No practitioner assigned
+                      </Text>
+                    )}
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
                 <Card withBorder p="md">
                   <Stack gap="sm">
                     <Text fw={600} size="sm" c="dimmed">
@@ -687,13 +823,22 @@ const Treatments = () => {
                           <Text size="sm" fw={500} w={80}>
                             Diagnosis:
                           </Text>
-                          <Text 
-                            size="sm" 
+                          <Text
+                            size="sm"
                             fw={600}
-                            style={{ cursor: 'pointer', color: 'var(--mantine-color-blue-6)' }}
-                            onClick={() => handleConditionClick(viewingTreatment.condition_id)}
+                            style={{
+                              cursor: 'pointer',
+                              color: 'var(--mantine-color-blue-6)',
+                            }}
+                            onClick={() =>
+                              handleConditionClick(
+                                viewingTreatment.condition_id
+                              )
+                            }
                           >
-                            {viewingTreatment.condition?.diagnosis || getConditionName(viewingTreatment.condition_id) || `Condition #${viewingTreatment.condition_id}`}
+                            {viewingTreatment.condition?.diagnosis ||
+                              getConditionName(viewingTreatment.condition_id) ||
+                              `Condition #${viewingTreatment.condition_id}`}
                           </Text>
                         </Group>
                         {viewingTreatment.condition?.severity && (
