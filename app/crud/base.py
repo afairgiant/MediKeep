@@ -463,7 +463,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """Create a new record with simplified error handling."""
-        obj_in_data = jsonable_encoder(obj_in)
+        obj_in_data = obj_in.model_dump() if hasattr(obj_in, 'model_dump') else obj_in.dict()
 
         self.logger.info(f"Creating new {self.model_name} record")
 

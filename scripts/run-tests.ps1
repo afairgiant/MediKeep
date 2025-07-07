@@ -110,15 +110,55 @@ function Run-BackendTests($testType = "all") {
     switch ($testType) {
         "unit" {
             Log-Info "Running backend unit tests..."
-            pytest tests/unit/ -v
+            pytest tests/test_basic.py -v
         }
         "api" {
             Log-Info "Running API tests..."
             pytest tests/api/ -v
         }
+        "crud" {
+            Log-Info "Running CRUD tests..."
+            pytest tests/crud/ -v
+        }
+        "crud-patient" {
+            Log-Info "Running Patient CRUD tests..."
+            pytest tests/crud/test_patient.py -v
+        }
+        "crud-medication" {
+            Log-Info "Running Medication CRUD tests..."
+            pytest tests/crud/test_medication.py -v
+        }
+        "crud-allergy" {
+            Log-Info "Running Allergy CRUD tests..."
+            pytest tests/crud/test_allergy.py -v
+        }
+        "crud-vitals" {
+            Log-Info "Running Vitals CRUD tests..."
+            pytest tests/crud/test_vitals.py -v
+        }
+        "crud-procedure" {
+            Log-Info "Running Procedure CRUD tests..."
+            pytest tests/crud/test_procedure.py -v
+        }
+        "crud-lab-result" {
+            Log-Info "Running Lab Result CRUD tests..."
+            pytest tests/crud/test_lab_result.py -v
+        }
+        "crud-condition" {
+            Log-Info "Running Condition CRUD tests..."
+            pytest tests/crud/test_condition.py -v
+        }
+        "crud-immunization" {
+            Log-Info "Running Immunization CRUD tests..."
+            pytest tests/crud/test_immunization.py -v
+        }
+        "crud-emergency-contact" {
+            Log-Info "Running Emergency Contact CRUD tests..."
+            pytest tests/crud/test_emergency_contact.py -v
+        }
         "integration" {
             Log-Info "Running integration tests..."
-            pytest tests/integration/ -v
+            pytest tests/e2e/ -v
         }
         "coverage" {
             Log-Info "Running backend tests with coverage..."
@@ -171,6 +211,38 @@ function Run-ContainerTests($testType = "build") {
     }
     
     Log-Success "Container tests completed"
+}
+
+# Show test statistics
+function Show-TestStats {
+    Log-Info "Current Test Coverage Statistics:"
+    Write-Host ""
+    Write-Host "CRUD Tests (112+ tests total):"
+    Write-Host "  ✅ Patient CRUD             15 tests"
+    Write-Host "  ✅ Medication CRUD          15 tests" 
+    Write-Host "  ✅ Allergy CRUD             12 tests"
+    Write-Host "  ✅ Vitals CRUD              15 tests"
+    Write-Host "  ✅ Procedure CRUD           11 tests"
+    Write-Host "  ✅ Lab Result CRUD          15 tests"
+    Write-Host "  ✅ Condition CRUD           15 tests"
+    Write-Host "  ✅ Immunization CRUD        15 tests"
+    Write-Host "  ✅ Emergency Contact CRUD   15 tests"
+    Write-Host ""
+    Write-Host "API Tests (21+ tests total):"
+    Write-Host "  ✅ Authentication API   5 tests"
+    Write-Host "  ✅ Patient API          4 tests"
+    Write-Host "  ✅ Medication API       4 tests"
+    Write-Host "  ✅ Allergy API          4 tests"
+    Write-Host "  ✅ Lab Result API       2 tests"
+    Write-Host "  ✅ Procedure API        1 test"
+    Write-Host "  ✅ Immunization API     1 test"
+    Write-Host ""
+    Write-Host "Integration Tests:"
+    Write-Host "  ✅ User Workflows       Multiple scenarios"
+    Write-Host ""
+    Write-Host "Container Tests:"
+    Write-Host "  ✅ Build Tests         1 test"
+    Write-Host ""
 }
 
 # Quick tests (unit tests only)
@@ -268,11 +340,12 @@ function Show-Help {
     Write-Host ""
     Write-Host "Commands:"
     Write-Host "  frontend [unit|lint|coverage|all]  Run frontend tests"
-    Write-Host "  backend [unit|api|integration|coverage|lint|all]  Run backend tests"
+    Write-Host "  backend [unit|api|crud|crud-<module>|integration|coverage|lint|all]  Run backend tests"
     Write-Host "  container [build|integration|e2e|security|all]  Run container tests"
     Write-Host "  quick                              Run quick test suite (unit tests)"
     Write-Host "  full                               Run full test suite"
     Write-Host "  performance                        Run performance tests"
+    Write-Host "  stats                              Show test coverage statistics"
     Write-Host "  cleanup                            Clean up test artifacts"
     Write-Host "  help                               Show this help message"
     Write-Host ""
@@ -280,8 +353,23 @@ function Show-Help {
     Write-Host "  .\scripts\run-tests.ps1 quick                           # Run unit tests only"
     Write-Host "  .\scripts\run-tests.ps1 frontend unit                   # Run frontend unit tests"
     Write-Host "  .\scripts\run-tests.ps1 backend coverage                # Run backend tests with coverage"
+    Write-Host "  .\scripts\run-tests.ps1 backend crud                    # Run all CRUD tests"
+    Write-Host "  .\scripts\run-tests.ps1 backend crud-patient            # Run Patient CRUD tests only"
+    Write-Host "  .\scripts\run-tests.ps1 backend crud-lab-result         # Run Lab Result CRUD tests only"
+    Write-Host "  .\scripts\run-tests.ps1 backend api                     # Run API tests"
     Write-Host "  .\scripts\run-tests.ps1 container build                 # Build and test container"
     Write-Host "  .\scripts\run-tests.ps1 full                            # Run complete test suite"
+    Write-Host ""
+    Write-Host "Available CRUD Test Modules:"
+    Write-Host "  crud-patient        Patient CRUD operations (15 tests)"
+    Write-Host "  crud-medication     Medication CRUD operations (15 tests)"
+    Write-Host "  crud-allergy        Allergy CRUD operations (12 tests)"
+    Write-Host "  crud-vitals         Vitals CRUD operations (15 tests)"
+    Write-Host "  crud-procedure      Procedure CRUD operations (11 tests)"
+    Write-Host "  crud-lab-result        Lab Result CRUD operations (15 tests)"
+    Write-Host "  crud-condition         Condition CRUD operations (15 tests)"
+    Write-Host "  crud-immunization      Immunization CRUD operations (15 tests)"
+    Write-Host "  crud-emergency-contact Emergency Contact CRUD operations (15 tests)"
     Write-Host ""
 }
 

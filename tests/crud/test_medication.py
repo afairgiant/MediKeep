@@ -64,7 +64,7 @@ class TestMedicationCRUD:
             status="active"
         )
         
-        # Create inactive medication
+        # Create stopped medication
         inactive_medication = MedicationCreate(
             patient_id=test_patient.id,
             medication_name="Ibuprofen",
@@ -72,7 +72,7 @@ class TestMedicationCRUD:
             frequency="twice daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="inactive"
+            status="stopped"
         )
         
         created_active = medication_crud.create(db_session, obj_in=active_medication)
@@ -98,7 +98,7 @@ class TestMedicationCRUD:
                 dosage="100mg",
                 frequency="once daily",
                 route="oral",
-                start_date="2024-01-01"
+                effective_period_start=date(2024, 1, 1)
             ),
             MedicationCreate(
                 patient_id=test_patient.id,
@@ -106,7 +106,7 @@ class TestMedicationCRUD:
                 dosage="200mg",
                 frequency="twice daily",
                 route="oral",
-                start_date="2024-01-01"
+                effective_period_start=date(2024, 1, 1)
             ),
             MedicationCreate(
                 patient_id=test_patient.id,
@@ -114,7 +114,7 @@ class TestMedicationCRUD:
                 dosage="500mg",
                 frequency="as needed",
                 route="oral",
-                start_date="2024-01-01"
+                effective_period_start=date(2024, 1, 1)
             )
         ]
         
@@ -124,14 +124,14 @@ class TestMedicationCRUD:
         # Search for medications containing "in"
         results = medication_crud.get_by_name(db_session, name="in")
         
-        assert len(results) == 2  # Aspirin and Ibuprofen
+        assert len(results) == 2  # Aspirin and Acetaminophen
         medication_names = [med.medication_name for med in results]
         assert "Aspirin" in medication_names
-        assert "Ibuprofen" in medication_names
+        assert "Acetaminophen" in medication_names
 
     def test_activate_medication(self, db_session: Session, test_patient):
         """Test activating a medication."""
-        # Create inactive medication
+        # Create stopped medication
         medication_data = MedicationCreate(
             patient_id=test_patient.id,
             medication_name="Aspirin",
@@ -139,11 +139,11 @@ class TestMedicationCRUD:
             frequency="once daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="inactive"
+            status="stopped"
         )
         
         created_medication = medication_crud.create(db_session, obj_in=medication_data)
-        assert created_medication.status == "inactive"
+        assert created_medication.status == "stopped"
         
         # Activate the medication
         activated_medication = medication_crud.activate(
@@ -174,7 +174,7 @@ class TestMedicationCRUD:
             db_session, db_obj=created_medication
         )
         
-        assert deactivated_medication.status == "inactive"
+        assert deactivated_medication.status == "stopped"
         assert deactivated_medication.id == created_medication.id
 
     def test_update_medication(self, db_session: Session, test_patient):

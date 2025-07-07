@@ -58,7 +58,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
 
     def deactivate(self, db: Session, *, db_obj: Medication) -> Medication:
         """
-        Deactivate a medication (mark as inactive).
+        Deactivate a medication (mark as stopped).
 
         Args:
             db: Database session
@@ -67,7 +67,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             Updated medication object
         """
-        db_obj.status = "inactive"
+        db_obj.status = "stopped"
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
