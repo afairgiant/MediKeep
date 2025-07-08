@@ -452,18 +452,33 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         """Get multiple records with pagination."""
         try:
             self.logger.debug(
-                f"Retrieving {self.model_name} records (skip={skip}, limit={limit})"
+                "Retrieving %s records (skip=%s, limit=%s)",
+                self.model_name,
+                skip,
+                limit,
             )
             results = db.query(self.model).offset(skip).limit(limit).all()
-            self.logger.debug(f"Retrieved {len(results)} {self.model_name} records")
+            self.logger.debug("Retrieved %s %s records", len(results), self.model_name)
             return results
         except Exception as e:
-            self.logger.error(f"Error retrieving {self.model_name} records: {e}")
+            self.logger.error("Error retrieving %s records: %s", self.model_name, e)
             raise
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """Create a new record with simplified error handling."""
-        obj_in_data = obj_in.model_dump() if hasattr(obj_in, 'model_dump') else obj_in.dict()
+        # Handle different input types with proper JSON serialization
+        if isinstance(obj_in, dict):
+            # Plain dictionary - use jsonable_encoder for robust serialization
+            obj_in_data = jsonable_encoder(obj_in)
+        elif hasattr(obj_in, "model_dump"):
+            # Pydantic v2 model
+            obj_in_data = jsonable_encoder(obj_in.model_dump())  # type: ignore
+        elif hasattr(obj_in, "dict"):
+            # Pydantic v1 model
+            obj_in_data = jsonable_encoder(obj_in.dict())  # type: ignore
+        else:
+            # Fallback for other types
+            obj_in_data = jsonable_encoder(obj_in)
 
         self.logger.info(f"Creating new {self.model_name} record")
 
@@ -573,14 +588,19 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         record_id = str(db_obj.id)  # type: ignore
         obj_data = jsonable_encoder(db_obj)
 
+        # Handle different input types with proper JSON serialization
         if isinstance(obj_in, dict):
-            update_data = obj_in
+            # Plain dictionary - use jsonable_encoder for robust serialization
+            update_data = jsonable_encoder(obj_in)
+        elif hasattr(obj_in, "model_dump"):
+            # Pydantic v2 model
+            update_data = jsonable_encoder(obj_in.model_dump(exclude_unset=True))  # type: ignore
+        elif hasattr(obj_in, "dict"):
+            # Pydantic v1 model
+            update_data = jsonable_encoder(obj_in.dict(exclude_unset=True))  # type: ignore
         else:
-            update_data = (
-                obj_in.dict(exclude_unset=True)  # type: ignore
-                if hasattr(obj_in, "dict")
-                else jsonable_encoder(obj_in)
-            )
+            # Fallback for other types
+            update_data = jsonable_encoder(obj_in)
 
         self.logger.info(f"Updating {self.model_name} record {record_id}")
 
