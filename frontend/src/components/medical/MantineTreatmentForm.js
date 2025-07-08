@@ -207,7 +207,9 @@ const MantineTreatmentForm = ({
                     ? 'Loading conditions...'
                     : 'Select condition (optional)'
                 }
-                value={formData.condition_id ? String(formData.condition_id) : ''}
+                value={
+                  formData.condition_id ? String(formData.condition_id) : ''
+                }
                 onChange={handleSelectChange('condition_id')}
                 data={conditionsOptions.map(condition => ({
                   value: String(condition.id),
@@ -230,7 +232,11 @@ const MantineTreatmentForm = ({
                     ? 'Loading practitioners...'
                     : 'Select practitioner (optional)'
                 }
-                value={formData.practitioner_id ? String(formData.practitioner_id) : ''}
+                value={
+                  formData.practitioner_id
+                    ? String(formData.practitioner_id)
+                    : ''
+                }
                 onChange={handleSelectChange('practitioner_id')}
                 data={practitionersOptions.map(practitioner => ({
                   value: String(practitioner.id),
@@ -306,7 +312,7 @@ const MantineTreatmentForm = ({
           <Grid>
             <Grid.Col span={6}>
               <TextInput
-                label="Dosage"
+                label="Amount"
                 placeholder="e.g., 500mg, 2 tablets, 30 minutes"
                 value={formData.dosage || ''}
                 onChange={handleTextInputChange('dosage')}

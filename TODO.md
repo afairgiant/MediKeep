@@ -19,6 +19,12 @@
 
 ## Improvements
 
+### URL Routing & Navigation
+
+- ✅ Add query parameter support for direct linking to specific items (implemented for Treatments page)
+- Upgrade to route parameters for cleaner URLs (e.g., `/treatments/123` instead of `/treatments?view=123`)
+- Implement URL routing for all medical pages (conditions, medications, procedures, etc.)
+
 ### User
 
 - Make it so only 1 session per user can be active at a time
