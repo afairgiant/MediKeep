@@ -4,6 +4,16 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
+// Add ResizeObserver polyfill for Mantine components
+global.ResizeObserver = class ResizeObserver {
+  constructor(cb) {
+    this.cb = cb;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Setup MSW server
 import { server } from './test-utils/mocks/server';
 

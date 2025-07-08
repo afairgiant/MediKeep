@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 import AuthContext from '../contexts/AuthContext';
 import { AppDataContext } from '../contexts/AppDataContext';
+import { MantineIntegratedThemeProvider } from '../contexts/ThemeContext';
 
 // Mock auth context values
 const defaultAuthContext = {
@@ -50,11 +51,13 @@ function render(
   function Wrapper({ children }) {
     const content = (
       <MantineProvider theme={mantineTheme}>
-        <AuthContext.Provider value={mergedAuthContext}>
-          <AppDataContext.Provider value={mergedAppDataContext}>
-            {children}
-          </AppDataContext.Provider>
-        </AuthContext.Provider>
+        <MantineIntegratedThemeProvider>
+          <AuthContext.Provider value={mergedAuthContext}>
+            <AppDataContext.Provider value={mergedAppDataContext}>
+              {children}
+            </AppDataContext.Provider>
+          </AuthContext.Provider>
+        </MantineIntegratedThemeProvider>
       </MantineProvider>
     );
 

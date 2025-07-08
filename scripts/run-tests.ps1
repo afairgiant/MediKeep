@@ -73,6 +73,10 @@ function Run-FrontendTests($testType = "all") {
                 Log-Info "Running frontend tests with coverage..."
                 npm run test:coverage
             }
+            "forms" {
+                Log-Info "Running medical form component tests..."
+                npm test -- --testPathPattern="components/medical/__tests__" --watchAll=false
+            }
             default {
                 Log-Info "Running all frontend tests..."
                 try { npm run lint } catch { }
@@ -339,7 +343,7 @@ function Show-Help {
     Write-Host "Usage: .\scripts\run-tests.ps1 [COMMAND] [OPTIONS]"
     Write-Host ""
     Write-Host "Commands:"
-    Write-Host "  frontend [unit|lint|coverage|all]  Run frontend tests"
+    Write-Host "  frontend [unit|lint|coverage|forms|all]  Run frontend tests"
     Write-Host "  backend [unit|api|crud|crud-<module>|integration|coverage|lint|all]  Run backend tests"
     Write-Host "  container [build|integration|e2e|security|all]  Run container tests"
     Write-Host "  quick                              Run quick test suite (unit tests)"
@@ -352,6 +356,7 @@ function Show-Help {
     Write-Host "Examples:"
     Write-Host "  .\scripts\run-tests.ps1 quick                           # Run unit tests only"
     Write-Host "  .\scripts\run-tests.ps1 frontend unit                   # Run frontend unit tests"
+    Write-Host "  .\scripts\run-tests.ps1 frontend forms                  # Run medical form component tests"
     Write-Host "  .\scripts\run-tests.ps1 backend coverage                # Run backend tests with coverage"
     Write-Host "  .\scripts\run-tests.ps1 backend crud                    # Run all CRUD tests"
     Write-Host "  .\scripts\run-tests.ps1 backend crud-patient            # Run Patient CRUD tests only"
