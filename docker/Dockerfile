@@ -12,19 +12,26 @@ ENV GENERATE_SOURCEMAP=false
 WORKDIR /frontend
 
 # Copy package files first for better layer caching
-COPY frontend/package.json ./
+COPY frontend/package.json frontend/package-lock.json* ./
 
-# Install dependencies with better error handling and compatibility
-RUN npm install --silent --no-audit --no-fund --force
+# Install dependencies with cache mount for faster builds
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/frontend/node_modules \
+    npm ci --silent --no-audit --no-fund --prefer-offline
 
-# Copy frontend source
+# Copy frontend source excluding test files
 COPY frontend/ ./
+RUN find . -name "*.test.js" -o -name "*.test.jsx" -o -name "*.spec.js" -o -name "*.spec.jsx" | xargs rm -f && \
+    rm -rf src/__tests__ src/**/__tests__
 
 # Build the React app with optimizations and ignore ESLint warnings
-RUN cp .eslintrc.production.js .eslintrc.js && \
+RUN --mount=type=cache,target=/frontend/.cache \
+    cp .eslintrc.production.js .eslintrc.js 2>/dev/null || true && \
     CI=false ESLINT_NO_DEV_ERRORS=true DISABLE_ESLINT_PLUGIN=true npm run build && \
     # Remove source maps and unnecessary files for production
-    find build -name "*.map" -delete
+    find build -name "*.map" -delete && \
+    # Remove development dependencies after build to reduce layer size
+    npm prune --production
 
 # Stage 2: Python backend with built React app
 FROM python:3.12-slim AS backend
@@ -53,8 +60,10 @@ WORKDIR /app
 # Copy requirements first for better layer caching
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies with cache mount for faster builds
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 # Copy backend source files
 COPY app/ ./app/
