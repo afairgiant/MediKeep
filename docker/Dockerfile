@@ -16,7 +16,6 @@ COPY frontend/package.json frontend/package-lock.json* ./
 
 # Install dependencies with cache mount for faster builds
 RUN --mount=type=cache,target=/root/.npm \
-    --mount=type=cache,target=/frontend/node_modules \
     npm ci --silent --no-audit --no-fund --prefer-offline
 
 # Copy frontend source excluding test files
