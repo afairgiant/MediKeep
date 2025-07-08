@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -42,6 +43,8 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import MantineConditionForm from '../../components/medical/MantineConditionForm';
 
 const Conditions = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -112,9 +115,27 @@ const Conditions = () => {
   const handleViewCondition = condition => {
     setViewingCondition(condition);
     setShowViewModal(true);
+    // Update URL with condition ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', condition.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
   };
 
-  // Check for condition ID to auto-open from other pages
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingCondition(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
+  };
+
+  // Check for condition ID to auto-open from other pages (sessionStorage)
   useEffect(() => {
     const conditionIdToOpen = sessionStorage.getItem('openConditionId');
     if (conditionIdToOpen && conditions.length > 0) {
@@ -127,6 +148,21 @@ const Conditions = () => {
       }
     }
   }, [conditions]); // Re-run when conditions data loads
+
+  // Handle URL parameters for direct linking to specific conditions
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && conditions.length > 0 && !loading) {
+      const condition = conditions.find(c => c.id.toString() === viewId);
+      if (condition && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingCondition(condition);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, conditions, loading, showViewModal]);
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
@@ -622,7 +658,7 @@ const Conditions = () => {
         {/* Condition View Modal */}
         <Modal
           opened={showViewModal}
-          onClose={() => setShowViewModal(false)}
+          onClose={handleCloseViewModal}
           title={
             <Group>
               <Text size="lg" fw={600}>
@@ -827,16 +863,13 @@ const Conditions = () => {
                 <Button
                   variant="light"
                   onClick={() => {
-                    setShowViewModal(false);
+                    handleCloseViewModal();
                     handleEditCondition(viewingCondition);
                   }}
                 >
                   Edit Condition
                 </Button>
-                <Button
-                  variant="filled"
-                  onClick={() => setShowViewModal(false)}
-                >
+                <Button variant="filled" onClick={handleCloseViewModal}>
                   Close
                 </Button>
               </Group>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -40,6 +41,8 @@ import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 
 const Allergies = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -117,6 +120,24 @@ const Allergies = () => {
   const handleViewAllergy = allergy => {
     setViewingAllergy(allergy);
     setShowViewModal(true);
+    // Update URL with allergy ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', allergy.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingAllergy(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleEditAllergy = allergy => {
@@ -131,6 +152,21 @@ const Allergies = () => {
     setEditingAllergy(allergy);
     setShowAddForm(true);
   };
+
+  // Handle URL parameters for direct linking to specific allergies
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && allergies.length > 0 && !loading) {
+      const allergy = allergies.find(a => a.id.toString() === viewId);
+      if (allergy && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingAllergy(allergy);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, allergies, loading, showViewModal]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -353,10 +389,10 @@ const Allergies = () => {
                           <Card.Section withBorder inheritPadding py="xs">
                             <Group justify="space-between">
                               <Group gap="xs">
-                                <SeverityIcon
-                                  size={20}
-                                  color={`var(--mantine-color-${getSeverityColor(allergy.severity)}-6)`}
-                                />
+                                {React.createElement(SeverityIcon, {
+                                  size: 20,
+                                  color: `var(--mantine-color-${getSeverityColor(allergy.severity)}-6)`,
+                                })}
                                 <Text fw={600} size="lg">
                                   {allergy.allergen}
                                 </Text>
@@ -378,7 +414,9 @@ const Allergies = () => {
                               <Badge
                                 color={getSeverityColor(allergy.severity)}
                                 variant="filled"
-                                leftSection={<SeverityIcon size={12} />}
+                                leftSection={React.createElement(SeverityIcon, {
+                                  size: 12,
+                                })}
                               >
                                 {allergy.severity}
                               </Badge>
@@ -478,7 +516,7 @@ const Allergies = () => {
         {/* Allergy View Modal */}
         <Modal
           opened={showViewModal}
-          onClose={() => setShowViewModal(false)}
+          onClose={handleCloseViewModal}
           title={
             <Group>
               <Text size="lg" fw={600}>
@@ -508,7 +546,10 @@ const Allergies = () => {
                         <Badge
                           color={getSeverityColor(viewingAllergy.severity)}
                           variant="filled"
-                          leftSection={<SeverityIcon size={16} />}
+                          leftSection={React.createElement(
+                            getSeverityIcon(viewingAllergy.severity),
+                            { size: 16 }
+                          )}
                         >
                           {viewingAllergy.severity}
                         </Badge>
@@ -618,16 +659,13 @@ const Allergies = () => {
                 <Button
                   variant="light"
                   onClick={() => {
-                    setShowViewModal(false);
+                    handleCloseViewModal();
                     handleEditAllergy(viewingAllergy);
                   }}
                 >
                   Edit Allergy
                 </Button>
-                <Button
-                  variant="filled"
-                  onClick={() => setShowViewModal(false)}
-                >
+                <Button variant="filled" onClick={handleCloseViewModal}>
                   Close
                 </Button>
               </Group>

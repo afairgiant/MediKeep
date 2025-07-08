@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -30,6 +31,8 @@ import {
 } from '@mantine/core';
 
 const Procedures = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners data
@@ -117,6 +120,24 @@ const Procedures = () => {
   const handleViewProcedure = procedure => {
     setViewingProcedure(procedure);
     setShowViewModal(true);
+    // Update URL with procedure ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', procedure.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingProcedure(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleEditProcedure = procedure => {
@@ -139,6 +160,21 @@ const Procedures = () => {
     });
     setShowModal(true);
   };
+
+  // Handle URL parameters for direct linking to specific procedures
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && procedures.length > 0 && !loading) {
+      const procedure = procedures.find(p => p.id.toString() === viewId);
+      if (procedure && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingProcedure(procedure);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, procedures, loading, showViewModal]);
 
   const handleDeleteProcedure = async procedureId => {
     const success = await deleteItem(procedureId);
@@ -488,7 +524,7 @@ const Procedures = () => {
       {/* Procedure View Modal */}
       <Modal
         opened={showViewModal}
-        onClose={() => setShowViewModal(false)}
+        onClose={handleCloseViewModal}
         title={
           <Group>
             <Text size="lg" fw={600}>
@@ -742,13 +778,13 @@ const Procedures = () => {
               <Button
                 variant="light"
                 onClick={() => {
-                  setShowViewModal(false);
+                  handleCloseViewModal();
                   handleEditProcedure(viewingProcedure);
                 }}
               >
                 Edit Procedure
               </Button>
-              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+              <Button variant="filled" onClick={handleCloseViewModal}>
                 Close
               </Button>
             </Group>

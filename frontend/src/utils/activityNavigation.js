@@ -43,6 +43,10 @@ const ROUTE_MAPPING = {
   encounter: '/visits',
   visit: '/visits',
   'medical visit': '/visits',
+  pharmacy: '/pharmacies',
+  'medical pharmacy': '/pharmacies',
+  practitioner: '/practitioners',
+  'medical practitioner': '/practitioners',
   patient: '/patients/me',
   'medical patient': '/patients/me',
 };
@@ -74,6 +78,10 @@ const ICON_MAPPING = {
   encounter: IconCalendarEvent,
   visit: IconCalendarEvent,
   'medical visit': IconCalendarEvent,
+  pharmacy: IconPill,
+  'medical pharmacy': IconPill,
+  practitioner: IconUser,
+  'medical practitioner': IconUser,
   patient: IconUser,
   'medical patient': IconUser,
 };
@@ -113,10 +121,10 @@ const ACTION_ICON_MAPPING = {
 /**
  * Generates the appropriate navigation URL for a given activity
  * @param {Object} activity - The activity object with id, model_name, and action
- * @param {boolean} includeHash - Whether to include hash for record highlighting
+ * @param {boolean} includeViewParam - Whether to include view parameter for direct linking
  * @returns {string|null} - The URL to navigate to, or null if navigation not supported
  */
-export const getActivityNavigationUrl = (activity, includeHash = true) => {
+export const getActivityNavigationUrl = (activity, includeViewParam = true) => {
   if (!activity || !activity.model_name) {
     return null;
   }
@@ -134,9 +142,9 @@ export const getActivityNavigationUrl = (activity, includeHash = true) => {
     return basePath;
   }
 
-  // For most medical records, navigate to the list page with hash for highlighting
-  if (includeHash && activity.id) {
-    return `${basePath}#record-${activity.id}`;
+  // For most medical records, navigate to the list page with view parameter for direct linking
+  if (includeViewParam && activity.id) {
+    return `${basePath}?view=${activity.id}`;
   }
 
   return basePath;
@@ -147,7 +155,7 @@ export const getActivityNavigationUrl = (activity, includeHash = true) => {
  * @param {string} modelName - The model name from the activity
  * @returns {React.Component|null} - The icon component or null if not found
  */
-export const getActivityIcon = (modelName) => {
+export const getActivityIcon = modelName => {
   if (!modelName) {
     return null;
   }
@@ -161,7 +169,7 @@ export const getActivityIcon = (modelName) => {
  * @param {string} action - The action performed (created, updated, deleted, etc.)
  * @returns {string} - The Mantine color name for the badge
  */
-export const getActionBadgeColor = (action) => {
+export const getActionBadgeColor = action => {
   if (!action) {
     return 'gray';
   }
@@ -175,7 +183,7 @@ export const getActionBadgeColor = (action) => {
  * @param {string} action - The action performed (created, updated, deleted, etc.)
  * @returns {React.Component|null} - The icon component for the action
  */
-export const getActionIcon = (action) => {
+export const getActionIcon = action => {
   if (!action) {
     return null;
   }
@@ -189,7 +197,7 @@ export const getActionIcon = (action) => {
  * @param {Object} activity - The activity object
  * @returns {string} - The formatted description
  */
-export const formatActivityDescription = (activity) => {
+export const formatActivityDescription = activity => {
   if (!activity || !activity.description) {
     return 'Unknown activity';
   }
@@ -201,11 +209,11 @@ export const formatActivityDescription = (activity) => {
 
   // For shorter descriptions, try to enhance them with context
   const { model_name, action, description } = activity;
-  
+
   if (model_name && action) {
     const modelDisplayName = getModelDisplayName(model_name);
     const actionDisplayName = getActionDisplayName(action);
-    
+
     // If the description doesn't already include the model name, add context
     if (!description.toLowerCase().includes(modelDisplayName.toLowerCase())) {
       return `${actionDisplayName} ${modelDisplayName.toLowerCase()}: ${description}`;
@@ -220,7 +228,7 @@ export const formatActivityDescription = (activity) => {
  * @param {string} modelName - The model name
  * @returns {string} - The display name
  */
-export const getModelDisplayName = (modelName) => {
+export const getModelDisplayName = modelName => {
   const displayNames = {
     medication: 'Medication',
     'medical medication': 'Medication',
@@ -245,6 +253,10 @@ export const getModelDisplayName = (modelName) => {
     encounter: 'Visit',
     visit: 'Visit',
     'medical visit': 'Visit',
+    pharmacy: 'Pharmacy',
+    'medical pharmacy': 'Pharmacy',
+    practitioner: 'Practitioner',
+    'medical practitioner': 'Practitioner',
     patient: 'Patient Information',
     'medical patient': 'Patient Information',
   };
@@ -257,7 +269,7 @@ export const getModelDisplayName = (modelName) => {
  * @param {string} action - The action name
  * @returns {string} - The display name
  */
-export const getActionDisplayName = (action) => {
+export const getActionDisplayName = action => {
   const displayNames = {
     created: 'Created',
     updated: 'Updated',
@@ -279,13 +291,16 @@ export const getActionDisplayName = (action) => {
  * @param {Object} activity - The activity object
  * @returns {boolean} - Whether the activity should be clickable
  */
-export const isActivityClickable = (activity) => {
+export const isActivityClickable = activity => {
   if (!activity || !activity.model_name) {
     return false;
   }
 
   // Don't make deleted items clickable since the record no longer exists
-  if (activity.action?.toLowerCase() === 'deleted' || activity.action?.toLowerCase() === 'removed') {
+  if (
+    activity.action?.toLowerCase() === 'deleted' ||
+    activity.action?.toLowerCase() === 'removed'
+  ) {
     return false;
   }
 
@@ -299,7 +314,7 @@ export const isActivityClickable = (activity) => {
  * @param {Object} activity - The activity object
  * @returns {string} - The tooltip text
  */
-export const getActivityTooltip = (activity) => {
+export const getActivityTooltip = activity => {
   if (!activity) {
     return '';
   }
@@ -333,6 +348,8 @@ export const getActivityFilterOptions = () => {
     { value: 'emergency_contact', label: 'Emergency Contacts' },
     { value: 'treatment', label: 'Treatments' },
     { value: 'encounter', label: 'Visits' },
+    { value: 'pharmacy', label: 'Pharmacies' },
+    { value: 'practitioner', label: 'Practitioners' },
     { value: 'patient', label: 'Patient Info' },
   ];
 };
@@ -359,15 +376,21 @@ export const getActionFilterOptions = () => {
  * @param {string} actionFilter - Action filter ('all' or specific action)
  * @returns {Array} - Filtered activities
  */
-export const filterActivities = (activities, typeFilter = 'all', actionFilter = 'all') => {
+export const filterActivities = (
+  activities,
+  typeFilter = 'all',
+  actionFilter = 'all'
+) => {
   if (!Array.isArray(activities)) {
     return [];
   }
 
   return activities.filter(activity => {
-    const typeMatch = typeFilter === 'all' || activity.model_name?.toLowerCase() === typeFilter;
-    const actionMatch = actionFilter === 'all' || activity.action?.toLowerCase() === actionFilter;
-    
+    const typeMatch =
+      typeFilter === 'all' || activity.model_name?.toLowerCase() === typeFilter;
+    const actionMatch =
+      actionFilter === 'all' || activity.action?.toLowerCase() === actionFilter;
+
     return typeMatch && actionMatch;
   });
 };
@@ -385,7 +408,7 @@ export const groupActivities = (activities, groupBy = 'date') => {
 
   return activities.reduce((groups, activity) => {
     let key;
-    
+
     switch (groupBy) {
       case 'date':
         key = new Date(activity.timestamp).toDateString();
@@ -403,7 +426,7 @@ export const groupActivities = (activities, groupBy = 'date') => {
     if (!groups[key]) {
       groups[key] = [];
     }
-    
+
     groups[key].push(activity);
     return groups;
   }, {});

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -32,6 +32,7 @@ import {
 
 const Treatments = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
 
   // Modern data management with useMedicalData
@@ -155,6 +156,24 @@ const Treatments = () => {
     // Use existing treatment data - no need to fetch again
     setViewingTreatment(treatment);
     setShowViewModal(true);
+    // Update URL with treatment ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', treatment.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingTreatment(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleDeleteTreatment = async treatmentId => {
@@ -263,6 +282,21 @@ const Treatments = () => {
       navigate('/conditions');
     }
   };
+
+  // Handle URL parameters for direct linking to specific treatments
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && treatments.length > 0 && !loading) {
+      const treatment = treatments.find(t => t.id.toString() === viewId);
+      if (treatment && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingTreatment(treatment);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, treatments, loading, showViewModal]);
 
   // Get processed data from data management
   const filteredTreatments = dataManagement.data;
@@ -440,7 +474,7 @@ const Treatments = () => {
                         {treatment.dosage && (
                           <Group>
                             <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Dosage:
+                              Amount:
                             </Text>
                             <Text size="sm">{treatment.dosage}</Text>
                           </Group>
@@ -531,24 +565,30 @@ const Treatments = () => {
               onEdit={handleEditTreatment}
               onDelete={handleDeleteTreatment}
               formatters={{
-                treatment_name: getEntityFormatters('treatments').treatment_name,
-                treatment_type: getEntityFormatters('treatments').treatment_type,
+                treatment_name:
+                  getEntityFormatters('treatments').treatment_name,
+                treatment_type:
+                  getEntityFormatters('treatments').treatment_type,
                 practitioner: (value, row) => {
                   if (row.practitioner_id) {
                     const practitionerInfo = getPractitionerInfo(
                       row.practitioner_id
                     );
-                    return `Dr. ${row.practitioner?.name ||
+                    return `Dr. ${
+                      row.practitioner?.name ||
                       practitionerInfo?.name ||
-                      `#${row.practitioner_id}`}`;
+                      `#${row.practitioner_id}`
+                    }`;
                   }
                   return 'No practitioner';
                 },
                 condition: (value, row) => {
                   if (row.condition_id) {
-                    return row.condition?.diagnosis ||
+                    return (
+                      row.condition?.diagnosis ||
                       getConditionName(row.condition_id) ||
-                      `Condition #${row.condition_id}`;
+                      `Condition #${row.condition_id}`
+                    );
                   }
                   return 'No condition linked';
                 },
@@ -582,7 +622,7 @@ const Treatments = () => {
       {/* Treatment View Modal */}
       <Modal
         opened={showViewModal}
-        onClose={() => setShowViewModal(false)}
+        onClose={handleCloseViewModal}
         title={
           <Group>
             <Text size="lg" fw={600}>
@@ -682,12 +722,12 @@ const Treatments = () => {
                 <Card withBorder p="md" h="100%">
                   <Stack gap="sm">
                     <Text fw={600} size="sm" c="dimmed">
-                      DOSAGE & FREQUENCY
+                      AMOUNT & FREQUENCY
                     </Text>
                     <Divider />
                     <Group>
                       <Text size="sm" fw={500} w={80}>
-                        Dosage:
+                        Amount:
                       </Text>
                       <Text
                         size="sm"
@@ -853,13 +893,13 @@ const Treatments = () => {
               <Button
                 variant="light"
                 onClick={() => {
-                  setShowViewModal(false);
+                  handleCloseViewModal();
                   handleEditTreatment(viewingTreatment);
                 }}
               >
                 Edit Treatment
               </Button>
-              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+              <Button variant="filled" onClick={handleCloseViewModal}>
                 Close
               </Button>
             </Group>

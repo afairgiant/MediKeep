@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -30,6 +31,8 @@ import {
 } from '@mantine/core';
 
 const Medication = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners and pharmacies data
@@ -130,7 +133,40 @@ const Medication = () => {
   const handleViewMedication = medication => {
     setViewingMedication(medication);
     setShowViewModal(true);
+    // Update URL with medication ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', medication.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
   };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingMedication(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
+  };
+
+  // Handle URL parameters for direct linking to specific medications
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && medications.length > 0 && !loading) {
+      const medication = medications.find(m => m.id.toString() === viewId);
+      if (medication && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingMedication(medication);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, medications, loading, showViewModal]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
@@ -461,7 +497,7 @@ const Medication = () => {
       {/* Medication View Modal */}
       <Modal
         opened={showViewModal}
-        onClose={() => setShowViewModal(false)}
+        onClose={handleCloseViewModal}
         title={
           <Group>
             <Text size="lg" fw={600}>
@@ -639,13 +675,13 @@ const Medication = () => {
               <Button
                 variant="light"
                 onClick={() => {
-                  setShowViewModal(false);
+                  handleCloseViewModal();
                   handleEditMedication(viewingMedication);
                 }}
               >
                 Edit Medication
               </Button>
-              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+              <Button variant="filled" onClick={handleCloseViewModal}>
                 Close
               </Button>
             </Group>

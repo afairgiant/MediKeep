@@ -633,10 +633,10 @@ const Dashboard = () => {
                 </SimpleGrid>
               </div>
 
-              {/* Active Treatments */}
+              {/* Treatments and Procedures */}
               <div>
                 <Title order={2} size="h3" mb="md">
-                  Active Treatments
+                  Treatments and Procedures
                 </Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   {treatmentModules.map((module, index) => (

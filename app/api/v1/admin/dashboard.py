@@ -184,6 +184,12 @@ def get_recent_activity(
                     "condition": "Condition",
                     "immunization": "Immunization",
                     "vitals": "Vitals",
+                    "pharmacy": "Pharmacy",
+                    "practitioner": "Practitioner",
+                    "treatment": "Treatment",
+                    "encounter": "Visit",
+                    "emergency_contact": "Emergency Contact",
+                    "lab_result_file": "Lab Result File",
                 }
                 entity_type = getattr(log, "entity_type", None)
                 model_name = model_name_mapping.get(
@@ -375,6 +381,12 @@ def get_recent_activity_enhanced(
                 "condition": "Condition",
                 "immunization": "Immunization",
                 "vitals": "Vitals",
+                "pharmacy": "Pharmacy",
+                "practitioner": "Practitioner",
+                "treatment": "Treatment",
+                "encounter": "Visit",
+                "emergency_contact": "Emergency Contact",
+                "lab_result_file": "Lab Result File",
             }
 
             entity_type = getattr(log, "entity_type", None)
