@@ -498,7 +498,7 @@ const Dashboard = () => {
         <Stack gap="xs">
           {recentActivity.slice(0, 4).map((activity, index) => (
             <ActivityItem
-              key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || Date.now()}`}
+              key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || `index-${index}`}`}
               activity={activity}
               index={index}
             />
