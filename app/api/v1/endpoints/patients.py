@@ -609,8 +609,10 @@ def get_user_recent_activity(
             "procedure",
             "treatment",
             "encounter",
+            "emergency_contact",  # Emergency contacts page
             "patient",
             "practitioner",  # Doctors/practitioners page
+            "pharmacy",  # Pharmacies page
             "lab_result_file",  # Lab result file uploads
         ]  # Query activity logs for this patient's medical activities
         # Include activities by the user AND activities that affect this patient
@@ -651,8 +653,10 @@ def get_user_recent_activity(
                 "procedure": "Procedure",
                 "treatment": "Treatment",
                 "encounter": "Visit",
+                "emergency_contact": "Emergency Contact",
                 "patient": "Patient Information",
                 "practitioner": "Doctor",
+                "pharmacy": "Pharmacy",
                 "lab_result_file": "Lab Result File",
             }
 
