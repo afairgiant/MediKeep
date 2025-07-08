@@ -23,7 +23,6 @@ COPY frontend/ ./
 # Build the React app with optimizations and ignore ESLint warnings
 RUN cp .eslintrc.production.js .eslintrc.js && \
     CI=false ESLINT_NO_DEV_ERRORS=true DISABLE_ESLINT_PLUGIN=true npm run build && \
-
     # Remove source maps and unnecessary files for production
     find build -name "*.map" -delete
 
