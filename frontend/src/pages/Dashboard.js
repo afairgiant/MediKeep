@@ -22,6 +22,9 @@ import {
   TextInput,
   Box,
   Flex,
+  Tooltip,
+  HoverCard,
+  Select,
 } from '@mantine/core';
 import {
   IconStethoscope,
@@ -52,6 +55,15 @@ import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient } from '../hooks/useGlobalData';
 import { formatDateTime } from '../utils/helpers';
+import {
+  getActivityNavigationUrl,
+  getActivityIcon,
+  getActionBadgeColor,
+  getActionIcon,
+  formatActivityDescription,
+  isActivityClickable,
+  getActivityTooltip,
+} from '../utils/activityNavigation';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -127,7 +139,10 @@ const Dashboard = () => {
         setIsAdmin(false);
       }
     } catch (error) {
-      frontendLogger.logError('Error checking admin status', { error: error.message, component: 'Dashboard' });
+      frontendLogger.logError('Error checking admin status', {
+        error: error.message,
+        component: 'Dashboard',
+      });
       setIsAdmin(false);
     }
   };
@@ -138,7 +153,10 @@ const Dashboard = () => {
       const activity = await apiService.getRecentActivity();
       setRecentActivity(activity);
     } catch (error) {
-      frontendLogger.logError('Error fetching activity', { error: error.message, component: 'Dashboard' });
+      frontendLogger.logError('Error fetching activity', {
+        error: error.message,
+        component: 'Dashboard',
+      });
     } finally {
       setActivityLoading(false);
     }
@@ -150,7 +168,10 @@ const Dashboard = () => {
       const stats = await apiService.getDashboardStats();
       setDashboardStats(stats);
     } catch (error) {
-      frontendLogger.logError('Error fetching dashboard stats', { error: error.message, component: 'Dashboard' });
+      frontendLogger.logError('Error fetching dashboard stats', {
+        error: error.message,
+        component: 'Dashboard',
+      });
       // Set fallback stats on error
       setDashboardStats({
         total_records: 0,
@@ -360,6 +381,113 @@ const Dashboard = () => {
     );
   };
 
+  const ActivityItem = ({ activity, index }) => {
+    const isClickable = isActivityClickable(activity);
+    const navigationUrl = getActivityNavigationUrl(activity);
+    const ActivityIcon = getActivityIcon(activity.model_name);
+    const ActionIcon = getActionIcon(activity.action);
+    const actionColor = getActionBadgeColor(activity.action);
+    const tooltip = getActivityTooltip(activity);
+    const formattedDescription = formatActivityDescription(activity);
+
+    const handleClick = e => {
+      if (isClickable && navigationUrl) {
+        navigate(navigationUrl);
+        frontendLogger.logInfo('Activity item clicked', {
+          component: 'Dashboard',
+          activity_id: activity.id,
+          model_name: activity.model_name,
+          action: activity.action,
+          navigation_url: navigationUrl,
+        });
+      }
+    };
+
+    return (
+      <Tooltip label={tooltip} position="left" disabled={!tooltip}>
+        <Paper
+          p="sm"
+          radius="md"
+          withBorder
+          style={{
+            cursor: isClickable ? 'pointer' : 'default',
+            transition: 'all 0.2s ease',
+            backgroundColor: isClickable
+              ? 'transparent'
+              : 'var(--mantine-color-gray-0)',
+          }}
+          styles={{
+            root: isClickable
+              ? {
+                  '&:hover': {
+                    backgroundColor: 'var(--mantine-color-gray-1)',
+                    transform: 'translateX(4px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  },
+                }
+              : {},
+          }}
+          onClick={handleClick}
+        >
+          <Group align="flex-start" gap="sm" wrap="nowrap">
+            {/* Activity Type Icon */}
+            <ThemeIcon
+              color={ActivityIcon ? 'blue' : 'gray'}
+              variant="light"
+              size="sm"
+              radius="md"
+              mt={2}
+              style={{ flexShrink: 0 }}
+            >
+              {ActivityIcon ? (
+                <ActivityIcon size={14} />
+              ) : (
+                <IconAlertCircle size={14} />
+              )}
+            </ThemeIcon>
+
+            {/* Content */}
+            <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+              <Group gap="xs" align="center" wrap="nowrap">
+                {/* Action Badge */}
+                <Badge
+                  color={actionColor}
+                  variant="light"
+                  size="xs"
+                  radius="sm"
+                  leftSection={ActionIcon && <ActionIcon size={10} />}
+                >
+                  {activity.action}
+                </Badge>
+
+                {/* Clickable indicator */}
+                {isClickable && (
+                  <IconChevronRight
+                    size={12}
+                    color="var(--mantine-color-dimmed)"
+                  />
+                )}
+              </Group>
+
+              <Text
+                size="sm"
+                fw={500}
+                lineClamp={2}
+                style={{ wordBreak: 'break-word' }}
+              >
+                {formattedDescription}
+              </Text>
+
+              <Text size="xs" c="dimmed">
+                {formatDateTime(activity.timestamp)}
+              </Text>
+            </Stack>
+          </Group>
+        </Paper>
+      </Tooltip>
+    );
+  };
+
   const RecentActivityList = () => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Title order={3} size="h4" mb="md">
@@ -367,28 +495,13 @@ const Dashboard = () => {
       </Title>
 
       {recentActivity.length > 0 ? (
-        <Stack gap="sm">
+        <Stack gap="xs">
           {recentActivity.slice(0, 4).map((activity, index) => (
-            <Group key={index} align="flex-start" gap="sm">
-              <Box
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--mantine-color-blue-6)',
-                  marginTop: 6,
-                  flexShrink: 0,
-                }}
-              />
-              <Stack gap={2} style={{ flex: 1 }}>
-                <Text size="sm" fw={500} lineClamp={2}>
-                  {activity.description}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {formatDateTime(activity.timestamp)}
-                </Text>
-              </Stack>
-            </Group>
+            <ActivityItem
+              key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || `index-${index}`}`}
+              activity={activity}
+              index={index}
+            />
           ))}
         </Stack>
       ) : (
@@ -399,6 +512,9 @@ const Dashboard = () => {
             </ThemeIcon>
             <Text size="sm" fw={500} c="dimmed" ta="center">
               No recent activity
+            </Text>
+            <Text size="xs" c="dimmed" ta="center">
+              Your medical record activities will appear here
             </Text>
           </Stack>
         </Paper>
@@ -501,15 +617,8 @@ const Dashboard = () => {
           />
         </Flex>
 
-        {/* Stats Row */}
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
-          {dashboardStatsCards.map((stat, index) => (
-            <StatCard key={index} stat={stat} />
-          ))}
-        </SimpleGrid>
-
         {/* Main Content Grid */}
-        <Grid>
+        <Grid mb="xl">
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="xl">
               {/* Core Medical Information */}
@@ -614,6 +723,13 @@ const Dashboard = () => {
             </Stack>
           </Grid.Col>
         </Grid>
+
+        {/* Stats Row */}
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
+          {dashboardStatsCards.map((stat, index) => (
+            <StatCard key={index} stat={stat} />
+          ))}
+        </SimpleGrid>
       </Container>
 
       {/* Profile Completion Modal */}
