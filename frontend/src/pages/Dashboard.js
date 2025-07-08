@@ -139,7 +139,10 @@ const Dashboard = () => {
         setIsAdmin(false);
       }
     } catch (error) {
-      frontendLogger.logError('Error checking admin status', { error: error.message, component: 'Dashboard' });
+      frontendLogger.logError('Error checking admin status', {
+        error: error.message,
+        component: 'Dashboard',
+      });
       setIsAdmin(false);
     }
   };
@@ -150,7 +153,10 @@ const Dashboard = () => {
       const activity = await apiService.getRecentActivity();
       setRecentActivity(activity);
     } catch (error) {
-      frontendLogger.logError('Error fetching activity', { error: error.message, component: 'Dashboard' });
+      frontendLogger.logError('Error fetching activity', {
+        error: error.message,
+        component: 'Dashboard',
+      });
     } finally {
       setActivityLoading(false);
     }
@@ -162,7 +168,10 @@ const Dashboard = () => {
       const stats = await apiService.getDashboardStats();
       setDashboardStats(stats);
     } catch (error) {
-      frontendLogger.logError('Error fetching dashboard stats', { error: error.message, component: 'Dashboard' });
+      frontendLogger.logError('Error fetching dashboard stats', {
+        error: error.message,
+        component: 'Dashboard',
+      });
       // Set fallback stats on error
       setDashboardStats({
         total_records: 0,
@@ -174,7 +183,6 @@ const Dashboard = () => {
       setStatsLoading(false);
     }
   };
-
 
   // Dashboard stats data - using real data from API
   const dashboardStatsCards = dashboardStats
@@ -382,15 +390,15 @@ const Dashboard = () => {
     const tooltip = getActivityTooltip(activity);
     const formattedDescription = formatActivityDescription(activity);
 
-    const handleClick = (e) => {
+    const handleClick = e => {
       if (isClickable && navigationUrl) {
         navigate(navigationUrl);
-        frontendLogger.logInfo('Activity item clicked', { 
-          component: 'Dashboard', 
+        frontendLogger.logInfo('Activity item clicked', {
+          component: 'Dashboard',
           activity_id: activity.id,
           model_name: activity.model_name,
           action: activity.action,
-          navigation_url: navigationUrl
+          navigation_url: navigationUrl,
         });
       }
     };
@@ -404,16 +412,20 @@ const Dashboard = () => {
           style={{
             cursor: isClickable ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
-            backgroundColor: isClickable ? 'transparent' : 'var(--mantine-color-gray-0)',
+            backgroundColor: isClickable
+              ? 'transparent'
+              : 'var(--mantine-color-gray-0)',
           }}
           styles={{
-            root: isClickable ? {
-              '&:hover': {
-                backgroundColor: 'var(--mantine-color-gray-1)',
-                transform: 'translateX(4px)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              },
-            } : {},
+            root: isClickable
+              ? {
+                  '&:hover': {
+                    backgroundColor: 'var(--mantine-color-gray-1)',
+                    transform: 'translateX(4px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  },
+                }
+              : {},
           }}
           onClick={handleClick}
         >
@@ -427,7 +439,11 @@ const Dashboard = () => {
               mt={2}
               style={{ flexShrink: 0 }}
             >
-              {ActivityIcon ? <ActivityIcon size={14} /> : <IconAlertCircle size={14} />}
+              {ActivityIcon ? (
+                <ActivityIcon size={14} />
+              ) : (
+                <IconAlertCircle size={14} />
+              )}
             </ThemeIcon>
 
             {/* Content */}
@@ -443,17 +459,25 @@ const Dashboard = () => {
                 >
                   {activity.action}
                 </Badge>
-                
+
                 {/* Clickable indicator */}
                 {isClickable && (
-                  <IconChevronRight size={12} color="var(--mantine-color-dimmed)" />
+                  <IconChevronRight
+                    size={12}
+                    color="var(--mantine-color-dimmed)"
+                  />
                 )}
               </Group>
 
-              <Text size="sm" fw={500} lineClamp={2} style={{ wordBreak: 'break-word' }}>
+              <Text
+                size="sm"
+                fw={500}
+                lineClamp={2}
+                style={{ wordBreak: 'break-word' }}
+              >
                 {formattedDescription}
               </Text>
-              
+
               <Text size="xs" c="dimmed">
                 {formatDateTime(activity.timestamp)}
               </Text>
@@ -473,7 +497,11 @@ const Dashboard = () => {
       {recentActivity.length > 0 ? (
         <Stack gap="xs">
           {recentActivity.slice(0, 4).map((activity, index) => (
-            <ActivityItem key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || Date.now()}`} activity={activity} index={index} />
+            <ActivityItem
+              key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || Date.now()}`}
+              activity={activity}
+              index={index}
+            />
           ))}
         </Stack>
       ) : (
@@ -589,15 +617,8 @@ const Dashboard = () => {
           />
         </Flex>
 
-        {/* Stats Row */}
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" mb="xl">
-          {dashboardStatsCards.map((stat, index) => (
-            <StatCard key={index} stat={stat} />
-          ))}
-        </SimpleGrid>
-
         {/* Main Content Grid */}
-        <Grid>
+        <Grid mb="xl">
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="xl">
               {/* Core Medical Information */}
@@ -702,6 +723,13 @@ const Dashboard = () => {
             </Stack>
           </Grid.Col>
         </Grid>
+
+        {/* Stats Row */}
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
+          {dashboardStatsCards.map((stat, index) => (
+            <StatCard key={index} stat={stat} />
+          ))}
+        </SimpleGrid>
       </Container>
 
       {/* Profile Completion Modal */}
@@ -710,7 +738,6 @@ const Dashboard = () => {
         onClose={() => setShowProfileModal(false)}
         onComplete={() => setShowProfileModal(false)}
       />
-
     </div>
   );
 };
