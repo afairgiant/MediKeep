@@ -6,6 +6,7 @@ import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
 import { useAuth } from '../contexts/AuthContext';
 import { getVersionInfo } from '../services/systemService';
+import frontendLogger from '../services/frontendLogger';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
@@ -39,7 +40,10 @@ const Settings = () => {
         const version = await getVersionInfo();
         setVersionInfo(version);
       } catch (error) {
-        console.error('Failed to load version information:', error);
+        frontendLogger.logError('Failed to load version information', {
+          error: error.message,
+          component: 'Settings',
+        });
         // Don't show error to user, just fail silently
       } finally {
         setLoadingVersion(false);

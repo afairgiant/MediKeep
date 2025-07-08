@@ -121,8 +121,14 @@ docs/
 
 backups/
 
+# Coverage reports
+/coverage/
+/lcov-report/
+*.lcov
+frontend/coverage/
+
 # Coverage
 frontend/coverage
 
-
 .claude/
+.claude/settings.local.json

@@ -19,6 +19,10 @@
 
 ## Improvements
 
+### User
+
+- Make it so only 1 session per user can be active at a time
+
 ### Conditions
 
 - ✅ Add end date to condition

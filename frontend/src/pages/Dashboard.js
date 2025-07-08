@@ -48,6 +48,7 @@ import {
 import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { PageHeader } from '../components';
 import { apiService } from '../services/api';
+import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient } from '../hooks/useGlobalData';
 import { formatDateTime } from '../utils/helpers';
@@ -126,7 +127,7 @@ const Dashboard = () => {
         setIsAdmin(false);
       }
     } catch (error) {
-      console.error('Error checking admin status:', error);
+      frontendLogger.logError('Error checking admin status', { error: error.message, component: 'Dashboard' });
       setIsAdmin(false);
     }
   };
@@ -137,7 +138,7 @@ const Dashboard = () => {
       const activity = await apiService.getRecentActivity();
       setRecentActivity(activity);
     } catch (error) {
-      console.error('Error fetching activity:', error);
+      frontendLogger.logError('Error fetching activity', { error: error.message, component: 'Dashboard' });
     } finally {
       setActivityLoading(false);
     }
@@ -149,7 +150,7 @@ const Dashboard = () => {
       const stats = await apiService.getDashboardStats();
       setDashboardStats(stats);
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      frontendLogger.logError('Error fetching dashboard stats', { error: error.message, component: 'Dashboard' });
       // Set fallback stats on error
       setDashboardStats({
         total_records: 0,

@@ -19,24 +19,33 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Get all lab results by test code (e.g., LOINC code)"""
-        return self.query(
-            db=db,
-            filters={"test_code": test_code},
-            skip=skip,
-            limit=limit,
-            order_by="ordered_date",
-            order_desc=True,
+        # Use direct query to preserve case sensitivity for test codes
+        # Test codes are normalized to uppercase in the schema validator
+        return (
+            db.query(self.model)
+            .filter(self.model.test_code == test_code.upper())
+            .order_by(self.model.ordered_date.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
         )
 
     def get_by_patient_and_test_code(
         self, db: Session, *, patient_id: int, test_code: str
     ) -> List[LabResult]:
         """Get lab results for a specific patient and test code"""
-        return self.query(
-            db=db,
-            filters={"patient_id": patient_id, "test_code": test_code},
-            order_by="ordered_date",
-            order_desc=True,
+        # Use direct query to preserve case sensitivity for test codes
+        # Test codes are normalized to uppercase in the schema validator
+        return (
+            db.query(self.model)
+            .filter(
+                and_(
+                    self.model.patient_id == patient_id,
+                    self.model.test_code == test_code.upper()
+                )
+            )
+            .order_by(self.model.ordered_date.desc())
+            .all()
         )
 
     def get_with_files(self, db: Session, *, lab_result_id: int) -> Optional[LabResult]:
@@ -47,13 +56,15 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         self, db: Session, *, test_code_pattern: str, skip: int = 0, limit: int = 100
     ) -> List[LabResult]:
         """Search lab results by test code pattern (partial match)"""
-        return self.query(
-            db=db,
-            search={"field": "test_code", "term": test_code_pattern},
-            skip=skip,
-            limit=limit,
-            order_by="ordered_date",
-            order_desc=True,
+        # Use direct query to preserve case sensitivity for test codes
+        # Test codes are normalized to uppercase in the schema validator
+        return (
+            db.query(self.model)
+            .filter(self.model.test_code.ilike(f"%{test_code_pattern.upper()}%"))
+            .order_by(self.model.ordered_date.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
         )
 
 

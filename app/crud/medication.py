@@ -30,7 +30,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         """
         return self.query(
             db=db,
-            filters={"patient_id": patient_id, "is_active": True},
+            filters={"patient_id": patient_id, "status": "active"},
             load_relations=["practitioner", "pharmacy"],
         )
 
@@ -58,7 +58,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
 
     def deactivate(self, db: Session, *, db_obj: Medication) -> Medication:
         """
-        Deactivate a medication (mark as inactive).
+        Deactivate a medication (mark as stopped).
 
         Args:
             db: Database session
@@ -67,7 +67,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             Updated medication object
         """
-        db_obj.is_active = False
+        db_obj.status = "stopped"
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -84,7 +84,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         Returns:
             Updated medication object
         """
-        db_obj.is_active = True
+        db_obj.status = "active"
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

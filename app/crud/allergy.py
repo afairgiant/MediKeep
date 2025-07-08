@@ -66,9 +66,16 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             patient_id: ID of the patient
 
         Returns:
-            List of critical allergies
+            List of critical allergies ordered by severity (life-threatening first)
         """
-        from sqlalchemy import or_
+        from sqlalchemy import or_, case
+
+        # Create a case statement to order by severity priority
+        severity_order = case(
+            (Allergy.severity == "life-threatening", 1),
+            (Allergy.severity == "severe", 2),
+            else_=3
+        )
 
         query = (
             db.query(Allergy)
@@ -79,7 +86,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
                     Allergy.severity == "severe", Allergy.severity == "life-threatening"
                 ),
             )
-            .order_by(Allergy.severity.desc(), Allergy.onset_date.desc().nullslast())
+            .order_by(severity_order, Allergy.onset_date.desc().nullslast())
         )
         return query.all()
 
