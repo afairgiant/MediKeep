@@ -21,9 +21,10 @@
 
 ### URL Routing & Navigation
 
-- ✅ Add query parameter support for direct linking to specific items (implemented for Treatments page)
+- ✅ Add query parameter support for direct linking to specific items (implemented for Treatments, Conditions, Procedures, Medications, Allergies)
+- ✅ Implement URL routing for remaining medical pages (immunizations, vitals, visits, lab results, emergency contacts) - **Note: These pages don't have view modals implemented yet**
+- ✅ Add view modals to remaining medical pages (immunizations, vitals, visits, lab results, emergency contacts) before implementing URL routing
 - Upgrade to route parameters for cleaner URLs (e.g., `/treatments/123` instead of `/treatments?view=123`)
-- Implement URL routing for all medical pages (conditions, medications, procedures, etc.)
 
 ### User
 

@@ -15,6 +15,7 @@ import {
   Card,
   Divider,
   Anchor,
+  Modal,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -24,6 +25,7 @@ import {
   IconPill,
 } from '@tabler/icons-react';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
@@ -37,7 +39,11 @@ const Pharmacies = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingPharmacy, setViewingPharmacy] = useState(null);
   const [editingPharmacy, setEditingPharmacy] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Use global state for pharmacies data
   const {
@@ -95,6 +101,29 @@ const Pharmacies = () => {
   const handleAddPharmacy = () => {
     resetForm();
     setShowModal(true);
+  };
+
+  const handleViewPharmacy = pharmacy => {
+    setViewingPharmacy(pharmacy);
+    setShowViewModal(true);
+    // Update URL with pharmacy ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', pharmacy.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingPharmacy(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleEditPharmacy = pharmacy => {
@@ -158,6 +187,26 @@ const Pharmacies = () => {
 
   // Get processed data from data management
   const filteredPharmacies = dataManagement.data;
+
+  // Handle URL parameters for direct linking to specific pharmacies
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (
+      viewId &&
+      filteredPharmacies &&
+      filteredPharmacies.length > 0 &&
+      !loading
+    ) {
+      const pharmacy = filteredPharmacies.find(p => p.id.toString() === viewId);
+      if (pharmacy && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingPharmacy(pharmacy);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, filteredPharmacies, loading, showViewModal]);
 
   if (loading) {
     return (
@@ -365,6 +414,13 @@ const Pharmacies = () => {
                             <Button
                               variant="light"
                               size="xs"
+                              onClick={() => handleViewPharmacy(pharmacy)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              variant="light"
+                              size="xs"
                               onClick={() => handleEditPharmacy(pharmacy)}
                             >
                               Edit
@@ -398,6 +454,142 @@ const Pharmacies = () => {
         onSubmit={handleSubmit}
         editingPharmacy={editingPharmacy}
       />
+
+      {/* View Details Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={handleCloseViewModal}
+        title={
+          <Group>
+            <Text size="lg" fw={600}>
+              Pharmacy Details
+            </Text>
+            {viewingPharmacy && viewingPharmacy.brand && (
+              <Badge color="blue" variant="light" size="lg">
+                {viewingPharmacy.brand}
+              </Badge>
+            )}
+          </Group>
+        }
+        size="lg"
+        centered
+      >
+        {viewingPharmacy && (
+          <Stack gap="md">
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Title order={3}>{viewingPharmacy.name}</Title>
+                    <Text size="sm" c="dimmed">
+                      Pharmacy
+                    </Text>
+                  </Stack>
+                </Group>
+              </Stack>
+            </Card>
+
+            <Grid>
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      LOCATION
+                    </Text>
+                    <Divider />
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Address:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingPharmacy.street_address ? 'inherit' : 'dimmed'
+                        }
+                      >
+                        {viewingPharmacy.street_address || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        City:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPharmacy.city ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPharmacy.city || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Store #:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPharmacy.store_number ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPharmacy.store_number || 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      CONTACT INFORMATION
+                    </Text>
+                    <Divider />
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Phone:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPharmacy.phone_number ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPharmacy.phone_number
+                          ? formatPhoneNumber(viewingPharmacy.phone_number)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Website:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPharmacy.website ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPharmacy.website ? (
+                          <Anchor
+                            href={
+                              viewingPharmacy.website.startsWith('http')
+                                ? viewingPharmacy.website
+                                : `https://${viewingPharmacy.website}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            size="sm"
+                            c="blue"
+                          >
+                            Visit Website
+                          </Anchor>
+                        ) : (
+                          'Not specified'
+                        )}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        )}
+      </Modal>
     </motion.div>
   );
 };

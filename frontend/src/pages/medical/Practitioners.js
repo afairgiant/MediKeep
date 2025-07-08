@@ -15,6 +15,7 @@ import {
   Card,
   Divider,
   Anchor,
+  Modal,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -26,6 +27,7 @@ import {
   IconShieldCheck,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -44,6 +46,8 @@ import frontendLogger from '../../services/frontendLogger';
 
 const Practitioners = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Using global state for practitioners data
   const {
@@ -57,6 +61,8 @@ const Practitioners = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingPractitioner, setViewingPractitioner] = useState(null);
 
   // Standardized filtering and sorting
   const config = getMedicalPageConfig('practitioners');
@@ -91,6 +97,29 @@ const Practitioners = () => {
       rating: '',
     });
     setShowModal(true);
+  };
+
+  const handleViewPractitioner = practitioner => {
+    setViewingPractitioner(practitioner);
+    setShowViewModal(true);
+    // Update URL with practitioner ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', practitioner.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingPractitioner(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleEditPractitioner = practitioner => {
@@ -185,6 +214,28 @@ const Practitioners = () => {
   };
 
   const filteredPractitioners = dataManagement.data;
+
+  // Handle URL parameters for direct linking to specific practitioners
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (
+      viewId &&
+      filteredPractitioners &&
+      filteredPractitioners.length > 0 &&
+      !loading
+    ) {
+      const practitioner = filteredPractitioners.find(
+        p => p.id.toString() === viewId
+      );
+      if (practitioner && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingPractitioner(practitioner);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, filteredPractitioners, loading, showViewModal]);
 
   const getSpecialtyColor = specialty => {
     // Color coding for different specialties
@@ -434,6 +485,15 @@ const Practitioners = () => {
                                 variant="light"
                                 size="xs"
                                 onClick={() =>
+                                  handleViewPractitioner(practitioner)
+                                }
+                              >
+                                View
+                              </Button>
+                              <Button
+                                variant="light"
+                                size="xs"
+                                onClick={() =>
                                   handleEditPractitioner(practitioner)
                                 }
                               >
@@ -470,6 +530,7 @@ const Practitioners = () => {
                   { header: 'Rating', accessor: 'rating' },
                 ]}
                 tableName="Healthcare Practitioners"
+                onView={handleViewPractitioner}
                 onEdit={handleEditPractitioner}
                 onDelete={handleDeletePractitioner}
                 formatters={{
@@ -498,6 +559,163 @@ const Practitioners = () => {
         onSubmit={handleSubmit}
         editingPractitioner={editingPractitioner}
       />
+
+      {/* View Details Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={handleCloseViewModal}
+        title={
+          <Group>
+            <Text size="lg" fw={600}>
+              Practitioner Details
+            </Text>
+            {viewingPractitioner && viewingPractitioner.specialty && (
+              <Badge
+                color={getSpecialtyColor(viewingPractitioner.specialty)}
+                variant="light"
+                size="lg"
+              >
+                {viewingPractitioner.specialty}
+              </Badge>
+            )}
+          </Group>
+        }
+        size="lg"
+        centered
+      >
+        {viewingPractitioner && (
+          <Stack gap="md">
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Title order={3}>{viewingPractitioner.name}</Title>
+                    <Text size="sm" c="dimmed">
+                      Healthcare Practitioner
+                    </Text>
+                  </Stack>
+                </Group>
+              </Stack>
+            </Card>
+
+            <Grid>
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      PRACTICE INFORMATION
+                    </Text>
+                    <Divider />
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Practice:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPractitioner.practice ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPractitioner.practice || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Specialty:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPractitioner.specialty ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPractitioner.specialty || 'Not specified'}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Phone:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingPractitioner.phone_number
+                            ? 'inherit'
+                            : 'dimmed'
+                        }
+                      >
+                        {viewingPractitioner.phone_number
+                          ? formatPhoneNumber(viewingPractitioner.phone_number)
+                          : 'Not specified'}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Card withBorder p="md" h="100%">
+                  <Stack gap="sm">
+                    <Text fw={600} size="sm" c="dimmed">
+                      CONTACT & RATING
+                    </Text>
+                    <Divider />
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Website:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={viewingPractitioner.website ? 'inherit' : 'dimmed'}
+                      >
+                        {viewingPractitioner.website ? (
+                          <Anchor
+                            href={viewingPractitioner.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            size="sm"
+                            c="blue"
+                          >
+                            Visit Website
+                          </Anchor>
+                        ) : (
+                          'Not specified'
+                        )}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text size="sm" fw={500} w={80}>
+                        Rating:
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={
+                          viewingPractitioner.rating !== null &&
+                          viewingPractitioner.rating !== undefined
+                            ? 'inherit'
+                            : 'dimmed'
+                        }
+                      >
+                        {viewingPractitioner.rating !== null &&
+                        viewingPractitioner.rating !== undefined ? (
+                          <Group gap="xs">
+                            <IconStar
+                              size={16}
+                              color="var(--mantine-color-yellow-6)"
+                              fill="var(--mantine-color-yellow-6)"
+                            />
+                            <Text size="sm" fw={500}>
+                              {viewingPractitioner.rating}/5
+                            </Text>
+                          </Group>
+                        ) : (
+                          'Not specified'
+                        )}
+                      </Text>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        )}
+      </Modal>
     </motion.div>
   );
 };

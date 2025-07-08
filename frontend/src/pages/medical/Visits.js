@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -26,6 +26,7 @@ import {
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
@@ -40,6 +41,8 @@ import MantineVisitForm from '../../components/medical/MantineVisitForm';
 
 const Visits = () => {
   const [viewMode, setViewMode] = useState('cards');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Get practitioners data
   const { practitioners } = usePractitioners();
@@ -119,6 +122,12 @@ const Visits = () => {
   const handleViewVisit = visit => {
     setViewingVisit(visit);
     setShowViewModal(true);
+    // Update URL with visit ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', visit.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
   };
 
   const handleEditVisit = visit => {
@@ -138,6 +147,18 @@ const Visits = () => {
       priority: visit.priority || '',
     });
     setShowModal(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingVisit(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleDeleteVisit = async visitId => {
@@ -243,6 +264,21 @@ const Visits = () => {
         return 'gray';
     }
   };
+
+  // Handle URL parameters for direct linking to specific visits
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && visits && visits.length > 0 && !loading) {
+      const visit = visits.find(v => v.id.toString() === viewId);
+      if (visit && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingVisit(visit);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, visits, loading, showViewModal]);
 
   if (loading) {
     return (
@@ -581,7 +617,11 @@ const Visits = () => {
                   reason: getEntityFormatters('visits').text,
                   visit_type: getEntityFormatters('visits').simple,
                   location: getEntityFormatters('visits').simple,
-                  practitioner_name: (value, item) => getEntityFormatters('visits', practitioners).practitioner_name(value, item),
+                  practitioner_name: (value, item) =>
+                    getEntityFormatters(
+                      'visits',
+                      practitioners
+                    ).practitioner_name(value, item),
                   diagnosis: getEntityFormatters('visits').text,
                   notes: getEntityFormatters('visits').text,
                 }}
@@ -605,7 +645,7 @@ const Visits = () => {
       {/* Visit View Modal */}
       <Modal
         opened={showViewModal}
-        onClose={() => setShowViewModal(false)}
+        onClose={handleCloseViewModal}
         title={
           <Group>
             <Text size="lg" fw={600}>
@@ -855,13 +895,16 @@ const Visits = () => {
               <Button
                 variant="light"
                 onClick={() => {
-                  setShowViewModal(false);
-                  handleEditVisit(viewingVisit);
+                  handleCloseViewModal();
+                  // Small delay to ensure view modal is closed before opening edit modal
+                  setTimeout(() => {
+                    handleEditVisit(viewingVisit);
+                  }, 100);
                 }}
               >
                 Edit Visit
               </Button>
-              <Button variant="filled" onClick={() => setShowViewModal(false)}>
+              <Button variant="filled" onClick={handleCloseViewModal}>
                 Close
               </Button>
             </Group>

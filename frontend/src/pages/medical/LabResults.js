@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -47,6 +48,8 @@ import {
 } from '@tabler/icons-react';
 
 const LabResults = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
 
   // Modern data management with useMedicalData
@@ -101,7 +104,6 @@ const LabResults = () => {
   const loading = labResultsLoading || practitionersLoading;
 
   // Additional file management state
-  const [selectedLabResult, setSelectedLabResult] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
   const [pendingFiles, setPendingFiles] = useState([]);
@@ -110,7 +112,8 @@ const LabResults = () => {
 
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState('create'); // 'create', 'edit', 'view'
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingLabResult, setViewingLabResult] = useState(null);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [formData, setFormData] = useState({
     test_name: '',
@@ -177,6 +180,33 @@ const LabResults = () => {
     }
   }, [labResults, loadFilesCounts]);
 
+  // Handle URL parameters for direct linking to specific lab results
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && labResults && labResults.length > 0 && !loading) {
+      const labResult = labResults.find(lr => lr.id.toString() === viewId);
+      if (labResult && !showViewModal) {
+        // Only auto-open if modal isn't already open
+        setViewingLabResult(labResult);
+        setShowViewModal(true);
+
+        // Load files for this specific lab result
+        const loadFiles = async () => {
+          try {
+            const files = await apiService.getLabResultFiles(labResult.id);
+            setSelectedFiles(files);
+          } catch (error) {
+            console.error('Error fetching lab result files:', error);
+            setSelectedFiles([]);
+          }
+        };
+        loadFiles();
+      }
+    }
+  }, [location.search, labResults, loading, showViewModal]);
+
   const handleAddPendingFile = (file, description = '') => {
     setPendingFiles(prev => [...prev, { file, description, id: Date.now() }]);
   };
@@ -225,7 +255,6 @@ const LabResults = () => {
 
   // Modern CRUD handlers using useMedicalData
   const handleAddLabResult = () => {
-    setModalType('create');
     setEditingLabResult(null);
     setFormData({
       test_name: '',
@@ -246,7 +275,6 @@ const LabResults = () => {
   };
 
   const handleEditLabResult = async labResult => {
-    setModalType('edit');
     setEditingLabResult(labResult);
     setFormData({
       test_name: labResult.test_name || '',
@@ -276,17 +304,38 @@ const LabResults = () => {
     setShowModal(true);
   };
 
-  const handleViewDetails = async labResult => {
-    setModalType('view');
-    setSelectedLabResult(labResult);
+  const handleViewLabResult = async labResult => {
+    setViewingLabResult(labResult);
+    setShowViewModal(true);
+
+    // Load files for this specific lab result
     try {
       const files = await apiService.getLabResultFiles(labResult.id);
       setSelectedFiles(files);
     } catch (error) {
-      console.error('Error fetching lab result details:', error);
+      console.error('Error fetching lab result files:', error);
       setSelectedFiles([]);
     }
-    setShowModal(true);
+
+    // Update URL with lab result ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', labResult.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingLabResult(null);
+    setSelectedFiles([]); // Clear files when closing view modal
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
   };
 
   const handleDeleteLabResult = async labResultId => {
@@ -371,7 +420,6 @@ const LabResults = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedLabResult(null);
     setEditingLabResult(null);
     setFormData({
       test_name: '',
@@ -394,7 +442,7 @@ const LabResults = () => {
   // File operations for view modal
   const handleFileUpload = async e => {
     e.preventDefault();
-    if (!fileUpload.file || !selectedLabResult) return;
+    if (!fileUpload.file || !viewingLabResult) return;
 
     try {
       const formData = new FormData();
@@ -404,16 +452,16 @@ const LabResults = () => {
       }
 
       await apiService.post(
-        `/lab-results/${selectedLabResult.id}/files`,
+        `/lab-results/${viewingLabResult.id}/files`,
         formData
       );
 
       // Refresh files list
-      const files = await apiService.getLabResultFiles(selectedLabResult.id);
+      const files = await apiService.getLabResultFiles(viewingLabResult.id);
       setSelectedFiles(files);
       setFilesCounts(prev => ({
         ...prev,
-        [selectedLabResult.id]: files.length,
+        [viewingLabResult.id]: files.length,
       }));
       setFileUpload({ file: null, description: '' });
     } catch (error) {
@@ -452,11 +500,11 @@ const LabResults = () => {
     if (window.confirm('Are you sure you want to delete this file?')) {
       try {
         await apiService.deleteLabResultFile(fileId);
-        const files = await apiService.getLabResultFiles(selectedLabResult.id);
+        const files = await apiService.getLabResultFiles(viewingLabResult.id);
         setSelectedFiles(files);
         setFilesCounts(prev => ({
           ...prev,
-          [selectedLabResult.id]: files.length,
+          [viewingLabResult.id]: files.length,
         }));
       } catch (error) {
         console.error('Error deleting file:', error);
@@ -691,7 +739,7 @@ const LabResults = () => {
                         <Button
                           variant="light"
                           size="xs"
-                          onClick={() => handleViewDetails(result)}
+                          onClick={() => handleViewLabResult(result)}
                         >
                           View
                         </Button>
@@ -735,7 +783,7 @@ const LabResults = () => {
               ]}
               patientData={currentPatient}
               tableName="Lab Results"
-              onView={handleViewDetails}
+              onView={handleViewLabResult}
               onEdit={handleEditLabResult}
               onDelete={handleDeleteLabResult}
               formatters={{
@@ -765,7 +813,7 @@ const LabResults = () => {
       </Container>
 
       {/* Create/Edit Form Modal */}
-      {showModal && (modalType === 'create' || modalType === 'edit') && (
+      {showModal && (
         <MantineLabResultForm
           isOpen={showModal}
           onClose={handleCloseModal}
@@ -942,14 +990,14 @@ const LabResults = () => {
 
       {/* View Details Modal */}
       <Modal
-        opened={showModal && modalType === 'view' && selectedLabResult}
-        onClose={handleCloseModal}
-        title={selectedLabResult?.test_name || 'Lab Result Details'}
+        opened={showViewModal}
+        onClose={handleCloseViewModal}
+        title={viewingLabResult?.test_name || 'Lab Result Details'}
         size="xl"
         scrollAreaComponent={ScrollArea.Autosize}
         centered
       >
-        {selectedLabResult && (
+        {viewingLabResult && (
           <>
             <Stack gap="lg" mb="lg">
               <Title order={3}>Lab Result Details</Title>
@@ -958,48 +1006,48 @@ const LabResults = () => {
                   <Text fw={500} size="sm" c="dimmed">
                     Test Name
                   </Text>
-                  <Text>{selectedLabResult.test_name}</Text>
+                  <Text>{viewingLabResult.test_name}</Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Test Code
                   </Text>
-                  <Text>{selectedLabResult.test_code || 'N/A'}</Text>
+                  <Text>{viewingLabResult.test_code || 'N/A'}</Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Category
                   </Text>
-                  <Text>{selectedLabResult.test_category || 'N/A'}</Text>
+                  <Text>{viewingLabResult.test_category || 'N/A'}</Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Test Type
                   </Text>
-                  <Text c={selectedLabResult.test_type ? 'inherit' : 'dimmed'}>
-                    {selectedLabResult.test_type || 'Not specified'}
+                  <Text c={viewingLabResult.test_type ? 'inherit' : 'dimmed'}>
+                    {viewingLabResult.test_type || 'Not specified'}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Facility
                   </Text>
-                  <Text c={selectedLabResult.facility ? 'inherit' : 'dimmed'}>
-                    {selectedLabResult.facility || 'Not specified'}
+                  <Text c={viewingLabResult.facility ? 'inherit' : 'dimmed'}>
+                    {viewingLabResult.facility || 'Not specified'}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Status
                   </Text>
-                  <StatusBadge status={selectedLabResult.status} />
+                  <StatusBadge status={viewingLabResult.status} />
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Lab Result
                   </Text>
-                  {selectedLabResult.labs_result ? (
-                    <StatusBadge status={selectedLabResult.labs_result} />
+                  {viewingLabResult.labs_result ? (
+                    <StatusBadge status={viewingLabResult.labs_result} />
                   ) : (
                     <Text c="dimmed">Not specified</Text>
                   )}
@@ -1009,13 +1057,13 @@ const LabResults = () => {
                     Ordering Practitioner
                   </Text>
                   <Text
-                    c={selectedLabResult.practitioner_id ? 'inherit' : 'dimmed'}
+                    c={viewingLabResult.practitioner_id ? 'inherit' : 'dimmed'}
                   >
-                    {selectedLabResult.practitioner_id
+                    {viewingLabResult.practitioner_id
                       ? practitioners.find(
-                          p => p.id === selectedLabResult.practitioner_id
+                          p => p.id === viewingLabResult.practitioner_id
                         )?.name ||
-                        `Practitioner ID: ${selectedLabResult.practitioner_id}`
+                        `Practitioner ID: ${viewingLabResult.practitioner_id}`
                       : 'Not specified'}
                   </Text>
                 </Stack>
@@ -1023,17 +1071,17 @@ const LabResults = () => {
                   <Text fw={500} size="sm" c="dimmed">
                     Ordered Date
                   </Text>
-                  <Text>{formatDate(selectedLabResult.ordered_date)}</Text>
+                  <Text>{formatDate(viewingLabResult.ordered_date)}</Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">
                     Completed Date
                   </Text>
                   <Text
-                    c={selectedLabResult.completed_date ? 'inherit' : 'dimmed'}
+                    c={viewingLabResult.completed_date ? 'inherit' : 'dimmed'}
                   >
-                    {selectedLabResult.completed_date
-                      ? formatDate(selectedLabResult.completed_date)
+                    {viewingLabResult.completed_date
+                      ? formatDate(viewingLabResult.completed_date)
                       : 'Not specified'}
                   </Text>
                 </Stack>
@@ -1045,9 +1093,9 @@ const LabResults = () => {
                 <Paper withBorder p="sm" bg="gray.0">
                   <Text
                     style={{ whiteSpace: 'pre-wrap' }}
-                    c={selectedLabResult.notes ? 'inherit' : 'dimmed'}
+                    c={viewingLabResult.notes ? 'inherit' : 'dimmed'}
                   >
-                    {selectedLabResult.notes || 'No notes available'}
+                    {viewingLabResult.notes || 'No notes available'}
                   </Text>
                 </Paper>
               </Stack>

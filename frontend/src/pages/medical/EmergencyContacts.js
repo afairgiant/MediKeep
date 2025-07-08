@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -16,6 +16,7 @@ import {
   Box,
   Divider,
   Anchor,
+  Modal,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -25,6 +26,7 @@ import {
   IconStar,
 } from '@tabler/icons-react';
 import { useMedicalData, useDataManagement } from '../../hooks';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
@@ -38,6 +40,8 @@ import { formatPhoneNumber } from '../../utils/phoneUtils';
 
 const EmergencyContacts = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Standardized data management
   const {
@@ -73,6 +77,8 @@ const EmergencyContacts = () => {
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingContact, setViewingContact] = useState(null);
   const [editingContact, setEditingContact] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -102,6 +108,15 @@ const EmergencyContacts = () => {
     setShowModal(true);
   };
 
+  const handleViewContact = contact => {
+    setViewingContact(contact);
+    setShowViewModal(true);
+    // Update URL with view parameter
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', contact.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`);
+  };
+
   const handleEditContact = contact => {
     setEditingContact(contact);
     setFormData({
@@ -116,6 +131,15 @@ const EmergencyContacts = () => {
       notes: contact.notes || '',
     });
     setShowModal(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setViewingContact(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    navigate(`${location.pathname}?${searchParams.toString()}`);
   };
 
   const handleDeleteContact = async contactId => {
@@ -158,6 +182,20 @@ const EmergencyContacts = () => {
       await refreshData();
     }
   };
+
+  // URL parameter handling
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && emergencyContacts.length > 0) {
+      const contact = emergencyContacts.find(c => c.id.toString() === viewId);
+      if (contact) {
+        setViewingContact(contact);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, emergencyContacts]);
 
   const handleInputChange = e => {
     const { name, value, type, checked } = e.target;
@@ -463,6 +501,13 @@ const EmergencyContacts = () => {
                             <Button
                               variant="light"
                               size="xs"
+                              onClick={() => handleViewContact(contact)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              variant="light"
+                              size="xs"
                               onClick={() => handleEditContact(contact)}
                             >
                               Edit
@@ -497,6 +542,7 @@ const EmergencyContacts = () => {
                 ]}
                 patientData={currentPatient}
                 tableName="Emergency Contacts"
+                onView={handleViewContact}
                 onEdit={handleEditContact}
                 onDelete={handleDeleteContact}
                 formatters={{
@@ -568,6 +614,180 @@ const EmergencyContacts = () => {
         onSubmit={handleSubmit}
         editingContact={editingContact}
       />
+
+      {/* View Modal */}
+      <Modal
+        opened={showViewModal}
+        onClose={handleCloseViewModal}
+        title={
+          <Group gap="xs">
+            <Text size="lg">🚨</Text>
+            <Text size="lg" fw={600}>
+              Emergency Contact Details
+            </Text>
+          </Group>
+        }
+        size="lg"
+        centered
+        closeOnClickOutside={true}
+        closeOnEscape={true}
+      >
+        {viewingContact && (
+          <Stack gap="lg">
+            {/* Header with relationship icon and name */}
+            <Card withBorder p="md" radius="md">
+              <Group gap="md" align="center">
+                <Text size="xl">
+                  {getRelationshipIcon(viewingContact.relationship)}
+                </Text>
+                <Stack gap="xs">
+                  <Title order={3} c="blue">
+                    {viewingContact.name}
+                  </Title>
+                  <Group gap="xs">
+                    <Badge
+                      color={getRelationshipColor(viewingContact.relationship)}
+                      variant="light"
+                      size="sm"
+                    >
+                      {viewingContact.relationship.charAt(0).toUpperCase() +
+                        viewingContact.relationship.slice(1)}
+                    </Badge>
+                    {viewingContact.is_primary && (
+                      <Badge color="yellow" variant="filled" size="sm">
+                        <Group gap="xs">
+                          <IconStar size={12} />
+                          PRIMARY
+                        </Group>
+                      </Badge>
+                    )}
+                    <Badge
+                      color={viewingContact.is_active ? 'green' : 'gray'}
+                      variant="light"
+                      size="sm"
+                    >
+                      {viewingContact.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </Group>
+                </Stack>
+              </Group>
+            </Card>
+
+            {/* Contact Information */}
+            <Card withBorder p="md" radius="md">
+              <Title order={4} mb="md">
+                📞 Contact Information
+              </Title>
+              <Grid>
+                <Grid.Col span={6}>
+                  <Stack gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Primary Phone
+                    </Text>
+                    <Anchor
+                      href={`tel:${viewingContact.phone_number}`}
+                      size="md"
+                      c="blue"
+                      fw={500}
+                    >
+                      {formatPhoneNumber(viewingContact.phone_number)}
+                    </Anchor>
+                  </Stack>
+                </Grid.Col>
+                <Grid.Col span={6}>
+                  <Stack gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Secondary Phone
+                    </Text>
+                    {viewingContact.secondary_phone ? (
+                      <Anchor
+                        href={`tel:${viewingContact.secondary_phone}`}
+                        size="md"
+                        c="blue"
+                        fw={500}
+                      >
+                        {formatPhoneNumber(viewingContact.secondary_phone)}
+                      </Anchor>
+                    ) : (
+                      <Text size="md" c="dimmed">
+                        Not specified
+                      </Text>
+                    )}
+                  </Stack>
+                </Grid.Col>
+                <Grid.Col span={6}>
+                  <Stack gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Email Address
+                    </Text>
+                    {viewingContact.email ? (
+                      <Anchor
+                        href={`mailto:${viewingContact.email}`}
+                        size="md"
+                        c="blue"
+                        fw={500}
+                      >
+                        {viewingContact.email}
+                      </Anchor>
+                    ) : (
+                      <Text size="md" c="dimmed">
+                        Not specified
+                      </Text>
+                    )}
+                  </Stack>
+                </Grid.Col>
+                <Grid.Col span={12}>
+                  <Stack gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Address
+                    </Text>
+                    {viewingContact.address ? (
+                      <Text size="md" fw={500}>
+                        {viewingContact.address}
+                      </Text>
+                    ) : (
+                      <Text size="md" c="dimmed">
+                        Not specified
+                      </Text>
+                    )}
+                  </Stack>
+                </Grid.Col>
+              </Grid>
+            </Card>
+
+            {/* Notes */}
+            <Card withBorder p="md" radius="md">
+              <Title order={4} mb="md">
+                📝 Notes
+              </Title>
+              {viewingContact.notes ? (
+                <Text size="md" c="gray.7">
+                  {viewingContact.notes}
+                </Text>
+              ) : (
+                <Text size="md" c="dimmed">
+                  No notes available
+                </Text>
+              )}
+            </Card>
+
+            {/* Action Buttons */}
+            <Group justify="flex-end" gap="md">
+              <Button variant="light" onClick={handleCloseViewModal}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  handleCloseViewModal();
+                  handleEditContact(viewingContact);
+                }}
+              >
+                Edit Contact
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </motion.div>
   );
 };
