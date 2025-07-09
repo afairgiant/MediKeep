@@ -64,7 +64,58 @@ import GlobalStateDemo from './components/common/GlobalStateDemo';
 
 import logger from './services/logger';
 import { timezoneService } from './services/timezoneService';
+import { ENTITY_TYPES } from './utils/entityRelationships';
 import './App.css';
+
+// Entity to component mapping for dynamic route generation
+const ENTITY_COMPONENT_MAP = {
+  [ENTITY_TYPES.MEDICATION]: Medication,
+  [ENTITY_TYPES.LAB_RESULT]: LabResults,
+  [ENTITY_TYPES.IMMUNIZATION]: Immunization,
+  [ENTITY_TYPES.PROCEDURE]: Procedures,
+  [ENTITY_TYPES.ALLERGY]: Allergies,
+  [ENTITY_TYPES.CONDITION]: Conditions,
+  [ENTITY_TYPES.TREATMENT]: Treatments,
+  [ENTITY_TYPES.ENCOUNTER]: Visits,
+  [ENTITY_TYPES.VITALS]: Vitals,
+  [ENTITY_TYPES.PRACTITIONER]: Practitioners,
+  [ENTITY_TYPES.PHARMACY]: Pharmacies,
+  [ENTITY_TYPES.EMERGENCY_CONTACT]: EmergencyContacts,
+};
+
+// Entity to route path mapping
+const ENTITY_ROUTE_MAP = {
+  [ENTITY_TYPES.MEDICATION]: '/medications',
+  [ENTITY_TYPES.LAB_RESULT]: '/lab-results',
+  [ENTITY_TYPES.IMMUNIZATION]: '/immunizations',
+  [ENTITY_TYPES.PROCEDURE]: '/procedures',
+  [ENTITY_TYPES.ALLERGY]: '/allergies',
+  [ENTITY_TYPES.CONDITION]: '/conditions',
+  [ENTITY_TYPES.TREATMENT]: '/treatments',
+  [ENTITY_TYPES.ENCOUNTER]: '/visits',
+  [ENTITY_TYPES.VITALS]: '/vitals',
+  [ENTITY_TYPES.PRACTITIONER]: '/practitioners',
+  [ENTITY_TYPES.PHARMACY]: '/pharmacies',
+  [ENTITY_TYPES.EMERGENCY_CONTACT]: '/emergency-contacts',
+};
+
+// Helper function to generate entity routes
+const generateEntityRoutes = () => {
+  return Object.entries(ENTITY_COMPONENT_MAP).map(([entityType, Component]) => {
+    const routePath = ENTITY_ROUTE_MAP[entityType];
+    return (
+      <Route
+        key={entityType}
+        path={routePath}
+        element={
+          <ProtectedRoute>
+            <Component />
+          </ProtectedRoute>
+        }
+      />
+    );
+  });
+};
 
 // Component to track navigation
 function NavigationTracker() {
@@ -192,102 +243,8 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
-                      <Route
-                        path="/lab-results"
-                        element={
-                          <ProtectedRoute>
-                            <LabResults />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/medications"
-                        element={
-                          <ProtectedRoute>
-                            <Medication />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/immunizations"
-                        element={
-                          <ProtectedRoute>
-                            <Immunization />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/procedures"
-                        element={
-                          <ProtectedRoute>
-                            <Procedures />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/allergies"
-                        element={
-                          <ProtectedRoute>
-                            <Allergies />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/conditions"
-                        element={
-                          <ProtectedRoute>
-                            <Conditions />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/treatments"
-                        element={
-                          <ProtectedRoute>
-                            <Treatments />
-                          </ProtectedRoute>
-                        }
-                      />{' '}
-                      <Route
-                        path="/visits"
-                        element={
-                          <ProtectedRoute>
-                            <Visits />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/vitals"
-                        element={
-                          <ProtectedRoute>
-                            <Vitals />
-                          </ProtectedRoute>
-                        }
-                      />{' '}
-                      <Route
-                        path="/practitioners"
-                        element={
-                          <ProtectedRoute>
-                            <Practitioners />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/pharmacies"
-                        element={
-                          <ProtectedRoute>
-                            <Pharmacies />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/emergency-contacts"
-                        element={
-                          <ProtectedRoute>
-                            <EmergencyContacts />
-                          </ProtectedRoute>
-                        }
-                      />
+                      {/* Generated entity routes */}
+                      {generateEntityRoutes()}
                       <Route
                         path="/export"
                         element={

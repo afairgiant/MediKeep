@@ -95,7 +95,9 @@ def read_condition(
     """Get condition by ID with related information - only allows access to user's own conditions."""
     # Get condition and verify it belongs to the user
     condition_obj = condition.get_with_relations(
-        db=db, record_id=condition_id, relations=["patient", "practitioner"]
+        db=db,
+        record_id=condition_id,
+        relations=["patient", "practitioner", "treatments"],
     )
     handle_not_found(condition_obj, "Condition")
     verify_patient_ownership(condition_obj, current_user_patient_id, "condition")

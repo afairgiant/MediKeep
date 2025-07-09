@@ -238,8 +238,8 @@ class ExportService:
             date_field = model.effective_period_start
         elif hasattr(model, "date_administered"):  # Immunization model
             date_field = model.date_administered
-        elif hasattr(model, "onsetDate"):  # Condition model
-            date_field = model.onsetDate
+        elif hasattr(model, "onset_date"):  # Condition model
+            date_field = model.onset_date
         elif hasattr(model, "onset_date"):  # Allergy model
             date_field = model.onset_date
         elif hasattr(model, "ordered_date"):  # LabResult model
@@ -443,8 +443,8 @@ class ExportService:
                 "diagnosis": condition.diagnosis,
                 "status": condition.status,
                 "onset_date": (
-                    condition.onsetDate.isoformat()
-                    if condition.onsetDate is not None
+                    condition.onset_date.isoformat()
+                    if condition.onset_date is not None
                     else None
                 ),
                 "diagnosed_by": (
@@ -506,7 +506,7 @@ class ExportService:
             {
                 "id": proc.id,
                 "procedure_name": proc.procedure_name,
-                "code": proc.code,
+                "code": proc.procedure_code,
                 "date": proc.date.isoformat() if proc.date is not None else None,
                 "description": proc.description,
                 "status": proc.status,
@@ -1181,7 +1181,7 @@ class ExportService:
             "onset_date": "Onset Date",
             "condition_name": "Condition",
             "diagnosis": "Diagnosis",
-            "onsetDate": "Onset Date",
+            "onset_date": "Onset Date",
             "diagnosed_by": "Diagnosed By",
             "vaccine_name": "Vaccine",
             "date_administered": "Date Given",
@@ -1266,7 +1266,7 @@ class ExportService:
                 "onset_date",
                 "recorded_date",
                 "date",
-                "onsetDate",
+                "onset_date",
                 "created_at",
                 "updated_at",
             ]:

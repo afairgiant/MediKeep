@@ -67,8 +67,10 @@ def read_practitioner(
     practitioner_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Get practitioner by ID."""
-    practitioner_obj = practitioner.get(db=db, id=practitioner_id)
+    """Get practitioner by ID with related information."""
+    practitioner_obj = practitioner.get_with_relations(
+        db=db, record_id=practitioner_id, relations=["patients", "conditions", "treatments", "medications", "procedures", "encounters", "lab_results", "immunizations", "vitals"]
+    )
     handle_not_found(practitioner_obj, "Practitioner")
     return practitioner_obj
 

@@ -1,4 +1,22 @@
 import logger from '../logger';
+import { ENTITY_TYPES } from '../../utils/entityRelationships';
+
+// Map entity types to their API endpoint paths
+const ENTITY_TO_API_PATH = {
+  [ENTITY_TYPES.MEDICATION]: 'medications',
+  [ENTITY_TYPES.LAB_RESULT]: 'lab-results',
+  [ENTITY_TYPES.IMMUNIZATION]: 'immunizations',
+  [ENTITY_TYPES.PROCEDURE]: 'procedures',
+  [ENTITY_TYPES.ALLERGY]: 'allergies',
+  [ENTITY_TYPES.CONDITION]: 'conditions',
+  [ENTITY_TYPES.TREATMENT]: 'treatments',
+  [ENTITY_TYPES.ENCOUNTER]: 'encounters',
+  [ENTITY_TYPES.VITALS]: 'vitals',
+  [ENTITY_TYPES.PRACTITIONER]: 'practitioners',
+  [ENTITY_TYPES.PHARMACY]: 'pharmacies',
+  [ENTITY_TYPES.EMERGENCY_CONTACT]: 'emergency-contacts',
+  [ENTITY_TYPES.PATIENT]: 'patients',
+};
 
 // Streamlined API service with proper logging integration
 class ApiService {
@@ -228,27 +246,70 @@ class ApiService {
     return this.get('/patients/me/dashboard-stats', { signal });
   }
 
+  // Generic entity methods using the entity relationship system
+  getEntities(entityType, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    return this.get(`/${apiPath}/`, { signal });
+  }
+
+  getEntity(entityType, entityId, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    return this.get(`/${apiPath}/${entityId}`, { signal });
+  }
+
+  createEntity(entityType, entityData, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    return this.post(`/${apiPath}/`, entityData, { signal });
+  }
+
+  updateEntity(entityType, entityId, entityData, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    return this.put(`/${apiPath}/${entityId}`, entityData, { signal });
+  }
+
+  deleteEntity(entityType, entityId, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    return this.delete(`/${apiPath}/${entityId}`, { signal });
+  }
+
+  getEntitiesWithFilters(entityType, filters = {}, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        params.append(key, value);
+      }
+    });
+    const queryString = params.toString();
+    return this.get(`/${apiPath}/${queryString ? `?${queryString}` : ''}`, { signal });
+  }
+
+  getPatientEntities(entityType, patientId, signal) {
+    const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
+    return this.get(`/${apiPath}/?patient_id=${patientId}`, { signal });
+  }
+
   // Lab Result methods
   getLabResults(signal) {
-    return this.get('/lab-results/', { signal });
+    return this.getEntities(ENTITY_TYPES.LAB_RESULT, signal);
   }
   getPatientLabResults(patientId, signal) {
-    return this.get(`/lab-results/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.LAB_RESULT, patientId, signal);
   }
   getLabResult(labResultId, signal) {
-    return this.get(`/lab-results/${labResultId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.LAB_RESULT, labResultId, signal);
   }
 
   createLabResult(labResultData, signal) {
-    return this.post('/lab-results/', labResultData, { signal });
+    return this.createEntity(ENTITY_TYPES.LAB_RESULT, labResultData, signal);
   }
 
   updateLabResult(labResultId, labResultData, signal) {
-    return this.put(`/lab-results/${labResultId}`, labResultData, { signal });
+    return this.updateEntity(ENTITY_TYPES.LAB_RESULT, labResultId, labResultData, signal);
   }
 
   deleteLabResult(labResultId, signal) {
-    return this.delete(`/lab-results/${labResultId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.LAB_RESULT, labResultId, signal);
   }
   getLabResultFiles(labResultId, signal) {
     return this.get(`/lab-results/${labResultId}/files`, { signal });
@@ -273,10 +334,13 @@ class ApiService {
 
   // Medication methods
   getMedications(signal) {
-    return this.get('/medications/', { signal });
+    return this.getEntities(ENTITY_TYPES.MEDICATION, signal);
   }
   getPatientMedications(patientId, signal) {
-    return this.get(`/medications/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.MEDICATION, patientId, signal);
+  }
+  getMedicationsWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.MEDICATION, filters, signal);
   }
 
   createMedication(medicationData, signal) {
@@ -297,169 +361,178 @@ class ApiService {
     return this.post(`/medications/`, cleanPayload, { signal });
   }
   updateMedication(medicationId, medicationData, signal) {
-    return this.put(`/medications/${medicationId}`, medicationData, { signal });
+    return this.updateEntity(ENTITY_TYPES.MEDICATION, medicationId, medicationData, signal);
   }
 
   deleteMedication(medicationId, signal) {
-    return this.delete(`/medications/${medicationId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.MEDICATION, medicationId, signal);
   }
 
   // Immunization methods
   getImmunizations(signal) {
-    return this.get('/immunizations/', { signal });
+    return this.getEntities(ENTITY_TYPES.IMMUNIZATION, signal);
   }
   getPatientImmunizations(patientId, signal) {
-    return this.get(`/immunizations/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.IMMUNIZATION, patientId, signal);
+  }
+  getImmunizationsWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.IMMUNIZATION, filters, signal);
   }
 
   createImmunization(immunizationData, signal) {
-    return this.post('/immunizations/', immunizationData, { signal });
+    return this.createEntity(ENTITY_TYPES.IMMUNIZATION, immunizationData, signal);
   }
   updateImmunization(immunizationId, immunizationData, signal) {
-    return this.put(`/immunizations/${immunizationId}`, immunizationData, {
-      signal,
-    });
+    return this.updateEntity(ENTITY_TYPES.IMMUNIZATION, immunizationId, immunizationData, signal);
   }
 
   deleteImmunization(immunizationId, signal) {
-    return this.delete(`/immunizations/${immunizationId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.IMMUNIZATION, immunizationId, signal);
   }
 
   // Practitioner methods
   getPractitioners(signal) {
-    return this.get('/practitioners/', { signal });
+    return this.getEntities(ENTITY_TYPES.PRACTITIONER, signal);
   }
 
   getPractitioner(practitionerId, signal) {
-    return this.get(`/practitioners/${practitionerId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.PRACTITIONER, practitionerId, signal);
+  }
+  getPractitionersWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.PRACTITIONER, filters, signal);
   }
 
   createPractitioner(practitionerData, signal) {
-    return this.post('/practitioners/', practitionerData, { signal });
+    return this.createEntity(ENTITY_TYPES.PRACTITIONER, practitionerData, signal);
   }
 
   updatePractitioner(practitionerId, practitionerData, signal) {
-    return this.put(`/practitioners/${practitionerId}`, practitionerData, {
-      signal,
-    });
+    return this.updateEntity(ENTITY_TYPES.PRACTITIONER, practitionerId, practitionerData, signal);
   }
 
   deletePractitioner(practitionerId, signal) {
-    return this.delete(`/practitioners/${practitionerId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.PRACTITIONER, practitionerId, signal);
   }
 
   // Pharmacy methods
   getPharmacies(signal) {
-    return this.get('/pharmacies/', { signal });
+    return this.getEntities(ENTITY_TYPES.PHARMACY, signal);
   }
 
   getPharmacy(pharmacyId, signal) {
-    return this.get(`/pharmacies/${pharmacyId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.PHARMACY, pharmacyId, signal);
   }
 
   createPharmacy(pharmacyData, signal) {
-    return this.post('/pharmacies/', pharmacyData, { signal });
+    return this.createEntity(ENTITY_TYPES.PHARMACY, pharmacyData, signal);
   }
 
   updatePharmacy(pharmacyId, pharmacyData, signal) {
-    return this.put(`/pharmacies/${pharmacyId}`, pharmacyData, {
-      signal,
-    });
+    return this.updateEntity(ENTITY_TYPES.PHARMACY, pharmacyId, pharmacyData, signal);
   }
 
   deletePharmacy(pharmacyId, signal) {
-    return this.delete(`/pharmacies/${pharmacyId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.PHARMACY, pharmacyId, signal);
   }
 
   // Allergy methods
   getAllergies(signal) {
-    return this.get('/allergies/', { signal });
+    return this.getEntities(ENTITY_TYPES.ALLERGY, signal);
   }
   getPatientAllergies(patientId, signal) {
-    return this.get(`/allergies/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.ALLERGY, patientId, signal);
   }
   getAllergy(allergyId, signal) {
-    return this.get(`/allergies/${allergyId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.ALLERGY, allergyId, signal);
   }
 
   createAllergy(allergyData, signal) {
-    return this.post('/allergies/', allergyData, { signal });
+    return this.createEntity(ENTITY_TYPES.ALLERGY, allergyData, signal);
   }
 
   updateAllergy(allergyId, allergyData, signal) {
-    return this.put(`/allergies/${allergyId}`, allergyData, { signal });
+    return this.updateEntity(ENTITY_TYPES.ALLERGY, allergyId, allergyData, signal);
   }
 
   deleteAllergy(allergyId, signal) {
-    return this.delete(`/allergies/${allergyId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.ALLERGY, allergyId, signal);
   }
 
   // Treatment methods
   getTreatments(signal) {
-    return this.get('/treatments/', { signal });
+    return this.getEntities(ENTITY_TYPES.TREATMENT, signal);
   }
   getPatientTreatments(patientId, signal) {
-    return this.get(`/treatments/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.TREATMENT, patientId, signal);
   }
   getTreatment(treatmentId, signal) {
-    return this.get(`/treatments/${treatmentId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.TREATMENT, treatmentId, signal);
+  }
+  getTreatmentsWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.TREATMENT, filters, signal);
   }
 
   createTreatment(treatmentData, signal) {
-    return this.post('/treatments/', treatmentData, { signal });
+    return this.createEntity(ENTITY_TYPES.TREATMENT, treatmentData, signal);
   }
 
   updateTreatment(treatmentId, treatmentData, signal) {
-    return this.put(`/treatments/${treatmentId}`, treatmentData, { signal });
+    return this.updateEntity(ENTITY_TYPES.TREATMENT, treatmentId, treatmentData, signal);
   }
 
   deleteTreatment(treatmentId, signal) {
-    return this.delete(`/treatments/${treatmentId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.TREATMENT, treatmentId, signal);
   }
 
   // Procedure methods
   getProcedures(signal) {
-    return this.get('/procedures/', { signal });
+    return this.getEntities(ENTITY_TYPES.PROCEDURE, signal);
   }
   getPatientProcedures(patientId, signal) {
-    return this.get(`/procedures/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.PROCEDURE, patientId, signal);
   }
   getProcedure(procedureId, signal) {
-    return this.get(`/procedures/${procedureId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.PROCEDURE, procedureId, signal);
+  }
+  getProceduresWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.PROCEDURE, filters, signal);
   }
 
   createProcedure(procedureData, signal) {
-    return this.post('/procedures/', procedureData, { signal });
+    return this.createEntity(ENTITY_TYPES.PROCEDURE, procedureData, signal);
   }
   updateProcedure(procedureId, procedureData, signal) {
-    return this.put(`/procedures/${procedureId}`, procedureData, { signal });
+    return this.updateEntity(ENTITY_TYPES.PROCEDURE, procedureId, procedureData, signal);
   }
 
   deleteProcedure(procedureId, signal) {
-    return this.delete(`/procedures/${procedureId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.PROCEDURE, procedureId, signal);
   }
 
   // Condition methods
   getConditions(signal) {
-    return this.get('/conditions/', { signal });
+    return this.getEntities(ENTITY_TYPES.CONDITION, signal);
   }
   getPatientConditions(patientId, signal) {
-    return this.get(`/conditions/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.CONDITION, patientId, signal);
   }
   getCondition(conditionId, signal) {
-    return this.get(`/conditions/${conditionId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.CONDITION, conditionId, signal);
+  }
+  getConditionsWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.CONDITION, filters, signal);
   }
 
   createCondition(conditionData, signal) {
-    return this.post('/conditions/', conditionData, { signal });
+    return this.createEntity(ENTITY_TYPES.CONDITION, conditionData, signal);
   }
 
   updateCondition(conditionId, conditionData, signal) {
-    return this.put(`/conditions/${conditionId}`, conditionData, { signal });
+    return this.updateEntity(ENTITY_TYPES.CONDITION, conditionId, conditionData, signal);
   }
 
   deleteCondition(conditionId, signal) {
-    return this.delete(`/conditions/${conditionId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.CONDITION, conditionId, signal);
   }
 
   getConditionsDropdown(activeOnly = true, signal) {
@@ -469,52 +542,56 @@ class ApiService {
 
   // Encounter methods
   getEncounters(signal) {
-    return this.get('/encounters/', { signal });
+    return this.getEntities(ENTITY_TYPES.ENCOUNTER, signal);
   }
   getPatientEncounters(patientId, signal) {
-    return this.get(`/encounters/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.ENCOUNTER, patientId, signal);
   }
   getEncounter(encounterId, signal) {
-    return this.get(`/encounters/${encounterId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.ENCOUNTER, encounterId, signal);
+  }
+  getEncountersWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.ENCOUNTER, filters, signal);
   }
 
   createEncounter(encounterData, signal) {
-    return this.post('/encounters/', encounterData, { signal });
+    return this.createEntity(ENTITY_TYPES.ENCOUNTER, encounterData, signal);
   }
 
   updateEncounter(encounterId, encounterData, signal) {
-    return this.put(`/encounters/${encounterId}`, encounterData, { signal });
+    return this.updateEntity(ENTITY_TYPES.ENCOUNTER, encounterId, encounterData, signal);
   }
 
   deleteEncounter(encounterId, signal) {
-    return this.delete(`/encounters/${encounterId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.ENCOUNTER, encounterId, signal);
   }
 
   // Emergency Contact methods
   getEmergencyContacts(signal) {
-    return this.get('/emergency-contacts/', { signal });
+    return this.getEntities(ENTITY_TYPES.EMERGENCY_CONTACT, signal);
   }
   getPatientEmergencyContacts(patientId, signal) {
-    return this.get(`/emergency-contacts/?patient_id=${patientId}`, { signal });
+    return this.getPatientEntities(ENTITY_TYPES.EMERGENCY_CONTACT, patientId, signal);
   }
   getEmergencyContact(emergencyContactId, signal) {
-    return this.get(`/emergency-contacts/${emergencyContactId}`, { signal });
+    return this.getEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactId, signal);
   }
 
   createEmergencyContact(emergencyContactData, signal) {
-    return this.post('/emergency-contacts/', emergencyContactData, { signal });
+    return this.createEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactData, signal);
   }
 
   updateEmergencyContact(emergencyContactId, emergencyContactData, signal) {
-    return this.put(
-      `/emergency-contacts/${emergencyContactId}`,
-      emergencyContactData,
-      { signal }
-    );
+    return this.updateEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactId, emergencyContactData, signal);
   }
 
   deleteEmergencyContact(emergencyContactId, signal) {
-    return this.delete(`/emergency-contacts/${emergencyContactId}`, { signal });
+    return this.deleteEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactId, signal);
+  }
+
+  // Generic method for fetching entities with relationship filters
+  getRelatedEntities(entityType, filters = {}, signal) {
+    return this.getEntitiesWithFilters(entityType, filters, signal);
   }
 }
 

@@ -4,6 +4,8 @@ import { Menu, Button } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useAuth } from '../../contexts/AuthContext';
 import ThemeToggle from '../ui/ThemeToggle';
+import { ENTITY_TYPES } from '../../utils/entityRelationships';
+import { buildEntityUrl } from '../../utils/entityNavigation';
 import './PageHeader.css';
 
 const PageHeader = ({
@@ -42,39 +44,39 @@ const PageHeader = ({
     return false;
   };
 
-  // Navigation items organized by category
+  // Navigation items organized by category using entity types
   const navigationSections = [
     {
       title: 'Core',
       items: [
         { name: 'Dashboard', path: '/dashboard', icon: '🏥' },
-        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
+        { name: 'Patient Info', path: buildEntityUrl(ENTITY_TYPES.PATIENT, 'me'), icon: '👤' },
       ],
     },
     {
       title: 'Medical Records',
       items: [
-        { name: 'Medications', path: '/medications', icon: '💊' },
-        { name: 'Lab Results', path: '/lab-results', icon: '🧪' },
-        { name: 'Conditions', path: '/conditions', icon: '🏥' },
-        { name: 'Allergies', path: '/allergies', icon: '⚠️' },
-        { name: 'Vital Signs', path: '/vitals', icon: '❤️' },
+        { name: 'Medications', path: buildEntityUrl(ENTITY_TYPES.MEDICATION), icon: '💊' },
+        { name: 'Lab Results', path: buildEntityUrl(ENTITY_TYPES.LAB_RESULT), icon: '🧪' },
+        { name: 'Conditions', path: buildEntityUrl(ENTITY_TYPES.CONDITION), icon: '🏥' },
+        { name: 'Allergies', path: buildEntityUrl(ENTITY_TYPES.ALLERGY), icon: '⚠️' },
+        { name: 'Vital Signs', path: buildEntityUrl(ENTITY_TYPES.VITALS), icon: '❤️' },
       ],
     },
     {
       title: 'Care & Treatment',
       items: [
-        { name: 'Treatments', path: '/treatments', icon: '🩺' },
-        { name: 'Procedures', path: '/procedures', icon: '⚕️' },
-        { name: 'Immunizations', path: '/immunizations', icon: '💉' },
-        { name: 'Visit History', path: '/visits', icon: '📅' },
+        { name: 'Treatments', path: buildEntityUrl(ENTITY_TYPES.TREATMENT), icon: '🩺' },
+        { name: 'Procedures', path: buildEntityUrl(ENTITY_TYPES.PROCEDURE), icon: '⚕️' },
+        { name: 'Immunizations', path: buildEntityUrl(ENTITY_TYPES.IMMUNIZATION), icon: '💉' },
+        { name: 'Visit History', path: buildEntityUrl(ENTITY_TYPES.ENCOUNTER), icon: '📅' },
       ],
     },
     {
       title: 'Providers',
       items: [
-        { name: 'Practitioners', path: '/practitioners', icon: '👨‍⚕️' },
-        { name: 'Pharmacies', path: '/pharmacies', icon: '🏪' },
+        { name: 'Practitioners', path: buildEntityUrl(ENTITY_TYPES.PRACTITIONER), icon: '👨‍⚕️' },
+        { name: 'Pharmacies', path: buildEntityUrl(ENTITY_TYPES.PHARMACY), icon: '🏪' },
       ],
     },
     {

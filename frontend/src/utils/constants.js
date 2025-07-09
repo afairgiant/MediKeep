@@ -1,22 +1,15 @@
 // Medical Records System Constants
 
-// API Endpoints
+// API Endpoints - Now using entity relationship system for most endpoints
+// Only keeping specific endpoints that aren't covered by the generic entity system
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/api/v1/auth/login',
     LOGOUT: '/api/v1/auth/logout',
     REFRESH: '/api/v1/auth/refresh',
   },
-  PATIENTS: {
-    BASE: '/api/v1/patients',
-    CURRENT: '/api/v1/patients/me',
-  },
-  MEDICATIONS: {
-    BASE: '/api/v1/medications',
-    BY_PATIENT: patientId => `/api/v1/patients/${patientId}/medications`,
-  },
+  // Special endpoints that don't follow the standard entity pattern
   LAB_RESULTS: {
-    BASE: '/api/v1/lab-results',
     FILES: labResultId => `/api/v1/lab-results/${labResultId}/files`,
     FILE_DOWNLOAD: fileId => `/api/v1/lab-result-files/${fileId}/download`,
   },

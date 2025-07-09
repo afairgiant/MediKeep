@@ -67,8 +67,10 @@ def read_vitals_by_id(
     vitals_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
-    """Get vitals reading by ID - only allows access to user's own vitals."""
-    vitals_obj = vitals.get(db=db, id=vitals_id)
+    """Get vitals reading by ID with related information - only allows access to user's own vitals."""
+    vitals_obj = vitals.get_with_relations(
+        db=db, record_id=vitals_id, relations=["patient", "practitioner"]
+    )
     handle_not_found(vitals_obj, "Vitals reading")
     verify_patient_ownership(vitals_obj, current_user_patient_id, "vitals")
     return vitals_obj
