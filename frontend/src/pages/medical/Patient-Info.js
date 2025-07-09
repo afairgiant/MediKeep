@@ -36,6 +36,9 @@ const PatientInfo = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Determine if this is a new user based on patient existence
+  const isNewUser = !patientExists;
 
   // Initialize form data when patient data becomes available or changes
   useEffect(() => {

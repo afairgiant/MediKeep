@@ -7,6 +7,7 @@
 - Dosage is not being displayed correctly
 - Dosage is not updating correctly
 - Treatment description is not being displayed correctly
+- ✅ Change dosage to amount
 
 ### Procedure Page
 
@@ -41,7 +42,7 @@
 ### Patient Page
 
 - Don't need to show the patient ID on the patient page
-- Make the weight in patient page linked to the vitals page for the latest weight
+- Make the weight in patient page linked to the vitals page for the latest weight and vice versa. if a new weight is added make it add a new vital record
 
 ### Nav Bar
 
@@ -55,10 +56,17 @@
 - Implement search functionality for admin pages (temporarily removed non-functional search bar)
 - Make the mobile version of the pages work better with the header
 
+### Container and Workflow
+
+- Make the docker image build tied to a release instead of a PR and have the version of in the build link to the release version?
+
 ## Roadmap
 
 ### Core Features
 
+- Family History
+  - table should have patient_id, relationship, condition_name, age_of_onset, severity, status(?), and the usual audit fields
+  - add a FamiylRelationship enum for relationship types
 - Family member linking of patients
 - ✅ Emergency Contacts
 - Document attachments

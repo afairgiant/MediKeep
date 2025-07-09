@@ -15,75 +15,80 @@ import {
   IconTrash,
   IconEye,
 } from '@tabler/icons-react';
+import { ENTITY_TYPES } from './entityRelationships';
+import { buildEntityUrl } from './entityNavigation';
 
 /**
- * Maps medical record model names to their corresponding route paths
+ * Maps medical record model names to their corresponding entity types
  */
-const ROUTE_MAPPING = {
-  medication: '/medications',
-  'medical medication': '/medications',
-  lab_result: '/lab-results',
-  'lab result': '/lab-results',
-  'medical lab result': '/lab-results',
-  procedure: '/procedures',
-  'medical procedure': '/procedures',
-  condition: '/conditions',
-  'medical condition': '/conditions',
-  allergy: '/allergies',
-  'medical allergy': '/allergies',
-  immunization: '/immunizations',
-  'medical immunization': '/immunizations',
-  vital: '/vitals',
-  'vital sign': '/vitals',
-  'medical vital': '/vitals',
-  emergency_contact: '/emergency-contacts',
-  'emergency contact': '/emergency-contacts',
-  treatment: '/treatments',
-  'medical treatment': '/treatments',
-  encounter: '/visits',
-  visit: '/visits',
-  'medical visit': '/visits',
-  pharmacy: '/pharmacies',
-  'medical pharmacy': '/pharmacies',
-  practitioner: '/practitioners',
-  'medical practitioner': '/practitioners',
-  patient: '/patients/me',
-  'medical patient': '/patients/me',
+const MODEL_TO_ENTITY_TYPE = {
+  medication: ENTITY_TYPES.MEDICATION,
+  'medical medication': ENTITY_TYPES.MEDICATION,
+  lab_result: ENTITY_TYPES.LAB_RESULT,
+  'lab result': ENTITY_TYPES.LAB_RESULT,
+  'medical lab result': ENTITY_TYPES.LAB_RESULT,
+  procedure: ENTITY_TYPES.PROCEDURE,
+  'medical procedure': ENTITY_TYPES.PROCEDURE,
+  condition: ENTITY_TYPES.CONDITION,
+  'medical condition': ENTITY_TYPES.CONDITION,
+  allergy: ENTITY_TYPES.ALLERGY,
+  'medical allergy': ENTITY_TYPES.ALLERGY,
+  immunization: ENTITY_TYPES.IMMUNIZATION,
+  'medical immunization': ENTITY_TYPES.IMMUNIZATION,
+  vital: ENTITY_TYPES.VITALS,
+  'vital sign': ENTITY_TYPES.VITALS,
+  'medical vital': ENTITY_TYPES.VITALS,
+  emergency_contact: ENTITY_TYPES.EMERGENCY_CONTACT,
+  'emergency contact': ENTITY_TYPES.EMERGENCY_CONTACT,
+  treatment: ENTITY_TYPES.TREATMENT,
+  'medical treatment': ENTITY_TYPES.TREATMENT,
+  encounter: ENTITY_TYPES.ENCOUNTER,
+  visit: ENTITY_TYPES.ENCOUNTER,
+  'medical visit': ENTITY_TYPES.ENCOUNTER,
+  pharmacy: ENTITY_TYPES.PHARMACY,
+  'medical pharmacy': ENTITY_TYPES.PHARMACY,
+  practitioner: ENTITY_TYPES.PRACTITIONER,
+  'medical practitioner': ENTITY_TYPES.PRACTITIONER,
+  patient: ENTITY_TYPES.PATIENT,
+  'medical patient': ENTITY_TYPES.PATIENT,
 };
 
 /**
- * Maps medical record model names to their corresponding icons
+ * Maps entity types to their corresponding route paths
  */
-const ICON_MAPPING = {
-  medication: IconPill,
-  'medical medication': IconPill,
-  lab_result: IconFlask,
-  'lab result': IconFlask,
-  'medical lab result': IconFlask,
-  procedure: IconMedicalCross,
-  'medical procedure': IconMedicalCross,
-  condition: IconBrain,
-  'medical condition': IconBrain,
-  allergy: IconAlertTriangle,
-  'medical allergy': IconAlertTriangle,
-  immunization: IconVaccine,
-  'medical immunization': IconVaccine,
-  vital: IconHeartbeat,
-  'vital sign': IconHeartbeat,
-  'medical vital': IconHeartbeat,
-  emergency_contact: IconPhoneCall,
-  'emergency contact': IconPhoneCall,
-  treatment: IconClipboardList,
-  'medical treatment': IconClipboardList,
-  encounter: IconCalendarEvent,
-  visit: IconCalendarEvent,
-  'medical visit': IconCalendarEvent,
-  pharmacy: IconPill,
-  'medical pharmacy': IconPill,
-  practitioner: IconUser,
-  'medical practitioner': IconUser,
-  patient: IconUser,
-  'medical patient': IconUser,
+const ENTITY_TYPE_TO_ROUTE = {
+  [ENTITY_TYPES.MEDICATION]: '/medications',
+  [ENTITY_TYPES.LAB_RESULT]: '/lab-results',
+  [ENTITY_TYPES.PROCEDURE]: '/procedures',
+  [ENTITY_TYPES.CONDITION]: '/conditions',
+  [ENTITY_TYPES.ALLERGY]: '/allergies',
+  [ENTITY_TYPES.IMMUNIZATION]: '/immunizations',
+  [ENTITY_TYPES.VITALS]: '/vitals',
+  [ENTITY_TYPES.EMERGENCY_CONTACT]: '/emergency-contacts',
+  [ENTITY_TYPES.TREATMENT]: '/treatments',
+  [ENTITY_TYPES.ENCOUNTER]: '/visits',
+  [ENTITY_TYPES.PHARMACY]: '/pharmacies',
+  [ENTITY_TYPES.PRACTITIONER]: '/practitioners',
+  [ENTITY_TYPES.PATIENT]: '/patients/me',
+};
+
+/**
+ * Maps entity types to their corresponding icons
+ */
+const ENTITY_TYPE_TO_ICON = {
+  [ENTITY_TYPES.MEDICATION]: IconPill,
+  [ENTITY_TYPES.LAB_RESULT]: IconFlask,
+  [ENTITY_TYPES.PROCEDURE]: IconMedicalCross,
+  [ENTITY_TYPES.CONDITION]: IconBrain,
+  [ENTITY_TYPES.ALLERGY]: IconAlertTriangle,
+  [ENTITY_TYPES.IMMUNIZATION]: IconVaccine,
+  [ENTITY_TYPES.VITALS]: IconHeartbeat,
+  [ENTITY_TYPES.EMERGENCY_CONTACT]: IconPhoneCall,
+  [ENTITY_TYPES.TREATMENT]: IconClipboardList,
+  [ENTITY_TYPES.ENCOUNTER]: IconCalendarEvent,
+  [ENTITY_TYPES.PHARMACY]: IconPill,
+  [ENTITY_TYPES.PRACTITIONER]: IconUser,
+  [ENTITY_TYPES.PATIENT]: IconUser,
 };
 
 /**
@@ -130,21 +135,28 @@ export const getActivityNavigationUrl = (activity, includeViewParam = true) => {
   }
 
   const modelName = activity.model_name.toLowerCase();
-  const basePath = ROUTE_MAPPING[modelName];
+  const entityType = MODEL_TO_ENTITY_TYPE[modelName];
+
+  if (!entityType) {
+    console.warn(`No entity type mapping found for model: ${modelName}`);
+    return null;
+  }
+
+  const basePath = ENTITY_TYPE_TO_ROUTE[entityType];
 
   if (!basePath) {
-    console.warn(`No route mapping found for model: ${modelName}`);
+    console.warn(`No route mapping found for entity type: ${entityType}`);
     return null;
   }
 
   // For patient records, navigate directly to the patient info page
-  if (modelName === 'patient') {
+  if (entityType === ENTITY_TYPES.PATIENT) {
     return basePath;
   }
 
   // For most medical records, navigate to the list page with view parameter for direct linking
   if (includeViewParam && activity.id) {
-    return `${basePath}?view=${activity.id}`;
+    return buildEntityUrl(entityType, activity.id, { autoOpen: true });
   }
 
   return basePath;
@@ -161,7 +173,13 @@ export const getActivityIcon = modelName => {
   }
 
   const normalizedModelName = modelName.toLowerCase();
-  return ICON_MAPPING[normalizedModelName] || null;
+  const entityType = MODEL_TO_ENTITY_TYPE[normalizedModelName];
+  
+  if (!entityType) {
+    return null;
+  }
+
+  return ENTITY_TYPE_TO_ICON[entityType] || null;
 };
 
 /**
@@ -224,44 +242,42 @@ export const formatActivityDescription = activity => {
 };
 
 /**
+ * Maps entity types to their display names
+ */
+const ENTITY_TYPE_TO_DISPLAY_NAME = {
+  [ENTITY_TYPES.MEDICATION]: 'Medication',
+  [ENTITY_TYPES.LAB_RESULT]: 'Lab Result',
+  [ENTITY_TYPES.PROCEDURE]: 'Procedure',
+  [ENTITY_TYPES.CONDITION]: 'Condition',
+  [ENTITY_TYPES.ALLERGY]: 'Allergy',
+  [ENTITY_TYPES.IMMUNIZATION]: 'Immunization',
+  [ENTITY_TYPES.VITALS]: 'Vital Signs',
+  [ENTITY_TYPES.EMERGENCY_CONTACT]: 'Emergency Contact',
+  [ENTITY_TYPES.TREATMENT]: 'Treatment',
+  [ENTITY_TYPES.ENCOUNTER]: 'Visit',
+  [ENTITY_TYPES.PHARMACY]: 'Pharmacy',
+  [ENTITY_TYPES.PRACTITIONER]: 'Practitioner',
+  [ENTITY_TYPES.PATIENT]: 'Patient Information',
+};
+
+/**
  * Gets a human-readable display name for a model
  * @param {string} modelName - The model name
  * @returns {string} - The display name
  */
 export const getModelDisplayName = modelName => {
-  const displayNames = {
-    medication: 'Medication',
-    'medical medication': 'Medication',
-    lab_result: 'Lab Result',
-    'lab result': 'Lab Result',
-    'medical lab result': 'Lab Result',
-    procedure: 'Procedure',
-    'medical procedure': 'Procedure',
-    condition: 'Condition',
-    'medical condition': 'Condition',
-    allergy: 'Allergy',
-    'medical allergy': 'Allergy',
-    immunization: 'Immunization',
-    'medical immunization': 'Immunization',
-    vital: 'Vital Signs',
-    'vital sign': 'Vital Signs',
-    'medical vital': 'Vital Signs',
-    emergency_contact: 'Emergency Contact',
-    'emergency contact': 'Emergency Contact',
-    treatment: 'Treatment',
-    'medical treatment': 'Treatment',
-    encounter: 'Visit',
-    visit: 'Visit',
-    'medical visit': 'Visit',
-    pharmacy: 'Pharmacy',
-    'medical pharmacy': 'Pharmacy',
-    practitioner: 'Practitioner',
-    'medical practitioner': 'Practitioner',
-    patient: 'Patient Information',
-    'medical patient': 'Patient Information',
-  };
+  if (!modelName) {
+    return 'Record';
+  }
 
-  return displayNames[modelName?.toLowerCase()] || modelName || 'Record';
+  const normalizedModelName = modelName.toLowerCase();
+  const entityType = MODEL_TO_ENTITY_TYPE[normalizedModelName];
+  
+  if (!entityType) {
+    return modelName;
+  }
+
+  return ENTITY_TYPE_TO_DISPLAY_NAME[entityType] || modelName;
 };
 
 /**
@@ -338,19 +354,19 @@ export const getActivityTooltip = activity => {
 export const getActivityFilterOptions = () => {
   return [
     { value: 'all', label: 'All Activity' },
-    { value: 'medication', label: 'Medications' },
-    { value: 'lab_result', label: 'Lab Results' },
-    { value: 'procedure', label: 'Procedures' },
-    { value: 'condition', label: 'Conditions' },
-    { value: 'allergy', label: 'Allergies' },
-    { value: 'immunization', label: 'Immunizations' },
-    { value: 'vital', label: 'Vital Signs' },
-    { value: 'emergency_contact', label: 'Emergency Contacts' },
-    { value: 'treatment', label: 'Treatments' },
-    { value: 'encounter', label: 'Visits' },
-    { value: 'pharmacy', label: 'Pharmacies' },
-    { value: 'practitioner', label: 'Practitioners' },
-    { value: 'patient', label: 'Patient Info' },
+    { value: ENTITY_TYPES.MEDICATION, label: 'Medications' },
+    { value: ENTITY_TYPES.LAB_RESULT, label: 'Lab Results' },
+    { value: ENTITY_TYPES.PROCEDURE, label: 'Procedures' },
+    { value: ENTITY_TYPES.CONDITION, label: 'Conditions' },
+    { value: ENTITY_TYPES.ALLERGY, label: 'Allergies' },
+    { value: ENTITY_TYPES.IMMUNIZATION, label: 'Immunizations' },
+    { value: ENTITY_TYPES.VITALS, label: 'Vital Signs' },
+    { value: ENTITY_TYPES.EMERGENCY_CONTACT, label: 'Emergency Contacts' },
+    { value: ENTITY_TYPES.TREATMENT, label: 'Treatments' },
+    { value: ENTITY_TYPES.ENCOUNTER, label: 'Visits' },
+    { value: ENTITY_TYPES.PHARMACY, label: 'Pharmacies' },
+    { value: ENTITY_TYPES.PRACTITIONER, label: 'Practitioners' },
+    { value: ENTITY_TYPES.PATIENT, label: 'Patient Info' },
   ];
 };
 
@@ -386,8 +402,11 @@ export const filterActivities = (
   }
 
   return activities.filter(activity => {
+    const modelName = activity.model_name?.toLowerCase();
+    const entityType = MODEL_TO_ENTITY_TYPE[modelName];
+    
     const typeMatch =
-      typeFilter === 'all' || activity.model_name?.toLowerCase() === typeFilter;
+      typeFilter === 'all' || entityType === typeFilter;
     const actionMatch =
       actionFilter === 'all' || activity.action?.toLowerCase() === actionFilter;
 

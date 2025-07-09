@@ -46,7 +46,7 @@ def create_medication(
     medication_id = getattr(medication_obj, "id", None)
     if medication_id:
         return medication.get_with_relations(
-            db=db, record_id=medication_id, relations=["practitioner", "pharmacy"]
+            db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
         )
     return medication_obj
 
@@ -66,7 +66,7 @@ def read_medications(
         patient_id=current_user_patient_id,
         skip=skip,
         limit=limit,
-        load_relations=["practitioner", "pharmacy"],
+        load_relations=["practitioner", "pharmacy", "condition"],
     )
 
     # Apply name filter if provided
@@ -89,7 +89,7 @@ def read_medication(
 ) -> Any:
     """Get medication by ID - only allows access to user's own medications."""
     medication_obj = medication.get_with_relations(
-        db=db, record_id=medication_id, relations=["practitioner", "pharmacy"]
+        db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
     )
     handle_not_found(medication_obj, "Medication")
     verify_patient_ownership(medication_obj, current_user_patient_id, "medication")
@@ -119,7 +119,7 @@ def update_medication(
 
     # Return with relationships loaded
     return medication.get_with_relations(
-        db=db, record_id=medication_id, relations=["practitioner", "pharmacy"]
+        db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
     )
 
 
@@ -161,6 +161,6 @@ def read_patient_medications(
             patient_id=patient_id,
             skip=skip,
             limit=limit,
-            load_relations=["practitioner", "pharmacy"],
+            load_relations=["practitioner", "pharmacy", "condition"],
         )
     return medications
