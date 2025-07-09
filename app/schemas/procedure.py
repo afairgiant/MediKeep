@@ -42,6 +42,9 @@ class ProcedureBase(BaseModel):
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the performing practitioner"
     )
+    condition_id: Optional[int] = Field(
+        None, gt=0, description="ID of the condition this procedure addresses"
+    )
     anesthesia_type: Optional[str] = Field(
         None, max_length=100, description="Type of Anethesia used during the procedure"
     )

@@ -7,6 +7,7 @@ import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -38,8 +39,8 @@ const Procedures = () => {
   // Get practitioners data
   const { practitioners } = usePractitioners();
 
-  // Get standardized formatters for procedures
-  const formatters = getEntityFormatters('procedures', practitioners);
+  // Get standardized formatters for procedures with linking support
+  const formatters = getEntityFormatters('procedures', practitioners, navigate);
 
   // Modern data management with useMedicalData
   const {
@@ -175,6 +176,17 @@ const Procedures = () => {
       }
     }
   }, [location.search, procedures, loading, showViewModal]);
+
+  // Handle auto-open from entity navigation (e.g., from other pages)
+  useEffect(() => {
+    const procedureIdToOpen = getAndClearStoredEntityId('procedure');
+    if (procedureIdToOpen && procedures.length > 0 && !loading) {
+      const procedureToView = procedures.find(p => p.id === parseInt(procedureIdToOpen));
+      if (procedureToView && !showViewModal) {
+        handleViewProcedure(procedureToView);
+      }
+    }
+  }, [procedures, loading, showViewModal]);
 
   const handleDeleteProcedure = async procedureId => {
     const success = await deleteItem(procedureId);
@@ -407,7 +419,12 @@ const Procedures = () => {
                             <Text size="sm" fw={500} c="dimmed" w={120}>
                               Doctor:
                             </Text>
-                            <Text size="sm">
+                            <Text 
+                              size="sm"
+                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
+                              title="View practitioner details"
+                            >
                               {practitioners.find(
                                 p => p.id === procedure.practitioner_id
                               )?.name ||
@@ -650,6 +667,9 @@ const Procedures = () => {
                               ? 'inherit'
                               : 'dimmed'
                           }
+                          style={viewingProcedure.practitioner_id ? { cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' } : {}}
+                          onClick={viewingProcedure.practitioner_id ? () => navigateToEntity('practitioner', viewingProcedure.practitioner_id, navigate) : undefined}
+                          title={viewingProcedure.practitioner_id ? "View practitioner details" : undefined}
                         >
                           {viewingProcedure.practitioner_id
                             ? practitioners.find(

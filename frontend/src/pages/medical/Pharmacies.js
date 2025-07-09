@@ -34,6 +34,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import MantinePharmacyForm from '../../components/medical/MantinePharmacyForm';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { usePharmacies } from '../../hooks/useGlobalData';
+import { getAndClearStoredEntityId } from '../../utils/linkNavigation';
 
 const Pharmacies = () => {
   const [error, setError] = useState('');
@@ -207,6 +208,17 @@ const Pharmacies = () => {
       }
     }
   }, [location.search, filteredPharmacies, loading, showViewModal]);
+
+  // Handle auto-open from entity navigation (e.g., from other pages)
+  useEffect(() => {
+    const pharmacyIdToOpen = getAndClearStoredEntityId('pharmacy');
+    if (pharmacyIdToOpen && filteredPharmacies && filteredPharmacies.length > 0 && !loading) {
+      const pharmacyToView = filteredPharmacies.find(p => p.id === parseInt(pharmacyIdToOpen));
+      if (pharmacyToView && !showViewModal) {
+        handleViewPharmacy(pharmacyToView);
+      }
+    }
+  }, [filteredPharmacies, loading, showViewModal]);
 
   if (loading) {
     return (

@@ -163,6 +163,7 @@ class Medication(Base):
     pharmacy_id = Column(Integer, ForeignKey("pharmacies.id"), nullable=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=True)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
@@ -174,6 +175,8 @@ class Medication(Base):
     patient = orm_relationship("Patient", back_populates="medications")
     practitioner = orm_relationship("Practitioner", back_populates="medications")
     pharmacy = orm_relationship("Pharmacy", back_populates="medications")
+    condition = orm_relationship("Condition", back_populates="medications")
+    allergies = orm_relationship("Allergy", back_populates="medications")
 
 
 class Encounter(Base):
@@ -185,6 +188,7 @@ class Encounter(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"))
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"))
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=True)
 
     # Basic encounter information
     reason = Column(String, nullable=False)  # Reason for the encounter
@@ -226,6 +230,7 @@ class Encounter(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="encounters")
     practitioner = orm_relationship("Practitioner", back_populates="encounters")
+    condition = orm_relationship("Condition")
 
 
 class LabResult(Base):
@@ -324,6 +329,9 @@ class Condition(Base):
     patient = orm_relationship("Patient", back_populates="conditions")
     practitioner = orm_relationship("Practitioner", back_populates="conditions")
     treatments = orm_relationship("Treatment", back_populates="condition")
+    medications = orm_relationship("Medication", back_populates="condition")
+    # encounters relationship removed - use queries instead due to potential high volume
+    procedures = orm_relationship("Procedure", back_populates="condition")
 
 
 class Immunization(Base):
@@ -361,6 +369,7 @@ class Procedure(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=True)
 
     procedure_name = Column(String, nullable=False)  # Name of the procedure
     procedure_type = Column(
@@ -404,6 +413,7 @@ class Procedure(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="procedures")
     practitioner = orm_relationship("Practitioner", back_populates="procedures")
+    condition = orm_relationship("Condition", back_populates="procedures")
 
 
 class Treatment(Base):
@@ -452,6 +462,8 @@ class Allergy(Base):
     __tablename__ = "allergies"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
+
     allergen = Column(String, nullable=False)  # Allergen name
     reaction = Column(String, nullable=False)  # Reaction to the allergen
     severity = Column(
@@ -471,6 +483,7 @@ class Allergy(Base):
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="allergies")
+    medications = orm_relationship("Medication", back_populates="allergies")
 
 
 class Vitals(Base):

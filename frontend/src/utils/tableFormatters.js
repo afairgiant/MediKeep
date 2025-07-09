@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDate } from './helpers';
+import { createEntityLinkProps } from './linkNavigation';
 
 /**
  * Standardized table formatters for medical pages
@@ -56,6 +57,51 @@ export const standardFormatters = {
   // Pharmacy fields
   pharmacy: (value, item) => item.pharmacy?.name || '-',
 
+  // Clickable entity link formatter
+  entityLink: (entityType, entityData, navigate, getEntityName = null) => {
+    const linkProps = createEntityLinkProps(entityType, entityData, navigate, getEntityName);
+    if (!linkProps) return '-';
+    
+    return (
+      <span 
+        onClick={linkProps.onClick}
+        style={linkProps.style}
+        title={`Navigate to ${entityType}`}
+      >
+        {linkProps.text}
+      </span>
+    );
+  },
+
+  // Clickable practitioner link
+  practitionerLink: (value, item, practitioners = [], navigate, getEntityName = null) => {
+    if (!item.practitioner_id) return '-';
+    
+    const practitioner = practitioners.find(p => p.id === item.practitioner_id) || 
+                        item.practitioner || 
+                        { id: item.practitioner_id };
+    
+    return standardFormatters.entityLink('practitioner', practitioner, navigate, getEntityName);
+  },
+
+  // Clickable pharmacy link
+  pharmacyLink: (value, item, navigate, getEntityName = null) => {
+    if (!item.pharmacy_id) return '-';
+    
+    const pharmacy = item.pharmacy || { id: item.pharmacy_id };
+    
+    return standardFormatters.entityLink('pharmacy', pharmacy, navigate, getEntityName);
+  },
+
+  // Clickable condition link
+  conditionLink: (value, item, navigate, getEntityName = null) => {
+    if (!item.condition_id) return '-';
+    
+    const condition = item.condition || { id: item.condition_id };
+    
+    return standardFormatters.entityLink('condition', condition, navigate, getEntityName);
+  },
+
   // Simple text with fallback
   simple: value => value || '-',
 };
@@ -64,9 +110,11 @@ export const standardFormatters = {
  * Get formatters for a specific medical entity
  * @param {string} entityType - The type of medical entity (medications, procedures, etc.)
  * @param {Array} practitioners - Array of practitioners for reference
+ * @param {function} navigate - React Router navigate function for links
+ * @param {function} getEntityName - Optional function to get entity name by ID
  * @returns {Object} Formatters object for the entity
  */
-export const getEntityFormatters = (entityType, practitioners = []) => {
+export const getEntityFormatters = (entityType, practitioners = [], navigate = null, getEntityName = null) => {
   const baseFormatters = {
     status: standardFormatters.status,
     date: standardFormatters.date,
@@ -85,9 +133,12 @@ export const getEntityFormatters = (entityType, practitioners = []) => {
         indication: value => standardFormatters.text(value, 50),
         effective_period_start: standardFormatters.date,
         effective_period_end: standardFormatters.date,
-        practitioner_name: (value, item) =>
-          standardFormatters.practitioner(value, item, practitioners),
-        pharmacy_name: standardFormatters.pharmacy,
+        practitioner_name: navigate 
+          ? (value, item) => standardFormatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
+          : (value, item) => standardFormatters.practitioner(value, item, practitioners),
+        pharmacy_name: navigate 
+          ? (value, item) => standardFormatters.pharmacyLink(value, item, navigate, getEntityName)
+          : standardFormatters.pharmacy,
       };
 
     case 'procedures':
@@ -99,8 +150,9 @@ export const getEntityFormatters = (entityType, practitioners = []) => {
         procedure_setting: standardFormatters.setting,
         procedure_duration: standardFormatters.duration,
         facility: standardFormatters.simple,
-        practitioner_name: (value, item) =>
-          standardFormatters.practitioner(value, item, practitioners),
+        practitioner_name: navigate 
+          ? (value, item) => standardFormatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
+          : (value, item) => standardFormatters.practitioner(value, item, practitioners),
         description: value => standardFormatters.text(value, 50),
         notes: value => standardFormatters.text(value, 50),
       };
@@ -169,8 +221,9 @@ export const getEntityFormatters = (entityType, practitioners = []) => {
         visit_type: standardFormatters.type,
         visit_date: standardFormatters.date,
         facility: standardFormatters.simple,
-        practitioner_name: (value, item) =>
-          standardFormatters.practitioner(value, item, practitioners),
+        practitioner_name: navigate 
+          ? (value, item) => standardFormatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
+          : (value, item) => standardFormatters.practitioner(value, item, practitioners),
         reason: value => standardFormatters.text(value, 50),
         diagnosis: value => standardFormatters.text(value, 50),
         notes: value => standardFormatters.text(value, 50),

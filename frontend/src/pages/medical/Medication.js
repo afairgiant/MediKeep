@@ -7,6 +7,7 @@ import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -42,9 +43,6 @@ const Medication = () => {
   const practitioners = practitionersObject?.practitioners || [];
   const pharmacies = pharmaciesObject?.pharmacies || [];
 
-  // Get standardized formatters for medications
-  const formatters = getEntityFormatters('medications', practitioners);
-
   // Modern data management with useMedicalData
   const {
     items: medications,
@@ -78,6 +76,100 @@ const Medication = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(medications, config);
 
+  // Get patient conditions for linking
+  const [conditions, setConditions] = useState([]);
+  
+  useEffect(() => {
+    if (currentPatient?.id) {
+      apiService.getPatientConditions(currentPatient.id)
+        .then(response => {
+          setConditions(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch conditions:', error);
+          setConditions([]);
+        });
+    }
+  }, [currentPatient?.id]);
+
+  // Smart function to display medication purpose with clickable condition links
+  const getMedicationPurpose = (medication, asText = false) => {
+    const indication = medication.indication?.trim();
+    
+    // Try to get condition info from the loaded relationship first
+    let conditionData = null;
+    if (medication.condition?.diagnosis || medication.condition?.condition_name) {
+      conditionData = {
+        id: medication.condition.id,
+        diagnosis: medication.condition.diagnosis?.trim() || medication.condition.condition_name?.trim()
+      };
+    }
+    
+    // If no condition object but we have condition_id, look it up in our conditions list
+    if (!conditionData && medication.condition_id && conditions.length > 0) {
+      const linkedCondition = conditions.find(c => c.id === medication.condition_id);
+      if (linkedCondition) {
+        conditionData = {
+          id: linkedCondition.id,
+          diagnosis: linkedCondition.diagnosis?.trim() || linkedCondition.condition_name?.trim()
+        };
+      }
+    }
+    
+    // For table formatters, return plain text
+    if (asText) {
+      if (indication && conditionData) {
+        return `${indication} (${conditionData.diagnosis})`;
+      } else if (indication) {
+        return indication;
+      } else if (conditionData) {
+        return conditionData.diagnosis;
+      } else {
+        return 'No indication specified';
+      }
+    }
+    
+    // For JSX components, return clickable elements
+    if (indication && conditionData) {
+      return (
+        <span>
+          {indication} (
+          <Text
+            component="span"
+            style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+            onClick={() => navigateToEntity('condition', conditionData.id, navigate)}
+            title="View condition details"
+          >
+            {conditionData.diagnosis}
+          </Text>
+          )
+        </span>
+      );
+    } else if (indication) {
+      return indication;
+    } else if (conditionData) {
+      return (
+        <Text
+          component="span"
+          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+          onClick={() => navigateToEntity('condition', conditionData.id, navigate)}
+          title="View condition details"
+        >
+          {conditionData.diagnosis}
+        </Text>
+      );
+    } else {
+      return 'No indication specified';
+    }
+  };
+
+  // Get standardized formatters for medications with linking support
+  const formatters = {
+    ...getEntityFormatters('medications', practitioners, navigate),
+    // Override indication formatter to use smart display (text version for tables)
+    indication: (value, medication) => getMedicationPurpose(medication, true),
+  };
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -94,6 +186,7 @@ const Medication = () => {
     status: 'active',
     practitioner_id: null,
     pharmacy_id: null,
+    condition_id: null,
   });
 
   const handleAddMedication = () => {
@@ -109,13 +202,14 @@ const Medication = () => {
       status: 'active',
       practitioner_id: null,
       pharmacy_id: null,
+      condition_id: null,
     });
     setShowModal(true);
   };
 
   const handleEditMedication = medication => {
     setEditingMedication(medication);
-    setFormData({
+    const formDataToSet = {
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
       frequency: medication.frequency || '',
@@ -124,9 +218,12 @@ const Medication = () => {
       effective_period_start: medication.effective_period_start || '',
       effective_period_end: medication.effective_period_end || '',
       status: medication.status || 'active',
-      practitioner_id: medication.practitioner_id || null,
-      pharmacy_id: medication.pharmacy_id || null,
-    });
+      practitioner_id: medication.practitioner_id ? String(medication.practitioner_id) : null,
+      pharmacy_id: medication.pharmacy_id ? String(medication.pharmacy_id) : null,
+      condition_id: medication.condition_id ? String(medication.condition_id) : null,
+    };
+    
+    setFormData(formDataToSet);
     setShowModal(true);
   };
 
@@ -168,6 +265,17 @@ const Medication = () => {
     }
   }, [location.search, medications, loading, showViewModal]);
 
+  // Handle auto-open from entity navigation (e.g., from other pages)
+  useEffect(() => {
+    const medicationIdToOpen = getAndClearStoredEntityId('medication');
+    if (medicationIdToOpen && medications.length > 0 && !loading) {
+      const medicationToView = medications.find(m => m.id === parseInt(medicationIdToOpen));
+      if (medicationToView && !showViewModal) {
+        handleViewMedication(medicationToView);
+      }
+    }
+  }, [medications, loading, showViewModal]);
+
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
     if (success) {
@@ -195,6 +303,7 @@ const Medication = () => {
         ? parseInt(formData.practitioner_id)
         : null,
       pharmacy_id: formData.pharmacy_id ? parseInt(formData.pharmacy_id) : null,
+      condition_id: formData.condition_id ? parseInt(formData.condition_id) : null,
     };
 
     // Add dates if provided
@@ -205,16 +314,20 @@ const Medication = () => {
       medicationData.effective_period_end = formData.effective_period_end;
     }
 
-    let success;
-    if (editingMedication) {
-      success = await updateItem(editingMedication.id, medicationData);
-    } else {
-      success = await createItem(medicationData);
-    }
+    try {
+      let success;
+      if (editingMedication) {
+        success = await updateItem(editingMedication.id, medicationData);
+      } else {
+        success = await createItem(medicationData);
+      }
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+      if (success) {
+        setShowModal(false);
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Error during save operation:', error);
     }
   };
 
@@ -223,7 +336,7 @@ const Medication = () => {
     let processedValue = value;
 
     // Handle ID fields - convert empty string to null, otherwise keep as string for Mantine
-    if (name === 'practitioner_id' || name === 'pharmacy_id') {
+    if (name === 'practitioner_id' || name === 'pharmacy_id' || name === 'condition_id') {
       if (value === '') {
         processedValue = null;
       } else {
@@ -373,22 +486,25 @@ const Medication = () => {
                             </Badge>
                           </Group>
                         )}
-                        {medication.indication && (
-                          <Group align="flex-start">
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Indication:
-                            </Text>
-                            <Text size="sm" style={{ flex: 1 }}>
-                              {medication.indication}
-                            </Text>
-                          </Group>
-                        )}
+                        <Group align="flex-start">
+                          <Text size="sm" fw={500} c="dimmed" w={120}>
+                            Purpose:
+                          </Text>
+                          <Text size="sm" style={{ flex: 1 }}>
+                            {getMedicationPurpose(medication)}
+                          </Text>
+                        </Group>
                         {medication.practitioner && (
                           <Group>
                             <Text size="sm" fw={500} c="dimmed" w={120}>
                               Prescriber:
                             </Text>
-                            <Text size="sm">
+                            <Text 
+                              size="sm" 
+                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
+                              title="View practitioner details"
+                            >
                               {medication.practitioner.name}
                             </Text>
                           </Group>
@@ -398,7 +514,14 @@ const Medication = () => {
                             <Text size="sm" fw={500} c="dimmed" w={120}>
                               Pharmacy:
                             </Text>
-                            <Text size="sm">{medication.pharmacy.name}</Text>
+                            <Text 
+                              size="sm" 
+                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
+                              title="View pharmacy details"
+                            >
+                              {medication.pharmacy.name}
+                            </Text>
                           </Group>
                         )}
                         {medication.effective_period_start && (
@@ -464,7 +587,7 @@ const Medication = () => {
                 { header: 'Dosage', accessor: 'dosage' },
                 { header: 'Frequency', accessor: 'frequency' },
                 { header: 'Route', accessor: 'route' },
-                { header: 'Indication', accessor: 'indication' },
+                { header: 'Purpose', accessor: 'indication' },
                 { header: 'Prescriber', accessor: 'practitioner_name' },
                 { header: 'Pharmacy', accessor: 'pharmacy_name' },
                 { header: 'Start Date', accessor: 'effective_period_start' },
@@ -491,6 +614,7 @@ const Medication = () => {
         onSubmit={handleSubmit}
         practitioners={practitioners}
         pharmacies={pharmacies}
+        conditions={conditions}
         editingMedication={editingMedication}
       />
 
@@ -528,10 +652,10 @@ const Medication = () => {
 
                 <Stack gap="xs">
                   <Text fw={500} c="dimmed" size="sm">
-                    Indication
+                    Purpose
                   </Text>
-                  <Text c={viewingMedication.indication ? 'inherit' : 'dimmed'}>
-                    {viewingMedication.indication || 'Not specified'}
+                  <Text>
+                    {getMedicationPurpose(viewingMedication)}
                   </Text>
                 </Stack>
               </Stack>

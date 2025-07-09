@@ -8,6 +8,7 @@ import {
   Stack,
   Grid,
   Text,
+  Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 
@@ -20,6 +21,7 @@ const MantineMedicalForm = ({
   onSubmit,
   practitioners = [],
   pharmacies = [],
+  conditions = [],
   editingMedication = null,
 }) => {
   // Convert practitioners to Mantine format
@@ -32,6 +34,12 @@ const MantineMedicalForm = ({
   const pharmacyOptions = pharmacies.map(pharmacy => ({
     value: String(pharmacy.id),
     label: `${pharmacy.name}${pharmacy.city ? ` - ${pharmacy.city}` : ''}${pharmacy.state ? `, ${pharmacy.state}` : ''}`,
+  }));
+
+  // Convert conditions to Mantine format
+  const conditionOptions = conditions.map(condition => ({
+    value: String(condition.id),
+    label: condition.diagnosis || condition.condition_name || `Condition #${condition.id}`,
   }));
 
   // Handle TextInput onChange (receives event object)
@@ -161,14 +169,39 @@ const MantineMedicalForm = ({
             </Grid.Col>
           </Grid>
 
-          {/* Indication */}
-          <TextInput
-            label="Indication"
-            placeholder="What is this medication for?"
-            value={formData.indication}
-            onChange={handleTextInputChange('indication')}
-            description="Medical condition or symptom being treated"
-          />
+          {/* Indication and Condition Linking */}
+          <Stack spacing="xs">
+            <Text size="sm" fw={500} c="dimmed">
+              What is this medication for?
+            </Text>
+            
+            <TextInput
+              label="Indication"
+              placeholder="e.g., High blood pressure, As needed for pain"
+              value={formData.indication}
+              onChange={handleTextInputChange('indication')}
+              description="Describe the reason in your own words"
+            />
+            
+            <Text size="xs" c="dimmed" ta="center">
+              — OR —
+            </Text>
+            
+            <Select
+              label="Link to Condition (Optional)"
+              placeholder="Choose from patient's conditions..."
+              value={formData.condition_id}
+              onChange={handleSelectChange('condition_id')}
+              data={conditionOptions}
+              searchable
+              clearable
+              description="Link to a formal diagnosis if applicable"
+            />
+            
+            <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+              💡 You can use either approach, or both together for more detail
+            </Text>
+          </Stack>
 
           {/* Status and Dates */}
           <Grid>

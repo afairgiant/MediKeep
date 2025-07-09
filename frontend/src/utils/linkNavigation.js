@@ -1,0 +1,147 @@
+/**
+ * Centralized navigation utility for linking between medical record entities
+ * Based on the existing Treatment → Condition pattern
+ */
+
+export const ENTITY_ROUTES = {
+  condition: '/conditions',
+  medication: '/medications',
+  procedure: '/procedures',
+  practitioner: '/practitioners',
+  pharmacy: '/pharmacies',
+  allergy: '/allergies',
+  treatment: '/treatments',
+  encounter: '/encounters',
+  lab_result: '/lab-results',
+  immunization: '/immunizations',
+  vitals: '/vitals',
+  patient: '/patients'
+};
+
+export const ENTITY_STORAGE_KEYS = {
+  condition: 'openConditionId',
+  medication: 'openMedicationId',
+  procedure: 'openProcedureId',
+  practitioner: 'openPractitionerId',
+  pharmacy: 'openPharmacyId',
+  allergy: 'openAllergyId',
+  treatment: 'openTreatmentId',
+  encounter: 'openEncounterId',
+  lab_result: 'openLabResultId',
+  immunization: 'openImmunizationId',
+  vitals: 'openVitalsId',
+  patient: 'openPatientId'
+};
+
+/**
+ * Navigate to a related entity and automatically open it
+ * @param {string} entityType - Type of entity to navigate to (e.g., 'condition', 'practitioner')
+ * @param {number|string} entityId - ID of the entity to open
+ * @param {function} navigate - React Router navigate function
+ */
+export const navigateToEntity = (entityType, entityId, navigate) => {
+  if (!entityId || !entityType) return;
+  
+  const route = ENTITY_ROUTES[entityType];
+  const storageKey = ENTITY_STORAGE_KEYS[entityType];
+  
+  if (!route || !storageKey) {
+    console.error(`Unknown entity type: ${entityType}`);
+    return;
+  }
+  
+  // Store the entity ID for auto-opening (fallback method)
+  sessionStorage.setItem(storageKey, entityId.toString());
+  
+  // Navigate to the entity page with view parameter in URL
+  navigate(`${route}?view=${entityId}`);
+};
+
+/**
+ * Get the stored entity ID for auto-opening and clear it
+ * @param {string} entityType - Type of entity
+ * @returns {string|null} - The stored entity ID or null
+ */
+export const getAndClearStoredEntityId = (entityType) => {
+  const storageKey = ENTITY_STORAGE_KEYS[entityType];
+  if (!storageKey) return null;
+  
+  const entityId = sessionStorage.getItem(storageKey);
+  if (entityId) {
+    sessionStorage.removeItem(storageKey);
+  }
+  
+  return entityId;
+};
+
+/**
+ * Create a click handler for entity navigation
+ * @param {string} entityType - Type of entity to navigate to
+ * @param {function} navigate - React Router navigate function
+ * @returns {function} - Click handler function
+ */
+export const createEntityNavigationHandler = (entityType, navigate) => {
+  return (entityId) => {
+    navigateToEntity(entityType, entityId, navigate);
+  };
+};
+
+/**
+ * Create entity display name from entity object or ID
+ * @param {string} entityType - Type of entity
+ * @param {object|number} entityData - Entity object or ID
+ * @param {function} getEntityName - Optional function to get entity name by ID
+ * @returns {string} - Display name for the entity
+ */
+export const getEntityDisplayName = (entityType, entityData, getEntityName = null) => {
+  if (!entityData) return null;
+  
+  // If it's just an ID
+  if (typeof entityData === 'number' || typeof entityData === 'string') {
+    if (getEntityName) {
+      return getEntityName(entityData) || `${entityType} #${entityData}`;
+    }
+    return `${entityType} #${entityData}`;
+  }
+  
+  // If it's an object, extract the appropriate display field
+  switch (entityType) {
+    case 'condition':
+      return entityData.diagnosis || `Condition #${entityData.id}`;
+    case 'practitioner':
+      return entityData.name || `${entityData.first_name} ${entityData.last_name}` || `Practitioner #${entityData.id}`;
+    case 'pharmacy':
+      return entityData.name || `Pharmacy #${entityData.id}`;
+    case 'medication':
+      return entityData.medication_name || `Medication #${entityData.id}`;
+    case 'procedure':
+      return entityData.procedure_name || `Procedure #${entityData.id}`;
+    case 'allergy':
+      return entityData.allergen || `Allergy #${entityData.id}`;
+    case 'treatment':
+      return entityData.treatment_name || `Treatment #${entityData.id}`;
+    default:
+      return `${entityType} #${entityData.id}`;
+  }
+};
+
+/**
+ * Create a generic entity link component props
+ * @param {string} entityType - Type of entity
+ * @param {object} entityData - Entity data
+ * @param {function} navigate - React Router navigate function
+ * @param {function} getEntityName - Optional function to get entity name by ID
+ * @returns {object} - Props for entity link component
+ */
+export const createEntityLinkProps = (entityType, entityData, navigate, getEntityName = null) => {
+  if (!entityData) return null;
+  
+  const displayName = getEntityDisplayName(entityType, entityData, getEntityName);
+  const entityId = typeof entityData === 'object' ? entityData.id : entityData;
+  
+  return {
+    text: displayName,
+    onClick: () => navigateToEntity(entityType, entityId, navigate),
+    style: { cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }
+  };
+};

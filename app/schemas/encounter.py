@@ -108,6 +108,7 @@ class EncounterCreate(EncounterBase):
 
     patient_id: int
     practitioner_id: Optional[int] = None
+    condition_id: Optional[int] = None
 
     @validator("patient_id")
     def validate_patient_id(cls, v):
@@ -123,6 +124,13 @@ class EncounterCreate(EncounterBase):
             raise ValueError("Practitioner ID must be a positive integer")
         return v
 
+    @validator("condition_id")
+    def validate_condition_id(cls, v):
+        """Validate condition ID"""
+        if v is not None and v <= 0:
+            raise ValueError("Condition ID must be a positive integer")
+        return v
+
 
 class EncounterUpdate(BaseModel):
     """Schema for updating an existing encounter"""
@@ -131,6 +139,7 @@ class EncounterUpdate(BaseModel):
     date: Optional[DateType] = None
     notes: Optional[str] = None
     practitioner_id: Optional[int] = None
+    condition_id: Optional[int] = None
 
     # Enhanced encounter fields (all optional for updates)
     visit_type: Optional[str] = None
