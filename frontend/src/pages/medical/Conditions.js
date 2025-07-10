@@ -233,23 +233,31 @@ const Conditions = () => {
 
   const filteredConditions = dataManagement.data;
 
-  // Helper function to calculate time since onset
-  const getTimeSinceOnset = onsetDate => {
+  // Helper function to calculate condition duration
+  const getConditionDuration = (onsetDate, endDate, status) => {
     if (!onsetDate) return null;
 
     const onset = new Date(onsetDate);
-    const now = new Date();
-    const diffTime = Math.abs(now - onset);
+    const endPoint = endDate ? new Date(endDate) : new Date();
+    const diffTime = Math.abs(endPoint - onset);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+    let duration;
     if (diffDays < 30) {
-      return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+      duration = `${diffDays} day${diffDays === 1 ? '' : 's'}`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      return `${months} month${months === 1 ? '' : 's'} ago`;
+      duration = `${months} month${months === 1 ? '' : 's'}`;
     } else {
       const years = Math.floor(diffDays / 365);
-      return `${years} year${years === 1 ? '' : 's'} ago`;
+      duration = `${years} year${years === 1 ? '' : 's'}`;
+    }
+
+    // Add appropriate suffix based on condition status
+    if (endDate || status === 'resolved' || status === 'inactive') {
+      return `${duration} (ended)`;
+    } else {
+      return `${duration} (ongoing)`;
     }
   };
 
@@ -493,7 +501,7 @@ const Conditions = () => {
                                     Duration:
                                   </Text>
                                   <Text size="sm" fw={500}>
-                                    {getTimeSinceOnset(condition.onset_date)}
+                                    {getConditionDuration(condition.onset_date, condition.end_date, condition.status)}
                                   </Text>
                                 </Group>
                               </>
@@ -781,7 +789,7 @@ const Conditions = () => {
                             Duration:
                           </Text>
                           <Text size="sm" c="inherit">
-                            {getTimeSinceOnset(viewingCondition.onset_date)}
+                            {getConditionDuration(viewingCondition.onset_date, viewingCondition.end_date, viewingCondition.status)}
                           </Text>
                         </Group>
                       )}

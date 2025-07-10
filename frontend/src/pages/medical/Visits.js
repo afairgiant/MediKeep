@@ -32,6 +32,7 @@ import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -80,6 +81,37 @@ const Visits = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(visits, config);
 
+  // Get patient conditions for linking
+  const [conditions, setConditions] = useState([]);
+  
+  useEffect(() => {
+    if (currentPatient?.id) {
+      apiService.getPatientConditions(currentPatient.id)
+        .then(response => {
+          setConditions(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch conditions:', error);
+          setConditions([]);
+        });
+    }
+  }, [currentPatient?.id]);
+
+  // Helper function to get condition details
+  const getConditionDetails = (conditionId) => {
+    if (!conditionId || conditions.length === 0) return null;
+    return conditions.find(cond => cond.id === conditionId);
+  };
+
+  // Get standardized formatters for visits with condition linking
+  const formatters = {
+    ...getEntityFormatters('visits', [], navigate),
+    condition_name: (value, visit) => {
+      const condition = getConditionDetails(visit.condition_id);
+      return condition?.diagnosis || '';
+    },
+  };
+
   // Form state
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -90,6 +122,7 @@ const Visits = () => {
     date: '',
     notes: '',
     practitioner_id: '',
+    condition_id: '',
     visit_type: '',
     chief_complaint: '',
     diagnosis: '',
@@ -107,6 +140,7 @@ const Visits = () => {
       date: '',
       notes: '',
       practitioner_id: '',
+      condition_id: '',
       visit_type: '',
       chief_complaint: '',
       diagnosis: '',
@@ -137,6 +171,7 @@ const Visits = () => {
       date: visit.date ? visit.date.split('T')[0] : '',
       notes: visit.notes || '',
       practitioner_id: visit.practitioner_id || '',
+      condition_id: visit.condition_id ? visit.condition_id.toString() : '',
       visit_type: visit.visit_type || '',
       chief_complaint: visit.chief_complaint || '',
       diagnosis: visit.diagnosis || '',
@@ -196,6 +231,7 @@ const Visits = () => {
       date: formData.date,
       notes: formData.notes || null,
       practitioner_id: formData.practitioner_id || null,
+      condition_id: formData.condition_id ? parseInt(formData.condition_id) : null,
       visit_type: formData.visit_type || null,
       chief_complaint: formData.chief_complaint || null,
       diagnosis: formData.diagnosis || null,
@@ -455,6 +491,26 @@ const Visits = () => {
                             </Text>
                           </Group>
 
+                          {(() => {
+                            const condition = getConditionDetails(visit.condition_id);
+                            return condition ? (
+                              <Group justify="space-between">
+                                <Text size="sm" c="dimmed">
+                                  Related Condition:
+                                </Text>
+                                <Text
+                                  size="sm"
+                                  fw={500}
+                                  style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                                  onClick={() => navigateToEntity('condition', condition.id, navigate)}
+                                  title="View condition details"
+                                >
+                                  {condition.diagnosis}
+                                </Text>
+                              </Group>
+                            ) : null;
+                          })()}
+
                           {visit.chief_complaint && (
                             <Group justify="space-between">
                               <Text size="sm" c="dimmed">
@@ -604,6 +660,7 @@ const Visits = () => {
                   { header: 'Visit Type', accessor: 'visit_type' },
                   { header: 'Facility', accessor: 'location' },
                   { header: 'Practitioner', accessor: 'practitioner_name' },
+                  { header: 'Related Condition', accessor: 'condition_name' },
                   { header: 'Diagnosis', accessor: 'diagnosis' },
                   { header: 'Notes', accessor: 'notes' },
                 ]}
@@ -622,6 +679,7 @@ const Visits = () => {
                       'visits',
                       practitioners
                     ).practitioner_name(value, item),
+                  condition_name: formatters.condition_name,
                   diagnosis: getEntityFormatters('visits').text,
                   notes: getEntityFormatters('visits').text,
                 }}
@@ -639,6 +697,8 @@ const Visits = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         practitioners={practitioners}
+        conditionsOptions={conditions}
+        conditionsLoading={false}
         editingVisit={editingVisit}
       />
 
@@ -788,6 +848,24 @@ const Visits = () => {
                           : 'Not specified'}
                       </Text>
                     </Group>
+                    {(() => {
+                      const condition = getConditionDetails(viewingVisit.condition_id);
+                      return condition ? (
+                        <Group>
+                          <Text size="sm" fw={500} w={80}>
+                            Condition:
+                          </Text>
+                          <Text
+                            size="sm"
+                            style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                            onClick={() => navigateToEntity('condition', condition.id, navigate)}
+                            title="View condition details"
+                          >
+                            {condition.diagnosis}
+                          </Text>
+                        </Group>
+                      ) : null;
+                    })()}
                     <Group>
                       <Text size="sm" fw={500} w={80}>
                         Practice:

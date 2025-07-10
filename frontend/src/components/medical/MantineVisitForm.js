@@ -22,6 +22,8 @@ const MantineVisitForm = ({
   onInputChange,
   onSubmit,
   practitioners = [],
+  conditionsOptions = [],
+  conditionsLoading = false,
   editingVisit = null,
 }) => {
   // Convert practitioners to Mantine format
@@ -196,6 +198,22 @@ const MantineVisitForm = ({
               />
             </Grid.Col>
           </Grid>
+
+          {/* Related Condition */}
+          <Select
+            label="Related Condition (Optional)"
+            placeholder={conditionsLoading ? "Loading conditions..." : "Select a condition this visit is related to"}
+            value={formData.condition_id}
+            onChange={handleSelectChange('condition_id')}
+            data={conditionsOptions.map(cond => ({
+              value: cond.id.toString(),
+              label: cond.diagnosis,
+            }))}
+            searchable
+            clearable
+            disabled={conditionsLoading}
+            description="Link this visit to a specific condition if applicable"
+          />
 
           {/* Chief Complaint */}
           <TextInput

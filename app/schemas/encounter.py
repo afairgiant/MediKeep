@@ -249,6 +249,7 @@ class EncounterResponse(EncounterBase):
     id: int
     patient_id: int
     practitioner_id: Optional[int] = None
+    condition_id: Optional[int] = None
 
     class Config:
         from_attributes = True
