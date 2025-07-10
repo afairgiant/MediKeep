@@ -7,12 +7,14 @@ import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
+import ConditionRelationships from '../../components/medical/ConditionRelationships';
 import { Button } from '../../components/ui';
 import {
   Badge,
@@ -96,6 +98,44 @@ const LabResults = () => {
   const dataManagement = useDataManagement(labResults || [], config, {
     filesCounts,
   });
+
+  // Get patient conditions for linking
+  const [conditions, setConditions] = useState([]);
+  const [labResultConditions, setLabResultConditions] = useState({});
+  
+  useEffect(() => {
+    if (currentPatient?.id) {
+      apiService.getPatientConditions(currentPatient.id)
+        .then(response => {
+          setConditions(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch conditions:', error);
+          setConditions([]);
+        });
+    }
+  }, [currentPatient?.id]);
+
+  // Helper function to get condition details
+  const getConditionDetails = (conditionId) => {
+    if (!conditionId || conditions.length === 0) return null;
+    return conditions.find(cond => cond.id === conditionId);
+  };
+
+  // Helper function to fetch condition relationships for a lab result
+  const fetchLabResultConditions = async (labResultId) => {
+    try {
+      const relationships = await apiService.getLabResultConditions(labResultId);
+      setLabResultConditions(prev => ({
+        ...prev,
+        [labResultId]: relationships || []
+      }));
+      return relationships || [];
+    } catch (error) {
+      console.error('Failed to fetch lab result conditions:', error);
+      return [];
+    }
+  };
 
   // Get processed data from data management
   const filteredLabResults = dataManagement.data;
@@ -823,6 +863,10 @@ const LabResults = () => {
           onSubmit={handleSubmit}
           practitioners={practitioners}
           editingLabResult={editingLabResult}
+          conditions={conditions}
+          labResultConditions={labResultConditions}
+          fetchLabResultConditions={fetchLabResultConditions}
+          navigate={navigate}
         >
           {/* File Management Section for Edit Mode */}
           {editingLabResult && (
@@ -1099,6 +1143,19 @@ const LabResults = () => {
                   </Text>
                 </Paper>
               </Stack>
+            </Stack>
+
+            {/* Related Conditions Section */}
+            <Stack gap="lg">
+              <Title order={3}>Related Conditions</Title>
+              <ConditionRelationships 
+                labResultId={viewingLabResult.id}
+                labResultConditions={labResultConditions}
+                conditions={conditions}
+                fetchLabResultConditions={fetchLabResultConditions}
+                navigate={navigate}
+                isViewMode={true}
+              />
             </Stack>
 
             <Stack gap="lg">

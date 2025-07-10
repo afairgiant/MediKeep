@@ -273,6 +273,11 @@ class LabResult(Base):
     files = orm_relationship(
         "LabResultFile", back_populates="lab_result", cascade="all, delete-orphan"
     )
+    
+    # Many-to-Many relationship with conditions through junction table
+    condition_relationships = orm_relationship(
+        "LabResultCondition", back_populates="lab_result", cascade="all, delete-orphan"
+    )
 
 
 class LabResultFile(Base):
@@ -291,6 +296,31 @@ class LabResultFile(Base):
 
     # Table Relationships
     lab_result = orm_relationship("LabResult", back_populates="files")
+
+
+class LabResultCondition(Base):
+    """
+    Junction table for many-to-many relationship between lab results and conditions.
+    Allows one lab result to be related to multiple conditions with optional context.
+    """
+    __tablename__ = "lab_result_conditions"
+    
+    id = Column(Integer, primary_key=True)
+    lab_result_id = Column(Integer, ForeignKey("lab_results.id"), nullable=False)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
+    
+    # Optional context about how this lab result relates to this condition
+    relevance_note = Column(String, nullable=True)  # e.g., "Elevated glucose indicates poor control"
+    
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+    
+    # Table Relationships
+    lab_result = orm_relationship("LabResult", back_populates="condition_relationships")
+    condition = orm_relationship("Condition", back_populates="lab_result_relationships")
 
 
 class Condition(Base):
@@ -332,6 +362,11 @@ class Condition(Base):
     medications = orm_relationship("Medication", back_populates="condition")
     # encounters relationship removed - use queries instead due to potential high volume
     procedures = orm_relationship("Procedure", back_populates="condition")
+    
+    # Many-to-Many relationship with lab results through junction table
+    lab_result_relationships = orm_relationship(
+        "LabResultCondition", back_populates="condition", cascade="all, delete-orphan"
+    )
 
 
 class Immunization(Base):

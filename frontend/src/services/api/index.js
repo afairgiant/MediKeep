@@ -332,6 +332,20 @@ class ApiService {
     return this.delete(`/lab-result-files/${fileId}`, { signal });
   }
 
+  // Lab Result - Condition Relationship methods
+  getLabResultConditions(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/conditions`, { signal });
+  }
+  createLabResultCondition(labResultId, conditionData, signal) {
+    return this.post(`/lab-results/${labResultId}/conditions`, conditionData, { signal });
+  }
+  updateLabResultCondition(labResultId, relationshipId, conditionData, signal) {
+    return this.put(`/lab-results/${labResultId}/conditions/${relationshipId}`, conditionData, { signal });
+  }
+  deleteLabResultCondition(labResultId, relationshipId, signal) {
+    return this.delete(`/lab-results/${labResultId}/conditions/${relationshipId}`, { signal });
+  }
+
   // Medication methods
   getMedications(signal) {
     return this.getEntities(ENTITY_TYPES.MEDICATION, signal);
