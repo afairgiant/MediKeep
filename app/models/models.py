@@ -176,7 +176,7 @@ class Medication(Base):
     practitioner = orm_relationship("Practitioner", back_populates="medications")
     pharmacy = orm_relationship("Pharmacy", back_populates="medications")
     condition = orm_relationship("Condition", back_populates="medications")
-    allergies = orm_relationship("Allergy", back_populates="medications")
+    allergies = orm_relationship("Allergy", back_populates="medication")
 
 
 class Encounter(Base):
@@ -483,7 +483,7 @@ class Allergy(Base):
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="allergies")
-    medications = orm_relationship("Medication", back_populates="allergies")
+    medication = orm_relationship("Medication", back_populates="allergies")
 
 
 class Vitals(Base):

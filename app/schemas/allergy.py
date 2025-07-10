@@ -91,6 +91,7 @@ class AllergyResponse(AllergyBase):
 
 class AllergyWithRelations(AllergyResponse):
     patient: Optional[dict] = None
+    medication: Optional[dict] = None
 
     class Config:
         from_attributes = True

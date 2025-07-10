@@ -20,6 +20,8 @@ const MantineAllergyForm = ({
   onInputChange,
   onSubmit,
   editingAllergy = null,
+  medicationsOptions = [],
+  medicationsLoading = false,
 }) => {
   // Handle TextInput onChange (receives event object)
   const handleTextInputChange = field => event => {
@@ -160,6 +162,22 @@ const MantineAllergyForm = ({
               />
             </Grid.Col>
           </Grid>
+
+          {/* Related Medication */}
+          <Select
+            label="Related Medication (Optional)"
+            placeholder={medicationsLoading ? "Loading medications..." : "Select a medication this allergy is related to"}
+            value={formData.medication_id}
+            onChange={handleSelectChange('medication_id')}
+            data={medicationsOptions.map(med => ({
+              value: med.id.toString(),
+              label: med.medication_name,
+            }))}
+            searchable
+            clearable
+            disabled={medicationsLoading}
+            description="Link this allergy to a specific medication if applicable"
+          />
 
           {/* Status */}
           <Select
