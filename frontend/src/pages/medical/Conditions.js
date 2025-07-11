@@ -42,11 +42,16 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineConditionForm from '../../components/medical/MantineConditionForm';
+import MedicationRelationships from '../../components/medical/MedicationRelationships';
 
 const Conditions = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  
+  // Get patient medications for linking
+  const [medications, setMedications] = useState([]);
+  const [conditionMedications, setConditionMedications] = useState({});
 
   // Standardized data management
   const {
@@ -134,6 +139,35 @@ const Conditions = () => {
     navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
       replace: true,
     });
+  };
+
+  // Load medications for linking
+  useEffect(() => {
+    if (currentPatient?.id) {
+      apiService.getPatientMedications(currentPatient.id)
+        .then(response => {
+          setMedications(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch medications:', error);
+          setMedications([]);
+        });
+    }
+  }, [currentPatient?.id]);
+
+  // Helper function to fetch condition medications
+  const fetchConditionMedications = async (conditionId) => {
+    try {
+      const relationships = await apiService.getConditionMedications(conditionId);
+      setConditionMedications(prev => ({
+        ...prev,
+        [conditionId]: relationships || []
+      }));
+      return relationships || [];
+    } catch (error) {
+      console.error('Failed to fetch condition medications:', error);
+      return [];
+    }
   };
 
   // Check for condition ID to auto-open from other pages (sessionStorage)
@@ -418,6 +452,10 @@ const Conditions = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingCondition={editingCondition}
+          medications={medications}
+          conditionMedications={conditionMedications}
+          fetchConditionMedications={fetchConditionMedications}
+          navigate={navigate}
         />
 
         {/* Content */}
@@ -866,6 +904,19 @@ const Conditions = () => {
                   </Text>
                 </Stack>
               </Card>
+
+              {/* Related Medications Section */}
+              <Stack gap="lg">
+                <Title order={3}>Related Medications</Title>
+                <MedicationRelationships 
+                  conditionId={viewingCondition.id}
+                  conditionMedications={conditionMedications}
+                  medications={medications}
+                  fetchConditionMedications={fetchConditionMedications}
+                  navigate={navigate}
+                  isViewMode={true}
+                />
+              </Stack>
 
               <Group justify="flex-end" mt="md">
                 <Button

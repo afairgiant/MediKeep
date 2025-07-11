@@ -76,91 +76,11 @@ const Medication = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(medications, config);
 
-  // Get patient conditions for linking
-  const [conditions, setConditions] = useState([]);
-  
-  useEffect(() => {
-    if (currentPatient?.id) {
-      apiService.getPatientConditions(currentPatient.id)
-        .then(response => {
-          setConditions(response || []);
-        })
-        .catch(error => {
-          console.error('Failed to fetch conditions:', error);
-          setConditions([]);
-        });
-    }
-  }, [currentPatient?.id]);
 
-  // Smart function to display medication purpose with clickable condition links
+  // Display medication purpose (indication only, since conditions are now linked via many-to-many)
   const getMedicationPurpose = (medication, asText = false) => {
     const indication = medication.indication?.trim();
-    
-    // Try to get condition info from the loaded relationship first
-    let conditionData = null;
-    if (medication.condition?.diagnosis || medication.condition?.condition_name) {
-      conditionData = {
-        id: medication.condition.id,
-        diagnosis: medication.condition.diagnosis?.trim() || medication.condition.condition_name?.trim()
-      };
-    }
-    
-    // If no condition object but we have condition_id, look it up in our conditions list
-    if (!conditionData && medication.condition_id && conditions.length > 0) {
-      const linkedCondition = conditions.find(c => c.id === medication.condition_id);
-      if (linkedCondition) {
-        conditionData = {
-          id: linkedCondition.id,
-          diagnosis: linkedCondition.diagnosis?.trim() || linkedCondition.condition_name?.trim()
-        };
-      }
-    }
-    
-    // For table formatters, return plain text
-    if (asText) {
-      if (indication && conditionData) {
-        return `${indication} (${conditionData.diagnosis})`;
-      } else if (indication) {
-        return indication;
-      } else if (conditionData) {
-        return conditionData.diagnosis;
-      } else {
-        return 'No indication specified';
-      }
-    }
-    
-    // For JSX components, return clickable elements
-    if (indication && conditionData) {
-      return (
-        <span>
-          {indication} (
-          <Text
-            component="span"
-            style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
-            onClick={() => navigateToEntity('condition', conditionData.id, navigate)}
-            title="View condition details"
-          >
-            {conditionData.diagnosis}
-          </Text>
-          )
-        </span>
-      );
-    } else if (indication) {
-      return indication;
-    } else if (conditionData) {
-      return (
-        <Text
-          component="span"
-          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
-          onClick={() => navigateToEntity('condition', conditionData.id, navigate)}
-          title="View condition details"
-        >
-          {conditionData.diagnosis}
-        </Text>
-      );
-    } else {
-      return 'No indication specified';
-    }
+    return indication || 'No indication specified';
   };
 
   // Get standardized formatters for medications with linking support
@@ -186,7 +106,6 @@ const Medication = () => {
     status: 'active',
     practitioner_id: null,
     pharmacy_id: null,
-    condition_id: null,
   });
 
   const handleAddMedication = () => {
@@ -202,7 +121,6 @@ const Medication = () => {
       status: 'active',
       practitioner_id: null,
       pharmacy_id: null,
-      condition_id: null,
     });
     setShowModal(true);
   };
@@ -220,7 +138,6 @@ const Medication = () => {
       status: medication.status || 'active',
       practitioner_id: medication.practitioner_id ? String(medication.practitioner_id) : null,
       pharmacy_id: medication.pharmacy_id ? String(medication.pharmacy_id) : null,
-      condition_id: medication.condition_id ? String(medication.condition_id) : null,
     };
     
     setFormData(formDataToSet);
@@ -303,7 +220,6 @@ const Medication = () => {
         ? parseInt(formData.practitioner_id)
         : null,
       pharmacy_id: formData.pharmacy_id ? parseInt(formData.pharmacy_id) : null,
-      condition_id: formData.condition_id ? parseInt(formData.condition_id) : null,
     };
 
     // Add dates if provided
@@ -336,7 +252,7 @@ const Medication = () => {
     let processedValue = value;
 
     // Handle ID fields - convert empty string to null, otherwise keep as string for Mantine
-    if (name === 'practitioner_id' || name === 'pharmacy_id' || name === 'condition_id') {
+    if (name === 'practitioner_id' || name === 'pharmacy_id') {
       if (value === '') {
         processedValue = null;
       } else {
@@ -614,7 +530,6 @@ const Medication = () => {
         onSubmit={handleSubmit}
         practitioners={practitioners}
         pharmacies={pharmacies}
-        conditions={conditions}
         editingMedication={editingMedication}
       />
 
@@ -720,26 +635,39 @@ const Medication = () => {
                       <Text size="sm" fw={500} w={80}>
                         Prescriber:
                       </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          viewingMedication.practitioner ? 'inherit' : 'dimmed'
-                        }
-                      >
-                        {viewingMedication.practitioner?.name ||
-                          'Not specified'}
-                      </Text>
+                      {viewingMedication.practitioner ? (
+                        <Text
+                          size="sm"
+                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                          onClick={() => navigateToEntity('practitioner', viewingMedication.practitioner.id, navigate)}
+                          title="View practitioner details"
+                        >
+                          {viewingMedication.practitioner.name}
+                        </Text>
+                      ) : (
+                        <Text size="sm" c="dimmed">
+                          Not specified
+                        </Text>
+                      )}
                     </Group>
                     <Group>
                       <Text size="sm" fw={500} w={80}>
                         Pharmacy:
                       </Text>
-                      <Text
-                        size="sm"
-                        c={viewingMedication.pharmacy ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingMedication.pharmacy?.name || 'Not specified'}
-                      </Text>
+                      {viewingMedication.pharmacy ? (
+                        <Text
+                          size="sm"
+                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                          onClick={() => navigateToEntity('pharmacy', viewingMedication.pharmacy.id, navigate)}
+                          title="View pharmacy details"
+                        >
+                          {viewingMedication.pharmacy.name}
+                        </Text>
+                      ) : (
+                        <Text size="sm" c="dimmed">
+                          Not specified
+                        </Text>
+                      )}
                     </Group>
                   </Stack>
                 </Card>
@@ -794,6 +722,7 @@ const Medication = () => {
                 </Grid>
               </Stack>
             </Card>
+
 
             <Group justify="flex-end" mt="md">
               <Button

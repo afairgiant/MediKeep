@@ -554,6 +554,25 @@ class ApiService {
     return this.get(url, { signal });
   }
 
+  // Condition - Medication Relationship methods
+  getConditionMedications(conditionId, signal) {
+    return this.get(`/conditions/${conditionId}/medications`, { signal });
+  }
+  createConditionMedication(conditionId, medicationData, signal) {
+    return this.post(`/conditions/${conditionId}/medications`, medicationData, { signal });
+  }
+  updateConditionMedication(conditionId, relationshipId, medicationData, signal) {
+    return this.put(`/conditions/${conditionId}/medications/${relationshipId}`, medicationData, { signal });
+  }
+  deleteConditionMedication(conditionId, relationshipId, signal) {
+    return this.delete(`/conditions/${conditionId}/medications/${relationshipId}`, { signal });
+  }
+
+  // Medication - Condition Relationship methods (for showing conditions on medication view)
+  getMedicationConditions(medicationId, signal) {
+    return this.get(`/conditions/medication/${medicationId}/conditions`, { signal });
+  }
+
   // Encounter methods
   getEncounters(signal) {
     return this.getEntities(ENTITY_TYPES.ENCOUNTER, signal);
