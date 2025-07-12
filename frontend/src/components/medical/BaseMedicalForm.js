@@ -189,15 +189,34 @@ const BaseMedicalForm = ({
         // Handle dynamic minDate for any end date field based on corresponding start date
         let dynamicMinDate = minDate;
         
-        // Support multiple start/end date patterns
+        // Support multiple start/end date patterns with robust field name derivation
         if (name === 'end_date' && formData.onset_date) {
           dynamicMinDate = new Date(formData.onset_date);
         } else if (name === 'end_date' && formData.start_date) {
           dynamicMinDate = new Date(formData.start_date);
-        } else if (name.includes('end') && name.includes('date')) {
-          // Generic pattern: look for corresponding start field
-          const startFieldName = name.replace('end', 'start');
-          if (formData[startFieldName]) {
+        } else {
+          // Generic pattern: derive start field name from end field name
+          let startFieldName = null;
+          
+          // Pattern 1: ends with '_end_date' -> replace with '_start_date'
+          if (name.endsWith('_end_date')) {
+            startFieldName = name.substring(0, name.length - '_end_date'.length) + '_start_date';
+          }
+          // Pattern 2: ends with '_end' -> replace with '_start'  
+          else if (name.endsWith('_end') && name.includes('date')) {
+            startFieldName = name.substring(0, name.length - '_end'.length) + '_start';
+          }
+          // Pattern 3: contains 'end_date' -> replace with 'start_date'
+          else if (name.includes('end_date')) {
+            startFieldName = name.replace(/end_date/g, 'start_date');
+          }
+          // Pattern 4: for fields like 'completion_end_date' -> 'completion_start_date'
+          else if (name.includes('_end_') && name.includes('date')) {
+            startFieldName = name.replace(/_end_/g, '_start_');
+          }
+          
+          // Apply the derived start field if it exists in formData
+          if (startFieldName && formData[startFieldName]) {
             dynamicMinDate = new Date(formData[startFieldName]);
           }
         }
