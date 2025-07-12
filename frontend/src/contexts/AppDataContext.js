@@ -312,14 +312,17 @@ export function AppDataProvider({ children }) {
   // Initialize app data when user logs in
   useEffect(() => {
     if (isAuthenticated && user) {
+      // Clear cache and fetch fresh data on login
+      dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+      
       // Add timeout to prevent rapid fire requests in production
       const timeoutId = setTimeout(
         () => {
-          // Fetch patient data immediately on login
-          fetchCurrentPatient();
+          // Fetch fresh patient data immediately on login
+          fetchCurrentPatient(true);
 
-          // Fetch static lists in parallel
-          Promise.all([fetchPractitioners(), fetchPharmacies()]).catch(
+          // Fetch fresh static lists in parallel
+          Promise.all([fetchPractitioners(true), fetchPharmacies(true)]).catch(
             error => {
               console.error('Error initializing app data:', error);
             }
