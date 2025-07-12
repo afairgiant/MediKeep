@@ -79,7 +79,7 @@ def read_encounter(
 ) -> Any:
     """Get encounter by ID with related information - only allows access to user's own encounters."""
     encounter_obj = encounter.get_with_relations(
-        db=db, record_id=encounter_id, relations=["patient", "practitioner"]
+        db=db, record_id=encounter_id, relations=["patient", "practitioner", "condition"]
     )
     handle_not_found(encounter_obj, "Encounter")
     verify_patient_ownership(encounter_obj, current_user_patient_id, "encounter")

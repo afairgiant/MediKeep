@@ -174,6 +174,12 @@ class Medication(Base):
     patient = orm_relationship("Patient", back_populates="medications")
     practitioner = orm_relationship("Practitioner", back_populates="medications")
     pharmacy = orm_relationship("Pharmacy", back_populates="medications")
+    allergies = orm_relationship("Allergy", back_populates="medication")
+    
+    # Many-to-Many relationship with conditions through junction table
+    condition_relationships = orm_relationship(
+        "ConditionMedication", back_populates="medication", cascade="all, delete-orphan"
+    )
 
 
 class Encounter(Base):
@@ -185,6 +191,7 @@ class Encounter(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"))
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"))
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=True)
 
     # Basic encounter information
     reason = Column(String, nullable=False)  # Reason for the encounter
@@ -226,6 +233,7 @@ class Encounter(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="encounters")
     practitioner = orm_relationship("Practitioner", back_populates="encounters")
+    condition = orm_relationship("Condition")
 
 
 class LabResult(Base):
@@ -268,6 +276,11 @@ class LabResult(Base):
     files = orm_relationship(
         "LabResultFile", back_populates="lab_result", cascade="all, delete-orphan"
     )
+    
+    # Many-to-Many relationship with conditions through junction table
+    condition_relationships = orm_relationship(
+        "LabResultCondition", back_populates="lab_result", cascade="all, delete-orphan"
+    )
 
 
 class LabResultFile(Base):
@@ -286,6 +299,56 @@ class LabResultFile(Base):
 
     # Table Relationships
     lab_result = orm_relationship("LabResult", back_populates="files")
+
+
+class LabResultCondition(Base):
+    """
+    Junction table for many-to-many relationship between lab results and conditions.
+    Allows one lab result to be related to multiple conditions with optional context.
+    """
+    __tablename__ = "lab_result_conditions"
+    
+    id = Column(Integer, primary_key=True)
+    lab_result_id = Column(Integer, ForeignKey("lab_results.id"), nullable=False)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
+    
+    # Optional context about how this lab result relates to this condition
+    relevance_note = Column(String, nullable=True)  # e.g., "Elevated glucose indicates poor control"
+    
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+    
+    # Table Relationships
+    lab_result = orm_relationship("LabResult", back_populates="condition_relationships")
+    condition = orm_relationship("Condition", back_populates="lab_result_relationships")
+
+
+class ConditionMedication(Base):
+    """
+    Junction table for many-to-many relationship between conditions and medications.
+    Allows one condition to be related to multiple medications with optional context.
+    """
+    __tablename__ = "condition_medications"
+    
+    id = Column(Integer, primary_key=True)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=False)
+    
+    # Optional context about how this medication relates to this condition
+    relevance_note = Column(String, nullable=True)  # e.g., "Primary treatment for hypertension"
+    
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+    
+    # Table Relationships
+    condition = orm_relationship("Condition", back_populates="medication_relationships")
+    medication = orm_relationship("Medication", back_populates="condition_relationships")
 
 
 class Condition(Base):
@@ -324,6 +387,18 @@ class Condition(Base):
     patient = orm_relationship("Patient", back_populates="conditions")
     practitioner = orm_relationship("Practitioner", back_populates="conditions")
     treatments = orm_relationship("Treatment", back_populates="condition")
+    # encounters relationship removed - use queries instead due to potential high volume
+    procedures = orm_relationship("Procedure", back_populates="condition")
+    
+    # Many-to-Many relationship with lab results through junction table
+    lab_result_relationships = orm_relationship(
+        "LabResultCondition", back_populates="condition", cascade="all, delete-orphan"
+    )
+    
+    # Many-to-Many relationship with medications through junction table
+    medication_relationships = orm_relationship(
+        "ConditionMedication", back_populates="condition", cascade="all, delete-orphan"
+    )
 
 
 class Immunization(Base):
@@ -361,6 +436,7 @@ class Procedure(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=True)
 
     procedure_name = Column(String, nullable=False)  # Name of the procedure
     procedure_type = Column(
@@ -404,6 +480,7 @@ class Procedure(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="procedures")
     practitioner = orm_relationship("Practitioner", back_populates="procedures")
+    condition = orm_relationship("Condition", back_populates="procedures")
 
 
 class Treatment(Base):
@@ -452,6 +529,8 @@ class Allergy(Base):
     __tablename__ = "allergies"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
+
     allergen = Column(String, nullable=False)  # Allergen name
     reaction = Column(String, nullable=False)  # Reaction to the allergen
     severity = Column(
@@ -471,6 +550,7 @@ class Allergy(Base):
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="allergies")
+    medication = orm_relationship("Medication", back_populates="allergies")
 
 
 class Vitals(Base):

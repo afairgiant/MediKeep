@@ -34,6 +34,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
@@ -77,8 +78,36 @@ const Allergies = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(allergies, config);
 
-  // Get standardized formatters for allergies
-  const formatters = getEntityFormatters('allergies');
+  // Get patient medications for linking
+  const [medications, setMedications] = useState([]);
+  
+  useEffect(() => {
+    if (currentPatient?.id) {
+      apiService.getPatientMedications(currentPatient.id)
+        .then(response => {
+          setMedications(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch medications:', error);
+          setMedications([]);
+        });
+    }
+  }, [currentPatient?.id]);
+
+  // Helper function to get medication details
+  const getMedicationDetails = (medicationId) => {
+    if (!medicationId || medications.length === 0) return null;
+    return medications.find(med => med.id === medicationId);
+  };
+
+  // Get standardized formatters for allergies with medication linking
+  const formatters = {
+    ...getEntityFormatters('allergies', [], navigate),
+    medication_name: (value, allergy) => {
+      const medication = getMedicationDetails(allergy.medication_id);
+      return medication?.medication_name || '';
+    },
+  };
 
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
@@ -92,6 +121,7 @@ const Allergies = () => {
     onset_date: '',
     status: 'active',
     notes: '',
+    medication_id: '',
   });
 
   const handleInputChange = e => {
@@ -107,6 +137,7 @@ const Allergies = () => {
       onset_date: '',
       status: 'active',
       notes: '',
+      medication_id: '',
     });
     setEditingAllergy(null);
     setShowAddForm(false);
@@ -148,6 +179,7 @@ const Allergies = () => {
       onset_date: allergy.onset_date || '',
       status: allergy.status || 'active',
       notes: allergy.notes || '',
+      medication_id: allergy.medication_id ? allergy.medication_id.toString() : '',
     });
     setEditingAllergy(allergy);
     setShowAddForm(true);
@@ -168,6 +200,7 @@ const Allergies = () => {
     }
   }, [location.search, allergies, loading, showViewModal]);
 
+
   const handleSubmit = async e => {
     e.preventDefault();
 
@@ -180,6 +213,7 @@ const Allergies = () => {
       ...formData,
       onset_date: formData.onset_date || null,
       notes: formData.notes || null,
+      medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       patient_id: currentPatient.id,
     };
 
@@ -340,6 +374,8 @@ const Allergies = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingAllergy={editingAllergy}
+          medicationsOptions={medications}
+          medicationsLoading={false}
         />
 
         {/* Content */}
@@ -444,6 +480,26 @@ const Allergies = () => {
                               </Group>
                             )}
 
+                            {(() => {
+                              const medication = getMedicationDetails(allergy.medication_id);
+                              return medication ? (
+                                <Group justify="space-between">
+                                  <Text size="sm" c="dimmed">
+                                    Related Medication:
+                                  </Text>
+                                  <Text
+                                    size="sm"
+                                    fw={500}
+                                    style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                                    onClick={() => navigateToEntity('medication', medication.id, navigate)}
+                                    title="View medication details"
+                                  >
+                                    {medication.medication_name}
+                                  </Text>
+                                </Group>
+                              ) : null;
+                            })()}
+
                             {allergy.notes && (
                               <Box>
                                 <Text size="sm" c="dimmed" mb="xs">
@@ -499,6 +555,7 @@ const Allergies = () => {
                   { header: 'Reaction', accessor: 'reaction' },
                   { header: 'Severity', accessor: 'severity' },
                   { header: 'Onset Date', accessor: 'onset_date' },
+                  { header: 'Medication', accessor: 'medication_name' },
                   { header: 'Status', accessor: 'status' },
                   { header: 'Notes', accessor: 'notes' },
                 ]}
@@ -600,6 +657,24 @@ const Allergies = () => {
                           {viewingAllergy.reaction || 'Not specified'}
                         </Text>
                       </Group>
+                      {(() => {
+                        const medication = getMedicationDetails(viewingAllergy.medication_id);
+                        return medication ? (
+                          <Group>
+                            <Text size="sm" fw={500} w={80}>
+                              Medication:
+                            </Text>
+                            <Text
+                              size="sm"
+                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              onClick={() => navigateToEntity('medication', medication.id, navigate)}
+                              title="View medication details"
+                            >
+                              {medication.medication_name}
+                            </Text>
+                          </Group>
+                        ) : null;
+                      })()}
                     </Stack>
                   </Card>
                 </Grid.Col>

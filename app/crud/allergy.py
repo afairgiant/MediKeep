@@ -15,7 +15,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
     """
 
     def get_by_severity(
-        self, db: Session, *, severity: str, patient_id: Optional[int] = None
+        self, db: Session, *, severity: str, patient_id: Optional[int] = None, load_relations: Optional[List[str]] = None
     ) -> List[Allergy]:
         """
         Retrieve allergies by severity, optionally filtered by patient.
@@ -24,6 +24,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             db: SQLAlchemy database session
             severity: Severity to filter by
             patient_id: Optional patient ID to filter by
+            load_relations: Optional list of relationships to load
 
         Returns:
             List of allergies with the specified severity
@@ -37,6 +38,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             filters=filters,
             order_by="onset_date",
             order_desc=True,
+            load_relations=load_relations,
         )
 
     def get_active_allergies(self, db: Session, *, patient_id: int) -> List[Allergy]:
@@ -91,7 +93,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
         return query.all()
 
     def get_by_allergen(
-        self, db: Session, *, allergen: str, patient_id: Optional[int] = None
+        self, db: Session, *, allergen: str, patient_id: Optional[int] = None, load_relations: Optional[List[str]] = None
     ) -> List[Allergy]:
         """
         Retrieve allergies by allergen name, optionally filtered by patient.
@@ -100,6 +102,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             db: SQLAlchemy database session
             allergen: Allergen name to search for
             patient_id: Optional patient ID to filter by
+            load_relations: Optional list of relationships to load
 
         Returns:
             List of allergies matching the allergen
@@ -114,6 +117,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
             search={"field": "allergen", "term": allergen},
             order_by="severity",
             order_desc=True,
+            load_relations=load_relations,
         )
 
     def check_allergen_conflict(

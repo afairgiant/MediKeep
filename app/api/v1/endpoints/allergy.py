@@ -86,7 +86,7 @@ def read_allergy(
     """
     # Get allergy and verify it belongs to the user
     allergy_obj = allergy.get_with_relations(
-        db=db, record_id=allergy_id, relations=["patient"]
+        db=db, record_id=allergy_id, relations=["patient", "medication"]
     )
     handle_not_found(allergy_obj, "Allergy")
     verify_patient_ownership(allergy_obj, current_user_patient_id, "allergy")

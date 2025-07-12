@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, field_validator
 
 # Import status enums for validation
 from ..models.enums import get_all_condition_statuses, get_all_severity_levels
@@ -174,3 +174,58 @@ class ConditionDropdownOption(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Condition - Medication Relationship Schemas
+
+class ConditionMedicationBase(BaseModel):
+    """Base schema for condition medication relationship"""
+    
+    condition_id: int
+    medication_id: int
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class ConditionMedicationCreate(ConditionMedicationBase):
+    """Schema for creating a condition medication relationship"""
+    pass
+
+
+class ConditionMedicationUpdate(BaseModel):
+    """Schema for updating a condition medication relationship"""
+    
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class ConditionMedicationResponse(ConditionMedicationBase):
+    """Schema for condition medication relationship response"""
+    
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+
+
+class ConditionMedicationWithDetails(ConditionMedicationResponse):
+    """Schema for condition medication relationship with medication details"""
+    
+    medication: Optional[dict] = None  # Will contain medication details
+
+    model_config = {"from_attributes": True}

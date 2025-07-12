@@ -31,7 +31,7 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate]):
         return self.query(
             db=db,
             filters={"patient_id": patient_id, "status": "active"},
-            load_relations=["practitioner", "pharmacy"],
+            load_relations=["practitioner", "pharmacy", "condition"],
         )
 
     def get_by_name(

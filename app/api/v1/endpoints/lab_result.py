@@ -25,14 +25,19 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
 )
 from app.core.database import get_db
-from app.crud.lab_result import lab_result
+from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
+from app.crud.condition import condition as condition_crud
 from app.models.activity_log import EntityType
 from app.schemas.lab_result import (
     LabResultCreate,
     LabResultResponse,
     LabResultUpdate,
     LabResultWithRelations,
+    LabResultConditionCreate,
+    LabResultConditionResponse,
+    LabResultConditionUpdate,
+    LabResultConditionWithDetails,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
 
@@ -472,3 +477,168 @@ def get_code_usage_count(*, code: str, db: Session = Depends(get_db)):
     all_results = lab_result.get_multi(db, skip=0, limit=10000)
     results = [result for result in all_results if result.code == code]
     return {"code": code, "usage_count": len(results)}
+
+
+# Lab Result - Condition Relationship Endpoints
+
+@router.get("/{lab_result_id}/conditions", response_model=List[LabResultConditionWithDetails])
+def get_lab_result_conditions(
+    *,
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Get all condition relationships for a specific lab result."""
+    # Verify lab result exists and belongs to user
+    db_lab_result = lab_result.get(db, id=lab_result_id)
+    handle_not_found(db_lab_result, "Lab result")
+    
+    if db_lab_result.patient_id != current_user_patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this lab result"
+        )
+    
+    # Get condition relationships
+    relationships = lab_result_condition.get_by_lab_result(db, lab_result_id=lab_result_id)
+    
+    # Enhance with condition details
+    from app.crud.condition import condition as condition_crud
+    
+    enhanced_relationships = []
+    for rel in relationships:
+        condition_obj = condition_crud.get(db, id=rel.condition_id)
+        rel_dict = {
+            "id": rel.id,
+            "lab_result_id": rel.lab_result_id,
+            "condition_id": rel.condition_id,
+            "relevance_note": rel.relevance_note,
+            "created_at": rel.created_at,
+            "updated_at": rel.updated_at,
+            "condition": {
+                "id": condition_obj.id,
+                "diagnosis": condition_obj.diagnosis,
+                "status": condition_obj.status,
+                "severity": condition_obj.severity,
+            } if condition_obj else None
+        }
+        enhanced_relationships.append(rel_dict)
+    
+    return enhanced_relationships
+
+
+@router.post("/{lab_result_id}/conditions", response_model=LabResultConditionResponse)
+def create_lab_result_condition(
+    *,
+    lab_result_id: int,
+    condition_in: LabResultConditionCreate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Create a new lab result condition relationship."""
+    # Verify lab result exists and belongs to user
+    db_lab_result = lab_result.get(db, id=lab_result_id)
+    handle_not_found(db_lab_result, "Lab result")
+    
+    if db_lab_result.patient_id != current_user_patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this lab result"
+        )
+    
+    # Verify condition exists and belongs to the same patient
+    db_condition = condition_crud.get(db, id=condition_in.condition_id)
+    handle_not_found(db_condition, "Condition")
+    
+    # Ensure condition belongs to the same patient as the lab result
+    if db_condition.patient_id != current_user_patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot link condition that doesn't belong to the same patient"
+        )
+    
+    # Check if relationship already exists
+    existing = lab_result_condition.get_by_lab_result_and_condition(
+        db, lab_result_id=lab_result_id, condition_id=condition_in.condition_id
+    )
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Relationship between this lab result and condition already exists"
+        )
+    
+    # Override lab_result_id to ensure consistency
+    condition_in.lab_result_id = lab_result_id
+    
+    # Create relationship
+    relationship = lab_result_condition.create(db, obj_in=condition_in)
+    return relationship
+
+
+@router.put("/{lab_result_id}/conditions/{relationship_id}", response_model=LabResultConditionResponse)
+def update_lab_result_condition(
+    *,
+    lab_result_id: int,
+    relationship_id: int,
+    condition_in: LabResultConditionUpdate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Update a lab result condition relationship."""
+    # Verify lab result exists and belongs to user
+    db_lab_result = lab_result.get(db, id=lab_result_id)
+    handle_not_found(db_lab_result, "Lab result")
+    
+    if db_lab_result.patient_id != current_user_patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this lab result"
+        )
+    
+    # Verify relationship exists
+    relationship = lab_result_condition.get(db, id=relationship_id)
+    handle_not_found(relationship, "Lab result condition relationship")
+    
+    if relationship.lab_result_id != lab_result_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Relationship does not belong to this lab result"
+        )
+    
+    # Update relationship
+    updated_relationship = lab_result_condition.update(db, db_obj=relationship, obj_in=condition_in)
+    return updated_relationship
+
+
+@router.delete("/{lab_result_id}/conditions/{relationship_id}")
+def delete_lab_result_condition(
+    *,
+    lab_result_id: int,
+    relationship_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Delete a lab result condition relationship."""
+    # Verify lab result exists and belongs to user
+    db_lab_result = lab_result.get(db, id=lab_result_id)
+    handle_not_found(db_lab_result, "Lab result")
+    
+    if db_lab_result.patient_id != current_user_patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this lab result"
+        )
+    
+    # Verify relationship exists
+    relationship = lab_result_condition.get(db, id=relationship_id)
+    handle_not_found(relationship, "Lab result condition relationship")
+    
+    if relationship.lab_result_id != lab_result_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Relationship does not belong to this lab result"
+        )
+    
+    # Delete relationship
+    lab_result_condition.delete(db, id=relationship_id)
+    return {"message": "Lab result condition relationship deleted successfully"}

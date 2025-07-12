@@ -41,11 +41,16 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineConditionForm from '../../components/medical/MantineConditionForm';
+import MedicationRelationships from '../../components/medical/MedicationRelationships';
 
 const Conditions = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  
+  // Get patient medications for linking
+  const [medications, setMedications] = useState([]);
+  const [conditionMedications, setConditionMedications] = useState({});
 
   // Standardized data management
   const {
@@ -135,19 +140,35 @@ const Conditions = () => {
     });
   };
 
-  // Check for condition ID to auto-open from other pages (sessionStorage)
+  // Load medications for linking
   useEffect(() => {
-    const conditionIdToOpen = sessionStorage.getItem('openConditionId');
-    if (conditionIdToOpen && conditions.length > 0) {
-      const conditionToView = conditions.find(
-        c => c.id === parseInt(conditionIdToOpen)
-      );
-      if (conditionToView) {
-        handleViewCondition(conditionToView);
-        sessionStorage.removeItem('openConditionId'); // Clean up
-      }
+    if (currentPatient?.id) {
+      apiService.getPatientMedications(currentPatient.id)
+        .then(response => {
+          setMedications(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch medications:', error);
+          setMedications([]);
+        });
     }
-  }, [conditions]); // Re-run when conditions data loads
+  }, [currentPatient?.id]);
+
+  // Helper function to fetch condition medications
+  const fetchConditionMedications = async (conditionId) => {
+    try {
+      const relationships = await apiService.getConditionMedications(conditionId);
+      setConditionMedications(prev => ({
+        ...prev,
+        [conditionId]: relationships || []
+      }));
+      return relationships || [];
+    } catch (error) {
+      console.error('Failed to fetch condition medications:', error);
+      return [];
+    }
+  };
+
 
   // Handle URL parameters for direct linking to specific conditions
   useEffect(() => {
@@ -233,23 +254,31 @@ const Conditions = () => {
 
   const filteredConditions = dataManagement.data;
 
-  // Helper function to calculate time since onset
-  const getTimeSinceOnset = onsetDate => {
+  // Helper function to calculate condition duration
+  const getConditionDuration = (onsetDate, endDate, status) => {
     if (!onsetDate) return null;
 
     const onset = new Date(onsetDate);
-    const now = new Date();
-    const diffTime = Math.abs(now - onset);
+    const endPoint = endDate ? new Date(endDate) : new Date();
+    const diffTime = Math.abs(endPoint - onset);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+    let duration;
     if (diffDays < 30) {
-      return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+      duration = `${diffDays} day${diffDays === 1 ? '' : 's'}`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      return `${months} month${months === 1 ? '' : 's'} ago`;
+      duration = `${months} month${months === 1 ? '' : 's'}`;
     } else {
       const years = Math.floor(diffDays / 365);
-      return `${years} year${years === 1 ? '' : 's'} ago`;
+      duration = `${years} year${years === 1 ? '' : 's'}`;
+    }
+
+    // Add appropriate suffix based on condition status
+    if (endDate || status === 'resolved' || status === 'inactive') {
+      return `${duration} (ended)`;
+    } else {
+      return `${duration} (ongoing)`;
     }
   };
 
@@ -410,6 +439,10 @@ const Conditions = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingCondition={editingCondition}
+          medications={medications}
+          conditionMedications={conditionMedications}
+          fetchConditionMedications={fetchConditionMedications}
+          navigate={navigate}
         />
 
         {/* Content */}
@@ -493,7 +526,7 @@ const Conditions = () => {
                                     Duration:
                                   </Text>
                                   <Text size="sm" fw={500}>
-                                    {getTimeSinceOnset(condition.onset_date)}
+                                    {getConditionDuration(condition.onset_date, condition.end_date, condition.status)}
                                   </Text>
                                 </Group>
                               </>
@@ -781,7 +814,7 @@ const Conditions = () => {
                             Duration:
                           </Text>
                           <Text size="sm" c="inherit">
-                            {getTimeSinceOnset(viewingCondition.onset_date)}
+                            {getConditionDuration(viewingCondition.onset_date, viewingCondition.end_date, viewingCondition.status)}
                           </Text>
                         </Group>
                       )}
@@ -858,6 +891,19 @@ const Conditions = () => {
                   </Text>
                 </Stack>
               </Card>
+
+              {/* Related Medications Section */}
+              <Stack gap="lg">
+                <Title order={3}>Related Medications</Title>
+                <MedicationRelationships 
+                  conditionId={viewingCondition.id}
+                  conditionMedications={conditionMedications}
+                  medications={medications}
+                  fetchConditionMedications={fetchConditionMedications}
+                  navigate={navigate}
+                  isViewMode={true}
+                />
+              </Stack>
 
               <Group justify="flex-end" mt="md">
                 <Button

@@ -237,6 +237,7 @@ const Practitioners = () => {
     }
   }, [location.search, filteredPractitioners, loading, showViewModal]);
 
+
   const getSpecialtyColor = specialty => {
     // Color coding for different specialties
     const specialtyColors = {

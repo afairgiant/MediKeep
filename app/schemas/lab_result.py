@@ -361,3 +361,58 @@ class LabResultWithRelations(LabResultResponse):
     files: Optional[List] = []  # Will be filled with LabResultFileResponse objects
 
     model_config = {"from_attributes": True}
+
+
+# Lab Result - Condition Relationship Schemas
+
+class LabResultConditionBase(BaseModel):
+    """Base schema for lab result condition relationship"""
+    
+    lab_result_id: int
+    condition_id: int
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class LabResultConditionCreate(LabResultConditionBase):
+    """Schema for creating a lab result condition relationship"""
+    pass
+
+
+class LabResultConditionUpdate(BaseModel):
+    """Schema for updating a lab result condition relationship"""
+    
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class LabResultConditionResponse(LabResultConditionBase):
+    """Schema for lab result condition relationship response"""
+    
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+
+
+class LabResultConditionWithDetails(LabResultConditionResponse):
+    """Schema for lab result condition relationship with condition details"""
+    
+    condition: Optional[dict] = None  # Will contain condition details
+
+    model_config = {"from_attributes": True}

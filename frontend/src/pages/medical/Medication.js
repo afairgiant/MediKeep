@@ -7,6 +7,7 @@ import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -42,9 +43,6 @@ const Medication = () => {
   const practitioners = practitionersObject?.practitioners || [];
   const pharmacies = pharmaciesObject?.pharmacies || [];
 
-  // Get standardized formatters for medications
-  const formatters = getEntityFormatters('medications', practitioners);
-
   // Modern data management with useMedicalData
   const {
     items: medications,
@@ -77,6 +75,20 @@ const Medication = () => {
 
   // Use standardized data management
   const dataManagement = useDataManagement(medications, config);
+
+
+  // Display medication purpose (indication only, since conditions are now linked via many-to-many)
+  const getMedicationPurpose = (medication, asText = false) => {
+    const indication = medication.indication?.trim();
+    return indication || 'No indication specified';
+  };
+
+  // Get standardized formatters for medications with linking support
+  const formatters = {
+    ...getEntityFormatters('medications', practitioners, navigate),
+    // Override indication formatter to use smart display (text version for tables)
+    indication: (value, medication) => getMedicationPurpose(medication, true),
+  };
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
@@ -115,7 +127,7 @@ const Medication = () => {
 
   const handleEditMedication = medication => {
     setEditingMedication(medication);
-    setFormData({
+    const formDataToSet = {
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
       frequency: medication.frequency || '',
@@ -124,9 +136,11 @@ const Medication = () => {
       effective_period_start: medication.effective_period_start || '',
       effective_period_end: medication.effective_period_end || '',
       status: medication.status || 'active',
-      practitioner_id: medication.practitioner_id || null,
-      pharmacy_id: medication.pharmacy_id || null,
-    });
+      practitioner_id: medication.practitioner_id ? String(medication.practitioner_id) : null,
+      pharmacy_id: medication.pharmacy_id ? String(medication.pharmacy_id) : null,
+    };
+    
+    setFormData(formDataToSet);
     setShowModal(true);
   };
 
@@ -168,6 +182,7 @@ const Medication = () => {
     }
   }, [location.search, medications, loading, showViewModal]);
 
+
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
     if (success) {
@@ -205,16 +220,20 @@ const Medication = () => {
       medicationData.effective_period_end = formData.effective_period_end;
     }
 
-    let success;
-    if (editingMedication) {
-      success = await updateItem(editingMedication.id, medicationData);
-    } else {
-      success = await createItem(medicationData);
-    }
+    try {
+      let success;
+      if (editingMedication) {
+        success = await updateItem(editingMedication.id, medicationData);
+      } else {
+        success = await createItem(medicationData);
+      }
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+      if (success) {
+        setShowModal(false);
+        await refreshData();
+      }
+    } catch (error) {
+      console.error('Error during save operation:', error);
     }
   };
 
@@ -373,22 +392,25 @@ const Medication = () => {
                             </Badge>
                           </Group>
                         )}
-                        {medication.indication && (
-                          <Group align="flex-start">
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Indication:
-                            </Text>
-                            <Text size="sm" style={{ flex: 1 }}>
-                              {medication.indication}
-                            </Text>
-                          </Group>
-                        )}
+                        <Group align="flex-start">
+                          <Text size="sm" fw={500} c="dimmed" w={120}>
+                            Purpose:
+                          </Text>
+                          <Text size="sm" style={{ flex: 1 }}>
+                            {getMedicationPurpose(medication)}
+                          </Text>
+                        </Group>
                         {medication.practitioner && (
                           <Group>
                             <Text size="sm" fw={500} c="dimmed" w={120}>
                               Prescriber:
                             </Text>
-                            <Text size="sm">
+                            <Text 
+                              size="sm" 
+                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
+                              title="View practitioner details"
+                            >
                               {medication.practitioner.name}
                             </Text>
                           </Group>
@@ -398,7 +420,14 @@ const Medication = () => {
                             <Text size="sm" fw={500} c="dimmed" w={120}>
                               Pharmacy:
                             </Text>
-                            <Text size="sm">{medication.pharmacy.name}</Text>
+                            <Text 
+                              size="sm" 
+                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
+                              title="View pharmacy details"
+                            >
+                              {medication.pharmacy.name}
+                            </Text>
                           </Group>
                         )}
                         {medication.effective_period_start && (
@@ -464,7 +493,7 @@ const Medication = () => {
                 { header: 'Dosage', accessor: 'dosage' },
                 { header: 'Frequency', accessor: 'frequency' },
                 { header: 'Route', accessor: 'route' },
-                { header: 'Indication', accessor: 'indication' },
+                { header: 'Purpose', accessor: 'indication' },
                 { header: 'Prescriber', accessor: 'practitioner_name' },
                 { header: 'Pharmacy', accessor: 'pharmacy_name' },
                 { header: 'Start Date', accessor: 'effective_period_start' },
@@ -528,10 +557,10 @@ const Medication = () => {
 
                 <Stack gap="xs">
                   <Text fw={500} c="dimmed" size="sm">
-                    Indication
+                    Purpose
                   </Text>
-                  <Text c={viewingMedication.indication ? 'inherit' : 'dimmed'}>
-                    {viewingMedication.indication || 'Not specified'}
+                  <Text>
+                    {getMedicationPurpose(viewingMedication)}
                   </Text>
                 </Stack>
               </Stack>
@@ -596,26 +625,39 @@ const Medication = () => {
                       <Text size="sm" fw={500} w={80}>
                         Prescriber:
                       </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          viewingMedication.practitioner ? 'inherit' : 'dimmed'
-                        }
-                      >
-                        {viewingMedication.practitioner?.name ||
-                          'Not specified'}
-                      </Text>
+                      {viewingMedication.practitioner ? (
+                        <Text
+                          size="sm"
+                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                          onClick={() => navigateToEntity('practitioner', viewingMedication.practitioner.id, navigate)}
+                          title="View practitioner details"
+                        >
+                          {viewingMedication.practitioner.name}
+                        </Text>
+                      ) : (
+                        <Text size="sm" c="dimmed">
+                          Not specified
+                        </Text>
+                      )}
                     </Group>
                     <Group>
                       <Text size="sm" fw={500} w={80}>
                         Pharmacy:
                       </Text>
-                      <Text
-                        size="sm"
-                        c={viewingMedication.pharmacy ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingMedication.pharmacy?.name || 'Not specified'}
-                      </Text>
+                      {viewingMedication.pharmacy ? (
+                        <Text
+                          size="sm"
+                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                          onClick={() => navigateToEntity('pharmacy', viewingMedication.pharmacy.id, navigate)}
+                          title="View pharmacy details"
+                        >
+                          {viewingMedication.pharmacy.name}
+                        </Text>
+                      ) : (
+                        <Text size="sm" c="dimmed">
+                          Not specified
+                        </Text>
+                      )}
                     </Group>
                   </Stack>
                 </Card>
@@ -670,6 +712,7 @@ const Medication = () => {
                 </Grid>
               </Stack>
             </Card>
+
 
             <Group justify="flex-end" mt="md">
               <Button

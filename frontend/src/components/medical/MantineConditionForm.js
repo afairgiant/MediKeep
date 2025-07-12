@@ -9,7 +9,10 @@ import {
   Stack,
   Grid,
   Text,
+  Divider,
+  Title,
 } from '@mantine/core';
+import MedicationRelationships from './MedicationRelationships';
 import { DateInput } from '@mantine/dates';
 import { CONDITION_STATUS_OPTIONS, SEVERITY_OPTIONS } from '../../utils/statusConfig';
 
@@ -21,6 +24,10 @@ const MantineConditionForm = ({
   onInputChange,
   onSubmit,
   editingCondition = null,
+  medications = [],
+  conditionMedications = {},
+  fetchConditionMedications = null,
+  navigate = null,
 }) => {
   // Handle TextInput onChange (receives event object)
   const handleTextInputChange = field => event => {
@@ -199,6 +206,24 @@ const MantineConditionForm = ({
             minRows={4}
             maxRows={8}
           />
+
+          {/* Medication Relationships - Only show for editing existing conditions */}
+          {editingCondition && medications.length > 0 && fetchConditionMedications && navigate && (
+            <>
+              <Divider />
+              <Stack gap="md">
+                <Title order={4}>Linked Medications</Title>
+                <MedicationRelationships 
+                  conditionId={editingCondition.id}
+                  conditionMedications={conditionMedications}
+                  medications={medications}
+                  fetchConditionMedications={fetchConditionMedications}
+                  navigate={navigate}
+                  isViewMode={false}
+                />
+              </Stack>
+            </>
+          )}
 
           {/* Form Actions */}
           <Group justify="flex-end" mt="lg" mb="sm">

@@ -11,8 +11,11 @@ import {
   Text,
   Divider,
   Badge,
+  Title,
+  Paper,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import ConditionRelationships from './ConditionRelationships';
 
 const MantineLabResultForm = ({
   isOpen,
@@ -24,6 +27,11 @@ const MantineLabResultForm = ({
   practitioners = [],
   editingLabResult = null,
   children, // For file management section in edit mode
+  // Condition relationship props
+  conditions = [],
+  labResultConditions = {},
+  fetchLabResultConditions,
+  navigate,
 }) => {
   // Status options with visual indicators
   const statusOptions = [
@@ -360,6 +368,28 @@ const MantineLabResultForm = ({
             minRows={3}
             maxRows={6}
           />
+
+          {/* Condition Relationships Section for Edit Mode */}
+          {editingLabResult && conditions.length > 0 && (
+            <>
+              <Divider label="Related Conditions" labelPosition="center" mt="lg" />
+              <Paper withBorder p="md" bg="gray.0">
+                <Stack gap="md">
+                  <Title order={5}>Link Medical Conditions</Title>
+                  <Text size="sm" c="dimmed">
+                    Associate this lab result with relevant medical conditions for better tracking and organization.
+                  </Text>
+                  <ConditionRelationships 
+                    labResultId={editingLabResult.id}
+                    labResultConditions={labResultConditions}
+                    conditions={conditions}
+                    fetchLabResultConditions={fetchLabResultConditions}
+                    navigate={navigate}
+                  />
+                </Stack>
+              </Paper>
+            </>
+          )}
 
           {/* File Management Section (passed as children for edit mode) */}
           {children}

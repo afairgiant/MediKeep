@@ -332,6 +332,20 @@ class ApiService {
     return this.delete(`/lab-result-files/${fileId}`, { signal });
   }
 
+  // Lab Result - Condition Relationship methods
+  getLabResultConditions(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/conditions`, { signal });
+  }
+  createLabResultCondition(labResultId, conditionData, signal) {
+    return this.post(`/lab-results/${labResultId}/conditions`, conditionData, { signal });
+  }
+  updateLabResultCondition(labResultId, relationshipId, conditionData, signal) {
+    return this.put(`/lab-results/${labResultId}/conditions/${relationshipId}`, conditionData, { signal });
+  }
+  deleteLabResultCondition(labResultId, relationshipId, signal) {
+    return this.delete(`/lab-results/${labResultId}/conditions/${relationshipId}`, { signal });
+  }
+
   // Medication methods
   getMedications(signal) {
     return this.getEntities(ENTITY_TYPES.MEDICATION, signal);
@@ -538,6 +552,25 @@ class ApiService {
   getConditionsDropdown(activeOnly = true, signal) {
     const url = `/conditions/dropdown?active_only=${activeOnly}`;
     return this.get(url, { signal });
+  }
+
+  // Condition - Medication Relationship methods
+  getConditionMedications(conditionId, signal) {
+    return this.get(`/conditions/${conditionId}/medications`, { signal });
+  }
+  createConditionMedication(conditionId, medicationData, signal) {
+    return this.post(`/conditions/${conditionId}/medications`, medicationData, { signal });
+  }
+  updateConditionMedication(conditionId, relationshipId, medicationData, signal) {
+    return this.put(`/conditions/${conditionId}/medications/${relationshipId}`, medicationData, { signal });
+  }
+  deleteConditionMedication(conditionId, relationshipId, signal) {
+    return this.delete(`/conditions/${conditionId}/medications/${relationshipId}`, { signal });
+  }
+
+  // Medication - Condition Relationship methods (for showing conditions on medication view)
+  getMedicationConditions(medicationId, signal) {
+    return this.get(`/conditions/medication/${medicationId}/conditions`, { signal });
   }
 
   // Encounter methods

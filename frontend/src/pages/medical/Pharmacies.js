@@ -208,6 +208,7 @@ const Pharmacies = () => {
     }
   }, [location.search, filteredPharmacies, loading, showViewModal]);
 
+
   if (loading) {
     return (
       <Container size="xl" py="lg">

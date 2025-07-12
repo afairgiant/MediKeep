@@ -8,6 +8,7 @@ import {
   Stack,
   Grid,
   Text,
+  Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 
@@ -33,6 +34,7 @@ const MantineMedicalForm = ({
     value: String(pharmacy.id),
     label: `${pharmacy.name}${pharmacy.city ? ` - ${pharmacy.city}` : ''}${pharmacy.state ? `, ${pharmacy.state}` : ''}`,
   }));
+
 
   // Handle TextInput onChange (receives event object)
   const handleTextInputChange = field => event => {
@@ -164,10 +166,10 @@ const MantineMedicalForm = ({
           {/* Indication */}
           <TextInput
             label="Indication"
-            placeholder="What is this medication for?"
+            placeholder="e.g., High blood pressure, As needed for pain, Diabetes management"
             value={formData.indication}
             onChange={handleTextInputChange('indication')}
-            description="Medical condition or symptom being treated"
+            description="What is this medication for? Describe the reason or condition being treated"
           />
 
           {/* Status and Dates */}

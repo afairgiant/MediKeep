@@ -5,8 +5,13 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models.models import LabResult
-from app.schemas.lab_result import LabResultCreate, LabResultUpdate
+from app.models.models import LabResult, LabResultCondition
+from app.schemas.lab_result import (
+    LabResultCreate, 
+    LabResultUpdate,
+    LabResultConditionCreate,
+    LabResultConditionUpdate
+)
 
 
 class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
@@ -68,5 +73,61 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
         )
 
 
-# Create instance of the CRUD class
+class CRUDLabResultCondition(CRUDBase[LabResultCondition, LabResultConditionCreate, LabResultConditionUpdate]):
+    """CRUD operations for LabResultCondition junction table"""
+
+    def __init__(self):
+        super().__init__(LabResultCondition)
+
+    def get_by_lab_result(
+        self, db: Session, *, lab_result_id: int
+    ) -> List[LabResultCondition]:
+        """Get all condition relationships for a specific lab result"""
+        return (
+            db.query(self.model)
+            .filter(self.model.lab_result_id == lab_result_id)
+            .all()
+        )
+
+    def get_by_condition(
+        self, db: Session, *, condition_id: int
+    ) -> List[LabResultCondition]:
+        """Get all lab result relationships for a specific condition"""
+        return (
+            db.query(self.model)
+            .filter(self.model.condition_id == condition_id)
+            .all()
+        )
+
+    def get_by_lab_result_and_condition(
+        self, db: Session, *, lab_result_id: int, condition_id: int
+    ) -> Optional[LabResultCondition]:
+        """Get specific relationship between lab result and condition"""
+        return (
+            db.query(self.model)
+            .filter(
+                and_(
+                    self.model.lab_result_id == lab_result_id,
+                    self.model.condition_id == condition_id
+                )
+            )
+            .first()
+        )
+
+    def delete_by_lab_result_and_condition(
+        self, db: Session, *, lab_result_id: int, condition_id: int
+    ) -> bool:
+        """Delete specific relationship between lab result and condition"""
+        relationship = self.get_by_lab_result_and_condition(
+            db, lab_result_id=lab_result_id, condition_id=condition_id
+        )
+        if relationship:
+            db.delete(relationship)
+            db.commit()
+            return True
+        return False
+
+
+# Create instances of the CRUD classes
 lab_result = CRUDLabResult()
+lab_result_condition = CRUDLabResultCondition()
