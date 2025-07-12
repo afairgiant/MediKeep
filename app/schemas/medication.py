@@ -6,7 +6,6 @@ from pydantic import BaseModel, root_validator, validator
 if TYPE_CHECKING:
     from app.schemas.pharmacy import Pharmacy
     from app.schemas.practitioner import Practitioner
-    from app.schemas.condition import ConditionResponse
 
 
 class MedicationBase(BaseModel):
@@ -22,7 +21,6 @@ class MedicationBase(BaseModel):
     status: Optional[str] = None
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
-    condition_id: Optional[int] = None
 
     @root_validator(pre=True)
     def clean_empty_strings(cls, values):  # noqa
@@ -38,7 +36,6 @@ class MedicationBase(BaseModel):
                 "status",
                 "practitioner_id",
                 "pharmacy_id",
-                "condition_id",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -125,7 +122,6 @@ class MedicationCreate(MedicationBase):
     patient_id: int
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
-    condition_id: Optional[int] = None
 
 
 class MedicationUpdate(BaseModel):
@@ -141,7 +137,6 @@ class MedicationUpdate(BaseModel):
     status: Optional[str] = None
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
-    condition_id: Optional[int] = None
 
     @root_validator(pre=True)
     def clean_empty_strings(cls, values):
@@ -158,7 +153,6 @@ class MedicationUpdate(BaseModel):
                 "status",
                 "practitioner_id",
                 "pharmacy_id",
-                "condition_id",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -240,13 +234,12 @@ class MedicationWithRelations(MedicationResponse):
 
 # Enhanced response schema with nested objects
 class MedicationResponseWithNested(MedicationBase):
-    """Schema for medication response with nested practitioner, pharmacy, and condition objects"""
+    """Schema for medication response with nested practitioner and pharmacy objects"""
 
     id: int
     patient_id: int
     practitioner: Optional["Practitioner"] = None
     pharmacy: Optional["Pharmacy"] = None
-    condition: Optional["ConditionResponse"] = None
 
     class Config:
         from_attributes = True
@@ -256,7 +249,6 @@ from app.schemas.pharmacy import Pharmacy
 
 # Import here to avoid circular imports
 from app.schemas.practitioner import Practitioner
-from app.schemas.condition import ConditionResponse
 
 # Rebuild the model to resolve forward references
 MedicationResponseWithNested.model_rebuild()
