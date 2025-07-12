@@ -98,10 +98,31 @@ const MantinePractitionerForm = ({
     onInputChange(syntheticEvent);
   };
 
+  // Override form data handling for custom formatted fields
+  const handleInputChange = (event) => {
+    const { name } = event.target;
+    
+    if (name === 'phone_number') {
+      handlePhoneChange(event);
+    } else {
+      onInputChange(event);
+    }
+  };
+
+
   const websiteError =
     formData.website && !isValidWebsite(formData.website)
       ? 'Please enter a valid website URL'
       : null;
+
+  // Custom validation for submit - prevent submission if website is invalid
+  const handleSubmit = (e) => {
+    if (websiteError) {
+      e.preventDefault();
+      return;
+    }
+    onSubmit(e);
+  };
 
   // Custom content for website validation and link
   const customContent = (
@@ -136,8 +157,9 @@ const MantinePractitionerForm = ({
       onClose={onClose}
       title={title}
       formData={formData}
-      onInputChange={onInputChange}
-      onSubmit={onSubmit}
+      onInputChange={handleInputChange}
+      onSubmit={handleSubmit}
+
       editingItem={editingPractitioner}
       fields={practitionerFormFields}
       dynamicOptions={dynamicOptions}
