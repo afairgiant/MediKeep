@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './useApi';
+import logger from '../services/logger';
 
 export const useAdminData = config => {
   const {
@@ -42,12 +43,21 @@ export const useAdminData = config => {
 
       const result = await execute(
         async signal => {
-          console.log(`📡 Loading ${config.entityName} data...`);
+          logger.info('Loading admin data', {
+            category: 'admin_data_load',
+            entityName: config.entityName,
+            operation: 'load_start'
+          });
           const response = await config.apiMethodsConfig.load(signal);
 
           if (response) {
             setData(response);
-            console.log(`✅ ${config.entityName} data loaded successfully`);
+            logger.info('Admin data loaded successfully', {
+              category: 'admin_data_load',
+              entityName: config.entityName,
+              operation: 'load_success',
+              dataCount: Array.isArray(response) ? response.length : 1
+            });
           }
 
           return response;
@@ -68,17 +78,31 @@ export const useAdminData = config => {
     async itemData => {
       const config = configRef.current;
 
-      console.log(`🏗️ Creating ${config.entityName} with data:`, itemData);
+      logger.info('Creating admin entity', {
+        category: 'admin_data_create',
+        entityName: config.entityName,
+        operation: 'create_start',
+        itemData: typeof itemData === 'object' ? Object.keys(itemData) : itemData
+      });
 
       const result = await execute(
         async signal => {
-          console.log(`📡 Calling API create method for ${config.entityName}`);
+          logger.debug('Calling API create method', {
+            category: 'admin_data_create',
+            entityName: config.entityName,
+            operation: 'api_call'
+          });
           return await config.apiMethodsConfig.create(itemData, signal);
         },
         { errorMessage: `Failed to create ${config.entityName}` }
       );
 
-      console.log(`✅ Create ${config.entityName} result:`, result);
+      logger.info('Admin entity created successfully', {
+        category: 'admin_data_create',
+        entityName: config.entityName,
+        operation: 'create_success',
+        result: typeof result === 'object' && result ? Object.keys(result) : !!result
+      });
 
       if (result) {
         setSuccessMessage(`${config.entityName} created successfully!`);
@@ -144,7 +168,13 @@ export const useAdminData = config => {
     async (actionName, actionData = null) => {
       const config = configRef.current;
 
-      console.log(`⚡ Executing ${actionName} on ${config.entityName}`);
+      logger.info('Executing admin action', {
+        category: 'admin_data_action',
+        entityName: config.entityName,
+        actionName,
+        operation: 'action_start',
+        hasActionData: !!actionData
+      });
 
       const result = await execute(
         async signal => {
@@ -181,17 +211,24 @@ export const useAdminData = config => {
     const initializeData = async () => {
       if (isInitialized.current || !isMounted) return;
 
-      console.log(`🚀 Initializing ${configRef.current.entityName} data...`);
+      logger.info('Initializing admin data', {
+        category: 'admin_data_init',
+        entityName: configRef.current.entityName,
+        operation: 'init_start'
+      });
       isInitialized.current = true;
 
       try {
         await loadData();
       } catch (error) {
         if (error.name !== 'AbortError' && isMounted) {
-          console.error(
-            `❌ Error initializing ${configRef.current.entityName}:`,
-            error
-          );
+          logger.error('Error initializing admin data', {
+            category: 'admin_data_error',
+            entityName: configRef.current.entityName,
+            operation: 'init_error',
+            error: error.message,
+            stack: error.stack
+          });
         }
       }
     };
@@ -211,9 +248,12 @@ export const useAdminData = config => {
     const config = configRef.current;
 
     if (config.autoRefresh && config.refreshInterval > 0) {
-      console.log(
-        `🔄 Setting up auto-refresh for ${config.entityName} every ${config.refreshInterval}ms`
-      );
+      logger.info('Setting up auto-refresh for admin data', {
+        category: 'admin_data_init',
+        entityName: config.entityName,
+        operation: 'auto_refresh_setup',
+        refreshInterval: config.refreshInterval
+      });
 
       refreshIntervalRef.current = setInterval(() => {
         loadData(true); // Silent refresh

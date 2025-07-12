@@ -4,6 +4,7 @@
  */
 import { authService } from './auth/simpleAuthService';
 import { toast } from 'react-toastify';
+import logger from './logger';
 
 class APIClient {
   constructor() {
@@ -60,7 +61,12 @@ class APIClient {
           return this.request(originalConfig);
         }
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
+        logger.error('Token refresh failed', {
+          category: 'api_client_error',
+          error: refreshError.message,
+          status: refreshError.status,
+          endpoint: originalConfig.url
+        });
       }
 
       // If refresh fails, clear auth data and redirect
@@ -92,7 +98,12 @@ class APIClient {
           }
         });
         url = urlObj.toString();
-        console.log('Request URL with params:', url); // Debug log
+        logger.debug('Request URL with params', {
+          category: 'api_request_debug',
+          url: url,
+          method: processedConfig.method || 'GET',
+          has_params: !!processedConfig.params
+        });
       }
 
       // Prepare headers
@@ -148,7 +159,13 @@ class APIClient {
         response,
       };
     } catch (error) {
-      console.error('API request failed:', error);
+      logger.error('API request failed', {
+        category: 'api_client_error',
+        error: error.message,
+        status: error.status,
+        url: processedConfig.url,
+        method: processedConfig.method || 'GET'
+      });
       throw error;
     }
   }

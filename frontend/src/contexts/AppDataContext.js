@@ -9,6 +9,7 @@ import React, {
 import { apiService } from '../services/api';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify';
+import logger from '../services/logger';
 
 // Initial state for application data
 const initialState = {
@@ -210,7 +211,14 @@ export function AppDataProvider({ children }) {
         });
         return patient;
       } catch (error) {
-        console.error('Error fetching current patient:', error);
+        logger.error('Failed to fetch current patient data', {
+          category: 'app_data_fetch_error',
+          entityType: 'patient',
+          error: error.message,
+          stack: error.stack,
+          userId: user?.id,
+          timestamp: new Date().toISOString()
+        });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PATIENT_ERROR,
           payload: error.message,
@@ -251,7 +259,14 @@ export function AppDataProvider({ children }) {
         });
         return safePractitioners;
       } catch (error) {
-        console.error('Error fetching practitioners:', error);
+        logger.error('Failed to fetch practitioners data', {
+          category: 'app_data_fetch_error',
+          entityType: 'practitioners',
+          error: error.message,
+          stack: error.stack,
+          cachedCount: stateRef.current.practitioners?.length || 0,
+          timestamp: new Date().toISOString()
+        });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PRACTITIONERS_ERROR,
           payload: error.message,
@@ -294,7 +309,14 @@ export function AppDataProvider({ children }) {
         });
         return safePharmacies;
       } catch (error) {
-        console.error('Error fetching pharmacies:', error);
+        logger.error('Failed to fetch pharmacies data', {
+          category: 'app_data_fetch_error',
+          entityType: 'pharmacies',
+          error: error.message,
+          stack: error.stack,
+          cachedCount: stateRef.current.pharmacies?.length || 0,
+          timestamp: new Date().toISOString()
+        });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PHARMACIES_ERROR,
           payload: error.message,
@@ -324,7 +346,14 @@ export function AppDataProvider({ children }) {
           // Fetch fresh static lists in parallel
           Promise.all([fetchPractitioners(true), fetchPharmacies(true)]).catch(
             error => {
-              console.error('Error initializing app data:', error);
+              logger.error('Failed to initialize application data', {
+                category: 'app_data_init_error',
+                error: error.message,
+                stack: error.stack,
+                userId: user?.id,
+                isAuthenticated,
+                timestamp: new Date().toISOString()
+              });
             }
           );
         },
@@ -376,7 +405,12 @@ export function AppDataProvider({ children }) {
           }
           break;
         default:
-          console.warn(`Unknown cache type: ${cacheType}`);
+          logger.warn('Unknown cache type specified', {
+            category: 'app_data_cache_warning',
+            cacheType,
+            validTypes: ['patient', 'practitioners', 'pharmacies', 'all'],
+            timestamp: new Date().toISOString()
+          });
       }
     },
     [fetchCurrentPatient, fetchPractitioners, fetchPharmacies, isAuthenticated]

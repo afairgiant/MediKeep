@@ -10,6 +10,7 @@ import {
   useContext,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logger from '../services/logger';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -46,7 +47,11 @@ class TokenManager {
       // Check if token is expired (with 30 second buffer)
       return payload.exp > currentTime + 30;
     } catch (error) {
-      console.error('Invalid token format:', error);
+      logger.error('Invalid token format', {
+        category: 'auth_token_error',
+        error: error.message,
+        token_exists: !!token
+      });
       return false;
     }
   }
@@ -57,7 +62,11 @@ class TokenManager {
     try {
       return JSON.parse(atob(token.split('.')[1]));
     } catch (error) {
-      console.error('Error parsing token payload:', error);
+      logger.error('Error parsing token payload', {
+        category: 'auth_token_error',
+        error: error.message,
+        token_exists: !!token
+      });
       return null;
     }
   }
@@ -123,12 +132,20 @@ export function AuthProvider({ children }) {
 
         // Check if token is expiring soon
         if (TokenManager.isTokenExpiringSoon(storedToken)) {
-          console.warn('🔑 Token expires soon, consider implementing refresh');
+          logger.warn('Token expires soon, consider implementing refresh', {
+            category: 'auth_warning',
+            token_expiry: payload.exp,
+            current_time: Math.floor(Date.now() / 1000)
+          });
           // TODO: Implement token refresh here
         }
       }
     } catch (error) {
-      console.error('Error initializing auth:', error);
+      logger.error('Error initializing auth', {
+        category: 'auth_init_error',
+        error: error.message,
+        has_stored_token: !!TokenManager.getToken()
+      });
       TokenManager.removeToken();
       setError('Authentication initialization failed');
     } finally {
@@ -226,7 +243,11 @@ export function AuthProvider({ children }) {
   const handleAuthError = useCallback(
     (error, response) => {
       if (response?.status === 401) {
-        console.warn('Authentication failed, logging out');
+        logger.warn('Authentication failed, logging out', {
+          category: 'auth_warning',
+          status: response?.status,
+          error_type: 'authentication_failed'
+        });
         logout();
         return true;
       }
@@ -246,7 +267,10 @@ export function AuthProvider({ children }) {
 
     const checkTokenExpiration = () => {
       if (!TokenManager.isTokenValid(token)) {
-        console.warn('Token expired, logging out');
+        logger.warn('Token expired, logging out', {
+          category: 'auth_warning',
+          error_type: 'token_expired'
+        });
         logout();
       }
     };

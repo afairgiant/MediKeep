@@ -9,6 +9,7 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -110,7 +111,12 @@ const LabResults = () => {
           setConditions(response || []);
         })
         .catch(error => {
-          console.error('Failed to fetch conditions:', error);
+          logger.error('medical_conditions_fetch_error', {
+            message: 'Failed to fetch conditions for lab results',
+            patientId: currentPatient.id,
+            error: error.message,
+            component: 'LabResults'
+          });
           setConditions([]);
         });
     }
@@ -132,7 +138,12 @@ const LabResults = () => {
       }));
       return relationships || [];
     } catch (error) {
-      console.error('Failed to fetch lab result conditions:', error);
+      logger.error('medical_conditions_fetch_error', {
+        message: 'Failed to fetch lab result conditions',
+        labResultId,
+        error: error.message,
+        component: 'LabResults'
+      });
       return [];
     }
   };
@@ -200,7 +211,12 @@ const LabResults = () => {
         setFilesCounts(counts);
       }
     } catch (error) {
-      console.error('Error loading file counts:', error);
+      logger.error('medical_data_fetch_error', {
+        message: 'Error loading file counts for lab results',
+        resultsCount: results?.length,
+        error: error.message,
+        component: 'LabResults'
+      });
     }
   }, []);
 
@@ -238,7 +254,13 @@ const LabResults = () => {
             const files = await apiService.getLabResultFiles(labResult.id);
             setSelectedFiles(files);
           } catch (error) {
-            console.error('Error fetching lab result files:', error);
+            logger.error('medical_file_download_error', {
+              message: 'Error fetching lab result files for view',
+              labResultId: labResult.id,
+              labResultName: labResult.test_name,
+              error: error.message,
+              component: 'LabResults'
+            });
             setSelectedFiles([]);
           }
         };
@@ -272,7 +294,14 @@ const LabResults = () => {
           pendingFile.description
         );
       } catch (error) {
-        console.error(`Failed to upload file: ${pendingFile.file.name}`, error);
+        logger.error('medical_file_upload_error', {
+          message: 'Failed to upload file to lab result',
+          fileName: pendingFile.file.name,
+          fileSize: pendingFile.file.size,
+          labResultId,
+          error: error.message,
+          component: 'LabResults'
+        });
         throw error;
       }
     });
@@ -285,7 +314,12 @@ const LabResults = () => {
       try {
         await apiService.deleteLabResultFile(fileId);
       } catch (error) {
-        console.error(`Failed to delete file: ${fileId}`, error);
+        logger.error('medical_file_delete_error', {
+          message: 'Failed to delete lab result file',
+          fileId,
+          error: error.message,
+          component: 'LabResults'
+        });
         throw error;
       }
     });
@@ -335,7 +369,13 @@ const LabResults = () => {
       const files = await apiService.getLabResultFiles(labResult.id);
       setSelectedFiles(files);
     } catch (error) {
-      console.error('Error loading files:', error);
+      logger.error('medical_data_fetch_error', {
+        message: 'Error loading files for lab result edit',
+        labResultId: labResult.id,
+        labResultName: labResult.test_name,
+        error: error.message,
+        component: 'LabResults'
+      });
       setSelectedFiles([]);
     }
 
@@ -353,7 +393,13 @@ const LabResults = () => {
       const files = await apiService.getLabResultFiles(labResult.id);
       setSelectedFiles(files);
     } catch (error) {
-      console.error('Error fetching lab result files:', error);
+      logger.error('medical_data_fetch_error', {
+        message: 'Error fetching lab result files for view',
+        labResultId: labResult.id,
+        labResultName: labResult.test_name,
+        error: error.message,
+        component: 'LabResults'
+      });
       setSelectedFiles([]);
     }
 
@@ -505,7 +551,14 @@ const LabResults = () => {
       }));
       setFileUpload({ file: null, description: '' });
     } catch (error) {
-      console.error('Error uploading file:', error);
+      logger.error('medical_file_upload_error', {
+        message: 'Error uploading file from view modal',
+        fileName: fileUpload.file?.name,
+        labResultId: viewingLabResult?.id,
+        labResultName: viewingLabResult?.test_name,
+        error: error.message,
+        component: 'LabResults'
+      });
       setError(error.message);
     }
   };
@@ -531,7 +584,13 @@ const LabResults = () => {
         document.body.removeChild(a);
       }
     } catch (error) {
-      console.error('Error downloading file:', error);
+      logger.error('medical_file_download_error', {
+        message: 'Error downloading lab result file',
+        fileId,
+        fileName,
+        error: error.message,
+        component: 'LabResults'
+      });
       setError(error.message);
     }
   };
@@ -547,7 +606,14 @@ const LabResults = () => {
           [viewingLabResult.id]: files.length,
         }));
       } catch (error) {
-        console.error('Error deleting file:', error);
+        logger.error('medical_file_delete_error', {
+          message: 'Error deleting lab result file',
+          fileId,
+          labResultId: viewingLabResult?.id,
+          labResultName: viewingLabResult?.test_name,
+          error: error.message,
+          component: 'LabResults'
+        });
         setError(error.message);
       }
     }

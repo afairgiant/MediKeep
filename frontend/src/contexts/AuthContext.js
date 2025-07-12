@@ -5,6 +5,7 @@ import {
   shouldShowPatientProfileCompletionPrompt,
   isFirstLogin,
 } from '../utils/profileUtils';
+import logger from '../services/logger';
 
 // Auth State Management
 const initialState = {
@@ -180,7 +181,15 @@ export function AuthProvider({ children }) {
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } catch (error) {
-        console.error('Auth initialization failed:', error);
+        logger.error('auth_context_init_error', {
+          message: 'Auth initialization failed',
+          error: error.message,
+          stack: error.stack,
+          hasStoredToken: !!localStorage.getItem('token'),
+          hasStoredUser: !!localStorage.getItem('user'),
+          hasStoredExpiry: !!localStorage.getItem('tokenExpiry'),
+          timestamp: new Date().toISOString()
+        });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
     };
@@ -212,7 +221,16 @@ export function AuthProvider({ children }) {
             dispatch({ type: AUTH_ACTIONS.LOGOUT });
           }
         } catch (error) {
-          console.error('Token refresh failed:', error);
+          logger.error('auth_context_refresh_error', {
+            message: 'Token refresh failed',
+            error: error.message,
+            stack: error.stack,
+            isAuthenticated: state.isAuthenticated,
+            hasToken: !!state.token,
+            tokenExpiry: state.tokenExpiry,
+            timeUntilExpiry: state.tokenExpiry ? state.tokenExpiry - Date.now() : null,
+            timestamp: new Date().toISOString()
+          });
           clearAuthData();
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
@@ -331,7 +349,16 @@ export function AuthProvider({ children }) {
         await authService.logout();
       }
     } catch (error) {
-      console.error('Logout API call failed:', error);
+      logger.error('auth_context_logout_error', {
+        message: 'Logout API call failed',
+        error: error.message,
+        stack: error.stack,
+        isAuthenticated: state.isAuthenticated,
+        hasToken: !!state.token,
+        userId: state.user?.id,
+        userRole: state.user?.role,
+        timestamp: new Date().toISOString()
+      });
     } finally {
       clearAuthData();
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
