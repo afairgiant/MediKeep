@@ -40,10 +40,17 @@ export function useFormHandlers(onInputChange) {
   const handleDateChange = useCallback(
     field => date => {
       let formattedDate = '';
+      
       if (date) {
-        // Format date as YYYY-MM-DD for consistent backend handling
-        formattedDate = date.toISOString().split('T')[0];
+        // Check if it's already a Date object, if not try to create one
+        const dateObj = date instanceof Date ? date : new Date(date);
+        
+        // Verify we have a valid date before formatting
+        if (!isNaN(dateObj.getTime())) {
+          formattedDate = dateObj.toISOString().split('T')[0];
+        }
       }
+      
       const syntheticEvent = {
         target: {
           name: field,
