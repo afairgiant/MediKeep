@@ -25,6 +25,10 @@ const MantineAllergyForm = ({
     medications: medicationSelectOptions,
   };
 
+  const loadingStates = {
+    medications: medicationsLoading,
+  };
+
   return (
     <BaseMedicalForm
       isOpen={isOpen}
@@ -36,6 +40,7 @@ const MantineAllergyForm = ({
       editingItem={editingAllergy}
       fields={allergyFormFields}
       dynamicOptions={dynamicOptions}
+      loadingStates={loadingStates}
     />
   );
 };

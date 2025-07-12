@@ -44,6 +44,9 @@ const BaseMedicalForm = ({
   // Dynamic options for select fields
   dynamicOptions = {},
   
+  // Loading states for dynamic options
+  loadingStates = {},
+  
   // Form state
   editingItem = null,
   isLoading = false,
@@ -121,6 +124,9 @@ const BaseMedicalForm = ({
     const selectOptions = dynamicOptionsKey 
       ? dynamicOptions[dynamicOptionsKey] || []
       : options;
+      
+    // Check if this dynamic option is loading
+    const isFieldLoading = dynamicOptionsKey && loadingStates[dynamicOptionsKey];
 
     // Base field props
     const baseProps = {
@@ -163,6 +169,8 @@ const BaseMedicalForm = ({
             searchable={searchable}
             clearable={clearable}
             maxDropdownHeight={maxDropdownHeight}
+            disabled={isFieldLoading}
+            placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
           />
         );
 

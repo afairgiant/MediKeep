@@ -1,4 +1,5 @@
 import React from 'react';
+import { Text } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import { pharmacyFormFields } from '../../utils/medicalFormFields';
 
@@ -90,7 +91,7 @@ const MantinePharmacyForm = ({
       ? 'Please enter a valid website URL'
       : null;
 
-  // Custom validation for submit
+  // Custom validation for submit - prevent submission if website is invalid
   const handleSubmit = (e) => {
     if (websiteError) {
       e.preventDefault();
@@ -98,6 +99,17 @@ const MantinePharmacyForm = ({
     }
     onSubmit(e);
   };
+
+  // Custom content for inline website validation error
+  const customContent = (
+    <>
+      {websiteError && (
+        <Text size="sm" c="red" style={{ marginTop: '-16px', marginBottom: '16px' }}>
+          {websiteError}
+        </Text>
+      )}
+    </>
+  );
 
   return (
     <BaseMedicalForm
@@ -110,7 +122,9 @@ const MantinePharmacyForm = ({
       editingItem={editingPharmacy}
       fields={pharmacyFormFields}
       modalSize="lg"
-    />
+    >
+      {customContent}
+    </BaseMedicalForm>
   );
 };
 
