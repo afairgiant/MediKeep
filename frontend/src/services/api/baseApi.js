@@ -1,4 +1,5 @@
 // Base API service with common functionality
+import logger from '../logger';
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? process.env.REACT_APP_API_URL || '' // Use relative URLs in production
@@ -27,17 +28,29 @@ class BaseApiService {
 
         // Check if token expires soon (within 5 minutes)
         if (payload.exp - currentTime < 300) {
-          console.warn('🔑 Token expires soon, consider refresh');
+          logger.warn('api_token_warning', {
+            message: 'Token expires soon, consider refresh',
+            expiresIn: payload.exp - currentTime,
+            currentTime
+          });
         }
 
         // Check if token is already expired
         if (payload.exp < currentTime) {
-          console.error('🔑 Token expired, removing');
+          logger.error('api_token_error', {
+            message: 'Token expired, removing',
+            tokenExpired: payload.exp,
+            currentTime
+          });
           localStorage.removeItem('token');
           return { 'Content-Type': 'application/json' };
         }
       } catch (e) {
-        console.error('🔑 Invalid token, removing:', e);
+        logger.error('api_token_error', {
+          message: 'Invalid token, removing',
+          error: e.message,
+          action: 'token_removed'
+        });
         localStorage.removeItem('token');
         return { 'Content-Type': 'application/json' };
       }
@@ -95,10 +108,12 @@ class BaseApiService {
   } // Enhanced authentication error handling
   handleAuthError(response) {
     const timestamp = new Date().toISOString();
-    console.log(`🔐 Auth error handler called at ${timestamp}:`, {
+    logger.info('api_auth_handler', {
+      message: 'Auth error handler called',
+      timestamp,
       status: response.status,
       url: response.url,
-      activeRequests: this.activeRequests,
+      activeRequests: this.activeRequests
     });
 
     if (response.status === 401) {
@@ -106,12 +121,20 @@ class BaseApiService {
 
       // For admin endpoints, be more lenient due to concurrent request issues
       if (url && url.includes('/admin/')) {
-        console.warn('🚫 Admin access denied - checking token validity');
+        logger.warn('api_admin_access_denied', {
+          message: 'Admin access denied - checking token validity',
+          url,
+          activeRequests: this.activeRequests
+        });
 
         try {
           const token = localStorage.getItem('token');
           if (!token) {
-            console.error('❌ No token found for admin request');
+            logger.error('api_auth_error', {
+              message: 'No token found for admin request',
+              url,
+              action: 'redirect_to_login'
+            });
             localStorage.removeItem('token');
             window.location.href = '/login';
             return true;
@@ -121,19 +144,34 @@ class BaseApiService {
           const currentTime = Date.now() / 1000;
 
           if (payload.exp < currentTime) {
-            console.error('⏰ Token expired for admin request');
+            logger.error('api_auth_error', {
+              message: 'Token expired for admin request',
+              tokenExpired: payload.exp,
+              currentTime,
+              url,
+              action: 'redirect_to_login'
+            });
             localStorage.removeItem('token');
             window.location.href = '/login';
             return true;
           }
 
           // Token is valid but got 401 - likely concurrent request issue
-          console.warn(
-            '⚠️ Valid token but 401 on admin endpoint - concurrent request issue'
-          );
+          logger.warn('api_admin_access_denied', {
+            message: 'Valid token but 401 on admin endpoint - concurrent request issue',
+            url,
+            tokenValid: true,
+            activeRequests: this.activeRequests,
+            action: 'retry_will_handle'
+          });
           return false; // Don't redirect, let retry logic handle it
         } catch (e) {
-          console.error('💥 Token decode error:', e);
+          logger.error('api_auth_error', {
+            message: 'Token decode error',
+            error: e.message,
+            url,
+            action: 'redirect_to_login'
+          });
           localStorage.removeItem('token');
           window.location.href = '/login';
           return true;
@@ -157,7 +195,13 @@ class BaseApiService {
           return true;
         }
 
-        console.warn('⚠️ 401 error but token seems valid, not redirecting');
+        logger.warn('api_auth_error', {
+          message: '401 error but token seems valid, not redirecting',
+          status: response.status,
+          url: response.url,
+          tokenValid: true,
+          action: 'no_redirect'
+        });
         return false;
       } catch (e) {
         localStorage.removeItem('token');
@@ -167,7 +211,11 @@ class BaseApiService {
     }
 
     if (response.status === 429) {
-      console.warn('🚦 Rate limit detected');
+      logger.warn('api_rate_limit', {
+        message: 'Rate limit detected',
+        status: response.status,
+        url: response.url
+      });
       return false;
     }
 
@@ -192,9 +240,12 @@ class BaseApiService {
         response.url?.includes('/admin/') &&
         retryCount < maxRetries
       ) {
-        console.log(
-          `🔄 Retrying request due to concurrent auth issue (attempt ${retryCount + 1})`
-        );
+        logger.info('api_retry', {
+          message: 'Retrying request due to concurrent auth issue',
+          attempt: retryCount + 1,
+          maxRetries,
+          url: response.url
+        });
         await new Promise(resolve =>
           setTimeout(resolve, 200 + retryCount * 100)
         ); // Backoff delay
@@ -230,9 +281,12 @@ class BaseApiService {
   async get(endpoint, errorMessage) {
     return this.queueRequest(async () => {
       const timestamp = new Date().toISOString();
-      console.log(
-        `📡 GET request queued at ${timestamp}: ${this.basePath}${endpoint}`
-      );
+      logger.debug('api_request', {
+        message: 'GET request queued',
+        timestamp,
+        endpoint: `${this.basePath}${endpoint}`,
+        method: 'GET'
+      });
 
       const response = await fetch(
         `${this.baseURL}${this.basePath}${endpoint}`,
@@ -241,9 +295,13 @@ class BaseApiService {
         }
       );
 
-      console.log(
-        `📡 GET response at ${timestamp}: ${response.status} for ${this.basePath}${endpoint}`
-      );
+      logger.debug('api_response', {
+        message: 'GET response received',
+        timestamp,
+        status: response.status,
+        endpoint: `${this.basePath}${endpoint}`,
+        method: 'GET'
+      });
       return this.handleResponse(response, errorMessage);
     });
   }

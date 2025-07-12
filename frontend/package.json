@@ -19,7 +19,6 @@
     "framer-motion": "^10.16.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.294.0",
-    "luxon": "^3.6.1",
     "prettier-eslint": "^16.4.2",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.0",

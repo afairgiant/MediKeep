@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import logger from './logger';
 
 export const exportService = {
   /**
@@ -9,7 +10,12 @@ export const exportService = {
       const response = await apiClient.get('/export/summary');
       return response.data;
     } catch (error) {
-      console.error('Failed to get export summary:', error);
+      logger.error('Failed to get export summary', {
+        category: 'export_error',
+        error: error.message,
+        status: error.status,
+        endpoint: '/export/summary'
+      });
       throw error;
     }
   },
@@ -22,7 +28,12 @@ export const exportService = {
       const response = await apiClient.get('/export/formats');
       return response.data;
     } catch (error) {
-      console.error('Failed to get supported formats:', error);
+      logger.error('Failed to get supported formats', {
+        category: 'export_error',
+        error: error.message,
+        status: error.status,
+        endpoint: '/export/formats'
+      });
       throw error;
     }
   },
@@ -60,7 +71,13 @@ export const exportService = {
 
       return { success: true, filename };
     } catch (error) {
-      console.error('Export download failed:', error);
+      logger.error('Export download failed', {
+        category: 'export_error',
+        error: error.message,
+        status: error.status,
+        endpoint: '/export/data',
+        params: params
+      });
       throw error;
     }
   },
@@ -97,7 +114,13 @@ export const exportService = {
 
       return { success: true, filename };
     } catch (error) {
-      console.error('Bulk export download failed:', error);
+      logger.error('Bulk export download failed', {
+        category: 'export_error',
+        error: error.message,
+        status: error.status,
+        endpoint: '/export/bulk',
+        data_keys: data ? Object.keys(data) : []
+      });
       throw error;
     }
   },

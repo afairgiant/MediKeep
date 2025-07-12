@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './useApi';
 import { apiService } from '../services/api';
 import { useCurrentPatient } from './useGlobalData';
+import logger from '../services/logger';
 
 export const useMedicalData = config => {
   const {
@@ -36,17 +37,28 @@ export const useMedicalData = config => {
   // Create item
   const createItem = useCallback(
     async data => {
-      console.log(`🏗️ Creating ${entityName} with data:`, data);
+      logger.info('medical_data_create', 'Starting entity creation', {
+        entityName,
+        operation: 'create',
+        hasData: !!data
+      });
 
       const result = await execute(
         async signal => {
-          console.log(`📡 Calling API create method for ${entityName}`);
+          logger.info('medical_data_create', 'Calling API create method', {
+            entityName,
+            operation: 'api_call'
+          });
           return await apiMethodsConfig.create(data, signal);
         },
         { errorMessage: `Failed to create ${entityName}` }
       );
 
-      console.log(`✅ Create ${entityName} result:`, result);
+      logger.info('medical_data_create', 'Entity creation completed', {
+        entityName,
+        operation: 'create_complete',
+        success: !!result
+      });
 
       if (result) {
         setSuccessMessage(`${entityName} created successfully!`);
@@ -125,7 +137,11 @@ export const useMedicalData = config => {
     const initializeData = async () => {
       if (isInitialized.current || !isMounted) return;
 
-      console.log('Initializing data...');
+      logger.info('medical_data_init', 'Starting data initialization', {
+        entityName: config.entityName,
+        requiresPatient: config.requiresPatient,
+        loadFilesCounts: config.loadFilesCounts
+      });
       isInitialized.current = true;
 
       const config = configRef.current;
@@ -134,7 +150,11 @@ export const useMedicalData = config => {
         // Wait for patient data to be available if required
         if (config.requiresPatient) {
           if (!currentPatient?.id) {
-            console.warn('No patient data available yet, waiting...');
+            logger.warn('medical_data_warning', 'Patient data not available for initialization', {
+              entityName: config.entityName,
+              requiresPatient: config.requiresPatient,
+              patientAvailable: false
+            });
             return;
           }
         }
@@ -171,10 +191,12 @@ export const useMedicalData = config => {
                 counts[item.id] = files?.length || 0;
               } catch (error) {
                 if (error.name !== 'AbortError') {
-                  console.warn(
-                    `Failed to load file count for ${config.entityName} ${item.id}:`,
-                    error
-                  );
+                  logger.warn('medical_data_warning', 'Failed to load file count during initialization', {
+                    entityName: config.entityName,
+                    itemId: item.id,
+                    operation: 'load_file_count',
+                    error: error.message
+                  });
                 }
                 counts[item.id] = 0;
               }
@@ -239,10 +261,12 @@ export const useMedicalData = config => {
                 counts[item.id] = files?.length || 0;
               } catch (error) {
                 if (error.name !== 'AbortError') {
-                  console.warn(
-                    `Failed to load file count for ${config.entityName} ${item.id}:`,
-                    error
-                  );
+                  logger.warn('medical_data_warning', 'Failed to load file count during refresh', {
+                    entityName: config.entityName,
+                    itemId: item.id,
+                    operation: 'refresh_file_count',
+                    error: error.message
+                  });
                 }
                 counts[item.id] = 0;
               }
