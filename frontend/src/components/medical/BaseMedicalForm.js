@@ -179,17 +179,31 @@ const BaseMedicalForm = ({
           <NumberInput
             {...baseProps}
             onChange={handleNumberChange(name)}
-            value={formData[name] ? Number(formData[name]) : ''}
+            value={formData[name] !== undefined && formData[name] !== null && formData[name] !== '' ? Number(formData[name]) : ''}
             min={min}
             max={max}
           />
         );
 
       case 'date':
-        // Handle dynamic minDate for end_date based on onset_date
-        const dynamicMinDate = name === 'end_date' && formData.onset_date 
-          ? new Date(formData.onset_date) 
-          : minDate;
+        // Handle dynamic minDate for any end date field based on corresponding start date
+        let dynamicMinDate = minDate;
+        
+        // Support multiple start/end date patterns
+        if (name === 'end_date' && formData.onset_date) {
+          dynamicMinDate = new Date(formData.onset_date);
+        } else if (name === 'end_date' && formData.start_date) {
+          dynamicMinDate = new Date(formData.start_date);
+        } else if (name.includes('end') && name.includes('date')) {
+          // Generic pattern: look for corresponding start field
+          const startFieldName = name.replace('end', 'start');
+          if (formData[startFieldName]) {
+            dynamicMinDate = new Date(formData[startFieldName]);
+          }
+        }
+        
+        // Handle dynamic maxDate - use current date if maxDate is a function
+        const dynamicMaxDate = typeof maxDate === 'function' ? maxDate() : maxDate;
           
         return (
           <DateInput
@@ -198,7 +212,7 @@ const BaseMedicalForm = ({
             onChange={handleDateChange(name)}
             firstDayOfWeek={0}
             clearable
-            maxDate={maxDate}
+            maxDate={dynamicMaxDate}
             minDate={dynamicMinDate}
           />
         );
