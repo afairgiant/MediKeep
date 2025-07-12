@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
+import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -182,16 +182,6 @@ const Medication = () => {
     }
   }, [location.search, medications, loading, showViewModal]);
 
-  // Handle auto-open from entity navigation (e.g., from other pages)
-  useEffect(() => {
-    const medicationIdToOpen = getAndClearStoredEntityId('medication');
-    if (medicationIdToOpen && medications.length > 0 && !loading) {
-      const medicationToView = medications.find(m => m.id === parseInt(medicationIdToOpen));
-      if (medicationToView && !showViewModal) {
-        handleViewMedication(medicationToView);
-      }
-    }
-  }, [medications, loading, showViewModal]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);

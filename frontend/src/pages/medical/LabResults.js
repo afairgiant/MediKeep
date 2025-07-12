@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
+import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';

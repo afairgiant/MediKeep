@@ -36,7 +36,6 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { getAndClearStoredEntityId } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -170,18 +169,6 @@ const Conditions = () => {
     }
   };
 
-  // Check for condition ID to auto-open from other pages (sessionStorage)
-  useEffect(() => {
-    const conditionIdToOpen = getAndClearStoredEntityId('condition');
-    if (conditionIdToOpen && conditions.length > 0 && !loading) {
-      const conditionToView = conditions.find(
-        c => c.id === parseInt(conditionIdToOpen)
-      );
-      if (conditionToView && !showViewModal) {
-        handleViewCondition(conditionToView);
-      }
-    }
-  }, [conditions, loading, showViewModal]); // Re-run when conditions data loads
 
   // Handle URL parameters for direct linking to specific conditions
   useEffect(() => {

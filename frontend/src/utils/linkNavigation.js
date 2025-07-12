@@ -18,23 +18,10 @@ export const ENTITY_ROUTES = {
   patient: '/patients'
 };
 
-export const ENTITY_STORAGE_KEYS = {
-  condition: 'openConditionId',
-  medication: 'openMedicationId',
-  procedure: 'openProcedureId',
-  practitioner: 'openPractitionerId',
-  pharmacy: 'openPharmacyId',
-  allergy: 'openAllergyId',
-  treatment: 'openTreatmentId',
-  encounter: 'openEncounterId',
-  lab_result: 'openLabResultId',
-  immunization: 'openImmunizationId',
-  vitals: 'openVitalsId',
-  patient: 'openPatientId'
-};
 
 /**
  * Navigate to a related entity and automatically open it
+ * SECURITY: Uses URL parameters only - no client-side storage
  * @param {string} entityType - Type of entity to navigate to (e.g., 'condition', 'practitioner')
  * @param {number|string} entityId - ID of the entity to open
  * @param {function} navigate - React Router navigate function
@@ -43,39 +30,37 @@ export const navigateToEntity = (entityType, entityId, navigate) => {
   if (!entityId || !entityType) return;
   
   const route = ENTITY_ROUTES[entityType];
-  const storageKey = ENTITY_STORAGE_KEYS[entityType];
   
-  if (!route || !storageKey) {
+  if (!route) {
     console.error(`Unknown entity type: ${entityType}`);
     return;
   }
   
-  // Store the entity ID for auto-opening (fallback method)
-  sessionStorage.setItem(storageKey, entityId.toString());
+  // Sanitize entity ID
+  const sanitizedId = parseInt(entityId, 10);
+  if (isNaN(sanitizedId)) {
+    console.error('Invalid entity ID');
+    return;
+  }
   
-  // Navigate to the entity page with view parameter in URL
-  navigate(`${route}?view=${entityId}`);
+  // SECURE: Navigate using URL parameters only
+  navigate(`${route}?view=${sanitizedId}`);
 };
 
 /**
- * Get the stored entity ID for auto-opening and clear it
- * @param {string} entityType - Type of entity
- * @returns {string|null} - The stored entity ID or null
+ * Extract entity ID from URL parameters
+ * SECURITY: No storage dependencies
+ * @param {object} location - React Router location object
+ * @returns {string|null} - The entity ID from URL or null
  */
-export const getAndClearStoredEntityId = (entityType) => {
-  const storageKey = ENTITY_STORAGE_KEYS[entityType];
-  if (!storageKey) return null;
-  
-  const entityId = sessionStorage.getItem(storageKey);
-  if (entityId) {
-    sessionStorage.removeItem(storageKey);
-  }
-  
-  return entityId;
+export const getEntityIdFromUrl = (location) => {
+  const searchParams = new URLSearchParams(location.search);
+  return searchParams.get('view');
 };
 
 /**
  * Create a click handler for entity navigation
+ * SECURITY: Direct navigation without storage
  * @param {string} entityType - Type of entity to navigate to
  * @param {function} navigate - React Router navigate function
  * @returns {function} - Click handler function

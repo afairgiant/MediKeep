@@ -34,7 +34,7 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
+import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
@@ -200,17 +200,6 @@ const Allergies = () => {
     }
   }, [location.search, allergies, loading, showViewModal]);
 
-  // Check for allergy ID to auto-open from other pages (sessionStorage)
-  useEffect(() => {
-    const allergyIdToOpen = getAndClearStoredEntityId('allergy');
-    if (allergyIdToOpen && allergies.length > 0 && !loading) {
-      const allergyToView = allergies.find(a => a.id === parseInt(allergyIdToOpen));
-      if (allergyToView && !showViewModal) {
-        setViewingAllergy(allergyToView);
-        setShowViewModal(true);
-      }
-    }
-  }, [allergies, loading, showViewModal]);
 
   const handleSubmit = async e => {
     e.preventDefault();

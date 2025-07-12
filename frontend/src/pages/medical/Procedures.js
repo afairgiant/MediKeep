@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { getAndClearStoredEntityId, navigateToEntity } from '../../utils/linkNavigation';
+import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -177,16 +177,6 @@ const Procedures = () => {
     }
   }, [location.search, procedures, loading, showViewModal]);
 
-  // Handle auto-open from entity navigation (e.g., from other pages)
-  useEffect(() => {
-    const procedureIdToOpen = getAndClearStoredEntityId('procedure');
-    if (procedureIdToOpen && procedures.length > 0 && !loading) {
-      const procedureToView = procedures.find(p => p.id === parseInt(procedureIdToOpen));
-      if (procedureToView && !showViewModal) {
-        handleViewProcedure(procedureToView);
-      }
-    }
-  }, [procedures, loading, showViewModal]);
 
   const handleDeleteProcedure = async procedureId => {
     const success = await deleteItem(procedureId);

@@ -42,7 +42,6 @@ import {
 import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { getAndClearStoredEntityId } from '../../utils/linkNavigation';
 import frontendLogger from '../../services/frontendLogger';
 
 const Practitioners = () => {
@@ -238,16 +237,6 @@ const Practitioners = () => {
     }
   }, [location.search, filteredPractitioners, loading, showViewModal]);
 
-  // Handle auto-open from entity navigation (e.g., from other pages)
-  useEffect(() => {
-    const practitionerIdToOpen = getAndClearStoredEntityId('practitioner');
-    if (practitionerIdToOpen && filteredPractitioners && filteredPractitioners.length > 0 && !loading) {
-      const practitionerToView = filteredPractitioners.find(p => p.id === parseInt(practitionerIdToOpen));
-      if (practitionerToView && !showViewModal) {
-        handleViewPractitioner(practitionerToView);
-      }
-    }
-  }, [filteredPractitioners, loading, showViewModal]);
 
   const getSpecialtyColor = specialty => {
     // Color coding for different specialties
