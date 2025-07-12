@@ -11,6 +11,7 @@ import {
   Textarea,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { useFormHandlers } from '../../hooks/useFormHandlers';
 
 const MantinePatientForm = ({
   formData,
@@ -27,61 +28,7 @@ const MantinePatientForm = ({
     label: `${practitioner.name} - ${practitioner.specialty}`,
   }));
 
-  // Handle TextInput onChange (receives event object)
-  const handleTextInputChange = field => event => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: event.target.value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle NumberInput onChange (receives value directly)
-  const handleNumberInputChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle Select onChange (receives value directly)
-  const handleSelectChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle date changes
-  const handleDateChange = field => date => {
-    let formattedDate = '';
-
-    if (date) {
-      // Check if it's already a Date object, if not try to create one
-      const dateObj = date instanceof Date ? date : new Date(date);
-
-      // Verify we have a valid date
-      if (!isNaN(dateObj.getTime())) {
-        formattedDate = dateObj.toISOString().split('T')[0];
-      }
-    }
-
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: formattedDate,
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
+  const { handleTextInputChange, handleSelectChange, handleDateChange, handleNumberChange } = useFormHandlers(onInputChange);
 
   return (
     <Stack spacing="md">
@@ -196,7 +143,7 @@ const MantinePatientForm = ({
             label="Height"
             placeholder="e.g., 70"
             value={formData.height || ''}
-            onChange={handleNumberInputChange('height')}
+            onChange={handleNumberChange('height')}
             disabled={saving}
             description="Height in inches"
             min={12}
@@ -209,7 +156,7 @@ const MantinePatientForm = ({
             label="Weight"
             placeholder="e.g., 150"
             value={formData.weight || ''}
-            onChange={handleNumberInputChange('weight')}
+            onChange={handleNumberChange('weight')}
             disabled={saving}
             description="Weight in pounds"
             min={1}

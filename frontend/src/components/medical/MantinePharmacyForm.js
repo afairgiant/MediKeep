@@ -10,6 +10,7 @@ import {
   Text,
   Divider,
 } from '@mantine/core';
+import { useFormHandlers } from '../../hooks/useFormHandlers';
 
 const MantinePharmacyForm = ({
   isOpen,
@@ -43,27 +44,7 @@ const MantinePharmacyForm = ({
     { value: 'Other', label: 'Other' },
   ];
 
-  // Handle TextInput onChange (receives event object)
-  const handleTextInputChange = field => event => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: event.target.value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle Select onChange (receives value directly)
-  const handleSelectChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
+  const { handleTextInputChange, handleSelectChange } = useFormHandlers(onInputChange);
 
   // Handle store number with formatting
   const handleStoreNumberChange = event => {

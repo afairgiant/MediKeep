@@ -12,6 +12,7 @@ import {
   Rating,
   Anchor,
 } from '@mantine/core';
+import { useFormHandlers } from '../../hooks/useFormHandlers';
 
 const MantinePractitionerForm = ({
   isOpen,
@@ -67,27 +68,7 @@ const MantinePractitionerForm = ({
     { value: 'Pathology', label: 'Pathology - Disease diagnosis' },
   ];
 
-  // Handle TextInput onChange (receives event object)
-  const handleTextInputChange = field => event => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: event.target.value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle Select onChange (receives value directly)
-  const handleSelectChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
+  const { handleTextInputChange, handleSelectChange } = useFormHandlers(onInputChange);
 
   // Handle Rating onChange (receives value directly)
   const handleRatingChange = value => {
