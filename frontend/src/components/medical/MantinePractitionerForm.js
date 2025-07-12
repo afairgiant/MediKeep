@@ -109,6 +109,7 @@ const MantinePractitionerForm = ({
     }
   };
 
+
   const websiteError =
     formData.website && !isValidWebsite(formData.website)
       ? 'Please enter a valid website URL'
@@ -158,6 +159,7 @@ const MantinePractitionerForm = ({
       formData={formData}
       onInputChange={handleInputChange}
       onSubmit={handleSubmit}
+
       editingItem={editingPractitioner}
       fields={practitionerFormFields}
       dynamicOptions={dynamicOptions}

@@ -57,6 +57,7 @@ export const allergyFormFields = [
     description: 'When this allergy was first discovered',
     gridColumn: 6,
     maxDate: () => new Date(), // Can't be in the future
+
   },
   {
     name: 'medication_id',
@@ -129,7 +130,9 @@ export const conditionFormFields = [
     placeholder: 'When did this condition start',
     description: 'When this condition was first diagnosed',
     gridColumn: 6,
+
     maxDate: () => new Date(),
+
   },
   {
     name: 'end_date',
@@ -139,6 +142,7 @@ export const conditionFormFields = [
     description: 'When this condition was resolved (optional)',
     gridColumn: 6,
     maxDate: () => new Date(),
+
   },
   {
     name: 'icd10_code',
@@ -826,6 +830,7 @@ export const visitFormFields = [
     description: 'When the visit occurred',
     gridColumn: 6,
     maxDate: () => new Date(),
+
   },
   {
     name: 'practitioner_id',

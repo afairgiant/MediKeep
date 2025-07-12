@@ -27,6 +27,7 @@ const MantineAllergyForm = ({
 
   const loadingStates = {
     medications: medicationsLoading,
+
   };
 
   return (
@@ -40,7 +41,9 @@ const MantineAllergyForm = ({
       editingItem={editingAllergy}
       fields={allergyFormFields}
       dynamicOptions={dynamicOptions}
+
       loadingStates={loadingStates}
+
     />
   );
 };

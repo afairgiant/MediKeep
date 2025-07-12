@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { Text } from '@mantine/core';
+
 import BaseMedicalForm from './BaseMedicalForm';
 import { pharmacyFormFields } from '../../utils/medicalFormFields';
 
@@ -92,6 +94,7 @@ const MantinePharmacyForm = ({
       : null;
 
   // Custom validation for submit - prevent submission if website is invalid
+
   const handleSubmit = (e) => {
     if (websiteError) {
       e.preventDefault();
@@ -122,9 +125,11 @@ const MantinePharmacyForm = ({
       editingItem={editingPharmacy}
       fields={pharmacyFormFields}
       modalSize="lg"
+
     >
       {customContent}
     </BaseMedicalForm>
+
   );
 };
 
