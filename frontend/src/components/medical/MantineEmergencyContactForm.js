@@ -12,6 +12,7 @@ import {
   Checkbox,
 } from '@mantine/core';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
+import { useFormHandlers } from '../../hooks/useFormHandlers';
 
 const MantineEmergencyContactForm = ({
   isOpen,
@@ -22,27 +23,7 @@ const MantineEmergencyContactForm = ({
   onSubmit,
   editingContact = null,
 }) => {
-  // Handle TextInput onChange (receives event object)
-  const handleTextInputChange = field => event => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: event.target.value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle Select onChange (receives value directly)
-  const handleSelectChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
+  const { handleTextInputChange, handleSelectChange } = useFormHandlers(onInputChange);
 
   // Handle Checkbox onChange
   const handleCheckboxChange = field => event => {

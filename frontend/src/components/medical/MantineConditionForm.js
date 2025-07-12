@@ -15,6 +15,7 @@ import {
 import MedicationRelationships from './MedicationRelationships';
 import { DateInput } from '@mantine/dates';
 import { CONDITION_STATUS_OPTIONS, SEVERITY_OPTIONS } from '../../utils/statusConfig';
+import { useFormHandlers } from '../../hooks/useFormHandlers';
 
 const MantineConditionForm = ({
   isOpen,
@@ -29,50 +30,7 @@ const MantineConditionForm = ({
   fetchConditionMedications = null,
   navigate = null,
 }) => {
-  // Handle TextInput onChange (receives event object)
-  const handleTextInputChange = field => event => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: event.target.value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle Select onChange (receives value directly)
-  const handleSelectChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle date changes
-  const handleDateChange = field => date => {
-    let formattedDate = '';
-
-    if (date) {
-      // Check if it's already a Date object, if not try to create one
-      const dateObj = date instanceof Date ? date : new Date(date);
-
-      // Verify we have a valid date
-      if (!isNaN(dateObj.getTime())) {
-        formattedDate = dateObj.toISOString().split('T')[0];
-      }
-    }
-
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: formattedDate,
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
+  const { handleTextInputChange, handleSelectChange, handleDateChange } = useFormHandlers(onInputChange);
 
   const handleSubmit = e => {
     e.preventDefault();

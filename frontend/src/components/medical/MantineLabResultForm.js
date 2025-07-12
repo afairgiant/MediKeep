@@ -16,6 +16,7 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import ConditionRelationships from './ConditionRelationships';
+import { useFormHandlers } from '../../hooks/useFormHandlers';
 
 const MantineLabResultForm = ({
   isOpen,
@@ -105,47 +106,7 @@ const MantineLabResultForm = ({
     })),
   ];
 
-  // Handle TextInput/Textarea onChange (receives event object)
-  const handleTextInputChange = field => event => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: event.target.value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle Select onChange (receives value directly)
-  const handleSelectChange = field => value => {
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: value || '',
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Handle date changes
-  const handleDateChange = field => date => {
-    let formattedDate = '';
-
-    if (date) {
-      const dateObj = date instanceof Date ? date : new Date(date);
-      if (!isNaN(dateObj.getTime())) {
-        formattedDate = dateObj.toISOString().split('T')[0];
-      }
-    }
-
-    const syntheticEvent = {
-      target: {
-        name: field,
-        value: formattedDate,
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
+  const { handleTextInputChange, handleSelectChange, handleDateChange } = useFormHandlers(onInputChange);
 
   const handleSubmit = e => {
     e.preventDefault();

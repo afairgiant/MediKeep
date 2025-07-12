@@ -6,6 +6,9 @@ export * from './useApi';
 export * from './useGlobalData';
 export * from './useAdminData';
 
+// Form handling hooks
+export { useFormHandlers } from './useFormHandlers';
+
 // Medical data hooks
 export { useMedicalData } from './useMedicalData';
 export { useAuth, AuthProvider, TokenManager } from './useAuth';
