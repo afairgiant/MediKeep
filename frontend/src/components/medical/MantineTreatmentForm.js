@@ -31,11 +31,13 @@ const MantineTreatmentForm = ({
   const dynamicOptions = {
     conditions: conditionOptions,
     practitioners: practitionerOptions,
+
   };
 
   const loadingStates = {
     conditions: conditionsLoading,
     practitioners: practitionersLoading,
+
   };
 
   // Get status color for visual feedback
@@ -77,6 +79,7 @@ const MantineTreatmentForm = ({
       fields={treatmentFormFields}
       dynamicOptions={dynamicOptions}
       loadingStates={loadingStates}
+
       modalSize="lg"
     >
       {/* Status Badge Visual Indicator */}
