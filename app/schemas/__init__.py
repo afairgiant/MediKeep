@@ -6,6 +6,8 @@ from .lab_result import *
 from .lab_result_file import *
 from .encounter import *
 from .condition import *
+from .family_member import *
+from .family_condition import *
 from .immunization import *
 from .procedure import *
 from .treatment import *

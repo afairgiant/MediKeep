@@ -82,6 +82,36 @@ class SeverityLevel(Enum):
     CRITICAL = "critical"
 
 
+class FamilyRelationship(Enum):
+    """Family relationship types for family history"""
+    FATHER = "father"
+    MOTHER = "mother"
+    BROTHER = "brother"
+    SISTER = "sister"
+    PATERNAL_GRANDFATHER = "paternal_grandfather"
+    PATERNAL_GRANDMOTHER = "paternal_grandmother"
+    MATERNAL_GRANDFATHER = "maternal_grandfather"
+    MATERNAL_GRANDMOTHER = "maternal_grandmother"
+    UNCLE = "uncle"
+    AUNT = "aunt"
+    COUSIN = "cousin"
+    OTHER = "other"
+
+
+class ConditionType(Enum):
+    """Medical condition types for categorization"""
+    CARDIOVASCULAR = "cardiovascular"
+    DIABETES = "diabetes"
+    CANCER = "cancer"
+    MENTAL_HEALTH = "mental_health"
+    NEUROLOGICAL = "neurological"
+    AUTOIMMUNE = "autoimmune"
+    GENETIC = "genetic"
+    RESPIRATORY = "respiratory"
+    ENDOCRINE = "endocrine"
+    OTHER = "other"
+
+
 # Helper functions to get status lists for validation
 def get_status_values(status_enum):
     """Get list of status values from enum"""
@@ -126,6 +156,16 @@ def get_all_severity_levels():
 def get_all_encounter_priorities():
     """Get all valid encounter priority levels"""
     return get_status_values(EncounterPriority)
+
+
+def get_all_family_relationships():
+    """Get all valid family relationship types"""
+    return get_status_values(FamilyRelationship)
+
+
+def get_all_condition_types():
+    """Get all valid condition types"""
+    return get_status_values(ConditionType)
 
 
 # Status mapping for data migration (old -> new)

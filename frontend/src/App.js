@@ -46,6 +46,7 @@ import Vitals from './pages/medical/Vitals';
 import Practitioners from './pages/medical/Practitioners';
 import Pharmacies from './pages/medical/Pharmacies';
 import EmergencyContacts from './pages/medical/EmergencyContacts';
+import FamilyHistory from './pages/medical/FamilyHistory';
 import PlaceholderPage from './pages/PlaceholderPage';
 import Settings from './pages/Settings';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -81,6 +82,7 @@ const ENTITY_COMPONENT_MAP = {
   [ENTITY_TYPES.PRACTITIONER]: Practitioners,
   [ENTITY_TYPES.PHARMACY]: Pharmacies,
   [ENTITY_TYPES.EMERGENCY_CONTACT]: EmergencyContacts,
+  [ENTITY_TYPES.FAMILY_MEMBER]: FamilyHistory,
 };
 
 // Entity to route path mapping
@@ -97,6 +99,7 @@ const ENTITY_ROUTE_MAP = {
   [ENTITY_TYPES.PRACTITIONER]: '/practitioners',
   [ENTITY_TYPES.PHARMACY]: '/pharmacies',
   [ENTITY_TYPES.EMERGENCY_CONTACT]: '/emergency-contacts',
+  [ENTITY_TYPES.FAMILY_MEMBER]: '/family-history',
 };
 
 // Helper function to generate entity routes

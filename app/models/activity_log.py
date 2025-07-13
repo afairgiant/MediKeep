@@ -144,6 +144,8 @@ class EntityType:
     ENCOUNTER = "encounter"
     EMERGENCY_CONTACT = "emergency_contact"
     PHARMACY = "pharmacy"
+    FAMILY_MEMBER = "family_member"
+    FAMILY_CONDITION = "family_condition"
 
     # System entities
     SYSTEM = "system"
@@ -167,6 +169,8 @@ class EntityType:
             cls.ENCOUNTER,
             cls.EMERGENCY_CONTACT,
             cls.PHARMACY,
+            cls.FAMILY_MEMBER,
+            cls.FAMILY_CONDITION,
             cls.SYSTEM,
             cls.BACKUP,
         ]

@@ -16,6 +16,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.PHARMACY]: 'pharmacies',
   [ENTITY_TYPES.EMERGENCY_CONTACT]: 'emergency-contacts',
   [ENTITY_TYPES.PATIENT]: 'patients',
+  [ENTITY_TYPES.FAMILY_MEMBER]: 'family-members',
 };
 
 // Streamlined API service with proper logging integration
@@ -625,6 +626,49 @@ class ApiService {
   // Generic method for fetching entities with relationship filters
   getRelatedEntities(entityType, filters = {}, signal) {
     return this.getEntitiesWithFilters(entityType, filters, signal);
+  }
+
+  // Family Member methods
+  getFamilyMembers(signal) {
+    return this.getEntities(ENTITY_TYPES.FAMILY_MEMBER, signal);
+  }
+  getPatientFamilyMembers(patientId, signal) {
+    return this.getPatientEntities(ENTITY_TYPES.FAMILY_MEMBER, patientId, signal);
+  }
+  getFamilyMember(familyMemberId, signal) {
+    return this.getEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberId, signal);
+  }
+  getFamilyMembersWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.FAMILY_MEMBER, filters, signal);
+  }
+
+  createFamilyMember(familyMemberData, signal) {
+    return this.createEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberData, signal);
+  }
+  updateFamilyMember(familyMemberId, familyMemberData, signal) {
+    return this.updateEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberId, familyMemberData, signal);
+  }
+  deleteFamilyMember(familyMemberId, signal) {
+    return this.deleteEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberId, signal);
+  }
+
+  // Family Condition methods (nested under family members)
+  getFamilyMemberConditions(familyMemberId, signal) {
+    return this.get(`/family-members/${familyMemberId}/conditions`, { signal });
+  }
+  createFamilyCondition(familyMemberId, conditionData, signal) {
+    return this.post(`/family-members/${familyMemberId}/conditions`, conditionData, { signal });
+  }
+  updateFamilyCondition(familyMemberId, conditionId, conditionData, signal) {
+    return this.put(`/family-members/${familyMemberId}/conditions/${conditionId}`, conditionData, { signal });
+  }
+  deleteFamilyCondition(familyMemberId, conditionId, signal) {
+    return this.delete(`/family-members/${familyMemberId}/conditions/${conditionId}`, { signal });
+  }
+
+  // Search family members
+  searchFamilyMembers(searchTerm, signal) {
+    return this.get(`/family-members/search/?name=${encodeURIComponent(searchTerm)}`, { signal });
   }
 }
 

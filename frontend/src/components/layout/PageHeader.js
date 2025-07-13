@@ -50,33 +50,86 @@ const PageHeader = ({
       title: 'Core',
       items: [
         { name: 'Dashboard', path: '/dashboard', icon: '🏥' },
-        { name: 'Patient Info', path: buildEntityUrl(ENTITY_TYPES.PATIENT, 'me'), icon: '👤' },
+        {
+          name: 'Patient Info',
+          path: buildEntityUrl(ENTITY_TYPES.PATIENT, 'me'),
+          icon: '👤',
+        },
       ],
     },
     {
       title: 'Medical Records',
       items: [
-        { name: 'Medications', path: buildEntityUrl(ENTITY_TYPES.MEDICATION), icon: '💊' },
-        { name: 'Lab Results', path: buildEntityUrl(ENTITY_TYPES.LAB_RESULT), icon: '🧪' },
-        { name: 'Conditions', path: buildEntityUrl(ENTITY_TYPES.CONDITION), icon: '🏥' },
-        { name: 'Allergies', path: buildEntityUrl(ENTITY_TYPES.ALLERGY), icon: '⚠️' },
-        { name: 'Vital Signs', path: buildEntityUrl(ENTITY_TYPES.VITALS), icon: '❤️' },
+        {
+          name: 'Medications',
+          path: buildEntityUrl(ENTITY_TYPES.MEDICATION),
+          icon: '💊',
+        },
+        {
+          name: 'Lab Results',
+          path: buildEntityUrl(ENTITY_TYPES.LAB_RESULT),
+          icon: '🧪',
+        },
+        {
+          name: 'Conditions',
+          path: buildEntityUrl(ENTITY_TYPES.CONDITION),
+          icon: '🏥',
+        },
+        {
+          name: 'Allergies',
+          path: buildEntityUrl(ENTITY_TYPES.ALLERGY),
+          icon: '⚠️',
+        },
+        {
+          name: 'Vital Signs',
+          path: buildEntityUrl(ENTITY_TYPES.VITALS),
+          icon: '❤️',
+        },
       ],
     },
     {
       title: 'Care & Treatment',
       items: [
-        { name: 'Treatments', path: buildEntityUrl(ENTITY_TYPES.TREATMENT), icon: '🩺' },
-        { name: 'Procedures', path: buildEntityUrl(ENTITY_TYPES.PROCEDURE), icon: '⚕️' },
-        { name: 'Immunizations', path: buildEntityUrl(ENTITY_TYPES.IMMUNIZATION), icon: '💉' },
-        { name: 'Visit History', path: buildEntityUrl(ENTITY_TYPES.ENCOUNTER), icon: '📅' },
+        {
+          name: 'Treatments',
+          path: buildEntityUrl(ENTITY_TYPES.TREATMENT),
+          icon: '🩺',
+        },
+        {
+          name: 'Procedures',
+          path: buildEntityUrl(ENTITY_TYPES.PROCEDURE),
+          icon: '⚕️',
+        },
+        {
+          name: 'Immunizations',
+          path: buildEntityUrl(ENTITY_TYPES.IMMUNIZATION),
+          icon: '💉',
+        },
+        {
+          name: 'Visit History',
+          path: buildEntityUrl(ENTITY_TYPES.ENCOUNTER),
+          icon: '📅',
+        },
+        {
+          name: 'Family History',
+          path: buildEntityUrl(ENTITY_TYPES.FAMILY_MEMBER),
+          icon: '👪',
+        },
       ],
     },
     {
       title: 'Providers',
       items: [
-        { name: 'Practitioners', path: buildEntityUrl(ENTITY_TYPES.PRACTITIONER), icon: '👨‍⚕️' },
-        { name: 'Pharmacies', path: buildEntityUrl(ENTITY_TYPES.PHARMACY), icon: '🏪' },
+        {
+          name: 'Practitioners',
+          path: buildEntityUrl(ENTITY_TYPES.PRACTITIONER),
+          icon: '👨‍⚕️',
+        },
+        {
+          name: 'Pharmacies',
+          path: buildEntityUrl(ENTITY_TYPES.PHARMACY),
+          icon: '🏪',
+        },
       ],
     },
     {
@@ -268,31 +321,35 @@ const PageHeader = ({
             {navigationSections
               .filter(section => section.title !== 'Administration') // Exclude admin section
               .map((section, sectionIndex) => (
-              <Menu key={sectionIndex} position="bottom-start" offset={5}>
-                <Menu.Target>
-                  <Button
-                    variant="subtle"
-                    className="nav-dropdown-trigger"
-                    rightSection={<IconChevronDown size={14} />}
-                  >
-                    {section.title}
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Label>{section.title}</Menu.Label>
-                  {section.items.map((item, itemIndex) => (
-                    <Menu.Item
-                      key={itemIndex}
-                      leftSection={<span style={{ fontSize: '14px' }}>{item.icon}</span>}
-                      onClick={() => handleNavigation(item.path)}
-                      className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
+                <Menu key={sectionIndex} position="bottom-start" offset={5}>
+                  <Menu.Target>
+                    <Button
+                      variant="subtle"
+                      className="nav-dropdown-trigger"
+                      rightSection={<IconChevronDown size={14} />}
                     >
-                      {item.name}
-                    </Menu.Item>
-                  ))}
-                </Menu.Dropdown>
-              </Menu>
-            ))}
+                      {section.title}
+                    </Button>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label>{section.title}</Menu.Label>
+                    {section.items.map((item, itemIndex) => (
+                      <Menu.Item
+                        key={itemIndex}
+                        leftSection={
+                          <span style={{ fontSize: '14px' }}>{item.icon}</span>
+                        }
+                        onClick={() => handleNavigation(item.path)}
+                        className={
+                          isCurrentPath(item.path) ? 'nav-item-active' : ''
+                        }
+                      >
+                        {item.name}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Dropdown>
+                </Menu>
+              ))}
           </div>
         </div>
       )}

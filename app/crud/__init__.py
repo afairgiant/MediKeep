@@ -3,6 +3,8 @@ from . import utils
 from .allergy import allergy
 from .condition import condition
 from .encounter import encounter
+from .family_condition import family_condition
+from .family_member import family_member
 from .immunization import immunization
 from .lab_result import lab_result
 from .lab_result_file import lab_result_file
@@ -25,6 +27,8 @@ __all__ = [
     "lab_result_file",
     "encounter",
     "condition",
+    "family_member",
+    "family_condition",
     "immunization",
     "procedure",
     "treatment",

@@ -77,18 +77,19 @@ const PageHeader = ({
     {
       title: 'Medical Records',
       items: [
-        { name: 'Medications', path: '/medications', icon: '💊' },
-        { name: 'Lab Results', path: '/lab-results', icon: '🧪' },
-        { name: 'Conditions', path: '/conditions', icon: '🏥' },
         { name: 'Allergies', path: '/allergies', icon: '⚠️' },
+        { name: 'Conditions', path: '/conditions', icon: '🏥' },
+        { name: 'Lab Results', path: '/lab-results', icon: '🧪' },
+        { name: 'Medications', path: '/medications', icon: '💊' },
+        { name: 'Procedures', path: '/procedures', icon: '⚕️' },
+        { name: 'Treatments', path: '/treatments', icon: '🩺' },
         { name: 'Vital Signs', path: '/vitals', icon: '❤️' },
       ],
     },
     {
-      title: 'Care & Treatment',
+      title: 'Prevention & History',
       items: [
-        { name: 'Treatments', path: '/treatments', icon: '🩺' },
-        { name: 'Procedures', path: '/procedures', icon: '⚕️' },
+        { name: 'Family History', path: '/family-history', icon: '👪' },
         { name: 'Immunizations', path: '/immunizations', icon: '💉' },
         { name: 'Visit History', path: '/visits', icon: '📅' },
       ],
