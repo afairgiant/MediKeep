@@ -137,14 +137,14 @@ export const useMedicalData = config => {
     const initializeData = async () => {
       if (isInitialized.current || !isMounted) return;
 
+      const config = configRef.current;
+
       logger.info('medical_data_init', 'Starting data initialization', {
         entityName: config.entityName,
         requiresPatient: config.requiresPatient,
         loadFilesCounts: config.loadFilesCounts
       });
       isInitialized.current = true;
-
-      const config = configRef.current;
 
       try {
         // Wait for patient data to be available if required

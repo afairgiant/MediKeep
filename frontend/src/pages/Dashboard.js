@@ -47,6 +47,7 @@ import {
   IconSearch,
   IconX,
   IconPhoneCall,
+  IconUsers,
 } from '@tabler/icons-react';
 import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { PageHeader } from '../components';
@@ -285,6 +286,12 @@ const Dashboard = () => {
       icon: IconCalendarEvent,
       color: 'yellow',
       link: '/visits',
+    },
+    {
+      title: 'Family History',
+      icon: IconUsers,
+      color: 'grape',
+      link: '/family-history',
     },
   ];
 
@@ -662,7 +669,7 @@ const Dashboard = () => {
                 <Title order={2} size="h3" mb="md">
                   Prevention & History
                 </Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                   {preventionModules.map((module, index) => (
                     <ModuleCard key={index} module={module} />
                   ))}

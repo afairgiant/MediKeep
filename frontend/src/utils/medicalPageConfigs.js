@@ -982,6 +982,62 @@ export const medicalPageConfigs = {
         'Filter emergency contacts by status, relationship, and priority',
     },
   },
+
+  family_members: {
+    filtering: {
+      searchFields: ['name', 'relationship', 'notes'],
+      categoryField: 'relationship',
+      categoryLabel: 'Relationship',
+      categoryOptions: [
+        { value: 'all', label: 'All Relationships' },
+        { value: 'father', label: 'Father' },
+        { value: 'mother', label: 'Mother' },
+        { value: 'brother', label: 'Brother' },
+        { value: 'sister', label: 'Sister' },
+        { value: 'paternal_grandfather', label: 'Paternal Grandfather' },
+        { value: 'paternal_grandmother', label: 'Paternal Grandmother' },
+        { value: 'maternal_grandfather', label: 'Maternal Grandfather' },
+        { value: 'maternal_grandmother', label: 'Maternal Grandmother' },
+        { value: 'uncle', label: 'Uncle' },
+        { value: 'aunt', label: 'Aunt' },
+        { value: 'cousin', label: 'Cousin' },
+        { value: 'other', label: 'Other' },
+      ],
+      statusField: 'is_deceased',
+      statusOptions: [
+        { value: 'all', label: 'All Members' },
+        { value: 'false', label: 'Living' },
+        { value: 'true', label: 'Deceased' },
+      ],
+      customFilters: {
+        is_deceased: (item, filterValue) => {
+          if (filterValue === 'all') return true;
+          return item.is_deceased === (filterValue === 'true');
+        },
+      },
+    },
+    sorting: {
+      defaultSortBy: 'relationship',
+      defaultSortOrder: 'asc',
+      sortOptions: [
+        { value: 'relationship', label: 'Relationship' },
+        { value: 'name', label: 'Name' },
+        { value: 'birth_year', label: 'Birth Year' },
+      ],
+      sortTypes: {
+        name: 'string',
+        relationship: 'string',
+        birth_year: 'number',
+      },
+    },
+    filterControls: {
+      searchPlaceholder: 'Search family members...',
+      title: 'Filter & Sort Family Members',
+      showCategory: true,
+      showStatus: true,
+      description: 'Filter family members by relationship and status',
+    },
+  },
 };
 
 /**

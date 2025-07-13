@@ -18,7 +18,9 @@ from sqlalchemy.orm import relationship as orm_relationship
 from .enums import (
     AllergyStatus,
     ConditionStatus,
+    ConditionType,
     EncounterPriority,
+    FamilyRelationship,
     LabResultStatus,
     MedicationStatus,
     ProcedureStatus,
@@ -26,7 +28,9 @@ from .enums import (
     TreatmentStatus,
     get_all_allergy_statuses,
     get_all_condition_statuses,
+    get_all_condition_types,
     get_all_encounter_priorities,
+    get_all_family_relationships,
     get_all_lab_result_statuses,
     get_all_medication_statuses,
     get_all_procedure_statuses,
@@ -115,6 +119,9 @@ class Patient(Base):
     emergency_contacts = orm_relationship(
         "EmergencyContact", back_populates="patient", cascade="all, delete-orphan"
     )
+    family_members = orm_relationship(
+        "FamilyMember", back_populates="patient", cascade="all, delete-orphan"
+    )
 
 
 class Practitioner(Base):
@@ -175,7 +182,7 @@ class Medication(Base):
     practitioner = orm_relationship("Practitioner", back_populates="medications")
     pharmacy = orm_relationship("Pharmacy", back_populates="medications")
     allergies = orm_relationship("Allergy", back_populates="medication")
-    
+
     # Many-to-Many relationship with conditions through junction table
     condition_relationships = orm_relationship(
         "ConditionMedication", back_populates="medication", cascade="all, delete-orphan"
@@ -276,7 +283,7 @@ class LabResult(Base):
     files = orm_relationship(
         "LabResultFile", back_populates="lab_result", cascade="all, delete-orphan"
     )
-    
+
     # Many-to-Many relationship with conditions through junction table
     condition_relationships = orm_relationship(
         "LabResultCondition", back_populates="lab_result", cascade="all, delete-orphan"
@@ -306,21 +313,24 @@ class LabResultCondition(Base):
     Junction table for many-to-many relationship between lab results and conditions.
     Allows one lab result to be related to multiple conditions with optional context.
     """
+
     __tablename__ = "lab_result_conditions"
-    
+
     id = Column(Integer, primary_key=True)
     lab_result_id = Column(Integer, ForeignKey("lab_results.id"), nullable=False)
     condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
-    
+
     # Optional context about how this lab result relates to this condition
-    relevance_note = Column(String, nullable=True)  # e.g., "Elevated glucose indicates poor control"
-    
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Elevated glucose indicates poor control"
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
-    
+
     # Table Relationships
     lab_result = orm_relationship("LabResult", back_populates="condition_relationships")
     condition = orm_relationship("Condition", back_populates="lab_result_relationships")
@@ -331,24 +341,29 @@ class ConditionMedication(Base):
     Junction table for many-to-many relationship between conditions and medications.
     Allows one condition to be related to multiple medications with optional context.
     """
+
     __tablename__ = "condition_medications"
-    
+
     id = Column(Integer, primary_key=True)
     condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
     medication_id = Column(Integer, ForeignKey("medications.id"), nullable=False)
-    
+
     # Optional context about how this medication relates to this condition
-    relevance_note = Column(String, nullable=True)  # e.g., "Primary treatment for hypertension"
-    
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Primary treatment for hypertension"
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
-    
+
     # Table Relationships
     condition = orm_relationship("Condition", back_populates="medication_relationships")
-    medication = orm_relationship("Medication", back_populates="condition_relationships")
+    medication = orm_relationship(
+        "Medication", back_populates="condition_relationships"
+    )
 
 
 class Condition(Base):
@@ -389,12 +404,12 @@ class Condition(Base):
     treatments = orm_relationship("Treatment", back_populates="condition")
     # encounters relationship removed - use queries instead due to potential high volume
     procedures = orm_relationship("Procedure", back_populates="condition")
-    
+
     # Many-to-Many relationship with lab results through junction table
     lab_result_relationships = orm_relationship(
         "LabResultCondition", back_populates="condition", cascade="all, delete-orphan"
     )
-    
+
     # Many-to-Many relationship with medications through junction table
     medication_relationships = orm_relationship(
         "ConditionMedication", back_populates="condition", cascade="all, delete-orphan"
@@ -699,3 +714,68 @@ class BackupRecord(Base):
     # Optional metadata
     compression_used = Column(Boolean, default=False, nullable=False)
     checksum = Column(String, nullable=True)  # File checksum for integrity verification
+
+
+class FamilyMember(Base):
+    """
+    Represents a family member for tracking family medical history.
+    """
+
+    __tablename__ = "family_members"
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+
+    # Basic Information
+    name = Column(String, nullable=False)
+    relationship = Column(String, nullable=False)  # Use FamilyRelationship enum
+    gender = Column(String, nullable=True)
+    birth_year = Column(Integer, nullable=True)
+    death_year = Column(Integer, nullable=True)
+    is_deceased = Column(Boolean, default=False, nullable=False)
+
+    # Additional information
+    notes = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    patient = orm_relationship("Patient", back_populates="family_members")
+    family_conditions = orm_relationship(
+        "FamilyCondition", back_populates="family_member", cascade="all, delete-orphan"
+    )
+
+
+class FamilyCondition(Base):
+    """
+    Represents a medical condition for a family member.
+    """
+
+    __tablename__ = "family_conditions"
+
+    id = Column(Integer, primary_key=True)
+    family_member_id = Column(Integer, ForeignKey("family_members.id"), nullable=False)
+
+    # Condition Information
+    condition_name = Column(String, nullable=False)
+    diagnosis_age = Column(Integer, nullable=True)  # Age when diagnosed
+    severity = Column(String, nullable=True)  # Use SeverityLevel enum
+    status = Column(String, nullable=True)  # active, resolved, chronic
+    condition_type = Column(String, nullable=True)  # Use ConditionType enum
+    notes = Column(Text, nullable=True)
+
+    # Medical Codes (optional)
+    icd10_code = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    family_member = orm_relationship("FamilyMember", back_populates="family_conditions")

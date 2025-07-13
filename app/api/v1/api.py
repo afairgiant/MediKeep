@@ -8,6 +8,7 @@ from app.api.v1.endpoints import (
     emergency_contact,
     encounter,
     export,
+    family_member,
     frontend_logs,
     immunization,
     lab_result,
@@ -42,6 +43,9 @@ api_router.include_router(encounter.router, prefix="/encounters", tags=["encount
 api_router.include_router(condition.router, prefix="/conditions", tags=["conditions"])
 api_router.include_router(
     emergency_contact.router, prefix="/emergency-contacts", tags=["emergency-contacts"]
+)
+api_router.include_router(
+    family_member.router, prefix="/family-members", tags=["family-members"]
 )
 api_router.include_router(
     immunization.router, prefix="/immunizations", tags=["immunizations"]

@@ -57,7 +57,6 @@ export const allergyFormFields = [
     description: 'When this allergy was first discovered',
     gridColumn: 6,
     maxDate: () => new Date(), // Can't be in the future
-
   },
   {
     name: 'medication_id',
@@ -132,7 +131,6 @@ export const conditionFormFields = [
     gridColumn: 6,
 
     maxDate: () => new Date(),
-
   },
   {
     name: 'end_date',
@@ -142,7 +140,6 @@ export const conditionFormFields = [
     description: 'When this condition was resolved (optional)',
     gridColumn: 6,
     maxDate: () => new Date(),
-
   },
   {
     name: 'icd10_code',
@@ -235,8 +232,10 @@ export const medicationFormFields = [
     name: 'indication',
     type: 'text',
     label: 'Indication',
-    placeholder: 'e.g., High blood pressure, As needed for pain, Diabetes management',
-    description: 'What is this medication for? Describe the reason or condition being treated',
+    placeholder:
+      'e.g., High blood pressure, As needed for pain, Diabetes management',
+    description:
+      'What is this medication for? Describe the reason or condition being treated',
     gridColumn: 12,
   },
   {
@@ -390,7 +389,8 @@ export const labResultFormFields = [
     name: 'notes',
     type: 'textarea',
     label: 'Additional Notes',
-    placeholder: 'Any additional information about the test, special instructions, or observations...',
+    placeholder:
+      'Any additional information about the test, special instructions, or observations...',
     description: 'Clinical notes or special instructions',
     gridColumn: 12,
     minRows: 3,
@@ -622,7 +622,8 @@ export const procedureFormFields = [
     type: 'textarea',
     label: 'Complications',
     placeholder: 'Any complications that occurred during the procedure...',
-    description: 'Document any complications, adverse events, or unexpected outcomes',
+    description:
+      'Document any complications, adverse events, or unexpected outcomes',
     gridColumn: 12,
     minRows: 2,
     maxRows: 4,
@@ -672,7 +673,7 @@ export const procedureFormFields = [
   },
 ];
 
-// Practitioner Form Field Configuration  
+// Practitioner Form Field Configuration
 export const practitionerFormFields = [
   {
     name: 'name',
@@ -725,7 +726,7 @@ export const practitionerFormFields = [
     name: 'rating',
     type: 'rating',
     label: 'Rating',
-    description: 'Rate this practitioner\'s overall care quality',
+    description: "Rate this practitioner's overall care quality",
     gridColumn: 12,
   },
 ];
@@ -802,7 +803,8 @@ export const emergencyContactFormFields = [
     name: 'notes',
     type: 'textarea',
     label: 'Notes',
-    placeholder: 'Additional information (e.g., \'Available weekdays only\', \'Speaks Spanish\')',
+    placeholder:
+      "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')",
     description: 'Any additional notes about this contact',
     gridColumn: 12,
     minRows: 3,
@@ -830,7 +832,6 @@ export const visitFormFields = [
     description: 'When the visit occurred',
     gridColumn: 6,
     maxDate: () => new Date(),
-
   },
   {
     name: 'practitioner_id',
@@ -1090,10 +1091,22 @@ export const treatmentFormFields = [
       { value: 'Physical Therapy', label: 'Physical Therapy - Rehabilitation' },
       { value: 'Chemotherapy', label: 'Chemotherapy - Cancer treatment' },
       { value: 'Radiation', label: 'Radiation - Radiation therapy' },
-      { value: 'Immunotherapy', label: 'Immunotherapy - Immune system treatment' },
-      { value: 'Occupational Therapy', label: 'Occupational Therapy - Functional improvement' },
-      { value: 'Speech Therapy', label: 'Speech Therapy - Communication improvement' },
-      { value: 'Behavioral Therapy', label: 'Behavioral Therapy - Mental health treatment' },
+      {
+        value: 'Immunotherapy',
+        label: 'Immunotherapy - Immune system treatment',
+      },
+      {
+        value: 'Occupational Therapy',
+        label: 'Occupational Therapy - Functional improvement',
+      },
+      {
+        value: 'Speech Therapy',
+        label: 'Speech Therapy - Communication improvement',
+      },
+      {
+        value: 'Behavioral Therapy',
+        label: 'Behavioral Therapy - Mental health treatment',
+      },
       { value: 'Dialysis', label: 'Dialysis - Kidney function support' },
       { value: 'Other', label: 'Other - Specify in description' },
     ],
@@ -1131,7 +1144,10 @@ export const treatmentFormFields = [
       { value: 'planned', label: 'Planned - Treatment scheduled for future' },
       { value: 'active', label: 'Active - Currently undergoing treatment' },
       { value: 'on-hold', label: 'On Hold - Temporarily paused' },
-      { value: 'completed', label: 'Completed - Treatment finished successfully' },
+      {
+        value: 'completed',
+        label: 'Completed - Treatment finished successfully',
+      },
       { value: 'cancelled', label: 'Cancelled - Treatment discontinued' },
     ],
   },
@@ -1204,8 +1220,198 @@ export const treatmentFormFields = [
   },
 ];
 
+// Family Member Form Field Configuration
+export const familyMemberFormFields = [
+  {
+    name: 'name',
+    type: 'text',
+    label: 'Full Name',
+    placeholder: 'Enter family member name',
+    required: true,
+    description: 'Full name of the family member',
+    gridColumn: 6,
+  },
+  {
+    name: 'relationship',
+    type: 'select',
+    label: 'Relationship',
+    placeholder: 'Select relationship',
+    required: true,
+    description: 'Relationship to you',
+    gridColumn: 6,
+    searchable: true,
+    options: [
+      { value: 'father', label: 'Father' },
+      { value: 'mother', label: 'Mother' },
+      { value: 'brother', label: 'Brother' },
+      { value: 'sister', label: 'Sister' },
+      { value: 'paternal_grandfather', label: 'Paternal Grandfather' },
+      { value: 'paternal_grandmother', label: 'Paternal Grandmother' },
+      { value: 'maternal_grandfather', label: 'Maternal Grandfather' },
+      { value: 'maternal_grandmother', label: 'Maternal Grandmother' },
+      { value: 'uncle', label: 'Uncle' },
+      { value: 'aunt', label: 'Aunt' },
+      { value: 'cousin', label: 'Cousin' },
+      { value: 'other', label: 'Other' },
+    ],
+  },
+  {
+    name: 'gender',
+    type: 'select',
+    label: 'Gender',
+    placeholder: 'Select gender',
+    description: 'Gender of family member',
+    gridColumn: 4,
+    clearable: true,
+    options: [
+      { value: 'male', label: 'Male' },
+      { value: 'female', label: 'Female' },
+      { value: 'other', label: 'Other' },
+    ],
+  },
+  {
+    name: 'birth_year',
+    type: 'number',
+    label: 'Birth Year',
+    placeholder: 'e.g., 1965',
+    description: 'Year family member was born',
+    gridColumn: 4,
+    min: 1900,
+    max: new Date().getFullYear(),
+  },
+  {
+    name: 'is_deceased',
+    type: 'checkbox',
+    label: 'Deceased',
+    description: 'Check if family member is deceased',
+    gridColumn: 4,
+  },
+  {
+    name: 'death_year',
+    type: 'number',
+    label: 'Death Year',
+    placeholder: 'e.g., 2020',
+    description: 'Year family member passed away',
+    gridColumn: 6,
+    min: 1900,
+    max: new Date().getFullYear(),
+  },
+  {
+    name: 'notes',
+    type: 'textarea',
+    label: 'Notes',
+    placeholder: 'Additional information about family member...',
+    description: 'Any additional notes or important information',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 6,
+  },
+];
+
+// Family Condition Form Field Configuration
+export const familyConditionFormFields = [
+  {
+    name: 'condition_name',
+    type: 'text',
+    label: 'Condition Name',
+    placeholder: 'e.g., Diabetes, Heart Disease, Cancer',
+    required: true,
+    description: 'Name of the medical condition',
+    gridColumn: 6,
+  },
+  {
+    name: 'condition_type',
+    type: 'select',
+    label: 'Condition Type',
+    placeholder: 'Select condition type',
+    description: 'Category of medical condition',
+    gridColumn: 6,
+    searchable: true,
+    clearable: true,
+    options: [
+      {
+        value: 'cardiovascular',
+        label: 'Cardiovascular - Heart & blood vessels',
+      },
+      { value: 'diabetes', label: 'Diabetes - Blood sugar disorders' },
+      { value: 'cancer', label: 'Cancer - Malignant conditions' },
+      {
+        value: 'mental_health',
+        label: 'Mental Health - Psychological conditions',
+      },
+      { value: 'neurological', label: 'Neurological - Brain & nervous system' },
+      { value: 'autoimmune', label: 'Autoimmune - Immune system disorders' },
+      { value: 'genetic', label: 'Genetic - Hereditary conditions' },
+      {
+        value: 'respiratory',
+        label: 'Respiratory - Lung & breathing conditions',
+      },
+      { value: 'endocrine', label: 'Endocrine - Hormone disorders' },
+      { value: 'other', label: 'Other - Specify in notes' },
+    ],
+  },
+  {
+    name: 'severity',
+    type: 'select',
+    label: 'Severity',
+    placeholder: 'Select severity level',
+    description: 'How severe the condition was/is',
+    gridColumn: 4,
+    clearable: true,
+    options: [
+      { value: 'mild', label: '💛 Mild - Minor impact' },
+      { value: 'moderate', label: '⚡ Moderate - Noticeable impact' },
+      { value: 'severe', label: '⚠️ Severe - Significant impact' },
+      { value: 'critical', label: '🚨 Critical - Life-threatening' },
+    ],
+  },
+  {
+    name: 'diagnosis_age',
+    type: 'number',
+    label: 'Diagnosis Age',
+    placeholder: 'e.g., 45',
+    description: 'Age at diagnosis',
+    gridColumn: 4,
+    min: 0,
+    max: 120,
+  },
+  {
+    name: 'status',
+    type: 'select',
+    label: 'Status',
+    placeholder: 'Select status',
+    description: 'Current status of the condition',
+    gridColumn: 4,
+    clearable: true,
+    options: [
+      { value: 'active', label: 'Active - Ongoing condition' },
+      { value: 'resolved', label: 'Resolved - No longer present' },
+      { value: 'chronic', label: 'Chronic - Long-term condition' },
+    ],
+  },
+  {
+    name: 'icd10_code',
+    type: 'text',
+    label: 'ICD-10 Code',
+    placeholder: 'e.g., E11.9',
+    description: 'Medical diagnosis code (if known)',
+    gridColumn: 6,
+    maxLength: 10,
+  },
+  {
+    name: 'notes',
+    type: 'textarea',
+    label: 'Notes',
+    placeholder: 'Additional details about the condition...',
+    description: 'Treatment details, outcomes, or other relevant information',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 6,
+  },
+];
+
 // Utility function to get field configuration by form type
-export const getFormFields = (formType) => {
+export const getFormFields = formType => {
   const fieldConfigs = {
     allergy: allergyFormFields,
     condition: conditionFormFields,
@@ -1218,7 +1424,9 @@ export const getFormFields = (formType) => {
     visit: visitFormFields,
     pharmacy: pharmacyFormFields,
     treatment: treatmentFormFields,
+    familyMember: familyMemberFormFields,
+    familyCondition: familyConditionFormFields,
   };
-  
+
   return fieldConfigs[formType] || [];
 };
