@@ -112,7 +112,7 @@ const PageHeader = ({
         },
         {
           name: 'Family History',
-          path: buildEntityUrl(ENTITY_TYPES.FAMILY_HISTORY),
+          path: buildEntityUrl(ENTITY_TYPES.FAMILY_MEMBER),
           icon: '👪',
         },
       ],
