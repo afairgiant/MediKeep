@@ -115,8 +115,8 @@ const Login = () => {
 
         if (loginResult.success) {
           setShowCreateUser(false);
-          const from = location.state?.from?.pathname || '/dashboard';
-          navigate(from, { replace: true });
+          // Redirect new users to patient info page in edit mode
+          navigate('/patients/me?edit=true', { replace: true });
         } else {
           toast.error(
             'Account created but login failed. Please try logging in manually.'

@@ -49,7 +49,6 @@ import {
   IconPhoneCall,
   IconUsers,
 } from '@tabler/icons-react';
-import ProfileCompletionModal from '../components/auth/ProfileCompletionModal';
 import { PageHeader } from '../components';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
@@ -82,7 +81,6 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showWelcomeBox, setShowWelcomeBox] = useState(() => {
     // Check if user has dismissed the welcome box for this user
@@ -103,7 +101,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (authUser && user) {
-      checkProfileCompletionModal();
       // Reset welcome box for new user login (different user)
       const currentUserId = authUser.id;
       const dismissed = localStorage.getItem(
@@ -112,19 +109,6 @@ const Dashboard = () => {
       setShowWelcomeBox(dismissed !== 'true');
     }
   }, [authUser, user]);
-
-  const checkProfileCompletionModal = () => {
-    if (
-      authUser &&
-      user &&
-      checkIsFirstLogin() &&
-      shouldShowProfilePrompts(user)
-    ) {
-      setTimeout(() => {
-        setShowProfileModal(true);
-      }, 1000);
-    }
-  };
 
   const checkAdminStatus = () => {
     try {
@@ -152,7 +136,22 @@ const Dashboard = () => {
     try {
       setActivityLoading(true);
       const activity = await apiService.getRecentActivity();
-      setRecentActivity(activity);
+      
+      // Filter out erroneous "deleted" patient information activities
+      // This is a temporary fix for a backend issue where patient updates are logged as deletions
+      const filteredActivity = activity.filter(item => {
+        const isPatientModel = item.model_name?.toLowerCase().includes('patient');
+        const isDeletedAction = item.action?.toLowerCase() === 'deleted';
+        
+        // Exclude deleted patient information activities (backend logging error)
+        if (isPatientModel && isDeletedAction) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      setRecentActivity(filteredActivity);
     } catch (error) {
       frontendLogger.logError('Error fetching activity', {
         error: error.message,
@@ -739,12 +738,6 @@ const Dashboard = () => {
         </SimpleGrid>
       </Container>
 
-      {/* Profile Completion Modal */}
-      <ProfileCompletionModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        onComplete={() => setShowProfileModal(false)}
-      />
     </div>
   );
 };

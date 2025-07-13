@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
@@ -11,6 +12,9 @@ import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   // Using global state for patient and practitioners data
   const {
     patient: patientData,
@@ -39,6 +43,18 @@ const PatientInfo = () => {
   
   // Determine if this is a new user based on patient existence
   const isNewUser = !patientExists;
+
+  // Check for edit mode from URL parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get('edit') === 'true') {
+      setIsEditing(true);
+      // Remove the edit parameter from URL to clean it up
+      urlParams.delete('edit');
+      const newSearch = urlParams.toString();
+      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, { replace: true });
+    }
+  }, [location.search, navigate, location.pathname]);
 
   // Initialize form data when patient data becomes available or changes
   useEffect(() => {
@@ -156,13 +172,11 @@ const PatientInfo = () => {
         updatedData = await apiService.createCurrentPatient(apiData);
         setPatientExists(true);
         setIsCreating(false);
-        setIsNewUser(false); // No longer a new user
         setSuccessMessage('Patient information created successfully!');
       } else {
         // Use the correct API method for updating current patient
         updatedData = await apiService.updateCurrentPatient(apiData);
         setIsEditing(false);
-        setIsNewUser(false); // No longer a new user
         setSuccessMessage('Patient information updated successfully!');
       }
 
