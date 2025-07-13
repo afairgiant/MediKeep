@@ -1037,6 +1037,94 @@ export const medicalPageConfigs = {
       showStatus: true,
       description: 'Filter family members by relationship and status',
     },
+    // Table configuration for flattened conditions view
+    table: {
+      columns: [
+        {
+          key: 'familyMemberName',
+          label: 'Family Member',
+          sortable: true,
+          width: '120px',
+        },
+        {
+          key: 'relationship',
+          label: 'Relationship',
+          sortable: true,
+          width: '100px',
+          render: (value) => value?.replace('_', ' ') || '-',
+        },
+        {
+          key: 'condition_name',
+          label: 'Condition',
+          sortable: true,
+          width: '150px',
+          render: (value) => value || 'No conditions',
+          style: (row) => ({
+            fontStyle: row.condition_name ? 'normal' : 'italic',
+            color: row.condition_name ? 'inherit' : 'var(--mantine-color-dimmed)',
+          }),
+        },
+        {
+          key: 'condition_type',
+          label: 'Type',
+          sortable: true,
+          width: '120px',
+          render: (value) => value?.replace('_', ' ') || '-',
+        },
+        {
+          key: 'severity',
+          label: 'Severity',
+          sortable: true,
+          width: '100px',
+          render: (value, row) => {
+            if (!value) return '-';
+            const colors = {
+              mild: 'green',
+              moderate: 'yellow', 
+              severe: 'red',
+              critical: 'red'
+            };
+            return {
+              type: 'badge',
+              color: colors[value] || 'gray',
+              text: value,
+            };
+          },
+        },
+        {
+          key: 'diagnosis_age',
+          label: 'Diagnosis Age',
+          sortable: true,
+          width: '100px',
+          render: (value) => value ? `${value} years` : '-',
+        },
+        {
+          key: 'status',
+          label: 'Status',
+          sortable: true,
+          width: '100px',
+          render: (value) => {
+            if (!value) return '-';
+            const colors = {
+              active: 'blue',
+              resolved: 'green',
+              chronic: 'orange'
+            };
+            return {
+              type: 'badge',
+              variant: 'light',
+              color: colors[value] || 'gray',
+              text: value,
+            };
+          },
+        },
+      ],
+      actions: {
+        view: (row) => row.familyMemberId,
+        edit: (row) => row.conditionId ? { familyMember: row, condition: row } : null,
+        delete: (row) => row.conditionId ? { familyMemberId: row.familyMemberId, conditionId: row.conditionId } : null,
+      },
+    },
   },
 };
 

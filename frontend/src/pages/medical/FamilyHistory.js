@@ -508,6 +508,64 @@ const FamilyHistory = () => {
       .filter(group => group.members.length > 0);
   }, [dataManagement.data]);
 
+  // Flatten family members and conditions for table view
+  const flattenedConditions = React.useMemo(() => {
+    const conditions = [];
+    
+    dataManagement.data.forEach(member => {
+      if (member.family_conditions && member.family_conditions.length > 0) {
+        // Add each condition as a separate row
+        member.family_conditions.forEach(condition => {
+          conditions.push({
+            id: `${member.id}-${condition.id}`, // Unique ID for table row
+            familyMemberId: member.id,
+            familyMemberName: member.name,
+            relationship: member.relationship,
+            gender: member.gender,
+            birth_year: member.birth_year,
+            death_year: member.death_year,
+            is_deceased: member.is_deceased,
+            // Condition data
+            conditionId: condition.id,
+            condition_name: condition.condition_name,
+            condition_type: condition.condition_type,
+            severity: condition.severity,
+            diagnosis_age: condition.diagnosis_age,
+            status: condition.status,
+            notes: condition.notes,
+            // For compatibility with existing table system
+            created_at: condition.created_at,
+            updated_at: condition.updated_at,
+          });
+        });
+      } else {
+        // Add family member with no conditions (empty row)
+        conditions.push({
+          id: `${member.id}-no-conditions`,
+          familyMemberId: member.id,
+          familyMemberName: member.name,
+          relationship: member.relationship,
+          gender: member.gender,
+          birth_year: member.birth_year,
+          death_year: member.death_year,
+          is_deceased: member.is_deceased,
+          // No condition data
+          conditionId: null,
+          condition_name: null,
+          condition_type: null,
+          severity: null,
+          diagnosis_age: null,
+          status: null,
+          notes: null,
+          created_at: member.created_at,
+          updated_at: member.updated_at,
+        });
+      }
+    });
+
+    return conditions;
+  }, [dataManagement.data]);
+
   const toggleExpanded = memberId => {
     const newExpanded = new Set(expandedMembers);
     if (newExpanded.has(memberId)) {
@@ -591,24 +649,31 @@ const FamilyHistory = () => {
       )}
 
       {/* Header Controls */}
-      <Group position="apart" mb="xl">
-        <div>
-          <Title order={3}>Family Medical History</Title>
-          <Text size="sm" color="dimmed">
-            {dataManagement.data.length} family member
-            {dataManagement.data.length !== 1 ? 's' : ''} recorded
-          </Text>
-        </div>
-        <Group>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <Title order={3}>Family Medical History</Title>
+        <Text size="sm" color="dimmed" mb="lg">
+          {viewMode === 'table' 
+            ? `${flattenedConditions.length} condition${flattenedConditions.length !== 1 ? 's' : ''} across ${dataManagement.data.length} family member${dataManagement.data.length !== 1 ? 's' : ''}`
+            : `${dataManagement.data.length} family member${dataManagement.data.length !== 1 ? 's' : ''} recorded`
+          }
+        </Text>
+
+        <Group justify="space-between" mb="lg">
           <Button
             leftIcon={<IconUserPlus size={16} />}
             onClick={handleAddMember}
-            variant="filled"
+            size="md"
           >
             Add Family Member
           </Button>
+
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
         </Group>
-      </Group>
+      </div>
 
       {/* Filters */}
       <MantineFilters
@@ -646,6 +711,55 @@ const FamilyHistory = () => {
             Add Your First Family Member
           </Button>
         </Card>
+      ) : viewMode === 'table' ? (
+        <MedicalTable
+          data={flattenedConditions}
+          columns={[
+            { header: 'Family Member', accessor: 'familyMemberName' },
+            { header: 'Relationship', accessor: 'relationship' },
+            { header: 'Condition', accessor: 'condition_name' },
+            { header: 'Type', accessor: 'condition_type' },
+            { header: 'Severity', accessor: 'severity' },
+            { header: 'Diagnosis Age', accessor: 'diagnosis_age' },
+            { header: 'Status', accessor: 'status' },
+          ]}
+          patientData={currentPatient}
+          tableName="Family History"
+          onView={(row) => handleViewFamilyMember({ id: row.familyMemberId })}
+          onEdit={(row) => {
+            if (row.conditionId) {
+              // Edit condition
+              const familyMember = familyMembers.find(m => m.id === row.familyMemberId);
+              const condition = familyMember?.family_conditions?.find(c => c.id === row.conditionId);
+              if (familyMember && condition) {
+                handleEditCondition(familyMember, condition);
+              }
+            } else {
+              // Edit family member (no condition)
+              const familyMember = familyMembers.find(m => m.id === row.familyMemberId);
+              if (familyMember) {
+                handleEditMember(familyMember);
+              }
+            }
+          }}
+          onDelete={(row) => {
+            if (row.conditionId) {
+              // Delete condition
+              handleDeleteCondition(row.familyMemberId, row.conditionId);
+            } else {
+              // Delete family member
+              handleDeleteMember(row.familyMemberId);
+            }
+          }}
+          formatters={{
+            relationship: (value) => value?.replace('_', ' ') || '-',
+            condition_name: (value) => value || 'No conditions',
+            condition_type: (value) => value?.replace('_', ' ') || '-',
+            severity: (value) => value || '-',
+            diagnosis_age: (value) => value ? `${value} years` : '-',
+            status: (value) => value || '-',
+          }}
+        />
       ) : (
         <Stack spacing="xl">
           {groupedMembers.map(group => (
