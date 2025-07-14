@@ -70,7 +70,10 @@ const MantinePatientForm = ({
           <DateInput
             label="Birth Date"
             placeholder="Select birth date"
-            value={formData.birth_date ? new Date(formData.birth_date) : null}
+            value={formData.birth_date ? (() => {
+              const [year, month, day] = formData.birth_date.split('-').map(Number);
+              return new Date(year, month - 1, day); // month is 0-indexed
+            })() : null}
             onChange={handleDateChange('birth_date')}
             firstDayOfWeek={0}
             required

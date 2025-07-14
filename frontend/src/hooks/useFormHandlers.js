@@ -43,11 +43,24 @@ export function useFormHandlers(onInputChange) {
       
       if (date) {
         // Check if it's already a Date object, if not try to create one
-        const dateObj = date instanceof Date ? date : new Date(date);
+        let dateObj;
+        if (date instanceof Date) {
+          dateObj = date;
+        } else if (typeof date === 'string') {
+          // Handle string dates by parsing manually to avoid timezone issues
+          const [year, month, day] = date.split('-').map(Number);
+          dateObj = new Date(year, month - 1, day); // month is 0-indexed
+        } else {
+          dateObj = new Date(date);
+        }
         
         // Verify we have a valid date before formatting
         if (!isNaN(dateObj.getTime())) {
-          formattedDate = dateObj.toISOString().split('T')[0];
+          // Use local date formatting to avoid timezone issues with toISOString()
+          const year = dateObj.getFullYear();
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          formattedDate = `${year}-${month}-${day}`;
         }
       }
       
