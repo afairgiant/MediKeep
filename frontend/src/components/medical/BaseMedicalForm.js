@@ -234,7 +234,10 @@ const BaseMedicalForm = ({
         return (
           <DateInput
             {...baseProps}
-            value={formData[name] ? new Date(formData[name]) : null}
+            value={formData[name] ? (() => {
+              const [year, month, day] = formData[name].split('-').map(Number);
+              return new Date(year, month - 1, day); // month is 0-indexed
+            })() : null}
             onChange={handleDateChange(name)}
             firstDayOfWeek={0}
             clearable

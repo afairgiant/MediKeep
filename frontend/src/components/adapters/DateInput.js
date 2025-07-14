@@ -33,7 +33,14 @@ export const DateInput = ({
 
   // Handle the change event to match form expectations
   const handleChange = date => {
-    const formattedDate = date ? date.toISOString().split('T')[0] : '';
+    let formattedDate = '';
+    if (date) {
+      // Use local date formatting to avoid timezone issues with toISOString()
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      formattedDate = `${year}-${month}-${day}`;
+    }
     const syntheticEvent = {
       target: {
         name: name,
@@ -44,7 +51,8 @@ export const DateInput = ({
   };
 
   // Convert string value to Date object for Mantine
-  const dateValue = value ? new Date(value) : null;
+  // For date-only strings like "1990-01-15", create Date in local timezone to avoid off-by-1 errors
+  const dateValue = value ? new Date(value + 'T00:00:00') : null;
 
   return (
     <MantineDateInput

@@ -13,6 +13,20 @@ import { timezoneService } from '../services/timezoneService';
  * @returns {string} - Formatted date
  */
 export const formatDate = (utcDate, format = DATE_FORMATS.DISPLAY) => {
+  if (!utcDate) return 'N/A';
+  
+  // For date-only strings (like birth dates), parse them as local dates to avoid timezone issues
+  if (typeof utcDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(utcDate.trim())) {
+    const [year, month, day] = utcDate.trim().split('-').map(Number);
+    const localDate = new Date(year, month - 1, day); // month is 0-indexed
+    return localDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    });
+  }
+  
+  // For datetime strings, use the timezone service
   return timezoneService.formatDateTime(utcDate, { dateOnly: true });
 };
 
