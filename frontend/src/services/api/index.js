@@ -223,7 +223,7 @@ class ApiService {
   }
 
   changePassword(passwordData, signal) {
-    return this.post('/auth/change-password/', passwordData, { signal });
+    return this.post('/auth/change-password', passwordData, { signal });
   }
 
   // Patient methods
