@@ -17,7 +17,8 @@ const Login = () => {
     username: '',
     password: '',
     email: '',
-    fullName: '',
+    firstName: '',
+    lastName: '',
   });
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [createUserError, setCreateUserError] = useState('');
@@ -73,7 +74,25 @@ const Login = () => {
     setIsCreatingUser(true);
     setCreateUserError('');
 
-    // Client-side validation - Updated to 6 characters minimum
+    // Client-side validation
+    if (createUserData.firstName.trim().length < 1) {
+      setCreateUserError('Please enter your first name');
+      setIsCreatingUser(false);
+      return;
+    }
+
+    if (createUserData.lastName.trim().length < 1) {
+      setCreateUserError('Please enter your last name');
+      setIsCreatingUser(false);
+      return;
+    }
+
+    if (createUserData.username.length < 3) {
+      setCreateUserError('Username must be at least 3 characters long');
+      setIsCreatingUser(false);
+      return;
+    }
+
     if (createUserData.password.length < 6) {
       setCreateUserError('Password must be at least 6 characters long');
       setIsCreatingUser(false);
@@ -89,19 +108,15 @@ const Login = () => {
       setIsCreatingUser(false);
       return;
     }
-
-    if (createUserData.username.length < 3) {
-      setCreateUserError('Username must be at least 3 characters long');
-      setIsCreatingUser(false);
-      return;
-    }
     try {
       // Create the user using the simple auth service
       const registerResult = await authService.register({
         username: createUserData.username,
         password: createUserData.password,
         email: createUserData.email,
-        full_name: createUserData.fullName,
+        full_name: `${createUserData.firstName} ${createUserData.lastName}`,
+        first_name: createUserData.firstName,
+        last_name: createUserData.lastName,
       });
 
       if (registerResult.success) {
@@ -186,13 +201,21 @@ const Login = () => {
       username: '',
       password: '',
       email: '',
-      fullName: '',
+      firstName: '',
+      lastName: '',
     });
   };
 
   const closeCreateUserModal = () => {
     setShowCreateUser(false);
     setCreateUserError('');
+    setCreateUserData({
+      username: '',
+      password: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+    });
   };
   return (
     <div className="login-container">
@@ -319,16 +342,29 @@ const Login = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="create-fullname">Full Name *</label>
+                <label htmlFor="create-firstname">First Name *</label>
                 <input
                   type="text"
-                  id="create-fullname"
-                  name="fullName"
-                  value={createUserData.fullName}
+                  id="create-firstname"
+                  name="firstName"
+                  value={createUserData.firstName}
                   onChange={handleCreateUserChange}
                   required
                   disabled={isCreatingUser}
-                  placeholder="Enter full name"
+                  placeholder="Enter first name"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="create-lastname">Last Name *</label>
+                <input
+                  type="text"
+                  id="create-lastname"
+                  name="lastName"
+                  value={createUserData.lastName}
+                  onChange={handleCreateUserChange}
+                  required
+                  disabled={isCreatingUser}
+                  placeholder="Enter last name"
                 />
               </div>
               <div className="form-actions">

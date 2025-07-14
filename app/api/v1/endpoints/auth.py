@@ -52,16 +52,57 @@ def register(
     # Check if username already exists
     existing_user = user.get_by_username(db, username=user_in.username)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"An account with the username '{user_in.username}' already exists. Please choose a different username."
+        )
+    
+    # Check if email already exists
+    existing_email = user.get_by_email(db, email=user_in.email)
+    if existing_email:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in."
+        )
 
     # Create new user
-    new_user = user.create(db, obj_in=user_in)
+    try:
+        new_user = user.create(db, obj_in=user_in)
+    except Exception as e:
+        # Handle any database constraint violations or other creation errors
+        error_msg = str(e).lower()
+        if "duplicate" in error_msg or "unique" in error_msg:
+            if "username" in error_msg:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"An account with the username '{user_in.username}' already exists. Please choose a different username."
+                )
+            elif "email" in error_msg:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in."
+                )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="An account with this information already exists. Please check your username and email."
+                )
+        else:
+            # For other database errors, provide a generic message
+            logger.error(f"Database error during user creation: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Unable to create account at this time. Please try again later."
+            )
 
     # Create a basic patient record for the new user
-    # Use placeholder values that can be updated later by the user
+    # Use provided first/last names if available, otherwise use placeholders
+    first_name = getattr(user_in, 'first_name', None) or "First Name"
+    last_name = getattr(user_in, 'last_name', None) or "Last Name"
+    
     default_patient_data = PatientCreate(
-        first_name="First Name",
-        last_name="Last Name",
+        first_name=first_name,
+        last_name=last_name,
         birth_date=date(1990, 1, 1),  # Default birth date
         gender="OTHER",  # Neutral default
         address="Please update your address",  # Placeholder address

@@ -97,6 +97,8 @@ class UserCreate(UserBase):
     """
 
     password: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
     @validator("password")
     def validate_password(cls, v):
@@ -124,6 +126,28 @@ class UserCreate(UserBase):
         if not (has_letter and has_number):
             raise ValueError("Password must contain at least one letter and one number")
 
+        return v
+
+    @validator("first_name")
+    def validate_first_name(cls, v):
+        """Validate first name if provided."""
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("First name cannot be empty")
+            if len(v) > 50:
+                raise ValueError("First name must be less than 50 characters")
+            return v.strip().title()
+        return v
+
+    @validator("last_name")
+    def validate_last_name(cls, v):
+        """Validate last name if provided."""
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("Last name cannot be empty")
+            if len(v) > 50:
+                raise ValueError("Last name must be less than 50 characters")
+            return v.strip().title()
         return v
 
 
