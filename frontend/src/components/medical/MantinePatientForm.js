@@ -71,8 +71,13 @@ const MantinePatientForm = ({
             label="Birth Date"
             placeholder="Select birth date"
             value={formData.birth_date ? (() => {
-              const [year, month, day] = formData.birth_date.split('-').map(Number);
-              return new Date(year, month - 1, day); // month is 0-indexed
+              if (typeof formData.birth_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.birth_date.trim())) {
+                const [year, month, day] = formData.birth_date.trim().split('-').map(Number);
+                if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                  return new Date(year, month - 1, day); // month is 0-indexed
+                }
+              }
+              return new Date(formData.birth_date);
             })() : null}
             onChange={handleDateChange('birth_date')}
             firstDayOfWeek={0}

@@ -48,8 +48,23 @@ export function useFormHandlers(onInputChange) {
           dateObj = date;
         } else if (typeof date === 'string') {
           // Handle string dates by parsing manually to avoid timezone issues
-          const [year, month, day] = date.split('-').map(Number);
-          dateObj = new Date(year, month - 1, day); // month is 0-indexed
+          const trimmedDate = date.trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedDate)) {
+            // Date-only string, parse manually
+            const [year, month, day] = trimmedDate.split('-').map(Number);
+            if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+              dateObj = new Date(year, month - 1, day); // month is 0-indexed
+              // Validate that the date is actually valid (e.g., not Feb 30th)
+              if (isNaN(dateObj.getTime())) {
+                dateObj = new Date(trimmedDate); // Fallback
+              }
+            } else {
+              dateObj = new Date(trimmedDate); // Fallback
+            }
+          } else {
+            // DateTime string or other format, use standard constructor
+            dateObj = new Date(trimmedDate);
+          }
         } else {
           dateObj = new Date(date);
         }
