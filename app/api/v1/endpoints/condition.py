@@ -55,19 +55,26 @@ def read_conditions(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
     status: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve conditions for the current user with optional filtering."""
-    # Filter conditions by the user's patient_id (ignore any provided patient_id for security)
+    """Retrieve conditions for the current user or specified patient (Phase 1 support)."""
+    
+    # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
+    if patient_id is not None:
+        target_patient_id = patient_id
+    else:
+        target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
+    
+    # Filter conditions by the target patient_id
     if status:
         conditions = condition.get_by_status(
-            db, status=status, patient_id=current_user_patient_id
+            db, status=status, patient_id=target_patient_id
         )
     else:
         conditions = condition.get_by_patient(
-            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db, patient_id=target_patient_id, skip=skip, limit=limit
         )
     return conditions
 

@@ -95,25 +95,35 @@ def register(
                 detail="Unable to create account at this time. Please try again later."
             )
 
-    # Create a basic patient record for the new user
+    # Create a basic patient record for the new user using Phase 1 approach
     # Use provided first/last names if available, otherwise use placeholders
     first_name = getattr(user_in, 'first_name', None) or "First Name"
     last_name = getattr(user_in, 'last_name', None) or "Last Name"
     
-    default_patient_data = PatientCreate(
-        first_name=first_name,
-        last_name=last_name,
-        birth_date=date(1990, 1, 1),  # Default birth date
-        gender="OTHER",  # Neutral default
-        address="Please update your address",  # Placeholder address
-    )
-
     try:  # Get the actual user ID value from the SQLAlchemy model
         user_id = getattr(new_user, "id", None)
         if user_id is None:
             raise ValueError("User ID not found after creation")
 
-        patient.create_for_user(db, user_id=user_id, patient_data=default_patient_data)
+        # Use Phase 1 patient management service to create self-record
+        from app.services.patient_management import PatientManagementService
+        patient_service = PatientManagementService(db)
+        
+        patient_data = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "birth_date": date(1990, 1, 1),  # Default birth date
+            "gender": "OTHER",  # Neutral default
+            "address": "Please update your address",  # Placeholder address
+        }
+        
+        # Create self-record for the new user
+        patient_service.create_patient(
+            user=new_user,
+            patient_data=patient_data,
+            is_self_record=True
+        )
+        
         # Log successful patient creation
         logger.info(
             f"Patient record created for user {user_id} ({user_in.username})",

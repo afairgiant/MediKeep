@@ -13,6 +13,7 @@ from app.api.v1.endpoints.utils import (
 )
 from app.crud.medication import medication
 from app.models.activity_log import EntityType
+from app.models.models import User
 from app.schemas.medication import (
     MedicationCreate,
     MedicationResponse,
@@ -58,12 +59,13 @@ def read_medications(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     name: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve medications for the current user with optional filtering."""
+    """Retrieve medications for the current user or specified patient (Phase 1 support)."""
+    
     medications = medication.get_by_patient(
         db=db,
-        patient_id=current_user_patient_id,
+        patient_id=target_patient_id,
         skip=skip,
         limit=limit,
         load_relations=["practitioner", "pharmacy", "condition"],

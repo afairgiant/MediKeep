@@ -185,6 +185,7 @@ export function useCacheManager() {
     fetchPharmacies,
     fetchPractitioners,
     fetchCurrentPatient,
+    setCurrentPatient,
   } = useAppData();
 
   const invalidateAll = useCallback(() => {
@@ -223,6 +224,7 @@ export function useCacheManager() {
     refreshPharmacies,
     refreshPractitioners,
     refreshPatient,
+    setCurrentPatient,
     updateCacheExpiry,
     isCacheValid,
   };

@@ -41,6 +41,7 @@ import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
 
 import { vitalsService } from '../../services/medical/vitalsService';
+import { apiService } from '../../services/api';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -135,13 +136,13 @@ const Vitals = () => {
   } = useMedicalData({
     entityName: 'vitals',
     apiMethodsConfig: {
-      getAll: signal => vitalsService.getVitals({}, signal),
+      getAll: signal => apiService.getEntities('vitals', signal),
       getByPatient: (patientId, signal) =>
-        vitalsService.getPatientVitals(patientId, {}, signal),
-      create: (data, signal) => vitalsService.createVitals(data, signal),
+        apiService.getPatientEntities('vitals', patientId, signal),
+      create: (data, signal) => apiService.createEntity('vitals', data, signal),
       update: (id, data, signal) =>
-        vitalsService.updateVitals(id, data, signal),
-      delete: (id, signal) => vitalsService.deleteVitals(id, signal),
+        apiService.updateEntity('vitals', id, data, signal),
+      delete: (id, signal) => apiService.deleteEntity('vitals', id, signal),
     },
     requiresPatient: true,
   });
@@ -169,9 +170,7 @@ const Vitals = () => {
       setIsLoadingStats(true);
       setStatsError(null);
 
-      const statsResponse = await vitalsService.getPatientVitalsStats(
-        currentPatient.id
-      );
+      const statsResponse = await apiService.get(`/vitals/stats?patient_id=${currentPatient.id}`);
       const statsData = statsResponse?.data || statsResponse;
       setStats(statsData);
     } catch (error) {

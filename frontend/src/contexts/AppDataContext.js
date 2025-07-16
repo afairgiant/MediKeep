@@ -7,6 +7,7 @@ import React, {
   useRef,
 } from 'react';
 import { apiService } from '../services/api';
+import patientApi from '../services/api/patientApi';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify';
 import logger from '../services/logger';
@@ -204,6 +205,23 @@ export function AppDataProvider({ children }) {
 
       try {
         dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_LOADING, payload: true });
+        
+        // Use Phase 1 API to get the active patient instead of just /patients/me
+        try {
+          const activePatientData = await patientApi.getActivePatient();
+          if (activePatientData) {
+            dispatch({
+              type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS,
+              payload: activePatientData,
+            });
+            return activePatientData;
+          }
+        } catch (e) {
+          // Fall back to old API if Phase 1 fails
+          console.warn('Phase 1 active patient API failed, falling back to /patients/me', e);
+        }
+        
+        // Fallback to original API
         const patient = await apiService.getCurrentPatient();
         dispatch({
           type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS,
@@ -381,6 +399,24 @@ export function AppDataProvider({ children }) {
     });
   }, []);
 
+  // Set current patient to a specific patient (Phase 1 support)
+  const setCurrentPatient = useCallback(async (patient) => {
+    if (patient) {
+      dispatch({
+        type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS,
+        payload: patient,
+      });
+      logger.debug('Current patient context updated', {
+        category: 'app_data_patient_switch',
+        patientId: patient.id,
+        patientName: `${patient.first_name} ${patient.last_name}`,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      dispatch({ type: APP_DATA_ACTIONS.CLEAR_PATIENT });
+    }
+  }, []);
+
   // Invalidate specific cache
   const invalidateCache = useCallback(
     async cacheType => {
@@ -434,6 +470,7 @@ export function AppDataProvider({ children }) {
     fetchPractitioners,
     fetchPharmacies,
     updatePatientData,
+    setCurrentPatient,
     invalidateCache,
     updateCacheExpiry,
 

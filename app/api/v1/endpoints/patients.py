@@ -570,6 +570,7 @@ async def get_my_dashboard_stats(
 @router.get("/recent-activity/", response_model=List[UserRecentActivity])
 def get_user_recent_activity(
     limit: int = Query(default=10, le=50),
+    patient_id: int = Query(None, description="Filter by specific patient ID"),
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -593,10 +594,35 @@ def get_user_recent_activity(
     Includes both user actions and medical activities that affect the patient.
     """
     try:
-        # Get the user's patient record
-        patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-        if not patient_record:
-            return []
+        # Get the target patient record
+        if patient_id:
+            # Validate patient access using patient_access service
+            from app.services.patient_access import PatientAccessService
+            from app.crud.user import user as user_crud
+            
+            # Get user and patient objects
+            user_obj = user_crud.get(db, id=current_user_id)
+            if not user_obj:
+                raise HTTPException(status_code=404, detail="User not found")
+            
+            access_service = PatientAccessService(db)
+            
+            # Get the specific patient record
+            patient_record = patient.get(db, id=patient_id)
+            if not patient_record:
+                raise HTTPException(status_code=404, detail="Patient record not found")
+            
+            # Validate that the user has access to this patient
+            if not access_service.can_access_patient(user_obj, patient_record):
+                raise HTTPException(
+                    status_code=403, 
+                    detail="Access denied to this patient record"
+                )
+        else:
+            # Default to user's own patient record
+            patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+            if not patient_record:
+                return []
 
         # Define medical entity types we want to include (all medical pages + doctors)
         medical_entity_types = [
@@ -614,18 +640,32 @@ def get_user_recent_activity(
             "practitioner",  # Doctors/practitioners page
             "pharmacy",  # Pharmacies page
             "lab_result_file",  # Lab result file uploads
-        ]  # Query activity logs for this patient's medical activities
-        # Include activities by the user AND activities that affect this patient
+        ]  
+        
+        # Define universal entity types that should be shown regardless of patient
+        universal_entity_types = ["practitioner", "pharmacy"]
+        
+        # Query activity logs for this patient's medical activities
+        # Include activities that relate to this specific patient
+        # Also include universal activities (practitioners, pharmacies) for all patients
+        
+        # For user's own patient, also include activities by this user
+        user_filter = (
+            (ActivityLog.user_id == current_user_id) 
+            if not patient_id or patient_record.user_id == current_user_id 
+            else False
+        )
+        
         activity_logs = (
             db.query(ActivityLog)
             .filter(
                 ActivityLog.entity_type.in_(medical_entity_types),
-                # Show activities by this user OR activities that relate to this patient
-                # This captures both user actions and doctor actions affecting the patient
-                (ActivityLog.user_id == current_user_id)
-                | (ActivityLog.description.like(f"%patient {patient_record.id}%"))
-                | (ActivityLog.description.like(f"%{patient_record.first_name}%"))
-                | (ActivityLog.description.like(f"%{patient_record.last_name}%")),
+                # Show activities that relate to this specific patient
+                # OR universal activities that apply to all patients
+                # OR activities by the current user (for their own patient only)
+                (ActivityLog.patient_id == patient_record.id)
+                | (ActivityLog.entity_type.in_(universal_entity_types))
+                | (user_filter if user_filter else False)
             )
             .order_by(desc(ActivityLog.timestamp))
             .limit(limit)

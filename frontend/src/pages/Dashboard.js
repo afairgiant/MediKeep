@@ -50,10 +50,11 @@ import {
   IconUsers,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
+import { PatientSelector } from '../components/medical';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
-import { useCurrentPatient } from '../hooks/useGlobalData';
+import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
 import { formatDateTime } from '../utils/helpers';
 import {
   getActivityNavigationUrl,
@@ -75,6 +76,7 @@ const Dashboard = () => {
 
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
+  const { invalidatePatient, refreshPatient, invalidateAll, setCurrentPatient } = useCacheManager();
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
@@ -82,6 +84,10 @@ const Dashboard = () => {
   const [statsLoading, setStatsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentActivePatient, setCurrentActivePatient] = useState(null);
+  const [patientSelectorLoading, setPatientSelectorLoading] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [lastActivityUpdate, setLastActivityUpdate] = useState(null);
   const [showWelcomeBox, setShowWelcomeBox] = useState(() => {
     // Check if user has dismissed the welcome box for this user
     const dismissed = localStorage.getItem(
@@ -90,14 +96,36 @@ const Dashboard = () => {
     return dismissed !== 'true';
   });
 
-  // Combine loading states
-  const loading = patientLoading || activityLoading || statsLoading;
+  // Combine loading states - only show full loading screen during initial load
+  const loading = (patientLoading || activityLoading || statsLoading) && !initialLoadComplete;
 
   useEffect(() => {
-    fetchRecentActivity();
-    fetchDashboardStats();
-    checkAdminStatus();
+    const loadInitialData = async () => {
+      await Promise.all([
+        fetchRecentActivity(),
+        fetchDashboardStats(),
+        checkAdminStatus()
+      ]);
+      setInitialLoadComplete(true);
+    };
+    loadInitialData();
   }, []);
+
+  // Initialize currentActivePatient when user loads
+  useEffect(() => {
+    if (user && !currentActivePatient) {
+      setCurrentActivePatient(user);
+    }
+  }, [user, currentActivePatient]);
+
+  // Auto-refresh recent activity every 30 seconds to catch new updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchRecentActivity();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [currentActivePatient, user]);
 
   useEffect(() => {
     if (authUser && user) {
@@ -110,7 +138,7 @@ const Dashboard = () => {
     }
   }, [authUser, user]);
 
-  const checkAdminStatus = () => {
+  const checkAdminStatus = async () => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
@@ -132,10 +160,45 @@ const Dashboard = () => {
     }
   };
 
-  const fetchRecentActivity = async () => {
+  const handlePatientChange = async (newPatient) => {
+    // Prevent infinite loops by checking if patient actually changed
+    if (currentActivePatient?.id === newPatient?.id) {
+      return;
+    }
+    
+    frontendLogger.logInfo('Patient switched from dashboard', {
+      component: 'Dashboard',
+      newPatientId: newPatient?.id,
+      patientName: newPatient ? `${newPatient.first_name} ${newPatient.last_name}` : null
+    });
+    
+    // Show loading state for patient selector during switch
+    setPatientSelectorLoading(true);
+    
+    // Update local state
+    setCurrentActivePatient(newPatient);
+    
+    // Invalidate all caches to force refresh of all medical data for new patient
+    invalidateAll();
+    refreshPatient();
+    
+    // Refresh dashboard data for the new patient context
+    if (newPatient) {
+      await Promise.all([
+        fetchRecentActivity(newPatient.id),
+        fetchDashboardStats()
+      ]);
+    }
+    
+    // Hide loading state
+    setPatientSelectorLoading(false);
+  };
+
+  const fetchRecentActivity = async (patientId = null) => {
     try {
       setActivityLoading(true);
-      const activity = await apiService.getRecentActivity();
+      const targetPatientId = patientId || currentActivePatient?.id || user?.id;
+      const activity = await apiService.getRecentActivity(targetPatientId);
       
       // Filter out erroneous "deleted" patient information activities
       // This is a temporary fix for a backend issue where patient updates are logged as deletions
@@ -152,6 +215,7 @@ const Dashboard = () => {
       });
       
       setRecentActivity(filteredActivity);
+      setLastActivityUpdate(new Date());
     } catch (error) {
       frontendLogger.logError('Error fetching activity', {
         error: error.message,
@@ -496,9 +560,28 @@ const Dashboard = () => {
 
   const RecentActivityList = () => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Title order={3} size="h4" mb="md">
-        Recent Activity
-      </Title>
+      <Group justify="space-between" mb="md">
+        <Title order={3} size="h4">
+          Recent Activity
+        </Title>
+        <Button
+          variant="light"
+          size="xs"
+          onClick={() => {
+            const patientIdToUse = currentActivePatient?.id || user?.id;
+            fetchRecentActivity(patientIdToUse);
+          }}
+          loading={activityLoading}
+        >
+          Refresh
+        </Button>
+      </Group>
+
+      {lastActivityUpdate && (
+        <Text size="xs" c="dimmed" mb="sm">
+          Last updated: {lastActivityUpdate.toLocaleTimeString()}
+        </Text>
+      )}
 
       {recentActivity.length > 0 ? (
         <Stack gap="xs">
@@ -602,9 +685,9 @@ const Dashboard = () => {
                   Manage your health information securely
                 </Text>
               </div>
-              {user && (
+              {(currentActivePatient || user) && (
                 <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
-                  Hello, {user.first_name} {user.last_name}!
+                  Hello, {(currentActivePatient || user).first_name} {(currentActivePatient || user).last_name}!
                 </Badge>
               )}
             </Group>
@@ -622,6 +705,15 @@ const Dashboard = () => {
             radius="md"
           />
         </Flex>
+
+        {/* Patient Selector */}
+        <Box mb="xl">
+          <PatientSelector 
+            onPatientChange={handlePatientChange}
+            currentPatientId={currentActivePatient?.id || user?.id}
+            loading={patientSelectorLoading}
+          />
+        </Box>
 
         {/* Main Content Grid */}
         <Grid mb="xl">

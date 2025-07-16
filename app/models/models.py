@@ -69,10 +69,20 @@ class User(Base):
     # V1: Current patient context - which patient they're managing
     active_patient_id = Column(Integer, ForeignKey("patients.id"), nullable=True)
 
-    patient = orm_relationship("Patient", back_populates="user", uselist=False)
-    # V1: Relationships
+    # Original relationship (specify foreign key to avoid ambiguity)
+    patient = orm_relationship(
+        "Patient", foreign_keys="Patient.user_id", back_populates="user", uselist=False
+    )
+
+    # V1: New relationships
     owned_patients = orm_relationship("Patient", foreign_keys="Patient.owner_user_id")
-    current_patient_context = orm_relationship("Patient", foreign_keys=[active_patient_id])
+    current_patient_context = orm_relationship(
+        "Patient", foreign_keys=[active_patient_id]
+    )
+    
+    # V1: Patient sharing relationships  
+    shared_patients_by_me = orm_relationship("PatientShare", foreign_keys="PatientShare.shared_by_user_id")
+    shared_patients_with_me = orm_relationship("PatientShare", foreign_keys="PatientShare.shared_with_user_id")
 
 
 class Patient(Base):
@@ -83,14 +93,16 @@ class Patient(Base):
     # V1: Individual ownership
     owner_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_self_record = Column(Boolean, default=False, nullable=False)
-    
+
     # V2+: Family context (nullable for V1)
     family_id = Column(Integer, nullable=True)  # Will add FK constraint in V2
-    relationship_to_family = Column(String, nullable=True)  # self, spouse, child, parent
-    
+    relationship_to_family = Column(
+        String, nullable=True
+    )  # self, spouse, child, parent
+
     # V3+: Advanced permissions (nullable for V1/V2)
-    privacy_level = Column(String, default='owner', nullable=False)
-    
+    privacy_level = Column(String, default="owner", nullable=False)
+
     # V4+: External linking (nullable for V1/V2/V3)
     external_account_id = Column(Integer, nullable=True)  # Will add FK constraint in V4
     is_externally_accessible = Column(Boolean, default=False, nullable=False)
@@ -109,9 +121,13 @@ class Patient(Base):
     gender = Column(String, nullable=True)
     address = Column(String, nullable=True)
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
     # Table Relationships
     owner = orm_relationship("User", foreign_keys=[owner_user_id])
-    user = orm_relationship("User", back_populates="patient")
+    user = orm_relationship("User", foreign_keys=[user_id], back_populates="patient")
     practitioner = orm_relationship("Practitioner", back_populates="patients")
     medications = orm_relationship(
         "Medication", back_populates="patient", cascade="all, delete-orphan"
@@ -146,6 +162,9 @@ class Patient(Base):
     family_members = orm_relationship(
         "FamilyMember", back_populates="patient", cascade="all, delete-orphan"
     )
+    
+    # V1: Patient sharing relationships
+    shares = orm_relationship("PatientShare", foreign_keys="PatientShare.patient_id", cascade="all, delete-orphan")
 
 
 class Practitioner(Base):

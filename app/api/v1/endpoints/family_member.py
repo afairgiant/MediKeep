@@ -56,17 +56,25 @@ def read_family_members(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
     relationship: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve family members for the current user with optional filtering."""
+    """Retrieve family members for the current user or specified patient (Phase 1 support)."""
+    
+    # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
+    if patient_id is not None:
+        target_patient_id = patient_id
+    else:
+        target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
+    
     if relationship:
         family_members = family_member.get_by_relationship(
-            db, patient_id=current_user_patient_id, relationship=relationship
+            db, patient_id=target_patient_id, relationship=relationship
         )
     else:
         family_members = family_member.get_by_patient_with_conditions(
-            db, patient_id=current_user_patient_id
+            db, patient_id=target_patient_id
         )
     return family_members
 

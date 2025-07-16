@@ -105,7 +105,13 @@ class ApiService {
     return response.text();
   } // Core request method with logging and fallback
   async request(method, url, data = null, options = {}) {
-    const { signal, headers: customHeaders = {}, responseType } = options;
+    const { signal, headers: customHeaders = {}, responseType, params } = options;
+
+    // Handle query parameters
+    if (params && Object.keys(params).length > 0) {
+      const searchParams = new URLSearchParams(params);
+      url += `?${searchParams.toString()}`;
+    }
 
     // Get token but don't fail if it doesn't exist - let backend handle authentication
     const token = localStorage.getItem('token');
@@ -239,8 +245,16 @@ class ApiService {
     return this.put('/patients/me', patientData, { signal });
   }
 
-  getRecentActivity(signal) {
-    return this.get('/patients/recent-activity/', { signal });
+  async getRecentActivity(patientId = null, signal) {
+    // Always send patient_id parameter if we have one, even if it's 0
+    const params = (patientId !== null && patientId !== undefined) ? { patient_id: patientId } : {};
+    
+    try {
+      const result = await this.get('/patients/recent-activity/', { params, signal });
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   getDashboardStats(signal) {
@@ -287,7 +301,8 @@ class ApiService {
 
   getPatientEntities(entityType, patientId, signal) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
-    return this.get(`/${apiPath}/?patient_id=${patientId}`, { signal });
+    const url = `/${apiPath}/?patient_id=${patientId}`;
+    return this.get(url, { signal });
   }
 
   // Lab Result methods
@@ -674,3 +689,7 @@ class ApiService {
 
 export const apiService = new ApiService();
 export default apiService;
+
+// V1 Patient Management Services
+export { default as patientApi } from './patientApi';
+export { default as patientSharingApi } from './patientSharingApi';

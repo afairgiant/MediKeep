@@ -50,14 +50,22 @@ def get_lab_results(
     *,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
     db: Session = Depends(get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ):
-    """Get lab results for the current user with pagination and practitioner info."""
-    # Filter lab results by the user's patient_id with practitioner relationship loaded
+    """Get lab results for the current user or specified patient (Phase 1 support)."""
+    
+    # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
+    if patient_id is not None:
+        target_patient_id = patient_id
+    else:
+        target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
+    
+    # Filter lab results by the target patient_id with practitioner relationship loaded
     results = lab_result.get_by_patient(
         db,
-        patient_id=current_user_patient_id,
+        patient_id=target_patient_id,
         skip=skip,
         limit=limit,
         load_relations=["practitioner", "patient"],

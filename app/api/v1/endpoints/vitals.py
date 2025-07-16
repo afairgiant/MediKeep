@@ -51,11 +51,19 @@ def read_vitals(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve vitals readings for the current user."""
+    """Retrieve vitals readings for the current user or specified patient (Phase 1 support)."""
+    
+    # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
+    if patient_id is not None:
+        target_patient_id = patient_id
+    else:
+        target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
+    
     vitals_list = vitals.get_by_patient(
-        db=db, patient_id=current_user_patient_id, skip=skip, limit=limit
+        db=db, patient_id=target_patient_id, skip=skip, limit=limit
     )
     return vitals_list
 
@@ -250,8 +258,16 @@ def create_patient_vitals(
 def read_current_user_vitals_stats(
     *,
     db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Get vitals statistics for the current user."""
-    stats = vitals.get_vitals_stats(db=db, patient_id=current_user_patient_id)
+    """Get vitals statistics for the current user or specified patient (Phase 1 support)."""
+    
+    # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
+    if patient_id is not None:
+        target_patient_id = patient_id
+    else:
+        target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
+    
+    stats = vitals.get_vitals_stats(db=db, patient_id=target_patient_id)
     return stats
