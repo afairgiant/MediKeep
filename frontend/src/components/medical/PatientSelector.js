@@ -38,6 +38,7 @@ import {
   IconTrash,
   IconDots,
   IconUserX,
+  IconChevronUp,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
@@ -48,7 +49,7 @@ import logger from '../../services/logger';
 import PatientForm from './PatientForm';
 import PatientSharingModal from './PatientSharingModal';
 
-const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false }) => {
+const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
   const { user: currentUser } = useAuth();
   const [patients, setPatients] = useState([]);
   const [activePatient, setActivePatient] = useState(null);
@@ -56,6 +57,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(compact);
   const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
   const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
   const [sharingModalOpened, { open: openSharingModal, close: closeSharingModal }] = useDisclosure(false);
@@ -145,23 +147,42 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   // Removed loadActivePatient function - now handled in loadPatients
 
   /**
-   * Load patient statistics
+   * Load patient statistics - use data from patient list instead of separate API
    */
   const loadStats = async () => {
     try {
-      // Use the new Phase 1 API to get patient statistics
-      const statsData = await patientApi.getPatientStats();
+      // Get the latest patient list data which includes the correct counts
+      const response = await patientApi.getAccessiblePatients('view');
+      
+      // Use the counts from the patient list response
+      const statsData = {
+        owned_count: response.owned_count || 0,
+        accessible_count: response.total_count || 0,
+        has_self_record: response.patients?.some(p => p.is_self_record) || false,
+        active_patient_id: activePatient?.id || null,
+        sharing_stats: {
+          owned: response.owned_count || 0,
+          shared_with_me: response.shared_count || 0,
+          total_accessible: response.total_count || 0
+        }
+      };
+      
       setStats(statsData);
     } catch (error) {
       logger.error('patient_selector_stats_error', {
         message: 'Failed to load patient stats',
         error: error.message
       });
-      // Fallback stats - calculate from current response to avoid dependency loops
+      // Fallback stats - calculate from current patients array
       const fallbackStats = {
-        owned_count: patients.length,
+        owned_count: patients.filter(p => isPatientOwned(p)).length,
         accessible_count: patients.length,
-        has_self_record: patients.some(p => p.is_self_record)
+        has_self_record: patients.some(p => p.is_self_record),
+        sharing_stats: {
+          owned: patients.filter(p => isPatientOwned(p)).length,
+          shared_with_me: patients.filter(p => !isPatientOwned(p)).length,
+          total_accessible: patients.length
+        }
       };
       setStats(fallbackStats);
     }
@@ -441,6 +462,87 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     );
   }
 
+  // Minimized view - single line with patient name and expand button
+  if (isMinimized && activePatient) {
+    return (
+      <Group gap="sm" p="xs" style={{ borderRadius: 8, border: '1px solid #e9ecef' }}>
+        <Avatar size="sm" color="blue" radius="xl">
+          <IconUser size="0.8rem" />
+        </Avatar>
+        <Text fw={500} size="sm" style={{ flex: 1 }}>
+          {formatPatientName(activePatient)}
+        </Text>
+        {getPatientBadge(activePatient)}
+        
+        {/* Loading indicator */}
+        {(loading || externalLoading) && <Loader size="xs" />}
+        
+        {/* Expand button */}
+        <Tooltip label="Expand patient selector">
+          <ActionIcon
+            variant="subtle"
+            color="blue"
+            size="sm"
+            onClick={() => setIsMinimized(false)}
+            disabled={loading || externalLoading}
+          >
+            <IconChevronDown size="0.8rem" />
+          </ActionIcon>
+        </Tooltip>
+        
+        {/* Quick patient switch menu */}
+        <Menu shadow="md" width={300}>
+          <Menu.Target>
+            <Tooltip label="Switch patient">
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                disabled={loading || externalLoading}
+              >
+                <IconUsers size="0.8rem" />
+              </ActionIcon>
+            </Tooltip>
+          </Menu.Target>
+          
+          <Menu.Dropdown>
+            <Menu.Label>Switch to Patient</Menu.Label>
+            {patients.map((patient) => (
+              <Menu.Item
+                key={patient.id}
+                leftSection={
+                  <Avatar size="xs" color="blue" radius="xl">
+                    <IconUser size="0.6rem" />
+                  </Avatar>
+                }
+                rightSection={getPatientBadge(patient)}
+                onClick={() => switchPatient(patient.id)}
+                disabled={patient.id === activePatient?.id}
+              >
+                <div>
+                  <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
+                    {formatPatientName(patient)}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {patient.birth_date}
+                  </Text>
+                </div>
+              </Menu.Item>
+            ))}
+            
+            <Menu.Divider />
+            <Menu.Item
+              leftSection={<IconPlus size="0.8rem" />}
+              onClick={openCreateModal}
+            >
+              Add New Patient
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
+    );
+  }
+
   return (
     <Paper withBorder p="md" radius="md">
       <Stack gap="md">
@@ -452,6 +554,18 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           </Title>
           
           <Group gap="xs">
+            {/* Minimize button */}
+            <Tooltip label="Minimize to one line">
+              <ActionIcon
+                variant="light"
+                color="gray"
+                onClick={() => setIsMinimized(true)}
+                disabled={loading || externalLoading}
+              >
+                <IconChevronUp size="1rem" />
+              </ActionIcon>
+            </Tooltip>
+            
             <Tooltip label="Refresh patients">
               <ActionIcon
                 variant="light"
@@ -615,7 +729,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               <Group gap="xs">
                 <IconShare size="1rem" />
                 <Text size="sm">
-                  Shared: <Text span fw={500}>{stats.accessible_count - stats.owned_count}</Text>
+                  Shared: <Text span fw={500}>{stats.sharing_stats?.shared_with_me || 0}</Text>
                 </Text>
               </Group>
               

@@ -564,17 +564,6 @@ const Dashboard = () => {
         <Title order={3} size="h4">
           Recent Activity
         </Title>
-        <Button
-          variant="light"
-          size="xs"
-          onClick={() => {
-            const patientIdToUse = currentActivePatient?.id || user?.id;
-            fetchRecentActivity(patientIdToUse);
-          }}
-          loading={activityLoading}
-        >
-          Refresh
-        </Button>
       </Group>
 
       {lastActivityUpdate && (
@@ -694,26 +683,43 @@ const Dashboard = () => {
           </Paper>
         )}
 
-        {/* Search Bar */}
-        <Flex justify="flex-end" mb="xl">
-          <TextInput
-            placeholder="search"
-            leftSection={<IconSearch size={16} />}
-            value={searchQuery}
-            onChange={event => setSearchQuery(event.currentTarget.value)}
-            w={300}
-            radius="md"
-          />
-        </Flex>
-
-        {/* Patient Selector */}
-        <Box mb="xl">
-          <PatientSelector 
-            onPatientChange={handlePatientChange}
-            currentPatientId={currentActivePatient?.id || user?.id}
-            loading={patientSelectorLoading}
-          />
-        </Box>
+        {/* Patient Selector and Search Bar - Responsive Layout */}
+        <Stack gap="md" mb="xl">
+          <Flex 
+            justify="space-between" 
+            align="flex-start" 
+            gap="md"
+            direction={{ base: 'column', sm: 'row' }}
+          >
+            {/* Patient Selector */}
+            <Box style={{ flex: '1', maxWidth: '500px', width: '100%' }}>
+              <PatientSelector 
+                onPatientChange={handlePatientChange}
+                currentPatientId={currentActivePatient?.id || user?.id}
+                loading={patientSelectorLoading}
+                compact={true}
+              />
+            </Box>
+            
+            {/* Search Bar */}
+            <Box 
+              style={{ 
+                flexShrink: 0,
+                width: '100%',
+                maxWidth: '300px'
+              }}
+            >
+              <TextInput
+                placeholder="search"
+                leftSection={<IconSearch size={16} />}
+                value={searchQuery}
+                onChange={event => setSearchQuery(event.currentTarget.value)}
+                style={{ width: '100%' }}
+                radius="md"
+              />
+            </Box>
+          </Flex>
+        </Stack>
 
         {/* Main Content Grid */}
         <Grid mb="xl">

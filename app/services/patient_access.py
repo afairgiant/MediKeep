@@ -188,6 +188,7 @@ class PatientAccessService:
             PatientShare.is_active == True
         ).count()
         
+        
         return {
             'owned': owned_count,
             'shared_with_me': shared_count,

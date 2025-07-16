@@ -308,10 +308,18 @@ class PatientManagementService:
         owned_patients = self.get_owned_patients(user)
         accessible_patients = self.get_user_patients(user)
         
+        active_patient_id = None
+        if user.active_patient_id is not None:
+            try:
+                active_patient_id = int(user.active_patient_id)
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid active_patient_id for user {user.id}: {user.active_patient_id}")
+                active_patient_id = None
+        
         return {
             'owned_count': len(owned_patients),
             'accessible_count': len(accessible_patients),
             'has_self_record': any(p.is_self_record for p in owned_patients),
-            'active_patient_id': int(user.active_patient_id) if user.active_patient_id else None,
+            'active_patient_id': active_patient_id,
             'sharing_stats': self.access_service.get_user_patient_count(user)
         }

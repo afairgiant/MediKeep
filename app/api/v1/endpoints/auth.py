@@ -96,9 +96,25 @@ def register(
             )
 
     # Create a basic patient record for the new user using Phase 1 approach
-    # Use provided first/last names if available, otherwise use placeholders
-    first_name = getattr(user_in, 'first_name', None) or "First Name"
-    last_name = getattr(user_in, 'last_name', None) or "Last Name"
+    # Extract first/last names from available user data
+    first_name = getattr(user_in, 'first_name', None)
+    last_name = getattr(user_in, 'last_name', None)
+    
+    # If first/last names aren't provided, try to parse from full_name
+    if not first_name or not last_name:
+        full_name = getattr(user_in, 'full_name', '')
+        if full_name:
+            name_parts = full_name.strip().split()
+            if len(name_parts) >= 2:
+                first_name = first_name or name_parts[0]
+                last_name = last_name or ' '.join(name_parts[1:])
+            elif len(name_parts) == 1:
+                first_name = first_name or name_parts[0]
+                last_name = last_name or name_parts[0]  # Use same name for both
+    
+    # Final fallbacks
+    first_name = first_name or "Update"
+    last_name = last_name or "Your Name"
     
     try:  # Get the actual user ID value from the SQLAlchemy model
         user_id = getattr(new_user, "id", None)
@@ -112,9 +128,9 @@ def register(
         patient_data = {
             "first_name": first_name,
             "last_name": last_name,
-            "birth_date": date(1990, 1, 1),  # Default birth date
+            "birth_date": date.today().replace(year=date.today().year - 25),  # 25 years ago as reasonable default
             "gender": "OTHER",  # Neutral default
-            "address": "Please update your address",  # Placeholder address
+            "address": "Please update your address in your profile",  # Placeholder address
         }
         
         # Create self-record for the new user

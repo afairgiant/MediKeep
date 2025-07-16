@@ -74,6 +74,13 @@ class PatientListResponse(BaseModel):
     shared_count: int
 
 
+class SharingStatsResponse(BaseModel):
+    """Response model for sharing statistics"""
+    owned: int
+    shared_with_me: int
+    total_accessible: int
+
+
 class PatientStatsResponse(BaseModel):
     """Response model for patient statistics"""
     owned_count: int
@@ -449,12 +456,12 @@ def get_active_patient(
         raise HTTPException(status_code=500, detail="Failed to retrieve active patient")
 
 
-@router.get("/stats", response_model=PatientStatsResponse)
+@router.get("/stats")
 def get_patient_statistics(
     *,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
-) -> Any:
+):
     """
     Get statistics about the user's patients.
     
@@ -464,7 +471,13 @@ def get_patient_statistics(
         service = PatientManagementService(db)
         stats = service.get_patient_statistics(current_user)
         
-        return PatientStatsResponse(**stats)
+        return {
+            'owned_count': stats['owned_count'],
+            'accessible_count': stats['accessible_count'],
+            'has_self_record': stats['has_self_record'],
+            'active_patient_id': stats['active_patient_id'],
+            'sharing_stats': stats['sharing_stats']
+        }
         
     except Exception as e:
         logger.error(f"Failed to get patient statistics for user {current_user.id}: {str(e)}")
