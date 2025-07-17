@@ -51,6 +51,7 @@ import {
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
+import { GlobalSearch } from '../components/common';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
@@ -83,7 +84,6 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [currentActivePatient, setCurrentActivePatient] = useState(null);
   const [patientSelectorLoading, setPatientSelectorLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -98,6 +98,7 @@ const Dashboard = () => {
 
   // Combine loading states - only show full loading screen during initial load
   const loading = (patientLoading || activityLoading || statsLoading) && !initialLoadComplete;
+
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -709,13 +710,10 @@ const Dashboard = () => {
                 maxWidth: '300px'
               }}
             >
-              <TextInput
-                placeholder="search"
-                leftSection={<IconSearch size={16} />}
-                value={searchQuery}
-                onChange={event => setSearchQuery(event.currentTarget.value)}
-                style={{ width: '100%' }}
-                radius="md"
+              <GlobalSearch
+                patientId={currentActivePatient?.id}
+                placeholder="Search medical records..."
+                width="100%"
               />
             </Box>
           </Flex>
