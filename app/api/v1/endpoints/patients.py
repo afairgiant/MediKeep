@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -10,6 +10,7 @@ from app.api import deps
 from app.core.logging_config import get_logger
 from app.crud.patient import patient
 from app.models.activity_log import ActivityLog
+from app.models.models import Patient as PatientModel, User
 from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 
@@ -510,12 +511,13 @@ def get_my_recent_activity(
 @router.get("/me/dashboard-stats", response_model=PatientDashboardStats)
 async def get_my_dashboard_stats(
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
 ) -> Any:
     """
-    Get dashboard statistics for the current patient.
+    Get dashboard statistics for the specified patient.
 
-    Returns counts of all medical records for the authenticated user:
+    Returns counts of all medical records for the patient:
     - Total records count
     - Active medications count
     - Lab results count
@@ -526,14 +528,39 @@ async def get_my_dashboard_stats(
     - Immunizations count
     - Encounters count
     - Vitals count
+    
+    Supports Phase 1 patient switching with patient_id parameter.
     """
     try:
         # Import ExportService here to avoid circular imports
         from app.services.export_service import ExportService
 
+        # Get the target patient ID
+        if patient_id:
+            # Phase 1: Use provided patient_id with access control
+            from app.services.patient_access import PatientAccessService
+            access_service = PatientAccessService(db)
+            
+            # Get the patient record
+            patient_record = db.query(PatientModel).filter(PatientModel.id == patient_id).first()
+            if not patient_record:
+                raise HTTPException(status_code=404, detail="Patient not found")
+            
+            # Check if user has access to this patient
+            if not access_service.can_access_patient(current_user, patient_record, "view"):
+                raise HTTPException(status_code=403, detail="Access denied to patient")
+            
+            target_patient_id = patient_id
+        else:
+            # Legacy: Get user's patient record ID
+            user_patient = db.query(PatientModel).filter(PatientModel.owner_user_id == current_user.id).first()
+            if not user_patient:
+                raise HTTPException(status_code=404, detail="No patient record found for user")
+            target_patient_id = user_patient.id
+
         # Initialize export service and get summary
         export_service = ExportService(db)
-        summary = await export_service.get_export_summary(current_user_id)
+        summary = await export_service.get_export_summary_by_patient_id(target_patient_id)
 
         counts = summary.get("counts", {})
 

@@ -257,8 +257,17 @@ class ApiService {
     }
   }
 
-  getDashboardStats(signal) {
-    return this.get('/patients/me/dashboard-stats', { signal });
+  getDashboardStats(patientId, signal) {
+    // Support both Phase 1 patient switching and legacy single patient mode
+    if (patientId) {
+      return this.get('/patients/me/dashboard-stats', { 
+        params: { patient_id: patientId },
+        signal 
+      });
+    } else {
+      // Fallback for legacy mode
+      return this.get('/patients/me/dashboard-stats', { signal });
+    }
   }
 
   // Generic entity methods using the entity relationship system

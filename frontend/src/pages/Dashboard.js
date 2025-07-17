@@ -119,6 +119,13 @@ const Dashboard = () => {
     }
   }, [user, currentActivePatient]);
 
+  // Refresh dashboard stats when active patient changes
+  useEffect(() => {
+    if (currentActivePatient?.id && initialLoadComplete) {
+      fetchDashboardStats();
+    }
+  }, [currentActivePatient?.id, initialLoadComplete]);
+
   // Auto-refresh recent activity every 30 seconds to catch new updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -230,12 +237,14 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setStatsLoading(true);
-      const stats = await apiService.getDashboardStats();
+      const patientId = currentActivePatient?.id;
+      const stats = await apiService.getDashboardStats(patientId);
       setDashboardStats(stats);
     } catch (error) {
       frontendLogger.logError('Error fetching dashboard stats', {
         error: error.message,
         component: 'Dashboard',
+        patientId: currentActivePatient?.id
       });
       // Set fallback stats on error
       setDashboardStats({
