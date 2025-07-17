@@ -5,6 +5,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
@@ -35,6 +36,12 @@ const Treatments = () => {
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
 
+  // Get practitioners data
+  const { practitioners: practitionersObject } =
+    usePatientWithStaticData();
+
+  const practitioners = practitionersObject?.practitioners || [];
+
   // Modern data management with useMedicalData
   const {
     items: treatments,
@@ -53,7 +60,7 @@ const Treatments = () => {
     entityName: 'treatment',
     apiMethodsConfig: {
       getAll: signal => apiService.getTreatments(signal),
-      getByPatient: (patientId, signal) => apiService.getTreatments(signal),
+      getByPatient: (patientId, signal) => apiService.getPatientTreatments(patientId, signal),
       create: (data, signal) => apiService.createTreatment(data, signal),
       update: (id, data, signal) =>
         apiService.updateTreatment(id, data, signal),
@@ -64,7 +71,7 @@ const Treatments = () => {
 
   // Conditions data for dropdown - following DRY principles with existing pattern
   const {
-    items: conditionsOptions,
+    items: conditions,
     loading: conditionsLoading,
     error: conditionsError,
   } = useMedicalData({
@@ -75,20 +82,6 @@ const Treatments = () => {
         apiService.getConditionsDropdown(false, signal), // Use same method for consistency
     },
     requiresPatient: false, // The endpoint handles patient context automatically
-  });
-
-  // Practitioners data for dropdown
-  const {
-    items: practitionersOptions,
-    loading: practitionersLoading,
-    error: practitionersError,
-  } = useMedicalData({
-    entityName: 'practitioners',
-    apiMethodsConfig: {
-      getAll: signal => apiService.getPractitioners(signal),
-      getByPatient: (patientId, signal) => apiService.getPractitioners(signal),
-    },
-    requiresPatient: false,
   });
 
   // Get standardized configuration
@@ -251,10 +244,10 @@ const Treatments = () => {
 
   // Helper function to get condition name from ID
   const getConditionName = conditionId => {
-    if (!conditionId || !conditionsOptions || conditionsOptions.length === 0) {
+    if (!conditionId || !conditions || conditions.length === 0) {
       return null;
     }
-    const condition = conditionsOptions.find(c => c.id === conditionId);
+    const condition = conditions.find(c => c.id === conditionId);
     return condition ? condition.diagnosis || condition.name : null;
   };
 
@@ -262,12 +255,12 @@ const Treatments = () => {
   const getPractitionerInfo = practitionerId => {
     if (
       !practitionerId ||
-      !practitionersOptions ||
-      practitionersOptions.length === 0
+      !practitioners ||
+      practitioners.length === 0
     ) {
       return null;
     }
-    const practitioner = practitionersOptions.find(
+    const practitioner = practitioners.find(
       p => p.id === practitionerId
     );
     return practitioner;
@@ -341,15 +334,6 @@ const Treatments = () => {
               title="Conditions Loading Error"
             >
               {conditionsError}
-            </Alert>
-          )}
-          {practitionersError && (
-            <Alert
-              variant="light"
-              color="orange"
-              title="Practitioners Loading Error"
-            >
-              {practitionersError}
             </Alert>
           )}
           {successMessage && (
@@ -613,10 +597,10 @@ const Treatments = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingTreatment={editingTreatment}
-        conditionsOptions={conditionsOptions}
+        conditionsOptions={conditions}
         conditionsLoading={conditionsLoading}
-        practitionersOptions={practitionersOptions}
-        practitionersLoading={practitionersLoading}
+        practitionersOptions={practitioners}
+        practitionersLoading={false}
       />
 
       {/* Treatment View Modal */}
