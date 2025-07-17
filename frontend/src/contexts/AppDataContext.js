@@ -12,6 +12,9 @@ import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify';
 import logger from '../services/logger';
 
+// App version for cache busting
+const APP_VERSION = '1.0.0';
+
 // Initial state for application data
 const initialState = {
   // Patient data
@@ -175,6 +178,44 @@ export function AppDataProvider({ children }) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // Check app version and clear cache if updated
+  const checkAppVersion = useCallback(() => {
+    const storedVersion = localStorage.getItem('appVersion');
+    if (storedVersion !== APP_VERSION) {
+      logger.info('App version changed, clearing cache', {
+        category: 'app_version_cache_clear',
+        oldVersion: storedVersion,
+        newVersion: APP_VERSION,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Clear all cache data
+      const cacheKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('appData_') || 
+        key.startsWith('patient_') || 
+        key.startsWith('cache_')
+      );
+      
+      cacheKeys.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      
+      // Update version
+      localStorage.setItem('appVersion', APP_VERSION);
+      
+      // Clear state cache
+      dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+      
+      return true; // Cache was cleared
+    }
+    return false; // No clear needed
+  }, []);
+
+  // Initialize version check on app load
+  useEffect(() => {
+    checkAppVersion();
+  }, [checkAppVersion]);
+
   // Helper function to check if cached data is still valid
   const isCacheValid = useCallback(
     (lastFetch, cacheKey) => {
@@ -200,11 +241,26 @@ export function AppDataProvider({ children }) {
         stateRef.current.currentPatient &&
         isCacheValid(stateRef.current.patientLastFetch, 'patient')
       ) {
+        logger.debug('Using cached patient data', {
+          category: 'app_data_cache_hit',
+          entityType: 'patient',
+          patientId: stateRef.current.currentPatient.id,
+          cacheAge: Date.now() - stateRef.current.patientLastFetch,
+          timestamp: new Date().toISOString()
+        });
         return stateRef.current.currentPatient;
       }
 
       try {
         dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_LOADING, payload: true });
+        
+        logger.info('Fetching fresh patient data', {
+          category: 'app_data_fetch',
+          entityType: 'patient',
+          forceRefresh,
+          userId: user?.id,
+          timestamp: new Date().toISOString()
+        });
         
         // Use Phase 1 API to get the active patient instead of just /patients/me
         try {
@@ -244,7 +300,7 @@ export function AppDataProvider({ children }) {
         return null;
       }
     },
-    [isCacheValid, isAuthenticated]
+    [isCacheValid, isAuthenticated, user]
   );
 
   // Fetch practitioners list
@@ -352,8 +408,20 @@ export function AppDataProvider({ children }) {
   // Initialize app data when user logs in
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Clear cache and fetch fresh data on login
-      dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+      logger.info('User authenticated, clearing cache and fetching fresh data', {
+        category: 'app_data_init',
+        userId: user.id,
+        username: user.username,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Check app version and clear cache if necessary
+      const versionCleared = checkAppVersion();
+      
+      // Clear cache and fetch fresh data on login (if not already cleared by version check)
+      if (!versionCleared) {
+        dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+      }
       
       // Add timeout to prevent rapid fire requests in production
       const timeoutId = setTimeout(
@@ -379,16 +447,18 @@ export function AppDataProvider({ children }) {
       ); // Small delay in production
 
       return () => clearTimeout(timeoutId);
-    } else {
+    } else if (!isAuthenticated) {
       // Clear all data when user logs out
+      logger.info('User logged out, clearing all cached data', {
+        category: 'app_data_logout',
+        timestamp: new Date().toISOString()
+      });
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
     }
   }, [
     isAuthenticated,
-    user,
-    fetchCurrentPatient,
-    fetchPractitioners,
-    fetchPharmacies,
+    user?.id, // Only depend on user ID, not the full user object
+    checkAppVersion,
   ]);
 
   // Update patient data (after patient profile changes)

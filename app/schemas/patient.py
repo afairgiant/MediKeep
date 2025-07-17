@@ -426,6 +426,46 @@ class Patient(PatientBase):
 
     id: int
 
+    @root_validator(pre=True)
+    def convert_empty_strings_to_none_for_response(cls, values):
+        """Convert empty strings to None for response validation"""
+        if isinstance(values, dict):
+            for field in [
+                "gender",
+                "address",
+                "blood_type",
+                "height",
+                "weight",
+                "physician_id",
+            ]:
+                if field in values and values[field] == "":
+                    values[field] = None
+        return values
+
+    @validator("gender")
+    def validate_gender_response(cls, v):
+        """Validate gender for response, allowing None for empty values"""
+        if v is not None and v != "":
+            allowed_genders = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
+            if v.upper() not in allowed_genders:
+                # For response validation, return None instead of raising error
+                return None
+            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
+            return gender_map.get(v.upper(), v.upper())
+        return None
+
+    @validator("address")
+    def validate_address_response(cls, v):
+        """Validate address for response, allowing None for empty values"""
+        if v is not None and v != "":
+            if len(v.strip()) < 5:
+                # For response validation, return None instead of raising error
+                return None
+            if len(v) > 200:
+                return v[:200]  # Truncate if too long
+            return v.strip()
+        return None
+
     class Config:
         """
         Pydantic configuration.

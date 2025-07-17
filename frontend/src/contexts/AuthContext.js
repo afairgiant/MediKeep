@@ -262,6 +262,19 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('tokenExpiry');
+    
+    // Clear any cached app data to ensure fresh data on next login
+    // This is additional insurance for cache clearing
+    const cacheKeys = Object.keys(localStorage).filter(key => 
+      key.startsWith('appData_') || 
+      key.startsWith('patient_') || 
+      key.startsWith('cache_')
+    );
+    
+    cacheKeys.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
     // Note: We don't clear first login status as it should persist across sessions
   };
 
@@ -301,6 +314,26 @@ export function AuthProvider({ children }) {
 
       if (result.success) {
         const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+        // Clear any existing cache data before login
+        // This ensures fresh data is loaded for the new user session
+        logger.info('Clearing cache before login', {
+          category: 'auth_cache_clear',
+          username: result.user.username,
+          userId: result.user.id,
+          timestamp: new Date().toISOString()
+        });
+
+        // Clear any existing cached data from localStorage
+        const cacheKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('appData_') || 
+          key.startsWith('patient_') || 
+          key.startsWith('cache_')
+        );
+        
+        cacheKeys.forEach(key => {
+          localStorage.removeItem(key);
+        });
 
         // Store in localStorage
         updateStoredToken(result.token, tokenExpiry);
