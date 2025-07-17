@@ -43,6 +43,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePatientList, useCacheManager } from '../../hooks/useGlobalData';
 import patientApi from '../../services/api/patientApi';
 import patientSharingApi from '../../services/api/patientSharingApi';
 import logger from '../../services/logger';
@@ -51,7 +52,13 @@ import PatientSharingModal from './PatientSharingModal';
 
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
   const { user: currentUser } = useAuth();
-  const [patients, setPatients] = useState([]);
+  
+  // Use cached patient list from global state
+  const { patientList: patients, loading: patientListLoading, error: patientListError, refresh: refreshPatientList } = usePatientList();
+  
+  // Use cache manager for invalidating cache when needed
+  const { invalidatePatientList } = useCacheManager();
+  
   const [activePatient, setActivePatient] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -64,10 +71,16 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   const [editingPatient, setEditingPatient] = useState(null);
   const [sharingPatient, setSharingPatient] = useState(null);
 
-  // Load patients on component mount only
+  // Combine loading states
+  const combinedLoading = loading || patientListLoading;
+  const combinedError = error || patientListError;
+
+  // Initialize active patient when patients are loaded from cache
   useEffect(() => {
-    loadPatients();
-  }, []);
+    if (patients.length > 0 && !initialLoadComplete) {
+      initializeActivePatient();
+    }
+  }, [patients.length, initialLoadComplete]);
   
   // Load stats after patients are loaded (only once after initial load)
   useEffect(() => {
@@ -87,19 +100,17 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   }, [currentPatientId]); // Only depend on currentPatientId changes
 
   /**
-   * Load accessible patients
+   * Initialize active patient from cached data
    */
-  const loadPatients = async () => {
+  const initializeActivePatient = async () => {
+    if (patients.length === 0) return;
+    
     try {
       setLoading(true);
       setError(null);
       
-      // Use the new Phase 1 API
-      const response = await patientApi.getAccessiblePatients('view');
-      setPatients(response.patients || []);
-      
       // If no active patient is set and this is the initial load, try to get the active patient from API
-      if (!activePatient && response.patients && response.patients.length > 0 && !initialLoadComplete) {
+      if (!activePatient && !initialLoadComplete) {
         try {
           const activePatientData = await patientApi.getActivePatient();
           if (activePatientData) {
@@ -109,7 +120,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             }
           } else {
             // No active patient set, use first patient
-            const firstPatient = response.patients[0];
+            const firstPatient = patients[0];
             setActivePatient(firstPatient);
             if (onPatientChange) {
               onPatientChange(firstPatient);
@@ -117,7 +128,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           }
         } catch (error) {
           // If API call fails, just use first patient
-          const firstPatient = response.patients[0];
+          const firstPatient = patients[0];
           setActivePatient(firstPatient);
           if (onPatientChange) {
             onPatientChange(firstPatient);
@@ -125,19 +136,17 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         }
       }
       
-      logger.debug('patient_selector_loaded', {
-        message: 'Patients loaded successfully',
-        count: response.total_count || 0,
-        owned: response.owned_count || 0,
-        shared: response.shared_count || 0
+      logger.debug('patient_selector_initialized', {
+        message: 'Active patient initialized from cached data',
+        count: patients.length,
+        activePatientId: activePatient?.id
       });
     } catch (error) {
-      logger.error('patient_selector_error', {
-        message: 'Failed to load patients',
+      logger.error('patient_selector_init_error', {
+        message: 'Failed to initialize active patient',
         error: error.message
       });
       setError(error.message);
-      setPatients([]);
     } finally {
       setLoading(false);
       setInitialLoadComplete(true);
@@ -226,24 +235,19 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   /**
-   * Refresh patient list (safer version that doesn't trigger auto-selection)
+   * Refresh patient list (uses cached refresh)
    */
   const refreshPatients = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Use the new Phase 1 API
-      const response = await patientApi.getAccessiblePatients('view');
-      setPatients(response.patients || []);
-      
-      // Don't auto-select first patient on refresh - keep current active patient
+      // Use the cached refresh function
+      await refreshPatientList();
       
       logger.debug('patient_selector_refreshed', {
-        message: 'Patients refreshed successfully',
-        count: response.total_count || 0,
-        owned: response.owned_count || 0,
-        shared: response.shared_count || 0
+        message: 'Patients refreshed successfully from cache',
+        count: patients.length
       });
     } catch (error) {
       logger.error('patient_selector_refresh_error', {
@@ -307,8 +311,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         }
       }
       
-      // Refresh patient list
-      await refreshPatients();
+      // Invalidate patient list cache to force fresh data
+      await invalidatePatientList();
       
       logger.info('patient_selector_deleted', {
         message: 'Patient deleted successfully',
@@ -357,8 +361,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         }
       }
       
-      // Refresh patient list
-      await refreshPatients();
+      // Invalidate patient list cache to force fresh data
+      await invalidatePatientList();
       
       logger.info('patient_selector_access_removed', {
         message: 'Shared patient access removed successfully',
@@ -440,7 +444,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     patient: patient
   }));
 
-  if (error) {
+  if (combinedError) {
     return (
       <Alert
         icon={<IconAlertCircle size="1rem" />}
@@ -448,7 +452,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         color="red"
         variant="light"
       >
-        {error}
+        {combinedError}
         <Button
           size="xs"
           variant="light"
@@ -475,7 +479,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {getPatientBadge(activePatient)}
         
         {/* Loading indicator */}
-        {(loading || externalLoading) && <Loader size="xs" />}
+        {(combinedLoading || externalLoading) && <Loader size="xs" />}
         
         {/* Expand button */}
         <Tooltip label="Expand patient selector">
@@ -484,7 +488,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             color="blue"
             size="sm"
             onClick={() => setIsMinimized(false)}
-            disabled={loading || externalLoading}
+            disabled={combinedLoading || externalLoading}
           >
             <IconChevronDown size="0.8rem" />
           </ActionIcon>
@@ -498,7 +502,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 variant="subtle"
                 color="gray"
                 size="sm"
-                disabled={loading || externalLoading}
+                disabled={combinedLoading || externalLoading}
               >
                 <IconUsers size="0.8rem" />
               </ActionIcon>
@@ -571,7 +575,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 variant="light"
                 color="blue"
                 onClick={refreshPatients}
-                loading={loading || externalLoading}
+                loading={combinedLoading || externalLoading}
                 disabled={externalLoading}
               >
                 <IconRefresh size="1rem" />
@@ -583,7 +587,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 variant="light"
                 color="green"
                 onClick={openCreateModal}
-                disabled={loading || externalLoading}
+                disabled={combinedLoading || externalLoading}
               >
                 <IconPlus size="1rem" />
               </ActionIcon>
@@ -633,7 +637,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               {/* Patient Actions Menu */}
               <Menu shadow="md" width={200}>
                 <Menu.Target>
-                  <ActionIcon variant="light" color="blue" disabled={loading || externalLoading}>
+                  <ActionIcon variant="light" color="blue" disabled={combinedLoading || externalLoading}>
                     <IconDots size="1rem" />
                   </ActionIcon>
                 </Menu.Target>
@@ -708,8 +712,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             onChange={(value) => value && switchPatient(parseInt(value))}
             searchable
             clearable
-            disabled={loading || externalLoading}
-            rightSection={(loading || externalLoading) ? <Loader size="xs" /> : <IconChevronDown size="1rem" />}
+            disabled={combinedLoading || externalLoading}
+            rightSection={(combinedLoading || externalLoading) ? <Loader size="xs" /> : <IconChevronDown size="1rem" />}
             renderOption={({ option }) => renderPatientOption(option.patient)}
           />
         </Box>
@@ -744,7 +748,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         )}
 
         {/* No patients message */}
-        {!loading && patients.length === 0 && (
+        {!combinedLoading && patients.length === 0 && (
           <Alert
             icon={<IconAlertCircle size="1rem" />}
             title="No patients found"
@@ -765,9 +769,9 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         padding="lg"
       >
         <PatientForm
-          onSuccess={(newPatient) => {
-            // Refresh patient list and switch to new patient
-            refreshPatients();
+          onSuccess={async (newPatient) => {
+            // Invalidate patient list cache to force fresh data
+            await invalidatePatientList();
             setActivePatient(newPatient);
             if (onPatientChange) {
               onPatientChange(newPatient);
@@ -793,9 +797,9 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       >
         <PatientForm
           patient={editingPatient}
-          onSuccess={(updatedPatient) => {
-            // Refresh patient list and update active patient if needed
-            refreshPatients();
+          onSuccess={async (updatedPatient) => {
+            // Invalidate patient list cache to force fresh data
+            await invalidatePatientList();
             if (activePatient?.id === updatedPatient.id) {
               setActivePatient(updatedPatient);
               if (onPatientChange) {
@@ -822,9 +826,9 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           setSharingPatient(null);
         }}
         patient={sharingPatient}
-        onSuccess={() => {
-          // Optionally refresh data if sharing affects patient list
-          refreshPatients();
+        onSuccess={async () => {
+          // Invalidate patient list cache in case sharing affects patient list
+          await invalidatePatientList();
           closeSharingModal();
           setSharingPatient(null);
         }}

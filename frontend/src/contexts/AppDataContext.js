@@ -34,11 +34,18 @@ const initialState = {
   pharmaciesError: null,
   pharmaciesLastFetch: null,
 
+  // Patient list for selector
+  patientList: [],
+  patientListLoading: false,
+  patientListError: null,
+  patientListLastFetch: null,
+
   // Cache expiry times (in minutes)
   cacheExpiry: {
     patient: 15, // Patient data expires after 15 minutes
     practitioners: 60, // Practitioners list expires after 1 hour
     pharmacies: 60, // Pharmacies list expires after 1 hour
+    patientList: 30, // Patient list expires after 30 minutes
   },
 };
 
@@ -59,6 +66,11 @@ const APP_DATA_ACTIONS = {
   SET_PHARMACIES_LOADING: 'SET_PHARMACIES_LOADING',
   SET_PHARMACIES_SUCCESS: 'SET_PHARMACIES_SUCCESS',
   SET_PHARMACIES_ERROR: 'SET_PHARMACIES_ERROR',
+
+  // Patient list actions
+  SET_PATIENT_LIST_LOADING: 'SET_PATIENT_LIST_LOADING',
+  SET_PATIENT_LIST_SUCCESS: 'SET_PATIENT_LIST_SUCCESS',
+  SET_PATIENT_LIST_ERROR: 'SET_PATIENT_LIST_ERROR',
 
   // General actions
   CLEAR_ALL_DATA: 'CLEAR_ALL_DATA',
@@ -146,6 +158,30 @@ function appDataReducer(state, action) {
         ...state,
         pharmaciesError: action.payload,
         pharmaciesLoading: false,
+      };
+
+    // Patient list actions
+    case APP_DATA_ACTIONS.SET_PATIENT_LIST_LOADING:
+      return {
+        ...state,
+        patientListLoading: action.payload,
+        patientListError: action.payload ? null : state.patientListError,
+      };
+
+    case APP_DATA_ACTIONS.SET_PATIENT_LIST_SUCCESS:
+      return {
+        ...state,
+        patientList: action.payload,
+        patientListLoading: false,
+        patientListError: null,
+        patientListLastFetch: Date.now(),
+      };
+
+    case APP_DATA_ACTIONS.SET_PATIENT_LIST_ERROR:
+      return {
+        ...state,
+        patientListError: action.payload,
+        patientListLoading: false,
       };
 
     // General actions
@@ -405,6 +441,80 @@ export function AppDataProvider({ children }) {
     [isCacheValid]
   );
 
+  // Fetch patient list for selector
+  const fetchPatientList = useCallback(
+    async (forceRefresh = false) => {
+      // Don't fetch if not authenticated
+      if (!isAuthenticated) {
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PATIENT_LIST_SUCCESS,
+          payload: [],
+        });
+        return [];
+      }
+
+      // Check if we have valid cached data and don't force refresh
+      if (
+        !forceRefresh &&
+        stateRef.current.patientList.length > 0 &&
+        isCacheValid(stateRef.current.patientListLastFetch, 'patientList')
+      ) {
+        logger.debug('Using cached patient list data', {
+          category: 'app_data_cache_hit',
+          entityType: 'patientList',
+          count: stateRef.current.patientList.length,
+          cacheAge: Date.now() - stateRef.current.patientListLastFetch,
+          timestamp: new Date().toISOString()
+        });
+        return stateRef.current.patientList;
+      }
+
+      try {
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PATIENT_LIST_LOADING,
+          payload: true,
+        });
+        
+        logger.info('Fetching fresh patient list data', {
+          category: 'app_data_fetch',
+          entityType: 'patientList',
+          forceRefresh,
+          userId: user?.id,
+          timestamp: new Date().toISOString()
+        });
+
+        const response = await patientApi.getAccessiblePatients('view');
+        const patients = response.patients || [];
+
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PATIENT_LIST_SUCCESS,
+          payload: patients,
+        });
+        return patients;
+      } catch (error) {
+        logger.error('Failed to fetch patient list data', {
+          category: 'app_data_fetch_error',
+          entityType: 'patientList',
+          error: error.message,
+          stack: error.stack,
+          userId: user?.id,
+          cachedCount: stateRef.current.patientList?.length || 0,
+          timestamp: new Date().toISOString()
+        });
+        dispatch({
+          type: APP_DATA_ACTIONS.SET_PATIENT_LIST_ERROR,
+          payload: error.message,
+        });
+
+        // Return existing data if available, otherwise empty array
+        return Array.isArray(stateRef.current.patientList)
+          ? stateRef.current.patientList
+          : [];
+      }
+    },
+    [isCacheValid, isAuthenticated, user]
+  );
+
   // Initialize app data when user logs in
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -429,8 +539,12 @@ export function AppDataProvider({ children }) {
           // Fetch fresh patient data immediately on login
           fetchCurrentPatient(true);
 
-          // Fetch fresh static lists in parallel
-          Promise.all([fetchPractitioners(true), fetchPharmacies(true)]).catch(
+          // Fetch fresh static lists and patient list in parallel
+          Promise.all([
+            fetchPractitioners(true), 
+            fetchPharmacies(true), 
+            fetchPatientList(true)
+          ]).catch(
             error => {
               logger.error('Failed to initialize application data', {
                 category: 'app_data_init_error',
@@ -500,6 +614,9 @@ export function AppDataProvider({ children }) {
         case 'pharmacies':
           await fetchPharmacies(true);
           break;
+        case 'patientList':
+          await fetchPatientList(true);
+          break;
         case 'all':
           dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
           if (isAuthenticated) {
@@ -507,6 +624,7 @@ export function AppDataProvider({ children }) {
               fetchCurrentPatient(true),
               fetchPractitioners(true),
               fetchPharmacies(true),
+              fetchPatientList(true),
             ]);
           }
           break;
@@ -514,12 +632,12 @@ export function AppDataProvider({ children }) {
           logger.warn('Unknown cache type specified', {
             category: 'app_data_cache_warning',
             cacheType,
-            validTypes: ['patient', 'practitioners', 'pharmacies', 'all'],
+            validTypes: ['patient', 'practitioners', 'pharmacies', 'patientList', 'all'],
             timestamp: new Date().toISOString()
           });
       }
     },
-    [fetchCurrentPatient, fetchPractitioners, fetchPharmacies, isAuthenticated]
+    [fetchCurrentPatient, fetchPractitioners, fetchPharmacies, fetchPatientList, isAuthenticated]
   );
 
   // Update cache expiry settings
@@ -539,6 +657,7 @@ export function AppDataProvider({ children }) {
     fetchCurrentPatient,
     fetchPractitioners,
     fetchPharmacies,
+    fetchPatientList,
     updatePatientData,
     setCurrentPatient,
     invalidateCache,
