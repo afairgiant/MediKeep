@@ -495,7 +495,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         </Tooltip>
         
         {/* Quick patient switch menu */}
-        <Menu shadow="md" width={300}>
+        <Menu shadow="md" width={300} position="bottom-start">
           <Menu.Target>
             <Tooltip label="Switch patient">
               <ActionIcon
@@ -635,7 +635,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               )}
               
               {/* Patient Actions Menu */}
-              <Menu shadow="md" width={200}>
+              <Menu shadow="md" width={200} position="bottom-end">
                 <Menu.Target>
                   <ActionIcon variant="light" color="blue" disabled={combinedLoading || externalLoading}>
                     <IconDots size="1rem" />

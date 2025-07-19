@@ -9,8 +9,10 @@ from app.api.v1.endpoints import (
     encounter,
     export,
     family_member,
+    family_history_sharing,
     frontend_logs,
     immunization,
+    invitations,
     lab_result,
     lab_result_file,
     medication,
@@ -37,6 +39,10 @@ api_router.include_router(patients.router, prefix="/patients", tags=["patients"]
 # V1 Patient Management and Sharing
 api_router.include_router(patient_management.router, prefix="/patient-management", tags=["v1-patient-management"])
 api_router.include_router(patient_sharing.router, prefix="/patient-sharing", tags=["v1-patient-sharing"])
+
+# V1.5 Family History Sharing and Invitations
+api_router.include_router(family_history_sharing.router, prefix="/family-history-sharing", tags=["family-history-sharing"])
+api_router.include_router(invitations.router, prefix="/invitations", tags=["invitations"])
 api_router.include_router(
     lab_result.router, prefix="/lab-results", tags=["lab-results"]
 )

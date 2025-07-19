@@ -79,10 +79,14 @@ class User(Base):
     current_patient_context = orm_relationship(
         "Patient", foreign_keys=[active_patient_id]
     )
-    
-    # V1: Patient sharing relationships  
-    shared_patients_by_me = orm_relationship("PatientShare", foreign_keys="PatientShare.shared_by_user_id")
-    shared_patients_with_me = orm_relationship("PatientShare", foreign_keys="PatientShare.shared_with_user_id")
+
+    # V1: Patient sharing relationships
+    shared_patients_by_me = orm_relationship(
+        "PatientShare", foreign_keys="PatientShare.shared_by_user_id"
+    )
+    shared_patients_with_me = orm_relationship(
+        "PatientShare", foreign_keys="PatientShare.shared_with_user_id"
+    )
 
 
 class Patient(Base):
@@ -123,7 +127,9 @@ class Patient(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     owner = orm_relationship("User", foreign_keys=[owner_user_id])
@@ -162,9 +168,13 @@ class Patient(Base):
     family_members = orm_relationship(
         "FamilyMember", back_populates="patient", cascade="all, delete-orphan"
     )
-    
+
     # V1: Patient sharing relationships
-    shares = orm_relationship("PatientShare", foreign_keys="PatientShare.patient_id", cascade="all, delete-orphan")
+    shares = orm_relationship(
+        "PatientShare",
+        foreign_keys="PatientShare.patient_id",
+        cascade="all, delete-orphan",
+    )
 
 
 class Practitioner(Base):
@@ -791,6 +801,11 @@ class FamilyMember(Base):
     family_conditions = orm_relationship(
         "FamilyCondition", back_populates="family_member", cascade="all, delete-orphan"
     )
+    shares = orm_relationship(
+        "FamilyHistoryShare",
+        back_populates="family_member",
+        cascade="all, delete-orphan",
+    )
 
 
 class FamilyCondition(Base):
@@ -860,5 +875,111 @@ class PatientShare(Base):
     __table_args__ = (
         UniqueConstraint(
             "patient_id", "shared_with_user_id", name="unique_patient_share"
+        ),
+    )
+
+
+class Invitation(Base):
+    """Reusable invitation system for various sharing/collaboration features"""
+
+    __tablename__ = "invitations"
+
+    id = Column(Integer, primary_key=True)
+
+    # Who's sending and receiving
+    sent_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    sent_to_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # What type of invitation
+    invitation_type = Column(
+        String, nullable=False
+    )  # 'family_history_share', 'patient_share', 'family_join', etc.
+
+    # Status tracking
+    status = Column(
+        String, default="pending", nullable=False
+    )  # pending, accepted, rejected, expired, cancelled
+
+    # Invitation details
+    title = Column(String, nullable=False)  # "Family History Share Request"
+    message = Column(Text, nullable=True)  # Custom message from sender
+
+    # Context data (JSON for flexibility)
+    context_data = Column(JSON, nullable=False)  # Stores type-specific data
+
+    # Expiration
+    expires_at = Column(DateTime, nullable=True)
+
+    # Response tracking
+    responded_at = Column(DateTime, nullable=True)
+    response_note = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    sent_by = orm_relationship("User", foreign_keys=[sent_by_user_id])
+    sent_to = orm_relationship("User", foreign_keys=[sent_to_user_id])
+
+    # Constraints - allow duplicate invitations with different context data
+    # Note: context_data excluded from unique constraint due to PostgreSQL JSON indexing limitations
+    __table_args__ = (
+        UniqueConstraint(
+            "sent_by_user_id",
+            "sent_to_user_id",
+            "invitation_type",
+            name="unique_active_invitation",
+        ),
+    )
+
+
+class FamilyHistoryShare(Base):
+    """Share family history records independently from personal medical data"""
+
+    __tablename__ = "family_history_shares"
+
+    id = Column(Integer, primary_key=True)
+
+    # Link to the invitation that created this share
+    invitation_id = Column(Integer, ForeignKey("invitations.id"), nullable=False)
+
+    # What's being shared - specific family member's history record
+    family_member_id = Column(Integer, ForeignKey("family_members.id"), nullable=False)
+
+    # Who's sharing and receiving
+    shared_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    shared_with_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Simple permissions
+    permission_level = Column(
+        String, default="view", nullable=False
+    )  # view only for Phase 1.5
+    is_active = Column(Boolean, default=True, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+
+    # Optional sharing note
+    sharing_note = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    invitation = orm_relationship("Invitation")
+    family_member = orm_relationship("FamilyMember", back_populates="shares")
+    shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id])
+    shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id])
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint(
+            "family_member_id",
+            "shared_with_user_id",
+            name="unique_family_history_share",
         ),
     )

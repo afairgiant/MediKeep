@@ -52,6 +52,7 @@ import {
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
 import { GlobalSearch } from '../components/common';
+import { InvitationNotifications } from '../components/dashboard';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
@@ -784,6 +785,9 @@ const Dashboard = () => {
 
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
+              {/* Invitation Notifications */}
+              <InvitationNotifications />
+              
               {/* Recent Activity */}
               <RecentActivityList />
 

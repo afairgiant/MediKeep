@@ -17,6 +17,9 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import MantineFamilyMemberForm from '../../components/medical/MantineFamilyMemberForm';
 import MantineFamilyConditionForm from '../../components/medical/MantineFamilyConditionForm';
 import StatusBadge from '../../components/medical/StatusBadge';
+import { InvitationManager } from '../../components/invitations';
+import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
+import familyHistoryApi from '../../services/api/familyHistoryApi';
 import {
   Badge,
   Card,
@@ -35,6 +38,10 @@ import {
   Collapse,
   Box,
   SimpleGrid,
+  Tabs,
+  Menu,
+  Tooltip,
+  Checkbox,
 } from '@mantine/core';
 import {
   IconUsers,
@@ -46,13 +53,30 @@ import {
   IconMedicalCross,
   IconUserPlus,
   IconStethoscope,
+  IconShare,
+  IconMail,
+  IconSend2,
+  IconUser,
+  IconDots,
+  IconX,
+  IconSend,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { useDisclosure } from '@mantine/hooks';
 
 const FamilyHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
   const [expandedMembers, setExpandedMembers] = useState(new Set());
+  
+  // Invitation-related state
+  const [invitationManagerOpened, { open: openInvitationManager, close: closeInvitationManager }] = useDisclosure(false);
+  const [sharingModalOpened, { open: openSharingModal, close: closeSharingModal }] = useDisclosure(false);
+  const [bulkSharingModalOpened, { open: openBulkSharingModal, close: closeBulkSharingModal }] = useDisclosure(false);
+  const [selectedMemberForSharing, setSelectedMemberForSharing] = useState(null);
+  const [selectedMembersForBulkSharing, setSelectedMembersForBulkSharing] = useState([]);
+  const [bulkSelectionMode, setBulkSelectionMode] = useState(false);
 
   // Modern data management with useMedicalData
   const {
@@ -575,6 +599,40 @@ const FamilyHistory = () => {
     }
     setExpandedMembers(newExpanded);
   };
+  
+  // Invitation-related handlers
+  const handleShareMember = (member) => {
+    setSelectedMemberForSharing(member);
+    openSharingModal();
+  };
+  
+  const handleBulkMemberToggle = (memberId) => {
+    setSelectedMembersForBulkSharing(current => 
+      current.includes(memberId) 
+        ? current.filter(id => id !== memberId)
+        : [...current, memberId]
+    );
+  };
+  
+  const handleSharingSuccess = () => {
+    setSelectedMemberForSharing(null);
+    closeSharingModal();
+    // Refresh data if needed
+    refreshData();
+  };
+  
+  const handleBulkSharingSuccess = () => {
+    setSelectedMembersForBulkSharing([]);
+    setBulkSelectionMode(false);
+    closeBulkSharingModal();
+    // Refresh data if needed
+    refreshData();
+  };
+  
+  const handleInvitationUpdate = () => {
+    // Refresh data when invitations are updated
+    refreshData();
+  };
 
   const getSeverityColor = severity => {
     switch (severity?.toLowerCase()) {
@@ -659,13 +717,49 @@ const FamilyHistory = () => {
         </Text>
 
         <Group justify="space-between" mb="lg">
-          <Button
-            leftIcon={<IconUserPlus size={16} />}
-            onClick={handleAddMember}
-            size="md"
-          >
-            Add Family Member
-          </Button>
+          <Group>
+            <Button
+              leftIcon={<IconUserPlus size={16} />}
+              onClick={handleAddMember}
+              size="md"
+            >
+              Add Family Member
+            </Button>
+            
+            <Button
+              variant={bulkSelectionMode ? "filled" : "light"}
+              leftIcon={<IconShare size={16} />}
+              size="md"
+              onClick={() => {
+                setBulkSelectionMode(!bulkSelectionMode);
+                setSelectedMembersForBulkSharing([]);
+              }}
+            >
+              {bulkSelectionMode ? 'End Sharing Mode' : 'Sharing Mode'}
+            </Button>
+            
+            <Button
+              variant="light"
+              leftIcon={<IconMail size={16} />}
+              size="md"
+              onClick={openInvitationManager}
+            >
+              Manage Invitations
+            </Button>
+            
+            {bulkSelectionMode && selectedMembersForBulkSharing.length > 0 && (
+              <Button
+                variant="filled"
+                leftIcon={<IconSend size={16} />}
+                size="md"
+                onClick={() => {
+                  openBulkSharingModal();
+                }}
+              >
+                Share Selected ({selectedMembersForBulkSharing.length})
+              </Button>
+            )}
+          </Group>
 
           <ViewToggle
             viewMode={viewMode}
@@ -673,6 +767,46 @@ const FamilyHistory = () => {
             showPrint={true}
           />
         </Group>
+        
+        {/* Sharing Mode Indicator */}
+        {bulkSelectionMode && (
+          <Alert
+            icon={<IconShare size="1rem" />}
+            title="Sharing Mode Active"
+            color="blue"
+            variant="light"
+            mb="md"
+          >
+            <Group justify="space-between">
+              <Text size="sm">
+                Select family members to share their medical history. {selectedMembersForBulkSharing.length} selected.
+              </Text>
+              <Group>
+                {selectedMembersForBulkSharing.length > 0 && (
+                  <Button
+                    size="xs"
+                    leftIcon={<IconSend size="0.8rem" />}
+                    onClick={() => {
+                      openBulkSharingModal();
+                    }}
+                  >
+                    Share Selected ({selectedMembersForBulkSharing.length})
+                  </Button>
+                )}
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={() => {
+                    setBulkSelectionMode(false);
+                    setSelectedMembersForBulkSharing([]);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Group>
+            </Group>
+          </Alert>
+        )}
       </div>
 
       {/* Filters */}
@@ -804,6 +938,13 @@ const FamilyHistory = () => {
                         </div>
 
                         <Group spacing="xs">
+                          {bulkSelectionMode && (
+                            <Checkbox
+                              checked={selectedMembersForBulkSharing.includes(member.id)}
+                              onChange={() => handleBulkMemberToggle(member.id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          )}
                           <Button
                             size="xs"
                             variant="light"
@@ -814,25 +955,47 @@ const FamilyHistory = () => {
                           >
                             View Details
                           </Button>
-                          <ActionIcon
-                            variant="light"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleEditMember(member);
-                            }}
-                          >
-                            <IconEdit size={16} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="light"
-                            color="red"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDeleteMember(member.id);
-                            }}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
+                          <Menu shadow="md" width={150} position="bottom-end">
+                            <Menu.Target>
+                              <ActionIcon
+                                variant="light"
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <IconDots size={16} />
+                              </ActionIcon>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                              <Menu.Item
+                                icon={<IconEdit size={14} />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditMember(member);
+                                }}
+                              >
+                                Edit
+                              </Menu.Item>
+                              <Menu.Item
+                                icon={<IconShare size={14} />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleShareMember(member);
+                                }}
+                              >
+                                Share History
+                              </Menu.Item>
+                              <Menu.Divider />
+                              <Menu.Item
+                                icon={<IconTrash size={14} />}
+                                color="red"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteMember(member.id);
+                                }}
+                              >
+                                Delete
+                              </Menu.Item>
+                            </Menu.Dropdown>
+                          </Menu>
                         </Group>
                       </Group>
 
@@ -1079,13 +1242,26 @@ const FamilyHistory = () => {
                 <Text weight={500} size="lg">
                   Medical Conditions
                 </Text>
-                <Button
-                  size="sm"
-                  leftIcon={<IconStethoscope size={16} />}
-                  onClick={handleAddConditionFromView}
-                >
-                  Add Condition
-                </Button>
+                <Group>
+                  <Button
+                    size="sm"
+                    variant="light"
+                    leftIcon={<IconShare size={16} />}
+                    onClick={() => {
+                      setSelectedMemberForSharing(viewingFamilyMember);
+                      openSharingModal();
+                    }}
+                  >
+                    Share History
+                  </Button>
+                  <Button
+                    size="sm"
+                    leftIcon={<IconStethoscope size={16} />}
+                    onClick={handleAddConditionFromView}
+                  >
+                    Add Condition
+                  </Button>
+                </Group>
               </Group>
 
               {!viewingFamilyMember.family_conditions ||
@@ -1174,6 +1350,30 @@ const FamilyHistory = () => {
           </Stack>
         </Modal>
       )}
+      
+      {/* Invitation Manager Modal */}
+      <InvitationManager
+        opened={invitationManagerOpened}
+        onClose={closeInvitationManager}
+        onUpdate={handleInvitationUpdate}
+      />
+      
+      {/* Family History Sharing Modal */}
+      <FamilyHistorySharingModal
+        opened={sharingModalOpened}
+        onClose={closeSharingModal}
+        familyMember={selectedMemberForSharing}
+        onSuccess={handleSharingSuccess}
+      />
+      
+      {/* Bulk Family History Sharing Modal */}
+      <FamilyHistorySharingModal
+        opened={bulkSharingModalOpened}
+        onClose={closeBulkSharingModal}
+        familyMembers={selectedMembersForBulkSharing.map(id => familyMembers.find(m => m.id === id)).filter(Boolean)}
+        bulkMode={true}
+        onSuccess={handleBulkSharingSuccess}
+      />
     </Container>
   );
 };
