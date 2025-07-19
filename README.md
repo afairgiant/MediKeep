@@ -7,6 +7,12 @@ A medical records management system with React frontend and FastAPI backend.
 
 ## This is actievly being worked on!
 
+## Screenshots
+
+### Dashboard
+
+![Dashboard View](docs/assets/screenshots/Screenshot%202025-07-13%20154004_dash.png)
+
 ## Quick Start
 
 ### 1️⃣ Install Docker & Docker Compose
