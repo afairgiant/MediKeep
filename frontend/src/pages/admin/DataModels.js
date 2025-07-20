@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Grid, Text, Group, ActionIcon, Badge } from '@mantine/core';
+import { Card, Grid, Text, Group, ActionIcon, Badge, Paper, useMantineColorScheme } from '@mantine/core';
 import {
   IconDatabase,
   IconUsers,
@@ -22,6 +22,7 @@ import './DataModels.css';
 
 const DataModels = () => {
   const navigate = useNavigate();
+  const { colorScheme } = useMantineColorScheme();
 
   const models = [
     {
@@ -202,7 +203,14 @@ const DataModels = () => {
   return (
     <AdminLayout>
       <div className="data-models-page">
-        <div className="page-header">
+        <div 
+          className="page-header" 
+          style={{
+            backgroundColor: colorScheme === 'dark' ? '#1a1b1e' : 'white',
+            borderColor: colorScheme === 'dark' ? '#373A40' : '#dee2e6',
+            border: '1px solid',
+          }}
+        >
           <Group justify="space-between" align="flex-start" mb="xl">
             <div>
               <Text size="xl" fw={700} mb="xs">

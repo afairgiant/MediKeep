@@ -23,6 +23,7 @@ import {
   Flex,
   Tooltip,
   Menu,
+  useMantineColorScheme,
 } from '@mantine/core';
 import {
   IconUser,
@@ -51,6 +52,7 @@ import PatientForm from './PatientForm';
 import PatientSharingModal from './PatientSharingModal';
 
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
+  const { colorScheme } = useMantineColorScheme();
   const { user: currentUser } = useAuth();
   
   // Use cached patient list from global state
@@ -542,7 +544,14 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   // Minimized view - single line with patient name and expand button
   if (isMinimized && activePatient) {
     return (
-      <Group gap="sm" p="xs" style={{ borderRadius: 8, border: '1px solid #e9ecef' }}>
+      <Group gap="sm" p="xs" style={{ borderRadius: 8 }} 
+        styles={(theme) => ({
+          root: {
+            border: `1px solid ${colorScheme === 'dark' 
+              ? theme.colors.dark[4] 
+              : theme.colors.gray[3]}`
+          }
+        })}>
         <Avatar size="sm" color="blue" radius="xl">
           <IconUser size="0.8rem" />
         </Avatar>
@@ -674,7 +683,14 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             <Text size="sm" c="dimmed" mb="xs">
               Currently viewing:
             </Text>
-            <Group gap="sm" p="sm" bg="blue.0" style={{ borderRadius: 8, position: 'relative' }}>
+            <Group gap="sm" p="sm" style={{ borderRadius: 8, position: 'relative' }} 
+              styles={(theme) => ({
+                root: {
+                  backgroundColor: colorScheme === 'dark' 
+                    ? theme.colors.dark[6] 
+                    : theme.colors.blue[0]
+                }
+              })}>
               <Avatar color="blue" radius="xl">
                 <IconUser size="1.2rem" />
               </Avatar>
@@ -690,21 +706,27 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               
               {/* Loading overlay */}
               {externalLoading && (
-                <div style={{
+                <Box style={{
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: 8,
                   zIndex: 1
-                }}>
+                }}
+                styles={(theme) => ({
+                  root: {
+                    backgroundColor: colorScheme === 'dark' 
+                      ? 'rgba(0, 0, 0, 0.8)' 
+                      : 'rgba(255, 255, 255, 0.8)',
+                  }
+                })}>
                   <Loader size="sm" />
-                </div>
+                </Box>
               )}
               
               {/* Patient Actions Menu */}

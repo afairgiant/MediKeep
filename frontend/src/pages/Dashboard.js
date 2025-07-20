@@ -25,6 +25,7 @@ import {
   Tooltip,
   HoverCard,
   Select,
+  useMantineColorScheme,
 } from '@mantine/core';
 import {
   IconStethoscope,
@@ -70,6 +71,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { colorScheme } = useMantineColorScheme();
   const {
     user: authUser,
     shouldShowProfilePrompts,
@@ -502,21 +504,25 @@ const Dashboard = () => {
           style={{
             cursor: isClickable ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
-            backgroundColor: isClickable
-              ? 'transparent'
-              : 'var(--mantine-color-gray-0)',
           }}
-          styles={{
-            root: isClickable
-              ? {
-                  '&:hover': {
-                    backgroundColor: 'var(--mantine-color-gray-1)',
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  },
-                }
-              : {},
-          }}
+          styles={(theme) => ({
+            root: {
+              backgroundColor: colorScheme === 'dark' 
+                ? theme.colors.dark[7] 
+                : theme.white,
+              ...(isClickable
+                ? {
+                    '&:hover': {
+                      backgroundColor: colorScheme === 'dark' 
+                        ? theme.colors.dark[6] 
+                        : theme.colors.gray[1],
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    },
+                  }
+                : {}),
+            },
+          })}
           onClick={handleClick}
         >
           <Group align="flex-start" gap="sm" wrap="nowrap">
@@ -554,7 +560,7 @@ const Dashboard = () => {
                 {isClickable && (
                   <IconChevronRight
                     size={12}
-                    color="var(--mantine-color-dimmed)"
+                    style={{ color: 'var(--mantine-color-dimmed)' }}
                   />
                 )}
               </Group>
@@ -603,7 +609,7 @@ const Dashboard = () => {
           ))}
         </Stack>
       ) : (
-        <Paper p="md" radius="md" bg="gray.1">
+        <Paper p="md" radius="md" bg="gray.1" style={{ backgroundColor: 'transparent' }}>
           <Stack align="center" gap="xs">
             <ThemeIcon color="gray" variant="light" size="lg">
               <IconAlertCircle size={20} />
@@ -814,15 +820,17 @@ const Dashboard = () => {
                         onClick={() => navigate(module.link)}
                         style={{ cursor: 'pointer' }}
                         withBorder
-                        styles={{
+                        styles={(theme) => ({
                           root: {
                             '&:hover': {
-                              backgroundColor: 'var(--mantine-color-gray-1)',
+                              backgroundColor: colorScheme === 'dark' 
+                                ? theme.colors.dark[6] 
+                                : theme.colors.gray[1],
                               transform: 'translateX(4px)',
                               transition: 'all 0.2s ease',
                             },
                           },
-                        }}
+                        })}
                       >
                         <Group gap="sm">
                           <ThemeIcon

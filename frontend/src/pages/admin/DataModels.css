@@ -6,6 +6,16 @@
 
 .page-header {
   margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+}
+
+/* Dark theme override */
+[data-theme='dark'] .page-header {
+  background-color: #1a1b1e !important;
+  border-color: #373A40 !important;
 }
 
 .models-content {
@@ -34,7 +44,8 @@
   transform: translateY(0);
 }
 
-/* Dark theme specific adjustments */
+/* Dark theme specific adjustments - removed as handled by Mantine component */
+
 [data-theme='dark'] .model-card {
   background: var(--color-bg-secondary);
   border-color: var(--color-border);
