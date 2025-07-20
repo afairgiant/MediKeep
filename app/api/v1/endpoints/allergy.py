@@ -50,20 +50,13 @@ def read_allergies(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
     severity: Optional[str] = Query(None),
     allergen: Optional[str] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """
-    Retrieve allergies for the current user or specified patient (Phase 1 support).
+    Retrieve allergies for the current user or accessible patient.
     """
-    
-    # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
-    if patient_id is not None:
-        target_patient_id = patient_id
-    else:
-        target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
     
     # Filter allergies by the target patient_id
     if severity:
