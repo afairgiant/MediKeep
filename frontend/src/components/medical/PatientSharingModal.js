@@ -46,6 +46,33 @@ import { toast } from 'react-toastify';
 import patientSharingApi from '../../services/api/patientSharingApi';
 import logger from '../../services/logger';
 
+/**
+ * Safely parse JSON string with error handling
+ * @param {string} jsonString - The JSON string to parse
+ * @param {string} fieldName - Field name for logging purposes
+ * @returns {object|null} Parsed object or null if invalid JSON
+ */
+const safeParseJSON = (jsonString, fieldName = 'custom_permissions') => {
+  if (!jsonString || typeof jsonString !== 'string') {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(jsonString);
+    return parsed;
+  } catch (error) {
+    logger.error('json_parse_error', {
+      message: `Invalid JSON in ${fieldName}`,
+      jsonString: jsonString.substring(0, 100), // Log first 100 chars only
+      error: error.message
+    });
+    
+    // Show user-friendly error
+    toast.error(`Invalid JSON format in ${fieldName}. Please check your syntax.`);
+    throw new Error(`Invalid JSON format in ${fieldName}`);
+  }
+};
+
 const PatientSharingModal = ({ 
   opened, 
   onClose, 
@@ -170,7 +197,7 @@ const PatientSharingModal = ({
         shared_with_user_identifier: values.shared_with_user_identifier,
         permission_level: values.permission_level,
         expires_at: values.has_expiration ? values.expires_at : null,
-        custom_permissions: values.custom_permissions ? JSON.parse(values.custom_permissions) : null,
+        custom_permissions: values.custom_permissions ? safeParseJSON(values.custom_permissions, 'custom permissions') : null,
       };
       
       await patientSharingApi.sharePatient(shareData);
@@ -217,7 +244,7 @@ const PatientSharingModal = ({
       const updateData = {
         permission_level: values.permission_level,
         expires_at: values.has_expiration ? values.expires_at : null,
-        custom_permissions: values.custom_permissions ? JSON.parse(values.custom_permissions) : null,
+        custom_permissions: values.custom_permissions ? safeParseJSON(values.custom_permissions, 'custom permissions') : null,
       };
       
       await patientSharingApi.updatePatientShare(
