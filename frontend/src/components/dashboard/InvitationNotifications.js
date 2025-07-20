@@ -167,10 +167,7 @@ const InvitationNotifications = () => {
                 p="sm"
                 radius="md"
                 withBorder
-                style={{
-                  backgroundColor: 'var(--mantine-color-blue-0)',
-                  borderColor: 'var(--mantine-color-blue-3)',
-                }}
+                bg="blue.0"
               >
                 <Stack gap="xs">
                   <Group gap="xs" justify="space-between">
@@ -236,7 +233,7 @@ const InvitationNotifications = () => {
             )}
           </Stack>
         ) : (
-          <Paper p="md" radius="md" bg="gray.1">
+          <Paper p="md" radius="md" withBorder>
             <Stack align="center" gap="xs">
               <ThemeIcon color="gray" variant="light" size="lg">
                 <IconBell size={20} />
