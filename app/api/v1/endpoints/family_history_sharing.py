@@ -168,6 +168,12 @@ def bulk_send_family_history_invitations(
         )
         
         return result
+    except ValueError as e:
+        logger.warning(f"Validation error in bulk sending family history invitations: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
         logger.error(f"Error bulk sending family history invitations: {e}")
         raise HTTPException(

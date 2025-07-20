@@ -456,12 +456,7 @@ class FamilyHistoryService:
             
         except Exception as e:
             logger.error(f"Error sending bulk family history share invitation: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "family_member_count": len(family_member_ids),
-                "family_member_ids": family_member_ids
-            }
+            raise
     
     def get_family_member_with_conditions(self, family_member_id: int, user: User) -> Optional[FamilyMember]:
         """Get family member with conditions - check if user has access"""
