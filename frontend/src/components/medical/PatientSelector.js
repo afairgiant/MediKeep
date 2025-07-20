@@ -284,6 +284,55 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   /**
+   * Find a fallback patient to switch to (prioritize self-record, then other owned patients)
+   */
+  const findFallbackPatient = async () => {
+    try {
+      // Wait a bit for the patient list to be updated after invalidation
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Trigger refresh to ensure we have the latest data
+      await refreshPatientList();
+      
+      // Get current patient list (should now exclude the removed patient)
+      const currentPatients = patients || [];
+      const ownedPatients = currentPatients.filter(p => isPatientOwned(p));
+      
+      if (ownedPatients.length === 0) {
+        logger.info('patient_selector_no_owned_patients', {
+          message: 'No owned patients available for fallback'
+        });
+        return null;
+      }
+      
+      // Prioritize self-record
+      const selfRecord = ownedPatients.find(p => p.is_self_record);
+      if (selfRecord) {
+        logger.debug('patient_selector_fallback_self_record', {
+          message: 'Found self-record for fallback',
+          patientId: selfRecord.id
+        });
+        return selfRecord;
+      }
+      
+      // Fall back to first owned patient
+      const firstOwned = ownedPatients[0];
+      logger.debug('patient_selector_fallback_owned', {
+        message: 'Found owned patient for fallback',
+        patientId: firstOwned.id
+      });
+      return firstOwned;
+      
+    } catch (error) {
+      logger.error('patient_selector_fallback_error', {
+        message: 'Error finding fallback patient',
+        error: error.message
+      });
+      return null;
+    }
+  };
+
+  /**
    * Delete a patient (only for owned patients)
    */
   const deletePatient = async (patient) => {
@@ -353,16 +402,40 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       
       toast.success(`Removed access to ${patient.first_name} ${patient.last_name}`);
       
-      // If we removed access to the active patient, clear it
-      if (activePatient?.id === patient.id) {
-        setActivePatient(null);
-        if (onPatientChange) {
-          onPatientChange(null);
-        }
-      }
-      
       // Invalidate patient list cache to force fresh data
       await invalidatePatientList();
+      
+      // If we removed access to the active patient, switch to a fallback patient
+      if (activePatient?.id === patient.id) {
+        // Find a fallback patient (prioritize self-record, then other owned patients)
+        const fallbackPatient = await findFallbackPatient();
+        
+        if (fallbackPatient) {
+          logger.info('patient_selector_auto_switch', {
+            message: 'Auto-switching to fallback patient after removing access',
+            fromPatientId: patient.id,
+            toPatientId: fallbackPatient.id,
+            fallbackType: fallbackPatient.is_self_record ? 'self_record' : 'owned_patient'
+          });
+          
+          setActivePatient(fallbackPatient);
+          if (onPatientChange) {
+            onPatientChange(fallbackPatient);
+          }
+          
+          toast.info(`Switched to ${fallbackPatient.first_name} ${fallbackPatient.last_name}`);
+        } else {
+          logger.info('patient_selector_no_fallback', {
+            message: 'No fallback patient available, clearing active patient',
+            removedPatientId: patient.id
+          });
+          
+          setActivePatient(null);
+          if (onPatientChange) {
+            onPatientChange(null);
+          }
+        }
+      }
       
       logger.info('patient_selector_access_removed', {
         message: 'Shared patient access removed successfully',
