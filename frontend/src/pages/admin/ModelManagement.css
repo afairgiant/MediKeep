@@ -10,19 +10,19 @@
   align-items: flex-start;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border-light, #e5e7eb);
 }
 
 .model-title h1 {
   margin: 0 0 5px 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary, #111827);
 }
 
 .model-title p {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
   font-size: 1rem;
 }
 
@@ -38,9 +38,9 @@
   align-items: center;
   margin-bottom: 20px;
   padding: 20px;
-  background: white;
+  background: var(--color-bg-primary, white);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-light, #e5e7eb);
 }
 
 .search-section {
@@ -51,23 +51,26 @@
 .search-input {
   width: 100%;
   padding: 10px 15px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-medium, #d1d5db);
   border-radius: 6px;
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s ease;
+  background: var(--color-bg-primary, white);
+  color: var(--color-text-primary, #111827);
 }
 
 .search-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--color-primary, #3b82f6);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .per-page-select {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-medium, #d1d5db);
   border-radius: 6px;
-  background: white;
+  background: var(--color-bg-primary, white);
+  color: var(--color-text-primary, #111827);
   font-size: 0.9rem;
 }
 
@@ -90,9 +93,9 @@
 
 /* Table */
 .model-table-container {
-  background: white;
+  background: var(--color-bg-primary, white);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-light, #e5e7eb);
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -106,19 +109,19 @@
 .model-table td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border-light, #f3f4f6);
 }
 
 .model-table th {
-  background: #f9fafb;
+  background: var(--color-bg-secondary, #f9fafb);
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-primary, #374151);
   font-size: 0.9rem;
   position: relative;
 }
 
 .pk-indicator {
-  background: #3b82f6;
+  background: var(--color-primary, #3b82f6);
   color: white;
   font-size: 0.7rem;
   padding: 2px 4px;
@@ -128,12 +131,12 @@
 }
 
 .model-table tr:hover {
-  background: #f9fafb;
+  background: var(--color-bg-secondary, #f9fafb);
 }
 
 .model-table td {
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--color-text-primary, #374151);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,30 +169,30 @@
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--color-primary, #3b82f6);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--color-primary-dark, #2563eb);
 }
 
 .btn-secondary {
-  background: #6b7280;
+  background: var(--color-gray-600, #6b7280);
   color: white;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #4b5563;
+  background: var(--color-gray-700, #4b5563);
 }
 
 .btn-danger {
-  background: #ef4444;
+  background: var(--color-danger, #ef4444);
   color: white;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #dc2626;
+  background: var(--color-danger-dark, #dc2626);
 }
 
 .btn-sm {
@@ -208,7 +211,7 @@
 
 .pagination-info {
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-primary, #374151);
 }
 
 /* Error State */
@@ -219,16 +222,16 @@
 
 .model-error h2 {
   margin: 0 0 10px 0;
-  color: #dc2626;
+  color: var(--color-danger, #dc2626);
 }
 
 .model-error p {
   margin: 0 0 20px 0;
-  color: #6b7280;
+  color: var(--color-text-secondary, #6b7280);
 }
 
 .retry-btn {
-  background: #3b82f6;
+  background: var(--color-primary, #3b82f6);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -239,7 +242,7 @@
 }
 
 .retry-btn:hover {
-  background: #2563eb;
+  background: var(--color-primary-dark, #2563eb);
 }
 
 /* Admin Page Loading - Centered within admin content area */

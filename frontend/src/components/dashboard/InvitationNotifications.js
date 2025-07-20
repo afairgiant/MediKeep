@@ -14,6 +14,7 @@ import {
   Center,
   Menu,
   Alert,
+  useMantineColorScheme,
 } from '@mantine/core';
 import {
   IconMail,
@@ -32,6 +33,7 @@ import { InvitationManager } from '../invitations';
 import { formatDateTime } from '../../utils/helpers';
 
 const InvitationNotifications = () => {
+  const { colorScheme } = useMantineColorScheme();
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -167,7 +169,13 @@ const InvitationNotifications = () => {
                 p="sm"
                 radius="md"
                 withBorder
-                bg="blue.0"
+                styles={(theme) => ({
+                  root: {
+                    backgroundColor: colorScheme === 'dark' 
+                      ? theme.colors.dark[6] 
+                      : theme.colors.blue[0]
+                  }
+                })}
               >
                 <Stack gap="xs">
                   <Group gap="xs" justify="space-between">
