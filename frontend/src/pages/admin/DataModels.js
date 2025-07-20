@@ -137,9 +137,33 @@ const DataModels = () => {
       color: 'dark',
       category: 'Medical Records',
     },
+    {
+      name: 'patient_share',
+      display: 'Patient Shares',
+      icon: IconUsers,
+      description: 'Patient data sharing relationships between users',
+      color: 'blue',
+      category: 'Sharing & Access',
+    },
+    {
+      name: 'invitation',
+      display: 'Invitations',
+      icon: IconUsers,
+      description: 'System invitations for sharing and collaboration',
+      color: 'green',
+      category: 'Sharing & Access',
+    },
+    {
+      name: 'family_history_share',
+      display: 'Family History Shares',
+      icon: IconUsers,
+      description: 'Family medical history sharing relationships',
+      color: 'purple',
+      category: 'Sharing & Access',
+    },
   ];
 
-  const categories = ['System', 'Core Medical', 'Medical Records'];
+  const categories = ['System', 'Core Medical', 'Medical Records', 'Sharing & Access'];
 
   const handleModelClick = modelName => {
     navigate(`/admin/models/${modelName}`);

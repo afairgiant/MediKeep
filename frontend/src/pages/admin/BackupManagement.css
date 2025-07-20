@@ -58,49 +58,168 @@
 
 .backup-actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Main Backup Actions - Compact Layout */
+.main-backup-actions {
+  display: grid;
+  grid-template-columns: minmax(280px, 350px) minmax(280px, 350px) minmax(150px, 200px);
+  gap: 1rem;
+  align-items: start;
+  overflow: visible;
+  justify-content: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Ensure parent containers don't clip the dropdown */
+.backup-actions-card {
+  overflow: visible !important;
+}
+
+.backup-actions-card > * {
+  overflow: visible !important;
+}
+
+/* Compact Button Style - Match Header Size */
+.backup-btn,
+.compact-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: auto;
+  width: fit-content;
+}
+
+/* Advanced Actions Menu */
+.advanced-actions-menu {
+  position: relative;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  max-width: 200px;
+  width: 100%;
+}
+
+.advanced-actions-menu h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.dots-menu-btn {
+  padding: 0.4rem 0.8rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.dots-menu-btn:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.dots-menu-btn span {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  margin-top: 0.25rem;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.8rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+}
+
+.dropdown-item:disabled {
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.dropdown-divider {
+  margin: 0.25rem 0;
+  border: none;
+  border-top: 1px solid var(--color-border);
 }
 
 .backup-action-card {
   background: var(--color-bg-primary);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
   text-align: center;
   border: 1px solid var(--color-border-light);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
+  overflow: visible;
+  max-width: 350px;
+  width: 100%;
 }
 
 .backup-action-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .backup-action-card h3 {
   color: var(--color-text-primary);
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.2rem;
 }
 
 .backup-action-card p {
   color: var(--color-text-secondary);
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+  font-size: 0.9rem;
 }
 
 .backup-btn {
-  padding: 0.75rem 2rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 200px;
+  min-width: auto;
+  width: fit-content;
 }
 
 .backup-btn.database {
@@ -881,4 +1000,42 @@
 
 [data-theme='dark'] .no-backups {
   color: var(--color-text-muted);
+}
+
+/* Additional dark theme styles for new components */
+[data-theme='dark'] .advanced-actions-menu {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .dropdown-menu {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .dots-menu-btn {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .dots-menu-btn:hover {
+  background: var(--color-bg-secondary);
+}
+
+/* Mobile responsive for new compact layout */
+@media (max-width: 768px) {
+  .main-backup-actions {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .advanced-actions-menu {
+    padding: 0.75rem !important;
+  }
+
+  .dropdown-menu {
+    left: 0.5rem;
+    right: 0.5rem;
+  }
 }
