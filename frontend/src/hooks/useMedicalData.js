@@ -42,11 +42,11 @@ export const useMedicalData = config => {
         if (data) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
-          console.log('Refresh: Setting items for', config.entityName, ':', {
-            rawData: data,
-            extractedData,
+          logger.debug('medical_data_refresh', 'Setting items for entity', {
+            entityName: config.entityName,
+            hasRawData: !!data,
             isArray: Array.isArray(extractedData),
-            length: extractedData?.length
+            itemCount: extractedData?.length || 0
           });
           setItems(Array.isArray(extractedData) ? extractedData : []);
 
@@ -95,10 +95,10 @@ export const useMedicalData = config => {
     
     // If patient ID actually changed (not just initial load), force refresh
     if (currentPatient?.id && previousPatientId && currentPatient.id !== previousPatientId) {
-      console.log('Patient changed, refreshing medical data:', { 
-        from: previousPatientId, 
-        to: currentPatient.id,
-        entityName 
+      logger.info('medical_data_patient_change', 'Patient changed, refreshing medical data', {
+        fromPatientId: previousPatientId,
+        toPatientId: currentPatient.id,
+        entityName
       });
       refreshData();
     }
@@ -233,27 +233,40 @@ export const useMedicalData = config => {
 
         let data = [];
         if (config.requiresPatient && currentPatient?.id) {
-          console.log('Initial fetch for', config.entityName, 'with patient ID:', currentPatient.id);
+          logger.info('medical_data_init', 'Starting initial fetch with patient', {
+            entityName: config.entityName,
+            patientId: currentPatient.id
+          });
           data = await config.apiMethodsConfig.getByPatient(
             currentPatient.id,
             abortController.signal
           );
-          console.log('Initial API response for', config.entityName, ':', data);
+          logger.debug('medical_data_init', 'Received initial API response', {
+            entityName: config.entityName,
+            hasData: !!data,
+            dataType: typeof data
+          });
         } else if (!config.requiresPatient) {
-          console.log('Initial fetch for', config.entityName, '(no patient required)');
+          logger.info('medical_data_init', 'Starting initial fetch without patient requirement', {
+            entityName: config.entityName
+          });
           data = await config.apiMethodsConfig.getAll(abortController.signal);
         } else {
-          console.log('No patient available for initial', config.entityName, 'fetch, currentPatient:', currentPatient);
+          logger.warn('medical_data_init', 'No patient available for initial fetch', {
+            entityName: config.entityName,
+            hasPatient: !!currentPatient,
+            patientId: currentPatient?.id
+          });
         }
 
         if (data && isMounted) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
-          console.log('Setting items for', config.entityName, ':', {
-            rawData: data,
-            extractedData,
+          logger.debug('medical_data_init', 'Setting items for entity', {
+            entityName: config.entityName,
+            hasRawData: !!data,
             isArray: Array.isArray(extractedData),
-            length: extractedData?.length
+            itemCount: extractedData?.length || 0
           });
           setItems(Array.isArray(extractedData) ? extractedData : []);
 

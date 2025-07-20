@@ -361,6 +361,21 @@ class BaseApiService {
       return this.handleResponse(response, errorMessage);
     });
   }
+
+  // Enhanced DELETE method with body support and queuing
+  async deleteWithBody(endpoint, data, errorMessage) {
+    return this.queueRequest(async () => {
+      const response = await fetch(
+        `${this.baseURL}${this.basePath}${endpoint}`,
+        {
+          method: 'DELETE',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(data),
+        }
+      );
+      return this.handleResponse(response, errorMessage);
+    });
+  }
 }
 
 export default BaseApiService;

@@ -58,17 +58,10 @@ class PatientSharingApiService extends BaseApiService {
     });
 
     try {
-      // Use custom request since we need to send body with DELETE
-      const response = await fetch(`${this.baseURL}${this.basePath}/revoke`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          patient_id: patientId,
-          shared_with_user_id: sharedWithUserId
-        })
-      });
-      
-      const data = await this.handleResponse(response, 'Failed to revoke patient share');
+      const data = await this.deleteWithBody('/revoke', {
+        patient_id: patientId,
+        shared_with_user_id: sharedWithUserId
+      }, 'Failed to revoke patient share');
       
       logger.info('patient_sharing_revoke_success', {
         message: 'Patient share revoked successfully',
