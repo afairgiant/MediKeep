@@ -544,9 +544,10 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   // Minimized view - single line with patient name and expand button
   if (isMinimized && activePatient) {
     return (
-      <Group gap="sm" p="xs" style={{ borderRadius: 8 }} 
+      <Group gap="sm" p="xs" 
         styles={(theme) => ({
           root: {
+            borderRadius: 8,
             border: `1px solid ${colorScheme === 'dark' 
               ? theme.colors.dark[4] 
               : theme.colors.gray[3]}`
@@ -715,14 +716,14 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: 8,
-                  zIndex: 1
                 }}
                 styles={(theme) => ({
                   root: {
                     backgroundColor: colorScheme === 'dark' 
                       ? 'rgba(0, 0, 0, 0.8)' 
                       : 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: 8,
+                    zIndex: 1,
                   }
                 })}>
                   <Loader size="sm" />
