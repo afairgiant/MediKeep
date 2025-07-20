@@ -22,17 +22,87 @@ export const useMedicalData = config => {
   const { patient: currentPatient, loading: patientLoading } =
     useCurrentPatient();
   const currentPatientRef = useRef(currentPatient);
-
-  // Keep ref in sync with global patient state and reset initialization when patient changes
-  useEffect(() => {
-    currentPatientRef.current = currentPatient;
-    // Reset initialization flag when patient changes to allow re-initialization
-    if (currentPatient?.id) {
-      isInitialized.current = false;
-    }
-  }, [currentPatient?.id]);
-
   const { loading, error, execute, clearError, setError, cleanup } = useApi();
+
+  // Refresh data function that uses execute wrapper
+  const refreshData = useCallback(async () => {
+    const config = configRef.current;
+    const result = await execute(
+      async signal => {
+        let data = [];
+        if (config.requiresPatient && currentPatientRef.current?.id) {
+          data = await config.apiMethodsConfig.getByPatient(
+            currentPatientRef.current.id,
+            signal
+          );
+        } else if (!config.requiresPatient) {
+          data = await config.apiMethodsConfig.getAll(signal);
+        }
+
+        if (data) {
+          // Extract data array from API response if it's wrapped in a response object
+          const extractedData = data?.data || data;
+          logger.debug('medical_data_refresh', 'Setting items for entity', {
+            entityName: config.entityName,
+            hasRawData: !!data,
+            isArray: Array.isArray(extractedData),
+            itemCount: extractedData?.length || 0
+          });
+          setItems(Array.isArray(extractedData) ? extractedData : []);
+
+          if (
+            config.loadFilesCounts &&
+            extractedData.length <= 20 &&
+            config.apiMethodsConfig.getFiles
+          ) {
+            const counts = {};
+            for (const item of extractedData) {
+              try {
+                const files = await config.apiMethodsConfig.getFiles(
+                  item.id,
+                  signal
+                );
+                counts[item.id] = files?.length || 0;
+              } catch (error) {
+                if (error.name !== 'AbortError') {
+                  logger.warn('medical_data_warning', 'Failed to load file count during refresh', {
+                    entityName: config.entityName,
+                    itemId: item.id,
+                    operation: 'refresh_file_count',
+                    error: error.message
+                  });
+                }
+                counts[item.id] = 0;
+              }
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            setFilesCounts(counts);
+          }
+        }
+
+        return [];
+      },
+      { errorMessage: `Failed to refresh ${config.entityName} data` }
+    );
+    return result;
+  }, [execute]);
+
+  // Keep ref in sync with global patient state and force refresh when patient changes
+  useEffect(() => {
+    const previousPatientId = currentPatientRef.current?.id;
+    currentPatientRef.current = currentPatient;
+    
+    // If patient ID actually changed (not just initial load), force refresh
+    if (currentPatient?.id && previousPatientId && currentPatient.id !== previousPatientId) {
+      logger.info('medical_data_patient_change', 'Patient changed, refreshing medical data', {
+        fromPatientId: previousPatientId,
+        toPatientId: currentPatient.id,
+        entityName
+      });
+      refreshData();
+    }
+  }, [currentPatient?.id, refreshData, entityName]);
 
   // Create item
   const createItem = useCallback(
@@ -163,17 +233,41 @@ export const useMedicalData = config => {
 
         let data = [];
         if (config.requiresPatient && currentPatient?.id) {
+          logger.info('medical_data_init', 'Starting initial fetch with patient', {
+            entityName: config.entityName,
+            patientId: currentPatient.id
+          });
           data = await config.apiMethodsConfig.getByPatient(
             currentPatient.id,
             abortController.signal
           );
+          logger.debug('medical_data_init', 'Received initial API response', {
+            entityName: config.entityName,
+            hasData: !!data,
+            dataType: typeof data
+          });
         } else if (!config.requiresPatient) {
+          logger.info('medical_data_init', 'Starting initial fetch without patient requirement', {
+            entityName: config.entityName
+          });
           data = await config.apiMethodsConfig.getAll(abortController.signal);
+        } else {
+          logger.warn('medical_data_init', 'No patient available for initial fetch', {
+            entityName: config.entityName,
+            hasPatient: !!currentPatient,
+            patientId: currentPatient?.id
+          });
         }
 
         if (data && isMounted) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
+          logger.debug('medical_data_init', 'Setting items for entity', {
+            entityName: config.entityName,
+            hasRawData: !!data,
+            isArray: Array.isArray(extractedData),
+            itemCount: extractedData?.length || 0
+          });
           setItems(Array.isArray(extractedData) ? extractedData : []);
 
           if (
@@ -226,63 +320,6 @@ export const useMedicalData = config => {
       cleanup();
     };
   }, [setError, cleanup, currentPatient?.id]); // Include currentPatient.id to reinitialize when patient loads
-  // Refresh data function that uses execute wrapper
-  const refreshData = useCallback(async () => {
-    const config = configRef.current;
-    const result = await execute(
-      async signal => {
-        let data = [];
-        if (config.requiresPatient && currentPatientRef.current?.id) {
-          data = await config.apiMethodsConfig.getByPatient(
-            currentPatientRef.current.id,
-            signal
-          );
-        } else if (!config.requiresPatient) {
-          data = await config.apiMethodsConfig.getAll(signal);
-        }
-
-        if (data) {
-          // Extract data array from API response if it's wrapped in a response object
-          const extractedData = data?.data || data;
-          setItems(Array.isArray(extractedData) ? extractedData : []);
-
-          if (
-            config.loadFilesCounts &&
-            extractedData.length <= 20 &&
-            config.apiMethodsConfig.getFiles
-          ) {
-            const counts = {};
-            for (const item of extractedData) {
-              try {
-                const files = await config.apiMethodsConfig.getFiles(
-                  item.id,
-                  signal
-                );
-                counts[item.id] = files?.length || 0;
-              } catch (error) {
-                if (error.name !== 'AbortError') {
-                  logger.warn('medical_data_warning', 'Failed to load file count during refresh', {
-                    entityName: config.entityName,
-                    itemId: item.id,
-                    operation: 'refresh_file_count',
-                    error: error.message
-                  });
-                }
-                counts[item.id] = 0;
-              }
-              await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            setFilesCounts(counts);
-          }
-
-          return extractedData;
-        }
-        return [];
-      },
-      { errorMessage: `Failed to refresh ${config.entityName} data` }
-    );
-    return result;
-  }, [execute]);
 
   return {
     // Data

@@ -51,13 +51,14 @@ def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     db: Session = Depends(get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ):
-    """Get lab results for the current user with pagination and practitioner info."""
-    # Filter lab results by the user's patient_id with practitioner relationship loaded
+    """Get lab results for the current user or accessible patient."""
+    
+    # Filter lab results by the target patient_id with practitioner relationship loaded
     results = lab_result.get_by_patient(
         db,
-        patient_id=current_user_patient_id,
+        patient_id=target_patient_id,
         skip=skip,
         limit=limit,
         load_relations=["practitioner", "patient"],

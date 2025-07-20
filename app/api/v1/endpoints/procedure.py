@@ -45,30 +45,30 @@ def read_procedures(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
     practitioner_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """
-    Retrieve procedures for the current user with optional filtering.
+    Retrieve procedures for the current user or accessible patient.
     """
-    # Filter procedures by the user's patient_id (ignore any provided patient_id for security)
+    
+    # Filter procedures by the target patient_id
     if status:
         procedures = procedure.get_by_status(
-            db, status=status, patient_id=current_user_patient_id
+            db, status=status, patient_id=target_patient_id
         )
     elif practitioner_id:
         procedures = procedure.get_by_practitioner(
             db,
             practitioner_id=practitioner_id,
-            patient_id=current_user_patient_id,
+            patient_id=target_patient_id,
             skip=skip,
             limit=limit,
         )
     else:
         procedures = procedure.get_by_patient(
-            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db, patient_id=target_patient_id, skip=skip, limit=limit
         )
     return procedures
 

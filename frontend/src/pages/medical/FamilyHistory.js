@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
+// COMMENTED OUT FOR PR - Family History Sharing Feature
+// import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
@@ -17,6 +19,9 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import MantineFamilyMemberForm from '../../components/medical/MantineFamilyMemberForm';
 import MantineFamilyConditionForm from '../../components/medical/MantineFamilyConditionForm';
 import StatusBadge from '../../components/medical/StatusBadge';
+// COMMENTED OUT FOR PR - Family History Sharing Feature
+// import { InvitationManager } from '../../components/invitations';
+// import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
 import {
   Badge,
   Card,
@@ -35,6 +40,10 @@ import {
   Collapse,
   Box,
   SimpleGrid,
+  Tabs,
+  Menu,
+  Tooltip,
+  Checkbox,
 } from '@mantine/core';
 import {
   IconUsers,
@@ -46,13 +55,31 @@ import {
   IconMedicalCross,
   IconUserPlus,
   IconStethoscope,
+  IconShare,
+  IconMail,
+  IconSend2,
+  IconUser,
+  IconDots,
+  IconX,
+  IconSend,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { useDisclosure } from '@mantine/hooks';
 
 const FamilyHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards');
   const [expandedMembers, setExpandedMembers] = useState(new Set());
+  
+  // COMMENTED OUT FOR PR - Family History Sharing Feature
+  // // Invitation-related state
+  // const [invitationManagerOpened, { open: openInvitationManager, close: closeInvitationManager }] = useDisclosure(false);
+  // const [sharingModalOpened, { open: openSharingModal, close: closeSharingModal }] = useDisclosure(false);
+  // const [bulkSharingModalOpened, { open: openBulkSharingModal, close: closeBulkSharingModal }] = useDisclosure(false);
+  // const [selectedMemberForSharing, setSelectedMemberForSharing] = useState(null);
+  // const [selectedMembersForBulkSharing, setSelectedMembersForBulkSharing] = useState([]);
+  // const [bulkSelectionMode, setBulkSelectionMode] = useState(false);
 
   // Modern data management with useMedicalData
   const {
@@ -70,12 +97,43 @@ const FamilyHistory = () => {
   } = useMedicalData({
     entityName: 'family_member',
     apiMethodsConfig: {
-      getAll: signal => {
-        logger.debug('Getting all family members', {
+      getAll: (signal) => {
+        logger.debug('Getting family members', {
           component: 'FamilyHistory',
         });
         return apiService.getFamilyMembers(signal);
       },
+      // COMMENTED OUT FOR PR - Family History Sharing Feature
+      // getAll: async (signal) => {
+      //   logger.debug('Getting organized family history (owned + shared)', {
+      //     component: 'FamilyHistory',
+      //   });
+      //   const organizedHistory = await familyHistoryApi.getOrganizedHistory();
+      //   
+      //   console.log('DEBUG: Raw organized history response:', organizedHistory);
+      //   
+      //   // Combine owned and shared family history into a flat array
+      //   const ownedMembers = organizedHistory.owned_family_history || [];
+      //   const sharedMembers = (organizedHistory.shared_family_history || []).map(item => {
+      //     console.log('DEBUG: Processing shared family member:', item);
+      //     return {
+      //       ...item.family_member,
+      //       // Add a flag to indicate this is shared data
+      //       is_shared: true,
+      //       shared_by: item.share_details?.shared_by,
+      //       shared_at: item.share_details?.shared_at,
+      //       sharing_note: item.share_details?.sharing_note
+      //     };
+      //   });
+      //   
+      //   logger.debug('Organized family history data', {
+      //     ownedCount: ownedMembers.length,
+      //     sharedCount: sharedMembers.length,
+      //     total: ownedMembers.length + sharedMembers.length
+      //   });
+      //   
+      //   return [...ownedMembers, ...sharedMembers];
+      // },
       getByPatient: (patientId, signal) => {
         logger.debug('Getting family members for patient', {
           patientId,
@@ -525,6 +583,7 @@ const FamilyHistory = () => {
             birth_year: member.birth_year,
             death_year: member.death_year,
             is_deceased: member.is_deceased,
+            is_shared: member.is_shared || false,
             // Condition data
             conditionId: condition.id,
             condition_name: condition.condition_name,
@@ -549,6 +608,7 @@ const FamilyHistory = () => {
           birth_year: member.birth_year,
           death_year: member.death_year,
           is_deceased: member.is_deceased,
+          is_shared: member.is_shared || false,
           // No condition data
           conditionId: null,
           condition_name: null,
@@ -575,6 +635,41 @@ const FamilyHistory = () => {
     }
     setExpandedMembers(newExpanded);
   };
+  
+  // COMMENTED OUT FOR PR - Family History Sharing Feature
+  // // Invitation-related handlers
+  // const handleShareMember = (member) => {
+  //   setSelectedMemberForSharing(member);
+  //   openSharingModal();
+  // };
+  // 
+  // const handleBulkMemberToggle = (memberId) => {
+  //   setSelectedMembersForBulkSharing(current => 
+  //     current.includes(memberId) 
+  //       ? current.filter(id => id !== memberId)
+  //       : [...current, memberId]
+  //   );
+  // };
+  // 
+  // const handleSharingSuccess = () => {
+  //   setSelectedMemberForSharing(null);
+  //   closeSharingModal();
+  //   // Refresh data if needed
+  //   refreshData();
+  // };
+  // 
+  // const handleBulkSharingSuccess = () => {
+  //   setSelectedMembersForBulkSharing([]);
+  //   setBulkSelectionMode(false);
+  //   closeBulkSharingModal();
+  //   // Refresh data if needed
+  //   refreshData();
+  // };
+  // 
+  // const handleInvitationUpdate = () => {
+  //   // Refresh data when invitations are updated
+  //   refreshData();
+  // };
 
   const getSeverityColor = severity => {
     switch (severity?.toLowerCase()) {
@@ -659,13 +754,50 @@ const FamilyHistory = () => {
         </Text>
 
         <Group justify="space-between" mb="lg">
-          <Button
-            leftIcon={<IconUserPlus size={16} />}
-            onClick={handleAddMember}
-            size="md"
-          >
-            Add Family Member
-          </Button>
+          <Group>
+            <Button
+              leftIcon={<IconUserPlus size={16} />}
+              onClick={handleAddMember}
+              size="md"
+            >
+              Add Family Member
+            </Button>
+            
+            {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+            {/* <Button
+              variant={bulkSelectionMode ? "filled" : "light"}
+              leftIcon={<IconShare size={16} />}
+              size="md"
+              onClick={() => {
+                setBulkSelectionMode(!bulkSelectionMode);
+                setSelectedMembersForBulkSharing([]);
+              }}
+            >
+              {bulkSelectionMode ? 'End Sharing Mode' : 'Sharing Mode'}
+            </Button>
+            
+            <Button
+              variant="light"
+              leftIcon={<IconMail size={16} />}
+              size="md"
+              onClick={openInvitationManager}
+            >
+              Manage Invitations
+            </Button>
+            
+            {bulkSelectionMode && selectedMembersForBulkSharing.length > 0 && (
+              <Button
+                variant="filled"
+                leftIcon={<IconSend size={16} />}
+                size="md"
+                onClick={() => {
+                  openBulkSharingModal();
+                }}
+              >
+                Share Selected ({selectedMembersForBulkSharing.length})
+              </Button>
+            )} */}
+          </Group>
 
           <ViewToggle
             viewMode={viewMode}
@@ -673,6 +805,33 @@ const FamilyHistory = () => {
             showPrint={true}
           />
         </Group>
+        
+        {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+        {/* {bulkSelectionMode && (
+          <Alert
+            icon={<IconShare size="1rem" />}
+            title="Sharing Mode Active"
+            color="blue"
+            variant="light"
+            mb="md"
+          >
+            <Group justify="space-between">
+              <Text size="sm">
+                Select family members to share their medical history. {selectedMembersForBulkSharing.length} selected.
+              </Text>
+              <Button
+                size="xs"
+                variant="outline"
+                onClick={() => {
+                  setBulkSelectionMode(false);
+                  setSelectedMembersForBulkSharing([]);
+                }}
+              >
+                Cancel Selection
+              </Button>
+            </Group>
+          </Alert>
+        )} */}
       </div>
 
       {/* Filters */}
@@ -727,6 +886,16 @@ const FamilyHistory = () => {
           tableName="Family History"
           onView={(row) => handleViewFamilyMember({ id: row.familyMemberId })}
           onEdit={(row) => {
+            {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+            {/* if (row.is_shared) {
+              notifications.show({
+                title: 'Cannot Edit',
+                message: 'You cannot edit shared family history records',
+                color: 'orange',
+                icon: <IconX size="1rem" />
+              });
+              return;
+            } */}
             if (row.conditionId) {
               // Edit condition
               const familyMember = familyMembers.find(m => m.id === row.familyMemberId);
@@ -743,6 +912,16 @@ const FamilyHistory = () => {
             }
           }}
           onDelete={(row) => {
+            {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+            {/* if (row.is_shared) {
+              notifications.show({
+                title: 'Cannot Delete',
+                message: 'You cannot delete shared family history records',
+                color: 'orange',
+                icon: <IconX size="1rem" />
+              });
+              return;
+            } */}
             if (row.conditionId) {
               // Delete condition
               handleDeleteCondition(row.familyMemberId, row.conditionId);
@@ -793,17 +972,35 @@ const FamilyHistory = () => {
                     >
                       <Group position="apart" mb="xs">
                         <div style={{ flex: 1 }}>
-                          <Text weight={500} size="lg">
-                            {member.name}
-                          </Text>
+                          <Group gap="xs" align="center">
+                            <Text weight={500} size="lg">
+                              {member.name}
+                            </Text>
+                            {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+                            {/* {member.is_shared && (
+                              <Badge size="xs" color="blue" variant="light">
+                                Shared
+                              </Badge>
+                            )} */}
+                          </Group>
                           <Text size="sm" color="dimmed" transform="capitalize">
                             {member.relationship.replace('_', ' ')}
                             {age && ` • Age ${age}`}
                             {member.is_deceased && ' • Deceased'}
+                            {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+                            {/* {member.is_shared && member.shared_by && ` • Shared by ${member.shared_by.name}`} */}
                           </Text>
                         </div>
 
                         <Group spacing="xs">
+                          {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+                          {/* {bulkSelectionMode && !member.is_shared && (
+                            <Checkbox
+                              checked={selectedMembersForBulkSharing.includes(member.id)}
+                              onChange={() => handleBulkMemberToggle(member.id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          )} */}
                           <Button
                             size="xs"
                             variant="light"
@@ -814,25 +1011,57 @@ const FamilyHistory = () => {
                           >
                             View Details
                           </Button>
-                          <ActionIcon
-                            variant="light"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleEditMember(member);
-                            }}
-                          >
-                            <IconEdit size={16} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="light"
-                            color="red"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDeleteMember(member.id);
-                            }}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
+                          <Menu shadow="md" width={150} position="bottom-end">
+                            <Menu.Target>
+                              <ActionIcon
+                                variant="light"
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <IconDots size={16} />
+                              </ActionIcon>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                              {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+                              {/* {!member.is_shared && ( */}
+                                <>
+                                  <Menu.Item
+                                    icon={<IconEdit size={14} />}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditMember(member);
+                                    }}
+                                  >
+                                    Edit
+                                  </Menu.Item>
+                                  {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+                                  {/* <Menu.Item
+                                    icon={<IconShare size={14} />}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleShareMember(member);
+                                    }}
+                                  >
+                                    Share History
+                                  </Menu.Item> */}
+                                </>
+                              {/* )} */}
+                              {/* {!member.is_shared && ( */}
+                                <>
+                                  <Menu.Divider />
+                                  <Menu.Item
+                                    icon={<IconTrash size={14} />}
+                                    color="red"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteMember(member.id);
+                                    }}
+                                  >
+                                    Delete
+                                  </Menu.Item>
+                                </>
+                              {/* )} */}
+                            </Menu.Dropdown>
+                          </Menu>
                         </Group>
                       </Group>
 
@@ -1079,13 +1308,27 @@ const FamilyHistory = () => {
                 <Text weight={500} size="lg">
                   Medical Conditions
                 </Text>
-                <Button
-                  size="sm"
-                  leftIcon={<IconStethoscope size={16} />}
-                  onClick={handleAddConditionFromView}
-                >
-                  Add Condition
-                </Button>
+                <Group>
+                  {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+                  {/* <Button
+                    size="sm"
+                    variant="light"
+                    leftIcon={<IconShare size={16} />}
+                    onClick={() => {
+                      setSelectedMemberForSharing(viewingFamilyMember);
+                      openSharingModal();
+                    }}
+                  >
+                    Share History
+                  </Button> */}
+                  <Button
+                    size="sm"
+                    leftIcon={<IconStethoscope size={16} />}
+                    onClick={handleAddConditionFromView}
+                  >
+                    Add Condition
+                  </Button>
+                </Group>
               </Group>
 
               {!viewingFamilyMember.family_conditions ||
@@ -1174,6 +1417,31 @@ const FamilyHistory = () => {
           </Stack>
         </Modal>
       )}
+      
+      {/* COMMENTED OUT FOR PR - Family History Sharing Feature */}
+      {/* {/* Invitation Manager Modal */}
+      {/* <InvitationManager
+        opened={invitationManagerOpened}
+        onClose={closeInvitationManager}
+        onUpdate={handleInvitationUpdate}
+      />
+      
+      {/* Family History Sharing Modal */}
+      {/* <FamilyHistorySharingModal
+        opened={sharingModalOpened}
+        onClose={closeSharingModal}
+        familyMember={selectedMemberForSharing}
+        onSuccess={handleSharingSuccess}
+      />
+      
+      {/* Bulk Family History Sharing Modal */}
+      {/* <FamilyHistorySharingModal
+        opened={bulkSharingModalOpened}
+        onClose={closeBulkSharingModal}
+        familyMembers={selectedMembersForBulkSharing.map(id => familyMembers.find(m => m.id === id)).filter(Boolean)}
+        bulkMode={true}
+        onSuccess={handleBulkSharingSuccess}
+      /> */}
     </Container>
   );
 };

@@ -320,6 +320,7 @@ class ActivityTracker:
             description = self._get_entity_description(instance, action)
             metadata = self._create_activity_metadata(instance, action)
             
+            
             # Create the activity log using the model's factory method
             activity = ActivityLog.create_activity(
                 action=action,

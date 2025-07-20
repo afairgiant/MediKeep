@@ -1,6 +1,10 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 
+# Include all PRs by default, even without labels
+include-pre-releases: false
+sort-direction: descending
+
 categories:
   - title: '🚀 Features'
     labels:
@@ -21,6 +25,9 @@ categories:
     labels:
       - 'documentation'
       - 'docs'
+  - title: '🔧 Other Changes'
+    labels:
+      - '*'
 
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 

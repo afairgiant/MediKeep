@@ -49,6 +49,8 @@ const MODEL_TO_ENTITY_TYPE = {
   'medical pharmacy': ENTITY_TYPES.PHARMACY,
   practitioner: ENTITY_TYPES.PRACTITIONER,
   'medical practitioner': ENTITY_TYPES.PRACTITIONER,
+  doctor: ENTITY_TYPES.PRACTITIONER,
+  'medical doctor': ENTITY_TYPES.PRACTITIONER,
   patient: ENTITY_TYPES.PATIENT,
   'medical patient': ENTITY_TYPES.PATIENT,
 };

@@ -48,17 +48,15 @@ def read_emergency_contacts(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
     is_active: Optional[bool] = Query(None),
     is_primary: Optional[bool] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve emergency contacts for the current user with optional filtering."""
-    # Filter emergency contacts by the user's patient_id (ignore any provided patient_id for security)
+    """Retrieve emergency contacts for the current user or accessible patient."""
 
     # Start with base query
     query = db.query(EmergencyContact).filter(
-        EmergencyContact.patient_id == current_user_patient_id
+        EmergencyContact.patient_id == target_patient_id
     )
 
     # Apply optional filters

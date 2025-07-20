@@ -1,6 +1,6 @@
-from typing import Generator
+from typing import Generator, Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -239,35 +239,85 @@ def verify_patient_record_access(
 def verify_patient_access(
     patient_id: int,
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
+    required_permission: str = "view"
 ) -> int:
     """
     Dependency that verifies the current user can access the specified patient's records.
-
-    This dependency automatically:
-    1. Gets the current user's patient ID
-    2. Verifies they have access to the requested patient_id
-    3. Returns the verified patient_id for use in the endpoint
+    
+    This function supports Phase 1 patient access including:
+    - Own patients (always accessible)
+    - Shared patients (with proper permission levels)
 
     Args:
         patient_id: The patient ID from the URL path
         db: Database session
-        current_user_id: Current authenticated user ID
+        current_user: Current authenticated user
+        required_permission: Required permission level ('view', 'edit', 'full')
 
     Returns:
         The verified patient_id
 
     Raises:
-        HTTPException 404: If patient not found or access denied
+        HTTPException 404: If patient not found
+        HTTPException 403: If access denied
     """
-    # Get current user's patient ID
-    current_user_patient_id = get_current_user_patient_id(db, current_user_id)
-
-    # Verify access to this patient's records
-    verify_patient_record_access(
-        record_patient_id=patient_id,
-        current_user_patient_id=current_user_patient_id,
-        record_type="patient records",
-    )
-
+    from app.models.models import Patient
+    from app.services.patient_access import PatientAccessService
+    
+    # Get the patient record
+    patient_record = db.query(Patient).filter(Patient.id == patient_id).first()
+    if not patient_record:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    # Check access using the PatientAccessService
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, required_permission):
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Access denied to patient {patient_id}"
+        )
+    
     return patient_id
+
+
+def get_accessible_patient_id(
+    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> int:
+    """
+    Get an accessible patient ID for Phase 1 patient switching.
+    
+    If patient_id is provided, verifies access and returns it.
+    If patient_id is None, returns the current user's own patient ID.
+    
+    Args:
+        patient_id: Optional patient ID from query parameter
+        db: Database session
+        current_user: Current authenticated user
+        
+    Returns:
+        Patient ID that the user can access
+        
+    Raises:
+        HTTPException 404: If patient not found
+        HTTPException 403: If access denied
+    """
+    if patient_id is not None:
+        # Verify user has access to this patient
+        from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
+        
+        patient_record = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient_record:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, patient_record, "view"):
+            raise HTTPException(status_code=403, detail="Access denied to patient")
+            
+        return patient_id
+    else:
+        # Fall back to user's own patient ID
+        return get_current_user_patient_id(db, current_user.id)

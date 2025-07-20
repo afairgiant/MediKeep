@@ -57,16 +57,17 @@ def read_family_members(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     relationship: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve family members for the current user with optional filtering."""
+    """Retrieve family members for the current user or accessible patient."""
+    
     if relationship:
         family_members = family_member.get_by_relationship(
-            db, patient_id=current_user_patient_id, relationship=relationship
+            db, patient_id=target_patient_id, relationship=relationship
         )
     else:
         family_members = family_member.get_by_patient_with_conditions(
-            db, patient_id=current_user_patient_id
+            db, patient_id=target_patient_id
         )
     return family_members
 
