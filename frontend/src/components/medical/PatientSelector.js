@@ -348,8 +348,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     try {
       setLoading(true);
       
-      // Revoke the share
-      await patientSharingApi.revokePatientShare(patient.id, currentUser.id);
+      // Remove my access to the shared patient
+      await patientSharingApi.removeMyAccess(patient.id);
       
       toast.success(`Removed access to ${patient.first_name} ${patient.last_name}`);
       

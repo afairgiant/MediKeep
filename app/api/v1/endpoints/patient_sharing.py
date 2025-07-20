@@ -192,6 +192,66 @@ def share_patient(
             raise HTTPException(status_code=500, detail="Failed to share patient")
 
 
+@router.delete("/remove-my-access/{patient_id}", response_model=dict)
+def remove_my_access(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Remove the current user's access to a shared patient.
+    
+    This allows users to remove themselves from patient shares they have received.
+    The current user must have received access to this patient (not be the owner).
+    """
+    user_ip = request.client.host if request.client else "unknown"
+    
+    try:
+        service = PatientSharingService(db)
+        success = service.remove_user_access(
+            user=current_user,
+            patient_id=patient_id
+        )
+        
+        if success:
+            logger.info(
+                f"User {current_user.id} removed their own access to patient {patient_id}",
+                extra={
+                    "category": "app",
+                    "event": "patient_access_self_removed",
+                    "user_id": current_user.id,
+                    "patient_id": patient_id,
+                    "ip": user_ip,
+                }
+            )
+            
+            return {"message": "Successfully removed your access to this patient"}
+        else:
+            return {"message": "No active access found to remove"}
+            
+    except Exception as e:
+        logger.error(
+            f"Failed to remove user {current_user.id} access to patient {patient_id}: {str(e)}",
+            extra={
+                "category": "app",
+                "event": "patient_access_self_removal_failed",
+                "user_id": current_user.id,
+                "patient_id": patient_id,
+                "error": str(e),
+                "ip": user_ip,
+            }
+        )
+        
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=str(e))
+        elif "cannot remove" in str(e).lower() or "not shared" in str(e).lower():
+            raise HTTPException(status_code=400, detail=str(e))
+        else:
+            raise HTTPException(status_code=500, detail="Failed to remove access")
+
+
 @router.delete("/revoke", response_model=dict)
 def revoke_patient_share(
     *,

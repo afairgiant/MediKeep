@@ -289,3 +289,45 @@ class PatientSharingService:
         self.db.commit()
         logger.info(f"Deactivated {count} expired patient shares")
         return count
+    
+    def remove_user_access(self, user: User, patient_id: int) -> bool:
+        """
+        Remove a user's access to a shared patient
+        
+        This allows users to remove themselves from patient shares they have received.
+        The user must have received access to this patient (not be the owner).
+        
+        Args:
+            user: The user removing their own access
+            patient_id: ID of the patient to remove access from
+            
+        Returns:
+            True if access was removed, False if no active share found
+        """
+        logger.info(f"User {user.id} removing their own access to patient {patient_id}")
+        
+        # Check if user is the owner (they cannot remove their own ownership)
+        patient = self.db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            raise ValueError("Patient not found")
+        
+        if patient.owner_user_id == user.id:
+            raise ValueError("Cannot remove access to patients you own")
+        
+        # Find active share where user is the recipient
+        share = self.db.query(PatientShare).filter(
+            PatientShare.patient_id == patient_id,
+            PatientShare.shared_with_user_id == user.id,
+            PatientShare.is_active == True
+        ).first()
+        
+        if not share:
+            logger.warning(f"No active share found for user {user.id} to patient {patient_id}")
+            return False
+        
+        # Deactivate the share
+        share.is_active = False
+        self.db.commit()
+        
+        logger.info(f"Removed user {user.id} access to patient {patient_id} (share {share.id})")
+        return True

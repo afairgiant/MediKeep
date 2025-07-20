@@ -45,7 +45,36 @@ class PatientSharingApiService extends BaseApiService {
   }
 
   /**
-   * Revoke patient sharing access
+   * Remove current user's access to a shared patient
+   * @param {number} patientId - Patient ID
+   * @returns {Promise<Object>} Success message
+   */
+  async removeMyAccess(patientId) {
+    logger.info('patient_sharing_remove_my_access', {
+      message: 'Removing my access to shared patient',
+      patientId
+    });
+
+    try {
+      const data = await this.delete(`/remove-my-access/${patientId}`, 'Failed to remove access');
+      
+      logger.info('patient_sharing_remove_my_access_success', {
+        message: 'Successfully removed my access to patient',
+        patientId
+      });
+      return data;
+    } catch (error) {
+      logger.error('patient_sharing_remove_my_access_error', {
+        message: 'Failed to remove my access to patient',
+        patientId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Revoke patient sharing access (owner revoking access from another user)
    * @param {number} patientId - Patient ID
    * @param {number} sharedWithUserId - User ID to revoke access from
    * @returns {Promise<Object>} Success message
