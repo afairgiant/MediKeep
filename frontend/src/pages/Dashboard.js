@@ -609,7 +609,14 @@ const Dashboard = () => {
           ))}
         </Stack>
       ) : (
-        <Paper p="md" radius="md" bg="gray.1" style={{ backgroundColor: 'transparent' }}>
+        <Paper p="md" radius="md" 
+          styles={(theme) => ({
+            root: {
+              backgroundColor: colorScheme === 'dark' 
+                ? theme.colors.dark[6] 
+                : theme.colors.gray[1],
+            },
+          })}>
           <Stack align="center" gap="xs">
             <ThemeIcon color="gray" variant="light" size="lg">
               <IconAlertCircle size={20} />
