@@ -12,6 +12,7 @@ class FamilyHistoryShareInvitationCreate(BaseModel):
     shared_with_identifier: str = Field(..., description="Username or email of user to share with")
     permission_level: str = Field(default='view', description="Permission level (view only for Phase 1.5)")
     sharing_note: Optional[str] = Field(None, description="Optional note about why sharing")
+    expires_hours: Optional[int] = Field(default=168, description="Hours until invitation expires (default 7 days, None for no expiration)")
 
 
 class FamilyHistoryBulkInvite(BaseModel):
@@ -20,6 +21,7 @@ class FamilyHistoryBulkInvite(BaseModel):
     shared_with_identifier: str = Field(..., description="Username or email of user to share with")
     permission_level: str = Field(default='view', description="Permission level")
     sharing_note: Optional[str] = Field(None, description="Optional sharing note")
+    expires_hours: Optional[int] = Field(default=168, description="Hours until invitation expires (default 7 days, None for no expiration)")
 
 
 class FamilyHistoryShareResponse(BaseModel):

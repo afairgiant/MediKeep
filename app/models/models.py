@@ -924,16 +924,8 @@ class Invitation(Base):
     sent_by = orm_relationship("User", foreign_keys=[sent_by_user_id])
     sent_to = orm_relationship("User", foreign_keys=[sent_to_user_id])
 
-    # Constraints - allow duplicate invitations with different context data
-    # Note: context_data excluded from unique constraint due to PostgreSQL JSON indexing limitations
-    __table_args__ = (
-        UniqueConstraint(
-            "sent_by_user_id",
-            "sent_to_user_id",
-            "invitation_type",
-            name="unique_active_invitation",
-        ),
-    )
+    # No unique constraints - let application logic handle business rules
+    # Each invitation has a unique ID which is sufficient for database integrity
 
 
 class FamilyHistoryShare(Base):

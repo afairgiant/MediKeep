@@ -78,7 +78,12 @@ const Dashboard = () => {
 
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
-  const { invalidatePatient, refreshPatient, invalidateAll, setCurrentPatient } = useCacheManager();
+  const {
+    invalidatePatient,
+    refreshPatient,
+    invalidateAll,
+    setCurrentPatient,
+  } = useCacheManager();
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
@@ -98,15 +103,15 @@ const Dashboard = () => {
   });
 
   // Combine loading states - only show full loading screen during initial load
-  const loading = (patientLoading || activityLoading || statsLoading) && !initialLoadComplete;
-
+  const loading =
+    (patientLoading || activityLoading || statsLoading) && !initialLoadComplete;
 
   useEffect(() => {
     const loadInitialData = async () => {
       await Promise.all([
         fetchRecentActivity(),
         fetchDashboardStats(),
-        checkAdminStatus()
+        checkAdminStatus(),
       ]);
       setInitialLoadComplete(true);
     };
@@ -169,36 +174,38 @@ const Dashboard = () => {
     }
   };
 
-  const handlePatientChange = async (newPatient) => {
+  const handlePatientChange = async newPatient => {
     // Prevent infinite loops by checking if patient actually changed
     if (currentActivePatient?.id === newPatient?.id) {
       return;
     }
-    
+
     frontendLogger.logInfo('Patient switched from dashboard', {
       component: 'Dashboard',
       newPatientId: newPatient?.id,
-      patientName: newPatient ? `${newPatient.first_name} ${newPatient.last_name}` : null
+      patientName: newPatient
+        ? `${newPatient.first_name} ${newPatient.last_name}`
+        : null,
     });
-    
+
     // Show loading state for patient selector during switch
     setPatientSelectorLoading(true);
-    
+
     // Update local state
     setCurrentActivePatient(newPatient);
-    
+
     // Invalidate all caches to force refresh of all medical data for new patient
     invalidateAll();
     refreshPatient();
-    
+
     // Refresh dashboard data for the new patient context
     if (newPatient) {
       await Promise.all([
         fetchRecentActivity(newPatient.id),
-        fetchDashboardStats()
+        fetchDashboardStats(),
       ]);
     }
-    
+
     // Hide loading state
     setPatientSelectorLoading(false);
   };
@@ -208,21 +215,23 @@ const Dashboard = () => {
       setActivityLoading(true);
       const targetPatientId = patientId || currentActivePatient?.id || user?.id;
       const activity = await apiService.getRecentActivity(targetPatientId);
-      
+
       // Filter out erroneous "deleted" patient information activities
       // This is a temporary fix for a backend issue where patient updates are logged as deletions
       const filteredActivity = activity.filter(item => {
-        const isPatientModel = item.model_name?.toLowerCase().includes('patient');
+        const isPatientModel = item.model_name
+          ?.toLowerCase()
+          .includes('patient');
         const isDeletedAction = item.action?.toLowerCase() === 'deleted';
-        
+
         // Exclude deleted patient information activities (backend logging error)
         if (isPatientModel && isDeletedAction) {
           return false;
         }
-        
+
         return true;
       });
-      
+
       setRecentActivity(filteredActivity);
       setLastActivityUpdate(new Date());
     } catch (error) {
@@ -245,7 +254,7 @@ const Dashboard = () => {
       frontendLogger.logError('Error fetching dashboard stats', {
         error: error.message,
         component: 'Dashboard',
-        patientId: currentActivePatient?.id
+        patientId: currentActivePatient?.id,
       });
       // Set fallback stats on error
       setDashboardStats({
@@ -687,7 +696,8 @@ const Dashboard = () => {
               </div>
               {(currentActivePatient || user) && (
                 <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
-                  Hello, {(currentActivePatient || user).first_name} {(currentActivePatient || user).last_name}!
+                  Hello, {(currentActivePatient || user).first_name}{' '}
+                  {(currentActivePatient || user).last_name}!
                 </Badge>
               )}
             </Group>
@@ -696,28 +706,28 @@ const Dashboard = () => {
 
         {/* Patient Selector and Search Bar - Responsive Layout */}
         <Stack gap="md" mb="xl">
-          <Flex 
-            justify="space-between" 
-            align="flex-start" 
+          <Flex
+            justify="space-between"
+            align="flex-start"
             gap="md"
             direction={{ base: 'column', sm: 'row' }}
           >
             {/* Patient Selector */}
             <Box style={{ flex: '1', maxWidth: '500px', width: '100%' }}>
-              <PatientSelector 
+              <PatientSelector
                 onPatientChange={handlePatientChange}
                 currentPatientId={currentActivePatient?.id || user?.id}
                 loading={patientSelectorLoading}
                 compact={true}
               />
             </Box>
-            
+
             {/* Search Bar */}
-            <Box 
-              style={{ 
+            <Box
+              style={{
                 flexShrink: 0,
                 width: '100%',
-                maxWidth: '300px'
+                maxWidth: '300px',
               }}
             >
               <GlobalSearch
@@ -785,9 +795,6 @@ const Dashboard = () => {
 
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
-              {/* Invitation Notifications */}
-              <InvitationNotifications />
-              
               {/* Recent Activity */}
               <RecentActivityList />
 
@@ -835,6 +842,8 @@ const Dashboard = () => {
                   })}
                 </Stack>
               </Card>
+              {/* Invitation Notifications */}
+              <InvitationNotifications />
             </Stack>
           </Grid.Col>
         </Grid>
@@ -846,7 +855,6 @@ const Dashboard = () => {
           ))}
         </SimpleGrid>
       </Container>
-
     </div>
   );
 };

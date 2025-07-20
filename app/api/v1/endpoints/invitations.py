@@ -200,6 +200,81 @@ def cancel_invitation(
         )
 
 
+@router.post("/{invitation_id}/revoke")
+def revoke_invitation(
+    invitation_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Revoke an accepted invitation (specifically for family history shares)"""
+    try:
+        # Get the invitation first
+        invitation_service = InvitationService(db)
+        invitation = invitation_service.get_invitation_by_id(invitation_id)
+        
+        if not invitation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invitation not found"
+            )
+        
+        # Verify the user owns this invitation
+        if invitation.sent_by_user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to revoke this invitation"
+            )
+        
+        # Handle family history share revocation
+        if invitation.invitation_type == 'family_history_share' and invitation.status == 'accepted':
+            family_service = FamilyHistoryService(db)
+            
+            # Extract context data
+            family_member_id = invitation.context_data.get('family_member_id')
+            shared_with_user_id = invitation.sent_to_user_id
+            
+            logger.info(f"DEBUG: Revoking invitation {invitation_id} - family_member_id={family_member_id}, shared_with_user_id={shared_with_user_id}, context_data={invitation.context_data}")
+            
+            if not family_member_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid invitation context data"
+                )
+            
+            # Revoke the share (this will also update the invitation status)
+            share = family_service.revoke_family_history_share(
+                current_user, 
+                family_member_id, 
+                shared_with_user_id
+            )
+            
+            return {
+                "message": "Family history sharing revoked successfully",
+                "invitation_id": invitation.id,
+                "share_id": share.id,
+                "status": "revoked"
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Can only revoke accepted family history share invitations"
+            )
+            
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error revoking invitation: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to revoke invitation"
+        )
+
+
 @router.post("/cleanup")
 def cleanup_expired_invitations(
     current_user: User = Depends(get_current_user),

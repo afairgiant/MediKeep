@@ -42,6 +42,7 @@ const InvitationCard = ({
             case 'rejected': return 'red';
             case 'expired': return 'gray';
             case 'cancelled': return 'gray';
+            case 'revoked': return 'gray';
             default: return 'blue';
         }
     };
@@ -135,7 +136,7 @@ const InvitationCard = ({
                         <Badge color={getStatusColor(invitation.status)} variant="light">
                             {invitation.status}
                         </Badge>
-                        {variant === 'sent' && invitation.status === 'pending' && (
+                        {variant === 'sent' && (invitation.status === 'pending' || invitation.status === 'accepted') && (
                             <Menu shadow="md" width={150} position="bottom-end">
                                 <Menu.Target>
                                     <ActionIcon variant="subtle" color="gray">
@@ -143,13 +144,24 @@ const InvitationCard = ({
                                     </ActionIcon>
                                 </Menu.Target>
                                 <Menu.Dropdown>
-                                    <Menu.Item 
-                                        leftSection={<IconTrash size="0.9rem" />}
-                                        color="red"
-                                        onClick={() => onCancel && onCancel(invitation)}
-                                    >
-                                        Cancel
-                                    </Menu.Item>
+                                    {invitation.status === 'pending' && (
+                                        <Menu.Item 
+                                            leftSection={<IconTrash size="0.9rem" />}
+                                            color="red"
+                                            onClick={() => onCancel && onCancel(invitation)}
+                                        >
+                                            Cancel
+                                        </Menu.Item>
+                                    )}
+                                    {invitation.status === 'accepted' && invitation.invitation_type === 'family_history_share' && (
+                                        <Menu.Item 
+                                            leftSection={<IconTrash size="0.9rem" />}
+                                            color="red"
+                                            onClick={() => onCancel && onCancel(invitation)}
+                                        >
+                                            Revoke Access
+                                        </Menu.Item>
+                                    )}
                                 </Menu.Dropdown>
                             </Menu>
                         )}

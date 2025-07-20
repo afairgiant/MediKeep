@@ -18,7 +18,8 @@ import {
     Loader,
     Menu,
     Checkbox,
-    List
+    List,
+    Select
 } from '@mantine/core';
 import {
     IconInfoCircle,
@@ -50,7 +51,8 @@ const FamilyHistorySharingModal = ({
     const [sharesLoading, setSharesLoading] = useState(false);
     const [shareForm, setShareForm] = useState({
         shared_with_identifier: '',
-        sharing_note: ''
+        sharing_note: '',
+        expires_hours: 168 // Default to 7 days
     });
     const [selectedMembers, setSelectedMembers] = useState([]);
 
@@ -105,7 +107,8 @@ const FamilyHistorySharingModal = ({
                     family_member_ids: selectedMembers,
                     shared_with_identifier: shareForm.shared_with_identifier,
                     permission_level: 'view',
-                    sharing_note: shareForm.sharing_note
+                    sharing_note: shareForm.sharing_note,
+                    expires_hours: shareForm.expires_hours
                 });
                 
                 console.log('DEBUG: Bulk invite result:', result);
@@ -136,7 +139,8 @@ const FamilyHistorySharingModal = ({
                 await familyHistoryApi.sendShareInvitation(familyMember.id, {
                     shared_with_identifier: shareForm.shared_with_identifier,
                     permission_level: 'view',
-                    sharing_note: shareForm.sharing_note
+                    sharing_note: shareForm.sharing_note,
+                    expires_hours: shareForm.expires_hours
                 });
                 
                 notifications.show({
@@ -149,7 +153,7 @@ const FamilyHistorySharingModal = ({
                 await loadShares();
             }
             
-            setShareForm({ shared_with_identifier: '', sharing_note: '' });
+            setShareForm({ shared_with_identifier: '', sharing_note: '', expires_hours: 168 });
             if (onSuccess) onSuccess();
         } catch (error) {
             const errorMessage = error.response?.data?.detail || error.message || 'Failed to send invitation';
@@ -186,7 +190,7 @@ const FamilyHistorySharingModal = ({
     };
 
     const handleClose = () => {
-        setShareForm({ shared_with_identifier: '', sharing_note: '' });
+        setShareForm({ shared_with_identifier: '', sharing_note: '', expires_hours: 168 });
         setSelectedMembers([]);
         onClose();
     };
@@ -304,6 +308,25 @@ const FamilyHistorySharingModal = ({
                         })}
                         rows={3}
                         leftSection={<IconMessageCircle size="1rem" />}
+                    />
+                    
+                    <Select
+                        label="Invitation Expiration"
+                        placeholder="Select expiration time"
+                        value={shareForm.expires_hours === null ? 'never' : shareForm.expires_hours?.toString()}
+                        onChange={(value) => setShareForm({
+                            ...shareForm, 
+                            expires_hours: value === 'never' ? null : parseInt(value)
+                        })}
+                        data={[
+                            { value: '24', label: '1 Day' },
+                            { value: '72', label: '3 Days' },
+                            { value: '168', label: '1 Week' },
+                            { value: '336', label: '2 Weeks' },
+                            { value: '720', label: '1 Month' },
+                            { value: 'never', label: 'Never Expires' }
+                        ]}
+                        description="How long the recipient has to accept the invitation"
                     />
                     
                     <Button 

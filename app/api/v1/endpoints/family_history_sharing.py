@@ -102,7 +102,8 @@ def send_family_history_share_invitation(
             family_member_id, 
             invite_data.shared_with_identifier,
             invite_data.permission_level,
-            invite_data.sharing_note
+            invite_data.sharing_note,
+            invite_data.expires_hours
         )
         return {
             "message": "Family history share invitation sent successfully",
@@ -148,34 +149,25 @@ def revoke_family_member_share(
         )
 
 
-@router.post("/bulk-invite", response_model=BulkInviteResponse)
+@router.post("/bulk-invite")
 def bulk_send_family_history_invitations(
     bulk_invite_data: FamilyHistoryBulkInvite,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Send multiple family history share invitations to one user"""
+    """Send ONE invitation to share multiple family members with one user"""
     try:
         service = FamilyHistoryService(db)
-        results = service.bulk_send_family_history_invitations(
+        result = service.bulk_send_family_history_invitations(
             current_user,
             bulk_invite_data.family_member_ids,
             bulk_invite_data.shared_with_identifier,
             bulk_invite_data.permission_level,
-            bulk_invite_data.sharing_note
+            bulk_invite_data.sharing_note,
+            bulk_invite_data.expires_hours
         )
         
-        # Convert to proper schema format
-        bulk_results = []
-        for result in results:
-            bulk_results.append(BulkInviteResult(
-                family_member_id=result["family_member_id"],
-                success=result["success"],
-                invitation_id=result.get("invitation_id"),
-                error=result.get("error")
-            ))
-        
-        return BulkInviteResponse(results=bulk_results)
+        return result
     except Exception as e:
         logger.error(f"Error bulk sending family history invitations: {e}")
         raise HTTPException(

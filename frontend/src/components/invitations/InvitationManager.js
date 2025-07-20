@@ -15,9 +15,7 @@ import {
     SimpleGrid,
     ActionIcon,
     Menu,
-    Divider,
-    TextInput,
-    Select
+    Divider
 } from '@mantine/core';
 import {
     IconMail,
@@ -27,14 +25,13 @@ import {
     IconUsers,
     IconInfoCircle,
     IconRefresh,
-    IconFilter,
-    IconSearch,
     IconTrash,
     IconClock
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import invitationApi from '../../services/api/invitationApi';
+import familyHistoryApi from '../../services/api/familyHistoryApi';
 import InvitationCard from './InvitationCard';
 import InvitationResponseModal from './InvitationResponseModal';
 
@@ -42,10 +39,8 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
     const [pendingInvitations, setPendingInvitations] = useState([]);
     const [sentInvitations, setSentInvitations] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState('pending');
+    const [activeTab, setActiveTab] = useState('pending_sent');
     const [selectedInvitation, setSelectedInvitation] = useState(null);
-    const [filterType, setFilterType] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
     const [responseModalOpened, { open: openResponseModal, close: closeResponseModal }] = useDisclosure(false);
 
     useEffect(() => {
@@ -61,9 +56,20 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                 invitationApi.getPendingInvitations(),
                 invitationApi.getSentInvitations()
             ]);
-            console.log('DEBUG: Loaded invitations', { pending, sent });
-            setPendingInvitations(pending);
-            setSentInvitations(sent);
+            // Filter out revoked and canceled invitations
+            const filteredPending = pending.filter(inv => !['revoked', 'cancelled', 'expired'].includes(inv.status));
+            const filteredSent = sent.filter(inv => !['revoked', 'cancelled', 'expired'].includes(inv.status));
+            
+            console.log('DEBUG: Loaded invitations', { 
+                pending: filteredPending, 
+                sent: filteredSent,
+                filtered_out: {
+                    pending: pending.length - filteredPending.length,
+                    sent: sent.length - filteredSent.length
+                }
+            });
+            setPendingInvitations(filteredPending);
+            setSentInvitations(filteredSent);
         } catch (error) {
             notifications.show({
                 title: 'Error',
@@ -107,24 +113,46 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
     const handleCancelInvitation = async (invitation) => {
         try {
-            await invitationApi.cancelInvitation(invitation.id);
-            
-            notifications.show({
-                title: 'Invitation Cancelled',
-                message: 'The invitation has been cancelled',
-                color: 'orange',
-                icon: <IconTrash size="1rem" />
-            });
+            if (invitation.status === 'pending') {
+                // Cancel pending invitation
+                await invitationApi.cancelInvitation(invitation.id);
+                
+                notifications.show({
+                    title: 'Invitation Cancelled',
+                    message: 'The invitation has been cancelled',
+                    color: 'orange',
+                    icon: <IconTrash size="1rem" />
+                });
+            } else if (invitation.status === 'accepted' && invitation.invitation_type === 'family_history_share') {
+                // Revoke accepted family history share using invitation ID
+                await invitationApi.revokeInvitation(invitation.id);
+                
+                notifications.show({
+                    title: 'Access Revoked',
+                    message: 'Family history sharing has been revoked',
+                    color: 'orange',
+                    icon: <IconTrash size="1rem" />
+                });
+            } else if (invitation.status === 'revoked') {
+                // Already revoked - just show a message
+                notifications.show({
+                    title: 'Already Revoked',
+                    message: 'This invitation has already been revoked',
+                    color: 'gray',
+                    icon: <IconTrash size="1rem" />
+                });
+            }
             
             loadInvitations();
             if (onUpdate) onUpdate();
         } catch (error) {
             notifications.show({
                 title: 'Error',
-                message: 'Failed to cancel invitation',
+                message: invitation.status === 'pending' ? 'Failed to cancel invitation' : 'Failed to revoke access',
                 color: 'red',
                 icon: <IconX size="1rem" />
             });
+            console.error('Error handling invitation action:', error);
         }
     };
 
@@ -135,36 +163,22 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         if (onUpdate) onUpdate();
     };
 
-    const filterInvitations = (invitations) => {
-        let filtered = invitations;
 
-        // Filter by type
-        if (filterType) {
-            filtered = filtered.filter(inv => inv.invitation_type === filterType);
-        }
-
-        // Filter by search term
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(inv => 
-                inv.title.toLowerCase().includes(term) ||
-                inv.message?.toLowerCase().includes(term) ||
-                (activeTab === 'pending' ? inv.sent_by?.name : inv.sent_to?.name)?.toLowerCase().includes(term)
-            );
-        }
-
-        return filtered;
+    // Organize invitations by status for tabs
+    const getAllInvitations = () => {
+        return [...pendingInvitations, ...sentInvitations];
     };
 
-    const getInvitationTypeOptions = () => {
-        const allInvitations = [...pendingInvitations, ...sentInvitations];
-        const types = [...new Set(allInvitations.map(inv => inv.invitation_type))];
-        
-        return types.map(type => ({
-            value: type,
-            label: type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
-        }));
+    const getPendingSentInvitations = () => {
+        const allInvitations = getAllInvitations();
+        return allInvitations.filter(inv => ['pending'].includes(inv.status));
     };
+
+    const getAcceptedInvitations = () => {
+        const allInvitations = getAllInvitations();
+        return allInvitations.filter(inv => ['accepted'].includes(inv.status));
+    };
+
 
     const EmptyState = ({ icon, title, description }) => (
         <Paper p="xl" radius="md" style={{ textAlign: 'center' }}>
@@ -176,16 +190,14 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         </Paper>
     );
 
-    const filteredPending = filterInvitations(pendingInvitations);
-    const filteredSent = filterInvitations(sentInvitations);
+    const pendingSentInvitations = getPendingSentInvitations();
+    const acceptedInvitations = getAcceptedInvitations();
     
     console.log('DEBUG: Rendering invitations', { 
         pendingCount: pendingInvitations.length, 
         sentCount: sentInvitations.length,
-        filteredPendingCount: filteredPending.length,
-        filteredSentCount: filteredSent.length,
-        filterType,
-        searchTerm,
+        pendingSentCount: pendingSentInvitations.length,
+        acceptedCount: acceptedInvitations.length,
         activeTab
     });
 
@@ -204,29 +216,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                 centered
             >
                 <Stack gap="md">
-                    {/* Filters */}
-                    <Group justify="space-between">
-                        <Group gap="sm">
-                            <TextInput
-                                placeholder="Search invitations..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                leftSection={<IconSearch size="1rem" />}
-                                style={{ minWidth: 200 }}
-                            />
-                            <Select
-                                placeholder="Filter by type"
-                                value={filterType}
-                                onChange={setFilterType}
-                                data={[
-                                    { value: '', label: 'All Types' },
-                                    ...getInvitationTypeOptions()
-                                ]}
-                                leftSection={<IconFilter size="1rem" />}
-                                clearable
-                            />
-                        </Group>
-                        <ActionIcon onClick={loadInvitations} loading={loading}>
+                    {/* Quick Actions */}
+                    <Group justify="flex-end">
+                        <ActionIcon onClick={loadInvitations} loading={loading} variant="light">
                             <IconRefresh size="1rem" />
                         </ActionIcon>
                     </Group>
@@ -234,57 +226,62 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                     <Tabs value={activeTab} onChange={setActiveTab}>
                         <Tabs.List>
                             <Tabs.Tab 
-                                value="pending" 
+                                value="pending_sent" 
                                 leftSection={<IconMail size="0.8rem" />}
                                 rightSection={
                                     <Badge size="sm" color="orange" variant="filled">
-                                        {filteredPending.length}
+                                        {pendingSentInvitations.length}
                                     </Badge>
                                 }
                             >
                                 Pending
                             </Tabs.Tab>
                             <Tabs.Tab 
-                                value="sent" 
-                                leftSection={<IconSend size="0.8rem" />}
+                                value="accepted" 
+                                leftSection={<IconCheck size="0.8rem" />}
                                 rightSection={
-                                    <Badge size="sm" color="blue" variant="filled">
-                                        {filteredSent.length}
+                                    <Badge size="sm" color="green" variant="filled">
+                                        {acceptedInvitations.length}
                                     </Badge>
                                 }
                             >
-                                Sent
+                                Accepted
                             </Tabs.Tab>
                         </Tabs.List>
 
-                        <Tabs.Panel value="pending" pt="md">
+                        <Tabs.Panel value="pending_sent" pt="md">
                             {loading ? (
                                 <Group justify="center" py="xl">
                                     <Loader size="sm" />
                                     <Text size="sm" c="dimmed">Loading invitations...</Text>
                                 </Group>
-                            ) : filteredPending.length > 0 ? (
+                            ) : pendingSentInvitations.length > 0 ? (
                                 <Stack gap="md">
                                     <Alert icon={<IconInfoCircle />} color="blue" variant="light">
                                         <Text size="sm">
-                                            You have {filteredPending.length} pending invitation(s) waiting for your response.
+                                            You have {pendingSentInvitations.length} pending invitation(s) waiting for response.
                                         </Text>
                                     </Alert>
                                     <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-                                        {filteredPending.map((invitation) => (
-                                            <InvitationCard
-                                                key={invitation.id}
-                                                invitation={invitation}
-                                                variant="received"
-                                                onRespond={(inv, response) => {
-                                                    if (response === 'accepted') {
-                                                        handleDetailedResponse(inv);
-                                                    } else {
-                                                        handleQuickResponse(inv, response);
-                                                    }
-                                                }}
-                                            />
-                                        ))}
+                                        {pendingSentInvitations.map((invitation) => {
+                                            // Determine if this is received or sent based on current user
+                                            const isReceived = invitation.sent_to_user_id === undefined; // This will need to be fixed with actual user context
+                                            return (
+                                                <InvitationCard
+                                                    key={invitation.id}
+                                                    invitation={invitation}
+                                                    variant={invitation.sent_by ? "received" : "sent"}
+                                                    onRespond={(inv, response) => {
+                                                        if (response === 'accepted') {
+                                                            handleDetailedResponse(inv);
+                                                        } else {
+                                                            handleQuickResponse(inv, response);
+                                                        }
+                                                    }}
+                                                    onCancel={handleCancelInvitation}
+                                                />
+                                            );
+                                        })}
                                     </SimpleGrid>
                                 </Stack>
                             ) : (
@@ -296,28 +293,28 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                             )}
                         </Tabs.Panel>
 
-                        <Tabs.Panel value="sent" pt="md">
+                        <Tabs.Panel value="accepted" pt="md">
                             {loading ? (
                                 <Group justify="center" py="xl">
                                     <Loader size="sm" />
-                                    <Text size="sm" c="dimmed">Loading sent invitations...</Text>
+                                    <Text size="sm" c="dimmed">Loading accepted invitations...</Text>
                                 </Group>
-                            ) : filteredSent.length > 0 ? (
+                            ) : acceptedInvitations.length > 0 ? (
                                 <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-                                    {filteredSent.map((invitation) => (
+                                    {acceptedInvitations.map((invitation) => (
                                         <InvitationCard
                                             key={invitation.id}
                                             invitation={invitation}
-                                            variant="sent"
+                                            variant={invitation.sent_by ? "received" : "sent"}
                                             onCancel={handleCancelInvitation}
                                         />
                                     ))}
                                 </SimpleGrid>
                             ) : (
                                 <EmptyState
-                                    icon={<IconClock size="2rem" />}
-                                    title="No Sent Invitations"
-                                    description="Invitations you send will appear here."
+                                    icon={<IconCheck size="2rem" />}
+                                    title="No Accepted Invitations"
+                                    description="Accepted invitations will appear here."
                                 />
                             )}
                         </Tabs.Panel>
@@ -328,7 +325,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                     {/* Quick Actions */}
                     <Group justify="space-between">
                         <Text size="sm" c="dimmed">
-                            {pendingInvitations.length} pending • {sentInvitations.length} sent
+                            {pendingSentInvitations.length} pending • {acceptedInvitations.length} accepted
                         </Text>
                         <Group gap="sm">
                             <Button variant="subtle" onClick={onClose}>

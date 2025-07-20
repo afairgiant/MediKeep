@@ -52,16 +52,8 @@ class InvitationService:
             if sent_to_user.id == sent_by_user.id:
                 raise ValueError("Cannot send invitation to yourself")
             
-            # Check for existing pending invitation (simplified check without JSON comparison)
-            existing = self.db.query(Invitation).filter(
-                Invitation.sent_by_user_id == sent_by_user.id,
-                Invitation.sent_to_user_id == sent_to_user.id,
-                Invitation.invitation_type == invitation_type,
-                Invitation.status == 'pending'
-            ).first()
-            
-            if existing:
-                raise ValueError("Invitation already sent and pending")
+            # Skip duplicate check - let users send multiple invitations
+            # The database constraint may prevent exact duplicates, but that's acceptable
             
             # Set expiration
             expires_at = None

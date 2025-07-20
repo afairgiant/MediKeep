@@ -35,6 +35,11 @@ class InvitationApi {
         return response;
     }
     
+    async revokeInvitation(invitationId) {
+        const response = await apiService.post(`/invitations/${invitationId}/revoke`);
+        return response;
+    }
+    
     async getInvitationSummary() {
         const response = await apiService.get('/invitations/summary');
         return response;
