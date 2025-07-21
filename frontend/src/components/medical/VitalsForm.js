@@ -52,10 +52,17 @@ import { DateInput, DateTimePicker } from '@mantine/dates';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useTimezone } from '../../hooks';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { validateDateTime } from '../../utils/helpers';
+import {
+  unitLabels,
+  validationRanges,
+  convertForDisplay,
+  convertForStorage,
+} from '../../utils/unitConversion';
 
-// Form field configurations with enhanced metadata
-const FORM_FIELDS = {
+// Function to get form field configurations based on unit system
+const getFormFields = unitSystem => ({
   basic: {
     title: 'Basic Information',
     icon: IconCalendar,
@@ -71,7 +78,7 @@ const FORM_FIELDS = {
     title: 'Physical Measurements',
     icon: IconWeight,
     fields: ['weight'],
-    description: 'Weight in lbs',
+    description: `Weight in ${unitLabels[unitSystem].weightLong}`,
   },
   vitals: {
     title: 'Vital Signs',
@@ -101,190 +108,207 @@ const FORM_FIELDS = {
     icon: IconNotes,
     fields: ['notes'],
   },
-};
+});
 
-// Field definitions with validation and display metadata
-const FIELD_CONFIGS = {
-  recorded_date: {
-    label: 'Measurement Date & Time',
-    type: 'datetime',
-    required: true,
-    icon: IconCalendar,
-    validation: {
-      required: 'Measurement date and time is required',
-      custom: value => {
-        const result = validateDateTime(value, 'Recorded Date');
-        return result.isValid ? null : result.error;
-      },
-    },
-  },
-  systolic_bp: {
-    label: 'Systolic BP',
-    type: 'number',
-    unit: 'mmHg',
-    placeholder: '120',
-    icon: IconHeart,
-    min: 50,
-    max: 300,
-    step: 1,
-    validation: {
-      min: { value: 50, message: 'Systolic BP must be at least 50 mmHg' },
-      max: { value: 300, message: 'Systolic BP cannot exceed 300 mmHg' },
-    },
-  },
-  diastolic_bp: {
-    label: 'Diastolic BP',
-    type: 'number',
-    unit: 'mmHg',
-    placeholder: '80',
-    icon: IconHeart,
-    min: 30,
-    max: 200,
-    step: 1,
-    validation: {
-      min: { value: 30, message: 'Diastolic BP must be at least 30 mmHg' },
-      max: { value: 200, message: 'Diastolic BP cannot exceed 200 mmHg' },
-    },
-  },
-  heart_rate: {
-    label: 'Heart Rate',
-    type: 'number',
-    unit: 'BPM',
-    placeholder: '72',
-    icon: IconActivity,
-    min: 30,
-    max: 250,
-    step: 1,
-    validation: {
-      min: { value: 30, message: 'Heart rate must be at least 30 BPM' },
-      max: { value: 250, message: 'Heart rate cannot exceed 250 BPM' },
-    },
-  },
-  temperature: {
-    label: 'Temperature',
-    type: 'number',
-    unit: '°F',
-    placeholder: '98.6',
-    icon: IconThermometer,
-    min: 90,
-    max: 110,
-    step: 0.1,
-    validation: {
-      min: { value: 90, message: 'Temperature must be at least 90°F' },
-      max: { value: 110, message: 'Temperature cannot exceed 110°F' },
-    },
-  },
-  weight: {
-    label: 'Weight',
-    type: 'number',
-    unit: 'lbs',
-    placeholder: '150',
-    icon: IconWeight,
-    min: 0.1,
-    max: 2200,
-    step: 0.1,
-    validation: {
-      min: { value: 0.1, message: 'Weight must be at least 0.1 lbs' },
-      max: { value: 2200, message: 'Weight cannot exceed 2200 lbs' },
-    },
-  },
-  respiratory_rate: {
-    label: 'Respiratory Rate',
-    type: 'number',
-    unit: '/min',
-    placeholder: '16',
-    icon: IconLungs,
-    min: 5,
-    max: 100,
-    step: 1,
-    validation: {
-      min: { value: 5, message: 'Respiratory rate must be at least 5/min' },
-      max: { value: 100, message: 'Respiratory rate cannot exceed 100/min' },
-    },
-  },
-  oxygen_saturation: {
-    label: 'Oxygen Saturation',
-    type: 'number',
-    unit: '%',
-    placeholder: '98',
-    icon: IconDroplet,
-    min: 50,
-    max: 100,
-    step: 1,
-    validation: {
-      min: { value: 50, message: 'Oxygen saturation must be at least 50%' },
-      max: { value: 100, message: 'Oxygen saturation cannot exceed 100%' },
-    },
-  },
+// Function to get field configurations based on unit system
+const getFieldConfigs = unitSystem => {
+  const ranges = validationRanges[unitSystem];
+  const labels = unitLabels[unitSystem];
 
-  blood_glucose: {
-    label: 'Blood Glucose',
-    type: 'number',
-    unit: 'mg/dL',
-    placeholder: '100',
-    icon: IconDropletFilled,
-    min: 20,
-    max: 800,
-    step: 1,
-    validation: {
-      min: { value: 20, message: 'Blood glucose must be at least 20 mg/dL' },
-      max: { value: 800, message: 'Blood glucose cannot exceed 800 mg/dL' },
-    },
-  },
-  pain_scale: {
-    label: 'Pain Scale',
-    type: 'number',
-    unit: '(0-10)',
-    placeholder: '0',
-    icon: IconMoodSad,
-    min: 0,
-    max: 10,
-    step: 1,
-    validation: {
-      min: { value: 0, message: 'Pain scale must be at least 0' },
-      max: { value: 10, message: 'Pain scale cannot exceed 10' },
-    },
-  },
-  location: {
-    label: 'Measurement Location',
-    type: 'select',
-    placeholder: 'Where were these readings taken?',
-    icon: IconMapPin,
-    options: [
-      { value: 'home', label: 'Home' },
-      { value: 'clinic', label: 'Clinic' },
-      { value: 'hospital', label: 'Hospital' },
-      { value: 'urgent_care', label: 'Urgent Care' },
-      { value: 'pharmacy', label: 'Pharmacy' },
-      { value: 'ambulatory', label: 'Ambulatory Care' },
-      { value: 'other', label: 'Other' },
-    ],
-  },
-  device_used: {
-    label: 'Device/Equipment Used',
-    type: 'text',
-    placeholder: 'e.g., Digital BP monitor, Thermometer model...',
-    icon: IconDevices,
-    validation: {
-      maxLength: {
-        value: 100,
-        message: 'Device name cannot exceed 100 characters',
+  return {
+    recorded_date: {
+      label: 'Measurement Date & Time',
+      type: 'datetime',
+      required: true,
+      icon: IconCalendar,
+      validation: {
+        required: 'Measurement date and time is required',
+        custom: value => {
+          const result = validateDateTime(value, 'Recorded Date');
+          return result.isValid ? null : result.error;
+        },
       },
     },
-  },
-  notes: {
-    label: 'Notes',
-    type: 'textarea',
-    placeholder: 'Additional notes about the vital signs measurement...',
-    icon: IconNotes,
-    rows: 3,
-    validation: {
-      maxLength: {
-        value: 1000,
-        message: 'Notes cannot exceed 1000 characters',
+    systolic_bp: {
+      label: 'Systolic BP',
+      type: 'number',
+      unit: 'mmHg',
+      placeholder: '120',
+      icon: IconHeart,
+      min: 50,
+      max: 300,
+      step: 1,
+      validation: {
+        min: { value: 50, message: 'Systolic BP must be at least 50 mmHg' },
+        max: { value: 300, message: 'Systolic BP cannot exceed 300 mmHg' },
       },
     },
-  },
+    diastolic_bp: {
+      label: 'Diastolic BP',
+      type: 'number',
+      unit: 'mmHg',
+      placeholder: '80',
+      icon: IconHeart,
+      min: 30,
+      max: 200,
+      step: 1,
+      validation: {
+        min: { value: 30, message: 'Diastolic BP must be at least 30 mmHg' },
+        max: { value: 200, message: 'Diastolic BP cannot exceed 200 mmHg' },
+      },
+    },
+    heart_rate: {
+      label: 'Heart Rate',
+      type: 'number',
+      unit: 'BPM',
+      placeholder: '72',
+      icon: IconActivity,
+      min: 30,
+      max: 250,
+      step: 1,
+      validation: {
+        min: { value: 30, message: 'Heart rate must be at least 30 BPM' },
+        max: { value: 250, message: 'Heart rate cannot exceed 250 BPM' },
+      },
+    },
+    temperature: {
+      label: 'Temperature',
+      type: 'number',
+      unit: labels.temperature,
+      placeholder: unitSystem === 'imperial' ? '98.6' : '37.0',
+      icon: IconThermometer,
+      min: ranges.temperature.min,
+      max: ranges.temperature.max,
+      step: 0.1,
+      validation: {
+        min: {
+          value: ranges.temperature.min,
+          message: `Temperature must be at least ${ranges.temperature.min}${labels.temperature}`,
+        },
+        max: {
+          value: ranges.temperature.max,
+          message: `Temperature cannot exceed ${ranges.temperature.max}${labels.temperature}`,
+        },
+      },
+    },
+    weight: {
+      label: 'Weight',
+      type: 'number',
+      unit: labels.weight,
+      placeholder: unitSystem === 'imperial' ? '150' : '68',
+      icon: IconWeight,
+      min: ranges.weight.min,
+      max: ranges.weight.max,
+      step: 0.1,
+      validation: {
+        min: {
+          value: ranges.weight.min,
+          message: `Weight must be at least ${ranges.weight.min} ${labels.weight}`,
+        },
+        max: {
+          value: ranges.weight.max,
+          message: `Weight cannot exceed ${ranges.weight.max} ${labels.weight}`,
+        },
+      },
+    },
+    respiratory_rate: {
+      label: 'Respiratory Rate',
+      type: 'number',
+      unit: '/min',
+      placeholder: '16',
+      icon: IconLungs,
+      min: 5,
+      max: 100,
+      step: 1,
+      validation: {
+        min: { value: 5, message: 'Respiratory rate must be at least 5/min' },
+        max: { value: 100, message: 'Respiratory rate cannot exceed 100/min' },
+      },
+    },
+    oxygen_saturation: {
+      label: 'Oxygen Saturation',
+      type: 'number',
+      unit: '%',
+      placeholder: '98',
+      icon: IconDroplet,
+      min: 50,
+      max: 100,
+      step: 1,
+      validation: {
+        min: { value: 50, message: 'Oxygen saturation must be at least 50%' },
+        max: { value: 100, message: 'Oxygen saturation cannot exceed 100%' },
+      },
+    },
+
+    blood_glucose: {
+      label: 'Blood Glucose',
+      type: 'number',
+      unit: 'mg/dL',
+      placeholder: '100',
+      icon: IconDropletFilled,
+      min: 20,
+      max: 800,
+      step: 1,
+      validation: {
+        min: { value: 20, message: 'Blood glucose must be at least 20 mg/dL' },
+        max: { value: 800, message: 'Blood glucose cannot exceed 800 mg/dL' },
+      },
+    },
+    pain_scale: {
+      label: 'Pain Scale',
+      type: 'number',
+      unit: '(0-10)',
+      placeholder: '0',
+      icon: IconMoodSad,
+      min: 0,
+      max: 10,
+      step: 1,
+      validation: {
+        min: { value: 0, message: 'Pain scale must be at least 0' },
+        max: { value: 10, message: 'Pain scale cannot exceed 10' },
+      },
+    },
+    location: {
+      label: 'Measurement Location',
+      type: 'select',
+      placeholder: 'Where were these readings taken?',
+      icon: IconMapPin,
+      options: [
+        { value: 'home', label: 'Home' },
+        { value: 'clinic', label: 'Clinic' },
+        { value: 'hospital', label: 'Hospital' },
+        { value: 'urgent_care', label: 'Urgent Care' },
+        { value: 'pharmacy', label: 'Pharmacy' },
+        { value: 'ambulatory', label: 'Ambulatory Care' },
+        { value: 'other', label: 'Other' },
+      ],
+    },
+    device_used: {
+      label: 'Device/Equipment Used',
+      type: 'text',
+      placeholder: 'e.g., Digital BP monitor, Thermometer model...',
+      icon: IconDevices,
+      validation: {
+        maxLength: {
+          value: 100,
+          message: 'Device name cannot exceed 100 characters',
+        },
+      },
+    },
+    notes: {
+      label: 'Notes',
+      type: 'textarea',
+      placeholder: 'Additional notes about the vital signs measurement...',
+      icon: IconNotes,
+      rows: 3,
+      validation: {
+        maxLength: {
+          value: 1000,
+          message: 'Notes cannot exceed 1000 characters',
+        },
+      },
+    },
+  };
 };
 
 const VitalsForm = ({
@@ -301,6 +325,14 @@ const VitalsForm = ({
 }) => {
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
+  const { unitSystem, loading: preferencesLoading } = useUserPreferences();
+
+  // Generate dynamic configs based on user's unit system
+  const FORM_FIELDS = useMemo(() => getFormFields(unitSystem), [unitSystem]);
+  const FIELD_CONFIGS = useMemo(
+    () => getFieldConfigs(unitSystem),
+    [unitSystem]
+  );
 
   // Form state
   const [formData, setFormData] = useState({
@@ -343,8 +375,13 @@ const VitalsForm = ({
         systolic_bp: vitals.systolic_bp || '',
         diastolic_bp: vitals.diastolic_bp || '',
         heart_rate: vitals.heart_rate || '',
-        temperature: vitals.temperature || '',
-        weight: vitals.weight || '',
+        // Convert stored imperial values to display units
+        temperature: vitals.temperature
+          ? convertForDisplay(vitals.temperature, 'temperature', unitSystem)
+          : '',
+        weight: vitals.weight
+          ? convertForDisplay(vitals.weight, 'weight', unitSystem)
+          : '',
         respiratory_rate: vitals.respiratory_rate || '',
         oxygen_saturation: vitals.oxygen_saturation || '',
         blood_glucose: vitals.blood_glucose || '',
@@ -354,18 +391,24 @@ const VitalsForm = ({
         notes: vitals.notes || '', // Ensure notes is always a string, never null
       });
     }
-  }, [vitals, isEdit, patientId, practitionerId]);
+  }, [vitals, isEdit, patientId, practitionerId, unitSystem]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
     if (formData.weight && patientHeight) {
-      return vitalsService.calculateBMI(
+      // Convert weight to imperial for BMI calculation (BMI service expects imperial units)
+      const weightInImperial = convertForStorage(
         parseFloat(formData.weight),
+        'weight',
+        unitSystem
+      );
+      return vitalsService.calculateBMI(
+        weightInImperial,
         parseFloat(patientHeight)
       );
     }
     return null;
-  }, [formData.weight, patientHeight]);
+  }, [formData.weight, patientHeight, unitSystem]);
 
   // Field validation
   const validateField = useCallback((fieldName, value) => {
@@ -473,10 +516,17 @@ const VitalsForm = ({
           ? parseInt(formData.diastolic_bp)
           : null,
         heart_rate: formData.heart_rate ? parseInt(formData.heart_rate) : null,
+        // Convert display values to storage format (imperial)
         temperature: formData.temperature
-          ? parseFloat(formData.temperature)
+          ? convertForStorage(
+              parseFloat(formData.temperature),
+              'temperature',
+              unitSystem
+            )
           : null,
-        weight: formData.weight ? parseFloat(formData.weight) : null,
+        weight: formData.weight
+          ? convertForStorage(parseFloat(formData.weight), 'weight', unitSystem)
+          : null,
         respiratory_rate: formData.respiratory_rate
           ? parseInt(formData.respiratory_rate)
           : null,

@@ -51,6 +51,11 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import {
+  formatMeasurement,
+  convertForDisplay,
+} from '../../utils/unitConversion';
 import {
   formatDate as formatDateHelper,
   formatDateTime,
@@ -67,6 +72,7 @@ const VitalsList = ({
   showActions = true,
   limit = 10,
 }) => {
+  const { unitSystem } = useUserPreferences();
   // Use passed data if available, otherwise load internally
   const [internalVitals, setInternalVitals] = useState([]);
   const [internalLoading, setInternalLoading] = useState(true);
@@ -561,7 +567,11 @@ const VitalsList = ({
       <Table.Td>
         {vital.temperature ? (
           <Text size="sm" fw={500}>
-            {vital.temperature}°F
+            {formatMeasurement(
+              convertForDisplay(vital.temperature, 'temperature', unitSystem),
+              'temperature',
+              unitSystem
+            )}
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
@@ -572,7 +582,11 @@ const VitalsList = ({
       <Table.Td>
         {vital.weight ? (
           <Text size="sm" fw={500}>
-            {vital.weight} lbs
+            {formatMeasurement(
+              convertForDisplay(vital.weight, 'weight', unitSystem),
+              'weight',
+              unitSystem
+            )}
           </Text>
         ) : (
           <Text size="sm" c="dimmed">

@@ -51,26 +51,28 @@ class VitalsBase(BaseModel):
 
     @validator("temperature")
     def validate_temperature(cls, v):
-        """Validate temperature (Fahrenheit)"""
+        """Validate temperature (stored as Fahrenheit, converted from user's preferred units)"""
         if v is not None:
-            if v < 90.0 or v > 115.0:
-                raise ValueError("Temperature must be between 90-115°F")
+            if v < 70.0 or v > 115.0:
+                raise ValueError("Temperature must be between 70-115°F")
         return v
 
     @validator("weight")
     def validate_weight(cls, v):
-        """Validate weight (pounds)"""
+        """Validate weight (stored as pounds, converted from user's preferred units)"""
         if v is not None:
-            if v < 1.0 or v > 1000.0:
-                raise ValueError("Weight must be between 1-1000 lbs")
+            # Allow up to 2 decimal places for precision from metric conversion
+            if v < 1.0 or v > 992.0:
+                raise ValueError("Weight must be between 1-992 lbs")
         return v
 
     @validator("height")
     def validate_height(cls, v):
-        """Validate height (inches)"""
+        """Validate height (stored as inches, converted from user's preferred units)"""
         if v is not None:
-            if v < 6.0 or v > 120.0:
-                raise ValueError("Height must be between 6-120 inches")
+            # Allow up to 2 decimal places for precision from metric conversion
+            if v < 12.0 or v > 108.0:
+                raise ValueError("Height must be between 12-108 inches")
         return v
 
     @validator("oxygen_saturation")
