@@ -24,6 +24,7 @@ import {
   useTheme,
 } from './contexts/ThemeContext';
 import { AppDataProvider } from './contexts/AppDataContext';
+import { UserPreferencesProvider } from './contexts/UserPreferencesContext';
 import ProtectedRoute, {
   AdminRoute,
   PublicRoute,
@@ -204,164 +205,169 @@ function App() {
     <ErrorBoundary componentName="App">
       <Router>
         <AuthProvider>
-          <AppDataProvider>
-            <MantineProvider theme={theme}>
-              <DatesProvider settings={{ timezone: 'UTC' }}>
-                <MantineIntegratedThemeProvider>
-                  <NavigationTracker />
-                  <div className="App">
-                    <Routes>
-                      {/* Public Routes */}
-                      <Route
-                        path="/login"
-                        element={
-                          <PublicRoute>
-                            <Login />
-                          </PublicRoute>
-                        }
-                      />
-                      {/* Protected Routes */}
-                      <Route
-                        path="/dashboard"
-                        element={
-                          <ProtectedRoute>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      {/* Medical Records Routes */}
-                      <Route
-                        path="/patients/me"
-                        element={
-                          <ProtectedRoute>
-                            <PatientInfo />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/patients/:section?"
-                        element={
-                          <ProtectedRoute>
-                            <PlaceholderPage />
-                          </ProtectedRoute>
-                        }
-                      />
-                      {/* Generated entity routes */}
-                      {generateEntityRoutes()}
-                      <Route
-                        path="/export"
-                        element={
-                          <ProtectedRoute>
-                            <ExportPage />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/settings"
-                        element={
-                          <ProtectedRoute>
-                            <Settings />
-                          </ProtectedRoute>
-                        }
-                      />
-                      {/* Admin Routes - Require Admin Role */}
-                      <Route
-                        path="/admin"
-                        element={
-                          <AdminRoute>
-                            <AdminDashboard />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/data-models"
-                        element={
-                          <AdminRoute>
-                            <DataModels />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/backup"
-                        element={
-                          <AdminRoute>
-                            <BackupManagement />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/models/:modelName"
-                        element={
-                          <AdminRoute>
-                            <ModelManagement />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/models/:modelName/:recordId"
-                        element={
-                          <AdminRoute>
-                            <ModelView />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/models/:modelName/:recordId/edit"
-                        element={
-                          <AdminRoute>
-                            <ModelEdit />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/models/:modelName/create"
-                        element={
-                          <AdminRoute>
-                            <ModelCreate />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/bulk-operations"
-                        element={
-                          <AdminRoute>
-                            <PlaceholderPage />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/system-health"
-                        element={
-                          <AdminRoute>
-                            <SystemHealth />
-                          </AdminRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin/settings"
-                        element={
-                          <AdminRoute>
-                            <AdminSettings />
-                          </AdminRoute>
-                        }
-                      />
-                      {/* Development/Testing Routes */}
-                      <Route path="/logging-test" element={<LoggingTest />} />
-                      <Route
-                        path="/global-state-demo"
-                        element={<GlobalStateDemo />}
-                      />
-                      {/* Default redirect */}
-                      <Route path="/" element={<Navigate to="/dashboard" />} />
-                    </Routes>
-                  </div>
+          <UserPreferencesProvider>
+            <AppDataProvider>
+              <MantineProvider theme={theme}>
+                <DatesProvider settings={{ timezone: 'UTC' }}>
+                  <MantineIntegratedThemeProvider>
+                    <NavigationTracker />
+                    <div className="App">
+                      <Routes>
+                        {/* Public Routes */}
+                        <Route
+                          path="/login"
+                          element={
+                            <PublicRoute>
+                              <Login />
+                            </PublicRoute>
+                          }
+                        />
+                        {/* Protected Routes */}
+                        <Route
+                          path="/dashboard"
+                          element={
+                            <ProtectedRoute>
+                              <Dashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        {/* Medical Records Routes */}
+                        <Route
+                          path="/patients/me"
+                          element={
+                            <ProtectedRoute>
+                              <PatientInfo />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/patients/:section?"
+                          element={
+                            <ProtectedRoute>
+                              <PlaceholderPage />
+                            </ProtectedRoute>
+                          }
+                        />
+                        {/* Generated entity routes */}
+                        {generateEntityRoutes()}
+                        <Route
+                          path="/export"
+                          element={
+                            <ProtectedRoute>
+                              <ExportPage />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/settings"
+                          element={
+                            <ProtectedRoute>
+                              <Settings />
+                            </ProtectedRoute>
+                          }
+                        />
+                        {/* Admin Routes - Require Admin Role */}
+                        <Route
+                          path="/admin"
+                          element={
+                            <AdminRoute>
+                              <AdminDashboard />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/data-models"
+                          element={
+                            <AdminRoute>
+                              <DataModels />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/backup"
+                          element={
+                            <AdminRoute>
+                              <BackupManagement />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/models/:modelName"
+                          element={
+                            <AdminRoute>
+                              <ModelManagement />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/models/:modelName/:recordId"
+                          element={
+                            <AdminRoute>
+                              <ModelView />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/models/:modelName/:recordId/edit"
+                          element={
+                            <AdminRoute>
+                              <ModelEdit />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/models/:modelName/create"
+                          element={
+                            <AdminRoute>
+                              <ModelCreate />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/bulk-operations"
+                          element={
+                            <AdminRoute>
+                              <PlaceholderPage />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/system-health"
+                          element={
+                            <AdminRoute>
+                              <SystemHealth />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/settings"
+                          element={
+                            <AdminRoute>
+                              <AdminSettings />
+                            </AdminRoute>
+                          }
+                        />
+                        {/* Development/Testing Routes */}
+                        <Route path="/logging-test" element={<LoggingTest />} />
+                        <Route
+                          path="/global-state-demo"
+                          element={<GlobalStateDemo />}
+                        />
+                        {/* Default redirect */}
+                        <Route
+                          path="/"
+                          element={<Navigate to="/dashboard" />}
+                        />
+                      </Routes>
+                    </div>
 
-                  {/* Toast Notifications */}
-                  <ThemedToastContainer />
-                </MantineIntegratedThemeProvider>
-              </DatesProvider>
-            </MantineProvider>
-          </AppDataProvider>
+                    {/* Toast Notifications */}
+                    <ThemedToastContainer />
+                  </MantineIntegratedThemeProvider>
+                </DatesProvider>
+              </MantineProvider>
+            </AppDataProvider>
+          </UserPreferencesProvider>
         </AuthProvider>
       </Router>
     </ErrorBoundary>

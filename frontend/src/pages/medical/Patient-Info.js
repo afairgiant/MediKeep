@@ -4,6 +4,11 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import {
+  formatMeasurement,
+  convertForDisplay,
+} from '../../utils/unitConversion';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import MantinePatientForm from '../../components/medical/MantinePatientForm';
@@ -14,7 +19,7 @@ import '../../styles/pages/PatientInfo.css';
 const PatientInfo = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Using global state for patient and practitioners data
   const {
     patient: patientData,
@@ -23,6 +28,7 @@ const PatientInfo = () => {
     refresh: refreshPatient,
   } = useCurrentPatient();
   const { practitioners, loading: practitionersLoading } = usePractitioners();
+  const { unitSystem } = useUserPreferences();
 
   // Combine loading states
   const loading = patientLoading || practitionersLoading;
@@ -40,7 +46,7 @@ const PatientInfo = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  
+
   // Determine if this is a new user based on patient existence
   const isNewUser = !patientExists;
 
@@ -52,7 +58,9 @@ const PatientInfo = () => {
       // Remove the edit parameter from URL to clean it up
       urlParams.delete('edit');
       const newSearch = urlParams.toString();
-      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, { replace: true });
+      navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+        replace: true,
+      });
     }
   }, [location.search, navigate, location.pathname]);
 
@@ -326,7 +334,15 @@ const PatientInfo = () => {
                   <label>Height:</label>
                   <span>
                     {patientData?.height
-                      ? `${patientData.height} inches`
+                      ? formatMeasurement(
+                          convertForDisplay(
+                            patientData.height,
+                            'height',
+                            unitSystem
+                          ),
+                          'height',
+                          unitSystem
+                        )
                       : 'Not provided'}
                   </span>
                 </div>
@@ -337,7 +353,15 @@ const PatientInfo = () => {
                   <label>Weight:</label>
                   <span>
                     {patientData?.weight
-                      ? `${patientData.weight} lbs`
+                      ? formatMeasurement(
+                          convertForDisplay(
+                            patientData.weight,
+                            'weight',
+                            unitSystem
+                          ),
+                          'weight',
+                          unitSystem
+                        )
                       : 'Not provided'}
                   </span>
                 </div>{' '}

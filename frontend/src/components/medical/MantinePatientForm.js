@@ -12,6 +12,13 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import {
+  unitLabels,
+  validationRanges,
+  convertForDisplay,
+  convertForStorage,
+} from '../../utils/unitConversion';
 
 const MantinePatientForm = ({
   formData,
@@ -22,13 +29,24 @@ const MantinePatientForm = ({
   saving = false,
   isCreating = false,
 }) => {
+  const { unitSystem } = useUserPreferences();
+
+  // Get unit labels and validation ranges for current system
+  const labels = unitLabels[unitSystem];
+  const ranges = validationRanges[unitSystem];
+
   // Convert practitioners to Mantine format
   const practitionerOptions = practitioners.map(practitioner => ({
     value: String(practitioner.id),
     label: `${practitioner.name} - ${practitioner.specialty}`,
   }));
 
-  const { handleTextInputChange, handleSelectChange, handleDateChange, handleNumberChange } = useFormHandlers(onInputChange);
+  const {
+    handleTextInputChange,
+    handleSelectChange,
+    handleDateChange,
+    handleNumberChange,
+  } = useFormHandlers(onInputChange);
 
   return (
     <Stack spacing="md">
@@ -70,15 +88,25 @@ const MantinePatientForm = ({
           <DateInput
             label="Birth Date"
             placeholder="Select birth date"
-            value={formData.birth_date ? (() => {
-              if (typeof formData.birth_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.birth_date.trim())) {
-                const [year, month, day] = formData.birth_date.trim().split('-').map(Number);
-                if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                  return new Date(year, month - 1, day); // month is 0-indexed
-                }
-              }
-              return new Date(formData.birth_date);
-            })() : null}
+            value={
+              formData.birth_date
+                ? (() => {
+                    if (
+                      typeof formData.birth_date === 'string' &&
+                      /^\d{4}-\d{2}-\d{2}$/.test(formData.birth_date.trim())
+                    ) {
+                      const [year, month, day] = formData.birth_date
+                        .trim()
+                        .split('-')
+                        .map(Number);
+                      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                        return new Date(year, month - 1, day); // month is 0-indexed
+                      }
+                    }
+                    return new Date(formData.birth_date);
+                  })()
+                : null
+            }
             onChange={handleDateChange('birth_date')}
             firstDayOfWeek={0}
             required
@@ -149,26 +177,48 @@ const MantinePatientForm = ({
         <Grid.Col span={4}>
           <NumberInput
             label="Height"
-            placeholder="e.g., 70"
-            value={formData.height || ''}
-            onChange={handleNumberChange('height')}
+            placeholder={unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'}
+            value={
+              formData.height
+                ? convertForDisplay(formData.height, 'height', unitSystem)
+                : ''
+            }
+            onChange={value => {
+              const convertedValue = convertForStorage(
+                value,
+                'height',
+                unitSystem
+              );
+              handleNumberChange('height')(convertedValue);
+            }}
             disabled={saving}
-            description="Height in inches"
-            min={12}
-            max={96}
-            step={0.5}
+            description={`Height in ${labels.heightLong}`}
+            min={ranges.height.min}
+            max={ranges.height.max}
+            step={unitSystem === 'imperial' ? 0.5 : 1}
           />
         </Grid.Col>
         <Grid.Col span={4}>
           <NumberInput
             label="Weight"
-            placeholder="e.g., 150"
-            value={formData.weight || ''}
-            onChange={handleNumberChange('weight')}
+            placeholder={unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'}
+            value={
+              formData.weight
+                ? convertForDisplay(formData.weight, 'weight', unitSystem)
+                : ''
+            }
+            onChange={value => {
+              const convertedValue = convertForStorage(
+                value,
+                'weight',
+                unitSystem
+              );
+              handleNumberChange('weight')(convertedValue);
+            }}
             disabled={saving}
-            description="Weight in pounds"
-            min={1}
-            max={1000}
+            description={`Weight in ${labels.weightLong}`}
+            min={ranges.weight.min}
+            max={ranges.weight.max}
             step={0.1}
           />
         </Grid.Col>

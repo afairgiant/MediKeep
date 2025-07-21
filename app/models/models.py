@@ -975,3 +975,22 @@ class FamilyHistoryShare(Base):
             name="unique_family_history_share",
         ),
     )
+
+
+class UserPreferences(Base):
+    __tablename__ = "user_preferences"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+
+    # Unit system preference: 'imperial' or 'metric'
+    unit_system = Column(String, default="imperial", nullable=False)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    user = orm_relationship("User", backref="preferences")

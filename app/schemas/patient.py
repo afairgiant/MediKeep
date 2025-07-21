@@ -22,8 +22,12 @@ class PatientBase(BaseModel):
     gender: Optional[str] = None
     address: Optional[str] = None
     blood_type: Optional[str] = None
-    height: Optional[int] = None  # in inches
-    weight: Optional[int] = None  # in pounds
+    height: Optional[float] = (
+        None  # in inches (allows decimals for metric conversion precision)
+    )
+    weight: Optional[float] = (
+        None  # in pounds (allows decimals for metric conversion precision)
+    )
     physician_id: Optional[int] = None
 
     @root_validator(pre=True)
@@ -184,7 +188,7 @@ class PatientBase(BaseModel):
     @validator("height")
     def validate_height(cls, v):
         """
-        Validate height in inches.
+        Validate height in inches (stored as imperial, converted from user's preferred units).
 
         Args:
             v: The height value to validate
@@ -196,14 +200,14 @@ class PatientBase(BaseModel):
             ValueError: If height is not reasonable
         """
         if v is not None:
-            if v < 12 or v > 120:  # 1 foot to 10 feet
-                raise ValueError("Height must be between 12 and 120 inches")
+            if v < 12.0 or v > 108.0:  # 1 foot to 9 feet, consistent with frontend
+                raise ValueError("Height must be between 12 and 108 inches")
         return v
 
     @validator("weight")
     def validate_weight(cls, v):
         """
-        Validate weight in pounds.
+        Validate weight in pounds (stored as imperial, converted from user's preferred units).
 
         Args:
             v: The weight value to validate
@@ -215,8 +219,8 @@ class PatientBase(BaseModel):
             ValueError: If weight is not reasonable
         """
         if v is not None:
-            if v < 1 or v > 1000:  # 1 to 1000 pounds
-                raise ValueError("Weight must be between 1 and 1000 pounds")
+            if v < 1.0 or v > 992.0:  # Consistent with frontend validation ranges
+                raise ValueError("Weight must be between 1 and 992 pounds")
         return v
 
     @validator("physician_id")
@@ -283,8 +287,8 @@ class PatientUpdate(BaseModel):
     gender: Optional[str] = None
     address: Optional[str] = None
     blood_type: Optional[str] = None
-    height: Optional[int] = None
-    weight: Optional[int] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
     physician_id: Optional[int] = None
 
     @root_validator(pre=True)
@@ -382,18 +386,18 @@ class PatientUpdate(BaseModel):
 
     @validator("height")
     def validate_height(cls, v):
-        """Validate height if provided."""
+        """Validate height if provided (stored as inches, converted from user's preferred units)."""
         if v is not None:
-            if v < 12 or v > 120:  # 1 foot to 10 feet
-                raise ValueError("Height must be between 12 and 120 inches")
+            if v < 12.0 or v > 108.0:  # 1 foot to 9 feet, consistent with frontend
+                raise ValueError("Height must be between 12 and 108 inches")
         return v
 
     @validator("weight")
     def validate_weight(cls, v):
-        """Validate weight if provided."""
+        """Validate weight if provided (stored as pounds, converted from user's preferred units)."""
         if v is not None:
-            if v < 1 or v > 1000:  # 1 to 1000 pounds
-                raise ValueError("Weight must be between 1 and 1000 pounds")
+            if v < 1.0 or v > 992.0:  # Consistent with frontend validation ranges
+                raise ValueError("Weight must be between 1 and 992 pounds")
         return v
 
     @validator("physician_id")
