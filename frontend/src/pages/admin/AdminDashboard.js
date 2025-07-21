@@ -709,13 +709,6 @@ const QuickActionsCard = () => (
         color="orange"
       />
       <ActionButton
-        href="/admin/bulk-operations"
-        icon={IconSettings}
-        title="Bulk Operations"
-        desc="Batch operations"
-        color="cyan"
-      />
-      <ActionButton
         href="/admin/backup"
         icon={IconDatabase}
         title="Backups"
