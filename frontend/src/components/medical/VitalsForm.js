@@ -391,7 +391,7 @@ const VitalsForm = ({
         notes: vitals.notes || '', // Ensure notes is always a string, never null
       });
     }
-  }, [vitals, isEdit, patientId, practitionerId, unitSystem]);
+  }, [vitals, isEdit, patientId, practitionerId]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {

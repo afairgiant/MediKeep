@@ -88,7 +88,7 @@ const PatientForm = ({
         is_self_record: patient.is_self_record || false,
       });
     }
-  }, [patient, unitSystem]);
+  }, [patient]);
 
   const handleSubmit = async e => {
     e.preventDefault();

@@ -29,32 +29,32 @@ class VitalsBase(BaseModel):
     def validate_systolic_bp(cls, v):
         """Validate systolic blood pressure"""
         if v is not None:
-            if v < 50 or v > 300:
-                raise ValueError("Systolic blood pressure must be between 50-300 mmHg")
+            if v < 60 or v > 250:
+                raise ValueError("Systolic blood pressure must be between 60-250 mmHg")
         return v
 
     @validator("diastolic_bp")
     def validate_diastolic_bp(cls, v):
         """Validate diastolic blood pressure"""
         if v is not None:
-            if v < 30 or v > 200:
-                raise ValueError("Diastolic blood pressure must be between 30-200 mmHg")
+            if v < 30 or v > 150:
+                raise ValueError("Diastolic blood pressure must be between 30-150 mmHg")
         return v
 
     @validator("heart_rate")
     def validate_heart_rate(cls, v):
         """Validate heart rate"""
         if v is not None:
-            if v < 30 or v > 220:
-                raise ValueError("Heart rate must be between 30-220 bpm")
+            if v < 30 or v > 250:
+                raise ValueError("Heart rate must be between 30-250 bpm")
         return v
 
     @validator("temperature")
     def validate_temperature(cls, v):
         """Validate temperature (stored as Fahrenheit, converted from user's preferred units)"""
         if v is not None:
-            if v < 70.0 or v > 115.0:
-                raise ValueError("Temperature must be between 70-115°F")
+            if v < 80.0 or v > 115.0:
+                raise ValueError("Temperature must be between 80-115°F")
         return v
 
     @validator("weight")
@@ -79,16 +79,16 @@ class VitalsBase(BaseModel):
     def validate_oxygen_saturation(cls, v):
         """Validate oxygen saturation percentage"""
         if v is not None:
-            if v < 50.0 or v > 100.0:
-                raise ValueError("Oxygen saturation must be between 50-100%")
+            if v < 70.0 or v > 100.0:
+                raise ValueError("Oxygen saturation must be between 70-100%")
         return v
 
     @validator("respiratory_rate")
     def validate_respiratory_rate(cls, v):
         """Validate respiratory rate"""
         if v is not None:
-            if v < 5 or v > 60:
-                raise ValueError("Respiratory rate must be between 5-60 breaths/min")
+            if v < 8 or v > 50:
+                raise ValueError("Respiratory rate must be between 8-50 breaths/min")
         return v
 
     @validator("blood_glucose")

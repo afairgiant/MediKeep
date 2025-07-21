@@ -100,7 +100,7 @@ export const validationRanges = {
   imperial: {
     weight: { min: 1, max: 992 }, // pounds (equivalent to 0.5-450 kg)
     height: { min: 12, max: 108 }, // inches (1 foot to 9 feet)
-    temperature: { min: 70, max: 115 }, // Fahrenheit
+    temperature: { min: 80, max: 115 }, // Fahrenheit - medically accurate range
     systolic_bp: { min: 60, max: 250 }, // mmHg (same for both systems)
     diastolic_bp: { min: 30, max: 150 }, // mmHg
     heart_rate: { min: 30, max: 250 }, // bpm
@@ -111,7 +111,7 @@ export const validationRanges = {
   metric: {
     weight: { min: 0.5, max: 450 }, // kilograms (equivalent to 1-992 lbs)
     height: { min: 30, max: 274 }, // centimeters (equivalent to 12-108 inches)
-    temperature: { min: 21, max: 46 }, // Celsius
+    temperature: { min: 27, max: 46 }, // Celsius - medically accurate range
     systolic_bp: { min: 60, max: 250 }, // mmHg (same for both systems)
     diastolic_bp: { min: 30, max: 150 }, // mmHg
     heart_rate: { min: 30, max: 250 }, // bpm
