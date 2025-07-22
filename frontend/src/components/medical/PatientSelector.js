@@ -350,20 +350,65 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     try {
       setLoading(true);
       
+      logger.info('patient_selector_delete_start', {
+        message: 'Starting patient deletion',
+        patientId: patient.id,
+        patientName: `${patient.first_name} ${patient.last_name}`
+      });
+      
       await patientApi.deletePatient(patient.id);
       
-      toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully`);
+      logger.info('patient_selector_delete_api_success', {
+        message: 'Patient deletion API call succeeded',
+        patientId: patient.id
+      });
       
-      // If we deleted the active patient, clear it
+      // If we deleted the active patient, find a fallback patient
       if (activePatient?.id === patient.id) {
+        logger.info('patient_selector_deleting_active', {
+          message: 'Deleted patient was active, finding fallback',
+          patientId: patient.id
+        });
+        
+        // Clear active patient first
         setActivePatient(null);
         if (onPatientChange) {
           onPatientChange(null);
         }
+        
+        // Invalidate patient list cache to get updated data
+        await invalidatePatientList();
+        
+        // Find a fallback patient after the list is refreshed
+        const fallbackPatient = await findFallbackPatient();
+        
+        if (fallbackPatient) {
+          logger.info('patient_selector_delete_fallback', {
+            message: 'Auto-switching to fallback patient after deletion',
+            deletedPatientId: patient.id,
+            fallbackPatientId: fallbackPatient.id,
+            fallbackType: fallbackPatient.is_self_record ? 'self_record' : 'owned_patient'
+          });
+          
+          setActivePatient(fallbackPatient);
+          if (onPatientChange) {
+            onPatientChange(fallbackPatient);
+          }
+          
+          toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully. Switched to ${fallbackPatient.first_name} ${fallbackPatient.last_name}.`);
+        } else {
+          logger.info('patient_selector_delete_no_fallback', {
+            message: 'No fallback patient available after deletion',
+            deletedPatientId: patient.id
+          });
+          
+          toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully. No other patients available.`);
+        }
+      } else {
+        // Just invalidate the list if we didn't delete the active patient
+        await invalidatePatientList();
+        toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully`);
       }
-      
-      // Invalidate patient list cache to force fresh data
-      await invalidatePatientList();
       
       logger.info('patient_selector_deleted', {
         message: 'Patient deleted successfully',
@@ -374,10 +419,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       logger.error('patient_selector_delete_error', {
         message: 'Failed to delete patient',
         patientId: patient.id,
-        error: error.message
+        error: error.message,
+        errorStack: error.stack
       });
       
-      toast.error(`Delete Failed: ${error.message}`);
+      toast.error(`Delete Failed: ${error.message || 'Unknown error occurred'}`);
     } finally {
       setLoading(false);
     }
@@ -809,7 +855,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             searchable
             clearable
             disabled={combinedLoading || externalLoading}
-            rightSection={(combinedLoading || externalLoading) ? <Loader size="xs" /> : <IconChevronDown size="1rem" />}
+            rightSection={(combinedLoading || externalLoading) ? <Loader size="xs" /> : undefined}
             renderOption={({ option }) => renderPatientOption(option.patient)}
           />
         </Box>

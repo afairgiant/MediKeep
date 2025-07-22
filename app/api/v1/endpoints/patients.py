@@ -696,8 +696,8 @@ def get_user_recent_activity(
             ActivityLog.entity_type.in_(universal_entity_types)
         )
 
-        # For user's own patient, also include activities by this user
-        if not patient_id or patient_record.user_id == current_user_id:
+        # For requests without specific patient_id, also include activities by this user
+        if not patient_id:
             main_filter = main_filter | (ActivityLog.user_id == current_user_id)
 
         activity_logs = (
