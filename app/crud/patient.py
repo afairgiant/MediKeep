@@ -148,6 +148,7 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
         # Create patient with the specified user_id
         patient_dict = patient_data.dict()
         patient_dict["user_id"] = user_id
+        patient_dict["owner_user_id"] = user_id  # Set owner_user_id for constraint compliance
 
         db_patient = Patient(**patient_dict)
         db.add(db_patient)
