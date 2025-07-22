@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models.models import User, Patient
 from app.core.logging_config import get_logger
 from app.services.patient_access import PatientAccessService
+from app.core.activity_tracker import activity_tracking_disabled_var
 
 logger = get_logger(__name__, "app")
 
@@ -178,6 +179,13 @@ class PatientManagementService:
         """
         Delete a patient record (only owner can delete)
         
+        This method handles all foreign key constraints by:
+        1. Clearing active_patient_id references in users table
+        2. Removing patient sharing relationships  
+        3. Deleting activity logs that reference this patient
+        4. Deleting all associated medical records (cascaded via database)
+        5. Finally deleting the patient record
+        
         Args:
             user: The user deleting the patient
             patient_id: ID of the patient to delete
@@ -197,16 +205,62 @@ class PatientManagementService:
             raise ValueError("Only the patient owner can delete this record")
         
         try:
+            # Temporarily disable activity tracking to prevent new logs during deletion
+            activity_tracking_disabled_var.set(True)
+            # Step 1: Clear active_patient_id for any users who have this patient as active
+            from app.models.models import User
+            users_with_active_patient = self.db.query(User).filter(
+                User.active_patient_id == patient_id
+            ).all()
+            
+            for active_user in users_with_active_patient:
+                logger.info(f"Clearing active_patient_id for user {active_user.id}")
+                active_user.active_patient_id = None
+                
+            # Step 2: Remove patient sharing relationships
+            from app.models.models import PatientShare
+            sharing_records = self.db.query(PatientShare).filter(
+                PatientShare.patient_id == patient_id
+            ).all()
+            
+            for share in sharing_records:
+                logger.info(f"Removing patient share: patient {patient_id} shared by {share.shared_by_user_id} with {share.shared_with_user_id}")
+                self.db.delete(share)
+            
+            # Step 3: Delete activity logs that reference this patient
+            from app.models import ActivityLog
+            activity_logs = self.db.query(ActivityLog).filter(
+                ActivityLog.patient_id == patient_id
+            ).all()
+            
+            for log in activity_logs:
+                logger.info(f"Removing activity log {log.id} for patient {patient_id}")
+                self.db.delete(log)
+            
+            # Step 4: Delete the patient (medical records will be cascaded by database constraints)
+            logger.info(f"Deleting patient {patient_id} and all associated medical records")
             self.db.delete(patient)
+            
+            # Commit all changes
             self.db.commit()
             
-            logger.info(f"Deleted patient {patient.id}")
+            # Ensure transaction is fully flushed and visible to other connections
+            self.db.flush()
+            
+            logger.info(f"Successfully deleted patient {patient.id} and cleared all references")
             return True
             
         except IntegrityError as e:
             self.db.rollback()
-            logger.error(f"Database integrity error: {e}")
-            raise ValueError("Failed to delete patient due to database constraint")
+            logger.error(f"Database integrity error during patient deletion: {e}")
+            raise ValueError(f"Failed to delete patient due to database constraint: {str(e)}")
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Unexpected error during patient deletion: {e}")
+            raise ValueError(f"Failed to delete patient: {str(e)}")
+        finally:
+            # Re-enable activity tracking
+            activity_tracking_disabled_var.set(False)
     
     def get_user_patients(self, user: User) -> List[Patient]:
         """

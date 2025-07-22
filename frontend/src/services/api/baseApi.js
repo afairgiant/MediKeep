@@ -231,7 +231,9 @@ class BaseApiService {
     if (!response.ok) {
       // Handle auth errors first
       if (this.handleAuthError(response)) {
-        return; // Will redirect to login
+        // If handleAuthError returns true, it means we're redirecting to login
+        // We should throw an error so the calling code knows the request failed
+        throw new Error('Authentication failed - redirecting to login');
       }
 
       // For 401 errors on admin endpoints with valid tokens, retry once

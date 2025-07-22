@@ -134,6 +134,13 @@ const Dashboard = () => {
     }
   }, [currentActivePatient?.id, initialLoadComplete]);
 
+  // Refresh recent activity when active patient changes
+  useEffect(() => {
+    if (currentActivePatient?.id && initialLoadComplete) {
+      fetchRecentActivity();
+    }
+  }, [currentActivePatient?.id, initialLoadComplete]);
+
   // Auto-refresh recent activity every 30 seconds to catch new updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -200,13 +207,7 @@ const Dashboard = () => {
     invalidateAll();
     refreshPatient();
 
-    // Refresh dashboard data for the new patient context
-    if (newPatient) {
-      await Promise.all([
-        fetchRecentActivity(newPatient.id),
-        fetchDashboardStats(),
-      ]);
-    }
+    // Dashboard data will be refreshed automatically by useEffect when currentActivePatient changes
 
     // Hide loading state
     setPatientSelectorLoading(false);
@@ -217,7 +218,7 @@ const Dashboard = () => {
       setActivityLoading(true);
       const targetPatientId = patientId || currentActivePatient?.id || user?.id;
       const activity = await apiService.getRecentActivity(targetPatientId);
-
+      
       // Filter out erroneous "deleted" patient information activities
       // This is a temporary fix for a backend issue where patient updates are logged as deletions
       const filteredActivity = activity.filter(item => {
