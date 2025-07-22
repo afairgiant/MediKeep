@@ -75,17 +75,17 @@ class User(Base):
     )
 
     # V1: New relationships
-    owned_patients = orm_relationship("Patient", foreign_keys="Patient.owner_user_id")
+    owned_patients = orm_relationship("Patient", foreign_keys="Patient.owner_user_id", overlaps="owner")
     current_patient_context = orm_relationship(
         "Patient", foreign_keys=[active_patient_id]
     )
 
     # V1: Patient sharing relationships
     shared_patients_by_me = orm_relationship(
-        "PatientShare", foreign_keys="PatientShare.shared_by_user_id"
+        "PatientShare", foreign_keys="PatientShare.shared_by_user_id", overlaps="shared_by"
     )
     shared_patients_with_me = orm_relationship(
-        "PatientShare", foreign_keys="PatientShare.shared_with_user_id"
+        "PatientShare", foreign_keys="PatientShare.shared_with_user_id", overlaps="shared_with"
     )
 
 
@@ -120,8 +120,8 @@ class Patient(Base):
     )  # Primary care physician
 
     blood_type = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
-    height = Column(Integer, nullable=True)  # in inches
-    weight = Column(Integer, nullable=True)  # in lbs
+    height = Column(Float, nullable=True)  # in inches
+    weight = Column(Float, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
     address = Column(String, nullable=True)
 
@@ -132,7 +132,7 @@ class Patient(Base):
     )
 
     # Table Relationships
-    owner = orm_relationship("User", foreign_keys=[owner_user_id])
+    owner = orm_relationship("User", foreign_keys=[owner_user_id], overlaps="owned_patients")
     user = orm_relationship("User", foreign_keys=[user_id], back_populates="patient")
     practitioner = orm_relationship("Practitioner", back_populates="patients")
     medications = orm_relationship(
@@ -174,6 +174,7 @@ class Patient(Base):
         "PatientShare",
         foreign_keys="PatientShare.patient_id",
         cascade="all, delete-orphan",
+        overlaps="patient",
     )
 
 
@@ -867,9 +868,9 @@ class PatientShare(Base):
     )
 
     # Relationships
-    patient = orm_relationship("Patient", foreign_keys=[patient_id])
-    shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id])
-    shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id])
+    patient = orm_relationship("Patient", foreign_keys=[patient_id], overlaps="shares")
+    shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id], overlaps="shared_patients_by_me")
+    shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id], overlaps="shared_patients_with_me")
 
     # Constraints
     __table_args__ = (

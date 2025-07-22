@@ -201,9 +201,16 @@ def update_my_patient_record(
     patient_id = getattr(existing_patient, "id", None)
 
     try:
+        # Log the incoming data for debugging
+        logger.info(f"Attempting to update patient {patient_id} for user {user_id} with data: {patient_in.dict()}")
+        
         updated_patient = patient.update_for_user(
             db, user_id=user_id, patient_data=patient_in
         )
+
+        if not updated_patient:
+            logger.error(f"Update returned None for patient {patient_id}, user {user_id}")
+            raise HTTPException(status_code=500, detail="Failed to update patient record")
 
         # Log successful patient record update
         logger.info(
@@ -214,6 +221,7 @@ def update_my_patient_record(
                 "user_id": user_id,
                 "patient_id": patient_id,
                 "ip": user_ip,
+                "updated_data": updated_patient.id,  # Just log the ID to confirm it exists
             },
         )
 
