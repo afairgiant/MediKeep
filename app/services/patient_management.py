@@ -207,7 +207,6 @@ class PatientManagementService:
         try:
             # Temporarily disable activity tracking to prevent new logs during deletion
             activity_tracking_disabled_var.set(True)
-            
             # Step 1: Clear active_patient_id for any users who have this patient as active
             from app.models.models import User
             users_with_active_patient = self.db.query(User).filter(
@@ -260,7 +259,8 @@ class PatientManagementService:
             logger.error(f"Unexpected error during patient deletion: {e}")
             raise ValueError(f"Failed to delete patient: {str(e)}")
         finally:
-            pass
+            # Re-enable activity tracking
+            activity_tracking_disabled_var.set(False)
     
     def get_user_patients(self, user: User) -> List[Patient]:
         """
