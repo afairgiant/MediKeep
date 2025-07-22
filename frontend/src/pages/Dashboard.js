@@ -708,10 +708,9 @@ const Dashboard = () => {
                   Manage your health information securely
                 </Text>
               </div>
-              {(currentActivePatient || user) && (
+              {authUser && (
                 <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
-                  Hello, {(currentActivePatient || user).first_name}{' '}
-                  {(currentActivePatient || user).last_name}!
+                  Hello, {authUser.fullName || authUser.full_name || authUser.username}!
                 </Badge>
               )}
             </Group>
