@@ -613,7 +613,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         try:
             # Update only fields that exist in the model
             for field, value in update_data.items():
-                if field in obj_data and hasattr(db_obj, field):
+                if hasattr(db_obj, field):
                     old_value = getattr(db_obj, field, None)
                     setattr(db_obj, field, value)
 

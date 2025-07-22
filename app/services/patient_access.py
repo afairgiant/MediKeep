@@ -35,11 +35,20 @@ class PatientAccessService:
         accessible_patients = []
         
         # 1. Own patients (always accessible)
-        own_patients = self.db.query(Patient).filter(
-            Patient.owner_user_id == user.id
-        ).all()
-        accessible_patients.extend(own_patients)
-        logger.info(f"Found {len(own_patients)} owned patients")
+        try:
+            own_patients = self.db.query(Patient).filter(
+                Patient.owner_user_id == user.id
+            ).all()
+            accessible_patients.extend(own_patients)
+            logger.info(f"Found {len(own_patients)} owned patients")
+        except Exception as e:
+            logger.error(f"Error querying owned patients: {e}")
+            # Fallback to old user_id query for backward compatibility
+            own_patients = self.db.query(Patient).filter(
+                Patient.user_id == user.id
+            ).all()
+            accessible_patients.extend(own_patients)
+            logger.info(f"Found {len(own_patients)} owned patients (fallback method)")
         
         # 2. Individually shared patients (Phase 1)
         shared_patients = self._get_individually_shared_patients(user, permission)

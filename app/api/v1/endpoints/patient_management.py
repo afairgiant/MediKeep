@@ -26,8 +26,8 @@ class PatientCreateRequest(BaseModel):
     birth_date: date = Field(..., description="Birth date")
     gender: Optional[str] = Field(None, max_length=20)
     blood_type: Optional[str] = Field(None, max_length=5)
-    height: Optional[int] = Field(None, gt=0, description="Height in inches")
-    weight: Optional[int] = Field(None, gt=0, description="Weight in pounds")
+    height: Optional[float] = Field(None, gt=0, description="Height in inches")
+    weight: Optional[float] = Field(None, gt=0, description="Weight in pounds")
     address: Optional[str] = Field(None, max_length=500)
     physician_id: Optional[int] = Field(None, description="Primary care physician ID")
     is_self_record: bool = Field(False, description="Whether this is the user's own medical record")
@@ -40,8 +40,8 @@ class PatientUpdateRequest(BaseModel):
     birth_date: Optional[date] = Field(None, description="Birth date")
     gender: Optional[str] = Field(None, max_length=20)
     blood_type: Optional[str] = Field(None, max_length=5)
-    height: Optional[int] = Field(None, gt=0, description="Height in inches")
-    weight: Optional[int] = Field(None, gt=0, description="Weight in pounds")
+    height: Optional[float] = Field(None, gt=0, description="Height in inches")
+    weight: Optional[float] = Field(None, gt=0, description="Weight in pounds")
     address: Optional[str] = Field(None, max_length=500)
     physician_id: Optional[int] = Field(None, description="Primary care physician ID")
 
@@ -54,8 +54,8 @@ class PatientResponse(BaseModel):
     birth_date: date
     gender: Optional[str]
     blood_type: Optional[str]
-    height: Optional[int]
-    weight: Optional[int]
+    height: Optional[float]
+    weight: Optional[float]
     address: Optional[str]
     physician_id: Optional[int]
     owner_user_id: int
