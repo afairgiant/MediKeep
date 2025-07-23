@@ -8,6 +8,8 @@ const AdminSettings = () => {
   const [settings, setSettings] = useState({
     backup_retention_days: 7,
     trash_retention_days: 30,
+    backup_min_count: 5,
+    backup_max_count: 50,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,6 +55,8 @@ const AdminSettings = () => {
       const updateData = {
         backup_retention_days: settings.backup_retention_days,
         trash_retention_days: settings.trash_retention_days,
+        backup_min_count: settings.backup_min_count,
+        backup_max_count: settings.backup_max_count,
       };
 
       const response =
@@ -119,20 +123,30 @@ const AdminSettings = () => {
           {/* Data Retention Settings */}
           <div className="settings-section-card">
             <div className="settings-section-header">
-              <h2>Data Retention Policies</h2>
+              <h2>Enhanced Backup Retention Policies</h2>
               <p>
-                Configure how long different types of data are kept before
-                automatic cleanup
+                Configure backup retention with count-based protection and time-based cleanup
               </p>
+            </div>
+
+            {/* Retention Logic Explanation */}
+            <div className="retention-info-card">
+              <div className="retention-info-header">
+                <h3>🔒 Retention Logic</h3>
+              </div>
+              <ul className="retention-info-list">
+                <li><strong>Count Protection:</strong> Always keep the {settings.backup_min_count} most recent backups</li>
+                <li><strong>Time-based Cleanup:</strong> Delete backups older than {settings.backup_retention_days || 7} days (beyond minimum count)</li>
+                <li><strong>Priority:</strong> Minimum count always takes precedence over time limits</li>
+              </ul>
             </div>
 
             <div className="settings-section-content">
               <div className="setting-item">
                 <div className="setting-info">
-                  <div className="setting-title">Backup Retention</div>
+                  <div className="setting-title">Backup Retention (Days)</div>
                   <div className="setting-description">
-                    Number of days to keep backup files before automatic
-                    deletion
+                    Delete backups older than this many days (beyond minimum count)
                   </div>
                 </div>
                 <div className="setting-control">
@@ -151,6 +165,60 @@ const AdminSettings = () => {
                       className="settings-input"
                     />
                     <span className="input-suffix">days</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="setting-item">
+                <div className="setting-info">
+                  <div className="setting-title">🛡️ Minimum Backup Count</div>
+                  <div className="setting-description">
+                    Always keep at least this many backups (regardless of age)
+                  </div>
+                </div>
+                <div className="setting-control">
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={settings.backup_min_count}
+                      onChange={e =>
+                        handleInputChange(
+                          'backup_min_count',
+                          e.target.value
+                        )
+                      }
+                      className="settings-input"
+                    />
+                    <span className="input-suffix">backups</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="setting-item">
+                <div className="setting-info">
+                  <div className="setting-title">⚠️ Maximum Backup Count</div>
+                  <div className="setting-description">
+                    Alert when backup count exceeds this limit (optional)
+                  </div>
+                </div>
+                <div className="setting-control">
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      min="5"
+                      max="500"
+                      value={settings.backup_max_count}
+                      onChange={e =>
+                        handleInputChange(
+                          'backup_max_count',
+                          e.target.value
+                        )
+                      }
+                      className="settings-input"
+                    />
+                    <span className="input-suffix">backups</span>
                   </div>
                 </div>
               </div>

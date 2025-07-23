@@ -67,6 +67,10 @@ class Settings:  # App Info
     BACKUP_RETENTION_DAYS: int = int(
         os.getenv("BACKUP_RETENTION_DAYS", "7")
     )  # Keep it simple initially
+    
+    # Enhanced Backup Retention Settings
+    BACKUP_MIN_COUNT: int = int(os.getenv("BACKUP_MIN_COUNT", "5"))  # Always keep at least 5 backups
+    BACKUP_MAX_COUNT: int = int(os.getenv("BACKUP_MAX_COUNT", "50"))  # Warning threshold for too many backups
 
     # Trash directory settings
     TRASH_DIR: Path = Path(os.getenv("TRASH_DIR", "./uploads/trash"))
