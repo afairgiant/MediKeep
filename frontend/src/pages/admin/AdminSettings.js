@@ -26,7 +26,10 @@ const AdminSettings = () => {
       const data = await adminApiService.getRetentionSettings();
       setSettings(data);
     } catch (error) {
-      frontendLogger.logError('Error loading settings', { error: error.message, component: 'AdminSettings' });
+      frontendLogger.logError('Error loading settings', {
+        error: error.message,
+        component: 'AdminSettings',
+      });
       setMessage({
         type: 'error',
         text: 'Failed to load settings: ' + error.message,
@@ -77,7 +80,10 @@ const AdminSettings = () => {
         setMessage({ type: '', text: '' });
       }, 5000);
     } catch (error) {
-      frontendLogger.logError('Error saving settings', { error: error.message, component: 'AdminSettings' });
+      frontendLogger.logError('Error saving settings', {
+        error: error.message,
+        component: 'AdminSettings',
+      });
       setMessage({
         type: 'error',
         text: 'Failed to save settings: ' + error.message,
@@ -123,9 +129,10 @@ const AdminSettings = () => {
           {/* Data Retention Settings */}
           <div className="settings-section-card">
             <div className="settings-section-header">
-              <h2>Enhanced Backup Retention Policies</h2>
+              <h2>Backup Retention Policies</h2>
               <p>
-                Configure backup retention with count-based protection and time-based cleanup
+                Configure backup retention with count-based protection and
+                time-based cleanup
               </p>
             </div>
 
@@ -135,9 +142,19 @@ const AdminSettings = () => {
                 <h3>🔒 Retention Logic</h3>
               </div>
               <ul className="retention-info-list">
-                <li><strong>Count Protection:</strong> Always keep the {settings.backup_min_count} most recent backups</li>
-                <li><strong>Time-based Cleanup:</strong> Delete backups older than {settings.backup_retention_days || 7} days (beyond minimum count)</li>
-                <li><strong>Priority:</strong> Minimum count always takes precedence over time limits</li>
+                <li>
+                  <strong>Count Protection:</strong> Always keep the{' '}
+                  {settings.backup_min_count} most recent backups
+                </li>
+                <li>
+                  <strong>Time-based Cleanup:</strong> Delete backups older than{' '}
+                  {settings.backup_retention_days || 7} days (beyond minimum
+                  count)
+                </li>
+                <li>
+                  <strong>Priority:</strong> Minimum count always takes
+                  precedence over time limits
+                </li>
               </ul>
             </div>
 
@@ -146,7 +163,8 @@ const AdminSettings = () => {
                 <div className="setting-info">
                   <div className="setting-title">Backup Retention (Days)</div>
                   <div className="setting-description">
-                    Delete backups older than this many days (beyond minimum count)
+                    Delete backups older than this many days (beyond minimum
+                    count)
                   </div>
                 </div>
                 <div className="setting-control">
@@ -184,10 +202,7 @@ const AdminSettings = () => {
                       max="100"
                       value={settings.backup_min_count}
                       onChange={e =>
-                        handleInputChange(
-                          'backup_min_count',
-                          e.target.value
-                        )
+                        handleInputChange('backup_min_count', e.target.value)
                       }
                       className="settings-input"
                     />
@@ -211,10 +226,7 @@ const AdminSettings = () => {
                       max="500"
                       value={settings.backup_max_count}
                       onChange={e =>
-                        handleInputChange(
-                          'backup_max_count',
-                          e.target.value
-                        )
+                        handleInputChange('backup_max_count', e.target.value)
                       }
                       className="settings-input"
                     />
