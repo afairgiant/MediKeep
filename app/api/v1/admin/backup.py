@@ -426,6 +426,17 @@ async def update_retention_settings(
                 raise HTTPException(
                     status_code=400, detail="Minimum backup count must be at least 1"
                 )
+            # Validate that min count is not greater than max count
+            current_max = (
+                settings_update.backup_max_count
+                if settings_update.backup_max_count is not None
+                else settings.BACKUP_MAX_COUNT
+            )
+            if settings_update.backup_min_count > current_max:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Minimum backup count must be less than or equal to maximum backup count",
+                )
             settings.BACKUP_MIN_COUNT = settings_update.backup_min_count
             updated_settings["backup_min_count"] = settings_update.backup_min_count
 
@@ -434,16 +445,16 @@ async def update_retention_settings(
                 raise HTTPException(
                     status_code=400, detail="Maximum backup count must be at least 1"
                 )
-            # Validate that max count is greater than min count
+            # Validate that max count is greater than or equal to min count
             current_min = (
-                settings_update.backup_min_count 
-                if settings_update.backup_min_count is not None 
+                settings_update.backup_min_count
+                if settings_update.backup_min_count is not None
                 else settings.BACKUP_MIN_COUNT
             )
             if settings_update.backup_max_count < current_min:
                 raise HTTPException(
-                    status_code=400, 
-                    detail="Maximum backup count must be greater than or equal to minimum backup count"
+                    status_code=400,
+                    detail="Maximum backup count must be greater than or equal to minimum backup count",
                 )
             settings.BACKUP_MAX_COUNT = settings_update.backup_max_count
             updated_settings["backup_max_count"] = settings_update.backup_max_count
@@ -481,12 +492,12 @@ async def get_retention_stats(
     try:
         backup_service = BackupService(db)
         stats = await backup_service.get_retention_stats()
-        
+
         return {
             "message": "Retention statistics retrieved successfully",
             "stats": stats,
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get retention stats: {str(e)}")
         raise HTTPException(
