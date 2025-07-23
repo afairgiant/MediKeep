@@ -263,37 +263,51 @@ const BackupManagement = () => {
             <div className="advanced-actions-menu">
               <h3>Advanced Options</h3>
               <div className="menu-trigger">
-                <button className="dots-menu-btn" onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}>
+                <button 
+                  className="dots-menu-btn" 
+                  onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}
+                  aria-expanded={showAdvancedMenu}
+                  aria-haspopup="menu"
+                  aria-label="Advanced backup options menu"
+                >
                   <span>⋮</span> More Options
                 </button>
                 {showAdvancedMenu && (
-                  <div className="dropdown-menu">
+                  <div className="dropdown-menu" role="menu">
                     <button 
                       className="dropdown-item"
+                      role="menuitem"
                       onClick={() => { handleCreateBackup('database'); setShowAdvancedMenu(false); }}
                       disabled={creating.database}
+                      aria-disabled={creating.database}
                     >
                       {creating.database ? 'Creating...' : 'Database Only Backup'}
                     </button>
                     <button 
                       className="dropdown-item"
+                      role="menuitem"
                       onClick={() => { handleCreateBackup('files'); setShowAdvancedMenu(false); }}
                       disabled={creating.files}
+                      aria-disabled={creating.files}
                     >
                       {creating.files ? 'Creating...' : 'Files Only Backup'}
                     </button>
                     <hr className="dropdown-divider" />
                     <button 
                       className="dropdown-item"
+                      role="menuitem"
                       onClick={() => { handleCleanupBackups(); setShowAdvancedMenu(false); }}
                       disabled={loading}
+                      aria-disabled={loading}
                     >
                       {loading ? 'Cleaning...' : 'Cleanup Old Backups'}
                     </button>
                     <button 
                       className="dropdown-item"
+                      role="menuitem"
                       onClick={() => { handleCompleteCleanup(); setShowAdvancedMenu(false); }}
                       disabled={loading}
+                      aria-disabled={loading}
                     >
                       {loading ? 'Cleaning...' : 'Complete Cleanup'}
                     </button>

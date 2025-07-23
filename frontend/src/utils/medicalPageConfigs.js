@@ -14,18 +14,18 @@ export const medicalPageConfigs = {
         { value: 'chronic', label: 'Chronic' },
         { value: 'inactive', label: 'Inactive' },
       ],
-      dateField: 'onsetDate',
+      dateField: 'onset_date',
     },
     sorting: {
-      defaultSortBy: 'onsetDate',
+      defaultSortBy: 'onset_date',
       defaultSortOrder: 'desc',
       sortOptions: [
-        { value: 'onsetDate', label: 'Onset Date' },
+        { value: 'onset_date', label: 'Onset Date' },
         { value: 'diagnosis', label: 'Diagnosis' },
         { value: 'status', label: 'Status' },
       ],
       sortTypes: {
-        onsetDate: 'date',
+        onset_date: 'date',
         diagnosis: 'string',
         status: 'status',
       },
