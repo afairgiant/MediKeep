@@ -13,6 +13,7 @@ const BackupManagement = () => {
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [showAdvancedMenu, setShowAdvancedMenu] = useState(false);
 
   // Backup Management with auto-refresh
   const {
@@ -150,6 +151,18 @@ const BackupManagement = () => {
   };
 
   const handleCompleteCleanup = async () => {
+    const confirmCleanup = window.confirm(
+      `⚠️ WARNING: Complete Cleanup will permanently remove:\n\n` +
+      `• Old backup files\n` +
+      `• Orphaned files\n` +
+      `• Trash files\n\n` +
+      `This action cannot be undone. Are you sure you want to proceed?`
+    );
+
+    if (!confirmCleanup) {
+      return;
+    }
+
     const result = await executeAction('cleanupAllOldData');
     if (result) {
       const totalFiles = result.total_files_cleaned || 0;
@@ -227,32 +240,14 @@ const BackupManagement = () => {
           </AdminCard>
         )}
 
-        {/* Backup Actions */}
+        {/* Main Backup Actions */}
         <AdminCard title="⚡ Backup Operations" className="backup-actions-card">
-          <div className="backup-actions-grid">
-            <BackupActionCard
-              title="Database Backup"
-              description="Create a backup of the database"
-              buttonText="Create Database Backup"
-              buttonClass="database"
-              loading={creating.database}
-              onClick={() => handleCreateBackup('database')}
-            />
-
-            <BackupActionCard
-              title="Files Backup"
-              description="Create a backup of uploaded files"
-              buttonText="Create Files Backup"
-              buttonClass="files"
-              loading={creating.files}
-              onClick={() => handleCreateBackup('files')}
-            />
-
+          <div className="main-backup-actions">
             <BackupActionCard
               title="Full System Backup"
-              description="Create a complete backup (database + files)"
+              description="Create a complete backup (database + files) - Recommended"
               buttonText="Create Full Backup"
-              buttonClass="full"
+              buttonClass="full compact-btn"
               loading={creating.full}
               onClick={() => handleCreateBackup('full')}
             />
@@ -265,23 +260,61 @@ const BackupManagement = () => {
               onUpload={handleUploadBackup}
             />
 
-            <BackupActionCard
-              title="Cleanup Old Backups"
-              description="Remove old backups based on retention policy"
-              buttonText="Cleanup Old Backups"
-              buttonClass="cleanup"
-              loading={loading}
-              onClick={handleCleanupBackups}
-            />
-
-            <BackupActionCard
-              title="Complete Cleanup"
-              description="Remove old backups, orphaned files, and trash files"
-              buttonText="Complete Cleanup"
-              buttonClass="cleanup-all"
-              loading={loading}
-              onClick={handleCompleteCleanup}
-            />
+            <div className="advanced-actions-menu">
+              <h3>Advanced Options</h3>
+              <div className="menu-trigger">
+                <button 
+                  className="dots-menu-btn" 
+                  onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}
+                  aria-expanded={showAdvancedMenu}
+                  aria-haspopup="menu"
+                  aria-label="Advanced backup options menu"
+                >
+                  <span>⋮</span> More Options
+                </button>
+                {showAdvancedMenu && (
+                  <div className="dropdown-menu" role="menu">
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCreateBackup('database'); setShowAdvancedMenu(false); }}
+                      disabled={creating.database}
+                      aria-disabled={creating.database}
+                    >
+                      {creating.database ? 'Creating...' : 'Database Only Backup'}
+                    </button>
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCreateBackup('files'); setShowAdvancedMenu(false); }}
+                      disabled={creating.files}
+                      aria-disabled={creating.files}
+                    >
+                      {creating.files ? 'Creating...' : 'Files Only Backup'}
+                    </button>
+                    <hr className="dropdown-divider" />
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCleanupBackups(); setShowAdvancedMenu(false); }}
+                      disabled={loading}
+                      aria-disabled={loading}
+                    >
+                      {loading ? 'Cleaning...' : 'Cleanup Old Backups'}
+                    </button>
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCompleteCleanup(); setShowAdvancedMenu(false); }}
+                      disabled={loading}
+                      aria-disabled={loading}
+                    >
+                      {loading ? 'Cleaning...' : 'Complete Cleanup'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </AdminCard>
 
