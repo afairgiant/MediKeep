@@ -15,7 +15,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.16.2"
+    VERSION: str = "0.17.0"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
@@ -67,10 +67,14 @@ class Settings:  # App Info
     BACKUP_RETENTION_DAYS: int = int(
         os.getenv("BACKUP_RETENTION_DAYS", "7")
     )  # Keep it simple initially
-    
+
     # Enhanced Backup Retention Settings
-    BACKUP_MIN_COUNT: int = int(os.getenv("BACKUP_MIN_COUNT", "5"))  # Always keep at least 5 backups
-    BACKUP_MAX_COUNT: int = int(os.getenv("BACKUP_MAX_COUNT", "50"))  # Warning threshold for too many backups
+    BACKUP_MIN_COUNT: int = int(
+        os.getenv("BACKUP_MIN_COUNT", "5")
+    )  # Always keep at least 5 backups
+    BACKUP_MAX_COUNT: int = int(
+        os.getenv("BACKUP_MAX_COUNT", "50")
+    )  # Warning threshold for too many backups
 
     # Trash directory settings
     TRASH_DIR: Path = Path(os.getenv("TRASH_DIR", "./uploads/trash"))
