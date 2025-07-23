@@ -535,7 +535,8 @@ class BackupService:
 
     async def cleanup_old_backups(self) -> Dict[str, Any]:
         """
-        Clean up old backups based on retention policy.
+        Clean up old backups based on enhanced retention policy.
+        Priority: Count-based protection (keep minimum X backups) then time-based cleanup.
         This includes both database records and orphaned files.
 
         Returns:
@@ -544,15 +545,34 @@ class BackupService:
         try:
             from datetime import timedelta
 
-            cutoff_date = datetime.now() - timedelta(
-                days=settings.BACKUP_RETENTION_DAYS
+            # Get all backups ordered by creation date (newest first)
+            all_backups = (
+                self.db.query(BackupRecord)
+                .order_by(BackupRecord.created_at.desc())
+                .all()
             )
 
-            # Find old backup records
-            old_backups = (
-                self.db.query(BackupRecord)
-                .filter(BackupRecord.created_at < cutoff_date)
-                .all()
+            min_count = settings.BACKUP_MIN_COUNT
+            retention_days = settings.BACKUP_RETENTION_DAYS
+            cutoff_date = datetime.now() - timedelta(days=retention_days)
+
+            # Step 1: Protect the N most recent backups (regardless of age)
+            protected_backups = all_backups[:min_count]
+            protected_ids = {backup.id for backup in protected_backups}
+
+            # Step 2: Apply time-based retention to remaining backups
+            eligible_for_deletion = all_backups[min_count:]
+            old_backups = [
+                backup for backup in eligible_for_deletion 
+                if backup.created_at < cutoff_date
+            ]
+
+            logger.info(
+                f"Retention policy: keeping {min_count} most recent backups, "
+                f"plus any within {retention_days} days. "
+                f"Total backups: {len(all_backups)}, "
+                f"Protected by count: {len(protected_backups)}, "
+                f"Eligible for deletion: {len(old_backups)}"
             )
 
             deleted_count = 0
@@ -619,7 +639,8 @@ class BackupService:
                     errors.append(f"Error scanning for orphaned files: {str(e)}")
 
             logger.info(
-                f"Cleanup completed: deleted {deleted_count} tracked backups and {orphaned_deleted} orphaned files"
+                f"Enhanced cleanup completed: deleted {deleted_count} tracked backups and {orphaned_deleted} orphaned files. "
+                f"Retention: {len(protected_backups)} protected by count, {len(all_backups) - len(old_backups) - deleted_count} remaining"
             )
 
             return {
@@ -628,11 +649,83 @@ class BackupService:
                 "total_deleted": deleted_count + orphaned_deleted,
                 "errors": errors,
                 "cutoff_date": cutoff_date.isoformat(),
+                "retention_stats": {
+                    "total_backups_before": len(all_backups),
+                    "protected_by_count": len(protected_backups),
+                    "protected_by_time": max(0, len(all_backups) - len(protected_backups) - len(old_backups)),
+                    "eligible_for_deletion": len(old_backups),
+                    "min_count_setting": min_count,
+                    "retention_days_setting": retention_days,
+                },
             }
 
         except Exception as e:
             logger.error(f"Failed to cleanup old backups: {str(e)}")
             raise Exception(f"Failed to cleanup old backups: {str(e)}")
+
+    async def get_retention_stats(self) -> Dict[str, Any]:
+        """
+        Get current retention statistics without performing cleanup.
+        Useful for preview functionality and dashboard display.
+
+        Returns:
+            Dictionary containing retention statistics
+        """
+        try:
+            from datetime import timedelta
+
+            # Get all backups ordered by creation date (newest first)
+            all_backups = (
+                self.db.query(BackupRecord)
+                .order_by(BackupRecord.created_at.desc())
+                .all()
+            )
+
+            min_count = settings.BACKUP_MIN_COUNT
+            retention_days = settings.BACKUP_RETENTION_DAYS
+            cutoff_date = datetime.now() - timedelta(days=retention_days)
+
+            # Step 1: Identify protected backups (N most recent)
+            protected_backups = all_backups[:min_count]
+            
+            # Step 2: Identify backups eligible for deletion
+            eligible_for_deletion = all_backups[min_count:]
+            backups_to_delete = [
+                backup for backup in eligible_for_deletion 
+                if backup.created_at < cutoff_date
+            ]
+
+            # Step 3: Calculate protected by time (within retention period but not in min count)
+            protected_by_time = [
+                backup for backup in eligible_for_deletion 
+                if backup.created_at >= cutoff_date
+            ]
+
+            return {
+                "total_backups": len(all_backups),
+                "protected_by_count": len(protected_backups),
+                "protected_by_time": len(protected_by_time),
+                "eligible_for_deletion": len(backups_to_delete),
+                "settings": {
+                    "backup_min_count": min_count,
+                    "backup_retention_days": retention_days,
+                    "backup_max_count": settings.BACKUP_MAX_COUNT,
+                },
+                "backups_to_delete": [
+                    {
+                        "id": backup.id,
+                        "filename": Path(backup.file_path).name if backup.file_path else "unknown",
+                        "created_at": backup.created_at.isoformat(),
+                        "size_bytes": backup.size_bytes,
+                        "backup_type": backup.backup_type,
+                    }
+                    for backup in backups_to_delete
+                ],
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to get retention stats: {str(e)}")
+            raise Exception(f"Failed to get retention stats: {str(e)}")
 
     async def cleanup_orphaned_files(self) -> Dict[str, Any]:
         """

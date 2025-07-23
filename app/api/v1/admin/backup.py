@@ -40,11 +40,15 @@ class BackupResponse(BaseModel):
 class RetentionSettingsResponse(BaseModel):
     backup_retention_days: int
     trash_retention_days: int
+    backup_min_count: int
+    backup_max_count: int
 
 
 class RetentionSettingsUpdate(BaseModel):
     backup_retention_days: Optional[int] = None
     trash_retention_days: Optional[int] = None
+    backup_min_count: Optional[int] = None
+    backup_max_count: Optional[int] = None
 
 
 @router.post("/create-database", response_model=BackupResponse)
@@ -383,6 +387,8 @@ async def get_retention_settings(
     return RetentionSettingsResponse(
         backup_retention_days=settings.BACKUP_RETENTION_DAYS,
         trash_retention_days=settings.TRASH_RETENTION_DAYS,
+        backup_min_count=settings.BACKUP_MIN_COUNT,
+        backup_max_count=settings.BACKUP_MAX_COUNT,
     )
 
 
@@ -415,6 +421,33 @@ async def update_retention_settings(
                 settings_update.trash_retention_days
             )
 
+        if settings_update.backup_min_count is not None:
+            if settings_update.backup_min_count < 1:
+                raise HTTPException(
+                    status_code=400, detail="Minimum backup count must be at least 1"
+                )
+            settings.BACKUP_MIN_COUNT = settings_update.backup_min_count
+            updated_settings["backup_min_count"] = settings_update.backup_min_count
+
+        if settings_update.backup_max_count is not None:
+            if settings_update.backup_max_count < 1:
+                raise HTTPException(
+                    status_code=400, detail="Maximum backup count must be at least 1"
+                )
+            # Validate that max count is greater than min count
+            current_min = (
+                settings_update.backup_min_count 
+                if settings_update.backup_min_count is not None 
+                else settings.BACKUP_MIN_COUNT
+            )
+            if settings_update.backup_max_count < current_min:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Maximum backup count must be greater than or equal to minimum backup count"
+                )
+            settings.BACKUP_MAX_COUNT = settings_update.backup_max_count
+            updated_settings["backup_max_count"] = settings_update.backup_max_count
+
         logger.info(
             f"Admin {current_user.username} updated retention settings: {updated_settings}"
         )
@@ -425,6 +458,8 @@ async def update_retention_settings(
             "current_settings": {
                 "backup_retention_days": settings.BACKUP_RETENTION_DAYS,
                 "trash_retention_days": settings.TRASH_RETENTION_DAYS,
+                "backup_min_count": settings.BACKUP_MIN_COUNT,
+                "backup_max_count": settings.BACKUP_MAX_COUNT,
             },
         }
 
@@ -434,4 +469,26 @@ async def update_retention_settings(
         logger.error(f"Failed to update retention settings: {str(e)}")
         raise HTTPException(
             status_code=500, detail=f"Failed to update retention settings: {str(e)}"
+        )
+
+
+@router.get("/retention/stats")
+async def get_retention_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """Get current backup retention statistics and cleanup preview."""
+    try:
+        backup_service = BackupService(db)
+        stats = await backup_service.get_retention_stats()
+        
+        return {
+            "message": "Retention statistics retrieved successfully",
+            "stats": stats,
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get retention stats: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get retention stats: {str(e)}"
         )

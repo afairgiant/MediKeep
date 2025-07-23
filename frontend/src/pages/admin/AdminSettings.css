@@ -48,6 +48,39 @@
   gap: 2rem;
 }
 
+/* Retention info card styles */
+.retention-info-card {
+  background-color: rgba(66, 135, 245, 0.05);
+  border: 1px solid rgba(66, 135, 245, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.retention-info-header h3 {
+  color: #4287f5;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.retention-info-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--color-text-primary);
+}
+
+.retention-info-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.retention-info-list li strong {
+  color: #4287f5;
+  font-weight: 600;
+}
+
 .settings-section-card {
   background: var(--color-bg-primary);
   border-radius: 12px;
