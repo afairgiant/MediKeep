@@ -640,7 +640,7 @@ class BackupService:
 
             logger.info(
                 f"Enhanced cleanup completed: deleted {deleted_count} tracked backups and {orphaned_deleted} orphaned files. "
-                f"Retention: {len(protected_backups)} protected by count, {len(all_backups) - len(old_backups) - deleted_count} remaining"
+                f"Retention: {len(protected_backups)} protected by count, {len(all_backups) - deleted_count} remaining"
             )
 
             return {

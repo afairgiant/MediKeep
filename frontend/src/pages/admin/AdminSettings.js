@@ -135,7 +135,7 @@ const AdminSettings = () => {
                 <h3>🔒 Retention Logic</h3>
               </div>
               <ul className="retention-info-list">
-                <li><strong>Count Protection:</strong> Always keep the {settings.backup_min_count || 5} most recent backups</li>
+                <li><strong>Count Protection:</strong> Always keep the {settings.backup_min_count} most recent backups</li>
                 <li><strong>Time-based Cleanup:</strong> Delete backups older than {settings.backup_retention_days || 7} days (beyond minimum count)</li>
                 <li><strong>Priority:</strong> Minimum count always takes precedence over time limits</li>
               </ul>
