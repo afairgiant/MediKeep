@@ -19,25 +19,27 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.v1.endpoints.utils import (
+    ensure_directory_with_permissions,
     handle_create_with_logging,
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
 )
+from app.core.config import settings
 from app.core.database import get_db
+from app.crud.condition import condition as condition_crud
 from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
-from app.crud.condition import condition as condition_crud
 from app.models.activity_log import EntityType
 from app.schemas.lab_result import (
-    LabResultCreate,
-    LabResultResponse,
-    LabResultUpdate,
-    LabResultWithRelations,
     LabResultConditionCreate,
     LabResultConditionResponse,
     LabResultConditionUpdate,
     LabResultConditionWithDetails,
+    LabResultCreate,
+    LabResultResponse,
+    LabResultUpdate,
+    LabResultWithRelations,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
 
@@ -54,7 +56,7 @@ def get_lab_results(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ):
     """Get lab results for the current user or accessible patient."""
-    
+
     # Filter lab results by the target patient_id with practitioner relationship loaded
     results = lab_result.get_by_patient(
         db,
@@ -346,7 +348,7 @@ async def upload_lab_result_file(
         )
 
     # Configuration
-    UPLOAD_DIRECTORY = "uploads/lab_result_files"
+    UPLOAD_DIRECTORY = settings.UPLOAD_DIR / "lab_result_files"
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
     ALLOWED_EXTENSIONS = {
         ".pdf",
@@ -383,17 +385,27 @@ async def upload_lab_result_file(
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024 * 1024)}MB",
         )
 
-    # Create upload directory if it doesn't exist
-    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+    # Create upload directory if it doesn't exist with proper error handling
+    ensure_directory_with_permissions(UPLOAD_DIRECTORY, "lab result file upload")
 
     # Generate unique filename
     unique_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+    file_path = UPLOAD_DIRECTORY / unique_filename
 
-    # Save file
+    # Save file with proper error handling
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(file_content)
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Permission denied writing file. This may be a Docker bind mount permission issue. Please ensure the container has write permissions to the upload directory: {str(e)}",
+        )
+    except OSError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save file: {str(e)}",
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -404,7 +416,7 @@ async def upload_lab_result_file(
     file_create = LabResultFileCreate(
         lab_result_id=lab_result_id,
         file_name=file.filename,
-        file_path=file_path,
+        file_path=str(file_path),
         file_type=file.content_type,
         file_size=len(file_content),
         description=description,
@@ -482,7 +494,10 @@ def get_code_usage_count(*, code: str, db: Session = Depends(get_db)):
 
 # Lab Result - Condition Relationship Endpoints
 
-@router.get("/{lab_result_id}/conditions", response_model=List[LabResultConditionWithDetails])
+
+@router.get(
+    "/{lab_result_id}/conditions", response_model=List[LabResultConditionWithDetails]
+)
 def get_lab_result_conditions(
     *,
     lab_result_id: int,
@@ -493,19 +508,21 @@ def get_lab_result_conditions(
     # Verify lab result exists and belongs to user
     db_lab_result = lab_result.get(db, id=lab_result_id)
     handle_not_found(db_lab_result, "Lab result")
-    
+
     if db_lab_result.patient_id != current_user_patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied to this lab result"
+            detail="Access denied to this lab result",
         )
-    
+
     # Get condition relationships
-    relationships = lab_result_condition.get_by_lab_result(db, lab_result_id=lab_result_id)
-    
+    relationships = lab_result_condition.get_by_lab_result(
+        db, lab_result_id=lab_result_id
+    )
+
     # Enhance with condition details
     from app.crud.condition import condition as condition_crud
-    
+
     enhanced_relationships = []
     for rel in relationships:
         condition_obj = condition_crud.get(db, id=rel.condition_id)
@@ -516,15 +533,19 @@ def get_lab_result_conditions(
             "relevance_note": rel.relevance_note,
             "created_at": rel.created_at,
             "updated_at": rel.updated_at,
-            "condition": {
-                "id": condition_obj.id,
-                "diagnosis": condition_obj.diagnosis,
-                "status": condition_obj.status,
-                "severity": condition_obj.severity,
-            } if condition_obj else None
+            "condition": (
+                {
+                    "id": condition_obj.id,
+                    "diagnosis": condition_obj.diagnosis,
+                    "status": condition_obj.status,
+                    "severity": condition_obj.severity,
+                }
+                if condition_obj
+                else None
+            ),
         }
         enhanced_relationships.append(rel_dict)
-    
+
     return enhanced_relationships
 
 
@@ -540,24 +561,24 @@ def create_lab_result_condition(
     # Verify lab result exists and belongs to user
     db_lab_result = lab_result.get(db, id=lab_result_id)
     handle_not_found(db_lab_result, "Lab result")
-    
+
     if db_lab_result.patient_id != current_user_patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied to this lab result"
+            detail="Access denied to this lab result",
         )
-    
+
     # Verify condition exists and belongs to the same patient
     db_condition = condition_crud.get(db, id=condition_in.condition_id)
     handle_not_found(db_condition, "Condition")
-    
+
     # Ensure condition belongs to the same patient as the lab result
     if db_condition.patient_id != current_user_patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot link condition that doesn't belong to the same patient"
+            detail="Cannot link condition that doesn't belong to the same patient",
         )
-    
+
     # Check if relationship already exists
     existing = lab_result_condition.get_by_lab_result_and_condition(
         db, lab_result_id=lab_result_id, condition_id=condition_in.condition_id
@@ -565,18 +586,21 @@ def create_lab_result_condition(
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Relationship between this lab result and condition already exists"
+            detail="Relationship between this lab result and condition already exists",
         )
-    
+
     # Override lab_result_id to ensure consistency
     condition_in.lab_result_id = lab_result_id
-    
+
     # Create relationship
     relationship = lab_result_condition.create(db, obj_in=condition_in)
     return relationship
 
 
-@router.put("/{lab_result_id}/conditions/{relationship_id}", response_model=LabResultConditionResponse)
+@router.put(
+    "/{lab_result_id}/conditions/{relationship_id}",
+    response_model=LabResultConditionResponse,
+)
 def update_lab_result_condition(
     *,
     lab_result_id: int,
@@ -589,25 +613,27 @@ def update_lab_result_condition(
     # Verify lab result exists and belongs to user
     db_lab_result = lab_result.get(db, id=lab_result_id)
     handle_not_found(db_lab_result, "Lab result")
-    
+
     if db_lab_result.patient_id != current_user_patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied to this lab result"
+            detail="Access denied to this lab result",
         )
-    
+
     # Verify relationship exists
     relationship = lab_result_condition.get(db, id=relationship_id)
     handle_not_found(relationship, "Lab result condition relationship")
-    
+
     if relationship.lab_result_id != lab_result_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Relationship does not belong to this lab result"
+            detail="Relationship does not belong to this lab result",
         )
-    
+
     # Update relationship
-    updated_relationship = lab_result_condition.update(db, db_obj=relationship, obj_in=condition_in)
+    updated_relationship = lab_result_condition.update(
+        db, db_obj=relationship, obj_in=condition_in
+    )
     return updated_relationship
 
 
@@ -623,23 +649,23 @@ def delete_lab_result_condition(
     # Verify lab result exists and belongs to user
     db_lab_result = lab_result.get(db, id=lab_result_id)
     handle_not_found(db_lab_result, "Lab result")
-    
+
     if db_lab_result.patient_id != current_user_patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied to this lab result"
+            detail="Access denied to this lab result",
         )
-    
+
     # Verify relationship exists
     relationship = lab_result_condition.get(db, id=relationship_id)
     handle_not_found(relationship, "Lab result condition relationship")
-    
+
     if relationship.lab_result_id != lab_result_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Relationship does not belong to this lab result"
+            detail="Relationship does not belong to this lab result",
         )
-    
+
     # Delete relationship
     lab_result_condition.delete(db, id=relationship_id)
     return {"message": "Lab result condition relationship deleted successfully"}
