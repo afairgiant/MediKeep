@@ -6,8 +6,8 @@ echo "Starting Medical Records Management System..."
 # Fix bind mount permissions for upload directories
 echo "Checking and fixing directory permissions..."
 
-# Change container user to match PUID/PGID if provided
-if [ -n "$PUID" ] && [ -n "$PGID" ]; then
+# Change container user to match PUID/PGID if provided (only when running as root)
+if [ "$(id -u)" = "0" ] && [ -n "$PUID" ] && [ -n "$PGID" ]; then
     echo "Configuring container for PUID=$PUID, PGID=$PGID"
     
     # Modify appuser to match PUID/PGID (we're running as root at startup)
