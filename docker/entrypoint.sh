@@ -6,18 +6,44 @@ echo "Starting Medical Records Management System..."
 # Fix bind mount permissions for upload directories
 echo "Checking and fixing directory permissions..."
 
-# Change container user to match PUID/PGID if provided (only when running as root)
-if [ "$(id -u)" = "0" ] && [ -n "$PUID" ] && [ -n "$PGID" ]; then
-    echo "Configuring container for PUID=$PUID, PGID=$PGID"
+# Handle PUID/PGID configuration (only run once as root)
+if [ "$(id -u)" = "0" ] && [ "$ENTRYPOINT_USER_SETUP" != "done" ]; then
+    export ENTRYPOINT_USER_SETUP="done"
     
-    # Modify appuser to match PUID/PGID (we're running as root at startup)
-    usermod -u "$PUID" appuser
-    groupmod -g "$PGID" appuser
-    
-    # Fix ownership of all app files for the new user
-    chown -R "$PUID:$PGID" /app
-    
-    echo "✓ Container user configured for $PUID:$PGID"
+    if [ -n "$PUID" ] && [ -n "$PGID" ]; then
+        echo "Configuring container for PUID=$PUID, PGID=$PGID"
+        
+        # Check if PUID/PGID are already in use by other users
+        if id "$PUID" >/dev/null 2>&1 && [ "$(id -u appuser)" != "$PUID" ]; then
+            echo "ERROR: PUID $PUID is already in use by user: $(id -nu "$PUID")"
+            exit 1
+        fi
+        
+        if getent group "$PGID" >/dev/null 2>&1 && [ "$(id -g appuser)" != "$PGID" ]; then
+            echo "ERROR: PGID $PGID is already in use by group: $(getent group "$PGID" | cut -d: -f1)"
+            exit 1
+        fi
+        
+        # Modify appuser to match PUID/PGID with error handling
+        if ! usermod -u "$PUID" appuser 2>/dev/null; then
+            echo "ERROR: Failed to set user ID to $PUID"
+            exit 1
+        fi
+        
+        if ! groupmod -g "$PGID" appuser 2>/dev/null; then
+            echo "ERROR: Failed to set group ID to $PGID"
+            exit 1
+        fi
+        
+        # Fix ownership of all app files for the new user
+        if ! chown -R "$PUID:$PGID" /app 2>/dev/null; then
+            echo "WARNING: Could not change ownership of some files"
+        fi
+        
+        echo "✓ Container user configured for $PUID:$PGID"
+    else
+        echo "No PUID/PGID provided, using default appuser"
+    fi
 fi
 
 # Function to safely create and fix permissions for directories
@@ -82,7 +108,7 @@ echo "Directory permission check completed."
 # Switch to appuser if we're still running as root (handles both PUID/PGID and default cases)
 if [ "$(id -u)" = "0" ]; then
     echo "Switching to appuser for application execution"
-    exec su appuser -c "$0 $*"
+    exec gosu appuser "$0" "$@"
 fi
 
 # Check if running in test environment (no database required)

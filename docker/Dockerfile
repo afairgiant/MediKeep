@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     bash \
     postgresql-client \
+    gosu \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
