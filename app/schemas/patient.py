@@ -150,13 +150,13 @@ class PatientBase(BaseModel):
         Raises:
             ValueError: If address is too long
         """
-        if v is not None:
+        if v is not None and v.strip():
             if len(v.strip()) < 5:
                 raise ValueError("Address must be at least 5 characters long")
             if len(v) > 200:
                 raise ValueError("Address must be less than 200 characters")
             return v.strip()
-        return v
+        return None
 
     @validator("blood_type")
     def validate_blood_type(cls, v):
@@ -172,7 +172,7 @@ class PatientBase(BaseModel):
         Raises:
             ValueError: If blood type is not in valid format
         """
-        if v is not None:
+        if v is not None and v.strip():
             # Common blood types
             valid_blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
             blood_type_upper = v.upper().strip()
@@ -183,7 +183,7 @@ class PatientBase(BaseModel):
                 )
 
             return blood_type_upper
-        return v
+        return None
 
     @validator("height")
     def validate_height(cls, v):
@@ -361,18 +361,18 @@ class PatientUpdate(BaseModel):
     @validator("address")
     def validate_address(cls, v):
         """Validate address if provided."""
-        if v is not None:
+        if v is not None and v.strip():
             if len(v.strip()) < 5:
                 raise ValueError("Address must be at least 5 characters long")
             if len(v) > 200:
                 raise ValueError("Address must be less than 200 characters")
             return v.strip()
-        return v
+        return None
 
     @validator("blood_type")
     def validate_blood_type(cls, v):
         """Validate blood type if provided."""
-        if v is not None:
+        if v is not None and v.strip():
             valid_blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
             blood_type_upper = v.upper().strip()
 
@@ -382,7 +382,7 @@ class PatientUpdate(BaseModel):
                 )
 
             return blood_type_upper
-        return v
+        return None
 
     @validator("height")
     def validate_height(cls, v):

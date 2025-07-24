@@ -17,6 +17,11 @@ class FamilyHistoryApi {
         return response;
     }
     
+    async getSharedByMe() {
+        const response = await apiService.get('/family-history-sharing/shared-by-me');
+        return response;
+    }
+    
     async getFamilyMemberShares(familyMemberId) {
         const response = await apiService.get(`/family-history-sharing/${familyMemberId}/shares`);
         return response;

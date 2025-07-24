@@ -968,12 +968,13 @@ class FamilyHistoryShare(Base):
     shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id])
     shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id])
 
-    # Constraints
+    # Constraints - allow multiple shares but only one active share per family member/user pair
     __table_args__ = (
         UniqueConstraint(
             "family_member_id",
             "shared_with_user_id",
-            name="unique_family_history_share",
+            "is_active",
+            name="unique_active_family_history_share",
         ),
     )
 

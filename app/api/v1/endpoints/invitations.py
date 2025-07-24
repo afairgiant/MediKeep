@@ -164,10 +164,14 @@ def respond_to_invitation(
             detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Error responding to invitation: {e}")
+        logger.error(f"Error responding to invitation {invitation_id}: {e}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Response data: {response_data}")
+        import traceback
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to respond to invitation"
+            detail=f"Failed to respond to invitation: {str(e)}"
         )
 
 
@@ -208,52 +212,97 @@ def revoke_invitation(
 ):
     """Revoke an accepted invitation (specifically for family history shares)"""
     try:
+        logger.info(f"DEBUG: Revoke request for invitation {invitation_id} by user {current_user.id}")
+        
         # Get the invitation first
         invitation_service = InvitationService(db)
         invitation = invitation_service.get_invitation_by_id(invitation_id)
         
         if not invitation:
+            logger.info(f"DEBUG: Invitation {invitation_id} not found")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Invitation not found"
             )
         
+        logger.info(f"DEBUG: Found invitation {invitation_id} - sent_by={invitation.sent_by_user_id}, current_user={current_user.id}")
+        
         # Verify the user owns this invitation
         if invitation.sent_by_user_id != current_user.id:
+            logger.info(f"DEBUG: Authorization failed - invitation sent by {invitation.sent_by_user_id}, current user is {current_user.id}")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to revoke this invitation"
             )
         
-        # Handle family history share revocation
+        # Handle family history share revocation  
+        logger.info(f"DEBUG: Checking invitation {invitation_id} - type={invitation.invitation_type}, status={invitation.status}")
         if invitation.invitation_type == 'family_history_share' and invitation.status == 'accepted':
             family_service = FamilyHistoryService(db)
-            
-            # Extract context data
-            family_member_id = invitation.context_data.get('family_member_id')
             shared_with_user_id = invitation.sent_to_user_id
             
-            logger.info(f"DEBUG: Revoking invitation {invitation_id} - family_member_id={family_member_id}, shared_with_user_id={shared_with_user_id}, context_data={invitation.context_data}")
+            logger.info(f"DEBUG: Revoking invitation {invitation_id} - shared_with_user_id={shared_with_user_id}, context_data={invitation.context_data}")
             
-            if not family_member_id:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid invitation context data"
+            # Check if this is a bulk invitation
+            if invitation.context_data.get('is_bulk_invite', False):
+                # Handle bulk invitation - revoke all shares
+                family_members_data = invitation.context_data.get('family_members', [])
+                if not family_members_data:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Invalid bulk invitation context data"
+                    )
+                
+                revoked_shares = []
+                for family_member_data in family_members_data:
+                    family_member_id = family_member_data.get('family_member_id')
+                    if family_member_id:
+                        try:
+                            # Don't update invitation status in individual revocations
+                            share = family_service.revoke_family_history_share(
+                                current_user, 
+                                family_member_id, 
+                                shared_with_user_id,
+                                update_invitation_status=False
+                            )
+                            revoked_shares.append(share)
+                        except Exception as e:
+                            logger.warning(f"Failed to revoke share for family member {family_member_id}: {e}")
+                
+                # After all shares are revoked, update the invitation status
+                if revoked_shares:
+                    invitation_service = InvitationService(db)
+                    invitation_service.update_invitation_status(invitation_id, 'revoked')
+                
+                return {
+                    "message": f"Bulk family history sharing revoked successfully for {len(revoked_shares)} family members",
+                    "invitation_id": invitation.id,
+                    "revoked_share_count": len(revoked_shares),
+                    "status": "revoked"
+                }
+            else:
+                # Handle single invitation
+                family_member_id = invitation.context_data.get('family_member_id')
+                
+                if not family_member_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Invalid invitation context data - missing family_member_id"
+                    )
+                
+                # Revoke the share (this will also update the invitation status)
+                share = family_service.revoke_family_history_share(
+                    current_user, 
+                    family_member_id, 
+                    shared_with_user_id
                 )
-            
-            # Revoke the share (this will also update the invitation status)
-            share = family_service.revoke_family_history_share(
-                current_user, 
-                family_member_id, 
-                shared_with_user_id
-            )
-            
-            return {
-                "message": "Family history sharing revoked successfully",
-                "invitation_id": invitation.id,
-                "share_id": share.id,
-                "status": "revoked"
-            }
+                
+                return {
+                    "message": "Family history sharing revoked successfully",
+                    "invitation_id": invitation.id,
+                    "share_id": share.id,
+                    "status": "revoked"
+                }
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

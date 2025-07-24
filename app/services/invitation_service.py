@@ -247,3 +247,18 @@ class InvitationService:
         except Exception as e:
             logger.error(f"Error fetching invitation by ID: {e}")
             raise
+    
+    def update_invitation_status(self, invitation_id: int, status: str) -> Optional[Invitation]:
+        """Update invitation status by ID"""
+        try:
+            invitation = self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
+            if invitation:
+                invitation.status = status
+                invitation.updated_at = get_utc_now()
+                self.db.commit()
+                logger.info(f"Updated invitation {invitation_id} status to {status}")
+            return invitation
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error updating invitation status: {e}")
+            raise

@@ -273,3 +273,25 @@ def get_my_family_history(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch owned family history"
         )
+
+
+@router.get("/shared-by-me")
+def get_shared_by_me(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all family history that current user has shared with others"""
+    try:
+        service = FamilyHistoryService(db)
+        shared_by_me = service.get_family_history_shared_by_me(current_user)
+        
+        return {
+            "shared_by_me": shared_by_me,
+            "count": len(shared_by_me)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching shared by me family history: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch shared by me family history"
+        )
