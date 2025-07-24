@@ -23,8 +23,21 @@ fix_directory_permissions() {
     
     # Fix ownership if PUID and PGID are provided
     if [ -n "$PUID" ] && [ -n "$PGID" ]; then
-        chown "$PUID:$PGID" "$dir_path" 2>/dev/null || true
-        chmod 755 "$dir_path" 2>/dev/null || true
+        echo "Attempting to set ownership of $dir_path to $PUID:$PGID"
+        if chown "$PUID:$PGID" "$dir_path" 2>/dev/null; then
+            echo "✓ Successfully changed ownership to $PUID:$PGID"
+        else
+            echo "WARNING: Failed to change ownership to $PUID:$PGID"
+        fi
+        if chmod 755 "$dir_path" 2>/dev/null; then
+            echo "✓ Successfully set permissions to 755"
+        else
+            echo "WARNING: Failed to set permissions to 755"
+        fi
+        # Show current ownership after attempt
+        ls -ld "$dir_path" || echo "Could not list directory details"
+    else
+        echo "PUID/PGID not set, skipping ownership changes"
     fi
     
     # Test write permissions
