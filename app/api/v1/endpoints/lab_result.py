@@ -19,12 +19,14 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.v1.endpoints.utils import (
+    ensure_directory_with_permissions,
     handle_create_with_logging,
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
 )
 from app.core.database import get_db
+from app.core.config import settings
 from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
 from app.crud.condition import condition as condition_crud
@@ -346,7 +348,7 @@ async def upload_lab_result_file(
         )
 
     # Configuration
-    UPLOAD_DIRECTORY = "uploads/lab_result_files"
+    UPLOAD_DIRECTORY = settings.UPLOAD_DIR / "lab_result_files"
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
     ALLOWED_EXTENSIONS = {
         ".pdf",
@@ -383,17 +385,27 @@ async def upload_lab_result_file(
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024 * 1024)}MB",
         )
 
-    # Create upload directory if it doesn't exist
-    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+    # Create upload directory if it doesn't exist with proper error handling
+    ensure_directory_with_permissions(UPLOAD_DIRECTORY, "lab result file upload")
 
     # Generate unique filename
     unique_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+    file_path = UPLOAD_DIRECTORY / unique_filename
 
-    # Save file
+    # Save file with proper error handling
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(file_content)
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Permission denied writing file. This may be a Docker bind mount permission issue. Please ensure the container has write permissions to the upload directory: {str(e)}",
+        )
+    except OSError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save file: {str(e)}",
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

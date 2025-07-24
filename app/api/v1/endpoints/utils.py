@@ -1,6 +1,7 @@
+from pathlib import Path
 from typing import Any, Optional, Type
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -342,3 +343,42 @@ def handle_delete_with_logging(
             error=str(e),
         )
         raise
+
+
+def ensure_directory_with_permissions(directory: Path, directory_name: str = "directory") -> None:
+    """
+    Ensure directory exists with proper error handling for Docker bind mount permission issues.
+    
+    Args:
+        directory: Path object for the directory to create
+        directory_name: Human-readable name for error messages
+        
+    Raises:
+        HTTPException: If directory cannot be created due to permissions or other errors
+    """
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Ensured {directory_name} directory exists: {directory}")
+    except PermissionError as e:
+        error_msg = (
+            f"Permission denied creating {directory_name} directory: {directory}. "
+            "This may be a Docker bind mount permission issue. "
+            "Please ensure the container has write permissions to the directory. "
+            "Solutions: "
+            "1. Use Docker volumes instead of bind mounts, "
+            "2. Fix host directory permissions: 'sudo chown -R 1000:1000 /host/path', "
+            "3. Add user mapping to docker run: '--user $(id -u):$(id -g)'. "
+            f"Error: {str(e)}"
+        )
+        logger.error(error_msg)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_msg,
+        )
+    except OSError as e:
+        error_msg = f"Failed to create {directory_name} directory {directory}: {str(e)}"
+        logger.error(error_msg)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_msg,
+        )

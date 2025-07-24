@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -101,14 +102,40 @@ class Settings:  # App Info
     )
 
     def __init__(self):
-        # Ensure upload directory exists
-        if not self.UPLOAD_DIR.exists():
-            self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        # Ensure upload directory exists with proper error handling
+        self._ensure_directory_exists(self.UPLOAD_DIR, "upload")
+        
+        # Ensure backup directory exists with proper error handling
+        self._ensure_directory_exists(self.BACKUP_DIR, "backup")
 
-        # Ensure backup directory exists
-        if not self.BACKUP_DIR.exists():
-            self.BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
+        """Ensure directory exists with proper permission error handling for Docker bind mounts."""
+        if not directory.exists():
+            try:
+                directory.mkdir(parents=True, exist_ok=True)
+                logging.info(f"Created {directory_type} directory: {directory}")
+            except PermissionError as e:
+                error_msg = (
+                    f"Permission denied creating {directory_type} directory: {directory}. "
+                    "This is likely a Docker bind mount permission issue. "
+                    "Please ensure the container has write permissions to the host directory. "
+                    "For bind mounts, you may need to: "
+                    "1. Set proper ownership: 'sudo chown -R 1000:1000 /host/path' "
+                    "2. Or use Docker volumes instead of bind mounts. "
+                    f"Error: {str(e)}"
+                )
+                logging.error(error_msg)
+                # Don't raise here to allow the app to start, but log the issue
+                # The actual endpoints will handle the error when they try to create files
+            except OSError as e:
+                error_msg = f"Failed to create {directory_type} directory {directory}: {str(e)}"
+                logging.error(error_msg)
+                # Don't raise here to allow the app to start
 
 
 # Create global settings instance
-settings = Settings()
+try:
+    settings = Settings()
+except Exception as e:
+    logging.error(f"Failed to initialize settings: {str(e)}")
+    raise
