@@ -79,7 +79,7 @@ fix_directory_permissions "/app/uploads/trash" "trash"
 
 echo "Directory permission check completed."
 
-# Switch to appuser if we're still running as root
+# Switch to appuser if we're still running as root (handles both PUID/PGID and default cases)
 if [ "$(id -u)" = "0" ]; then
     echo "Switching to appuser for application execution"
     exec su appuser -c "$0 $*"
