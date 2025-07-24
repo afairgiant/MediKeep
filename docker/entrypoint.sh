@@ -8,13 +8,16 @@ echo "Checking and fixing directory permissions..."
 
 # Change container user to match PUID/PGID if provided
 if [ -n "$PUID" ] && [ -n "$PGID" ]; then
-    echo "Changing container user to PUID=$PUID, PGID=$PGID"
-    # Change the appuser to match PUID/PGID
-    usermod -u "$PUID" appuser 2>/dev/null || true
-    groupmod -g "$PGID" appuser 2>/dev/null || true
+    echo "Configuring container for PUID=$PUID, PGID=$PGID"
     
-    # Fix ownership of app directory for the new user
-    chown -R "$PUID:$PGID" /app 2>/dev/null || true
+    # Modify appuser to match PUID/PGID (we're running as root at startup)
+    usermod -u "$PUID" appuser
+    groupmod -g "$PGID" appuser
+    
+    # Fix ownership of all app files for the new user
+    chown -R "$PUID:$PGID" /app
+    
+    echo "✓ Container user configured for $PUID:$PGID"
 fi
 
 # Function to safely create and fix permissions for directories
@@ -75,6 +78,12 @@ fix_directory_permissions "/app/backups" "backups"
 fix_directory_permissions "/app/uploads/trash" "trash"
 
 echo "Directory permission check completed."
+
+# Switch to appuser if we're still running as root
+if [ "$(id -u)" = "0" ]; then
+    echo "Switching to appuser for application execution"
+    exec su appuser -c "$0 $*"
+fi
 
 # Check if running in test environment (no database required)
 if [ "$SKIP_MIGRATIONS" = "true" ]; then
