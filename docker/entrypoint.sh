@@ -6,6 +6,17 @@ echo "Starting Medical Records Management System..."
 # Fix bind mount permissions for upload directories
 echo "Checking and fixing directory permissions..."
 
+# Change container user to match PUID/PGID if provided
+if [ -n "$PUID" ] && [ -n "$PGID" ]; then
+    echo "Changing container user to PUID=$PUID, PGID=$PGID"
+    # Change the appuser to match PUID/PGID
+    usermod -u "$PUID" appuser 2>/dev/null || true
+    groupmod -g "$PGID" appuser 2>/dev/null || true
+    
+    # Fix ownership of app directory for the new user
+    chown -R "$PUID:$PGID" /app 2>/dev/null || true
+fi
+
 # Function to safely create and fix permissions for directories
 fix_directory_permissions() {
     local dir_path="$1"
