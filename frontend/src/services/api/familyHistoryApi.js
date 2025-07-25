@@ -37,6 +37,11 @@ class FamilyHistoryApi {
         return response;
     }
     
+    async removeMyAccess(familyMemberId) {
+        const response = await apiService.delete(`/family-history-sharing/shared-with-me/${familyMemberId}/remove-access`);
+        return response;
+    }
+    
     async bulkSendInvitations(inviteData) {
         const response = await apiService.post('/family-history-sharing/bulk-invite', inviteData);
         return response;

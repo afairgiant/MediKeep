@@ -455,6 +455,56 @@ class FamilyHistoryService:
             logger.error(f"Error revoking family history share (family_member_id={family_member_id}, shared_with_user_id={shared_with_user_id}): {e}")
             raise
     
+    def remove_my_access_to_family_history(self, user: User, family_member_id: int) -> FamilyHistoryShare:
+        """Allow a recipient user to remove their own access to shared family history"""
+        try:
+            # Find an active share where the current user is the recipient
+            share = self.db.query(FamilyHistoryShare).filter(
+                FamilyHistoryShare.family_member_id == family_member_id,
+                FamilyHistoryShare.shared_with_user_id == user.id,  # Current user is the recipient
+                FamilyHistoryShare.is_active == True
+            ).first()
+            
+            if not share:
+                logger.warning(f"No active family history share found for family_member_id={family_member_id}, recipient_user_id={user.id}")
+                raise ValueError("No active share found or not authorized to remove access")
+            
+            # Set the share to inactive (now allowed due to partial unique constraint)
+            share.is_active = False
+            share.updated_at = get_utc_now()
+            
+            # Update the related invitation status (but don't mark as revoked - the recipient removed access)
+            invitation = self.db.query(Invitation).filter(
+                Invitation.id == share.invitation_id
+            ).first()
+            
+            if invitation:
+                # For bulk invitations, only update status if ALL shares for this user are inactive
+                if invitation.context_data.get('is_bulk_invite', False):
+                    # Check if all shares for this invitation and this recipient are now inactive
+                    active_shares_count = self.db.query(FamilyHistoryShare).filter(
+                        FamilyHistoryShare.invitation_id == invitation.id,
+                        FamilyHistoryShare.shared_with_user_id == user.id,
+                        FamilyHistoryShare.is_active == True
+                    ).count()
+                    
+                    logger.info(f"DEBUG: Bulk invitation {invitation.id} has {active_shares_count} active shares remaining for user {user.id}")
+                    
+                    # Note: We don't change the invitation status here because the recipient removed access,
+                    # not the sender. The invitation remains 'accepted' but the shares are inactive.
+                else:
+                    # Single invitation - recipient removed access but invitation remains accepted
+                    logger.info(f"DEBUG: Recipient {user.id} removed access to single invitation {invitation.id}")
+            
+            self.db.commit()
+            logger.info(f"User {user.id} removed their own access to family history share: {share.id}")
+            return share
+                
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error removing user's own access to family history (family_member_id={family_member_id}, user_id={user.id}): {e}")
+            raise
+    
     def bulk_send_family_history_invitations(self, user: User, family_member_ids: List[int], 
                                            shared_with_identifier: str, permission_level: str = 'view',
                                            sharing_note: Optional[str] = None,

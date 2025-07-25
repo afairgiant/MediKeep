@@ -986,6 +986,31 @@ export const medicalPageConfigs = {
   family_members: {
     filtering: {
       searchFields: ['name', 'relationship', 'notes'],
+      customSearchFunction: (item, searchTerm) => {
+        // Search in basic family member fields
+        const basicFields = ['name', 'relationship', 'notes'];
+        const matchesBasic = basicFields.some(field => {
+          const value = item[field];
+          return value && value.toString().toLowerCase().includes(searchTerm);
+        });
+        
+        if (matchesBasic) return true;
+        
+        // Search in family conditions
+        if (item.family_conditions && Array.isArray(item.family_conditions)) {
+          const conditionFields = ['condition_name', 'notes', 'condition_type', 'severity', 'status'];
+          const matchesCondition = item.family_conditions.some(condition => {
+            return conditionFields.some(field => {
+              const value = condition[field];
+              return value && value.toString().toLowerCase().includes(searchTerm);
+            });
+          });
+          
+          if (matchesCondition) return true;
+        }
+        
+        return false;
+      },
       categoryField: 'relationship',
       categoryLabel: 'Relationship',
       categoryOptions: [
@@ -1031,7 +1056,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search family members...',
+      searchPlaceholder: 'Search family members, conditions, notes...',
       title: 'Filter & Sort Family Members',
       showCategory: true,
       showStatus: true,

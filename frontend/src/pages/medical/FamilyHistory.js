@@ -175,9 +175,32 @@ const FamilyHistory = () => {
   // Extract family member ID from URL for view modal
   const urlParams = new URLSearchParams(location.search);
   const viewingFamilyMemberId = urlParams.get('view');
-  const viewingFamilyMember = familyMembers.find(
-    m => m.id === parseInt(viewingFamilyMemberId)
-  );
+  
+  // Look for the family member in both owned and shared arrays
+  const viewingFamilyMember = React.useMemo(() => {
+    if (!viewingFamilyMemberId) return null;
+    
+    const parsedId = parseInt(viewingFamilyMemberId);
+    
+    // First check owned family members
+    const ownedMember = familyMembers.find(m => m.id === parsedId);
+    if (ownedMember) return ownedMember;
+    
+    // Then check shared family members
+    const sharedItem = sharedFamilyHistory.find(
+      item => item.family_member.id === parsedId
+    );
+    if (sharedItem) {
+      // Return the family_member with is_shared flag
+      return {
+        ...sharedItem.family_member,
+        is_shared: true,
+        share_details: sharedItem.share_details
+      };
+    }
+    
+    return null;
+  }, [viewingFamilyMemberId, familyMembers, sharedFamilyHistory]);
 
   // Get standardized configuration
   const config = getMedicalPageConfig('family_members');
@@ -1343,17 +1366,19 @@ const FamilyHistory = () => {
                                 <Text size="sm" color="dimmed" mb="md">
                                   No medical conditions recorded
                                 </Text>
-                                <Button
-                                  size="xs"
-                                  variant="light"
-                                  leftIcon={<IconStethoscope size={14} />}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleAddCondition(member);
-                                  }}
-                                >
-                                  Add Condition
-                                </Button>
+                                {!member.is_shared && (
+                                  <Button
+                                    size="xs"
+                                    variant="light"
+                                    leftIcon={<IconStethoscope size={14} />}
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleAddCondition(member);
+                                    }}
+                                  >
+                                    Add Condition
+                                  </Button>
+                                )}
                               </Box>
                             ) : (
                               <Stack spacing="xs">
@@ -1420,35 +1445,37 @@ const FamilyHistory = () => {
                                         )}
                                       </div>
 
-                                      <Group spacing="xs">
-                                        <ActionIcon
-                                          size="xs"
-                                          variant="light"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            handleEditCondition(
-                                              member,
-                                              condition
-                                            );
-                                          }}
-                                        >
-                                          <IconEdit size={12} />
-                                        </ActionIcon>
-                                        <ActionIcon
-                                          size="xs"
-                                          variant="light"
-                                          color="red"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            handleDeleteCondition(
-                                              member.id,
-                                              condition.id
-                                            );
-                                          }}
-                                        >
-                                          <IconTrash size={12} />
-                                        </ActionIcon>
-                                      </Group>
+                                      {!member.is_shared && (
+                                        <Group spacing="xs">
+                                          <ActionIcon
+                                            size="xs"
+                                            variant="light"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              handleEditCondition(
+                                                member,
+                                                condition
+                                              );
+                                            }}
+                                          >
+                                            <IconEdit size={12} />
+                                          </ActionIcon>
+                                          <ActionIcon
+                                            size="xs"
+                                            variant="light"
+                                            color="red"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              handleDeleteCondition(
+                                                member.id,
+                                                condition.id
+                                              );
+                                            }}
+                                          >
+                                            <IconTrash size={12} />
+                                          </ActionIcon>
+                                        </Group>
+                                      )}
                                     </Group>
                                   </Box>
                                 ))}
@@ -1775,11 +1802,22 @@ const FamilyHistory = () => {
               <Group position="apart" mb="xs">
                 <Text weight={500} size="lg">
                   {viewingFamilyMember.name}
+                  {viewingFamilyMember.is_shared && (
+                    <Badge color="blue" variant="light" size="sm" ml="xs">
+                      Shared
+                    </Badge>
+                  )}
                 </Text>
                 <Group spacing="xs">
                   <ActionIcon
                     variant="light"
                     onClick={() => handleEditMember(viewingFamilyMember)}
+                    disabled={viewingFamilyMember.is_shared}
+                    title={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
+                    style={{
+                      opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
+                      cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
+                    }}
                   >
                     <IconEdit size={16} />
                   </ActionIcon>
@@ -1837,6 +1875,8 @@ const FamilyHistory = () => {
                       setSelectedMemberForSharing(viewingFamilyMember);
                       openSharingModal();
                     }}
+                    disabled={viewingFamilyMember.is_shared}
+                    title={viewingFamilyMember.is_shared ? "Cannot share history of shared family member" : "Share this family member's history"}
                   >
                     Share History
                   </Button>
@@ -1844,6 +1884,8 @@ const FamilyHistory = () => {
                     size="sm"
                     leftIcon={<IconStethoscope size={16} />}
                     onClick={handleAddConditionFromView}
+                    disabled={viewingFamilyMember.is_shared}
+                    title={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
                   >
                     Add Condition
                   </Button>
@@ -1902,6 +1944,12 @@ const FamilyHistory = () => {
                             onClick={() =>
                               handleEditConditionFromView(condition)
                             }
+                            disabled={viewingFamilyMember.is_shared}
+                            title={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
+                            style={{
+                              opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
+                              cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
+                            }}
                           >
                             <IconEdit size={16} />
                           </ActionIcon>
@@ -1914,6 +1962,12 @@ const FamilyHistory = () => {
                                 condition.id
                               )
                             }
+                            disabled={viewingFamilyMember.is_shared}
+                            title={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
+                            style={{
+                              opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
+                              cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
+                            }}
                           >
                             <IconTrash size={16} />
                           </ActionIcon>

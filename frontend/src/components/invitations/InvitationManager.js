@@ -254,36 +254,41 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
     try {
       // Find the family member ID from the share item
       const familyMemberId = shareItem.family_member?.id;
-      const sharedWithUserId = shareItem.share_details?.shared_by?.id;
 
-      logger.debug('Revoking shared family history access', {
+      logger.debug('Removing own access to shared family history', {
         component: 'InvitationManager',
         familyMemberId,
-        sharedWithUserId,
         user: authUser?.id
       });
 
-      if (familyMemberId && sharedWithUserId) {
-        await familyHistoryApi.revokeShare(familyMemberId, sharedWithUserId);
+      if (familyMemberId) {
+        // Use the new endpoint for recipients to remove their own access
+        await familyHistoryApi.removeMyAccess(familyMemberId);
 
-        logger.info('Successfully revoked shared family history access', {
+        logger.info('Successfully removed own access to shared family history', {
           component: 'InvitationManager',
           familyMemberId,
           familyMemberName: shareItem.family_member?.name
         });
 
         notifications.show({
-          title: 'Access Revoked',
+          title: 'Access Removed',
           message: 'You no longer have access to this family history',
           color: 'orange',
           icon: <IconTrash size="1rem" />,
         });
 
+        // Immediately remove the item from local state for better UX
+        setSharedWithMe(prev => prev.filter(item => 
+          item.family_member?.id !== familyMemberId
+        ));
+
+        // Also refresh from server to ensure consistency
         loadInvitations();
         if (onUpdate) onUpdate();
       }
     } catch (error) {
-      logger.error('Failed to revoke shared family history access', {
+      logger.error('Failed to remove access to shared family history', {
         component: 'InvitationManager',
         familyMemberId: shareItem.family_member?.id,
         error: error.message
@@ -291,7 +296,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
       notifications.show({
         title: 'Error',
-        message: 'Failed to revoke access',
+        message: error.response?.data?.detail || 'Failed to remove access',
         color: 'red',
         icon: <IconX size="1rem" />,
       });
