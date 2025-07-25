@@ -168,7 +168,10 @@ jest.mock('../../components/medical/FamilyHistorySharingModal', () => {
         }
         onSuccess();
       } catch (error) {
-        console.error('Sharing failed:', error);
+        // Mock logger is already imported at line 99-103
+        // In a real test, we would use the mocked logger
+        // For test context, using a test-specific error handler
+        throw error; // Re-throw to maintain test behavior
       }
     };
 

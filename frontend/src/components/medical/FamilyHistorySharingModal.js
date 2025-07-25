@@ -37,6 +37,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { formatDateTime } from '../../utils/helpers';
+import logger from '../../services/logger';
 
 const FamilyHistorySharingModal = ({ 
     opened, 
@@ -75,7 +76,11 @@ const FamilyHistorySharingModal = ({
             const shareData = await familyHistoryApi.getFamilyMemberShares(familyMember.id);
             setShares(shareData);
         } catch (error) {
-            console.error('Error loading shares:', error);
+            logger.error('Failed to load family member shares', {
+                component: 'FamilyHistorySharingModal',
+                familyMemberId: familyMember?.id,
+                error: error.message
+            });
             notifications.show({
                 title: 'Error',
                 message: 'Failed to load sharing information',
@@ -111,8 +116,16 @@ const FamilyHistorySharingModal = ({
                     expires_hours: shareForm.expires_hours
                 });
                 
-                console.log('DEBUG: Bulk invite result:', result);
-                console.log('DEBUG: Individual results:', result.results);
+                logger.debug('Bulk invitation results received', {
+                    component: 'FamilyHistorySharingModal',
+                    totalSent: result.total_sent,
+                    totalFailed: result.total_failed,
+                    selectedMemberCount: selectedMembers.length,
+                    hasRecipient: !!shareForm.shared_with_identifier,
+                    recipientType: shareForm.shared_with_identifier?.includes('@') ? 'email' : 'username',
+                    hasNote: !!shareForm.sharing_note,
+                    expiresHours: shareForm.expires_hours
+                });
                 
                 const successCount = result.total_sent;
                 const failedCount = result.total_failed;

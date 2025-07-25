@@ -2,7 +2,14 @@
  * Standardized configuration templates for medical pages filtering and sorting
  */
 
+import logger from '../services/logger';
+
 // Constants for search functionality
+// Maximum length for search terms to prevent performance issues with large text inputs.
+// 100 characters is sufficient for most medical search queries while avoiding:
+// - Excessive memory usage during string operations
+// - Poor UI performance with very long search strings
+// - Potential DoS attacks through extremely large input
 const SEARCH_TERM_MAX_LENGTH = 100;
 
 export const medicalPageConfigs = {
@@ -72,7 +79,7 @@ export const medicalPageConfigs = {
         { value: 'effective_period_start', label: 'Start Date' },
       ],
       customSortFunctions: {
-        active: (a, b, sortOrder) => {
+        active: (a, b) => {
           const aIsActive = a.status === 'active';
           const bIsActive = b.status === 'active';
           if (aIsActive && !bIsActive) return -1;
@@ -142,7 +149,7 @@ export const medicalPageConfigs = {
       startDateField: 'start_date',
       endDateField: 'end_date',
       customFilters: {
-        dateRange: (item, dateRange, additionalData) => {
+        dateRange: (item, dateRange) => {
           if (dateRange === 'all') return true;
 
           const now = new Date();
@@ -963,7 +970,7 @@ export const medicalPageConfigs = {
         is_active: 'boolean',
       },
       customSortFunctions: {
-        priority: (a, b, sortOrder) => {
+        priority: (a, b) => {
           // Primary contacts first
           if (a.is_primary && !b.is_primary) return -1;
           if (!a.is_primary && b.is_primary) return 1;
@@ -1002,7 +1009,11 @@ export const medicalPageConfigs = {
         
         // Additional validation: prevent extremely long search terms that could cause performance issues
         if (sanitizedTerm.length > SEARCH_TERM_MAX_LENGTH) {
-          console.warn(`Search term too long, truncating to ${SEARCH_TERM_MAX_LENGTH} characters`);
+          logger.warn(`Search term too long, truncating to ${SEARCH_TERM_MAX_LENGTH} characters`, {
+            component: 'medicalPageConfigs',
+            originalLength: sanitizedTerm.length,
+            truncatedLength: SEARCH_TERM_MAX_LENGTH
+          });
           sanitizedTerm = sanitizedTerm.substring(0, SEARCH_TERM_MAX_LENGTH);
         }
         
@@ -1014,7 +1025,14 @@ export const medicalPageConfigs = {
           try {
             return value.toString().toLowerCase().includes(sanitizedTerm);
           } catch (error) {
-            console.warn(`Error processing field ${field}:`, error);
+            logger.warn(`Error processing search field "${field}"`, {
+              component: 'medicalPageConfigs',
+              field,
+              value,
+              valueType: typeof value,
+              error: error.message,
+              searchTerm: sanitizedTerm
+            });
             return false;
           }
         });
@@ -1033,7 +1051,15 @@ export const medicalPageConfigs = {
               try {
                 return value.toString().toLowerCase().includes(sanitizedTerm);
               } catch (error) {
-                console.warn(`Error processing condition field ${field}:`, error);
+                logger.warn(`Error processing condition search field "${field}"`, {
+                  component: 'medicalPageConfigs',
+                  field,
+                  value,
+                  valueType: typeof value,
+                  error: error.message,
+                  searchTerm: sanitizedTerm,
+                  conditionId: condition?.id
+                });
                 return false;
               }
             });
@@ -1134,7 +1160,7 @@ export const medicalPageConfigs = {
           label: 'Severity',
           sortable: true,
           width: '100px',
-          render: (value, row) => {
+          render: (value) => {
             if (!value) return '-';
             const colors = {
               mild: 'green',

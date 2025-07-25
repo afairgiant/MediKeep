@@ -182,16 +182,20 @@ const FamilyHistory = () => {
       },
       create: (data, signal) => {
         logger.debug('Creating family member', {
-          data,
           component: 'FamilyHistory',
+          hasData: !!data,
+          relationship: data?.relationship,
+          hasConditions: Array.isArray(data?.family_conditions) && data.family_conditions.length > 0
         });
         return apiService.createFamilyMember(data, signal);
       },
       update: (id, data, signal) => {
         logger.debug('Updating family member', {
           id,
-          data,
           component: 'FamilyHistory',
+          hasData: !!data,
+          relationship: data?.relationship,
+          hasConditions: Array.isArray(data?.family_conditions) && data.family_conditions.length > 0
         });
         return apiService.updateFamilyMember(id, data, signal);
       },
@@ -266,7 +270,11 @@ const FamilyHistory = () => {
         const sharedData = await familyHistoryApi.getSharedFamilyHistory();
         setSharedFamilyHistory(sharedData.shared_family_history || []);
       } catch (error) {
-        console.error('Error loading shared family history:', error);
+        logger.error('Failed to load shared family history', {
+          component: 'FamilyHistory',
+          error: error.message,
+          userId: currentPatient?.owner_user_id
+        });
       }
     };
 
@@ -373,7 +381,12 @@ const FamilyHistory = () => {
     try {
       await deleteItem(memberId);
     } catch (error) {
-      console.error('Failed to delete family member:', error);
+      logger.error('Failed to delete family member', {
+        component: 'FamilyHistory',
+        memberId,
+        error: error.message,
+        patientId: currentPatient?.id
+      });
     }
   };
 
@@ -386,9 +399,11 @@ const FamilyHistory = () => {
     }
 
     logger.debug('Submitting family member data', {
-      formData,
       patientId: currentPatient.id,
       component: 'FamilyHistory',
+      isEditing: !!editingMember,
+      relationship: formData.relationship,
+      hasRequiredFields: !!(formData.name && formData.relationship)
     });
 
     const memberData = {
@@ -414,7 +429,12 @@ const FamilyHistory = () => {
       try {
         await refreshData();
       } catch (error) {
-        console.error('Failed to refresh data after saving family member:', error);
+        logger.error('Failed to refresh data after saving family member', {
+          component: 'FamilyHistory',
+          action: editingMember ? 'update' : 'create',
+          familyMemberId: editingMember?.id,
+          error: error.message
+        });
         setError(`Family member ${editingMember ? 'updated' : 'created'} successfully, but failed to refresh the list. Please reload the page to see changes.`);
       }
     }
@@ -426,9 +446,8 @@ const FamilyHistory = () => {
 
   const handleAddCondition = familyMember => {
     logger.debug('Adding condition for family member', {
-      familyMember: familyMember.name,
       familyMemberId: familyMember.id,
-      component: 'FamilyHistory',
+      component: 'FamilyHistory'
     });
     setSelectedFamilyMember(familyMember);
     setSelectedFamilyMemberId(familyMember.id);
@@ -461,7 +480,13 @@ const FamilyHistory = () => {
       await apiService.deleteFamilyCondition(familyMemberId, conditionId);
       await refreshData();
     } catch (error) {
-      console.error('Failed to delete family condition:', error);
+      logger.error('Failed to delete family condition', {
+        component: 'FamilyHistory',
+        familyMemberId,
+        conditionId,
+        error: error.message,
+        patientId: currentPatient?.id
+      });
       setError('Failed to delete condition');
     }
   };
@@ -472,9 +497,11 @@ const FamilyHistory = () => {
     const familyMemberId = selectedFamilyMember?.id || selectedFamilyMemberId;
 
     logger.debug('Submitting family condition', {
-      selectedFamilyMember: selectedFamilyMember?.name,
       selectedFamilyMemberIdState: selectedFamilyMember?.id,
       selectedFamilyMemberIdBackup: selectedFamilyMemberId,
+      conditionType: conditionFormData.condition_type,
+      hasSeverity: !!conditionFormData.severity,
+      hasRequiredFields: !!(conditionFormData.condition_name)
       finalFamilyMemberId: familyMemberId,
       conditionFormData,
       component: 'FamilyHistory',
@@ -484,7 +511,7 @@ const FamilyHistory = () => {
       logger.error(
         'Family member information not available for condition submission',
         {
-          selectedFamilyMember,
+          hasSelectedFamilyMember: !!selectedFamilyMember,
           selectedFamilyMemberId,
           component: 'FamilyHistory',
         }
@@ -540,7 +567,13 @@ const FamilyHistory = () => {
       }
       setOpenedFromViewModal(false);
     } catch (error) {
-      console.error('Failed to save family condition:', error);
+      logger.error('Failed to save family condition', {
+        component: 'FamilyHistory',
+        familyMemberId,
+        editingCondition: editingCondition?.id,
+        error: error.message,
+        patientId: currentPatient?.id
+      });
       setError('Failed to save condition');
     }
   };
