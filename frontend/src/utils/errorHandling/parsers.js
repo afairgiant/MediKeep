@@ -4,7 +4,7 @@
  * Updated to use constants as suggested by reviewer feedback
  */
 
-import { ERROR_TYPES, ERROR_PATTERNS } from './constants';
+import { ERROR_TYPES, ERROR_PATTERNS, ERROR_REGEX_PATTERNS } from './constants';
 
 /**
  * Enhanced error parser that extracts specific error information
@@ -16,26 +16,83 @@ export const parseErrorMessage = errorMessage => {
     return null;
   }
 
-  const lowerMessage = errorMessage.toLowerCase();
-
-  // Check for "already shared for: [names]" pattern (bulk errors)
-  if (lowerMessage.includes('family history already shared for:')) {
-    const namesMatch = errorMessage.match(
-      /family history already shared for:\s*(.+)$/i
-    );
-    if (namesMatch) {
-      const names = namesMatch[1].split(',').map(name => name.trim());
-      return {
-        type: ERROR_TYPES.BULK_ALREADY_SHARED,
-        names,
-        count: names.length,
-        originalMessage: errorMessage,
-      };
-    }
+  // Check for bulk sharing errors using robust regex
+  const bulkSharedMatch = errorMessage.match(ERROR_REGEX_PATTERNS.BULK_ALREADY_SHARED);
+  if (bulkSharedMatch) {
+    const names = bulkSharedMatch[1].split(',').map(name => name.trim());
+    return {
+      type: ERROR_TYPES.BULK_ALREADY_SHARED,
+      names,
+      count: names.length,
+      originalMessage: errorMessage,
+    };
   }
 
-  // Check for HTTP status codes
-  const statusMatch = errorMessage.match(/(\d{3})/);
+  // Check for authentication errors
+  if (ERROR_REGEX_PATTERNS.AUTH_ERRORS.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.AUTH_ERROR,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for user not found errors
+  if (ERROR_REGEX_PATTERNS.USER_NOT_FOUND.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.USER_NOT_FOUND,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for permission errors
+  if (ERROR_REGEX_PATTERNS.PERMISSION_ERRORS.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.PERMISSION_ERROR,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for validation errors
+  if (ERROR_REGEX_PATTERNS.VALIDATION_ERRORS.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.VALIDATION_ERROR,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for invitation specific errors
+  if (ERROR_REGEX_PATTERNS.INVITATION_EXPIRED.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.INVITATION_EXPIRED,
+      originalMessage: errorMessage,
+    };
+  }
+
+  if (ERROR_REGEX_PATTERNS.INVITATION_NOT_FOUND.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.INVITATION_NOT_FOUND,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for network-specific patterns using robust regex
+  if (ERROR_REGEX_PATTERNS.NETWORK_ERRORS.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.NETWORK_ERROR,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for timeout errors using robust regex
+  if (ERROR_REGEX_PATTERNS.TIMEOUT_ERRORS.test(errorMessage)) {
+    return {
+      type: ERROR_TYPES.TIMEOUT_ERROR,
+      originalMessage: errorMessage,
+    };
+  }
+
+  // Check for HTTP status codes using robust regex
+  const statusMatch = errorMessage.match(ERROR_REGEX_PATTERNS.HTTP_STATUS);
   if (statusMatch) {
     const statusCode = statusMatch[1];
     return {
@@ -45,20 +102,10 @@ export const parseErrorMessage = errorMessage => {
     };
   }
 
-  // Check for network-specific patterns
-  if (
-    lowerMessage.includes(ERROR_PATTERNS.NETWORK_ERROR) ||
-    lowerMessage.includes(ERROR_PATTERNS.FAILED_TO_FETCH)
-  ) {
+  // Check for generic sharing errors
+  if (ERROR_REGEX_PATTERNS.SHARING_ERRORS.test(errorMessage)) {
     return {
-      type: ERROR_TYPES.NETWORK_ERROR,
-      originalMessage: errorMessage,
-    };
-  }
-
-  if (lowerMessage.includes(ERROR_PATTERNS.TIMEOUT)) {
-    return {
-      type: ERROR_TYPES.TIMEOUT_ERROR,
+      type: ERROR_TYPES.SHARING_ERROR,
       originalMessage: errorMessage,
     };
   }
@@ -115,48 +162,45 @@ export const parseValidationErrors = error => {
 };
 
 /**
- * Check if error is a specific type
+ * Check if error is a specific type using robust regex patterns
  * @param {string} errorMessage - Error message to check
  * @param {string} type - Type to check for
  * @returns {boolean} Whether error matches type
  */
 export const isErrorType = (errorMessage, type) => {
-  const lowerMessage = errorMessage.toLowerCase();
+  if (!errorMessage || typeof errorMessage !== 'string') {
+    return false;
+  }
+
   const lowerType = type.toLowerCase();
 
   switch (lowerType) {
     case 'network':
-      return (
-        lowerMessage.includes('network') ||
-        lowerMessage.includes('failed to fetch') ||
-        lowerMessage.includes('connection')
-      );
+      return ERROR_REGEX_PATTERNS.NETWORK_ERRORS.test(errorMessage);
     case 'timeout':
-      return lowerMessage.includes('timeout');
+      return ERROR_REGEX_PATTERNS.TIMEOUT_ERRORS.test(errorMessage);
     case 'auth':
-      return (
-        lowerMessage.includes('unauthorized') ||
-        lowerMessage.includes('authentication') ||
-        lowerMessage.includes('login')
-      );
+    case 'authentication':
+      return ERROR_REGEX_PATTERNS.AUTH_ERRORS.test(errorMessage);
     case 'validation':
-      return (
-        lowerMessage.includes('validation') ||
-        lowerMessage.includes('invalid') ||
-        lowerMessage.includes('required')
-      );
+      return ERROR_REGEX_PATTERNS.VALIDATION_ERRORS.test(errorMessage);
     case 'permission':
-      return (
-        lowerMessage.includes('permission') ||
-        lowerMessage.includes('access denied') ||
-        lowerMessage.includes('forbidden')
-      );
+      return ERROR_REGEX_PATTERNS.PERMISSION_ERRORS.test(errorMessage);
     case 'sharing':
-      return (
-        lowerMessage.includes('already shared') ||
-        lowerMessage.includes('invitation') ||
-        lowerMessage.includes('share')
-      );
+      return ERROR_REGEX_PATTERNS.SHARING_ERRORS.test(errorMessage) ||
+             ERROR_REGEX_PATTERNS.BULK_ALREADY_SHARED.test(errorMessage);
+    case 'user_not_found':
+    case 'user':
+      return ERROR_REGEX_PATTERNS.USER_NOT_FOUND.test(errorMessage);
+    case 'invitation_expired':
+    case 'expired':
+      return ERROR_REGEX_PATTERNS.INVITATION_EXPIRED.test(errorMessage);
+    case 'invitation_not_found':
+    case 'invitation':
+      return ERROR_REGEX_PATTERNS.INVITATION_NOT_FOUND.test(errorMessage);
+    case 'http':
+    case 'status':
+      return ERROR_REGEX_PATTERNS.HTTP_STATUS.test(errorMessage);
     default:
       return false;
   }

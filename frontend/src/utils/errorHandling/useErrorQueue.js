@@ -3,7 +3,7 @@
  * Addresses reviewer feedback about implementing error queue instead of single error state
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import { formatError, getNotificationAutoClose } from './formatError';
 import { ErrorIcon } from './ErrorIcon';
@@ -22,14 +22,31 @@ export const useErrorQueue = (componentName, options = {}) => {
     const errorIdCounter = useRef(0);
     const clearTimers = useRef(new Map());
     
+    // Memoize options to prevent unnecessary re-renders (addresses reviewer feedback)
+    const memoizedOptions = useMemo(() => ({
+        showNotifications: options.showNotifications ?? true,
+        logErrors: options.logErrors ?? true,
+        autoCloseNotifications: options.autoCloseNotifications ?? true,
+        maxErrors: options.maxErrors ?? ERROR_QUEUE_CONFIG.MAX_ERRORS,
+        autoClearAfter: options.autoClearAfter ?? ERROR_QUEUE_CONFIG.AUTO_CLEAR_AFTER,
+        showMultipleNotifications: options.showMultipleNotifications ?? ERROR_QUEUE_CONFIG.SHOW_MULTIPLE_NOTIFICATIONS
+    }), [
+        options.showNotifications,
+        options.logErrors,
+        options.autoCloseNotifications,
+        options.maxErrors,
+        options.autoClearAfter,
+        options.showMultipleNotifications
+    ]);
+
     const {
-        showNotifications = true,
-        logErrors = true,
-        autoCloseNotifications = true,
-        maxErrors = ERROR_QUEUE_CONFIG.MAX_ERRORS,
-        autoClearAfter = ERROR_QUEUE_CONFIG.AUTO_CLEAR_AFTER,
-        showMultipleNotifications = ERROR_QUEUE_CONFIG.SHOW_MULTIPLE_NOTIFICATIONS
-    } = options;
+        showNotifications,
+        logErrors,
+        autoCloseNotifications,
+        maxErrors,
+        autoClearAfter,
+        showMultipleNotifications
+    } = memoizedOptions;
 
     /**
      * Generate unique error ID
@@ -133,7 +150,52 @@ export const useErrorQueue = (componentName, options = {}) => {
     }, []);
 
     /**
+     * Log error to console/service (broken out to reduce handleError dependencies)
+     */
+    const logErrorToService = useCallback((errorWithId, originalError, formattedError, context) => {
+        if (!logErrors) return;
+        
+        logger.error(`Error in ${componentName}`, {
+            component: componentName,
+            errorId: errorWithId.id,
+            originalError,
+            formattedError,
+            context,
+            queueSize: errorQueue.length + 1,
+            timestamp: new Date().toISOString()
+        });
+    }, [logErrors, componentName, errorQueue.length]);
+
+    /**
+     * Show notification for error (broken out to reduce handleError dependencies)
+     */
+    const showErrorNotification = useCallback((errorWithId, formattedError) => {
+        if (!showNotifications) return;
+        
+        const shouldShowNotification = showMultipleNotifications || 
+            !notifications.notifications.some(n => n.title === formattedError.title);
+
+        if (shouldShowNotification) {
+            const autoClose = autoCloseNotifications 
+                ? getNotificationAutoClose(formattedError.severity)
+                : false;
+
+            notifications.show({
+                id: errorWithId.id,
+                title: formattedError.title,
+                message: formattedError.message,
+                color: formattedError.color,
+                icon: <ErrorIcon icon={formattedError.icon} />,
+                autoClose,
+                withCloseButton: true,
+                onClose: () => removeFromQueue(errorWithId.id)
+            });
+        }
+    }, [showNotifications, showMultipleNotifications, autoCloseNotifications, removeFromQueue]);
+
+    /**
      * Handle an error - format it, add to queue, display it, and log it
+     * Optimized with smaller dependency array (addresses reviewer feedback)
      */
     const handleError = useCallback((error, context = {}) => {
         const formattedError = formatError(error, {
@@ -144,45 +206,12 @@ export const useErrorQueue = (componentName, options = {}) => {
         // Add to queue
         const errorWithId = addToQueue(formattedError);
 
-        // Log the error if enabled
-        if (logErrors) {
-            logger.error(`Error in ${componentName}`, {
-                component: componentName,
-                errorId: errorWithId.id,
-                originalError: error,
-                formattedError,
-                context,
-                queueSize: errorQueue.length + 1,
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        // Show notification if enabled
-        if (showNotifications) {
-            const shouldShowNotification = showMultipleNotifications || 
-                !notifications.notifications.some(n => n.title === formattedError.title);
-
-            if (shouldShowNotification) {
-                const autoClose = autoCloseNotifications 
-                    ? getNotificationAutoClose(formattedError.severity)
-                    : false;
-
-                notifications.show({
-                    id: errorWithId.id, // Use error ID as notification ID
-                    title: formattedError.title,
-                    message: formattedError.message,
-                    color: formattedError.color,
-                    icon: <ErrorIcon icon={formattedError.icon} />,
-                    autoClose,
-                    withCloseButton: true,
-                    onClose: () => removeFromQueue(errorWithId.id)
-                });
-            }
-        }
+        // Log and show notification using separate functions
+        logErrorToService(errorWithId, error, formattedError, context);
+        showErrorNotification(errorWithId, formattedError);
 
         return formattedError;
-    }, [componentName, addToQueue, logErrors, showNotifications, autoCloseNotifications, 
-        showMultipleNotifications, removeFromQueue, errorQueue.length]);
+    }, [componentName, addToQueue, logErrorToService, showErrorNotification]);
 
     /**
      * Handle API errors specifically

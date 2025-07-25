@@ -18,6 +18,12 @@ export const ERROR_TYPES = {
     TIMEOUT_ERROR: 'timeout_error',
     HTTP_STATUS: 'http_status',
     VALIDATION_ERROR: 'validation_error',
+    AUTH_ERROR: 'auth_error',
+    USER_NOT_FOUND: 'user_not_found',
+    PERMISSION_ERROR: 'permission_error',
+    INVITATION_EXPIRED: 'invitation_expired',
+    INVITATION_NOT_FOUND: 'invitation_not_found',
+    SHARING_ERROR: 'sharing_error',
     GENERIC: 'generic',
     UNKNOWN: 'unknown'
 };
@@ -71,6 +77,40 @@ export const ERROR_PATTERNS = {
     REQUIRED_FIELD: 'required field',
     INVALID_EMAIL: 'invalid email',
     INVALID_FORMAT: 'invalid format'
+};
+
+// Robust regex patterns for error message matching
+export const ERROR_REGEX_PATTERNS = {
+    // Bulk sharing errors - flexible pattern matching
+    BULK_ALREADY_SHARED: /(?:family\s*history\s*)?already\s*shared\s*(?:for|with)?:?\s*(.+)$/i,
+    
+    // Network errors - catch variations
+    NETWORK_ERRORS: /(?:network\s*(?:error|failure|issue)|failed\s*to\s*fetch|connection\s*(?:error|failed|lost|timeout)|unable\s*to\s*(?:reach|connect))/i,
+    
+    // Timeout errors - various timeout patterns
+    TIMEOUT_ERRORS: /(?:timeout|timed?\s*out|request\s*timeout|connection\s*timeout|server\s*timeout)/i,
+    
+    // HTTP status code extraction
+    HTTP_STATUS: /(?:http\s*)?(\d{3})(?:\s*error)?/i,
+    
+    // Authentication errors - flexible auth patterns
+    AUTH_ERRORS: /(?:unauthorized|unauthenticated|authentication\s*(?:failed|error|required)|invalid\s*(?:token|credentials|login)|session\s*(?:expired|invalid)|access\s*denied)/i,
+    
+    // User not found errors - flexible user matching
+    USER_NOT_FOUND: /(?:user|account|profile)\s*(?:not\s*found|does\s*not\s*exist|cannot\s*be\s*found)/i,
+    
+    // Permission errors - flexible permission patterns
+    PERMISSION_ERRORS: /(?:permission\s*denied|access\s*denied|forbidden|not\s*authorized|insufficient\s*(?:permissions|privileges))/i,
+    
+    // Validation errors - flexible validation patterns
+    VALIDATION_ERRORS: /(?:validation\s*(?:error|failed)|invalid\s*(?:input|data|format)|required\s*field|missing\s*(?:field|parameter))/i,
+    
+    // Invitation specific errors
+    INVITATION_EXPIRED: /invitation\s*(?:has\s*)?(?:expired|is\s*no\s*longer\s*valid)/i,
+    INVITATION_NOT_FOUND: /invitation\s*(?:not\s*found|does\s*not\s*exist)/i,
+    
+    // Generic sharing patterns
+    SHARING_ERRORS: /(?:share|sharing)\s*(?:error|failed|not\s*allowed)/i
 };
 
 // Icon names (semantic mapping)

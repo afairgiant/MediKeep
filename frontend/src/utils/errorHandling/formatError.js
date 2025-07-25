@@ -76,6 +76,50 @@ export const formatError = (error, context = {}) => {
 };
 
 /**
+ * Formats a list of names into a grammatically correct string
+ * @param {string[]} names - Array of names to format
+ * @param {Object} options - Formatting options
+ * @returns {string} Formatted name list
+ */
+const formatNameList = (names, options = {}) => {
+    const { 
+        conjunction = 'and',
+        finalConjunction = null, // Use different conjunction for final item (e.g., "and" vs "or")
+    } = options;
+    
+    if (!names || names.length === 0) {
+        return '';
+    }
+    
+    if (names.length === 1) {
+        return names[0];
+    }
+    
+    if (names.length === 2) {
+        return `${names[0]} ${conjunction} ${names[1]}`;
+    }
+    
+    // For 3 or more names: "Name1, Name2, Name3, and Name4"
+    const lastPerson = names[names.length - 1];
+    const otherNames = names.slice(0, -1);
+    const finalConj = finalConjunction || conjunction;
+    
+    return `${otherNames.join(', ')}, ${finalConj} ${lastPerson}`;
+};
+
+/**
+ * Creates a formatted message using a name list template
+ * @param {string[]} names - Array of names 
+ * @param {string} template - Message template with {nameList} placeholder
+ * @param {Object} options - Formatting options
+ * @returns {string} Formatted message
+ */
+const formatListMessage = (names, template, options = {}) => {
+    const nameList = formatNameList(names, options);
+    return template.replace('{nameList}', nameList);
+};
+
+/**
  * Format bulk already shared errors with specific family member names
  * @param {Object} parsed - Parsed error information
  * @param {Object} context - Additional context
@@ -83,20 +127,17 @@ export const formatError = (error, context = {}) => {
  */
 const formatBulkAlreadySharedError = (parsed, context) => {
     const { names, count } = parsed;
-    let message;
     
-    if (count === 1) {
-        message = `${names[0]} is already shared with this user.`;
-    } else if (count === 2) {
-        message = `${names[0]} and ${names[1]} are already shared with this user.`;
-    } else {
-        const lastPerson = names[names.length - 1];
-        const otherNames = names.slice(0, -1);
-        message = `${otherNames.join(', ')}, and ${lastPerson} are already shared with this user.`;
-    }
+    // Use the reusable formatter to create the message
+    const message = formatListMessage(
+        names,
+        count === 1 
+            ? '{nameList} is already shared with this user.'
+            : '{nameList} are already shared with this user.'
+    );
     
     return {
-        title: count > 2 ? 'Multiple Already Shared' : 'Already Shared',
+        title: count > 1 ? 'Multiple Already Shared' : 'Already Shared',
         message,
         color: ERROR_COLORS.ORANGE,
         icon: ERROR_ICONS.SHARING_ERROR,
@@ -224,3 +265,8 @@ export const formatErrorForContext = (error, context, additionalContext = {}) =>
             return baseFormat;
     }
 };
+
+/**
+ * Utility functions for formatting lists and messages (exported for reuse)
+ */
+export { formatNameList, formatListMessage };
