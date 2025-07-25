@@ -96,12 +96,22 @@ fix_directory_permissions() {
     return 0
 }
 
-# Check essential directories
-fix_directory_permissions "/app/uploads" "uploads"
-fix_directory_permissions "/app/uploads/lab_result_files" "lab result files"
-fix_directory_permissions "/app/logs" "logs"
-fix_directory_permissions "/app/backups" "backups"
-fix_directory_permissions "/app/uploads/trash" "trash"
+# Check essential directories (don't exit on permission failures for mounts)
+if ! fix_directory_permissions "/app/uploads" "uploads"; then
+    echo "WARNING: Failed to fix uploads directory permissions - continuing startup"
+fi
+if ! fix_directory_permissions "/app/uploads/lab_result_files" "lab result files"; then
+    echo "WARNING: Failed to fix lab result files directory permissions - continuing startup"
+fi
+if ! fix_directory_permissions "/app/logs" "logs"; then
+    echo "WARNING: Failed to fix logs directory permissions - continuing startup"
+fi
+if ! fix_directory_permissions "/app/backups" "backups"; then
+    echo "WARNING: Failed to fix backups directory permissions - continuing startup"
+fi
+if ! fix_directory_permissions "/app/uploads/trash" "trash"; then
+    echo "WARNING: Failed to fix trash directory permissions - continuing startup"
+fi
 
 echo "Directory permission check completed."
 

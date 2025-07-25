@@ -16,7 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.17.0"
+    VERSION: str = "0.17.1"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
@@ -104,7 +104,7 @@ class Settings:  # App Info
     def __init__(self):
         # Ensure upload directory exists with proper error handling
         self._ensure_directory_exists(self.UPLOAD_DIR, "upload")
-        
+
         # Ensure backup directory exists with proper error handling
         self._ensure_directory_exists(self.BACKUP_DIR, "backup")
 
@@ -128,7 +128,9 @@ class Settings:  # App Info
                 # Don't raise here to allow the app to start, but log the issue
                 # The actual endpoints will handle the error when they try to create files
             except OSError as e:
-                error_msg = f"Failed to create {directory_type} directory {directory}: {str(e)}"
+                error_msg = (
+                    f"Failed to create {directory_type} directory {directory}: {str(e)}"
+                )
                 logging.error(error_msg)
                 # Don't raise here to allow the app to start
 
