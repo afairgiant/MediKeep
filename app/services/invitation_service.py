@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_utc_now():
-    """Get the current UTC datetime with timezone awareness."""
-    return datetime.now(timezone.utc)
+    """Get the current UTC datetime as naive datetime for database compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class InvitationService:
@@ -95,12 +95,8 @@ class InvitationService:
             if invitation_type:
                 query = query.filter(Invitation.invitation_type == invitation_type)
             
-            # Filter out expired invitations (timezone-safe)
+            # Filter out expired invitations
             now = get_utc_now()
-            # Convert to naive datetime for PostgreSQL compatibility
-            if now.tzinfo is not None:
-                now = now.replace(tzinfo=None)
-            
             query = query.filter(
                 or_(Invitation.expires_at.is_(None), 
                     Invitation.expires_at > now)
@@ -149,25 +145,13 @@ class InvitationService:
             if not invitation:
                 raise ValueError("Invitation not found or not pending")
             
-            # Check if expired (handle timezone comparison)
+            # Check if expired
             if invitation.expires_at:
                 now = get_utc_now()
-                # Make timezone-naive if expires_at is naive
-                if invitation.expires_at.tzinfo is None and now.tzinfo is not None:
-                    now = now.replace(tzinfo=None)
-                elif invitation.expires_at.tzinfo is not None and now.tzinfo is None:
-                    # Convert expires_at to naive if now is naive
-                    expires_at_naive = invitation.expires_at.replace(tzinfo=None)
-                    if expires_at_naive < now:
-                        invitation.status = 'expired'
-                        self.db.commit()
-                        raise ValueError("Invitation has expired")
-                else:
-                    # Both have same timezone info, direct comparison
-                    if invitation.expires_at < now:
-                        invitation.status = 'expired'
-                        self.db.commit()
-                        raise ValueError("Invitation has expired")
+                if invitation.expires_at < now:
+                    invitation.status = 'expired'
+                    self.db.commit()
+                    raise ValueError("Invitation has expired")
             
             if response not in ['accepted', 'rejected']:
                 raise ValueError("Response must be 'accepted' or 'rejected'")
@@ -191,10 +175,6 @@ class InvitationService:
         """Mark expired invitations as expired (cleanup task)"""
         try:
             now = get_utc_now()
-            # Convert to naive datetime for PostgreSQL compatibility
-            if now.tzinfo is not None:
-                now = now.replace(tzinfo=None)
-                
             expired_count = self.db.query(Invitation).filter(
                 Invitation.status == 'pending',
                 Invitation.expires_at < now

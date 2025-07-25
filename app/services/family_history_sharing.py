@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_utc_now():
-    """Get the current UTC datetime with timezone awareness."""
-    return datetime.now(timezone.utc)
+    """Get the current UTC datetime as naive datetime for database compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class FamilyHistoryService:
@@ -206,13 +206,7 @@ class FamilyHistoryService:
             # Check if expired
             if invitation.expires_at:
                 now = get_utc_now()
-                if invitation.expires_at.tzinfo is None and now.tzinfo is not None:
-                    now = now.replace(tzinfo=None)
-                elif invitation.expires_at.tzinfo is not None and now.tzinfo is None:
-                    expires_at_naive = invitation.expires_at.replace(tzinfo=None)
-                    if expires_at_naive < now.replace(tzinfo=None):
-                        raise ValueError("Invitation has expired")
-                elif invitation.expires_at < now:
+                if invitation.expires_at < now:
                     raise ValueError("Invitation has expired")
             
             # 2. Extract context data with error handling
@@ -287,6 +281,23 @@ class FamilyHistoryService:
                 family_member_id = context_data.get('family_member_id')
                 if not family_member_id:
                     raise ValueError("Single invitation missing family_member_id")
+                
+                # Check if an active share already exists
+                existing_active_share = self.db.query(FamilyHistoryShare).filter(
+                    FamilyHistoryShare.family_member_id == family_member_id,
+                    FamilyHistoryShare.shared_with_user_id == user.id,
+                    FamilyHistoryShare.is_active == True
+                ).first()
+                
+                if existing_active_share:
+                    logger.info(f"Active share already exists for family_member_id={family_member_id}, user_id={user.id}, using existing share")
+                    # Update invitation status even if share already exists
+                    invitation.status = 'accepted'
+                    invitation.responded_at = get_utc_now()
+                    invitation.response_note = response_note
+                    invitation.updated_at = get_utc_now()
+                    self.db.commit()
+                    return existing_active_share
                 
                 share = FamilyHistoryShare(
                     invitation_id=invitation.id,

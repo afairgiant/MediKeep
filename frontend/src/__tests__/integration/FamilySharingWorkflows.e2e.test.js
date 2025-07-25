@@ -39,6 +39,7 @@ const mockFamilyHistoryApi = {
   sendShareInvitation: jest.fn(),
   bulkSendInvitations: jest.fn(),
   revokeShare: jest.fn(),
+  removeMyAccess: jest.fn(),
 };
 
 const mockInvitationApi = {

@@ -66,6 +66,40 @@ import {
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 
+// Style constants
+const CARD_STYLES = {
+  selectable: {
+    cursor: 'pointer',
+    opacity: 0.8,
+    transition: 'all 0.2s ease',
+    transform: 'scale(1)',
+  },
+  selected: {
+    border: '2px solid var(--mantine-color-blue-6)',
+    backgroundColor: 'var(--mantine-color-blue-0)',
+    transform: 'scale(1.02)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+  },
+  conditionBox: (colorScheme, severityColor) => ({
+    borderLeft: `3px solid var(--mantine-color-${severityColor}-6)`,
+    backgroundColor: colorScheme === 'dark'
+      ? 'var(--mantine-color-dark-6)'
+      : 'var(--mantine-color-gray-0)',
+    borderRadius: '4px',
+  }),
+  viewModalConditionBox: (colorScheme, severityColor) => ({
+    borderLeft: `4px solid var(--mantine-color-${severityColor}-6)`,
+    backgroundColor: colorScheme === 'dark'
+      ? 'var(--mantine-color-dark-6)'
+      : 'var(--mantine-color-gray-0)',
+    borderRadius: '8px',
+  }),
+  disabledAction: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+};
+
 const FamilyHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1186,19 +1220,9 @@ const FamilyHistory = () => {
                           padding="md"
                           radius="md"
                           style={{
-                            cursor: 'pointer',
-                            border: isSelected
-                              ? '2px solid var(--mantine-color-blue-6)'
-                              : undefined,
-                            backgroundColor: isSelected
-                              ? 'var(--mantine-color-blue-0)'
-                              : undefined,
+                            ...CARD_STYLES.selectable,
+                            ...(isSelected ? CARD_STYLES.selected : {}),
                             opacity: isSelectable && !isSelected ? 0.8 : 1,
-                            transition: 'all 0.2s ease',
-                            transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                            boxShadow: isSelected
-                              ? '0 4px 12px rgba(0, 0, 0, 0.15)'
-                              : undefined,
                           }}
                           onMouseEnter={e => {
                             if (isSelectable) {
@@ -1386,14 +1410,7 @@ const FamilyHistory = () => {
                                   <Box
                                     key={condition.id}
                                     p="xs"
-                                    style={{
-                                      borderLeft: `3px solid var(--mantine-color-${getSeverityColor(condition.severity)}-6)`,
-                                      backgroundColor:
-                                        colorScheme === 'dark'
-                                          ? 'var(--mantine-color-dark-6)'
-                                          : 'var(--mantine-color-gray-0)',
-                                      borderRadius: '4px',
-                                    }}
+                                    style={CARD_STYLES.conditionBox(colorScheme, getSeverityColor(condition.severity))}
                                   >
                                     <Group position="apart">
                                       <div style={{ flex: 1 }}>
@@ -1682,14 +1699,7 @@ const FamilyHistory = () => {
                                   <Box
                                     key={condition.id}
                                     p="xs"
-                                    style={{
-                                      borderLeft: `3px solid var(--mantine-color-${getSeverityColor(condition.severity)}-6)`,
-                                      backgroundColor:
-                                        colorScheme === 'dark'
-                                          ? 'var(--mantine-color-dark-6)'
-                                          : 'var(--mantine-color-gray-0)',
-                                      borderRadius: '4px',
-                                    }}
+                                    style={CARD_STYLES.conditionBox(colorScheme, getSeverityColor(condition.severity))}
                                   >
                                     <Group position="apart">
                                       <div style={{ flex: 1 }}>
@@ -1815,10 +1825,7 @@ const FamilyHistory = () => {
                     disabled={viewingFamilyMember.is_shared}
                     title={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
                     aria-label={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
-                    style={{
-                      opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
-                      cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
-                    }}
+                    style={viewingFamilyMember.is_shared ? CARD_STYLES.disabledAction : {}}
                   >
                     <IconEdit size={16} />
                   </ActionIcon>
@@ -1910,14 +1917,7 @@ const FamilyHistory = () => {
                     <Box
                       key={condition.id}
                       p="md"
-                      style={{
-                        borderLeft: `4px solid var(--mantine-color-${getSeverityColor(condition.severity)}-6)`,
-                        backgroundColor:
-                          colorScheme === 'dark'
-                            ? 'var(--mantine-color-dark-6)'
-                            : 'var(--mantine-color-gray-0)',
-                        borderRadius: '8px',
-                      }}
+                      style={CARD_STYLES.viewModalConditionBox(colorScheme, getSeverityColor(condition.severity))}
                     >
                       <Group position="apart" mb="xs">
                         <Group spacing="xs">
@@ -1950,10 +1950,7 @@ const FamilyHistory = () => {
                             disabled={viewingFamilyMember.is_shared}
                             title={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
                             aria-label={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
-                            style={{
-                              opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
-                              cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
-                            }}
+                            style={viewingFamilyMember.is_shared ? CARD_STYLES.disabledAction : {}}
                           >
                             <IconEdit size={16} />
                           </ActionIcon>
@@ -1969,10 +1966,7 @@ const FamilyHistory = () => {
                             disabled={viewingFamilyMember.is_shared}
                             title={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
                             aria-label={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
-                            style={{
-                              opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
-                              cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
-                            }}
+                            style={viewingFamilyMember.is_shared ? CARD_STYLES.disabledAction : {}}
                           >
                             <IconTrash size={16} />
                           </ActionIcon>
