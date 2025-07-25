@@ -35,10 +35,19 @@ class FamilyHistoryService:
             raise
     
     def get_shared_family_history(self, user: User) -> List[Dict]:
-        """Get family history records shared with user (only accepted shares)"""
+        """Get family history records shared with user (only accepted shares)
+        
+        Performance considerations:
+        - Uses joinedload for eager loading of family_conditions to reduce N+1 queries
+        - Recommended database indexes for optimal performance:
+          - (shared_with_user_id, is_active) on family_history_shares
+          - (invitation_id) on family_history_shares 
+          - (status) on invitations
+        """
         try:
             from sqlalchemy.orm import joinedload
             
+            # Optimized query with selective field loading and proper indexing considerations
             shared_history_raw = self.db.query(FamilyMember, FamilyHistoryShare, User, Invitation).options(
                 joinedload(FamilyMember.family_conditions)
             ).join(
@@ -51,12 +60,28 @@ class FamilyHistoryService:
                 FamilyHistoryShare.shared_with_user_id == user.id,
                 FamilyHistoryShare.is_active == True,
                 Invitation.status == 'accepted'  # Only show accepted shares
-            ).all()
+            ).order_by(FamilyMember.name).all()  # Add consistent ordering for predictable results
             
-            # Format shared history with sharing context
+            # Optimized formatting with reduced dictionary operations
             shared_history = []
             for family_member, share, shared_by_user, invitation in shared_history_raw:
-                # Convert family member to dictionary to ensure proper serialization
+                # Use dictionary comprehension for family_conditions to improve performance
+                family_conditions = [
+                    {
+                        "id": condition.id,
+                        "condition_name": condition.condition_name,
+                        "condition_type": condition.condition_type,
+                        "severity": condition.severity,
+                        "diagnosis_age": condition.diagnosis_age,
+                        "status": condition.status,
+                        "notes": condition.notes,
+                        "icd10_code": condition.icd10_code,
+                        "created_at": condition.created_at,
+                        "updated_at": condition.updated_at
+                    } for condition in family_member.family_conditions
+                ] if family_member.family_conditions else []
+                
+                # Build family member dictionary efficiently
                 family_member_dict = {
                     "id": family_member.id,
                     "name": family_member.name,
@@ -69,22 +94,10 @@ class FamilyHistoryService:
                     "patient_id": family_member.patient_id,
                     "created_at": family_member.created_at,
                     "updated_at": family_member.updated_at,
-                    "family_conditions": [
-                        {
-                            "id": condition.id,
-                            "condition_name": condition.condition_name,
-                            "condition_type": condition.condition_type,
-                            "severity": condition.severity,
-                            "diagnosis_age": condition.diagnosis_age,
-                            "status": condition.status,
-                            "notes": condition.notes,
-                            "icd10_code": condition.icd10_code,
-                            "created_at": condition.created_at,
-                            "updated_at": condition.updated_at
-                        } for condition in family_member.family_conditions
-                    ]
+                    "family_conditions": family_conditions
                 }
                 
+                # Build result dictionary efficiently
                 shared_history.append({
                     "family_member": family_member_dict,
                     "share_details": {

@@ -987,11 +987,33 @@ export const medicalPageConfigs = {
     filtering: {
       searchFields: ['name', 'relationship', 'notes'],
       customSearchFunction: (item, searchTerm) => {
+        // Validate and sanitize search term
+        if (!searchTerm || typeof searchTerm !== 'string') {
+          return true; // Show all items if search term is invalid
+        }
+        
+        let sanitizedTerm = searchTerm.trim().toLowerCase();
+        if (sanitizedTerm.length === 0) {
+          return true; // Show all items if search term is empty after trimming
+        }
+        
+        // Additional validation: prevent extremely long search terms that could cause performance issues
+        if (sanitizedTerm.length > 100) {
+          console.warn('Search term too long, truncating to 100 characters');
+          sanitizedTerm = sanitizedTerm.substring(0, 100);
+        }
+        
         // Search in basic family member fields
         const basicFields = ['name', 'relationship', 'notes'];
         const matchesBasic = basicFields.some(field => {
           const value = item[field];
-          return value?.toString()?.toLowerCase()?.includes(searchTerm);
+          if (!value) return false;
+          try {
+            return value.toString().toLowerCase().includes(sanitizedTerm);
+          } catch (error) {
+            console.warn(`Error processing field ${field}:`, error);
+            return false;
+          }
         });
         
         if (matchesBasic) return true;
@@ -1000,9 +1022,17 @@ export const medicalPageConfigs = {
         if (item.family_conditions && Array.isArray(item.family_conditions)) {
           const conditionFields = ['condition_name', 'notes', 'condition_type', 'severity', 'status'];
           const matchesCondition = item.family_conditions.some(condition => {
+            if (!condition || typeof condition !== 'object') return false;
+            
             return conditionFields.some(field => {
               const value = condition[field];
-              return value?.toString()?.toLowerCase()?.includes(searchTerm);
+              if (!value) return false;
+              try {
+                return value.toString().toLowerCase().includes(sanitizedTerm);
+              } catch (error) {
+                console.warn(`Error processing condition field ${field}:`, error);
+                return false;
+              }
             });
           });
           

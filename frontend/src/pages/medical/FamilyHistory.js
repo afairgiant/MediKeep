@@ -411,7 +411,12 @@ const FamilyHistory = () => {
 
     if (success) {
       setShowModal(false);
-      await refreshData();
+      try {
+        await refreshData();
+      } catch (error) {
+        console.error('Failed to refresh data after saving family member:', error);
+        setError('Data saved but failed to refresh. Please reload the page.');
+      }
     }
   };
 
