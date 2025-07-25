@@ -81,35 +81,43 @@ export const useErrorQueue = (componentName, options = {}) => {
     }, [componentName, maxErrors, autoClearAfter, generateErrorId]);
 
     /**
-     * Remove error from queue
+     * Remove error from queue - race condition eliminated with cleaner approach
      */
     const removeFromQueue = useCallback((errorId) => {
-        setErrorQueue(prevQueue => prevQueue.filter(error => error.id !== errorId));
-        
-        setCurrentError(prevCurrent => {
-            if (prevCurrent?.id === errorId) {
-                // Find next highest priority error
-                setErrorQueue(currentQueue => {
-                    const remaining = currentQueue.filter(error => error.id !== errorId);
-                    const highPriority = remaining.find(error => error.severity === ERROR_SEVERITY.HIGH);
-                    const mediumPriority = remaining.find(error => error.severity === ERROR_SEVERITY.MEDIUM);
-                    const lowPriority = remaining.find(error => error.severity === ERROR_SEVERITY.LOW);
-                    
-                    const nextError = highPriority || mediumPriority || lowPriority || null;
-                    setCurrentError(nextError);
-                    return remaining;
-                });
-                return null; // Will be set by the inner setCurrentError
-            }
-            return prevCurrent;
-        });
-
-        // Clear associated timer
+        // Clear associated timer first
         const timer = clearTimers.current.get(errorId);
         if (timer) {
             clearTimeout(timer);
             clearTimers.current.delete(errorId);
         }
+
+        // Store current error state to determine if we need to find a replacement
+        let wasCurrentError = false;
+        setCurrentError(prevCurrent => {
+            wasCurrentError = prevCurrent?.id === errorId;
+            return wasCurrentError ? null : prevCurrent;
+        });
+
+        // Update queue and find next error if needed
+        setErrorQueue(prevQueue => {
+            const remainingQueue = prevQueue.filter(error => error.id !== errorId);
+            
+            // If the removed error was current, find next highest priority
+            if (wasCurrentError && remainingQueue.length > 0) {
+                const nextError = remainingQueue
+                    .sort((a, b) => {
+                        const severityOrder = { high: 3, medium: 2, low: 1 };
+                        const severityDiff = (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
+                        if (severityDiff !== 0) return severityDiff;
+                        return b.timestamp - a.timestamp; // Newer first within same severity
+                    })[0];
+                
+                // Set new current error
+                setCurrentError(nextError);
+            }
+            
+            return remainingQueue;
+        });
     }, []);
 
     /**

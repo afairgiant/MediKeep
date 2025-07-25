@@ -6,17 +6,13 @@ from typing import List, Dict, Optional, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app.models.models import User, Invitation
+from app.core.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
 import logging
 import json
 import hashlib
 
 logger = logging.getLogger(__name__)
-
-
-def get_utc_now():
-    """Get the current UTC datetime as naive datetime for database compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class InvitationService:

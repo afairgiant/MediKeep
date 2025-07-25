@@ -7,15 +7,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app.models.models import User, FamilyMember, FamilyCondition, FamilyHistoryShare, Patient, Invitation
 from app.services.invitation_service import InvitationService
+from app.core.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def get_utc_now():
-    """Get the current UTC datetime as naive datetime for database compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class FamilyHistoryService:

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
 from app.models.models import User, Patient, PatientShare
+from app.core.datetime_utils import get_utc_now
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__, "app")
@@ -170,7 +171,7 @@ class PatientAccessService:
             return False
         
         # Check expiration
-        if share.expires_at and share.expires_at < datetime.now():
+        if share.expires_at and share.expires_at < get_utc_now():
             logger.debug(f"Share expired for patient {patient.id}")
             return False
         
