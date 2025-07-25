@@ -3,35 +3,37 @@
  * Contains all error patterns and configurations specific to sharing functionality
  */
 
+import { ERROR_SEVERITY, ERROR_COLORS, ERROR_DOMAINS, ERROR_ICONS, ERROR_PATTERNS } from '../constants';
+
 export const sharingErrors = {
     // User/Recipient Related Errors
-    'recipient user not found': {
+    [ERROR_PATTERNS.USER_NOT_FOUND]: {
         title: 'User Not Found',
         message: 'We couldn\'t find a user with that username or email address.',
-        color: 'red',
-        icon: 'user-not-found',
+        color: ERROR_COLORS.RED,
+        icon: ERROR_ICONS.USER_NOT_FOUND,
         suggestions: [
             'Double-check the spelling of the username or email',
             'Try using their email address instead of username',
             'Ask the person to confirm their username or email',
             'Make sure they have created an account on this platform'
         ],
-        severity: 'high',
-        domain: 'sharing'
+        severity: ERROR_SEVERITY.HIGH,
+        domain: ERROR_DOMAINS.SHARING
     },
     
     'cannot send invitation to yourself': {
         title: 'Invalid Recipient',
         message: 'You cannot share family history with yourself.',
-        color: 'orange',
-        icon: 'warning',
+        color: ERROR_COLORS.ORANGE,
+        icon: ERROR_ICONS.WARNING,
         suggestions: [
             'Enter a family member or friend\'s username',
             'Use a different email address',
             'Share with someone who would benefit from this medical information'
         ],
-        severity: 'medium',
-        domain: 'sharing'
+        severity: ERROR_SEVERITY.MEDIUM,
+        domain: ERROR_DOMAINS.SHARING
     },
 
     'cannot share patient with yourself': {

@@ -460,13 +460,15 @@ class Patient(PatientBase):
 
     @validator("address")
     def validate_address_response(cls, v):
-        """Validate address for response, allowing None for empty values"""
-        if v is not None and v != "":
+        """Validate address for response, consistent with other validation methods"""
+        if v is not None and v.strip():
+            # Use same validation logic as other classes for consistency
             if len(v.strip()) < 5:
-                # For response validation, return None instead of raising error
+                # For response, silently return None for invalid data rather than failing
                 return None
             if len(v) > 200:
-                return v[:200]  # Truncate if too long
+                # Truncate if too long rather than failing in response validation
+                return v.strip()[:200]
             return v.strip()
         return None
 

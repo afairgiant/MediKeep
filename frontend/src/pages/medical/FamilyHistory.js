@@ -12,6 +12,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { Button } from '../../components/ui';
 import logger from '../../services/logger';
+import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -109,6 +110,9 @@ const FamilyHistory = () => {
   const [expandedMembers, setExpandedMembers] = useState(new Set());
   const [sharedFamilyHistory, setSharedFamilyHistory] = useState([]);
 
+  // Error handling for shared family history loading (addresses reviewer feedback)
+  const { handleError, currentError, clearError } = useErrorHandler('FamilyHistory');
+
   // Invitation-related state
   const [
     invitationManagerOpened,
@@ -171,7 +175,7 @@ const FamilyHistory = () => {
           total: ownedMembers.length + sharedMembers.length,
         });
 
-        return [...ownedMembers, ...sharedMembers];
+        return ownedMembers.concat(sharedMembers);
       },
       getByPatient: (patientId, signal) => {
         logger.debug('Getting family members for patient', {
@@ -270,10 +274,11 @@ const FamilyHistory = () => {
         const sharedData = await familyHistoryApi.getSharedFamilyHistory();
         setSharedFamilyHistory(sharedData.shared_family_history || []);
       } catch (error) {
-        logger.error('Failed to load shared family history', {
-          component: 'FamilyHistory',
-          error: error.message,
-          userId: currentPatient?.owner_user_id
+        // Use enhanced error handling system for user-friendly messaging (addresses reviewer feedback)
+        handleError(error, {
+          action: 'loading_shared_family_history',
+          userId: currentPatient?.owner_user_id,
+          context: 'Family history shared with you could not be loaded'
         });
       }
     };
@@ -952,11 +957,15 @@ const FamilyHistory = () => {
         icon={<IconUsers size={24} />}
       />
 
-      {error && (
+      {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
+      <ErrorAlert error={currentError} onClose={clearError} />
+      
+      {/* Legacy error display for backward compatibility */}
+      {error && !currentError && (
         <Alert
           color="red"
           style={{ marginBottom: '1rem' }}
-          onClose={clearError}
+          onClose={() => setError(null)}
         >
           {error}
         </Alert>

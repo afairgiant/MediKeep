@@ -1,10 +1,19 @@
 /**
  * Error formatting utilities
  * Converts raw errors into user-friendly display formats
+ * Updated to address reviewer feedback about using constants instead of magic strings
  */
 
 import { parseErrorMessage, parseHttpError } from './parsers';
 import { getErrorMapping } from './errorMappings';
+import { 
+    ERROR_TYPES, 
+    ERROR_SEVERITY, 
+    ERROR_COLORS, 
+    ERROR_ICONS, 
+    ERROR_DOMAINS,
+    NOTIFICATION_DURATIONS 
+} from './constants';
 
 /**
  * Formats user-friendly error messages for display
@@ -33,22 +42,22 @@ export const formatError = (error, context = {}) => {
     }
 
     // Handle bulk already shared errors with custom formatting
-    if (parsed.type === 'bulk_already_shared') {
+    if (parsed.type === ERROR_TYPES.BULK_ALREADY_SHARED) {
         return formatBulkAlreadySharedError(parsed, context);
     }
 
     // Handle HTTP status codes
-    if (parsed.type === 'http_status') {
+    if (parsed.type === ERROR_TYPES.HTTP_STATUS) {
         return formatHttpStatusError(parsed);
     }
 
     // Handle network errors
-    if (parsed.type === 'network_error') {
+    if (parsed.type === ERROR_TYPES.NETWORK_ERROR) {
         return getErrorMapping('network error') || createGenericErrorFormat(errorMessage);
     }
 
     // Handle timeout errors
-    if (parsed.type === 'timeout_error') {
+    if (parsed.type === ERROR_TYPES.TIMEOUT_ERROR) {
         return getErrorMapping('timeout') || createGenericErrorFormat(errorMessage);
     }
 
@@ -57,7 +66,7 @@ export const formatError = (error, context = {}) => {
     if (mappedError) {
         return {
             ...mappedError,
-            type: 'mapped_error',
+            type: ERROR_TYPES.MAPPED_ERROR,
             originalMessage: errorMessage
         };
     }
@@ -89,18 +98,18 @@ const formatBulkAlreadySharedError = (parsed, context) => {
     return {
         title: count > 2 ? 'Multiple Already Shared' : 'Already Shared',
         message,
-        color: 'orange',
-        icon: 'sharing-error',
+        color: ERROR_COLORS.ORANGE,
+        icon: ERROR_ICONS.SHARING_ERROR,
         suggestions: [
             'Choose a different recipient',
             'Remove the already-shared family members from your selection',
             'Check the "Currently Shared With" section for details'
         ],
-        severity: 'low',
-        type: 'bulk_already_shared',
+        severity: ERROR_SEVERITY.LOW,
+        type: ERROR_TYPES.BULK_ALREADY_SHARED,
         names,
         count,
-        domain: 'sharing'
+        domain: ERROR_DOMAINS.SHARING
     };
 };
 
@@ -124,16 +133,16 @@ const formatHttpStatusError = (parsed) => {
     return {
         title: `HTTP ${parsed.statusCode} Error`,
         message: `Server returned status code ${parsed.statusCode}`,
-        color: 'red',
-        icon: 'server-off',
+        color: ERROR_COLORS.RED,
+        icon: ERROR_ICONS.SERVER_OFF,
         suggestions: [
             'Try again in a few minutes',
             'Contact support if the problem persists'
         ],
-        severity: 'high',
-        type: 'http_status',
+        severity: ERROR_SEVERITY.HIGH,
+        type: ERROR_TYPES.HTTP_STATUS,
         statusCode: parsed.statusCode,
-        domain: 'network'
+        domain: ERROR_DOMAINS.NETWORK
     };
 };
 
@@ -158,35 +167,27 @@ const createGenericErrorFormat = (errorMessage) => {
     return {
         title: 'Error',
         message: errorMessage,
-        color: 'red',
-        icon: 'alert-circle',
+        color: ERROR_COLORS.RED,
+        icon: ERROR_ICONS.ALERT_CIRCLE,
         suggestions: [
             'Please try again',
             'Refresh the page if the problem persists',
             'Contact support if you continue to experience issues'
         ],
-        severity: 'medium',
-        type: 'generic',
-        domain: 'general'
+        severity: ERROR_SEVERITY.MEDIUM,
+        type: ERROR_TYPES.GENERIC,
+        domain: ERROR_DOMAINS.GENERAL
     };
 };
 
 /**
  * Get notification auto-close time based on error severity
+ * Updated to use constants as suggested by reviewer
  * @param {string} severity - Error severity level
  * @returns {number|false} Auto-close time in ms, or false for no auto-close
  */
 export const getNotificationAutoClose = (severity) => {
-    switch (severity) {
-        case 'low':
-            return 4000; // 4 seconds
-        case 'medium':
-            return 6000; // 6 seconds
-        case 'high':
-            return 10000; // 10 seconds
-        default:
-            return 5000; // 5 seconds
-    }
+    return NOTIFICATION_DURATIONS[severity] || NOTIFICATION_DURATIONS.DEFAULT;
 };
 
 /**

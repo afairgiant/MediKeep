@@ -163,8 +163,8 @@ class APIClient {
         category: 'api_client_error',
         error: error.message,
         status: error.status,
-        url: config.url,
-        method: config.method || 'GET'
+        url: processedConfig.url,
+        method: processedConfig.method || 'GET'
       });
       throw error;
     }

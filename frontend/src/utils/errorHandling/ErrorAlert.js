@@ -1,11 +1,13 @@
 /**
  * Reusable error alert component
  * Displays formatted errors with consistent styling and suggestions
+ * Enhanced to support error queues as suggested by reviewer feedback
  */
 
 import React from 'react';
-import { Alert, Text, Stack, List } from '@mantine/core';
+import { Alert, Text, Stack, List, Badge, Group, Collapse, Button } from '@mantine/core';
 import { ErrorIcon } from './ErrorIcon';
+import { ERROR_SEVERITY } from './constants';
 
 /**
  * ErrorAlert component - displays formatted errors consistently
@@ -84,6 +86,86 @@ export const CompactErrorAlert = ({ error, showIcon = false, ...props }) => {
         >
             <Text size="xs">{error.message}</Text>
         </Alert>
+    );
+};
+
+/**
+ * Error queue alert - displays multiple errors with priority (addresses reviewer feedback)
+ * @param {Object} props
+ * @param {Array} props.errorQueue - Array of errors to display
+ * @param {Function} props.onDismiss - Function to dismiss a specific error
+ * @param {Function} props.onClearAll - Function to clear all errors
+ * @param {boolean} props.showCount - Whether to show error count (default: true)
+ * @param {number} props.maxVisible - Maximum errors to show expanded (default: 3)
+ * @returns {JSX.Element|null} Error queue alert or null if no errors
+ */
+export const ErrorQueueAlert = ({ 
+    errorQueue = [], 
+    onDismiss, 
+    onClearAll,
+    showCount = true,
+    maxVisible = 3,
+    ...props 
+}) => {
+    const [expanded, setExpanded] = React.useState(false);
+    
+    if (!errorQueue || errorQueue.length === 0) {
+        return null;
+    }
+
+    // Sort errors by severity (high -> medium -> low) and then by timestamp
+    const sortedErrors = [...errorQueue].sort((a, b) => {
+        const severityOrder = { high: 3, medium: 2, low: 1 };
+        const severityDiff = (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
+        if (severityDiff !== 0) return severityDiff;
+        return b.timestamp - a.timestamp; // Newer errors first within same severity
+    });
+
+    const visibleErrors = expanded ? sortedErrors : sortedErrors.slice(0, maxVisible);
+    const hiddenCount = sortedErrors.length - maxVisible;
+
+    return (
+        <Stack gap="xs" {...props}>
+            {/* Error count header */}
+            {showCount && sortedErrors.length > 1 && (
+                <Group justify="space-between">
+                    <Group gap="xs">
+                        <Badge color="red" variant="light">
+                            {sortedErrors.length} Error{sortedErrors.length !== 1 ? 's' : ''}
+                        </Badge>
+                        <Text size="sm" c="dimmed">
+                            {sortedErrors.filter(e => e.severity === ERROR_SEVERITY.HIGH).length} high priority
+                        </Text>
+                    </Group>
+                    {onClearAll && (
+                        <Button size="xs" variant="subtle" color="red" onClick={onClearAll}>
+                            Clear All
+                        </Button>
+                    )}
+                </Group>
+            )}
+
+            {/* Display visible errors */}
+            {visibleErrors.map((error) => (
+                <ErrorAlert
+                    key={error.id}
+                    error={error}
+                    onClose={onDismiss ? () => onDismiss(error.id) : undefined}
+                    showSuggestions={error.severity === ERROR_SEVERITY.HIGH}
+                />
+            ))}
+
+            {/* Show more/less button */}
+            {hiddenCount > 0 && (
+                <Button
+                    variant="subtle"
+                    size="xs"
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    {expanded ? 'Show Less' : `Show ${hiddenCount} More Error${hiddenCount !== 1 ? 's' : ''}`}
+                </Button>
+            )}
+        </Stack>
     );
 };
 

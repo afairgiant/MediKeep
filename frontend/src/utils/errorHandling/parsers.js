@@ -1,7 +1,10 @@
 /**
  * Error parsing utilities
  * Extracts meaningful information from raw error messages
+ * Updated to use constants as suggested by reviewer feedback
  */
+
+import { ERROR_TYPES, ERROR_PATTERNS } from './constants';
 
 /**
  * Enhanced error parser that extracts specific error information
@@ -21,7 +24,7 @@ export const parseErrorMessage = (errorMessage) => {
         if (namesMatch) {
             const names = namesMatch[1].split(',').map(name => name.trim());
             return {
-                type: 'bulk_already_shared',
+                type: ERROR_TYPES.BULK_ALREADY_SHARED,
                 names,
                 count: names.length,
                 originalMessage: errorMessage
@@ -34,30 +37,30 @@ export const parseErrorMessage = (errorMessage) => {
     if (statusMatch) {
         const statusCode = statusMatch[1];
         return {
-            type: 'http_status',
+            type: ERROR_TYPES.HTTP_STATUS,
             statusCode,
             originalMessage: errorMessage
         };
     }
 
     // Check for network-specific patterns
-    if (lowerMessage.includes('network error') || lowerMessage.includes('failed to fetch')) {
+    if (lowerMessage.includes(ERROR_PATTERNS.NETWORK_ERROR) || lowerMessage.includes(ERROR_PATTERNS.FAILED_TO_FETCH)) {
         return {
-            type: 'network_error',
+            type: ERROR_TYPES.NETWORK_ERROR,
             originalMessage: errorMessage
         };
     }
 
-    if (lowerMessage.includes('timeout')) {
+    if (lowerMessage.includes(ERROR_PATTERNS.TIMEOUT)) {
         return {
-            type: 'timeout_error',
+            type: ERROR_TYPES.TIMEOUT_ERROR,
             originalMessage: errorMessage
         };
     }
 
     // Return parsed info for further processing
     return {
-        type: 'unknown',
+        type: ERROR_TYPES.UNKNOWN,
         originalMessage: errorMessage
     };
 };

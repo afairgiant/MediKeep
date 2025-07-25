@@ -47,7 +47,7 @@ import { notifications } from '@mantine/notifications';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { formatDateTime } from '../../utils/helpers';
 import logger from '../../services/logger';
-import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
+import { useErrorHandler, useErrorQueue, ErrorAlert, ErrorQueueAlert } from '../../utils/errorHandling';
 
 const FamilyHistorySharingModal = ({ 
     opened, 
@@ -55,7 +55,8 @@ const FamilyHistorySharingModal = ({
     familyMember, 
     familyMembers = [], // For bulk sharing
     onSuccess,
-    bulkMode = false
+    bulkMode = false,
+    useErrorQueue = false // New prop to enable error queue system (addresses reviewer feedback)
 }) => {
     const [shares, setShares] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -67,13 +68,28 @@ const FamilyHistorySharingModal = ({
     });
     const [selectedMembers, setSelectedMembers] = useState([]);
     
-    // Use the new error handling system
-    const { handleError, currentError, clearError } = useErrorHandler('FamilyHistorySharingModal');
+    // Use either error queue or single error system based on prop (addresses reviewer feedback)
+    const errorSystem = useErrorQueue ? 
+        useErrorQueue('FamilyHistorySharingModal') : 
+        useErrorHandler('FamilyHistorySharingModal');
+    
+    const { 
+        handleError, 
+        currentError, 
+        errorQueue = [], 
+        clearError, 
+        clearAllErrors, 
+        removeFromQueue 
+    } = errorSystem;
 
     useEffect(() => {
         if (opened) {
             // Clear any previous error state when modal opens
-            clearError();
+            if (useErrorQueue && clearAllErrors) {
+                clearAllErrors();
+            } else {
+                clearError();
+            }
             
             if (bulkMode) {
                 // Initialize with all family members selected
@@ -223,7 +239,12 @@ const FamilyHistorySharingModal = ({
     const handleClose = () => {
         setShareForm({ shared_with_identifier: '', sharing_note: '', expires_hours: 168 });
         setSelectedMembers([]);
-        clearError(); // Clear any error state
+        // Clear error state based on system type
+        if (useErrorQueue && clearAllErrors) {
+            clearAllErrors();
+        } else {
+            clearError();
+        }
         onClose();
     };
 
@@ -234,8 +255,12 @@ const FamilyHistorySharingModal = ({
         }));
         
         // Clear error when user changes recipient
-        if (field === 'shared_with_identifier' && currentError) {
-            clearError();
+        if (field === 'shared_with_identifier' && (currentError || errorQueue.length > 0)) {
+            if (useErrorQueue && clearAllErrors) {
+                clearAllErrors();
+            } else {
+                clearError();
+            }
         }
     };
 
@@ -330,8 +355,16 @@ const FamilyHistorySharingModal = ({
                 
                 {/* Sharing Form */}
                 <Stack gap="md">
-                    {/* Error display using the new ErrorAlert component */}
-                    <ErrorAlert error={currentError} onClose={clearError} />
+                    {/* Error display - supports both single error and error queue (addresses reviewer feedback) */}
+                    {useErrorQueue ? (
+                        <ErrorQueueAlert 
+                            errorQueue={errorQueue} 
+                            onDismiss={removeFromQueue}
+                            onClearAll={clearAllErrors}
+                        />
+                    ) : (
+                        <ErrorAlert error={currentError} onClose={clearError} />
+                    )}
                     
                     <TextInput
                         label="Share with (username or email)"
