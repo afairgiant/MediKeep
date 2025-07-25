@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from app.models.models import User, Patient, PatientShare
+from app.core.datetime_utils import get_utc_now
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__, "app")
@@ -277,7 +278,7 @@ class PatientSharingService:
         logger.info("Cleaning up expired patient shares")
         
         expired_shares = self.db.query(PatientShare).filter(
-            PatientShare.expires_at < datetime.now(),
+            PatientShare.expires_at < get_utc_now(),
             PatientShare.is_active == True
         ).all()
         

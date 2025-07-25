@@ -6,17 +6,13 @@ from typing import List, Dict, Optional, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app.models.models import User, Invitation
+from app.core.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
 import logging
 import json
 import hashlib
 
 logger = logging.getLogger(__name__)
-
-
-def get_utc_now():
-    """Get the current UTC datetime with timezone awareness."""
-    return datetime.now(timezone.utc)
 
 
 class InvitationService:
@@ -95,12 +91,8 @@ class InvitationService:
             if invitation_type:
                 query = query.filter(Invitation.invitation_type == invitation_type)
             
-            # Filter out expired invitations (timezone-safe)
+            # Filter out expired invitations
             now = get_utc_now()
-            # Convert to naive datetime for PostgreSQL compatibility
-            if now.tzinfo is not None:
-                now = now.replace(tzinfo=None)
-            
             query = query.filter(
                 or_(Invitation.expires_at.is_(None), 
                     Invitation.expires_at > now)
@@ -149,25 +141,13 @@ class InvitationService:
             if not invitation:
                 raise ValueError("Invitation not found or not pending")
             
-            # Check if expired (handle timezone comparison)
+            # Check if expired
             if invitation.expires_at:
                 now = get_utc_now()
-                # Make timezone-naive if expires_at is naive
-                if invitation.expires_at.tzinfo is None and now.tzinfo is not None:
-                    now = now.replace(tzinfo=None)
-                elif invitation.expires_at.tzinfo is not None and now.tzinfo is None:
-                    # Convert expires_at to naive if now is naive
-                    expires_at_naive = invitation.expires_at.replace(tzinfo=None)
-                    if expires_at_naive < now:
-                        invitation.status = 'expired'
-                        self.db.commit()
-                        raise ValueError("Invitation has expired")
-                else:
-                    # Both have same timezone info, direct comparison
-                    if invitation.expires_at < now:
-                        invitation.status = 'expired'
-                        self.db.commit()
-                        raise ValueError("Invitation has expired")
+                if invitation.expires_at < now:
+                    invitation.status = 'expired'
+                    self.db.commit()
+                    raise ValueError("Invitation has expired")
             
             if response not in ['accepted', 'rejected']:
                 raise ValueError("Response must be 'accepted' or 'rejected'")
@@ -191,10 +171,6 @@ class InvitationService:
         """Mark expired invitations as expired (cleanup task)"""
         try:
             now = get_utc_now()
-            # Convert to naive datetime for PostgreSQL compatibility
-            if now.tzinfo is not None:
-                now = now.replace(tzinfo=None)
-                
             expired_count = self.db.query(Invitation).filter(
                 Invitation.status == 'pending',
                 Invitation.expires_at < now
@@ -246,4 +222,19 @@ class InvitationService:
             return self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
         except Exception as e:
             logger.error(f"Error fetching invitation by ID: {e}")
+            raise
+    
+    def update_invitation_status(self, invitation_id: int, status: str) -> Optional[Invitation]:
+        """Update invitation status by ID"""
+        try:
+            invitation = self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
+            if invitation:
+                invitation.status = status
+                invitation.updated_at = get_utc_now()
+                self.db.commit()
+                logger.info(f"Updated invitation {invitation_id} status to {status}")
+            return invitation
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error updating invitation status: {e}")
             raise

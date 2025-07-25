@@ -8,10 +8,12 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
+    column,
 )
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
@@ -968,12 +970,16 @@ class FamilyHistoryShare(Base):
     shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id])
     shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id])
 
-    # Constraints
+    # Constraints - allow multiple shares but only one active share per family member/user pair
     __table_args__ = (
-        UniqueConstraint(
-            "family_member_id",
+        # Partial unique constraint: only one active share per (family_member_id, shared_with_user_id)
+        # Multiple inactive shares are allowed to maintain history
+        Index(
+            "unique_active_family_history_share_partial",
+            "family_member_id", 
             "shared_with_user_id",
-            name="unique_family_history_share",
+            unique=True,
+            postgresql_where=(column("is_active") == True)
         ),
     )
 

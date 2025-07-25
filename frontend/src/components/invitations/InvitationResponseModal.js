@@ -27,6 +27,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import invitationApi from '../../services/api/invitationApi';
 import { formatDateTime } from '../../utils/helpers';
+import { renderFamilyHistoryContextDetails } from '../../utils/invitationUtils';
 
 const InvitationResponseModal = ({ 
     opened, 
@@ -109,40 +110,18 @@ const InvitationResponseModal = ({
     };
 
     const getContextDetails = (invitation) => {
-        if (!invitation?.context_data) return null;
-        
-        const { context_data } = invitation;
-        
-        switch (invitation.invitation_type) {
-            case 'family_history_share':
-                return (
-                    <Stack gap="xs">
-                        <Text size="sm" fw={500}>Sharing Details:</Text>
-                        <List size="sm" spacing="xs">
-                            <List.Item>
-                                <Text span fw={500}>Family Member:</Text> {context_data.family_member_name}
-                            </List.Item>
-                            <List.Item>
-                                <Text span fw={500}>Relationship:</Text> {context_data.family_member_relationship}
-                            </List.Item>
-                            <List.Item>
-                                <Text span fw={500}>Access Level:</Text> {context_data.permission_level}
-                            </List.Item>
-                            {context_data.sharing_note && (
-                                <List.Item>
-                                    <Text span fw={500}>Note:</Text> {context_data.sharing_note}
-                                </List.Item>
-                            )}
-                        </List>
-                    </Stack>
-                );
-            default:
-                return (
-                    <Text size="sm" c="dimmed">
-                        Additional details available after acceptance
-                    </Text>
-                );
+        // Use utility function for family history invitations
+        const familyHistoryDetails = renderFamilyHistoryContextDetails(invitation);
+        if (familyHistoryDetails) {
+            return familyHistoryDetails;
         }
+        
+        // Default fallback for other invitation types
+        return (
+            <Text size="sm" c="dimmed">
+                Additional details available after acceptance
+            </Text>
+        );
     };
 
     if (!invitation) return null;

@@ -17,6 +17,11 @@ class FamilyHistoryApi {
         return response;
     }
     
+    async getSharedByMe() {
+        const response = await apiService.get('/family-history-sharing/shared-by-me');
+        return response;
+    }
+    
     async getFamilyMemberShares(familyMemberId) {
         const response = await apiService.get(`/family-history-sharing/${familyMemberId}/shares`);
         return response;
@@ -29,6 +34,11 @@ class FamilyHistoryApi {
     
     async revokeShare(familyMemberId, userId) {
         const response = await apiService.delete(`/family-history-sharing/${familyMemberId}/shares/${userId}`);
+        return response;
+    }
+    
+    async removeMyAccess(familyMemberId) {
+        const response = await apiService.delete(`/family-history-sharing/shared-with-me/${familyMemberId}/remove-access`);
         return response;
     }
     

@@ -14,6 +14,7 @@ import {
   Center,
   Menu,
   Alert,
+  Modal,
   useMantineColorScheme,
 } from '@mantine/core';
 import {
@@ -38,6 +39,8 @@ const InvitationNotifications = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [invitationManagerOpened, { open: openInvitationManager, close: closeInvitationManager }] = useDisclosure(false);
+  const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
+  const [selectedInvitation, setSelectedInvitation] = useState(null);
 
   const loadPendingInvitations = async () => {
     try {
@@ -61,6 +64,14 @@ const InvitationNotifications = () => {
   }, []);
 
   const handleQuickResponse = async (invitation, response) => {
+    // Show confirmation for accepted responses
+    if (response === 'accepted') {
+      setSelectedInvitation(invitation);
+      openConfirmModal();
+      return;
+    }
+
+    // Direct processing for rejected responses
     try {
       await invitationApi.respondToInvitation(invitation.id, response);
       
@@ -77,6 +88,33 @@ const InvitationNotifications = () => {
       notifications.show({
         title: 'Error',
         message: `Failed to ${response} invitation`,
+        color: 'red',
+        icon: <IconX size="1rem" />
+      });
+    }
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!selectedInvitation) return;
+
+    try {
+      await invitationApi.respondToInvitation(selectedInvitation.id, 'accepted');
+      
+      notifications.show({
+        title: 'Invitation accepted',
+        message: 'Successfully accepted the invitation',
+        color: 'green',
+        icon: <IconCheck size="1rem" />
+      });
+      
+      // Refresh the list
+      loadPendingInvitations();
+      closeConfirmModal();
+      setSelectedInvitation(null);
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to accept invitation',
         color: 'red',
         icon: <IconX size="1rem" />
       });
@@ -276,6 +314,68 @@ const InvitationNotifications = () => {
         onClose={closeInvitationManager}
         onUpdate={handleInvitationUpdate}
       />
+
+      {/* Confirmation Modal for Accepting Invitations */}
+      <Modal
+        opened={confirmModalOpened}
+        onClose={() => {
+          closeConfirmModal();
+          setSelectedInvitation(null);
+        }}
+        title="Confirm Invitation Acceptance"
+        centered
+        size="md"
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            Are you sure you want to accept this invitation?
+          </Text>
+          
+          {selectedInvitation && (
+            <Paper p="sm" withBorder radius="md" bg={colorScheme === 'dark' ? 'dark.6' : 'gray.0'}>
+              <Stack gap="xs">
+                <Group gap="xs">
+                  <ThemeIcon color="blue" variant="light" size="sm">
+                    {getInvitationIcon(selectedInvitation.invitation_type)}
+                  </ThemeIcon>
+                  <Text size="sm" fw={500}>
+                    {selectedInvitation.title}
+                  </Text>
+                </Group>
+                <Text size="xs" c="dimmed">
+                  From: {selectedInvitation.sent_by?.name}
+                </Text>
+                <Badge size="xs" variant="light" color="blue">
+                  {getInvitationTypeDisplay(selectedInvitation.invitation_type)}
+                </Badge>
+              </Stack>
+            </Paper>
+          )}
+          
+          <Text size="xs" c="dimmed">
+            By accepting, you will gain access to view the shared medical information.
+          </Text>
+          
+          <Group justify="flex-end" gap="sm">
+            <Button
+              variant="subtle"
+              onClick={() => {
+                closeConfirmModal();
+                setSelectedInvitation(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="green"
+              onClick={handleConfirmAccept}
+              leftSection={<IconCheck size="1rem" />}
+            >
+              Accept Invitation
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </>
   );
 };

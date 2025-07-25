@@ -149,6 +149,37 @@ def revoke_family_member_share(
         )
 
 
+@router.delete("/shared-with-me/{family_member_id}/remove-access")
+def remove_my_access_to_family_history(
+    family_member_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Allow the recipient to remove their own access to shared family history"""
+    try:
+        service = FamilyHistoryService(db)
+        service.remove_my_access_to_family_history(current_user, family_member_id)
+        return {"message": "Access removed successfully"}
+    except ValueError as e:
+        error_msg = str(e)
+        if "not found" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No active sharing found for this family history record"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg
+            )
+    except Exception as e:
+        logger.error(f"Error removing user's access to family history: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to remove access"
+        )
+
+
 @router.post("/bulk-invite")
 def bulk_send_family_history_invitations(
     bulk_invite_data: FamilyHistoryBulkInvite,
@@ -272,4 +303,26 @@ def get_my_family_history(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch owned family history"
+        )
+
+
+@router.get("/shared-by-me")
+def get_shared_by_me(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all family history that current user has shared with others"""
+    try:
+        service = FamilyHistoryService(db)
+        shared_by_me = service.get_family_history_shared_by_me(current_user)
+        
+        return {
+            "shared_by_me": shared_by_me,
+            "count": len(shared_by_me)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching shared by me family history: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch shared by me family history"
         )

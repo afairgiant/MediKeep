@@ -273,11 +273,19 @@ export const useFiltering = (data = [], config = {}) => {
       // Search filter
       if (filters.search && filters.search.trim()) {
         const searchTerm = filters.search.toLowerCase();
-        const matchesSearch = searchFields.some(field => {
-          const value = getNestedValue(item, field);
-          return value && value.toString().toLowerCase().includes(searchTerm);
-        });
-        if (!matchesSearch) return false;
+        
+        // Check if there's a custom search function
+        if (config.customSearchFunction) {
+          const matchesCustomSearch = config.customSearchFunction(item, searchTerm);
+          if (!matchesCustomSearch) return false;
+        } else {
+          // Default field-based search
+          const matchesSearch = searchFields.some(field => {
+            const value = getNestedValue(item, field);
+            return value?.toString()?.toLowerCase()?.includes(searchTerm);
+          });
+          if (!matchesSearch) return false;
+        }
       }
 
       // Status filter

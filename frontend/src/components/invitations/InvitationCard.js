@@ -181,7 +181,13 @@ const InvitationCard = ({
                 {invitation.context_data && invitation.invitation_type === 'family_history_share' && (
                     <Group gap="xs" wrap="nowrap">
                         <Text size="xs" c="dimmed">
-                            Sharing: {invitation.context_data.family_member_name} ({invitation.context_data.family_member_relationship})
+                            Sharing: {
+                                invitation.context_data.is_bulk_invite ? (
+                                    `${invitation.context_data.family_member_count || invitation.context_data.family_members?.length || 0} family members`
+                                ) : (
+                                    `${invitation.context_data.family_member_name} (${invitation.context_data.family_member_relationship})`
+                                )
+                            }
                         </Text>
                     </Group>
                 )}

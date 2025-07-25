@@ -7,15 +7,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app.models.models import User, FamilyMember, FamilyCondition, FamilyHistoryShare, Patient, Invitation
 from app.services.invitation_service import InvitationService
+from app.core.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def get_utc_now():
-    """Get the current UTC datetime with timezone awareness."""
-    return datetime.now(timezone.utc)
 
 
 class FamilyHistoryService:
@@ -35,10 +31,19 @@ class FamilyHistoryService:
             raise
     
     def get_shared_family_history(self, user: User) -> List[Dict]:
-        """Get family history records shared with user (only accepted shares)"""
+        """Get family history records shared with user (only accepted shares)
+        
+        Performance considerations:
+        - Uses joinedload for eager loading of family_conditions to reduce N+1 queries
+        - Recommended database indexes for optimal performance:
+          - (shared_with_user_id, is_active) on family_history_shares
+          - (invitation_id) on family_history_shares 
+          - (status) on invitations
+        """
         try:
             from sqlalchemy.orm import joinedload
             
+            # Optimized query with selective field loading and proper indexing considerations
             shared_history_raw = self.db.query(FamilyMember, FamilyHistoryShare, User, Invitation).options(
                 joinedload(FamilyMember.family_conditions)
             ).join(
@@ -51,12 +56,28 @@ class FamilyHistoryService:
                 FamilyHistoryShare.shared_with_user_id == user.id,
                 FamilyHistoryShare.is_active == True,
                 Invitation.status == 'accepted'  # Only show accepted shares
-            ).all()
+            ).order_by(FamilyMember.name).all()  # Add consistent ordering for predictable results
             
-            # Format shared history with sharing context
+            # Optimized formatting with reduced dictionary operations
             shared_history = []
             for family_member, share, shared_by_user, invitation in shared_history_raw:
-                # Convert family member to dictionary to ensure proper serialization
+                # Use dictionary comprehension for family_conditions to improve performance
+                family_conditions = [
+                    {
+                        "id": condition.id,
+                        "condition_name": condition.condition_name,
+                        "condition_type": condition.condition_type,
+                        "severity": condition.severity,
+                        "diagnosis_age": condition.diagnosis_age,
+                        "status": condition.status,
+                        "notes": condition.notes,
+                        "icd10_code": condition.icd10_code,
+                        "created_at": condition.created_at,
+                        "updated_at": condition.updated_at
+                    } for condition in family_member.family_conditions
+                ] if family_member.family_conditions else []
+                
+                # Build family member dictionary efficiently
                 family_member_dict = {
                     "id": family_member.id,
                     "name": family_member.name,
@@ -69,22 +90,10 @@ class FamilyHistoryService:
                     "patient_id": family_member.patient_id,
                     "created_at": family_member.created_at,
                     "updated_at": family_member.updated_at,
-                    "family_conditions": [
-                        {
-                            "id": condition.id,
-                            "condition_name": condition.condition_name,
-                            "condition_type": condition.condition_type,
-                            "severity": condition.severity,
-                            "diagnosis_age": condition.diagnosis_age,
-                            "status": condition.status,
-                            "notes": condition.notes,
-                            "icd10_code": condition.icd10_code,
-                            "created_at": condition.created_at,
-                            "updated_at": condition.updated_at
-                        } for condition in family_member.family_conditions
-                    ]
+                    "family_conditions": family_conditions
                 }
                 
+                # Build result dictionary efficiently
                 shared_history.append({
                     "family_member": family_member_dict,
                     "share_details": {
@@ -193,26 +202,72 @@ class FamilyHistoryService:
                                              response_note: Optional[str] = None):
         """Accept a family history share invitation and create the share(s)"""
         try:
-            # 1. Accept the invitation
-            invitation = self.invitation_service.respond_to_invitation(
-                user, invitation_id, 'accepted', response_note
-            )
+            # 1. Get the invitation first (don't accept it yet)
+            invitation = self.db.query(Invitation).filter(
+                Invitation.id == invitation_id,
+                Invitation.sent_to_user_id == user.id,
+                Invitation.status == 'pending'
+            ).first()
             
-            # 2. Extract context data
+            if not invitation:
+                raise ValueError("Invitation not found or not pending")
+            
+            # Check if expired
+            if invitation.expires_at:
+                now = get_utc_now()
+                if invitation.expires_at < now:
+                    raise ValueError("Invitation has expired")
+            
+            # 2. Extract context data with error handling
             context_data = invitation.context_data
-            permission_level = context_data['permission_level']
-            sharing_note = context_data['sharing_note']
+            logger.info(f"DEBUG: Processing invitation {invitation_id} with context_data: {context_data}")
+            
+            if not context_data:
+                raise ValueError("Invitation context data is missing")
+            
+            permission_level = context_data.get('permission_level', 'view')
+            sharing_note = context_data.get('sharing_note')
             
             # 3. Check if this is a bulk invitation
             if context_data.get('is_bulk_invite', False):
                 # Handle bulk invitation - create multiple shares
-                family_members_data = context_data['family_members']
+                family_members_data = context_data.get('family_members', [])
+                if not family_members_data:
+                    raise ValueError("Bulk invitation missing family_members data")
                 shares = []
                 
                 for family_member_data in family_members_data:
+                    family_member_id = family_member_data.get('family_member_id')
+                    if not family_member_id:
+                        logger.warning(f"Skipping family member data without ID: {family_member_data}")
+                        continue
+                    
+                    # Check if an active share already exists
+                    existing_active_share = self.db.query(FamilyHistoryShare).filter(
+                        FamilyHistoryShare.family_member_id == family_member_id,
+                        FamilyHistoryShare.shared_with_user_id == user.id,
+                        FamilyHistoryShare.is_active == True
+                    ).first()
+                    
+                    if existing_active_share:
+                        logger.info(f"Active share already exists for family_member_id={family_member_id}, user_id={user.id}, using existing share")
+                        shares.append(existing_active_share)
+                        continue
+                    
+                    # Check if there are any inactive shares (expired/revoked) - these are OK to have multiple of
+                    inactive_shares = self.db.query(FamilyHistoryShare).filter(
+                        FamilyHistoryShare.family_member_id == family_member_id,
+                        FamilyHistoryShare.shared_with_user_id == user.id,
+                        FamilyHistoryShare.is_active == False
+                    ).count()
+                    
+                    if inactive_shares > 0:
+                        logger.info(f"Found {inactive_shares} inactive shares for family_member_id={family_member_id}, user_id={user.id}, creating new active share")
+                    
+                        
                     share = FamilyHistoryShare(
                         invitation_id=invitation.id,
-                        family_member_id=family_member_data['family_member_id'],
+                        family_member_id=family_member_id,
                         shared_by_user_id=invitation.sent_by_user_id,
                         shared_with_user_id=user.id,
                         permission_level=permission_level,
@@ -221,12 +276,37 @@ class FamilyHistoryService:
                     self.db.add(share)
                     shares.append(share)
                 
+                # Update invitation status after shares are created
+                invitation.status = 'accepted'
+                invitation.responded_at = get_utc_now()
+                invitation.response_note = response_note
+                invitation.updated_at = get_utc_now()
+                
                 self.db.commit()
                 logger.info(f"Created {len(shares)} family history shares from bulk invitation: {invitation.id}")
                 return shares
             else:
                 # Handle single invitation
-                family_member_id = context_data['family_member_id']
+                family_member_id = context_data.get('family_member_id')
+                if not family_member_id:
+                    raise ValueError("Single invitation missing family_member_id")
+                
+                # Check if an active share already exists
+                existing_active_share = self.db.query(FamilyHistoryShare).filter(
+                    FamilyHistoryShare.family_member_id == family_member_id,
+                    FamilyHistoryShare.shared_with_user_id == user.id,
+                    FamilyHistoryShare.is_active == True
+                ).first()
+                
+                if existing_active_share:
+                    logger.info(f"Active share already exists for family_member_id={family_member_id}, user_id={user.id}, using existing share")
+                    # Update invitation status even if share already exists
+                    invitation.status = 'accepted'
+                    invitation.responded_at = get_utc_now()
+                    invitation.response_note = response_note
+                    invitation.updated_at = get_utc_now()
+                    self.db.commit()
+                    return existing_active_share
                 
                 share = FamilyHistoryShare(
                     invitation_id=invitation.id,
@@ -238,6 +318,13 @@ class FamilyHistoryService:
                 )
                 
                 self.db.add(share)
+                
+                # Update invitation status after share is created
+                invitation.status = 'accepted'
+                invitation.responded_at = get_utc_now()
+                invitation.response_note = response_note
+                invitation.updated_at = get_utc_now()
+                
                 self.db.commit()
                 
                 logger.info(f"Created family history share from invitation: {share.id}")
@@ -245,7 +332,11 @@ class FamilyHistoryService:
             
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Error accepting family history share invitation: {e}")
+            logger.error(f"Error accepting family history share invitation {invitation_id}: {e}")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"User ID: {user.id}")
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             raise
     
     def reject_family_history_share_invitation(self, user: User, invitation_id: int,
@@ -305,7 +396,7 @@ class FamilyHistoryService:
             logger.error(f"Error fetching family member shares: {e}")
             raise
     
-    def revoke_family_history_share(self, user: User, family_member_id: int, shared_with_user_id: int) -> FamilyHistoryShare:
+    def revoke_family_history_share(self, user: User, family_member_id: int, shared_with_user_id: int, update_invitation_status: bool = True) -> FamilyHistoryShare:
         """Revoke family history sharing"""
         try:
             # First, try to find an active share
@@ -321,17 +412,36 @@ class FamilyHistoryService:
                 share.is_active = False
                 share.updated_at = get_utc_now()
                 
-                # Also update the related invitation status to 'revoked'
-                invitation = self.db.query(Invitation).filter(
-                    Invitation.id == share.invitation_id
-                ).first()
-                
-                if invitation:
-                    invitation.status = 'revoked'
-                    invitation.updated_at = get_utc_now()
+                # Optionally update the related invitation status to 'revoked'
+                if update_invitation_status:
+                    invitation = self.db.query(Invitation).filter(
+                        Invitation.id == share.invitation_id
+                    ).first()
+                    
+                    if invitation:
+                        # For bulk invitations, only mark as revoked if ALL shares are inactive
+                        if invitation.context_data.get('is_bulk_invite', False):
+                            # Check if all shares for this invitation are now inactive
+                            active_shares_count = self.db.query(FamilyHistoryShare).filter(
+                                FamilyHistoryShare.invitation_id == invitation.id,
+                                FamilyHistoryShare.is_active == True
+                            ).count()
+                            
+                            logger.info(f"DEBUG: Bulk invitation {invitation.id} has {active_shares_count} active shares remaining")
+                            
+                            if active_shares_count <= 1:  # This share will become inactive after commit
+                                invitation.status = 'revoked'
+                                invitation.updated_at = get_utc_now()
+                                logger.info(f"DEBUG: Marking bulk invitation {invitation.id} as revoked")
+                            else:
+                                logger.info(f"DEBUG: Not revoking bulk invitation {invitation.id} - still has {active_shares_count} active shares")
+                        else:
+                            # Single invitation - always mark as revoked
+                            invitation.status = 'revoked'
+                            invitation.updated_at = get_utc_now()
                 
                 self.db.commit()
-                logger.info(f"Revoked family history share: {share.id} and updated invitation: {share.invitation_id}")
+                logger.info(f"Revoked family history share: {share.id} and updated invitation status: {update_invitation_status}")
                 return share
             
             # If no active share found, check if there's an inactive one (already revoked)
@@ -363,6 +473,56 @@ class FamilyHistoryService:
         except Exception as e:
             self.db.rollback()
             logger.error(f"Error revoking family history share (family_member_id={family_member_id}, shared_with_user_id={shared_with_user_id}): {e}")
+            raise
+    
+    def remove_my_access_to_family_history(self, user: User, family_member_id: int) -> FamilyHistoryShare:
+        """Allow a recipient user to remove their own access to shared family history"""
+        try:
+            # Find an active share where the current user is the recipient
+            share = self.db.query(FamilyHistoryShare).filter(
+                FamilyHistoryShare.family_member_id == family_member_id,
+                FamilyHistoryShare.shared_with_user_id == user.id,  # Current user is the recipient
+                FamilyHistoryShare.is_active == True
+            ).first()
+            
+            if not share:
+                logger.warning(f"No active family history share found for family_member_id={family_member_id}, recipient_user_id={user.id}")
+                raise ValueError("No active share found or not authorized to remove access")
+            
+            # Set the share to inactive (now allowed due to partial unique constraint)
+            share.is_active = False
+            share.updated_at = get_utc_now()
+            
+            # Update the related invitation status (but don't mark as revoked - the recipient removed access)
+            invitation = self.db.query(Invitation).filter(
+                Invitation.id == share.invitation_id
+            ).first()
+            
+            if invitation:
+                # For bulk invitations, only update status if ALL shares for this user are inactive
+                if invitation.context_data.get('is_bulk_invite', False):
+                    # Check if all shares for this invitation and this recipient are now inactive
+                    active_shares_count = self.db.query(FamilyHistoryShare).filter(
+                        FamilyHistoryShare.invitation_id == invitation.id,
+                        FamilyHistoryShare.shared_with_user_id == user.id,
+                        FamilyHistoryShare.is_active == True
+                    ).count()
+                    
+                    logger.info(f"DEBUG: Bulk invitation {invitation.id} has {active_shares_count} active shares remaining for user {user.id}")
+                    
+                    # Note: We don't change the invitation status here because the recipient removed access,
+                    # not the sender. The invitation remains 'accepted' but the shares are inactive.
+                else:
+                    # Single invitation - recipient removed access but invitation remains accepted
+                    logger.info(f"DEBUG: Recipient {user.id} removed access to single invitation {invitation.id}")
+            
+            self.db.commit()
+            logger.info(f"User {user.id} removed their own access to family history share: {share.id}")
+            return share
+                
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error removing user's own access to family history (family_member_id={family_member_id}, user_id={user.id}): {e}")
             raise
     
     def bulk_send_family_history_invitations(self, user: User, family_member_ids: List[int], 
@@ -482,4 +642,54 @@ class FamilyHistoryService:
             
         except Exception as e:
             logger.error(f"Error fetching family member with conditions: {e}")
+            raise
+    
+    def get_family_history_shared_by_me(self, user: User) -> List[Dict]:
+        """Get all family history that the current user has shared with others"""
+        try:
+            # Get all active shares where current user is the sharer
+            shares = self.db.query(FamilyHistoryShare).join(
+                FamilyMember, FamilyHistoryShare.family_member_id == FamilyMember.id
+            ).join(
+                Patient, FamilyMember.patient_id == Patient.id
+            ).join(
+                User, FamilyHistoryShare.shared_with_user_id == User.id
+            ).filter(
+                FamilyHistoryShare.shared_by_user_id == user.id,
+                FamilyHistoryShare.is_active == True
+            ).all()
+            
+            result = []
+            for share in shares:
+                # Get the family member details
+                family_member = share.family_member
+                # Get the user it's shared with
+                shared_with_user = self.db.query(User).filter(User.id == share.shared_with_user_id).first()
+                
+                result.append({
+                    "share_id": share.id,
+                    "family_member": {
+                        "id": family_member.id,
+                        "name": family_member.name,
+                        "relationship": family_member.relationship,
+                        "birth_year": family_member.birth_year,
+                        "death_year": family_member.death_year,
+                        "is_deceased": family_member.is_deceased,
+                        "condition_count": len(family_member.family_conditions) if family_member.family_conditions else 0
+                    },
+                    "shared_with": {
+                        "id": shared_with_user.id,
+                        "name": shared_with_user.name,
+                        "email": shared_with_user.email
+                    },
+                    "permission_level": share.permission_level,
+                    "sharing_note": share.sharing_note,
+                    "shared_at": share.created_at,
+                    "invitation_id": share.invitation_id
+                })
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error fetching family history shared by user: {e}")
             raise
