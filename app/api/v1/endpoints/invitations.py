@@ -129,19 +129,69 @@ def respond_to_invitation(
             invitation = invitation_service.get_invitation_by_id(invitation_id)
             
             if invitation and invitation.invitation_type == 'family_history_share':
-                family_service = FamilyHistoryService(db)
-                share = family_service.accept_family_history_share_invitation(
-                    current_user, 
-                    invitation_id, 
-                    response_data.response_note
-                )
-                
-                return {
-                    "message": f"Family history share invitation {response_data.response}",
-                    "invitation_id": invitation.id,
-                    "share_id": share.id,
-                    "status": "accepted"
-                }
+                try:
+                    family_service = FamilyHistoryService(db)
+                    share_result = family_service.accept_family_history_share_invitation(
+                        current_user, 
+                        invitation_id, 
+                        response_data.response_note
+                    )
+                    
+                    # Handle both single share and bulk share responses
+                    if isinstance(share_result, list):
+                        # Bulk invitation - multiple shares created
+                        share_ids = [share.id for share in share_result]
+                        context_data = invitation.context_data or {}
+                        family_count = context_data.get('family_member_count', len(share_result))
+                        return {
+                            "message": f"Successfully accepted family history sharing for {family_count} family members",
+                            "invitation_id": invitation.id,
+                            "share_ids": share_ids,
+                            "share_count": len(share_result),
+                            "status": "accepted"
+                        }
+                    else:
+                        # Single invitation - one share created
+                        context_data = invitation.context_data or {}
+                        member_name = context_data.get('family_member_name', 'family member')
+                        return {
+                            "message": f"Successfully accepted family history sharing for {member_name}",
+                            "invitation_id": invitation.id,
+                            "share_id": share_result.id,
+                            "status": "accepted"
+                        }
+                except ValueError as ve:
+                    # Handle specific family sharing errors with user-friendly messages
+                    error_msg = str(ve)
+                    if "not found" in error_msg.lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="The invitation or family history record could not be found"
+                        )
+                    elif "expired" in error_msg.lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="This invitation has expired and can no longer be accepted"
+                        )
+                    elif "already shared" in error_msg.lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_409_CONFLICT,
+                            detail="This family history is already shared with you"
+                        )
+                    else:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Unable to accept family history sharing: {error_msg}"
+                        )
+                except Exception as e:
+                    logger.error(f"Unexpected error accepting family history invitation {invitation_id}: {e}")
+                    logger.error(f"Exception type: {type(e).__name__}")
+                    import traceback
+                    logger.error(f"Full traceback: {traceback.format_exc()}")
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="An unexpected error occurred while accepting the family history sharing invitation. Please try again or contact support."
+                    )
         
         # For all other cases (reject, or non-family-history accepts)
         invitation_service = InvitationService(db)
@@ -159,10 +209,31 @@ def respond_to_invitation(
         }
             
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        error_msg = str(e)
+        # Provide more user-friendly error messages for common issues
+        if "not found" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="The invitation could not be found or may have already been responded to"
+            )
+        elif "expired" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This invitation has expired and can no longer be responded to"
+            )
+        elif "already responded" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="You have already responded to this invitation"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg
+            )
+    except HTTPException:
+        # Re-raise HTTP exceptions (these are already properly formatted)
+        raise
     except Exception as e:
         logger.error(f"Error responding to invitation {invitation_id}: {e}")
         logger.error(f"Exception type: {type(e).__name__}")
@@ -171,7 +242,7 @@ def respond_to_invitation(
         logger.error(f"Full traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to respond to invitation: {str(e)}"
+            detail="An unexpected error occurred while responding to the invitation. Please try again or contact support."
         )
 
 
