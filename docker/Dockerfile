@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     bash \
     postgresql-client \
+    gosu \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -98,8 +99,8 @@ RUN mkdir -p logs uploads/labwork backups certs /usr/local/bin && \
     ln -sf /app/app/scripts/restore /usr/local/bin/restore && \
     chown -R appuser:appuser /app
 
-# Switch to non-root user
-USER appuser
+# Note: We start as root and switch to appuser in entrypoint.sh to allow PUID/PGID configuration
+# USER appuser
 
 # Expose port
 EXPOSE 8000
