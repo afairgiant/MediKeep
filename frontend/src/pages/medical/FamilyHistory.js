@@ -501,9 +501,8 @@ const FamilyHistory = () => {
       selectedFamilyMemberIdBackup: selectedFamilyMemberId,
       conditionType: conditionFormData.condition_type,
       hasSeverity: !!conditionFormData.severity,
-      hasRequiredFields: !!(conditionFormData.condition_name)
+      hasRequiredFields: !!(conditionFormData.condition_name),
       finalFamilyMemberId: familyMemberId,
-      conditionFormData,
       component: 'FamilyHistory',
     });
 
