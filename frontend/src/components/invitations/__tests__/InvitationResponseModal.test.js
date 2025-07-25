@@ -417,7 +417,7 @@ describe('InvitationResponseModal Component', () => {
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
-          title: 'Failed to accepted invitation',
+          title: 'Failed to accept invitation',
           message: 'This invitation has already been responded to.',
           color: 'red',
           icon: expect.anything(),
@@ -439,7 +439,7 @@ describe('InvitationResponseModal Component', () => {
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
-          title: 'Failed to rejected invitation',
+          title: 'Failed to reject invitation',
           message: 'Network connection failed',
           color: 'red',
           icon: expect.anything(),

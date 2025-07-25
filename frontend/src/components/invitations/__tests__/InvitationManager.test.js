@@ -160,6 +160,7 @@ describe('InvitationManager Component', () => {
     invitationApi.cancelInvitation.mockResolvedValue({ message: 'Cancelled' });
     invitationApi.revokeInvitation.mockResolvedValue({ message: 'Revoked' });
     familyHistoryApi.revokeShare.mockResolvedValue({ message: 'Access revoked' });
+    familyHistoryApi.removeMyAccess.mockResolvedValue({ message: 'Access removed' });
   });
 
   const renderInvitationManager = (props = {}) => {
@@ -415,7 +416,7 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByText('Remove Access'));
 
       await waitFor(() => {
-        expect(familyHistoryApi.revokeShare).toHaveBeenCalledWith('member-1', 'user-456');
+        expect(familyHistoryApi.removeMyAccess).toHaveBeenCalledWith('member-1');
         expect(notifications.show).toHaveBeenCalledWith({
           title: 'Access Revoked',
           message: 'You no longer have access to this family history',
@@ -509,7 +510,7 @@ describe('InvitationManager Component', () => {
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
           title: 'Error',
-          message: 'Failed to rejected invitation',
+          message: 'Failed to reject invitation',
           color: 'red',
           icon: expect.anything(),
         });
@@ -517,7 +518,7 @@ describe('InvitationManager Component', () => {
     });
 
     it('should handle errors when revoking shared access', async () => {
-      familyHistoryApi.revokeShare.mockRejectedValue(new Error('Revoke failed'));
+      familyHistoryApi.removeMyAccess.mockRejectedValue(new Error('Remove access failed'));
       
       renderInvitationManager();
 

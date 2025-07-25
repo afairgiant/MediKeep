@@ -2,6 +2,9 @@
  * Standardized configuration templates for medical pages filtering and sorting
  */
 
+// Constants for search functionality
+const SEARCH_TERM_MAX_LENGTH = 100;
+
 export const medicalPageConfigs = {
   conditions: {
     filtering: {
@@ -998,9 +1001,9 @@ export const medicalPageConfigs = {
         }
         
         // Additional validation: prevent extremely long search terms that could cause performance issues
-        if (sanitizedTerm.length > 100) {
-          console.warn('Search term too long, truncating to 100 characters');
-          sanitizedTerm = sanitizedTerm.substring(0, 100);
+        if (sanitizedTerm.length > SEARCH_TERM_MAX_LENGTH) {
+          console.warn(`Search term too long, truncating to ${SEARCH_TERM_MAX_LENGTH} characters`);
+          sanitizedTerm = sanitizedTerm.substring(0, SEARCH_TERM_MAX_LENGTH);
         }
         
         // Search in basic family member fields

@@ -214,7 +214,7 @@ const FamilyHistory = () => {
   const viewingFamilyMember = React.useMemo(() => {
     if (!viewingFamilyMemberId) return null;
     
-    const parsedId = parseInt(viewingFamilyMemberId);
+    const parsedId = parseInt(viewingFamilyMemberId, 10);
     
     // First check owned family members
     const ownedMember = familyMembers.find(m => m.id === parsedId);
@@ -415,7 +415,7 @@ const FamilyHistory = () => {
         await refreshData();
       } catch (error) {
         console.error('Failed to refresh data after saving family member:', error);
-        setError('Data saved but failed to refresh. Please reload the page.');
+        setError(`Family member ${editingMember ? 'updated' : 'created'} successfully, but failed to refresh the list. Please reload the page to see changes.`);
       }
     }
   };
