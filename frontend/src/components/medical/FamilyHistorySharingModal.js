@@ -32,12 +32,22 @@ import {
     IconCheck,
     IconX,
     IconDots,
-    IconSend2
+    IconSend2,
+    IconUserX,
+    IconAlertTriangle,
+    IconLock,
+    IconShieldX,
+    IconClock,
+    IconMailX,
+    IconHelpCircle,
+    IconAlertCircle,
+    IconWifiOff
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { formatDateTime } from '../../utils/helpers';
 import logger from '../../services/logger';
+import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 
 const FamilyHistorySharingModal = ({ 
     opened, 
@@ -56,9 +66,15 @@ const FamilyHistorySharingModal = ({
         expires_hours: 168 // Default to 7 days
     });
     const [selectedMembers, setSelectedMembers] = useState([]);
+    
+    // Use the new error handling system
+    const { handleError, currentError, clearError } = useErrorHandler('FamilyHistorySharingModal');
 
     useEffect(() => {
         if (opened) {
+            // Clear any previous error state when modal opens
+            clearError();
+            
             if (bulkMode) {
                 // Initialize with all family members selected
                 setSelectedMembers(familyMembers.map(member => member.id));
@@ -91,6 +107,8 @@ const FamilyHistorySharingModal = ({
             setSharesLoading(false);
         }
     };
+
+    // The error handling is now managed by the useErrorHandler hook
 
     const sendInvitation = async () => {
         if (!shareForm.shared_with_identifier.trim()) {
@@ -169,12 +187,13 @@ const FamilyHistorySharingModal = ({
             setShareForm({ shared_with_identifier: '', sharing_note: '', expires_hours: 168 });
             if (onSuccess) onSuccess();
         } catch (error) {
-            const errorMessage = error.response?.data?.detail || error.message || 'Failed to send invitation';
-            notifications.show({
-                title: 'Error',
-                message: errorMessage,
-                color: 'red',
-                icon: <IconX size="1rem" />
+            // Use the new error handling system with context
+            handleError(error, {
+                bulkMode,
+                selectedMembers,
+                familyMember,
+                familyMembers,
+                action: 'sending_invitation'
             });
         } finally {
             setLoading(false);
@@ -193,11 +212,10 @@ const FamilyHistorySharingModal = ({
             await loadShares();
             if (onSuccess) onSuccess();
         } catch (error) {
-            notifications.show({
-                title: 'Error',
-                message: 'Failed to revoke sharing',
-                color: 'red',
-                icon: <IconX size="1rem" />
+            handleError(error, {
+                action: 'revoking_share',
+                familyMember,
+                shareId: share.id
             });
         }
     };
@@ -205,7 +223,20 @@ const FamilyHistorySharingModal = ({
     const handleClose = () => {
         setShareForm({ shared_with_identifier: '', sharing_note: '', expires_hours: 168 });
         setSelectedMembers([]);
+        clearError(); // Clear any error state
         onClose();
+    };
+
+    const handleFormChange = (field, value) => {
+        setShareForm(prev => ({
+            ...prev,
+            [field]: value
+        }));
+        
+        // Clear error when user changes recipient
+        if (field === 'shared_with_identifier' && currentError) {
+            clearError();
+        }
     };
 
     const handleMemberToggle = (memberId) => {
@@ -299,26 +330,24 @@ const FamilyHistorySharingModal = ({
                 
                 {/* Sharing Form */}
                 <Stack gap="md">
+                    {/* Error display using the new ErrorAlert component */}
+                    <ErrorAlert error={currentError} onClose={clearError} />
+                    
                     <TextInput
                         label="Share with (username or email)"
                         placeholder="Enter username or email"
                         value={shareForm.shared_with_identifier}
-                        onChange={(e) => setShareForm({
-                            ...shareForm, 
-                            shared_with_identifier: e.target.value
-                        })}
+                        onChange={(e) => handleFormChange('shared_with_identifier', e.target.value)}
                         required
                         leftSection={<IconMail size="1rem" />}
+                        error={currentError && currentError.severity === 'high'}
                     />
                     
                     <Textarea
                         label="Note (optional)"
                         placeholder="Add a note about why you're sharing this..."
                         value={shareForm.sharing_note}
-                        onChange={(e) => setShareForm({
-                            ...shareForm, 
-                            sharing_note: e.target.value
-                        })}
+                        onChange={(e) => handleFormChange('sharing_note', e.target.value)}
                         rows={3}
                         leftSection={<IconMessageCircle size="1rem" />}
                     />
@@ -327,10 +356,7 @@ const FamilyHistorySharingModal = ({
                         label="Invitation Expiration"
                         placeholder="Select expiration time"
                         value={shareForm.expires_hours === null ? 'never' : shareForm.expires_hours?.toString()}
-                        onChange={(value) => setShareForm({
-                            ...shareForm, 
-                            expires_hours: value === 'never' ? null : parseInt(value)
-                        })}
+                        onChange={(value) => handleFormChange('expires_hours', value === 'never' ? null : parseInt(value))}
                         data={[
                             { value: '24', label: '1 Day' },
                             { value: '72', label: '3 Days' },
