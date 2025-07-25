@@ -68,11 +68,11 @@ const FamilyHistorySharingModal = ({
     });
     const [selectedMembers, setSelectedMembers] = useState([]);
     
-    // Use either error queue or single error system based on prop (addresses reviewer feedback)
-    const errorSystem = useErrorQueue ? 
-        useErrorQueue('FamilyHistorySharingModal') : 
-        useErrorHandler('FamilyHistorySharingModal');
+    // Always call both hooks to satisfy React rules, but only use one (addresses reviewer feedback)
+    const queueSystem = useErrorQueue('FamilyHistorySharingModal');
+    const singleSystem = useErrorHandler('FamilyHistorySharingModal');
     
+    // Choose which system to use based on prop
     const { 
         handleError, 
         currentError, 
@@ -80,7 +80,12 @@ const FamilyHistorySharingModal = ({
         clearError, 
         clearAllErrors, 
         removeFromQueue 
-    } = errorSystem;
+    } = useErrorQueue ? queueSystem : {
+        ...singleSystem,
+        errorQueue: [],
+        clearAllErrors: singleSystem.clearError,
+        removeFromQueue: () => {}
+    };
 
     useEffect(() => {
         if (opened) {

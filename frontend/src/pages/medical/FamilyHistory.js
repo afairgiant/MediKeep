@@ -111,7 +111,7 @@ const FamilyHistory = () => {
   const [sharedFamilyHistory, setSharedFamilyHistory] = useState([]);
 
   // Error handling for shared family history loading (addresses reviewer feedback)
-  const { handleError, currentError, clearError } = useErrorHandler('FamilyHistory');
+  const { handleError, currentError, clearError: clearSharedError } = useErrorHandler('FamilyHistory');
 
   // Invitation-related state
   const [
@@ -958,7 +958,7 @@ const FamilyHistory = () => {
       />
 
       {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
-      <ErrorAlert error={currentError} onClose={clearError} />
+      <ErrorAlert error={currentError} onClose={clearSharedError} />
       
       {/* Legacy error display for backward compatibility */}
       {error && !currentError && (

@@ -81,9 +81,9 @@ class APIClient {
 
   // Main request method
   async request(config) {
+    // Apply request interceptors (declare outside try block for error logging)
+    let processedConfig = { ...config };
     try {
-      // Apply request interceptors
-      let processedConfig = { ...config };
       for (const interceptor of this.requestInterceptors) {
         processedConfig = await interceptor(processedConfig);
       } // Prepare URL
