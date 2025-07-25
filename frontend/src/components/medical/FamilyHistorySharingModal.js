@@ -16,32 +16,19 @@ import {
     ActionIcon,
     Tooltip,
     Loader,
-    Menu,
     Checkbox,
-    List,
     Select
 } from '@mantine/core';
 import {
     IconInfoCircle,
     IconUsers,
-    IconShare,
     IconTrash,
     IconMessageCircle,
     IconSend,
     IconMail,
     IconCheck,
     IconX,
-    IconDots,
-    IconSend2,
-    IconUserX,
-    IconAlertTriangle,
-    IconLock,
-    IconShieldX,
-    IconClock,
-    IconMailX,
-    IconHelpCircle,
-    IconAlertCircle,
-    IconWifiOff
+    IconSend2
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
