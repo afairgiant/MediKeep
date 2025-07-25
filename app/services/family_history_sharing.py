@@ -215,7 +215,11 @@ class FamilyHistoryService:
             # Check if expired
             if invitation.expires_at:
                 now = get_utc_now()
-                if invitation.expires_at < now:
+                # Ensure both datetimes are timezone-aware for comparison
+                expires_at = invitation.expires_at
+                if expires_at.tzinfo is None:
+                    expires_at = expires_at.replace(tzinfo=timezone.utc)
+                if expires_at < now:
                     raise ValueError("Invitation has expired")
             
             # 2. Extract context data with error handling
