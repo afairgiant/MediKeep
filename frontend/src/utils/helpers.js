@@ -231,7 +231,7 @@ export const filterBySearch = (array, searchTerm, searchFields) => {
   return array.filter(item =>
     searchFields.some(field => {
       const value = item[field];
-      return value && value.toString().toLowerCase().includes(term);
+      return value?.toString()?.toLowerCase()?.includes(term);
     })
   );
 };

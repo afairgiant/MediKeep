@@ -282,7 +282,7 @@ export const useFiltering = (data = [], config = {}) => {
           // Default field-based search
           const matchesSearch = searchFields.some(field => {
             const value = getNestedValue(item, field);
-            return value && value.toString().toLowerCase().includes(searchTerm);
+            return value?.toString()?.toLowerCase()?.includes(searchTerm);
           });
           if (!matchesSearch) return false;
         }

@@ -991,7 +991,7 @@ export const medicalPageConfigs = {
         const basicFields = ['name', 'relationship', 'notes'];
         const matchesBasic = basicFields.some(field => {
           const value = item[field];
-          return value && value.toString().toLowerCase().includes(searchTerm);
+          return value?.toString()?.toLowerCase()?.includes(searchTerm);
         });
         
         if (matchesBasic) return true;
@@ -1002,7 +1002,7 @@ export const medicalPageConfigs = {
           const matchesCondition = item.family_conditions.some(condition => {
             return conditionFields.some(field => {
               const value = condition[field];
-              return value && value.toString().toLowerCase().includes(searchTerm);
+              return value?.toString()?.toLowerCase()?.includes(searchTerm);
             });
           });
           

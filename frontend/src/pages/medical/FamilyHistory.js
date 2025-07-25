@@ -1814,6 +1814,7 @@ const FamilyHistory = () => {
                     onClick={() => handleEditMember(viewingFamilyMember)}
                     disabled={viewingFamilyMember.is_shared}
                     title={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
+                    aria-label={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
                     style={{
                       opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
                       cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
@@ -1877,6 +1878,7 @@ const FamilyHistory = () => {
                     }}
                     disabled={viewingFamilyMember.is_shared}
                     title={viewingFamilyMember.is_shared ? "Cannot share history of shared family member" : "Share this family member's history"}
+                    aria-label={viewingFamilyMember.is_shared ? "Cannot share history of shared family member" : "Share this family member's history"}
                   >
                     Share History
                   </Button>
@@ -1886,6 +1888,7 @@ const FamilyHistory = () => {
                     onClick={handleAddConditionFromView}
                     disabled={viewingFamilyMember.is_shared}
                     title={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
+                    aria-label={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
                   >
                     Add Condition
                   </Button>
@@ -1946,6 +1949,7 @@ const FamilyHistory = () => {
                             }
                             disabled={viewingFamilyMember.is_shared}
                             title={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
+                            aria-label={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
                             style={{
                               opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
                               cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
@@ -1964,6 +1968,7 @@ const FamilyHistory = () => {
                             }
                             disabled={viewingFamilyMember.is_shared}
                             title={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
+                            aria-label={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
                             style={{
                               opacity: viewingFamilyMember.is_shared ? 0.5 : 1,
                               cursor: viewingFamilyMember.is_shared ? 'not-allowed' : 'pointer'
