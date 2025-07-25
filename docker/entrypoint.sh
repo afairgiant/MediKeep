@@ -96,12 +96,12 @@ fix_directory_permissions() {
     return 0
 }
 
-# Check essential directories
-fix_directory_permissions "/app/uploads" "uploads"
-fix_directory_permissions "/app/uploads/lab_result_files" "lab result files"
-fix_directory_permissions "/app/logs" "logs"
-fix_directory_permissions "/app/backups" "backups"
-fix_directory_permissions "/app/uploads/trash" "trash"
+# Check essential directories (don't exit on permission failures for Docker volumes)
+fix_directory_permissions "/app/uploads" "uploads" || true
+fix_directory_permissions "/app/uploads/lab_result_files" "lab result files" || true
+fix_directory_permissions "/app/logs" "logs" || true
+fix_directory_permissions "/app/backups" "backups" || true
+fix_directory_permissions "/app/uploads/trash" "trash" || true
 
 echo "Directory permission check completed."
 
