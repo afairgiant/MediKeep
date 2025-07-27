@@ -12,6 +12,7 @@ from app.api.v1.endpoints import (
     family_history_sharing,
     frontend_logs,
     immunization,
+    insurance,
     invitations,
     lab_result,
     lab_result_file,
@@ -62,6 +63,7 @@ api_router.include_router(
 api_router.include_router(
     immunization.router, prefix="/immunizations", tags=["immunizations"]
 )
+api_router.include_router(insurance.router, prefix="/insurances", tags=["insurance"])
 api_router.include_router(procedure.router, prefix="/procedures", tags=["procedures"])
 api_router.include_router(treatment.router, prefix="/treatments", tags=["treatments"])
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])

@@ -54,6 +54,9 @@ const BaseMedicalForm = ({
   // Custom content
   children,
   
+  // Field errors
+  fieldErrors = {},
+  
   // Button customization
   submitButtonText,
   submitButtonColor,
@@ -138,16 +141,19 @@ const BaseMedicalForm = ({
       withAsterisk: required,
       value: formData[name] || '',
       maxLength,
+      error: fieldErrors[name] || null,
     };
 
     switch (type) {
       case 'text':
       case 'email':
+      case 'tel':
+      case 'url':
         return (
           <TextInput
             {...baseProps}
             onChange={handleTextInputChange(name)}
-            type={type === 'email' ? 'email' : 'text'}
+            type={type === 'email' ? 'email' : type === 'tel' ? 'tel' : type === 'url' ? 'url' : 'text'}
           />
         );
 

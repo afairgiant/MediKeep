@@ -38,6 +38,7 @@ import PatientInfo from './pages/medical/Patient-Info';
 import Medication from './pages/medical/Medication';
 import LabResults from './pages/medical/LabResults';
 import Immunization from './pages/medical/Immunization';
+import Insurance from './pages/medical/Insurance';
 import Allergies from './pages/medical/Allergies';
 import Treatments from './pages/medical/Treatments';
 import Procedures from './pages/medical/Procedures';
@@ -74,6 +75,7 @@ const ENTITY_COMPONENT_MAP = {
   [ENTITY_TYPES.MEDICATION]: Medication,
   [ENTITY_TYPES.LAB_RESULT]: LabResults,
   [ENTITY_TYPES.IMMUNIZATION]: Immunization,
+  [ENTITY_TYPES.INSURANCE]: Insurance,
   [ENTITY_TYPES.PROCEDURE]: Procedures,
   [ENTITY_TYPES.ALLERGY]: Allergies,
   [ENTITY_TYPES.CONDITION]: Conditions,
@@ -91,6 +93,7 @@ const ENTITY_ROUTE_MAP = {
   [ENTITY_TYPES.MEDICATION]: '/medications',
   [ENTITY_TYPES.LAB_RESULT]: '/lab-results',
   [ENTITY_TYPES.IMMUNIZATION]: '/immunizations',
+  [ENTITY_TYPES.INSURANCE]: '/insurance',
   [ENTITY_TYPES.PROCEDURE]: '/procedures',
   [ENTITY_TYPES.ALLERGY]: '/allergies',
   [ENTITY_TYPES.CONDITION]: '/conditions',

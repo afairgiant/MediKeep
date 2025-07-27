@@ -6,6 +6,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.MEDICATION]: 'medications',
   [ENTITY_TYPES.LAB_RESULT]: 'lab-results',
   [ENTITY_TYPES.IMMUNIZATION]: 'immunizations',
+  [ENTITY_TYPES.INSURANCE]: 'insurances',
   [ENTITY_TYPES.PROCEDURE]: 'procedures',
   [ENTITY_TYPES.ALLERGY]: 'allergies',
   [ENTITY_TYPES.CONDITION]: 'conditions',
@@ -149,6 +150,7 @@ class ApiService {
           {
             url: fullUrl,
             hasAuth: !!token,
+            method: method
           }
         );
 
@@ -288,7 +290,16 @@ class ApiService {
 
   updateEntity(entityType, entityId, entityData, signal) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
-    return this.put(`/${apiPath}/${entityId}`, entityData, { signal });
+    const url = `/${apiPath}/${entityId}`;
+    logger.debug('api_update_entity', 'Update entity URL construction', {
+      entityType,
+      entityId,
+      apiPath,
+      url,
+      baseURL: this.baseURL,
+      fallbackURL: this.fallbackURL
+    });
+    return this.put(url, entityData, { signal });
   }
 
   deleteEntity(entityType, entityId, signal) {
@@ -311,6 +322,12 @@ class ApiService {
   getPatientEntities(entityType, patientId, signal) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
     const url = `/${apiPath}/?patient_id=${patientId}`;
+    logger.debug('api_patient_entities', 'Fetching patient entities', {
+      entityType,
+      patientId,
+      url,
+      apiPath
+    });
     return this.get(url, { signal });
   }
 
@@ -405,6 +422,60 @@ class ApiService {
 
   deleteMedication(medicationId, signal) {
     return this.deleteEntity(ENTITY_TYPES.MEDICATION, medicationId, signal);
+  }
+
+  // Insurance methods
+  getInsurances(signal) {
+    return this.getEntities(ENTITY_TYPES.INSURANCE, signal);
+  }
+  getPatientInsurances(patientId, signal) {
+    return this.getPatientEntities(ENTITY_TYPES.INSURANCE, patientId, signal);
+  }
+  getInsurancesWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.INSURANCE, filters, signal);
+  }
+
+  createInsurance(insuranceData, signal) {
+    // Clean up empty strings which might cause backend validation issues
+    const cleanPayload = {};
+    Object.keys(insuranceData).forEach(key => {
+      const value = insuranceData[key];
+      if (value !== '' && value !== null && value !== undefined) {
+        cleanPayload[key] = value;
+      }
+    });
+
+    // Ensure required fields
+    if (!cleanPayload.insurance_type) {
+      throw new Error('Insurance type is required');
+    }
+    if (!cleanPayload.company_name) {
+      throw new Error('Insurance company name is required');
+    }
+    if (!cleanPayload.member_name) {
+      throw new Error('Member name is required');
+    }
+    if (!cleanPayload.member_id) {
+      throw new Error('Member ID is required');
+    }
+
+    return this.post(`/insurances/`, cleanPayload, { signal });
+  }
+  updateInsurance(insuranceId, insuranceData, signal) {
+    logger.debug('api_update_insurance', 'Updating insurance via API', {
+      insuranceId,
+      insuranceData,
+      hasData: !!insuranceData
+    });
+    return this.updateEntity(ENTITY_TYPES.INSURANCE, insuranceId, insuranceData, signal);
+  }
+
+  deleteInsurance(insuranceId, signal) {
+    return this.deleteEntity(ENTITY_TYPES.INSURANCE, insuranceId, signal);
+  }
+
+  setPrimaryInsurance(insuranceId, signal) {
+    return this.request('PATCH', `/insurances/${insuranceId}/set-primary`, null, { signal });
   }
 
   // Immunization methods

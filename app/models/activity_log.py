@@ -145,6 +145,7 @@ class EntityType:
     EMERGENCY_CONTACT = "emergency_contact"
     PHARMACY = "pharmacy"
     FAMILY_MEMBER = "family_member"
+    INSURANCE = "insurance"
     FAMILY_CONDITION = "family_condition"
 
     # System entities

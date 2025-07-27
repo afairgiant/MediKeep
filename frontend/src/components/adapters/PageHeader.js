@@ -95,10 +95,11 @@ const PageHeader = ({
       ],
     },
     {
-      title: 'Providers',
+      title: 'Other',
       items: [
-        { name: 'Practitioners', path: '/practitioners', icon: '👨‍⚕️' },
+        { name: 'Insurance', path: '/insurance', icon: '💳' },
         { name: 'Pharmacies', path: '/pharmacies', icon: '🏪' },
+        { name: 'Practitioners', path: '/practitioners', icon: '👨‍⚕️' },
       ],
     },
     {
