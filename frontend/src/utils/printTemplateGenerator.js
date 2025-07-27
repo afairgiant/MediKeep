@@ -7,10 +7,10 @@ import { formatDate } from './helpers';
 import { formatFieldLabel, formatFieldValue, formatPhoneFields, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
 
 /**
- * Base CSS styles for medical record printing
- * @returns {string} CSS styles for print templates
+ * Cached CSS styles for medical record printing
+ * Performance optimization: avoid regenerating template literal on every call
  */
-export const getMedicalPrintStyles = () => `
+const MEDICAL_PRINT_STYLES = `
   body { 
     font-family: Arial, sans-serif; 
     margin: 20px; 
@@ -96,6 +96,13 @@ export const getMedicalPrintStyles = () => `
     .section { page-break-inside: avoid; }
   }
 `;
+
+/**
+ * Returns cached CSS styles for medical record printing
+ * Performance optimized: returns pre-computed constant instead of template literal
+ * @returns {string} CSS styles for print templates
+ */
+export const getMedicalPrintStyles = () => MEDICAL_PRINT_STYLES;
 
 /**
  * Generates the header section for medical record prints

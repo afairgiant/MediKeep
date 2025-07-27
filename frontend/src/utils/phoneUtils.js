@@ -1,6 +1,37 @@
 /**
- * Phone number formatting utilities
+ * Phone number formatting utilities with centralized field detection
  */
+
+/**
+ * Centralized configuration for phone field identification
+ */
+export const PHONE_FIELD_PATTERNS = [
+  'phone',
+  'telephone',
+  'mobile',
+  'cell'
+];
+
+/**
+ * Centralized phone field detection utility
+ * Replaces fragile string matching throughout the codebase
+ * 
+ * @param {string} fieldName - The field name to check
+ * @param {string} fieldType - Optional field type (e.g., 'tel')
+ * @returns {boolean} True if field is a phone field
+ */
+export const isPhoneField = (fieldName, fieldType = '') => {
+  if (!fieldName) return false;
+  
+  // Check if field type is 'tel'
+  if (fieldType === 'tel') return true;
+  
+  // Check if field name contains any phone patterns
+  const lowercaseFieldName = fieldName.toLowerCase();
+  return PHONE_FIELD_PATTERNS.some(pattern => 
+    lowercaseFieldName.includes(pattern)
+  );
+};
 
 /**
  * Format a phone number for display
@@ -168,4 +199,55 @@ export const formatPhoneInput = value => {
   }
   
   return digits;
+};
+
+/**
+ * Formats phone number specifically for display purposes
+ * Provides consistent formatting across the application
+ * 
+ * @param {string} phoneNumber - Raw phone number
+ * @returns {string} Formatted phone number for display
+ */
+export const formatPhoneForDisplay = (phoneNumber) => {
+  if (!phoneNumber || phoneNumber.trim() === '') {
+    return '';
+  }
+  
+  const cleaned = cleanPhoneNumber(phoneNumber);
+  return formatPhoneNumber(cleaned);
+};
+
+/**
+ * Formats phone number for storage (digits only)
+ * Ensures consistent data format in database
+ * 
+ * @param {string} phoneNumber - Raw phone number input
+ * @returns {string} Cleaned phone number for storage
+ */
+export const formatPhoneForStorage = (phoneNumber) => {
+  return cleanPhoneNumber(phoneNumber);
+};
+
+/**
+ * Processes all phone fields in an object
+ * Applies consistent formatting to all phone fields in a data object
+ * 
+ * @param {Object} data - Object containing potential phone fields
+ * @param {Function} formatter - Formatting function to apply (formatPhoneForDisplay or formatPhoneForStorage)
+ * @returns {Object} Object with processed phone fields
+ */
+export const processPhoneFields = (data, formatter = formatPhoneForDisplay) => {
+  if (!data || typeof data !== 'object') return data;
+  
+  const processed = {};
+  
+  Object.entries(data).forEach(([key, value]) => {
+    if (isPhoneField(key) && value) {
+      processed[key] = formatter(value);
+    } else {
+      processed[key] = value;
+    }
+  });
+  
+  return processed;
 };

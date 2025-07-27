@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { IconEdit, IconPrinter, IconStar } from '@tabler/icons-react';
 import { formatDate } from '../../../utils/helpers';
-import { formatPhoneNumber, cleanPhoneNumber } from '../../../utils/phoneUtils';
+import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatFieldLabel, formatFieldValue } from '../../../utils/fieldFormatters';
 import StatusBadge from '../StatusBadge';
 
@@ -194,7 +194,7 @@ const InsuranceViewModal = ({
                     {formatFieldLabel(key)}
                   </Text>
                   <Text style={key === 'website_url' ? { wordBreak: 'break-all' } : {}}>
-                    {key.includes('phone') ? formatPhoneNumber(cleanPhoneNumber(value)) : value}
+                    {isPhoneField(key) ? formatPhoneNumber(cleanPhoneNumber(value)) : value}
                   </Text>
                 </Grid.Col>
               ))}

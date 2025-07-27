@@ -3,7 +3,15 @@
  * Provides consistent formatting across all medical pages
  */
 
-import { formatPhoneNumber, cleanPhoneNumber } from './phoneUtils';
+import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from './phoneUtils';
+import { 
+  CURRENCY_FIELDS, 
+  PERCENTAGE_FIELDS, 
+  PERCENTAGE_EXCLUDE_FIELDS, 
+  DATE_FIELDS, 
+  BOOLEAN_FIELDS,
+  isFieldType 
+} from './fieldTypeConfig';
 
 /**
  * Default label mappings for common medical record fields
@@ -97,23 +105,24 @@ export const formatFieldLabel = (fieldName, customMappings = {}) => {
 
 /**
  * Default format rules for different field types
+ * Uses centralized field configuration for consistency
  */
 const defaultFormatRules = {
   currency: {
-    fields: ['deductible', 'copay', 'allowance', 'maximum', 'cost', 'price', 'amount'],
+    fields: CURRENCY_FIELDS,
     format: (value) => `$${value}`
   },
   percentage: {
-    fields: ['coverage', 'percent'],
-    excludeFields: ['lens_coverage'], // Some coverage fields are not percentages
+    fields: PERCENTAGE_FIELDS,
+    excludeFields: PERCENTAGE_EXCLUDE_FIELDS,
     format: (value) => `${value}%`
   },
   phone: {
-    fields: ['phone'],
+    fields: ['phone'], // This will be handled by isPhoneField utility
     format: (value) => formatPhoneNumber(cleanPhoneNumber(value))
   },
   date: {
-    fields: ['date', '_at'],
+    fields: DATE_FIELDS,
     format: (value) => {
       try {
         return new Date(value).toLocaleDateString();
@@ -123,7 +132,7 @@ const defaultFormatRules = {
     }
   },
   boolean: {
-    fields: ['is_'],
+    fields: BOOLEAN_FIELDS,
     format: (value) => value ? 'Yes' : 'No'
   }
 };
@@ -142,8 +151,21 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
 
   const allFormatRules = { ...defaultFormatRules, ...customFormatRules };
 
+  // Special handling for phone fields using centralized detection
+  if (isPhoneField(fieldName)) {
+    try {
+      return formatPhoneNumber(cleanPhoneNumber(value));
+    } catch (error) {
+      console.warn(`Error formatting phone field ${fieldName}:`, error);
+      return String(value);
+    }
+  }
+
   // Apply format rules based on field name patterns
   for (const [ruleType, rule] of Object.entries(allFormatRules)) {
+    // Skip phone rule since it's handled above
+    if (ruleType === 'phone') continue;
+    
     const shouldApply = rule.fields.some(pattern => fieldName.includes(pattern));
     const shouldExclude = rule.excludeFields?.some(pattern => fieldName.includes(pattern));
     
@@ -172,7 +194,7 @@ export const formatPhoneFields = (obj) => {
   const formatted = {};
   
   Object.entries(obj).forEach(([key, value]) => {
-    if (key.includes('phone') && value) {
+    if (isPhoneField(key) && value) {
       formatted[key] = formatPhoneNumber(cleanPhoneNumber(value));
     } else {
       formatted[key] = value;

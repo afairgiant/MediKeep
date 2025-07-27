@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BaseMedicalForm from '../BaseMedicalForm';
 import { getFormFields } from '../../../utils/medicalFormFields';
-import { formatPhoneInput, cleanPhoneNumber, isValidPhoneNumber } from '../../../utils/phoneUtils';
+import { formatPhoneInput, cleanPhoneNumber, isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
 
 const InsuranceFormWrapper = ({
@@ -39,10 +39,10 @@ const InsuranceFormWrapper = ({
         }));
       }
       
-      // Handle phone number formatting and validation for any field containing 'phone' or type 'tel'
-      const isPhoneField = name.includes('phone') || 
-                          fields.find(f => f.name === name && f.type === 'tel');
-      if (isPhoneField) {
+      // Handle phone number formatting and validation using centralized detection
+      const fieldInfo = fields.find(f => f.name === name);
+      const isPhoneFieldCheck = isPhoneField(name, fieldInfo?.type);
+      if (isPhoneFieldCheck) {
         // Validate phone number if not empty
         if (value.trim() !== '' && !isValidPhoneNumber(value)) {
           setFieldErrors(prev => ({
@@ -175,14 +175,13 @@ const InsuranceFormWrapper = ({
         }
       });
       
-      // Phone validation - check all fields that contain 'phone' or are type 'tel'
+      // Phone validation using centralized detection
       const filteredFields = getFilteredFields();
       Object.keys(formData).forEach(fieldName => {
         const fieldConfig = filteredFields.find(f => f.name === fieldName);
-        const isPhoneField = fieldName.includes('phone') || 
-                            (fieldConfig && fieldConfig.type === 'tel');
+        const isPhoneFieldCheck = isPhoneField(fieldName, fieldConfig?.type);
                             
-        if (isPhoneField && formData[fieldName] && formData[fieldName].trim() !== '') {
+        if (isPhoneFieldCheck && formData[fieldName] && formData[fieldName].trim() !== '') {
           if (!isValidPhoneNumber(formData[fieldName])) {
             newFieldErrors[fieldName] = 'Please enter a valid phone number (10-15 digits)';
             hasErrors = true;
