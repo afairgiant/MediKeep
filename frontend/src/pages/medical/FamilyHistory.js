@@ -1851,6 +1851,7 @@ const FamilyHistory = () => {
           title={`${viewingFamilyMember.name} - Family Medical History`}
           size="lg"
           zIndex={1000}
+          withinPortal
         >
           <Stack spacing="md">
             {/* Family Member Info */}
@@ -1920,32 +1921,16 @@ const FamilyHistory = () => {
                 <Text weight={500} size="lg">
                   Medical Conditions
                 </Text>
-                <Group>
-                  <Button
-                    size="sm"
-                    variant="light"
-                    leftSection={<IconShare size={16} />}
-                    onClick={() => {
-                      setSelectedMemberForSharing(viewingFamilyMember);
-                      openSharingModal();
-                    }}
-                    disabled={viewingFamilyMember.is_shared}
-                    title={viewingFamilyMember.is_shared ? "Cannot share history of shared family member" : "Share this family member's history"}
-                    aria-label={viewingFamilyMember.is_shared ? "Cannot share history of shared family member" : "Share this family member's history"}
-                  >
-                    Share History
-                  </Button>
-                  <Button
-                    size="sm"
-                    leftIcon={<IconStethoscope size={16} />}
-                    onClick={handleAddConditionFromView}
-                    disabled={viewingFamilyMember.is_shared}
-                    title={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
-                    aria-label={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
-                  >
-                    Add Condition
-                  </Button>
-                </Group>
+                <Button
+                  size="sm"
+                  leftIcon={<IconStethoscope size={16} />}
+                  onClick={handleAddConditionFromView}
+                  disabled={viewingFamilyMember.is_shared}
+                  title={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
+                  aria-label={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
+                >
+                  Add Condition
+                </Button>
               </Group>
 
               {!viewingFamilyMember.family_conditions ||

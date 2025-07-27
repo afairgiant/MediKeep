@@ -16,7 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.19.0"
+    VERSION: str = "0.19.1"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
@@ -87,17 +87,19 @@ class Settings:  # App Info
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
-    ENABLE_DEBUG_LOGS: bool = (
-        os.getenv("DEBUG", "False").lower() == "true"
-    )
-    
+    ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
+
     # Log Rotation Configuration
-    LOG_ROTATION_METHOD: str = os.getenv("LOG_ROTATION_METHOD", "auto")  # auto|python|logrotate
+    LOG_ROTATION_METHOD: str = os.getenv(
+        "LOG_ROTATION_METHOD", "auto"
+    )  # auto|python|logrotate
     LOG_ROTATION_SIZE: str = os.getenv("LOG_ROTATION_SIZE", "5M")
-    LOG_ROTATION_TIME: str = os.getenv("LOG_ROTATION_TIME", "daily")  # daily|weekly|monthly
+    LOG_ROTATION_TIME: str = os.getenv(
+        "LOG_ROTATION_TIME", "daily"
+    )  # daily|weekly|monthly
     LOG_ROTATION_BACKUP_COUNT: int = int(os.getenv("LOG_ROTATION_BACKUP_COUNT", "30"))
     LOG_COMPRESSION: bool = os.getenv("LOG_COMPRESSION", "True").lower() == "true"
-    
+
     # Database Sequence Monitoring (configurable for different environments)
     ENABLE_SEQUENCE_MONITORING: bool = (
         os.getenv("ENABLE_SEQUENCE_MONITORING", "True").lower() == "true"

@@ -310,6 +310,8 @@ const FamilyHistorySharingModal = ({
       title={getTitle()}
       size="lg"
       centered
+      zIndex={2000}
+      withinPortal
     >
       <Stack gap="md">
         <Alert icon={<IconInfoCircle />} color="blue" variant="light">
