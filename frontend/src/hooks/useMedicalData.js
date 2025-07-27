@@ -42,6 +42,13 @@ export const useMedicalData = config => {
         if (data) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
+          logger.debug('medical_data_processing', 'Processing API response data', {
+            entityName: config.entityName,
+            hasRawData: !!data,
+            isArray: Array.isArray(extractedData),
+            itemCount: extractedData?.length || 0,
+            operation: 'refresh'
+          });
           logger.debug('medical_data_refresh', 'Setting items for entity', {
             entityName: config.entityName,
             hasRawData: !!data,
@@ -262,6 +269,13 @@ export const useMedicalData = config => {
         if (data && isMounted) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
+          logger.debug('medical_data_processing', 'Processing initial API response data', {
+            entityName: config.entityName,
+            hasRawData: !!data,
+            isArray: Array.isArray(extractedData),
+            itemCount: extractedData?.length || 0,
+            operation: 'initialization'
+          });
           logger.debug('medical_data_init', 'Setting items for entity', {
             entityName: config.entityName,
             hasRawData: !!data,

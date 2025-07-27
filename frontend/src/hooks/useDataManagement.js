@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useFiltering } from './useFiltering';
 import { useSorting } from './useSorting';
+import logger from '../services/logger';
 
 /**
  * Combined data management hook for filtering and sorting
@@ -37,6 +38,14 @@ export const useDataManagement = (
     filteredCount = 0,
   } = useFiltering(safeData, filterConfig);
 
+  // Debug data flow
+  logger.debug('data_management_flow', 'Data management processing', {
+    inputCount: safeData?.length || 0,
+    filteredCount: filteredData?.length || 0,
+    hasFilterConfig: !!filterConfig,
+    hasSortConfig: !!sortConfig
+  });
+
   // Use sorting hook on filtered data
   const {
     sortedData: finalData = [],
@@ -48,6 +57,13 @@ export const useDataManagement = (
     isSorted = () => false,
     sortOptions = [],
   } = useSorting(filteredData, sortConfig);
+
+  // Debug final output
+  logger.debug('data_management_output', 'Final data management results', {
+    finalCount: finalData?.length || 0,
+    sortBy,
+    sortOrder
+  });
 
   // Combined interface
   return {

@@ -112,6 +112,22 @@ class ConditionType(Enum):
     OTHER = "other"
 
 
+class InsuranceType(Enum):
+    """Insurance types for categorization"""
+    MEDICAL = "medical"
+    DENTAL = "dental"
+    VISION = "vision"
+    PRESCRIPTION = "prescription"
+
+
+class InsuranceStatus(Enum):
+    """Status values for insurance policies"""
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    EXPIRED = "expired"
+    PENDING = "pending"
+
+
 # Helper functions to get status lists for validation
 def get_status_values(status_enum):
     """Get list of status values from enum"""
@@ -166,6 +182,16 @@ def get_all_family_relationships():
 def get_all_condition_types():
     """Get all valid condition types"""
     return get_status_values(ConditionType)
+
+
+def get_all_insurance_types():
+    """Get all valid insurance types"""
+    return get_status_values(InsuranceType)
+
+
+def get_all_insurance_statuses():
+    """Get all valid insurance status values"""
+    return get_status_values(InsuranceStatus)
 
 
 # Status mapping for data migration (old -> new)

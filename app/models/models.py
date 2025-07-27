@@ -25,6 +25,8 @@ from .enums import (
     ConditionType,
     EncounterPriority,
     FamilyRelationship,
+    InsuranceStatus,
+    InsuranceType,
     LabResultStatus,
     MedicationStatus,
     ProcedureStatus,
@@ -35,6 +37,8 @@ from .enums import (
     get_all_condition_types,
     get_all_encounter_priorities,
     get_all_family_relationships,
+    get_all_insurance_statuses,
+    get_all_insurance_types,
     get_all_lab_result_statuses,
     get_all_medication_statuses,
     get_all_procedure_statuses,
@@ -169,6 +173,9 @@ class Patient(Base):
     )
     family_members = orm_relationship(
         "FamilyMember", back_populates="patient", cascade="all, delete-orphan"
+    )
+    insurances = orm_relationship(
+        "Insurance", back_populates="patient", cascade="all, delete-orphan"
     )
 
     # V1: Patient sharing relationships
@@ -1001,3 +1008,63 @@ class UserPreferences(Base):
 
     # Relationships
     user = orm_relationship("User", backref="preferences")
+
+
+class Insurance(Base):
+    """
+    Represents insurance information for a patient.
+    Supports multiple insurance types: medical, dental, vision, prescription.
+    """
+
+    __tablename__ = "insurances"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+
+    # Insurance type and basic info
+    insurance_type = Column(
+        String, nullable=False
+    )  # Use InsuranceType enum: medical, dental, vision, prescription
+    company_name = Column(String, nullable=False)
+    employer_group = Column(String, nullable=True)  # Company or organization providing the insurance
+    member_name = Column(String, nullable=False)
+    member_id = Column(String, nullable=False)
+    group_number = Column(String, nullable=True)
+    plan_name = Column(String, nullable=True)
+
+    # Policy holder information (may differ from member)
+    policy_holder_name = Column(String, nullable=True)
+    relationship_to_holder = Column(
+        String, nullable=True
+    )  # self, spouse, child, dependent
+
+    # Coverage period
+    effective_date = Column(Date, nullable=False)
+    expiration_date = Column(Date, nullable=True)
+
+    # Status management
+    status = Column(
+        String, nullable=False, default="active"
+    )  # Use InsuranceStatus enum: active, inactive, expired, pending
+    is_primary = Column(
+        Boolean, default=False, nullable=False
+    )  # For medical insurance hierarchy
+
+    # Type-specific data stored as JSON for flexibility
+    coverage_details = Column(
+        JSON, nullable=True
+    )  # Copays, deductibles, percentages, BIN/PCN, etc.
+    contact_info = Column(
+        JSON, nullable=True
+    )  # Phone numbers, addresses, websites
+
+    # General notes
+    notes = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="insurances")

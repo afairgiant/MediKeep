@@ -49,6 +49,7 @@ import {
   IconX,
   IconPhoneCall,
   IconUsers,
+  IconShield,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
@@ -383,6 +384,12 @@ const Dashboard = () => {
 
   // Additional resources
   const additionalModules = [
+    {
+      title: 'Insurance',
+      icon: IconShield,
+      color: 'violet',
+      link: '/insurance',
+    },
     {
       title: 'Emergency Contacts',
       icon: IconPhoneCall,

@@ -17,6 +17,7 @@ export const ENTITY_TYPES = {
   ENCOUNTER: 'encounter',
   VITALS: 'vitals',
   IMMUNIZATION: 'immunization',
+  INSURANCE: 'insurance',
   PHARMACY: 'pharmacy',
   PRACTITIONER: 'practitioner',
   EMERGENCY_CONTACT: 'emergency_contact',
