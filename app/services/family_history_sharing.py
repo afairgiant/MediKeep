@@ -9,9 +9,9 @@ from app.models.models import User, FamilyMember, FamilyCondition, FamilyHistory
 from app.services.invitation_service import InvitationService
 from app.core.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
-import logging
+from app.core.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "app")
 
 
 class FamilyHistoryService:

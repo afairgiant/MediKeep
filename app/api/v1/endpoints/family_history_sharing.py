@@ -18,9 +18,9 @@ from app.schemas.family_history_sharing import (
     BulkInviteResponse,
     BulkInviteResult
 )
-import logging
+from app.core.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "app")
 router = APIRouter()
 
 

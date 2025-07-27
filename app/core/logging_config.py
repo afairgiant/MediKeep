@@ -10,6 +10,8 @@ import json
 import logging
 import logging.handlers
 import os
+import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -36,6 +38,107 @@ from .logging_constants import (
 correlation_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
     "correlation_id", default=None
 )
+
+
+def _is_logrotate_available() -> bool:
+    """Check if logrotate is available on the system."""
+    return shutil.which("logrotate") is not None
+
+
+def _parse_size_string(size_str: str) -> int:
+    """
+    Convert size string (e.g., '50M', '1G') to bytes with robust error handling.
+    
+    Args:
+        size_str: Size string with optional suffix (K, M, G)
+        
+    Returns:
+        Size in bytes
+        
+    Raises:
+        ValueError: If the size string is invalid or out of reasonable bounds
+    """
+    if not isinstance(size_str, str):
+        raise ValueError(f"Size must be a string, got {type(size_str).__name__}: {size_str}")
+    
+    size_str = size_str.strip()
+    if not size_str:
+        raise ValueError("Size string cannot be empty")
+    
+    # Normalize to uppercase for consistent processing
+    original_size = size_str
+    size_str = size_str.upper()
+    
+    # Define multipliers and reasonable bounds
+    multipliers = {
+        'K': 1024,
+        'M': 1024 * 1024,
+        'G': 1024 * 1024 * 1024
+    }
+    
+    # Parse size and suffix
+    try:
+        if size_str[-1] in multipliers:
+            suffix = size_str[-1]
+            number_part = size_str[:-1]
+            multiplier = multipliers[suffix]
+        else:
+            # No suffix, assume bytes
+            suffix = 'B'
+            number_part = size_str
+            multiplier = 1
+        
+        # Validate and convert the numeric part
+        if not number_part:
+            raise ValueError(f"Invalid size format '{original_size}': missing numeric part")
+        
+        try:
+            number = float(number_part)
+            if number != int(number):
+                raise ValueError(f"Invalid size format '{original_size}': decimal numbers not supported")
+            number = int(number)
+        except ValueError as e:
+            if "decimal numbers not supported" in str(e):
+                raise
+            raise ValueError(f"Invalid size format '{original_size}': numeric part must be an integer")
+        
+        if number <= 0:
+            raise ValueError(f"Invalid size '{original_size}': size must be positive")
+        
+        # Calculate result in bytes
+        result_bytes = number * multiplier
+        
+        # Validate reasonable bounds (1KB to 10GB)
+        min_bytes = 1024  # 1KB minimum
+        max_bytes = 10 * 1024 * 1024 * 1024  # 10GB maximum
+        
+        if result_bytes < min_bytes:
+            raise ValueError(f"Size '{original_size}' ({result_bytes} bytes) is too small. Minimum is 1KB")
+        
+        if result_bytes > max_bytes:
+            raise ValueError(f"Size '{original_size}' ({result_bytes} bytes) is too large. Maximum is 10GB")
+        
+        return result_bytes
+        
+    except (IndexError, KeyError) as e:
+        raise ValueError(f"Invalid size format '{original_size}': {str(e)}")
+
+
+def _get_rotation_method() -> str:
+    """Determine which log rotation method to use."""
+    from .config import settings
+    
+    method = settings.LOG_ROTATION_METHOD.lower()
+    
+    if method == "auto":
+        # Auto-detect: prefer logrotate if available, otherwise use Python
+        return "logrotate" if _is_logrotate_available() else "python"
+    elif method in ["logrotate", "python"]:
+        return method
+    else:
+        import logging
+        logging.warning(f"Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'")
+        return "logrotate" if _is_logrotate_available() else "python"
 
 
 class MedicalRecordsJSONFormatter(logging.Formatter):
@@ -119,10 +222,11 @@ class LoggingConfig:
         level_str = os.getenv("LOG_LEVEL", DEFAULT_LOG_LEVEL).upper().strip()
 
         if not validate_log_level(level_str):
-            print(
-                f"WARNING: Invalid LOG_LEVEL '{level_str}', defaulting to {DEFAULT_LOG_LEVEL}"
+            import logging
+            logging.warning(
+                f"Invalid LOG_LEVEL '{level_str}', defaulting to {DEFAULT_LOG_LEVEL}. "
+                f"Valid levels: {', '.join(VALID_LOG_LEVELS)}"
             )
-            print(f"Valid levels: {', '.join(VALID_LOG_LEVELS)}")
             return get_log_level_numeric(DEFAULT_LOG_LEVEL)
 
         return get_log_level_numeric(level_str)
@@ -195,17 +299,39 @@ class LoggingConfig:
     def _setup_file_handler(
         self, category: str, formatter: logging.Formatter, level: int
     ):
-        """Set up a rotating file handler for a specific log category."""
+        """Set up a file handler for a specific log category with hybrid rotation support."""
+        from .config import settings
 
         log_file = self.log_dir / f"{category}.log"
+        rotation_method = _get_rotation_method()
 
-        # Create rotating file handler using shared constants
-        handler = logging.handlers.RotatingFileHandler(
-            log_file,
-            maxBytes=LOG_FILE_MAX_BYTES,
-            backupCount=LOG_FILE_BACKUP_COUNT,
-            encoding=LOG_FILE_ENCODING,
-        )
+        if rotation_method == "logrotate":
+            # Use simple FileHandler when logrotate handles rotation
+            handler = logging.FileHandler(
+                log_file,
+                encoding=LOG_FILE_ENCODING,
+            )
+            import logging
+            logging.info(f"Using logrotate for {category}.log rotation")
+        else:
+            # Use Python's built-in rotation as fallback
+            try:
+                max_bytes = _parse_size_string(settings.LOG_ROTATION_SIZE)
+            except ValueError as e:
+                import logging
+                logging.warning(f"Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log")
+                max_bytes = 5 * 1024 * 1024  # 5MB default
+            
+            backup_count = settings.LOG_ROTATION_BACKUP_COUNT
+            
+            handler = logging.handlers.RotatingFileHandler(
+                log_file,
+                maxBytes=max_bytes,
+                backupCount=backup_count,
+                encoding=LOG_FILE_ENCODING,
+            )
+            import logging
+            logging.info(f"Using Python rotation for {category}.log (size: {settings.LOG_ROTATION_SIZE}, backups: {backup_count})")
 
         handler.setFormatter(formatter)
         handler.setLevel(level)
@@ -224,7 +350,7 @@ def get_logger(name: str, category: str = "app") -> logging.Logger:
 
     Args:
         name: Usually __name__ of the calling module
-        category: Log category (app, security, medical, performance)
+        category: Log category (app, security)
 
     Returns:
         Configured logger instance
@@ -242,40 +368,7 @@ def get_correlation_id() -> Optional[str]:
     return correlation_id_var.get()
 
 
-def log_medical_access(
-    logger: logging.Logger,
-    event: str,
-    user_id: int,
-    patient_id: int,
-    ip_address: str,
-    duration_ms: Optional[int] = None,
-    message: Optional[str] = None,
-    **kwargs,
-):
-    """
-    Log medical data access events with standardized format.
-
-    Args:
-        logger: Logger instance
-        event: Type of event (e.g., 'patient_accessed', 'record_modified')
-        user_id: ID of the user performing the action
-        patient_id: ID of the patient whose data is being accessed
-        ip_address: IP address of the request
-        duration_ms: Request duration in milliseconds
-        message: Human-readable message
-        **kwargs: Additional context data
-    """
-    extra_data = {
-        "category": "medical",
-        "event": event,
-        "user_id": user_id,
-        "patient_id": patient_id,
-        "ip": ip_address,
-        "duration": duration_ms,
-        **kwargs,
-    }
-
-    logger.info(message or f"Medical data access: {event}", extra=extra_data)
+# Removed log_medical_access function - unused and no corresponding file handler
 
 
 def log_security_event(
@@ -329,8 +422,8 @@ def log_performance_event(
     """
     if duration_ms > threshold_ms:
         extra_data = {
-            "category": "performance",
-            "event": event,
+            "category": "app",
+            "event": f"performance_{event}",
             "duration": duration_ms,
             "threshold": threshold_ms,
             **kwargs,

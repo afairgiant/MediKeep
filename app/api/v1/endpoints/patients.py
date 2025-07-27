@@ -17,9 +17,8 @@ from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 
 router = APIRouter()
 
-# Initialize loggers
+# Initialize logger
 logger = get_logger(__name__, "app")
-medical_logger = get_logger(__name__, "medical")
 
 
 class UserRecentActivity(BaseModel):
