@@ -28,7 +28,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.logger = get_logger(logger_name, "app")
         self.security_logger = get_logger(logger_name, "security")
-        self.performance_logger = get_logger(logger_name, "performance")
+        self.performance_logger = get_logger(logger_name, "app")  # Performance logs go to app.log
 
     async def dispatch(
         self, request: Request, call_next: Callable

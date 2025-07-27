@@ -89,7 +89,16 @@ class Settings:  # App Info
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
     ENABLE_DEBUG_LOGS: bool = (
         os.getenv("DEBUG", "False").lower() == "true"
-    )  # Database Sequence Monitoring (configurable for different environments)
+    )
+    
+    # Log Rotation Configuration
+    LOG_ROTATION_METHOD: str = os.getenv("LOG_ROTATION_METHOD", "auto")  # auto|python|logrotate
+    LOG_ROTATION_SIZE: str = os.getenv("LOG_ROTATION_SIZE", "5M")
+    LOG_ROTATION_TIME: str = os.getenv("LOG_ROTATION_TIME", "daily")  # daily|weekly|monthly
+    LOG_ROTATION_BACKUP_COUNT: int = int(os.getenv("LOG_ROTATION_BACKUP_COUNT", "30"))
+    LOG_COMPRESSION: bool = os.getenv("LOG_COMPRESSION", "True").lower() == "true"
+    
+    # Database Sequence Monitoring (configurable for different environments)
     ENABLE_SEQUENCE_MONITORING: bool = (
         os.getenv("ENABLE_SEQUENCE_MONITORING", "True").lower() == "true"
     )

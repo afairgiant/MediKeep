@@ -8,11 +8,11 @@ from sqlalchemy import or_, and_
 from app.models.models import User, Invitation
 from app.core.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
-import logging
+from app.core.logging_config import get_logger
 import json
 import hashlib
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "app")
 
 
 class InvitationService:
