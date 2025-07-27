@@ -473,6 +473,7 @@ def get_my_recent_activity(
     - procedures
     - treatments
     - encounters
+    - insurance
 
     Each activity includes a brief description and timestamp.
     """
@@ -638,6 +639,7 @@ def get_user_recent_activity(
     - Procedures
     - Treatments
     - Visits/Encounters
+    - Insurance
     - Patient Info updates
     - Doctor/Practitioner interactions
 
@@ -690,6 +692,7 @@ def get_user_recent_activity(
             "practitioner",  # Doctors/practitioners page
             "pharmacy",  # Pharmacies page
             "lab_result_file",  # Lab result file uploads
+            "insurance",  # Insurance page
         ]
 
         # Define universal entity types that should be shown regardless of patient

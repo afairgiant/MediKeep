@@ -171,6 +171,7 @@ class EntityType:
             cls.EMERGENCY_CONTACT,
             cls.PHARMACY,
             cls.FAMILY_MEMBER,
+            cls.INSURANCE,
             cls.FAMILY_CONDITION,
             cls.SYSTEM,
             cls.BACKUP,
@@ -274,6 +275,11 @@ class ActivityCategory:
     ENCOUNTER_UPDATED = "encounter_updated"
     ENCOUNTER_DELETED = "encounter_deleted"
 
+    INSURANCE_ADDED = "insurance_added"
+    INSURANCE_UPDATED = "insurance_updated"
+    INSURANCE_DELETED = "insurance_deleted"
+    INSURANCE_SET_PRIMARY = "insurance_set_primary"
+
     # System events
     USER_LOGIN = "user_login"
     USER_LOGOUT = "user_logout"
@@ -323,6 +329,10 @@ class ActivityCategory:
             cls.ENCOUNTER_ADDED,
             cls.ENCOUNTER_UPDATED,
             cls.ENCOUNTER_DELETED,
+            cls.INSURANCE_ADDED,
+            cls.INSURANCE_UPDATED,
+            cls.INSURANCE_DELETED,
+            cls.INSURANCE_SET_PRIMARY,
         ]
 
     @classmethod
