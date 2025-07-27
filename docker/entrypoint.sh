@@ -109,9 +109,6 @@ fi
 if ! fix_directory_permissions "/app/backups" "backups"; then
     echo "WARNING: Failed to fix backups directory permissions - continuing startup"
 fi
-if ! fix_directory_permissions "/app/uploads/trash" "trash"; then
-    echo "WARNING: Failed to fix trash directory permissions - continuing startup"
-fi
 
 echo "Directory permission check completed."
 
