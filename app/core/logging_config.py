@@ -46,16 +46,83 @@ def _is_logrotate_available() -> bool:
 
 
 def _parse_size_string(size_str: str) -> int:
-    """Convert size string (e.g., '50M', '1G') to bytes."""
-    size_str = size_str.upper().strip()
-    if size_str.endswith('K'):
-        return int(size_str[:-1]) * 1024
-    elif size_str.endswith('M'):
-        return int(size_str[:-1]) * 1024 * 1024
-    elif size_str.endswith('G'):
-        return int(size_str[:-1]) * 1024 * 1024 * 1024
-    else:
-        return int(size_str)  # Assume bytes if no suffix
+
+    """
+    Convert size string (e.g., '50M', '1G') to bytes with robust error handling.
+    
+    Args:
+        size_str: Size string with optional suffix (K, M, G)
+        
+    Returns:
+        Size in bytes
+        
+    Raises:
+        ValueError: If the size string is invalid or out of reasonable bounds
+    """
+    if not isinstance(size_str, str):
+        raise ValueError(f"Size must be a string, got {type(size_str).__name__}: {size_str}")
+    
+    size_str = size_str.strip()
+    if not size_str:
+        raise ValueError("Size string cannot be empty")
+    
+    # Normalize to uppercase for consistent processing
+    original_size = size_str
+    size_str = size_str.upper()
+    
+    # Define multipliers and reasonable bounds
+    multipliers = {
+        'K': 1024,
+        'M': 1024 * 1024,
+        'G': 1024 * 1024 * 1024
+    }
+    
+    # Parse size and suffix
+    try:
+        if size_str[-1] in multipliers:
+            suffix = size_str[-1]
+            number_part = size_str[:-1]
+            multiplier = multipliers[suffix]
+        else:
+            # No suffix, assume bytes
+            suffix = 'B'
+            number_part = size_str
+            multiplier = 1
+        
+        # Validate and convert the numeric part
+        if not number_part:
+            raise ValueError(f"Invalid size format '{original_size}': missing numeric part")
+        
+        try:
+            number = float(number_part)
+            if number != int(number):
+                raise ValueError(f"Invalid size format '{original_size}': decimal numbers not supported")
+            number = int(number)
+        except ValueError as e:
+            if "decimal numbers not supported" in str(e):
+                raise
+            raise ValueError(f"Invalid size format '{original_size}': numeric part must be an integer")
+        
+        if number <= 0:
+            raise ValueError(f"Invalid size '{original_size}': size must be positive")
+        
+        # Calculate result in bytes
+        result_bytes = number * multiplier
+        
+        # Validate reasonable bounds (1KB to 10GB)
+        min_bytes = 1024  # 1KB minimum
+        max_bytes = 10 * 1024 * 1024 * 1024  # 10GB maximum
+        
+        if result_bytes < min_bytes:
+            raise ValueError(f"Size '{original_size}' ({result_bytes} bytes) is too small. Minimum is 1KB")
+        
+        if result_bytes > max_bytes:
+            raise ValueError(f"Size '{original_size}' ({result_bytes} bytes) is too large. Maximum is 10GB")
+        
+        return result_bytes
+        
+    except (IndexError, KeyError) as e:
+        raise ValueError(f"Invalid size format '{original_size}': {str(e)}")
 
 
 def _get_rotation_method() -> str:
@@ -70,7 +137,8 @@ def _get_rotation_method() -> str:
     elif method in ["logrotate", "python"]:
         return method
     else:
-        print(f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'")
+        import logging
+        logging.warning(f"Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'")
         return "logrotate" if _is_logrotate_available() else "python"
 
 
@@ -155,10 +223,11 @@ class LoggingConfig:
         level_str = os.getenv("LOG_LEVEL", DEFAULT_LOG_LEVEL).upper().strip()
 
         if not validate_log_level(level_str):
-            print(
-                f"WARNING: Invalid LOG_LEVEL '{level_str}', defaulting to {DEFAULT_LOG_LEVEL}"
+            import logging
+            logging.warning(
+                f"Invalid LOG_LEVEL '{level_str}', defaulting to {DEFAULT_LOG_LEVEL}. "
+                f"Valid levels: {', '.join(VALID_LOG_LEVELS)}"
             )
-            print(f"Valid levels: {', '.join(VALID_LOG_LEVELS)}")
             return get_log_level_numeric(DEFAULT_LOG_LEVEL)
 
         return get_log_level_numeric(level_str)
@@ -243,10 +312,19 @@ class LoggingConfig:
                 log_file,
                 encoding=LOG_FILE_ENCODING,
             )
-            print(f"Using logrotate for {category}.log rotation")
+
+            import logging
+            logging.info(f"Using logrotate for {category}.log rotation")
         else:
             # Use Python's built-in rotation as fallback
-            max_bytes = _parse_size_string(settings.LOG_ROTATION_SIZE)
+            try:
+                max_bytes = _parse_size_string(settings.LOG_ROTATION_SIZE)
+            except ValueError as e:
+                import logging
+                logging.warning(f"Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log")
+                max_bytes = 5 * 1024 * 1024  # 5MB default
+            
+
             backup_count = settings.LOG_ROTATION_BACKUP_COUNT
             
             handler = logging.handlers.RotatingFileHandler(
@@ -255,7 +333,9 @@ class LoggingConfig:
                 backupCount=backup_count,
                 encoding=LOG_FILE_ENCODING,
             )
-            print(f"Using Python rotation for {category}.log (size: {settings.LOG_ROTATION_SIZE}, backups: {backup_count})")
+
+            import logging
+            logging.info(f"Using Python rotation for {category}.log (size: {settings.LOG_ROTATION_SIZE}, backups: {backup_count})")
 
         handler.setFormatter(formatter)
         handler.setLevel(level)
