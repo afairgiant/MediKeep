@@ -46,6 +46,7 @@ def _is_logrotate_available() -> bool:
 
 
 def _parse_size_string(size_str: str) -> int:
+
     """
     Convert size string (e.g., '50M', '1G') to bytes with robust error handling.
     
@@ -311,6 +312,7 @@ class LoggingConfig:
                 log_file,
                 encoding=LOG_FILE_ENCODING,
             )
+
             import logging
             logging.info(f"Using logrotate for {category}.log rotation")
         else:
@@ -322,6 +324,7 @@ class LoggingConfig:
                 logging.warning(f"Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log")
                 max_bytes = 5 * 1024 * 1024  # 5MB default
             
+
             backup_count = settings.LOG_ROTATION_BACKUP_COUNT
             
             handler = logging.handlers.RotatingFileHandler(
@@ -330,6 +333,7 @@ class LoggingConfig:
                 backupCount=backup_count,
                 encoding=LOG_FILE_ENCODING,
             )
+
             import logging
             logging.info(f"Using Python rotation for {category}.log (size: {settings.LOG_ROTATION_SIZE}, backups: {backup_count})")
 

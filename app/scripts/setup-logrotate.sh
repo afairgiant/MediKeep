@@ -4,6 +4,8 @@
 
 set -e
 
+
+
 # Input validation functions
 validate_path() {
     local path="$1"
@@ -99,6 +101,7 @@ ROTATION_SIZE="${LOG_ROTATION_SIZE:-5M}"
 validate_path "$LOG_DIR" "LOG_DIR"
 validate_retention_days "$RETENTION_DAYS"
 validate_rotation_size "$ROTATION_SIZE"
+
 
 echo "Setting up logrotate for Medical Records Management System..."
 
