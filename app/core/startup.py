@@ -94,8 +94,8 @@ async def startup_event():
     await check_sequences_on_startup()
     
     # Initialize activity tracking
-    logger.info("Initializing activity tracking...")
-    initialize_activity_tracking()
-    logger.info("Activity tracking initialized successfully")
+    # NOTE: Automatic activity tracking disabled to prevent double logging
+    # Manual activity logging is used instead via app.api.activity_logging
+    logger.info("Activity tracking initialization skipped (using manual logging)")
     
     logger.info("Application startup completed")
