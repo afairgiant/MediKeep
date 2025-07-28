@@ -10,8 +10,26 @@ class AdminApiService extends BaseApiService {
     return this.get('/dashboard/stats');
   }
 
-  async getRecentActivity(limit = 20) {
-    return this.get('/dashboard/recent-activity', { limit });
+  async getRecentActivity(limit = 20, actionFilterOrSignal = null, entityFilter = null) {
+    const params = { limit };
+    
+    // Handle backward compatibility: if second parameter looks like a signal, treat it as such
+    let signal = null;
+    let actionFilter = null;
+    
+    if (actionFilterOrSignal && typeof actionFilterOrSignal === 'object' && actionFilterOrSignal.aborted !== undefined) {
+      // Second parameter is an AbortSignal
+      signal = actionFilterOrSignal;
+    } else if (typeof actionFilterOrSignal === 'string') {
+      // Second parameter is an action filter
+      actionFilter = actionFilterOrSignal;
+    }
+    
+    if (actionFilter) params.action_filter = actionFilter;
+    if (entityFilter) params.entity_filter = entityFilter;
+    
+    const options = signal ? { signal } : {};
+    return this.get('/dashboard/recent-activity', params, options);
   }
   async getSystemHealth() {
     return this.get('/dashboard/system-health');
