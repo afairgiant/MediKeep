@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
+import { Button } from '../../components/ui';
 import { formatDate } from '../../utils/helpers';
 import './ModelManagement.css';
 
@@ -239,12 +240,12 @@ const ModelManagement = () => {
           </div>
 
           <div className="model-actions">
-            <button
-              className="btn btn-primary"
+            <Button
+              variant="primary"
               onClick={() => navigate(`/admin/models/${modelName}/create`)}
             >
               ➕ Add New
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -268,9 +269,9 @@ const ModelManagement = () => {
         {showBulkActions && (
           <div className="bulk-actions">
             <span>{selectedRecords.size} selected</span>
-            <button onClick={handleBulkDelete} className="btn btn-danger">
+            <Button variant="danger" onClick={handleBulkDelete}>
               🗑️ Delete Selected
-            </button>
+            </Button>
           </div>
         )}
 
@@ -317,33 +318,36 @@ const ModelManagement = () => {
                   ))}
                   <td>
                     <div className="record-actions">
-                      <button
+                      <Button
                         onClick={() =>
                           navigate(`/admin/models/${modelName}/${record.id}`)
                         }
-                        className="btn btn-sm btn-secondary"
+                        variant="secondary"
+                        size="small"
                         title="View Details"
                       >
                         👁️
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() =>
                           navigate(
                             `/admin/models/${modelName}/${record.id}/edit`
                           )
                         }
-                        className="btn btn-sm btn-primary"
+                        variant="primary"
+                        size="small"
                         title="Edit"
                       >
                         ✏️
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleDeleteRecord(record.id)}
-                        className="btn btn-sm btn-danger"
+                        variant="danger"
+                        size="small"
                         title="Delete"
                       >
                         🗑️
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -355,25 +359,25 @@ const ModelManagement = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination">
-            <button
+            <Button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="btn btn-secondary"
+              variant="secondary"
             >
               ← Previous
-            </button>
+            </Button>
 
             <span className="pagination-info">
               Page {currentPage} of {totalPages}
             </span>
 
-            <button
+            <Button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="btn btn-secondary"
+              variant="secondary"
             >
               Next →
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -1,9 +1,7 @@
 import React from 'react';
 import { TextInput } from '@mantine/core';
-import OldFormInput from '../forms/FormInput';
 
 export const FormInput = ({
-  useMantine = true,
   label,
   name,
   type = 'text',
@@ -18,26 +16,6 @@ export const FormInput = ({
   helpText,
   ...props
 }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldFormInput
-        label={label}
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        error={error}
-        required={required}
-        disabled={disabled}
-        placeholder={placeholder}
-        className={className}
-        helpText={helpText}
-        {...props}
-      />
-    );
-  }
 
   // Map input types to Mantine types
   const typeMap = {

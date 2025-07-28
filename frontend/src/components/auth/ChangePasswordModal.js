@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../ui/Modal';
+import { Modal } from '../ui';
 import { Button, Alert } from '../ui';
 import { apiService } from '../../services/api';
 import './ChangePasswordModal.css';

@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
+import { Button } from '../../components/ui';
 import '../../styles/pages/Login.css';
 
 const Login = () => {
@@ -368,21 +369,21 @@ const Login = () => {
                 />
               </div>
               <div className="form-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
+                <Button
+                  variant="secondary"
                   onClick={closeCreateUserModal}
                   disabled={isCreatingUser}
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="btn btn-primary"
+                  variant="primary"
                   disabled={isCreatingUser}
+                  loading={isCreatingUser}
                 >
-                  {isCreatingUser ? 'Creating Account...' : 'Create Account'}
-                </button>
+                  Create Account
+                </Button>
               </div>
             </form>
 

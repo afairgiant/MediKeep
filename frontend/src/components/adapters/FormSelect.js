@@ -1,9 +1,7 @@
 import React from 'react';
 import { Select } from '@mantine/core';
-import OldFormSelect from '../forms/FormSelect';
 
 export const FormSelect = ({
-  useMantine = true,
   label,
   name,
   value,
@@ -18,26 +16,6 @@ export const FormSelect = ({
   helpText,
   ...props
 }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldFormSelect
-        label={label}
-        name={name}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        options={options}
-        error={error}
-        required={required}
-        disabled={disabled}
-        placeholder={placeholder}
-        className={className}
-        helpText={helpText}
-        {...props}
-      />
-    );
-  }
 
   // Mantine Select expects different onChange signature
   const handleChange = selectedValue => {

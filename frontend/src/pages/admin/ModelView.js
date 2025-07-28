@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
+import { Button } from '../../components/ui';
 import { formatDateTime } from '../../utils/helpers';
 import './ModelView.css';
 
@@ -108,9 +109,9 @@ const ModelView = () => {
         <div className="model-view-error">
           <h2>Error</h2>
           <p>{error}</p>
-          <button onClick={handleBack} className="btn btn-secondary">
+          <Button variant="secondary" onClick={handleBack}>
             ← Back to {modelName}
-          </button>
+          </Button>
         </div>
       </AdminLayout>
     );
@@ -129,12 +130,12 @@ const ModelView = () => {
           </div>
 
           <div className="view-actions">
-            <button onClick={handleEdit} className="btn btn-primary">
+            <Button variant="primary" onClick={handleEdit}>
               ✏️ Edit
-            </button>
-            <button onClick={handleDelete} className="btn btn-danger">
+            </Button>
+            <Button variant="danger" onClick={handleDelete}>
               🗑️ Delete
-            </button>
+            </Button>
           </div>
         </div>
 
