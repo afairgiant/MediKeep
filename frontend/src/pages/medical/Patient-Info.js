@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
+import patientApi from '../../services/api/patientApi';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
-import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
+import { useCurrentPatient, usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import {
   formatMeasurement,
@@ -28,6 +29,7 @@ const PatientInfo = () => {
     refresh: refreshPatient,
   } = useCurrentPatient();
   const { practitioners, loading: practitionersLoading } = usePractitioners();
+  const { invalidatePatientList, invalidatePatient } = useCacheManager();
   const { unitSystem } = useUserPreferences();
 
   // Combine loading states
@@ -177,17 +179,21 @@ const PatientInfo = () => {
       };
 
       if (isCreating || !patientExists) {
-        updatedData = await apiService.createCurrentPatient(apiData);
+        updatedData = await patientApi.createPatient(apiData);
         setPatientExists(true);
         setIsCreating(false);
         setSuccessMessage('Patient information created successfully!');
       } else {
-        // Use the correct API method for updating current patient
-        updatedData = await apiService.updateCurrentPatient(apiData);
+        // Use the new patient management system like PatientSelector does
+        updatedData = await patientApi.updatePatient(patientData.id, apiData);
         setIsEditing(false);
         setSuccessMessage('Patient information updated successfully!');
       }
 
+      // Invalidate caches to ensure data consistency across the app
+      await invalidatePatientList();
+      await invalidatePatient();
+      
       // Refresh global patient data to reflect changes across the app
       await refreshPatient();
 
