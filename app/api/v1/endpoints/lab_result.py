@@ -203,23 +203,19 @@ def delete_lab_result(
     handle_not_found(db_lab_result, "Lab result")
 
     try:
-        # Log the deletion activity BEFORE deleting
-        from app.api.activity_logging import log_delete
-
-        log_delete(
-            db=db,
-            entity_type=EntityType.LAB_RESULT,
-            entity_obj=db_lab_result,
-            user_id=current_user_id,
-            request=request,
-        )
-
         # Delete associated files first
         lab_result_file.delete_by_lab_result(db, lab_result_id=lab_result_id)
 
-        # Delete the lab result
-        lab_result.delete(db, id=lab_result_id)
-        return {"message": "Lab result and associated files deleted successfully"}
+        # Use centralized deletion with logging
+        return handle_delete_with_logging(
+            db=db,
+            crud_obj=lab_result,
+            entity_id=lab_result_id,
+            entity_type=EntityType.LAB_RESULT,
+            user_id=current_user_id,
+            entity_name="Lab result",
+            request=request,
+        )
     except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Error deleting lab result: {str(e)}"

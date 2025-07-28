@@ -11,7 +11,6 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.api.activity_logging import log_update
 from app.crud.insurance import insurance
 from app.models.activity_log import EntityType
 from app.models.models import User
@@ -208,14 +207,6 @@ def set_primary_insurance(
     if not updated_insurance:
         raise HTTPException(status_code=400, detail="Failed to set insurance as primary")
 
-    # Log the activity
-    log_update(
-        db=db,
-        entity_type=EntityType.INSURANCE,
-        entity_obj=updated_insurance,
-        user_id=current_user.id,
-        request=request,
-    )
 
     return updated_insurance
 

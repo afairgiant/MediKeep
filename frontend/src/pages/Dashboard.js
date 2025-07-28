@@ -128,28 +128,30 @@ const Dashboard = () => {
     }
   }, [user, currentActivePatient]);
 
-  // Refresh dashboard stats when active patient changes
+  // Refresh dashboard data when active patient changes (after initial load)
   useEffect(() => {
     if (currentActivePatient?.id && initialLoadComplete) {
-      fetchDashboardStats();
+      // Only fetch if patient actually changed to prevent duplicate calls
+      const currentPatientId = currentActivePatient.id;
+      const previousPatientId = recentActivity.length > 0 ? recentActivity[0]?.patient_id : null;
+      
+      if (currentPatientId !== previousPatientId) {
+        fetchDashboardStats();
+        fetchRecentActivity();
+      }
     }
   }, [currentActivePatient?.id, initialLoadComplete]);
 
-  // Refresh recent activity when active patient changes
+  // Auto-refresh recent activity every 30 seconds (only when component is stable)
   useEffect(() => {
-    if (currentActivePatient?.id && initialLoadComplete) {
-      fetchRecentActivity();
-    }
-  }, [currentActivePatient?.id, initialLoadComplete]);
+    if (!initialLoadComplete || !currentActivePatient?.id) return;
 
-  // Auto-refresh recent activity every 30 seconds to catch new updates
-  useEffect(() => {
     const interval = setInterval(() => {
       fetchRecentActivity();
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [currentActivePatient, user]);
+  }, [initialLoadComplete, currentActivePatient?.id]); // Stable dependencies only
 
   useEffect(() => {
     if (authUser && user) {
@@ -592,7 +594,8 @@ const Dashboard = () => {
     );
   };
 
-  const RecentActivityList = () => (
+  const RecentActivityList = () => {
+    return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
         <Title order={3} size="h4">
@@ -610,7 +613,7 @@ const Dashboard = () => {
         <Stack gap="xs">
           {recentActivity.slice(0, 4).map((activity, index) => (
             <ActivityItem
-              key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || `index-${index}`}`}
+              key={`activity-${activity.id || index}-${activity.timestamp || index}`}
               activity={activity}
               index={index}
             />
@@ -639,7 +642,8 @@ const Dashboard = () => {
         </Paper>
       )}
     </Card>
-  );
+    );
+  };
 
   if (loading) {
     return (

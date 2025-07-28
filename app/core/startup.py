@@ -9,7 +9,6 @@ from app.core.database import (
 )
 from app.core.datetime_utils import set_application_startup_time
 from app.core.logging_config import get_logger
-from app.core.activity_tracker import initialize_activity_tracking
 
 logger = get_logger(__name__, "app")
 
@@ -93,9 +92,8 @@ async def startup_event():
     create_default_user()
     await check_sequences_on_startup()
     
-    # Initialize activity tracking
-    logger.info("Initializing activity tracking...")
-    initialize_activity_tracking()
-    logger.info("Activity tracking initialized successfully")
+    # Activity tracking disabled - using manual endpoint logging instead
+    # to prevent duplicate activity log entries
+    logger.info("Activity tracking disabled - using manual endpoint logging")
     
     logger.info("Application startup completed")

@@ -148,25 +148,11 @@ def handle_create_with_logging(
     Raises:
         HTTPException: If creation fails
     """
-    user_ip = request.client.host if request and request.client else "unknown"
 
     try:
         entity_obj = crud_obj.create(db=db, obj_in=obj_in)
-        entity_id = getattr(entity_obj, "id", None)
-        patient_id = getattr(entity_obj, "patient_id", None)
 
-        # Log successful creation
-        handle_entity_operation_logging(
-            operation="created",
-            entity_name=entity_name,
-            entity_id=entity_id,
-            patient_id=patient_id,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=True,
-        )
-
-        # Log activity using centralized logging
+        # Log activity using centralized logging only
         log_create(
             db=db,
             entity_type=entity_type,
@@ -178,18 +164,9 @@ def handle_create_with_logging(
         return entity_obj
 
     except Exception as e:
-        # Log failed creation
-        patient_id_input = getattr(obj_in, "patient_id", None)
-        handle_entity_operation_logging(
-            operation="created",
-            entity_name=entity_name,
-            entity_id=None,
-            patient_id=patient_id_input,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=False,
-            error=str(e),
-        )
+        # Log failed creation to application logger
+        logger.error(f"Failed to create {entity_name}: {str(e)}", 
+                    extra={"user_id": user_id, "entity_name": entity_name})
         raise
 
 
@@ -222,7 +199,6 @@ def handle_update_with_logging(
     Raises:
         HTTPException: If entity not found or update fails
     """
-    user_ip = request.client.host if request and request.client else "unknown"
 
     # Get existing entity
     entity_obj = crud_obj.get(db=db, id=entity_id)
@@ -233,18 +209,7 @@ def handle_update_with_logging(
     try:
         updated_entity = crud_obj.update(db=db, db_obj=entity_obj, obj_in=obj_in)
 
-        # Log successful update
-        handle_entity_operation_logging(
-            operation="updated",
-            entity_name=entity_name,
-            entity_id=entity_id,
-            patient_id=patient_id,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=True,
-        )
-
-        # Log activity using centralized logging
+        # Log activity using centralized logging only
         log_update(
             db=db,
             entity_type=entity_type,
@@ -256,17 +221,9 @@ def handle_update_with_logging(
         return updated_entity
 
     except Exception as e:
-        # Log failed update
-        handle_entity_operation_logging(
-            operation="updated",
-            entity_name=entity_name,
-            entity_id=entity_id,
-            patient_id=patient_id,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=False,
-            error=str(e),
-        )
+        # Log failed update to application logger
+        logger.error(f"Failed to update {entity_name} {entity_id}: {str(e)}", 
+                    extra={"user_id": user_id, "entity_name": entity_name, "entity_id": entity_id})
         raise
 
 
@@ -297,7 +254,6 @@ def handle_delete_with_logging(
     Raises:
         HTTPException: If entity not found or deletion fails
     """
-    user_ip = request.client.host if request and request.client else "unknown"
 
     # Get existing entity
     entity_obj = crud_obj.get(db=db, id=entity_id)
@@ -306,7 +262,7 @@ def handle_delete_with_logging(
     patient_id = getattr(entity_obj, "patient_id", None)
 
     try:
-        # Log activity BEFORE deleting
+        # Log activity using centralized logging BEFORE deleting
         log_delete(
             db=db,
             entity_type=entity_type,
@@ -317,31 +273,12 @@ def handle_delete_with_logging(
 
         crud_obj.delete(db=db, id=entity_id)
 
-        # Log successful deletion
-        handle_entity_operation_logging(
-            operation="deleted",
-            entity_name=entity_name,
-            entity_id=entity_id,
-            patient_id=patient_id,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=True,
-        )
-
         return create_success_response(entity_name)
 
     except Exception as e:
-        # Log failed deletion
-        handle_entity_operation_logging(
-            operation="deleted",
-            entity_name=entity_name,
-            entity_id=entity_id,
-            patient_id=patient_id,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=False,
-            error=str(e),
-        )
+        # Log failed deletion to application logger
+        logger.error(f"Failed to delete {entity_name} {entity_id}: {str(e)}", 
+                    extra={"user_id": user_id, "entity_name": entity_name, "entity_id": entity_id})
         raise
 
 

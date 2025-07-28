@@ -102,6 +102,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         EntityType.LAB_RESULT: ["test_name", "name"],
         EntityType.LAB_RESULT_FILE: ["file_name", "name"],
         EntityType.EMERGENCY_CONTACT: ["name"],
+        EntityType.INSURANCE: ["company_name", "insurance_type"],  # Try company_name first, then insurance_type
         "vitals": [
             "recorded_date"
         ],  # For vitals, use the date since there's no single identifying field
@@ -141,6 +142,14 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
                         else:
                             date_str = _sanitize_entity_value("date", encounter_date)
                         entity_name = f"{entity_name} on {date_str}"
+                # Special handling for insurance - include type and company
+                elif entity_type == EntityType.INSURANCE:
+                    insurance_type = getattr(entity_obj, "insurance_type", "")
+                    if field_name == "company_name" and insurance_type:
+                        insurance_type_sanitized = _sanitize_entity_value("insurance_type", insurance_type)
+                        entity_name = f"{insurance_type_sanitized.title()} Insurance: {entity_name}"
+                    elif field_name == "insurance_type":
+                        entity_name = f"{entity_name.title()} Insurance"
 
                 # Use friendly display names
                 entity_display_names = {
@@ -156,6 +165,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
                     EntityType.LAB_RESULT: "Lab Result",
                     EntityType.LAB_RESULT_FILE: "Lab Result File",
                     EntityType.EMERGENCY_CONTACT: "Emergency Contact",
+                    EntityType.INSURANCE: "Insurance",
                     "vitals": "Vitals",
                     "pharmacy": "Pharmacy",
                     "patient": "Patient",
@@ -194,6 +204,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         EntityType.LAB_RESULT: "Lab Result",
         EntityType.LAB_RESULT_FILE: "Lab Result File",
         EntityType.EMERGENCY_CONTACT: "Emergency Contact",
+        EntityType.INSURANCE: "Insurance",
         "vitals": "Vitals",
         "pharmacy": "Pharmacy",
         "patient": "Patient",

@@ -14,6 +14,7 @@ import {
   IconEdit,
   IconTrash,
   IconEye,
+  IconShield,
 } from '@tabler/icons-react';
 import { ENTITY_TYPES } from './entityRelationships';
 import { buildEntityUrl } from './entityNavigation';
@@ -53,6 +54,8 @@ const MODEL_TO_ENTITY_TYPE = {
   'medical doctor': ENTITY_TYPES.PRACTITIONER,
   patient: ENTITY_TYPES.PATIENT,
   'medical patient': ENTITY_TYPES.PATIENT,
+  insurance: ENTITY_TYPES.INSURANCE,
+  'medical insurance': ENTITY_TYPES.INSURANCE,
 };
 
 /**
@@ -72,6 +75,7 @@ const ENTITY_TYPE_TO_ROUTE = {
   [ENTITY_TYPES.PHARMACY]: '/pharmacies',
   [ENTITY_TYPES.PRACTITIONER]: '/practitioners',
   [ENTITY_TYPES.PATIENT]: '/patients/me',
+  [ENTITY_TYPES.INSURANCE]: '/insurance',
 };
 
 /**
@@ -91,6 +95,7 @@ const ENTITY_TYPE_TO_ICON = {
   [ENTITY_TYPES.PHARMACY]: IconPill,
   [ENTITY_TYPES.PRACTITIONER]: IconUser,
   [ENTITY_TYPES.PATIENT]: IconUser,
+  [ENTITY_TYPES.INSURANCE]: IconShield,
 };
 
 /**
@@ -260,6 +265,7 @@ const ENTITY_TYPE_TO_DISPLAY_NAME = {
   [ENTITY_TYPES.PHARMACY]: 'Pharmacy',
   [ENTITY_TYPES.PRACTITIONER]: 'Practitioner',
   [ENTITY_TYPES.PATIENT]: 'Patient Information',
+  [ENTITY_TYPES.INSURANCE]: 'Insurance',
 };
 
 /**
@@ -369,6 +375,7 @@ export const getActivityFilterOptions = () => {
     { value: ENTITY_TYPES.PHARMACY, label: 'Pharmacies' },
     { value: ENTITY_TYPES.PRACTITIONER, label: 'Practitioners' },
     { value: ENTITY_TYPES.PATIENT, label: 'Patient Info' },
+    { value: ENTITY_TYPES.INSURANCE, label: 'Insurance' },
   ];
 };
 
