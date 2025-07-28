@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { apiService } from '../../services/api';
 import { Loading } from '../../components';
+import { Button } from '../../components/ui';
 import './ModelEdit.css'; // Reuse the same styles as ModelEdit
 
 const ModelCreate = () => {
@@ -398,9 +399,9 @@ const ModelCreate = () => {
         <div className="model-edit-error">
           <h2>Error</h2>
           <p>{error}</p>
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button variant="secondary" onClick={handleCancel}>
             ← Back
-          </button>
+          </Button>
         </div>
       </AdminLayout>
     );
@@ -416,20 +417,21 @@ const ModelCreate = () => {
           </div>
 
           <div className="edit-actions">
-            <button
+            <Button
+              variant="secondary"
               onClick={handleCancel}
-              className="btn btn-secondary"
               disabled={saving}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleCreate}
-              className="btn btn-primary"
               disabled={saving}
+              loading={saving}
             >
-              {saving ? '💾 Creating...' : '💾 Create Record'}
-            </button>
+              💾 Create Record
+            </Button>
           </div>
         </div>
 

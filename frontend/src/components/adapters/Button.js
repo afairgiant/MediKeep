@@ -1,24 +1,13 @@
 import React from 'react';
 import { Button as MantineButton } from '@mantine/core';
-import OldButton from '../ui/Button';
 
 export const Button = ({
-  useMantine = true,
   variant,
   size,
   loading,
   children,
   ...props
 }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldButton variant={variant} size={size} loading={loading} {...props}>
-        {children}
-      </OldButton>
-    );
-  }
-
   // Map your old variants to Mantine
   const variantMap = {
     primary: 'filled',

@@ -3,18 +3,16 @@
  */
 
 // UI Components
-export { default as Button } from './ui/Button';
 export { default as DashboardCard } from './ui/DashboardCard';
 export { default as Loading } from './ui/Loading';
-export { default as Modal } from './ui/Modal';
 export {
   default as Notification,
   NotificationContainer,
 } from './ui/Notification';
 
 // Form Components
-export { default as FormInput } from './forms/FormInput';
-export { default as FormSelect } from './forms/FormSelect';
+export { default as FormInput } from './adapters/FormInput';
+export { default as FormSelect } from './adapters/FormSelect';
 
 // Layout Components
 export { default as Header } from './adapters/Header';
@@ -32,8 +30,7 @@ export {
   withErrorBoundary,
   useErrorHandler,
 } from './common/ErrorBoundary';
-export { default as ProtectedRoute } from './common/ProtectedRoute';
-export { default as LoggingTest } from './common/LoggingTest';
+export { default as ProtectedRoute } from './auth/ProtectedRoute';
 
 // Layout Components (future)
 // export { default as Header } from './layout/Header';

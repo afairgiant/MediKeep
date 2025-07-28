@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { AdminResetPasswordModal } from '../../components/auth';
 import { Loading } from '../../components';
+import { Button } from '../../components/ui';
 import './ModelEdit.css';
 
 const ModelEdit = () => {
@@ -203,18 +204,16 @@ const ModelEdit = () => {
               Password hash (read-only for security)
             </small>
             {modelName === 'user' && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-small"
+              <Button
+                variant="secondary"
+                size="small"
                 onClick={() => handleChangePassword(recordId)}
                 style={{
                   marginLeft: '1rem',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
                 }}
               >
                 🔑 Reset Password
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -334,9 +333,9 @@ const ModelEdit = () => {
         <div className="model-edit-error">
           <h2>Error</h2>
           <p>{error}</p>
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button variant="secondary" onClick={handleCancel}>
             ← Back
-          </button>
+          </Button>
         </div>
       </AdminLayout>
     );
@@ -352,20 +351,21 @@ const ModelEdit = () => {
           </div>
 
           <div className="edit-actions">
-            <button
+            <Button
+              variant="secondary"
               onClick={handleCancel}
-              className="btn btn-secondary"
               disabled={saving}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              className="btn btn-primary"
               disabled={saving}
+              loading={saving}
             >
-              {saving ? '💾 Saving...' : '💾 Save Changes'}
-            </button>
+              💾 Save Changes
+            </Button>
           </div>
         </div>
 

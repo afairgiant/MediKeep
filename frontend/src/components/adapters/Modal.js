@@ -1,9 +1,7 @@
 import React from 'react';
 import { Modal as MantineModal } from '@mantine/core';
-import OldModal from '../ui/Modal';
 
 export const Modal = ({
-  useMantine = true,
   isOpen,
   onClose,
   title,
@@ -14,23 +12,6 @@ export const Modal = ({
   className = '',
   ...props
 }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldModal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={title}
-        size={size}
-        showCloseButton={showCloseButton}
-        closeOnOverlayClick={closeOnOverlayClick}
-        className={className}
-        {...props}
-      >
-        {children}
-      </OldModal>
-    );
-  }
 
   // Map sizes to Mantine sizes
   const sizeMap = {

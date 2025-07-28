@@ -62,8 +62,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
 
 // Components
-import { LoggingTest, ErrorBoundary } from './components';
-import GlobalStateDemo from './components/common/GlobalStateDemo';
+import { ErrorBoundary } from './components';
 
 import logger from './services/logger';
 import { timezoneService } from './services/timezoneService';
@@ -351,11 +350,6 @@ function App() {
                           }
                         />
                         {/* Development/Testing Routes */}
-                        <Route path="/logging-test" element={<LoggingTest />} />
-                        <Route
-                          path="/global-state-demo"
-                          element={<GlobalStateDemo />}
-                        />
                         {/* Default redirect */}
                         <Route
                           path="/"
