@@ -10,7 +10,6 @@ import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -23,6 +22,7 @@ import { InvitationManager } from '../../components/invitations';
 import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,
@@ -83,16 +83,18 @@ const CARD_STYLES = {
   },
   conditionBox: (colorScheme, severityColor) => ({
     borderLeft: `3px solid var(--mantine-color-${severityColor}-6)`,
-    backgroundColor: colorScheme === 'dark'
-      ? 'var(--mantine-color-dark-6)'
-      : 'var(--mantine-color-gray-0)',
+    backgroundColor:
+      colorScheme === 'dark'
+        ? 'var(--mantine-color-dark-6)'
+        : 'var(--mantine-color-gray-0)',
     borderRadius: '4px',
   }),
   viewModalConditionBox: (colorScheme, severityColor) => ({
     borderLeft: `4px solid var(--mantine-color-${severityColor}-6)`,
-    backgroundColor: colorScheme === 'dark'
-      ? 'var(--mantine-color-dark-6)'
-      : 'var(--mantine-color-gray-0)',
+    backgroundColor:
+      colorScheme === 'dark'
+        ? 'var(--mantine-color-dark-6)'
+        : 'var(--mantine-color-gray-0)',
     borderRadius: '8px',
   }),
   disabledAction: {
@@ -111,7 +113,11 @@ const FamilyHistory = () => {
   const [sharedFamilyHistory, setSharedFamilyHistory] = useState([]);
 
   // Error handling for shared family history loading (addresses reviewer feedback)
-  const { handleError, currentError, clearError: clearSharedError } = useErrorHandler('FamilyHistory');
+  const {
+    handleError,
+    currentError,
+    clearError: clearSharedError,
+  } = useErrorHandler('FamilyHistory');
 
   // Invitation-related state
   const [
@@ -189,7 +195,9 @@ const FamilyHistory = () => {
           component: 'FamilyHistory',
           hasData: !!data,
           relationship: data?.relationship,
-          hasConditions: Array.isArray(data?.family_conditions) && data.family_conditions.length > 0
+          hasConditions:
+            Array.isArray(data?.family_conditions) &&
+            data.family_conditions.length > 0,
         });
         return apiService.createFamilyMember(data, signal);
       },
@@ -199,7 +207,9 @@ const FamilyHistory = () => {
           component: 'FamilyHistory',
           hasData: !!data,
           relationship: data?.relationship,
-          hasConditions: Array.isArray(data?.family_conditions) && data.family_conditions.length > 0
+          hasConditions:
+            Array.isArray(data?.family_conditions) &&
+            data.family_conditions.length > 0,
         });
         return apiService.updateFamilyMember(id, data, signal);
       },
@@ -217,17 +227,17 @@ const FamilyHistory = () => {
   // Extract family member ID from URL for view modal
   const urlParams = new URLSearchParams(location.search);
   const viewingFamilyMemberId = urlParams.get('view');
-  
+
   // Look for the family member in both owned and shared arrays
   const viewingFamilyMember = React.useMemo(() => {
     if (!viewingFamilyMemberId) return null;
-    
+
     const parsedId = parseInt(viewingFamilyMemberId, 10);
-    
+
     // First check owned family members
     const ownedMember = familyMembers.find(m => m.id === parsedId);
     if (ownedMember) return ownedMember;
-    
+
     // Then check shared family members
     const sharedItem = sharedFamilyHistory.find(
       item => item.family_member.id === parsedId
@@ -237,10 +247,10 @@ const FamilyHistory = () => {
       return {
         ...sharedItem.family_member,
         is_shared: true,
-        share_details: sharedItem.share_details
+        share_details: sharedItem.share_details,
       };
     }
-    
+
     return null;
   }, [viewingFamilyMemberId, familyMembers, sharedFamilyHistory]);
 
@@ -278,7 +288,7 @@ const FamilyHistory = () => {
         handleError(error, {
           action: 'loading_shared_family_history',
           userId: currentPatient?.owner_user_id,
-          context: 'Family history shared with you could not be loaded'
+          context: 'Family history shared with you could not be loaded',
         });
       }
     };
@@ -390,7 +400,7 @@ const FamilyHistory = () => {
         component: 'FamilyHistory',
         memberId,
         error: error.message,
-        patientId: currentPatient?.id
+        patientId: currentPatient?.id,
       });
     }
   };
@@ -408,7 +418,7 @@ const FamilyHistory = () => {
       component: 'FamilyHistory',
       isEditing: !!editingMember,
       relationship: formData.relationship,
-      hasRequiredFields: !!(formData.name && formData.relationship)
+      hasRequiredFields: !!(formData.name && formData.relationship),
     });
 
     const memberData = {
@@ -438,9 +448,11 @@ const FamilyHistory = () => {
           component: 'FamilyHistory',
           action: editingMember ? 'update' : 'create',
           familyMemberId: editingMember?.id,
-          error: error.message
+          error: error.message,
         });
-        setError(`Family member ${editingMember ? 'updated' : 'created'} successfully, but failed to refresh the list. Please reload the page to see changes.`);
+        setError(
+          `Family member ${editingMember ? 'updated' : 'created'} successfully, but failed to refresh the list. Please reload the page to see changes.`
+        );
       }
     }
   };
@@ -452,7 +464,7 @@ const FamilyHistory = () => {
   const handleAddCondition = familyMember => {
     logger.debug('Adding condition for family member', {
       familyMemberId: familyMember.id,
-      component: 'FamilyHistory'
+      component: 'FamilyHistory',
     });
     setSelectedFamilyMember(familyMember);
     setSelectedFamilyMemberId(familyMember.id);
@@ -490,7 +502,7 @@ const FamilyHistory = () => {
         familyMemberId,
         conditionId,
         error: error.message,
-        patientId: currentPatient?.id
+        patientId: currentPatient?.id,
       });
       setError('Failed to delete condition');
     }
@@ -506,7 +518,7 @@ const FamilyHistory = () => {
       selectedFamilyMemberIdBackup: selectedFamilyMemberId,
       conditionType: conditionFormData.condition_type,
       hasSeverity: !!conditionFormData.severity,
-      hasRequiredFields: !!(conditionFormData.condition_name),
+      hasRequiredFields: !!conditionFormData.condition_name,
       finalFamilyMemberId: familyMemberId,
       component: 'FamilyHistory',
     });
@@ -576,7 +588,7 @@ const FamilyHistory = () => {
         familyMemberId,
         editingCondition: editingCondition?.id,
         error: error.message,
-        patientId: currentPatient?.id
+        patientId: currentPatient?.id,
       });
       setError('Failed to save condition');
     }
@@ -959,7 +971,7 @@ const FamilyHistory = () => {
 
       {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
       <ErrorAlert error={currentError} onClose={clearSharedError} />
-      
+
       {/* Legacy error display for backward compatibility */}
       {error && !currentError && (
         <Alert
@@ -994,9 +1006,9 @@ const FamilyHistory = () => {
           <Group>
             {activeTab === 'my-family' && (
               <Button
-                leftIcon={<IconUserPlus size={16} />}
+                leftSection={<IconUserPlus size={16} />}
                 onClick={handleAddMember}
-                size="md"
+                variant="filled"
               >
                 Add Family Member
               </Button>
@@ -1006,7 +1018,6 @@ const FamilyHistory = () => {
               <Button
                 variant={bulkSelectionMode ? 'filled' : 'light'}
                 leftSection={<IconShare size={16} />}
-                size="md"
                 onClick={() => {
                   setBulkSelectionMode(!bulkSelectionMode);
                   setSelectedMembersForBulkSharing([]);
@@ -1018,8 +1029,7 @@ const FamilyHistory = () => {
 
             <Button
               variant="light"
-              leftIcon={<IconMail size={16} />}
-              size="md"
+              leftSection={<IconMail size={16} />}
               onClick={openInvitationManager}
             >
               Manage Invitations
@@ -1029,7 +1039,6 @@ const FamilyHistory = () => {
               <Button
                 variant="filled"
                 leftSection={<IconSend size={16} />}
-                size="md"
                 onClick={() => {
                   openBulkSharingModal();
                 }}
@@ -1151,8 +1160,9 @@ const FamilyHistory = () => {
                 family member.
               </Text>
               <Button
-                leftIcon={<IconUserPlus size={16} />}
+                leftSection={<IconUserPlus size={16} />}
                 onClick={handleAddMember}
+                variant="filled"
               >
                 Add Your First Family Member
               </Button>
@@ -1340,7 +1350,7 @@ const FamilyHistory = () => {
 
                               <Button
                                 size="xs"
-                                variant="light"
+                                variant="filled"
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleViewFamilyMember(member);
@@ -1372,15 +1382,6 @@ const FamilyHistory = () => {
                                         }}
                                       >
                                         Edit
-                                      </Menu.Item>
-                                      <Menu.Item
-                                        leftSection={<IconShare size={14} />}
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          handleShareMember(member);
-                                        }}
-                                      >
-                                        Share History
                                       </Menu.Item>
                                     </>
                                   )}
@@ -1439,8 +1440,8 @@ const FamilyHistory = () => {
                                 {!member.is_shared && (
                                   <Button
                                     size="xs"
-                                    variant="light"
-                                    leftIcon={<IconStethoscope size={14} />}
+                                    variant="filled"
+                                    leftSection={<IconStethoscope size={14} />}
                                     onClick={e => {
                                       e.stopPropagation();
                                       handleAddCondition(member);
@@ -1456,7 +1457,10 @@ const FamilyHistory = () => {
                                   <Box
                                     key={condition.id}
                                     p="xs"
-                                    style={CARD_STYLES.conditionBox(colorScheme, getSeverityColor(condition.severity))}
+                                    style={CARD_STYLES.conditionBox(
+                                      colorScheme,
+                                      getSeverityColor(condition.severity)
+                                    )}
                                   >
                                     <Group position="apart">
                                       <div style={{ flex: 1 }}>
@@ -1510,9 +1514,9 @@ const FamilyHistory = () => {
 
                                       {!member.is_shared && (
                                         <Group spacing="xs">
-                                          <ActionIcon
+                                          <Button
                                             size="xs"
-                                            variant="light"
+                                            variant="filled"
                                             onClick={e => {
                                               e.stopPropagation();
                                               handleEditCondition(
@@ -1521,11 +1525,11 @@ const FamilyHistory = () => {
                                               );
                                             }}
                                           >
-                                            <IconEdit size={12} />
-                                          </ActionIcon>
-                                          <ActionIcon
+                                            Edit
+                                          </Button>
+                                          <Button
                                             size="xs"
-                                            variant="light"
+                                            variant="filled"
                                             color="red"
                                             onClick={e => {
                                               e.stopPropagation();
@@ -1535,8 +1539,8 @@ const FamilyHistory = () => {
                                               );
                                             }}
                                           >
-                                            <IconTrash size={12} />
-                                          </ActionIcon>
+                                            Delete
+                                          </Button>
                                         </Group>
                                       )}
                                     </Group>
@@ -1689,7 +1693,7 @@ const FamilyHistory = () => {
                             <Group spacing="xs">
                               <Button
                                 size="xs"
-                                variant="light"
+                                variant="filled"
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleViewFamilyMember(member);
@@ -1745,7 +1749,10 @@ const FamilyHistory = () => {
                                   <Box
                                     key={condition.id}
                                     p="xs"
-                                    style={CARD_STYLES.conditionBox(colorScheme, getSeverityColor(condition.severity))}
+                                    style={CARD_STYLES.conditionBox(
+                                      colorScheme,
+                                      getSeverityColor(condition.severity)
+                                    )}
                                   >
                                     <Group position="apart">
                                       <div style={{ flex: 1 }}>
@@ -1870,9 +1877,21 @@ const FamilyHistory = () => {
                     variant="light"
                     onClick={() => handleEditMember(viewingFamilyMember)}
                     disabled={viewingFamilyMember.is_shared}
-                    title={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
-                    aria-label={viewingFamilyMember.is_shared ? "Cannot edit shared family member" : "Edit family member"}
-                    style={viewingFamilyMember.is_shared ? CARD_STYLES.disabledAction : {}}
+                    title={
+                      viewingFamilyMember.is_shared
+                        ? 'Cannot edit shared family member'
+                        : 'Edit family member'
+                    }
+                    aria-label={
+                      viewingFamilyMember.is_shared
+                        ? 'Cannot edit shared family member'
+                        : 'Edit family member'
+                    }
+                    style={
+                      viewingFamilyMember.is_shared
+                        ? CARD_STYLES.disabledAction
+                        : {}
+                    }
                   >
                     <IconEdit size={16} />
                   </ActionIcon>
@@ -1922,12 +1941,21 @@ const FamilyHistory = () => {
                   Medical Conditions
                 </Text>
                 <Button
-                  size="sm"
-                  leftIcon={<IconStethoscope size={16} />}
+                  size="xs"
+                  variant="filled"
+                  leftSection={<IconStethoscope size={16} />}
                   onClick={handleAddConditionFromView}
                   disabled={viewingFamilyMember.is_shared}
-                  title={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
-                  aria-label={viewingFamilyMember.is_shared ? "Cannot add conditions to shared family member" : "Add medical condition"}
+                  title={
+                    viewingFamilyMember.is_shared
+                      ? 'Cannot add conditions to shared family member'
+                      : 'Add medical condition'
+                  }
+                  aria-label={
+                    viewingFamilyMember.is_shared
+                      ? 'Cannot add conditions to shared family member'
+                      : 'Add medical condition'
+                  }
                 >
                   Add Condition
                 </Button>
@@ -1948,7 +1976,10 @@ const FamilyHistory = () => {
                     <Box
                       key={condition.id}
                       p="md"
-                      style={CARD_STYLES.viewModalConditionBox(colorScheme, getSeverityColor(condition.severity))}
+                      style={CARD_STYLES.viewModalConditionBox(
+                        colorScheme,
+                        getSeverityColor(condition.severity)
+                      )}
                     >
                       <Group position="apart" mb="xs">
                         <Group spacing="xs">
@@ -1973,20 +2004,34 @@ const FamilyHistory = () => {
                         </Group>
 
                         <Group spacing="xs">
-                          <ActionIcon
-                            variant="light"
+                          <Button
+                            size="xs"
+                            variant="filled"
                             onClick={() =>
                               handleEditConditionFromView(condition)
                             }
                             disabled={viewingFamilyMember.is_shared}
-                            title={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
-                            aria-label={viewingFamilyMember.is_shared ? "Cannot edit conditions of shared family member" : "Edit condition"}
-                            style={viewingFamilyMember.is_shared ? CARD_STYLES.disabledAction : {}}
+                            title={
+                              viewingFamilyMember.is_shared
+                                ? 'Cannot edit conditions of shared family member'
+                                : 'Edit condition'
+                            }
+                            aria-label={
+                              viewingFamilyMember.is_shared
+                                ? 'Cannot edit conditions of shared family member'
+                                : 'Edit condition'
+                            }
+                            style={
+                              viewingFamilyMember.is_shared
+                                ? CARD_STYLES.disabledAction
+                                : {}
+                            }
                           >
-                            <IconEdit size={16} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="light"
+                            Edit
+                          </Button>
+                          <Button
+                            size="xs"
+                            variant="filled"
                             color="red"
                             onClick={() =>
                               handleDeleteCondition(
@@ -1995,12 +2040,24 @@ const FamilyHistory = () => {
                               )
                             }
                             disabled={viewingFamilyMember.is_shared}
-                            title={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
-                            aria-label={viewingFamilyMember.is_shared ? "Cannot delete conditions of shared family member" : "Delete condition"}
-                            style={viewingFamilyMember.is_shared ? CARD_STYLES.disabledAction : {}}
+                            title={
+                              viewingFamilyMember.is_shared
+                                ? 'Cannot delete conditions of shared family member'
+                                : 'Delete condition'
+                            }
+                            aria-label={
+                              viewingFamilyMember.is_shared
+                                ? 'Cannot delete conditions of shared family member'
+                                : 'Delete condition'
+                            }
+                            style={
+                              viewingFamilyMember.is_shared
+                                ? CARD_STYLES.disabledAction
+                                : {}
+                            }
                           >
-                            <IconTrash size={16} />
-                          </ActionIcon>
+                            Delete
+                          </Button>
                         </Group>
                       </Group>
 

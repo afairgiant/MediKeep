@@ -379,6 +379,7 @@ const Vitals = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddNew}
             size="md"
@@ -402,7 +403,7 @@ const Vitals = () => {
                 </Text>
               </Box>
               <Button
-                variant="light"
+                variant="filled"
                 leftSection={<IconRefresh size={16} />}
                 onClick={loadStats}
                 loading={isLoadingStats}
@@ -430,7 +431,7 @@ const Vitals = () => {
               >
                 <Group justify="space-between" align="center">
                   <Text size="sm">{statsError}</Text>
-                  <Button variant="light" size="xs" onClick={loadStats}>
+                  <Button variant="filled" size="xs" onClick={loadStats}>
                     Try Again
                   </Button>
                 </Group>

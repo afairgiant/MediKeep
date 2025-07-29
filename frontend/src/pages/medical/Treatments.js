@@ -12,11 +12,11 @@ import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import { Button } from '../../components/ui';
 import MantineTreatmentForm from '../../components/medical/MantineTreatmentForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,
@@ -501,21 +501,21 @@ const Treatments = () => {
                       <Divider />
                       <Group justify="flex-end" gap="xs" pt="sm">
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleViewTreatment(treatment)}
                         >
                           View
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleEditTreatment(treatment)}
                         >
                           Edit
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           color="red"
                           size="xs"
                           onClick={() => handleDeleteTreatment(treatment.id)}
@@ -875,7 +875,8 @@ const Treatments = () => {
 
             <Group justify="flex-end" mt="md">
               <Button
-                variant="light"
+                variant="filled"
+                size="xs"
                 onClick={() => {
                   handleCloseViewModal();
                   handleEditTreatment(viewingTreatment);

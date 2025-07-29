@@ -17,8 +17,8 @@ import {
   Divider,
   Modal,
   SimpleGrid,
+  Button,
 } from '@mantine/core';
-import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
@@ -326,6 +326,7 @@ const Immunization = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddImmunization}
             size="md"
@@ -570,6 +571,22 @@ const Immunization = () => {
                   </Card>
                 </Grid.Col>
               </Grid>
+
+              <Group justify="flex-end" mt="md">
+                <Button
+                  variant="filled"
+                  size="xs"
+                  onClick={() => {
+                    handleCloseViewModal();
+                    handleEditImmunization(viewingImmunization);
+                  }}
+                >
+                  Edit Immunization
+                </Button>
+                <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
+                  Close
+                </Button>
+              </Group>
             </Stack>
           )}
         </Modal>
@@ -742,7 +759,7 @@ const Immunization = () => {
                             <Divider />
                             <Group justify="flex-end" gap="xs" pt="sm">
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() =>
                                   handleViewImmunization(immunization)
@@ -751,7 +768,7 @@ const Immunization = () => {
                                 View
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() =>
                                   handleEditImmunization(immunization)
@@ -760,7 +777,7 @@ const Immunization = () => {
                                 Edit
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 color="red"
                                 size="xs"
                                 onClick={() =>

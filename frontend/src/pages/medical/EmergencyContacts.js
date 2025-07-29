@@ -17,6 +17,7 @@ import {
   Divider,
   Anchor,
   Modal,
+  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -30,7 +31,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -294,6 +294,7 @@ const EmergencyContacts = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddContact}
             size="md"
@@ -489,7 +490,7 @@ const EmergencyContacts = () => {
                             <Text size="sm" c="dimmed" mb="xs">
                               📝 Notes
                             </Text>
-                            <Text size="sm" c="gray.7">
+                            <Text size="sm">
                               {contact.notes}
                             </Text>
                           </Box>
@@ -499,21 +500,21 @@ const EmergencyContacts = () => {
                           <Divider />
                           <Group justify="flex-end" gap="xs" pt="sm">
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleViewContact(contact)}
                             >
                               View
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleEditContact(contact)}
                             >
                               Edit
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               color="red"
                               size="xs"
                               onClick={() => handleDeleteContact(contact.id)}
@@ -761,7 +762,7 @@ const EmergencyContacts = () => {
                 📝 Notes
               </Title>
               {viewingContact.notes ? (
-                <Text size="md" c="gray.7">
+                <Text size="md">
                   {viewingContact.notes}
                 </Text>
               ) : (
@@ -773,10 +774,12 @@ const EmergencyContacts = () => {
 
             {/* Action Buttons */}
             <Group justify="flex-end" gap="md">
-              <Button variant="light" onClick={handleCloseViewModal}>
+              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
                 Close
               </Button>
               <Button
+                variant="filled"
+                size="xs"
                 onClick={() => {
                   handleCloseViewModal();
                   handleEditContact(viewingContact);

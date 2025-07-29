@@ -16,9 +16,9 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ConditionRelationships from '../../components/medical/ConditionRelationships';
-import { Button } from '../../components/ui';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,
@@ -843,21 +843,21 @@ const LabResults = () => {
                       <Divider />
                       <Group justify="flex-end" gap="xs" pt="sm">
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleViewLabResult(result)}
                         >
                           View
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleEditLabResult(result)}
                         >
                           Edit
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           color="red"
                           size="xs"
                           onClick={() => handleDeleteLabResult(result.id)}
@@ -1332,6 +1332,26 @@ const LabResults = () => {
                 )}
               </Stack>
             </Stack>
+
+            {/* Modal Action Buttons */}
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="filled"
+                size="xs"
+                onClick={() => {
+                  handleCloseViewModal();
+                  handleEditLabResult(viewingLabResult);
+                }}
+              >
+                Edit Lab Result
+              </Button>
+              <Button 
+                variant="filled" 
+                onClick={handleCloseViewModal}
+              >
+                Close
+              </Button>
+            </Group>
           </>
         )}
       </Modal>

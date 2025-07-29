@@ -17,8 +17,8 @@ import {
   Box,
   Divider,
   Modal,
+  Button,
 } from '@mantine/core';
-import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
@@ -333,6 +333,7 @@ const Allergies = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddAllergy}
             size="md"
@@ -516,21 +517,21 @@ const Allergies = () => {
                             <Divider />
                             <Group justify="flex-end" gap="xs" pt="sm">
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() => handleViewAllergy(allergy)}
                               >
                                 View
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() => handleEditAllergy(allergy)}
                               >
                                 Edit
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 color="red"
                                 size="xs"
                                 onClick={() => handleDeleteAllergy(allergy.id)}
@@ -732,7 +733,8 @@ const Allergies = () => {
 
               <Group justify="flex-end" mt="md">
                 <Button
-                  variant="light"
+                  variant="filled"
+                  size="xs"
                   onClick={() => {
                     handleCloseViewModal();
                     handleEditAllergy(viewingAllergy);

@@ -219,21 +219,21 @@ const InsuranceCard = ({ insurance, onEdit, onDelete, onSetPrimary, onView }) =>
         <Divider />
         <Group justify="flex-end" gap="xs" pt="sm">
           <Button
-            variant="light"
+            variant="filled"
             size="xs"
             onClick={() => onView(insurance)}
           >
             View
           </Button>
           <Button
-            variant="light"
+            variant="filled"
             size="xs"
             onClick={() => onEdit(insurance)}
           >
             Edit
           </Button>
           <Button
-            variant="light"
+            variant="filled"
             color="red"
             size="xs"
             onClick={() => onDelete(insurance)}

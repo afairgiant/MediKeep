@@ -17,8 +17,8 @@ import {
   Box,
   Divider,
   Modal,
+  Button,
 } from '@mantine/core';
-import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
@@ -398,6 +398,7 @@ const Conditions = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddCondition}
             size="md"
@@ -624,21 +625,21 @@ const Conditions = () => {
                             <Divider />
                             <Group justify="flex-end" gap="xs" pt="sm">
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() => handleViewCondition(condition)}
                               >
                                 View
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() => handleEditCondition(condition)}
                               >
                                 Edit
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 color="red"
                                 size="xs"
                                 onClick={() =>
@@ -907,7 +908,8 @@ const Conditions = () => {
 
               <Group justify="flex-end" mt="md">
                 <Button
-                  variant="light"
+                  variant="filled"
+                  size="xs"
                   onClick={() => {
                     handleCloseViewModal();
                     handleEditCondition(viewingCondition);

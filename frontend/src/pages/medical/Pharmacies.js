@@ -16,6 +16,7 @@ import {
   Divider,
   Anchor,
   Modal,
+  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -29,7 +30,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MantinePharmacyForm from '../../components/medical/MantinePharmacyForm';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
@@ -259,6 +259,7 @@ const Pharmacies = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddPharmacy}
             size="md"
@@ -413,21 +414,21 @@ const Pharmacies = () => {
                           <Divider />
                           <Group justify="flex-end" gap="xs" pt="sm">
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleViewPharmacy(pharmacy)}
                             >
                               View
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleEditPharmacy(pharmacy)}
                             >
                               Edit
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               color="red"
                               size="xs"
                               onClick={() => handleDeletePharmacy(pharmacy.id)}
@@ -588,6 +589,22 @@ const Pharmacies = () => {
                 </Card>
               </Grid.Col>
             </Grid>
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="filled"
+                size="xs"
+                onClick={() => {
+                  handleCloseViewModal();
+                  handleEditPharmacy(viewingPharmacy);
+                }}
+              >
+                Edit Pharmacy
+              </Button>
+              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
+                Close
+              </Button>
+            </Group>
           </Stack>
         )}
       </Modal>

@@ -11,7 +11,7 @@ import {
   convertForDisplay,
 } from '../../utils/unitConversion';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
+import { Button } from '@mantine/core';
 import MantinePatientForm from '../../components/medical/MantinePatientForm';
 import frontendLogger from '../../services/frontendLogger';
 import '../../styles/shared/MedicalPageShared.css';
@@ -283,7 +283,7 @@ const PatientInfo = () => {
           <div className="card-header">
             <h2>Personal Information</h2>
             {!isEditing && (
-              <Button variant="primary" onClick={handleEdit}>
+              <Button variant="filled" size="xs" onClick={handleEdit}>
                 ✏️ Edit
               </Button>
             )}

@@ -9,7 +9,6 @@ import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -17,6 +16,7 @@ import MantineMedicalForm from '../../components/medical/MantineMedicalForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,
@@ -458,21 +458,21 @@ const Medication = () => {
                       <Divider />
                       <Group justify="flex-end" gap="xs" pt="sm">
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleViewMedication(medication)}
                         >
                           View
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleEditMedication(medication)}
                         >
                           Edit
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           color="red"
                           size="xs"
                           onClick={() => handleDeleteMedication(medication.id)}
