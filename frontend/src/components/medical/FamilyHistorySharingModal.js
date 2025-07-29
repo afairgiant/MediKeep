@@ -503,7 +503,7 @@ const FamilyHistorySharingModal = ({
                 </Stack>
               </Stack>
             ) : (
-              <Paper p="md" radius="md" bg="gray.1">
+              <Paper p="md" radius="md" bg="gray.2">
                 <Text size="sm" c="dimmed" ta="center">
                   This family history is not currently shared with anyone.
                 </Text>

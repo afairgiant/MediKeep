@@ -407,7 +407,8 @@ const Medication = () => {
                             </Text>
                             <Text 
                               size="sm" 
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              c="blue"
+                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
                               onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
                               title="View practitioner details"
                             >
@@ -422,7 +423,8 @@ const Medication = () => {
                             </Text>
                             <Text 
                               size="sm" 
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              c="blue"
+                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
                               onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
                               title="View pharmacy details"
                             >
@@ -628,7 +630,8 @@ const Medication = () => {
                       {viewingMedication.practitioner ? (
                         <Text
                           size="sm"
-                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                          c="blue"
+                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
                           onClick={() => navigateToEntity('practitioner', viewingMedication.practitioner.id, navigate)}
                           title="View practitioner details"
                         >
@@ -647,7 +650,8 @@ const Medication = () => {
                       {viewingMedication.pharmacy ? (
                         <Text
                           size="sm"
-                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                          c="blue"
+                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
                           onClick={() => navigateToEntity('pharmacy', viewingMedication.pharmacy.id, navigate)}
                           title="View pharmacy details"
                         >

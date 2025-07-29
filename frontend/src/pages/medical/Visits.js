@@ -502,7 +502,8 @@ const Visits = () => {
                                 <Text
                                   size="sm"
                                   fw={500}
-                                  style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                                  c="blue"
+                                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                   onClick={() => navigateToEntity('condition', condition.id, navigate)}
                                   title="View condition details"
                                 >
@@ -858,7 +859,8 @@ const Visits = () => {
                           </Text>
                           <Text
                             size="sm"
-                            style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                            c="blue"
+                            style={{ cursor: 'pointer', textDecoration: 'underline' }}
                             onClick={() => navigateToEntity('condition', condition.id, navigate)}
                             title="View condition details"
                           >

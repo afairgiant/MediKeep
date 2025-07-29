@@ -256,15 +256,15 @@ const PatientInfo = () => {
           <div
             className="welcome-message"
             style={{
-              background: '#e8f4fd',
-              border: '1px solid #2196f3',
+              background: 'var(--mantine-color-blue-1)',
+              border: '1px solid var(--mantine-color-blue-6)',
               borderRadius: '8px',
               padding: '16px',
               marginBottom: '20px',
-              color: '#1976d2',
+              color: 'var(--mantine-color-blue-7)',
             }}
           >
-            <h3 style={{ margin: '0 0 8px 0', color: '#1976d2' }}>
+            <h3 style={{ margin: '0 0 8px 0', color: 'var(--mantine-color-blue-7)' }}>
               Welcome to Your Medical Records!
             </h3>
             <p style={{ margin: '0', lineHeight: '1.4' }}>

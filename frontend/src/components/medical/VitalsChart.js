@@ -81,8 +81,8 @@ const VITAL_CONFIGS = {
   systolic_bp: {
     label: 'Systolic BP',
     unit: 'mmHg',
-    color: '#e53e3e',
-    gradient: ['#e53e3e', '#fc8181'],
+    color: 'var(--mantine-color-red-6)',
+    gradient: ['var(--mantine-color-red-6)', 'var(--mantine-color-red-4)'],
     icon: IconHeart,
     normalRange: { min: 90, max: 120 },
     dangerThreshold: { min: 60, max: 180 },
@@ -90,8 +90,8 @@ const VITAL_CONFIGS = {
   diastolic_bp: {
     label: 'Diastolic BP',
     unit: 'mmHg',
-    color: '#dd6b20',
-    gradient: ['#dd6b20', '#f6ad55'],
+    color: 'var(--mantine-color-orange-6)',
+    gradient: ['var(--mantine-color-orange-6)', 'var(--mantine-color-orange-4)'],
     icon: IconHeart,
     normalRange: { min: 60, max: 80 },
     dangerThreshold: { min: 40, max: 120 },
@@ -99,8 +99,8 @@ const VITAL_CONFIGS = {
   heart_rate: {
     label: 'Heart Rate',
     unit: 'BPM',
-    color: '#4299e1',
-    gradient: ['#4299e1', '#63b3ed'],
+    color: 'var(--mantine-color-blue-6)',
+    gradient: ['var(--mantine-color-blue-6)', 'var(--mantine-color-blue-4)'],
     icon: IconActivity,
     normalRange: { min: 60, max: 100 },
     dangerThreshold: { min: 40, max: 150 },
@@ -108,8 +108,8 @@ const VITAL_CONFIGS = {
   temperature: {
     label: 'Temperature',
     unit: '°F',
-    color: '#38a169',
-    gradient: ['#38a169', '#68d391'],
+    color: 'var(--mantine-color-green-6)',
+    gradient: ['var(--mantine-color-green-6)', 'var(--mantine-color-green-4)'],
     icon: IconTemperature,
     normalRange: { min: 97.0, max: 99.5 },
     dangerThreshold: { min: 95.0, max: 104.0 },
@@ -117,8 +117,8 @@ const VITAL_CONFIGS = {
   weight: {
     label: 'Weight',
     unit: 'lbs',
-    color: '#805ad5',
-    gradient: ['#805ad5', '#b794f6'],
+    color: 'var(--mantine-color-violet-6)',
+    gradient: ['var(--mantine-color-violet-6)', 'var(--mantine-color-violet-4)'],
     icon: IconWeight,
     normalRange: null, // Varies by person
     dangerThreshold: null,
@@ -126,8 +126,8 @@ const VITAL_CONFIGS = {
   oxygen_saturation: {
     label: 'O₂ Saturation',
     unit: '%',
-    color: '#00b5d8',
-    gradient: ['#00b5d8', '#0bc5ea'],
+    color: 'var(--mantine-color-cyan-6)',
+    gradient: ['var(--mantine-color-cyan-6)', 'var(--mantine-color-cyan-4)'],
     icon: IconBolt,
     normalRange: { min: 95, max: 100 },
     dangerThreshold: { min: 85, max: 100 },
@@ -135,8 +135,8 @@ const VITAL_CONFIGS = {
   respiratory_rate: {
     label: 'Respiratory Rate',
     unit: '/min',
-    color: '#d69e2e',
-    gradient: ['#d69e2e', '#ecc94b'],
+    color: 'var(--mantine-color-yellow-6)',
+    gradient: ['var(--mantine-color-yellow-6)', 'var(--mantine-color-yellow-4)'],
     icon: IconActivity,
     normalRange: { min: 12, max: 20 },
     dangerThreshold: { min: 8, max: 30 },
@@ -261,7 +261,7 @@ const VitalsChart = ({
         return (
           <AreaChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
             {renderNormalRanges()}
@@ -289,7 +289,7 @@ const VitalsChart = ({
         return (
           <BarChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
             {renderNormalRanges()}
@@ -312,7 +312,7 @@ const VitalsChart = ({
         return (
           <ScatterChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
             {renderNormalRanges()}
@@ -334,7 +334,7 @@ const VitalsChart = ({
         return (
           <LineChart {...commonProps}>
             {renderAxes()}
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" />
             <Tooltip content={<CustomTooltip />} />
             <Legend content={<CustomLegend />} />
             {renderNormalRanges()}

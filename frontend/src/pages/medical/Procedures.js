@@ -411,7 +411,8 @@ const Procedures = () => {
                             </Text>
                             <Text 
                               size="sm"
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              c="blue"
+                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
                               onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
                               title="View practitioner details"
                             >
@@ -654,10 +655,10 @@ const Procedures = () => {
                           size="sm"
                           c={
                             viewingProcedure.practitioner_id
-                              ? 'inherit'
+                              ? 'blue'
                               : 'dimmed'
                           }
-                          style={viewingProcedure.practitioner_id ? { cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' } : {}}
+                          style={viewingProcedure.practitioner_id ? { cursor: 'pointer', textDecoration: 'underline' } : {}}
                           onClick={viewingProcedure.practitioner_id ? () => navigateToEntity('practitioner', viewingProcedure.practitioner_id, navigate) : undefined}
                           title={viewingProcedure.practitioner_id ? "View practitioner details" : undefined}
                         >

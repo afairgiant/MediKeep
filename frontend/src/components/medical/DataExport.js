@@ -207,14 +207,14 @@ const DataExport = () => {
             <Button
               variant={!bulkExport ? 'filled' : 'outline'}
               onClick={() => setBulkExport(false)}
-              size="md"
+              size="xs"
             >
               Single Export
             </Button>
             <Button
               variant={bulkExport ? 'filled' : 'outline'}
               onClick={() => setBulkExport(true)}
-              size="md"
+              size="xs"
             >
               Bulk Export
             </Button>
@@ -226,7 +226,7 @@ const DataExport = () => {
           <Stack gap="lg">
             {/* Format Selection */}
             <Box>
-              <Text fw={500} size="sm" mb="xs">
+              <Text fw={500} size="sm" mb="xs" c="inherit">
                 Export Format
               </Text>
               <Select
@@ -243,7 +243,7 @@ const DataExport = () => {
             {/* Scope Selection */}
             {!bulkExport ? (
               <Box>
-                <Text fw={500} size="sm" mb="xs">
+                <Text fw={500} size="sm" mb="xs" c="inherit">
                   Data to Export
                 </Text>
                 <Select
@@ -261,7 +261,7 @@ const DataExport = () => {
               </Box>
             ) : (
               <Box>
-                <Text fw={500} size="sm" mb="xs">
+                <Text fw={500} size="sm" mb="xs" c="inherit">
                   Select Data Types (Bulk Export)
                 </Text>
                 <Grid>
@@ -283,7 +283,7 @@ const DataExport = () => {
             {/* Date Range */}
             <Grid>
               <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text fw={500} size="sm" mb="xs">
+                <Text fw={500} size="sm" mb="xs" c="inherit">
                   Start Date (Optional)
                 </Text>
                 <DateInput
@@ -294,7 +294,7 @@ const DataExport = () => {
                 />
               </Grid.Col>
               <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text fw={500} size="sm" mb="xs">
+                <Text fw={500} size="sm" mb="xs" c="inherit">
                   End Date (Optional)
                 </Text>
                 <DateInput
@@ -329,7 +329,7 @@ const DataExport = () => {
                   onClick={handleSingleExport}
                   loading={loading}
                   fullWidth
-                  size="md"
+                  size="xs"
                   leftSection={<IconDownload size={16} />}
                 >
                   {loading
@@ -342,7 +342,7 @@ const DataExport = () => {
                   loading={loading}
                   disabled={selectedScopes.length === 0}
                   fullWidth
-                  size="md"
+                  size="xs"
                   leftSection={<IconDownload size={16} />}
                 >
                   {loading
@@ -354,25 +354,25 @@ const DataExport = () => {
           </Stack>
 
           {/* Export Information */}
-          <Paper withBorder p="md" radius="md" bg="blue.0">
+          <Paper withBorder p="md" radius="md">
             <Stack gap="sm">
-              <Text fw={500} c="blue.9">
+              <Text fw={500} c="blue">
                 Export Information
               </Text>
               <Stack gap="xs">
-                <Text size="sm" c="blue.8">
+                <Text size="sm" c="blue">
                   • JSON format provides complete machine-readable data
                 </Text>
-                <Text size="sm" c="blue.8">
+                <Text size="sm" c="blue">
                   • CSV format is ideal for spreadsheet applications
                 </Text>
-                <Text size="sm" c="blue.8">
+                <Text size="sm" c="blue">
                   • PDF format creates human-readable documents
                 </Text>
-                <Text size="sm" c="blue.8">
+                <Text size="sm" c="blue">
                   • Date filters apply to record dates where available
                 </Text>
-                <Text size="sm" c="blue.8">
+                <Text size="sm" c="blue">
                   • Bulk exports are packaged in ZIP files for convenience
                 </Text>
               </Stack>

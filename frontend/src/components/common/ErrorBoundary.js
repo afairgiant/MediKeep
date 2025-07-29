@@ -105,7 +105,7 @@ class ErrorBoundary extends React.Component {
               </button>
             </div>
 
-            <p style={{ marginTop: '20px', fontSize: '0.9em', color: '#666' }}>
+            <p style={{ marginTop: '20px', fontSize: '0.9em', color: 'var(--mantine-color-gray-6)' }}>
               The error has been automatically logged for investigation.
             </p>
           </div>
