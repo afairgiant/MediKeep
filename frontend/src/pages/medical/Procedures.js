@@ -14,6 +14,8 @@ import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineProcedureForm from '../../components/medical/MantineProcedureForm';
 import StatusBadge from '../../components/medical/StatusBadge';
+import DocumentManager from '../../components/shared/DocumentManager';
+import FileCountBadge from '../../components/shared/FileCountBadge';
 import {
   Badge,
   Button,
@@ -74,6 +76,37 @@ const Procedures = () => {
 
   // Use standardized data management
   const dataManagement = useDataManagement(procedures, config);
+
+  // File count management for cards
+  const [fileCounts, setFileCounts] = useState({});
+  const [fileCountsLoading, setFileCountsLoading] = useState({});
+
+  // Load file counts for procedures
+  useEffect(() => {
+    const loadFileCountsForProcedures = async () => {
+      if (!procedures || procedures.length === 0) return;
+      
+      const countPromises = procedures.map(async (procedure) => {
+        if (fileCounts[procedure.id] !== undefined) return; // Already loaded
+        
+        setFileCountsLoading(prev => ({ ...prev, [procedure.id]: true }));
+        try {
+          const files = await apiService.getEntityFiles('procedure', procedure.id);
+          const count = Array.isArray(files) ? files.length : 0;
+          setFileCounts(prev => ({ ...prev, [procedure.id]: count }));
+        } catch (error) {
+          console.error(`Error loading file count for procedure ${procedure.id}:`, error);
+          setFileCounts(prev => ({ ...prev, [procedure.id]: 0 }));
+        } finally {
+          setFileCountsLoading(prev => ({ ...prev, [procedure.id]: false }));
+        }
+      });
+      
+      await Promise.all(countPromises);
+    };
+
+    loadFileCountsForProcedures();
+  }, [procedures, fileCounts]);
 
   // Form state
   const [showModal, setShowModal] = useState(false);
@@ -350,11 +383,21 @@ const Procedures = () => {
                           <Text fw={600} size="lg">
                             {procedure.procedure_name}
                           </Text>
-                          {procedure.procedure_type && (
-                            <Badge variant="light" color="blue" size="md">
-                              {procedure.procedure_type}
-                            </Badge>
-                          )}
+                          <Group gap="xs">
+                            {procedure.procedure_type && (
+                              <Badge variant="light" color="blue" size="md">
+                                {procedure.procedure_type}
+                              </Badge>
+                            )}
+                            <FileCountBadge
+                              count={fileCounts[procedure.id] || 0}
+                              entityType="procedure"
+                              variant="badge"
+                              size="sm"
+                              loading={fileCountsLoading[procedure.id] || false}
+                              onClick={() => handleViewProcedure(procedure)}
+                            />
+                          </Group>
                         </Stack>
                         <StatusBadge status={procedure.status} />
                       </Group>
@@ -782,6 +825,29 @@ const Procedures = () => {
                 >
                   {viewingProcedure.notes || 'No clinical notes available'}
                 </Text>
+              </Stack>
+            </Card>
+
+            {/* Document Management */}
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  ATTACHED DOCUMENTS
+                </Text>
+                <Divider />
+                <DocumentManager
+                  entityType="procedure"
+                  entityId={viewingProcedure.id}
+                  mode="view"
+                  config={{
+                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
+                    maxSize: 10 * 1024 * 1024, // 10MB
+                    maxFiles: 10
+                  }}
+                  onError={(error) => {
+                    console.error('Document manager error:', error);
+                  }}
+                />
               </Stack>
             </Card>
 

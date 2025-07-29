@@ -17,6 +17,7 @@ import { formatDate } from '../../../utils/helpers';
 import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatFieldLabel, formatFieldValue } from '../../../utils/fieldFormatters';
 import StatusBadge from '../StatusBadge';
+import DocumentManager from '../../shared/DocumentManager';
 
 const InsuranceViewModal = ({ 
   isOpen, 
@@ -209,6 +210,24 @@ const InsuranceViewModal = ({
             <Text style={{ whiteSpace: 'pre-wrap' }}>{insurance.notes}</Text>
           </div>
         )}
+
+        {/* Document Management */}
+        <div>
+          <Title order={4} mb="sm">Attached Documents</Title>
+          <DocumentManager
+            entityType="insurance"
+            entityId={insurance.id}
+            mode="view"
+            config={{
+              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
+              maxSize: 10 * 1024 * 1024, // 10MB
+              maxFiles: 10
+            }}
+            onError={(error) => {
+              console.error('Document manager error:', error);
+            }}
+          />
+        </div>
 
         {/* Action Buttons */}
         <Divider />

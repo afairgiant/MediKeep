@@ -353,25 +353,204 @@ class ApiService {
   deleteLabResult(labResultId, signal) {
     return this.deleteEntity(ENTITY_TYPES.LAB_RESULT, labResultId, signal);
   }
-  getLabResultFiles(labResultId, signal) {
-    return this.get(`/lab-results/${labResultId}/files`, { signal });
-  }
-  uploadLabResultFile(labResultId, file, description = '', signal) {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (description && description.trim()) {
-      formData.append('description', description);
+
+  // ==========================================
+  // GENERIC FILE MANAGEMENT METHODS
+  // ==========================================
+  
+  /**
+   * Generic file management methods that work with any entity type
+   * Supports: lab-result, insurance, visit, procedure, etc.
+   */
+  
+  // Map entity types to their file endpoint paths
+  getFileEndpoint(entityType, entityId) {
+    const endpointMap = {
+      'lab-result': `/lab-results/${entityId}/files`,
+      'insurance': `/insurances/${entityId}/files`,
+      'visit': `/encounters/${entityId}/files`,
+      'procedure': `/procedures/${entityId}/files`,
+      'encounter': `/encounters/${entityId}/files`, // Alternative name for visits
+    };
+    
+    const endpoint = endpointMap[entityType];
+    if (!endpoint) {
+      throw new Error(`Unsupported entity type for file operations: ${entityType}`);
     }
-    return this.post(`/lab-results/${labResultId}/files`, formData, { signal });
+    
+    return endpoint;
   }
-  downloadLabResultFile(fileId, signal) {
-    return this.get(`/lab-result-files/${fileId}/download`, {
-      responseType: 'blob',
-      signal,
-    });
+
+  // Get all files for an entity
+  getEntityFiles(entityType, entityId, signal) {
+    try {
+      const endpoint = this.getFileEndpoint(entityType, entityId);
+      
+      logger.debug('api_get_entity_files', 'Fetching entity files', {
+        entityType,
+        entityId,
+        endpoint,
+        component: 'ApiService'
+      });
+      
+      return this.get(endpoint, { signal });
+    } catch (error) {
+      logger.error('api_get_entity_files_error', 'Failed to get entity files', {
+        entityType,
+        entityId,
+        error: error.message,
+        component: 'ApiService'
+      });
+      throw error;
+    }
   }
+
+  // Upload file to an entity
+  uploadEntityFile(entityType, entityId, file, description = '', signal) {
+    try {
+      const endpoint = this.getFileEndpoint(entityType, entityId);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      if (description && description.trim()) {
+        formData.append('description', description.trim());
+      }
+      
+      logger.info('api_upload_entity_file', 'Uploading file to entity', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        fileSize: file.size,
+        hasDescription: !!description,
+        endpoint,
+        component: 'ApiService'
+      });
+      
+      return this.post(endpoint, formData, { signal });
+    } catch (error) {
+      logger.error('api_upload_entity_file_error', 'Failed to upload entity file', {
+        entityType,
+        entityId,
+        fileName: file?.name,
+        error: error.message,
+        component: 'ApiService'
+      });
+      throw error;
+    }
+  }
+
+  // Download file (generic - file ID is enough)
+  async downloadEntityFile(fileId, fileName, signal) {
+    try {
+      logger.info('api_download_entity_file', 'Downloading entity file', {
+        fileId,
+        fileName,
+        component: 'ApiService'
+      });
+      
+      const blob = await this.get(`/files/${fileId}/download`, {
+        responseType: 'blob',
+        signal
+      });
+      
+      // Handle blob download in browser
+      if (blob instanceof Blob) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName || `file_${fileId}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        logger.info('api_download_entity_file_success', 'File download completed', {
+          fileId,
+          fileName,
+          component: 'ApiService'
+        });
+      } else {
+        throw new Error('Invalid blob response from server');
+      }
+    } catch (error) {
+      logger.error('api_download_entity_file_error', 'Failed to download entity file', {
+        fileId,
+        fileName,
+        error: error.message,
+        component: 'ApiService'
+      });
+      throw error;
+    }
+  }
+
+  // Delete file (generic - file ID is enough)
+  deleteEntityFile(fileId, signal) {
+    try {
+      logger.info('api_delete_entity_file', 'Deleting entity file', {
+        fileId,
+        component: 'ApiService'
+      });
+      
+      return this.delete(`/files/${fileId}`, { signal });
+    } catch (error) {
+      logger.error('api_delete_entity_file_error', 'Failed to delete entity file', {
+        fileId,
+        error: error.message,
+        component: 'ApiService'
+      });
+      throw error;
+    }
+  }
+
+  // Batch get file counts for multiple entities (performance optimization)
+  getMultipleEntityFilesCounts(entityType, entityIds, signal) {
+    try {
+      logger.debug('api_batch_file_counts', 'Getting batch file counts', {
+        entityType,
+        entityCount: entityIds?.length,
+        component: 'ApiService'
+      });
+      
+      return this.post('/files/batch-counts', {
+        entity_type: entityType,
+        entity_ids: entityIds
+      }, { signal });
+    } catch (error) {
+      logger.error('api_batch_file_counts_error', 'Failed to get batch file counts', {
+        entityType,
+        entityCount: entityIds?.length,
+        error: error.message,
+        component: 'ApiService'
+      });
+      throw error;
+    }
+  }
+
+  // ==========================================
+  // BACKWARD COMPATIBILITY WRAPPERS
+  // ==========================================
+  
+  /**
+   * Maintain backward compatibility with existing LabResult file methods
+   * These now use the generic methods internally
+   */
+  
+  // Backward compatibility for lab result files
+  getLabResultFiles(labResultId, signal) {
+    return this.getEntityFiles('lab-result', labResultId, signal);
+  }
+  
+  uploadLabResultFile(labResultId, file, description = '', signal) {
+    return this.uploadEntityFile('lab-result', labResultId, file, description, signal);
+  }
+  
+  downloadLabResultFile(fileId, fileName, signal) {
+    return this.downloadEntityFile(fileId, fileName, signal);
+  }
+  
   deleteLabResultFile(fileId, signal) {
-    return this.delete(`/lab-result-files/${fileId}`, { signal });
+    return this.deleteEntityFile(fileId, signal);
   }
 
   // Lab Result - Condition Relationship methods
