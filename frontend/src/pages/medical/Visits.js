@@ -16,6 +16,7 @@ import {
   Box,
   Divider,
   Modal,
+  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -34,7 +35,6 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -368,6 +368,7 @@ const Visits = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddVisit}
             size="md"
@@ -501,7 +502,8 @@ const Visits = () => {
                                 <Text
                                   size="sm"
                                   fw={500}
-                                  style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                                  c="blue"
+                                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                   onClick={() => navigateToEntity('condition', condition.id, navigate)}
                                   title="View condition details"
                                 >
@@ -557,7 +559,7 @@ const Visits = () => {
                             <Text size="sm" c="dimmed" mb="xs">
                               📋 Diagnosis/Assessment
                             </Text>
-                            <Text size="sm" c="gray.7">
+                            <Text size="sm">
                               {visit.diagnosis}
                             </Text>
                           </Box>
@@ -575,7 +577,7 @@ const Visits = () => {
                             <Text size="sm" c="dimmed" mb="xs">
                               💊 Treatment Plan
                             </Text>
-                            <Text size="sm" c="gray.7">
+                            <Text size="sm">
                               {visit.treatment_plan}
                             </Text>
                           </Box>
@@ -593,7 +595,7 @@ const Visits = () => {
                             <Text size="sm" c="dimmed" mb="xs">
                               📅 Follow-up Instructions
                             </Text>
-                            <Text size="sm" c="gray.7">
+                            <Text size="sm">
                               {visit.follow_up_instructions}
                             </Text>
                           </Box>
@@ -611,7 +613,7 @@ const Visits = () => {
                             <Text size="sm" c="dimmed" mb="xs">
                               📝 Additional Notes
                             </Text>
-                            <Text size="sm" c="gray.7">
+                            <Text size="sm">
                               {visit.notes}
                             </Text>
                           </Box>
@@ -621,21 +623,21 @@ const Visits = () => {
                           <Divider />
                           <Group justify="flex-end" gap="xs" pt="sm">
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleViewVisit(visit)}
                             >
                               View
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleEditVisit(visit)}
                             >
                               Edit
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               color="red"
                               size="xs"
                               onClick={() => handleDeleteVisit(visit.id)}
@@ -857,7 +859,8 @@ const Visits = () => {
                           </Text>
                           <Text
                             size="sm"
-                            style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                            c="blue"
+                            style={{ cursor: 'pointer', textDecoration: 'underline' }}
                             onClick={() => navigateToEntity('condition', condition.id, navigate)}
                             title="View condition details"
                           >
@@ -971,7 +974,8 @@ const Visits = () => {
 
             <Group justify="flex-end" mt="md">
               <Button
-                variant="light"
+                variant="filled"
+                size="xs"
                 onClick={() => {
                   handleCloseViewModal();
                   // Small delay to ensure view modal is closed before opening edit modal
@@ -982,7 +986,7 @@ const Visits = () => {
               >
                 Edit Visit
               </Button>
-              <Button variant="filled" onClick={handleCloseViewModal}>
+              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
                 Close
               </Button>
             </Group>

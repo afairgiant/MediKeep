@@ -12,11 +12,11 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import { Button } from '../../components/ui';
 import MantineProcedureForm from '../../components/medical/MantineProcedureForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,
@@ -411,7 +411,8 @@ const Procedures = () => {
                             </Text>
                             <Text 
                               size="sm"
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              c="blue"
+                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
                               onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
                               title="View practitioner details"
                             >
@@ -465,21 +466,21 @@ const Procedures = () => {
                       <Divider />
                       <Group justify="flex-end" gap="xs" pt="sm">
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleViewProcedure(procedure)}
                         >
                           View
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleEditProcedure(procedure)}
                         >
                           Edit
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           color="red"
                           size="xs"
                           onClick={() => handleDeleteProcedure(procedure.id)}
@@ -654,10 +655,10 @@ const Procedures = () => {
                           size="sm"
                           c={
                             viewingProcedure.practitioner_id
-                              ? 'inherit'
+                              ? 'blue'
                               : 'dimmed'
                           }
-                          style={viewingProcedure.practitioner_id ? { cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' } : {}}
+                          style={viewingProcedure.practitioner_id ? { cursor: 'pointer', textDecoration: 'underline' } : {}}
                           onClick={viewingProcedure.practitioner_id ? () => navigateToEntity('practitioner', viewingProcedure.practitioner_id, navigate) : undefined}
                           title={viewingProcedure.practitioner_id ? "View practitioner details" : undefined}
                         >
@@ -786,7 +787,8 @@ const Procedures = () => {
 
             <Group justify="flex-end" mt="md">
               <Button
-                variant="light"
+                variant="filled"
+                size="xs"
                 onClick={() => {
                   handleCloseViewModal();
                   handleEditProcedure(viewingProcedure);

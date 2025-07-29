@@ -16,9 +16,9 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ConditionRelationships from '../../components/medical/ConditionRelationships';
-import { Button } from '../../components/ui';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,
@@ -843,21 +843,21 @@ const LabResults = () => {
                       <Divider />
                       <Group justify="flex-end" gap="xs" pt="sm">
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleViewLabResult(result)}
                         >
                           View
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           size="xs"
                           onClick={() => handleEditLabResult(result)}
                         >
                           Edit
                         </Button>
                         <Button
-                          variant="light"
+                          variant="filled"
                           color="red"
                           size="xs"
                           onClick={() => handleDeleteLabResult(result.id)}
@@ -1046,7 +1046,7 @@ const LabResults = () => {
                   <Title order={5}>Files to Upload:</Title>
                   <Stack gap="sm">
                     {pendingFiles.map(pendingFile => (
-                      <Paper key={pendingFile.id} withBorder p="sm" bg="blue.0">
+                      <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
                         <Group justify="space-between" align="flex-start">
                           <Group gap="xs" style={{ flex: 1 }}>
                             <ThemeIcon variant="light" color="blue" size="sm">
@@ -1200,7 +1200,7 @@ const LabResults = () => {
                 <Text fw={500} size="sm" c="dimmed">
                   Notes
                 </Text>
-                <Paper withBorder p="sm" bg="gray.0">
+                <Paper withBorder p="sm" bg="gray.1">
                   <Text
                     style={{ whiteSpace: 'pre-wrap' }}
                     c={viewingLabResult.notes ? 'inherit' : 'dimmed'}
@@ -1228,7 +1228,7 @@ const LabResults = () => {
               <Title order={3}>Associated Files</Title>
 
               {/* File Upload Form */}
-              <Paper withBorder p="md" bg="gray.0">
+              <Paper withBorder p="md" bg="gray.1">
                 <form onSubmit={handleFileUpload}>
                   <Stack gap="md">
                     <Group align="flex-end">
@@ -1332,6 +1332,26 @@ const LabResults = () => {
                 )}
               </Stack>
             </Stack>
+
+            {/* Modal Action Buttons */}
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="filled"
+                size="xs"
+                onClick={() => {
+                  handleCloseViewModal();
+                  handleEditLabResult(viewingLabResult);
+                }}
+              >
+                Edit Lab Result
+              </Button>
+              <Button 
+                variant="filled" 
+                onClick={handleCloseViewModal}
+              >
+                Close
+              </Button>
+            </Group>
           </>
         )}
       </Modal>

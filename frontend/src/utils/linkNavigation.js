@@ -127,6 +127,7 @@ export const createEntityLinkProps = (entityType, entityData, navigate, getEntit
   return {
     text: displayName,
     onClick: () => navigateToEntity(entityType, entityId, navigate),
-    style: { cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }
+    style: { cursor: 'pointer', textDecoration: 'underline' },
+    c: 'blue'
   };
 };

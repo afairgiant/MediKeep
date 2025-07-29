@@ -242,6 +242,18 @@
   transition: width 0.3s ease;
 }
 
+.disk-usage-fill.healthy {
+  background-color: var(--color-success);
+}
+
+.disk-usage-fill.warning {
+  background-color: var(--color-warning);
+}
+
+.disk-usage-fill.error {
+  background-color: var(--color-danger);
+}
+
 .disk-usage-text {
   font-size: 0.85rem;
   color: var(--color-text-secondary);

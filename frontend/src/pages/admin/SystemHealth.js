@@ -289,18 +289,11 @@ const SystemHealth = () => {
                   <div className="disk-usage-info">
                     <div className="disk-usage-bar">
                       <div
-                        className="disk-usage-fill"
+                        className={`disk-usage-fill ${getStorageUsageColor(
+                          storageHealth.disk_space.usage_percent
+                        )}`}
                         style={{
                           width: `${storageHealth.disk_space.usage_percent}%`,
-                          backgroundColor: {
-                            healthy: '#10b981',
-                            warning: '#f59e0b',
-                            error: '#ef4444',
-                          }[
-                            getStorageUsageColor(
-                              storageHealth.disk_space.usage_percent
-                            )
-                          ],
                         }}
                       />
                     </div>

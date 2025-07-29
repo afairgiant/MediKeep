@@ -16,6 +16,7 @@ import {
   Divider,
   Anchor,
   Modal,
+  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -29,7 +30,6 @@ import {
 import { apiService } from '../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -321,6 +321,7 @@ const Practitioners = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddPractitioner}
             size="md"
@@ -483,7 +484,7 @@ const Practitioners = () => {
                             <Divider />
                             <Group justify="flex-end" gap="xs" pt="sm">
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() =>
                                   handleViewPractitioner(practitioner)
@@ -492,7 +493,7 @@ const Practitioners = () => {
                                 View
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() =>
                                   handleEditPractitioner(practitioner)
@@ -501,7 +502,7 @@ const Practitioners = () => {
                                 Edit
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 color="red"
                                 size="xs"
                                 onClick={() =>
@@ -714,6 +715,22 @@ const Practitioners = () => {
                 </Card>
               </Grid.Col>
             </Grid>
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                variant="filled"
+                size="xs"
+                onClick={() => {
+                  handleCloseViewModal();
+                  handleEditPractitioner(viewingPractitioner);
+                }}
+              >
+                Edit Practitioner
+              </Button>
+              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
+                Close
+              </Button>
+            </Group>
           </Stack>
         )}
       </Modal>

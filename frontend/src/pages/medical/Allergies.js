@@ -17,8 +17,8 @@ import {
   Box,
   Divider,
   Modal,
+  Button,
 } from '@mantine/core';
-import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
@@ -333,6 +333,7 @@ const Allergies = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddAllergy}
             size="md"
@@ -490,7 +491,8 @@ const Allergies = () => {
                                   <Text
                                     size="sm"
                                     fw={500}
-                                    style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                                    c="blue"
+                                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                     onClick={() => navigateToEntity('medication', medication.id, navigate)}
                                     title="View medication details"
                                   >
@@ -505,7 +507,7 @@ const Allergies = () => {
                                 <Text size="sm" c="dimmed" mb="xs">
                                   Notes:
                                 </Text>
-                                <Text size="sm" c="gray.7">
+                                <Text size="sm" c="dimmed">
                                   {allergy.notes}
                                 </Text>
                               </Box>
@@ -516,21 +518,21 @@ const Allergies = () => {
                             <Divider />
                             <Group justify="flex-end" gap="xs" pt="sm">
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() => handleViewAllergy(allergy)}
                               >
                                 View
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 size="xs"
                                 onClick={() => handleEditAllergy(allergy)}
                               >
                                 Edit
                               </Button>
                               <Button
-                                variant="light"
+                                variant="filled"
                                 color="red"
                                 size="xs"
                                 onClick={() => handleDeleteAllergy(allergy.id)}
@@ -666,7 +668,8 @@ const Allergies = () => {
                             </Text>
                             <Text
                               size="sm"
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
+                              c="blue"
+                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
                               onClick={() => navigateToEntity('medication', medication.id, navigate)}
                               title="View medication details"
                             >
@@ -732,7 +735,8 @@ const Allergies = () => {
 
               <Group justify="flex-end" mt="md">
                 <Button
-                  variant="light"
+                  variant="filled"
+                  size="xs"
                   onClick={() => {
                     handleCloseViewModal();
                     handleEditAllergy(viewingAllergy);
@@ -740,7 +744,7 @@ const Allergies = () => {
                 >
                   Edit Allergy
                 </Button>
-                <Button variant="filled" onClick={handleCloseViewModal}>
+                <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
                   Close
                 </Button>
               </Group>

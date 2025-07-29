@@ -19,7 +19,6 @@ import { printInsuranceRecord } from '../../utils/printTemplateGenerator';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -29,6 +28,7 @@ import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFo
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
 import {
   Badge,
+  Button,
   Card,
   Group,
   Stack,

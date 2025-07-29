@@ -153,7 +153,7 @@ const MantinePractitionerForm = ({
             }
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: '12px', color: '#228be6' }}
+            style={{ fontSize: '12px', color: 'var(--mantine-color-blue-6)' }}
           >
             Visit Website ↗
           </Anchor>
