@@ -47,7 +47,7 @@ const FileUploadZone = ({
     // Check file type
     const fileName = file.name.toLowerCase();
     const hasValidExtension = acceptedTypes.some(type => 
-      fileName.endsWith(type.toLowerCase().replace('.', ''))
+      fileName.endsWith(type.toLowerCase())
     );
     
     if (!hasValidExtension) {

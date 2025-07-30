@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging_config import get_logger
-from app.models.models import EntityFile
+from app.models.models import EntityFile, get_utc_now
 from app.schemas.entity_file import (
     EntityFileCreate,
     EntityFileResponse,
@@ -137,7 +137,7 @@ class GenericEntityFileService:
                 file_size=file_size,
                 description=description,
                 category=category,
-                uploaded_at=datetime.utcnow()
+                uploaded_at=get_utc_now()
             )
             
             db.add(entity_file)
