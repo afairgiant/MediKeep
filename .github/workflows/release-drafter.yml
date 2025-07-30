@@ -18,8 +18,11 @@ permissions:
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
-    # Only run on main branch pushes or merged PRs to main
-    if: github.ref == 'refs/heads/main' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+    # Run on main branch pushes, merged PRs to main, or manual triggers
+    if: |
+      github.ref == 'refs/heads/main' || 
+      (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main') ||
+      github.event_name == 'workflow_dispatch'
     steps:
       - uses: release-drafter/release-drafter@v6
         with:
