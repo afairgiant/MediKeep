@@ -83,6 +83,13 @@ class Settings:  # App Info
         os.getenv("TRASH_RETENTION_DAYS", "30")
     )  # Keep deleted files for 30 days
 
+    # Paperless-ngx Integration Configuration
+    PAPERLESS_REQUEST_TIMEOUT: int = int(os.getenv("PAPERLESS_REQUEST_TIMEOUT", "30"))  # seconds
+    PAPERLESS_CONNECT_TIMEOUT: int = int(os.getenv("PAPERLESS_CONNECT_TIMEOUT", "10"))  # seconds
+    PAPERLESS_MAX_UPLOAD_SIZE: int = int(os.getenv("PAPERLESS_MAX_UPLOAD_SIZE", str(50 * 1024 * 1024)))  # 50MB
+    PAPERLESS_RETRY_ATTEMPTS: int = int(os.getenv("PAPERLESS_RETRY_ATTEMPTS", "3"))
+    PAPERLESS_SALT: str = os.getenv("PAPERLESS_SALT", "paperless_integration_salt_v1")
+
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
