@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     condition,
     emergency_contact,
     encounter,
+    entity_file,
     export,
     family_member,
     family_history_sharing,
@@ -49,6 +50,9 @@ api_router.include_router(
 )
 api_router.include_router(
     lab_result_file.router, prefix="/lab-result-files", tags=["lab-result-files"]
+)
+api_router.include_router(
+    entity_file.router, prefix="/entity-files", tags=["entity-files"]
 )
 
 # Medical record endpoints

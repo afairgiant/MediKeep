@@ -14,6 +14,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     column,
+    func,
 )
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
@@ -81,17 +82,23 @@ class User(Base):
     )
 
     # V1: New relationships
-    owned_patients = orm_relationship("Patient", foreign_keys="Patient.owner_user_id", overlaps="owner")
+    owned_patients = orm_relationship(
+        "Patient", foreign_keys="Patient.owner_user_id", overlaps="owner"
+    )
     current_patient_context = orm_relationship(
         "Patient", foreign_keys=[active_patient_id]
     )
 
     # V1: Patient sharing relationships
     shared_patients_by_me = orm_relationship(
-        "PatientShare", foreign_keys="PatientShare.shared_by_user_id", overlaps="shared_by"
+        "PatientShare",
+        foreign_keys="PatientShare.shared_by_user_id",
+        overlaps="shared_by",
     )
     shared_patients_with_me = orm_relationship(
-        "PatientShare", foreign_keys="PatientShare.shared_with_user_id", overlaps="shared_with"
+        "PatientShare",
+        foreign_keys="PatientShare.shared_with_user_id",
+        overlaps="shared_with",
     )
 
 
@@ -138,7 +145,9 @@ class Patient(Base):
     )
 
     # Table Relationships
-    owner = orm_relationship("User", foreign_keys=[owner_user_id], overlaps="owned_patients")
+    owner = orm_relationship(
+        "User", foreign_keys=[owner_user_id], overlaps="owned_patients"
+    )
     user = orm_relationship("User", foreign_keys=[user_id], back_populates="patient")
     practitioner = orm_relationship("Practitioner", back_populates="patients")
     medications = orm_relationship(
@@ -369,6 +378,42 @@ class LabResultFile(Base):
 
     # Table Relationships
     lab_result = orm_relationship("LabResult", back_populates="files")
+
+
+class EntityFile(Base):
+    """
+    Generic file management for all entity types.
+    Supports lab-results, insurance, visits, procedures, and future entity types.
+    """
+
+    __tablename__ = "entity_files"
+
+    id = Column(Integer, primary_key=True)
+    entity_type = Column(
+        String(50), nullable=False
+    )  # 'lab-result', 'insurance', 'visit', 'procedure'
+    entity_id = Column(Integer, nullable=False)  # Foreign key to the entity
+    file_name = Column(String(255), nullable=False)  # Original filename
+    file_path = Column(String(500), nullable=False)  # Path to file on server
+    file_type = Column(String(100), nullable=False)  # MIME type or extension
+    file_size = Column(Integer, nullable=True)  # Size in bytes
+    description = Column(Text, nullable=True)  # Optional description
+    category = Column(
+        String(100), nullable=True
+    )  # File category (result, report, card, etc.)
+    uploaded_at = Column(DateTime, nullable=False)  # Upload timestamp
+    created_at = Column(DateTime, nullable=False, default=get_utc_now)
+    updated_at = Column(
+        DateTime, nullable=False, default=get_utc_now, onupdate=get_utc_now
+    )
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_entity_type_id", "entity_type", "entity_id"),
+        Index("idx_category", "category"),
+        Index("idx_uploaded_at", "uploaded_at"),
+        Index("idx_created_at", "created_at"),
+    )
 
 
 class LabResultCondition(Base):
@@ -878,8 +923,12 @@ class PatientShare(Base):
 
     # Relationships
     patient = orm_relationship("Patient", foreign_keys=[patient_id], overlaps="shares")
-    shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id], overlaps="shared_patients_by_me")
-    shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id], overlaps="shared_patients_with_me")
+    shared_by = orm_relationship(
+        "User", foreign_keys=[shared_by_user_id], overlaps="shared_patients_by_me"
+    )
+    shared_with = orm_relationship(
+        "User", foreign_keys=[shared_with_user_id], overlaps="shared_patients_with_me"
+    )
 
     # Constraints
     __table_args__ = (
@@ -983,10 +1032,10 @@ class FamilyHistoryShare(Base):
         # Multiple inactive shares are allowed to maintain history
         Index(
             "unique_active_family_history_share_partial",
-            "family_member_id", 
+            "family_member_id",
             "shared_with_user_id",
             unique=True,
-            postgresql_where=(column("is_active") == True)
+            postgresql_where=(column("is_active") == True),
         ),
     )
 
@@ -1025,7 +1074,9 @@ class Insurance(Base):
         String, nullable=False
     )  # Use InsuranceType enum: medical, dental, vision, prescription
     company_name = Column(String, nullable=False)
-    employer_group = Column(String, nullable=True)  # Company or organization providing the insurance
+    employer_group = Column(
+        String, nullable=True
+    )  # Company or organization providing the insurance
     member_name = Column(String, nullable=False)
     member_id = Column(String, nullable=False)
     group_number = Column(String, nullable=True)
@@ -1053,9 +1104,7 @@ class Insurance(Base):
     coverage_details = Column(
         JSON, nullable=True
     )  # Copays, deductibles, percentages, BIN/PCN, etc.
-    contact_info = Column(
-        JSON, nullable=True
-    )  # Phone numbers, addresses, websites
+    contact_info = Column(JSON, nullable=True)  # Phone numbers, addresses, websites
 
     # General notes
     notes = Column(Text, nullable=True)

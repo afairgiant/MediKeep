@@ -365,20 +365,8 @@ class ApiService {
   
   // Map entity types to their file endpoint paths
   getFileEndpoint(entityType, entityId) {
-    const endpointMap = {
-      'lab-result': `/lab-results/${entityId}/files`,
-      'insurance': `/insurances/${entityId}/files`,
-      'visit': `/encounters/${entityId}/files`,
-      'procedure': `/procedures/${entityId}/files`,
-      'encounter': `/encounters/${entityId}/files`, // Alternative name for visits
-    };
-    
-    const endpoint = endpointMap[entityType];
-    if (!endpoint) {
-      throw new Error(`Unsupported entity type for file operations: ${entityType}`);
-    }
-    
-    return endpoint;
+    // Use the new generic backend API endpoints
+    return `/entity-files/${entityType}/${entityId}/files`;
   }
 
   // Get all files for an entity
@@ -448,7 +436,7 @@ class ApiService {
         component: 'ApiService'
       });
       
-      const blob = await this.get(`/files/${fileId}/download`, {
+      const blob = await this.get(`/entity-files/files/${fileId}/download`, {
         responseType: 'blob',
         signal
       });
@@ -492,7 +480,7 @@ class ApiService {
         component: 'ApiService'
       });
       
-      return this.delete(`/files/${fileId}`, { signal });
+      return this.delete(`/entity-files/files/${fileId}`, { signal });
     } catch (error) {
       logger.error('api_delete_entity_file_error', 'Failed to delete entity file', {
         fileId,
@@ -512,7 +500,7 @@ class ApiService {
         component: 'ApiService'
       });
       
-      return this.post('/files/batch-counts', {
+      return this.post('/entity-files/files/batch-counts', {
         entity_type: entityType,
         entity_ids: entityIds
       }, { signal });

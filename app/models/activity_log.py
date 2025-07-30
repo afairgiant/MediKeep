@@ -136,6 +136,7 @@ class EntityType:
     MEDICATION = "medication"
     LAB_RESULT = "lab_result"
     LAB_RESULT_FILE = "lab_result_file"
+    ENTITY_FILE = "entity_file"
     CONDITION = "condition"
     TREATMENT = "treatment"
     IMMUNIZATION = "immunization"
@@ -162,6 +163,7 @@ class EntityType:
             cls.MEDICATION,
             cls.LAB_RESULT,
             cls.LAB_RESULT_FILE,
+            cls.ENTITY_FILE,
             cls.CONDITION,
             cls.TREATMENT,
             cls.IMMUNIZATION,
