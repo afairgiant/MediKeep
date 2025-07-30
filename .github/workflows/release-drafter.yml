@@ -10,10 +10,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write  # Required for creating releases
   pull-requests: read
-  # Required for creating releases
-  releases: write
 
 jobs:
   update_release_draft:
