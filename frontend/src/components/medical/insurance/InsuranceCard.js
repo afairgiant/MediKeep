@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Text,
@@ -16,8 +16,33 @@ import { formatDate } from '../../../utils/helpers';
 import { notifications } from '@mantine/notifications';
 import logger from '../../../services/logger';
 import StatusBadge from '../StatusBadge';
+import FileCountBadge from '../../shared/FileCountBadge';
+import { apiService } from '../../../services/api';
 
 const InsuranceCard = ({ insurance, onEdit, onDelete, onSetPrimary, onView }) => {
+  const [fileCount, setFileCount] = useState(0);
+  const [fileCountLoading, setFileCountLoading] = useState(false);
+
+  // Load file count for this insurance
+  useEffect(() => {
+    const loadFileCount = async () => {
+      if (!insurance?.id) return;
+      
+      setFileCountLoading(true);
+      try {
+        const files = await apiService.getEntityFiles('insurance', insurance.id);
+        setFileCount(Array.isArray(files) ? files.length : 0);
+      } catch (error) {
+        console.error('Error loading file count:', error);
+        setFileCount(0);
+      } finally {
+        setFileCountLoading(false);
+      }
+    };
+
+    loadFileCount();
+  }, [insurance?.id]);
+
   // Get type-specific styling
   const getTypeColor = (type) => {
     switch (type) {
@@ -131,6 +156,14 @@ const InsuranceCard = ({ insurance, onEdit, onDelete, onSetPrimary, onView }) =>
                   Primary
                 </Badge>
               )}
+              <FileCountBadge
+                count={fileCount}
+                entityType="insurance"
+                variant="badge"
+                size="sm"
+                loading={fileCountLoading}
+                onClick={() => onView(insurance)}
+              />
             </Group>
           </Stack>
           <StatusBadge status={insurance.status} />

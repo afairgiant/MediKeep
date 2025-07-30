@@ -39,6 +39,8 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineVisitForm from '../../components/medical/MantineVisitForm';
+import DocumentManager from '../../components/shared/DocumentManager';
+import FileCountBadge from '../../components/shared/FileCountBadge';
 
 const Visits = () => {
   const [viewMode, setViewMode] = useState('cards');
@@ -84,6 +86,10 @@ const Visits = () => {
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
   
+  // File count management for cards
+  const [fileCounts, setFileCounts] = useState({});
+  const [fileCountsLoading, setFileCountsLoading] = useState({});
+  
   useEffect(() => {
     if (currentPatient?.id) {
       apiService.getPatientConditions(currentPatient.id)
@@ -96,6 +102,33 @@ const Visits = () => {
         });
     }
   }, [currentPatient?.id]);
+
+  // Load file counts for visits
+  useEffect(() => {
+    const loadFileCountsForVisits = async () => {
+      if (!visits || visits.length === 0) return;
+      
+      const countPromises = visits.map(async (visit) => {
+        if (fileCounts[visit.id] !== undefined) return; // Already loaded
+        
+        setFileCountsLoading(prev => ({ ...prev, [visit.id]: true }));
+        try {
+          const files = await apiService.getEntityFiles('visit', visit.id);
+          const count = Array.isArray(files) ? files.length : 0;
+          setFileCounts(prev => ({ ...prev, [visit.id]: count }));
+        } catch (error) {
+          console.error(`Error loading file count for visit ${visit.id}:`, error);
+          setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
+        } finally {
+          setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
+        }
+      });
+      
+      await Promise.all(countPromises);
+    };
+
+    loadFileCountsForVisits();
+  }, [visits, fileCounts]);
 
   // Helper function to get condition details
   const getConditionDetails = (conditionId) => {
@@ -469,6 +502,14 @@ const Visits = () => {
                                   {visit.priority}
                                 </Badge>
                               )}
+                              <FileCountBadge
+                                count={fileCounts[visit.id] || 0}
+                                entityType="visit"
+                                variant="badge"
+                                size="sm"
+                                loading={fileCountsLoading[visit.id] || false}
+                                onClick={() => handleViewVisit(visit)}
+                              />
                             </Group>
                           </Group>
                         </Card.Section>
@@ -969,6 +1010,29 @@ const Visits = () => {
                 <Text size="sm" c={viewingVisit.notes ? 'inherit' : 'dimmed'}>
                   {viewingVisit.notes || 'No notes available'}
                 </Text>
+              </Stack>
+            </Card>
+
+            {/* Document Management */}
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  ATTACHED DOCUMENTS
+                </Text>
+                <Divider />
+                <DocumentManager
+                  entityType="visit"
+                  entityId={viewingVisit.id}
+                  mode="view"
+                  config={{
+                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
+                    maxSize: 10 * 1024 * 1024, // 10MB
+                    maxFiles: 10
+                  }}
+                  onError={(error) => {
+                    console.error('Document manager error:', error);
+                  }}
+                />
               </Stack>
             </Card>
 

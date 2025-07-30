@@ -137,8 +137,7 @@ def _get_rotation_method() -> str:
     elif method in ["logrotate", "python"]:
         return method
     else:
-        import logging
-        logging.warning(f"Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'")
+        print(f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'")
         return "logrotate" if _is_logrotate_available() else "python"
 
 
@@ -223,9 +222,8 @@ class LoggingConfig:
         level_str = os.getenv("LOG_LEVEL", DEFAULT_LOG_LEVEL).upper().strip()
 
         if not validate_log_level(level_str):
-            import logging
-            logging.warning(
-                f"Invalid LOG_LEVEL '{level_str}', defaulting to {DEFAULT_LOG_LEVEL}. "
+            print(
+                f"WARNING: Invalid LOG_LEVEL '{level_str}', defaulting to {DEFAULT_LOG_LEVEL}. "
                 f"Valid levels: {', '.join(VALID_LOG_LEVELS)}"
             )
             return get_log_level_numeric(DEFAULT_LOG_LEVEL)
@@ -313,15 +311,15 @@ class LoggingConfig:
                 encoding=LOG_FILE_ENCODING,
             )
 
-            import logging
-            logging.info(f"Using logrotate for {category}.log rotation")
+            # Using logrotate for rotation (no Python rotation needed)
+            pass
         else:
             # Use Python's built-in rotation as fallback
             try:
                 max_bytes = _parse_size_string(settings.LOG_ROTATION_SIZE)
             except ValueError as e:
-                import logging
-                logging.warning(f"Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log")
+                # Log warning through print since logging might not be fully set up
+                print(f"WARNING: Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log")
                 max_bytes = 5 * 1024 * 1024  # 5MB default
             
 
@@ -334,8 +332,8 @@ class LoggingConfig:
                 encoding=LOG_FILE_ENCODING,
             )
 
-            import logging
-            logging.info(f"Using Python rotation for {category}.log (size: {settings.LOG_ROTATION_SIZE}, backups: {backup_count})")
+            # Python rotation configured (logged via print to avoid circular logging)
+            pass
 
         handler.setFormatter(formatter)
         handler.setLevel(level)
