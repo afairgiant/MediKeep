@@ -4,6 +4,7 @@ import Container from '../components/layout/Container';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
+import PaperlessSettings from '../components/settings/PaperlessSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
@@ -23,7 +24,9 @@ const Settings = () => {
     useState(false);
   const [versionInfo, setVersionInfo] = useState(null);
   const [loadingVersion, setLoadingVersion] = useState(true);
-  const [updatingUnitSystem, setUpdatingUnitSystem] = useState(false);
+  const [localPreferences, setLocalPreferences] = useState({});
+  const [hasChanges, setHasChanges] = useState(false);
+  const [savingPreferences, setSavingPreferences] = useState(false);
 
   const handleOpenPasswordModal = () => {
     setIsPasswordModalOpen(true);
@@ -41,29 +44,83 @@ const Settings = () => {
     setIsDeleteAccountModalOpen(false);
   };
 
-  const handleUnitSystemChange = async newUnitSystem => {
-    try {
-      setUpdatingUnitSystem(true);
-      const updatedPreferences = await updateUserPreferences({
-        unit_system: newUnitSystem,
-      });
+  // Initialize local preferences when context loads
+  useEffect(() => {
+    if (userPreferences && Object.keys(userPreferences).length > 0) {
+      setLocalPreferences({ ...userPreferences });
+    }
+  }, [userPreferences]);
 
+  // Check for changes
+  useEffect(() => {
+    if (!userPreferences || Object.keys(localPreferences).length === 0) {
+      setHasChanges(false);
+      return;
+    }
+    
+    const hasChanged = Object.keys(localPreferences).some(key => {
+      return localPreferences[key] !== userPreferences[key];
+    });
+    setHasChanges(hasChanged);
+  }, [localPreferences, userPreferences]);
+
+  const handleUnitSystemChange = (newUnitSystem) => {
+    setLocalPreferences(prev => ({
+      ...prev,
+      unit_system: newUnitSystem
+    }));
+    
+    frontendLogger.logInfo('Unit system preference changed (not saved yet)', {
+      newUnitSystem,
+      component: 'Settings',
+    });
+  };
+
+  const handleSavePreferences = async () => {
+    try {
+      setSavingPreferences(true);
+      
+      // Filter out unchanged fields to avoid validation issues
+      const fieldsToUpdate = {};
+      Object.keys(localPreferences).forEach(key => {
+        if (localPreferences[key] !== userPreferences?.[key]) {
+          fieldsToUpdate[key] = localPreferences[key];
+        }
+      });
+      
+      // Only send the update if there are actual changes
+      if (Object.keys(fieldsToUpdate).length === 0) {
+        frontendLogger.logInfo('No changes to save', { component: 'Settings' });
+        return userPreferences;
+      }
+      
+      const updatedPreferences = await updateUserPreferences(fieldsToUpdate);
+      
       // Update the context
       updatePreferences(updatedPreferences);
 
-      frontendLogger.logInfo('Unit system preference updated', {
-        newUnitSystem,
+      frontendLogger.logInfo('User preferences saved successfully', {
+        updatedFields: Object.keys(fieldsToUpdate),
         component: 'Settings',
       });
+      
+      return updatedPreferences;
     } catch (error) {
-      frontendLogger.logError('Failed to update unit system preference', {
+      frontendLogger.logError('Failed to save user preferences', {
         error: error.message,
         component: 'Settings',
       });
-      // You might want to show a toast notification here
+      throw error;
     } finally {
-      setUpdatingUnitSystem(false);
+      setSavingPreferences(false);
     }
+  };
+
+  const handleResetPreferences = () => {
+    setLocalPreferences({ ...userPreferences });
+    frontendLogger.logInfo('User preferences reset to original values', {
+      component: 'Settings',
+    });
   };
 
   useEffect(() => {
@@ -201,9 +258,9 @@ const Settings = () => {
                         type="radio"
                         name="unit-system"
                         value="imperial"
-                        checked={userPreferences?.unit_system === 'imperial'}
+                        checked={localPreferences?.unit_system === 'imperial'}
                         onChange={() => handleUnitSystemChange('imperial')}
-                        disabled={updatingUnitSystem}
+                        disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
                         Imperial (lbs, feet, °F)
@@ -215,9 +272,9 @@ const Settings = () => {
                         type="radio"
                         name="unit-system"
                         value="metric"
-                        checked={userPreferences?.unit_system === 'metric'}
+                        checked={localPreferences?.unit_system === 'metric'}
                         onChange={() => handleUnitSystemChange('metric')}
-                        disabled={updatingUnitSystem}
+                        disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
                         Metric (kg, cm, °C)
@@ -226,13 +283,57 @@ const Settings = () => {
                   </div>
                 )}
 
-                {updatingUnitSystem && (
-                  <div className="settings-update-indicator">Updating...</div>
-                )}
               </div>
             </div>
           </div>
         </Card>
+
+        {/* Document Storage Section */}
+        <Card>
+          <div className="settings-section">
+            <h3 className="settings-section-title">Document Storage</h3>
+            <div className="settings-section-description">
+              Configure how your medical documents are stored and managed
+            </div>
+            
+            <PaperlessSettings 
+              preferences={localPreferences}
+              onPreferencesUpdate={(newPrefs) => setLocalPreferences(newPrefs)}
+              loading={loadingPreferences}
+            />
+          </div>
+        </Card>
+
+        {/* Unified Save/Reset Actions */}
+        {hasChanges && (
+          <Card>
+            <div className="settings-actions">
+              <div className="settings-actions-info">
+                <div className="settings-changes-indicator">
+                  You have unsaved changes
+                </div>
+              </div>
+              
+              <div className="settings-actions-buttons">
+                <Button 
+                  variant="secondary" 
+                  onClick={handleResetPreferences}
+                  disabled={savingPreferences}
+                >
+                  Reset Changes
+                </Button>
+                
+                <Button 
+                  onClick={handleSavePreferences}
+                  disabled={savingPreferences}
+                  loading={savingPreferences}
+                >
+                  {savingPreferences ? 'Saving...' : 'Save All Changes'}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Change Password Modal */}

@@ -38,21 +38,45 @@ class UserPreferencesBase(BaseModel):
     @validator("paperless_url")
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
-        if v is None:
+        if v is None or v == "":
             return v
             
-        # Must be HTTPS for security
-        if not v.startswith('https://'):
-            raise ValueError('Paperless URL must use HTTPS')
+        # Allow HTTP for localhost/local development, require HTTPS for external URLs
+        from urllib.parse import urlparse
+        parsed = urlparse(v)
         
-        # Basic URL format validation
+        if not v.startswith(('http://', 'https://')):
+            raise ValueError('URL must start with http:// or https://')
+        
+        # Check if it's a local development URL
+        is_local = (
+            parsed.hostname in ['localhost', '127.0.0.1'] or
+            (parsed.hostname and (
+                parsed.hostname.startswith('192.168.') or
+                parsed.hostname.startswith('10.') or
+                (parsed.hostname.startswith('172.') and 
+                 len(parsed.hostname.split('.')) >= 2 and
+                 parsed.hostname.split('.')[1].isdigit() and
+                 16 <= int(parsed.hostname.split('.')[1]) <= 31)
+            ))
+        )
+        
+        # For external URLs, require HTTPS for security
+        if not is_local and not v.startswith('https://'):
+            raise ValueError('External URLs must use HTTPS for security')
+        
+        # Basic URL format validation - simplified for local development
         import re
+        # More permissive regex that allows IP addresses and domains
         url_pattern = re.compile(
-            r'^https://'
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\.)+[A-Z]{2,6}\\.?|'
-            r'localhost(?::\\d+)?|'
-            r'\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?::\\d+)?)'
-            r'(?:/.*)?$', re.IGNORECASE
+            r'^https?://'  # Allow both http and https
+            r'(?:'
+            r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'  # domain or hostname
+            r'|'
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # IP address
+            r')'
+            r'(?::\d+)?'  # optional port
+            r'(?:/.*)?$', re.IGNORECASE  # optional path
         )
         
         if not url_pattern.match(v):
@@ -105,21 +129,45 @@ class UserPreferencesUpdate(BaseModel):
     @validator("paperless_url")
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
-        if v is None:
+        if v is None or v == "":
             return v
             
-        # Must be HTTPS for security
-        if not v.startswith('https://'):
-            raise ValueError('Paperless URL must use HTTPS')
+        # Allow HTTP for localhost/local development, require HTTPS for external URLs
+        from urllib.parse import urlparse
+        parsed = urlparse(v)
         
-        # Basic URL format validation
+        if not v.startswith(('http://', 'https://')):
+            raise ValueError('URL must start with http:// or https://')
+        
+        # Check if it's a local development URL
+        is_local = (
+            parsed.hostname in ['localhost', '127.0.0.1'] or
+            (parsed.hostname and (
+                parsed.hostname.startswith('192.168.') or
+                parsed.hostname.startswith('10.') or
+                (parsed.hostname.startswith('172.') and 
+                 len(parsed.hostname.split('.')) >= 2 and
+                 parsed.hostname.split('.')[1].isdigit() and
+                 16 <= int(parsed.hostname.split('.')[1]) <= 31)
+            ))
+        )
+        
+        # For external URLs, require HTTPS for security
+        if not is_local and not v.startswith('https://'):
+            raise ValueError('External URLs must use HTTPS for security')
+        
+        # Basic URL format validation - simplified for local development
         import re
+        # More permissive regex that allows IP addresses and domains
         url_pattern = re.compile(
-            r'^https://'
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\.)+[A-Z]{2,6}\\.?|'
-            r'localhost(?::\\d+)?|'
-            r'\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?::\\d+)?)'
-            r'(?:/.*)?$', re.IGNORECASE
+            r'^https?://'  # Allow both http and https
+            r'(?:'
+            r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'  # domain or hostname
+            r'|'
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # IP address
+            r')'
+            r'(?::\d+)?'  # optional port
+            r'(?:/.*)?$', re.IGNORECASE  # optional path
         )
         
         if not url_pattern.match(v):
@@ -164,50 +212,56 @@ class PaperlessConnectionData(BaseModel):
     @validator('paperless_url')
     def validate_url(cls, v):
         """Validate paperless URL format and security."""
-        # Must be HTTPS
-        if not v.startswith('https://'):
-            raise ValueError('Paperless URL must use HTTPS')
+        # Allow HTTP for localhost/local development, require HTTPS for external URLs
+        from urllib.parse import urlparse
+        parsed = urlparse(v)
         
-        # URL format validation
+        if not v.startswith(('http://', 'https://')):
+            raise ValueError('URL must start with http:// or https://')
+        
+        # Check if it's a local development URL
+        is_local = (
+            parsed.hostname in ['localhost', '127.0.0.1'] or
+            (parsed.hostname and (
+                parsed.hostname.startswith('192.168.') or
+                parsed.hostname.startswith('10.') or
+                (parsed.hostname.startswith('172.') and 
+                 len(parsed.hostname.split('.')) >= 2 and
+                 parsed.hostname.split('.')[1].isdigit() and
+                 16 <= int(parsed.hostname.split('.')[1]) <= 31)
+            ))
+        )
+        
+        # For external URLs, require HTTPS for security
+        if not is_local and not v.startswith('https://'):
+            raise ValueError('External URLs must use HTTPS for security')
+        
+        # Basic URL format validation - simplified for local development
         import re
+        # More permissive regex that allows IP addresses and domains
         url_pattern = re.compile(
-            r'^https://'
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\.)+[A-Z]{2,6}\\.?|'
-            r'localhost(?::\\d+)?|'
-            r'\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(?::\\d+)?)'
-            r'(?:/.*)?$', re.IGNORECASE
+            r'^https?://'  # Allow both http and https
+            r'(?:'
+            r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'  # domain or hostname
+            r'|'
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # IP address
+            r')'
+            r'(?::\d+)?'  # optional port
+            r'(?:/.*)?$', re.IGNORECASE  # optional path
         )
         
         if not url_pattern.match(v):
             raise ValueError('Invalid URL format')
-        
-        # Prevent access to internal/private networks in production
-        from urllib.parse import urlparse
-        parsed = urlparse(v)
-        
-        # Block common internal/private IPs (except localhost for development)
-        blocked_patterns = [
-            r'^10\\.',            # private class A
-            r'^192\\.168\\.',      # private class C
-            r'^172\\.(1[6-9]|2[0-9]|3[0-1])\\.',  # private class B
-            r'^169\\.254\\.',      # link-local
-            r'^::1$',            # IPv6 localhost
-            r'^fc00:',           # IPv6 private
-        ]
-        
-        hostname = parsed.hostname
-        if hostname and hostname != 'localhost':
-            import re
-            if any(re.match(pattern, hostname) for pattern in blocked_patterns):
-                raise ValueError('Access to private/internal networks not allowed')
         
         return v.rstrip('/')
     
     @validator('paperless_api_token')
     def validate_token(cls, v):
         """Validate API token format."""
-        # Paperless tokens are typically 40-character hex strings
-        import re
-        if not re.match(r'^[a-f0-9]{40}$', v):
-            raise ValueError('Invalid API token format')
+        # Basic validation - tokens should be non-empty strings
+        if not v or len(v.strip()) == 0:
+            raise ValueError('API token is required')
+        # Allow various token formats as paperless may use different formats
+        if len(v) < 10:
+            raise ValueError('API token seems too short')
         return v

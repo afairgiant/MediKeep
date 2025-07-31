@@ -63,8 +63,8 @@ class TestPaperlessService:
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json.return_value = {"app_title": "Paperless-ngx"}
-        mock_response.headers = {"X-Version": "2.6.3"}
+        mock_response.json.return_value = {"count": 0, "results": []}
+        mock_response.headers = {"X-Version": "2.6.3", "X-Api-Version": "6"}
         
         with patch.object(service, '_make_request') as mock_request:
             mock_request.return_value.__aenter__.return_value = mock_response
@@ -344,8 +344,9 @@ class TestCredentialEncryption:
         """Test invalid token format validation."""
         from app.services.credential_encryption import SecurityError
         
+        # Test with a token that's too short (less than 10 characters)
         with pytest.raises(SecurityError, match="Invalid API token format"):
-            credential_encryption.encrypt_token("invalid_token_format")
+            credential_encryption.encrypt_token("short")
 
 
 # Integration test fixtures (commented out - would need actual paperless instance)

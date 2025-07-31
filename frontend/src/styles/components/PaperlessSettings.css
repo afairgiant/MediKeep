@@ -1,0 +1,425 @@
+/* PaperlessSettings.css */
+/* Styles for paperless-ngx integration settings components */
+
+.paperless-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.paperless-settings-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+/* Section Headers */
+.paperless-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #e1e5e9);
+}
+
+.paperless-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.paperless-section-title h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+}
+
+.paperless-section-icon {
+  font-size: 1.25rem;
+}
+
+/* Connection Status */
+.paperless-connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.connection-status-connected {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.connection-status-failed {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.connection-status-testing {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.connection-status-disconnected {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.connection-status-icon {
+  font-weight: bold;
+}
+
+/* Form Sections */
+.paperless-form-section {
+  margin-bottom: 2rem;
+}
+
+.paperless-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.paperless-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+  font-size: 0.875rem;
+}
+
+.paperless-form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #dee2e6);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.paperless-form-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.paperless-form-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.paperless-form-input:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.paperless-form-error {
+  margin-top: 0.5rem;
+  color: #dc3545;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.paperless-form-help {
+  margin-top: 0.5rem;
+  color: #6c757d;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Token Input Group */
+.paperless-token-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.paperless-token-input-group .paperless-form-input {
+  padding-right: 3rem;
+}
+
+.paperless-token-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.125rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.paperless-token-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.paperless-token-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Connection Actions */
+.paperless-connection-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.paperless-server-info {
+  padding: 1rem;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 0.5rem;
+  color: #155724;
+}
+
+.server-info-item {
+  font-size: 0.8125rem;
+  margin-bottom: 0.25rem;
+}
+
+.server-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.paperless-connection-error {
+  padding: 1rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 0.5rem;
+  color: #721c24;
+}
+
+.connection-error-message {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Storage Options */
+.paperless-storage-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.paperless-storage-option {
+  border: 1px solid var(--border-color, #dee2e6);
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.paperless-storage-option:hover {
+  border-color: var(--primary-color, #007bff);
+}
+
+.paperless-storage-option.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.paperless-storage-option.disabled:hover {
+  border-color: var(--border-color, #dee2e6);
+}
+
+.paperless-storage-option-label {
+  display: block;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.paperless-storage-option.disabled .paperless-storage-option-label {
+  cursor: not-allowed;
+}
+
+.paperless-storage-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: 2rem;
+}
+
+.paperless-storage-option-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.paperless-storage-icon {
+  font-size: 1.125rem;
+}
+
+.paperless-storage-title {
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+}
+
+.paperless-storage-badge {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.paperless-storage-description {
+  color: #6c757d;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.paperless-storage-radio {
+  margin-right: 0.75rem;
+  cursor: pointer;
+}
+
+.paperless-storage-option.disabled .paperless-storage-radio {
+  cursor: not-allowed;
+}
+
+/* Checkbox Group */
+.paperless-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.paperless-checkbox-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.paperless-checkbox {
+  margin-top: 0.125rem;
+  cursor: pointer;
+}
+
+.paperless-checkbox-label {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text-primary, #2c3e50);
+}
+
+/* Storage Statistics */
+.paperless-storage-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.paperless-storage-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.storage-stat-icon {
+  font-size: 1.125rem;
+}
+
+.storage-stat-content {
+  flex: 1;
+}
+
+.storage-stat-label {
+  font-weight: 500;
+  color: var(--text-primary, #2c3e50);
+  font-size: 0.875rem;
+}
+
+.storage-stat-value {
+  color: #6c757d;
+  font-size: 0.8125rem;
+}
+
+.paperless-storage-stats-loading,
+.paperless-storage-stats-empty {
+  padding: 1rem;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.875rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+/* Action Buttons */
+.paperless-settings-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.paperless-settings-actions-info {
+  flex: 1;
+}
+
+.paperless-settings-changes-indicator {
+  color: #856404;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.paperless-settings-actions-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .paperless-section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .paperless-settings-actions {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .paperless-settings-actions-buttons {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .paperless-settings-actions-buttons button {
+    flex: 1;
+  }
+  
+  .paperless-storage-options {
+    gap: 0.75rem;
+  }
+  
+  .paperless-storage-option-content {
+    margin-left: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .paperless-settings-actions-buttons {
+    flex-direction: column;
+  }
+  
+  .paperless-connection-actions {
+    align-items: stretch;
+  }
+}

@@ -18,6 +18,7 @@ from app.api.v1.endpoints import (
     lab_result,
     lab_result_file,
     medication,
+    paperless,
     patients,
     patient_management,
     patient_sharing,
@@ -95,6 +96,9 @@ api_router.include_router(utils.router)
 
 # System endpoints
 api_router.include_router(system.router, prefix="/system", tags=["system"])
+
+# Paperless-ngx integration endpoints
+api_router.include_router(paperless.router, prefix="/paperless", tags=["paperless"])
 
 # Admin endpoints
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])

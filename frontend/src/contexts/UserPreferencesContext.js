@@ -42,7 +42,15 @@ export const UserPreferencesProvider = ({ children }) => {
         setError(errorMessage);
 
         // Set default preferences on error
-        const defaultPrefs = { unit_system: 'imperial' };
+        const defaultPrefs = { 
+          unit_system: 'imperial',
+          paperless_enabled: false,
+          paperless_url: '',
+          paperless_api_token: '',
+          default_storage_backend: 'local',
+          paperless_auto_sync: false,
+          paperless_sync_tags: true
+        };
         setPreferences(defaultPrefs);
 
         frontendLogger.logError(
