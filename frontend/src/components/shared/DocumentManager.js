@@ -15,7 +15,7 @@ import {
   Divider,
   FileInput,
   TextInput,
-  ThemeIcon
+  ThemeIcon,
 } from '@mantine/core';
 import {
   IconFile,
@@ -25,7 +25,7 @@ import {
   IconX,
   IconRestore,
   IconFileText,
-  IconAlertTriangle
+  IconAlertTriangle,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
 import { getPaperlessSettings } from '../../services/api/paperlessApi';
@@ -42,7 +42,7 @@ const DocumentManager = ({
   config = {},
   onFileCountChange,
   onError,
-  className = ''
+  className = '',
 }) => {
   // State management
   const [files, setFiles] = useState([]);
@@ -67,7 +67,7 @@ const DocumentManager = ({
       loadFiles();
     }
   }, [entityId, mode]);
-  
+
   // Load paperless settings separately (independent of entityId)
   useEffect(() => {
     loadPaperlessSettings();
@@ -79,7 +79,7 @@ const DocumentManager = ({
     try {
       const settings = await getPaperlessSettings();
       setPaperlessSettings(settings);
-      
+
       // Set default storage backend based on user preference
       if (settings?.default_storage_backend) {
         setSelectedStorageBackend(settings.default_storage_backend);
@@ -87,18 +87,18 @@ const DocumentManager = ({
         // Fallback to app's local storage system
         setSelectedStorageBackend('local');
       }
-      
+
       logger.debug('Paperless settings loaded successfully', {
         paperlessEnabled: settings?.paperless_enabled,
         hasUrl: !!settings?.paperless_url,
         hasCredentials: !!settings?.paperless_has_credentials,
         defaultBackend: settings?.default_storage_backend,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } catch (err) {
       logger.warn('Failed to load paperless settings', {
         error: err.message,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
       // Default to local storage if paperless settings fail
       setPaperlessSettings(null);
@@ -119,7 +119,7 @@ const DocumentManager = ({
       const response = await apiService.getEntityFiles(entityType, entityId);
       const fileList = Array.isArray(response) ? response : [];
       setFiles(fileList);
-      
+
       // Notify parent of file count change
       if (onFileCountChange) {
         onFileCountChange(fileList.length);
@@ -127,17 +127,17 @@ const DocumentManager = ({
     } catch (err) {
       const errorMessage = err.message || 'Failed to load files';
       setError(errorMessage);
-      
+
       if (onError) {
         onError(errorMessage);
       }
-      
+
       logger.error('document_manager_load_error', {
         message: 'Failed to load files',
         entityType,
         entityId,
         error: err.message,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } finally {
       setLoading(false);
@@ -150,17 +150,17 @@ const DocumentManager = ({
   }, []);
 
   // Remove pending file
-  const handleRemovePendingFile = useCallback((fileId) => {
+  const handleRemovePendingFile = useCallback(fileId => {
     setPendingFiles(prev => prev.filter(f => f.id !== fileId));
   }, []);
 
   // Mark file for deletion (edit mode)
-  const handleMarkFileForDeletion = useCallback((fileId) => {
+  const handleMarkFileForDeletion = useCallback(fileId => {
     setFilesToDelete(prev => [...prev, fileId]);
   }, []);
 
   // Unmark file for deletion
-  const handleUnmarkFileForDeletion = useCallback((fileId) => {
+  const handleUnmarkFileForDeletion = useCallback(fileId => {
     setFilesToDelete(prev => prev.filter(id => id !== fileId));
   }, []);
 
@@ -184,47 +184,56 @@ const DocumentManager = ({
         paperlessEnabled: paperlessSettings?.paperless_enabled,
         paperlessHasCredentials: paperlessSettings?.paperless_has_credentials,
         paperlessUrl: paperlessSettings?.paperless_url,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
-      
-      await apiService.uploadEntityFile(entityType, entityId, file, description, '', selectedStorageBackend);
-      
+
+      await apiService.uploadEntityFile(
+        entityType,
+        entityId,
+        file,
+        description,
+        '',
+        selectedStorageBackend
+      );
+
       // Reload files to show the new upload
       await loadFiles();
-      
+
       // Clear upload form
       setFileUpload({ file: null, description: '' });
       setShowUploadModal(false);
-      
+
       logger.info('document_manager_upload_success', {
         message: 'File uploaded successfully',
         entityType,
         entityId,
         fileName: file.name,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } catch (err) {
       let errorMessage = err.message || 'Failed to upload file';
-      
+
       // Provide more specific error messages for Paperless issues
       if (selectedStorageBackend === 'paperless') {
         if (errorMessage.includes('not enabled')) {
-          errorMessage = 'Paperless integration is not enabled. Please enable it in Settings.';
+          errorMessage =
+            'Paperless integration is not enabled. Please enable it in Settings.';
         } else if (errorMessage.includes('configuration is incomplete')) {
-          errorMessage = 'Paperless configuration is incomplete. Please check your settings.';
+          errorMessage =
+            'Paperless configuration is incomplete. Please check your settings.';
         } else if (errorMessage.includes('Failed to upload to paperless')) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
         } else if (!errorMessage.includes('Paperless')) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
         }
       }
-      
+
       setError(errorMessage);
-      
+
       if (onError) {
         onError(errorMessage);
       }
-      
+
       logger.error('document_manager_upload_error', {
         message: 'Failed to upload file',
         entityType,
@@ -232,7 +241,7 @@ const DocumentManager = ({
         fileName: file.name,
         selectedStorageBackend,
         error: err.message,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } finally {
       setLoading(false);
@@ -243,23 +252,23 @@ const DocumentManager = ({
   const handleDownloadFile = async (fileId, fileName) => {
     try {
       await apiService.downloadEntityFile(fileId, fileName);
-      
+
       logger.info('document_manager_download_success', {
         message: 'File downloaded successfully',
         entityType,
         entityId,
         fileId,
         fileName,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } catch (err) {
       const errorMessage = err.message || 'Failed to download file';
       setError(errorMessage);
-      
+
       if (onError) {
         onError(errorMessage);
       }
-      
+
       logger.error('document_manager_download_error', {
         message: 'Failed to download file',
         entityType,
@@ -267,13 +276,13 @@ const DocumentManager = ({
         fileId,
         fileName,
         error: err.message,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     }
   };
 
   // Delete file immediately (view mode)
-  const handleImmediateDelete = async (fileId) => {
+  const handleImmediateDelete = async fileId => {
     if (!window.confirm('Are you sure you want to delete this file?')) {
       return;
     }
@@ -283,32 +292,32 @@ const DocumentManager = ({
 
     try {
       await apiService.deleteEntityFile(fileId);
-      
+
       // Reload files to reflect deletion
       await loadFiles();
-      
+
       logger.info('document_manager_delete_success', {
         message: 'File deleted successfully',
         entityType,
         entityId,
         fileId,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } catch (err) {
       const errorMessage = err.message || 'Failed to delete file';
       setError(errorMessage);
-      
+
       if (onError) {
         onError(errorMessage);
       }
-      
+
       logger.error('document_manager_delete_error', {
         message: 'Failed to delete file',
         entityType,
         entityId,
         fileId,
         error: err.message,
-        component: 'DocumentManager'
+        component: 'DocumentManager',
       });
     } finally {
       setLoading(false);
@@ -316,10 +325,10 @@ const DocumentManager = ({
   };
 
   // Batch upload pending files (for create/edit mode)
-  const uploadPendingFiles = async (targetEntityId) => {
+  const uploadPendingFiles = async targetEntityId => {
     if (pendingFiles.length === 0) return true;
 
-    const uploadPromises = pendingFiles.map(async (pendingFile) => {
+    const uploadPromises = pendingFiles.map(async pendingFile => {
       try {
         logger.info('document_manager_batch_upload_attempt', {
           message: 'Attempting batch file upload',
@@ -330,9 +339,9 @@ const DocumentManager = ({
           paperlessEnabled: paperlessSettings?.paperless_enabled,
           paperlessHasCredentials: paperlessSettings?.paperless_has_credentials,
           paperlessUrl: paperlessSettings?.paperless_url,
-          component: 'DocumentManager'
+          component: 'DocumentManager',
         });
-        
+
         await apiService.uploadEntityFile(
           entityType,
           targetEntityId,
@@ -341,30 +350,32 @@ const DocumentManager = ({
           '',
           selectedStorageBackend
         );
-        
+
         logger.info('document_manager_batch_upload_success', {
           message: 'Batch file uploaded successfully',
           entityType,
           entityId: targetEntityId,
           fileName: pendingFile.file.name,
-          component: 'DocumentManager'
+          component: 'DocumentManager',
         });
       } catch (error) {
         // Enhance error message for Paperless issues
         let errorMessage = error.message || 'Failed to upload file';
-        
+
         if (selectedStorageBackend === 'paperless') {
           if (errorMessage.includes('not enabled')) {
-            errorMessage = 'Paperless integration is not enabled. Please enable it in Settings.';
+            errorMessage =
+              'Paperless integration is not enabled. Please enable it in Settings.';
           } else if (errorMessage.includes('configuration is incomplete')) {
-            errorMessage = 'Paperless configuration is incomplete. Please check your settings.';
+            errorMessage =
+              'Paperless configuration is incomplete. Please check your settings.';
           } else if (errorMessage.includes('Failed to upload to paperless')) {
             errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
           } else if (!errorMessage.includes('Paperless')) {
             errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
           }
         }
-        
+
         logger.error('document_manager_batch_upload_error', {
           message: 'Failed to upload file in batch',
           entityType,
@@ -373,9 +384,9 @@ const DocumentManager = ({
           selectedStorageBackend,
           error: error.message,
           enhancedError: errorMessage,
-          component: 'DocumentManager'
+          component: 'DocumentManager',
         });
-        
+
         // Create a new error with the enhanced message
         const enhancedError = new Error(errorMessage);
         enhancedError.originalError = error;
@@ -392,16 +403,16 @@ const DocumentManager = ({
   const deleteMarkedFiles = async () => {
     if (filesToDelete.length === 0) return true;
 
-    const deletePromises = filesToDelete.map(async (fileId) => {
+    const deletePromises = filesToDelete.map(async fileId => {
       try {
         await apiService.deleteEntityFile(fileId);
-        
+
         logger.info('document_manager_batch_delete_success', {
           message: 'Batch file deleted successfully',
           entityType,
           entityId,
           fileId,
-          component: 'DocumentManager'
+          component: 'DocumentManager',
         });
       } catch (error) {
         logger.error('document_manager_batch_delete_error', {
@@ -410,7 +421,7 @@ const DocumentManager = ({
           entityId,
           fileId,
           error: error.message,
-          component: 'DocumentManager'
+          component: 'DocumentManager',
         });
         throw error;
       }
@@ -422,7 +433,7 @@ const DocumentManager = ({
   };
 
   // Handle file upload form submission (view mode modal)
-  const handleFileUploadSubmit = async (e) => {
+  const handleFileUploadSubmit = async e => {
     e.preventDefault();
     if (!fileUpload.file) return;
 
@@ -434,7 +445,7 @@ const DocumentManager = ({
     uploadPendingFiles,
     deleteMarkedFiles,
     getPendingFilesCount: () => pendingFiles.length,
-    getFilesToDeleteCount: () => filesToDelete.length
+    getFilesToDeleteCount: () => filesToDelete.length,
   }));
 
   // Render based on mode
@@ -459,7 +470,11 @@ const DocumentManager = ({
               value={selectedStorageBackend}
               onChange={setSelectedStorageBackend}
               paperlessEnabled={paperlessSettings?.paperless_enabled || false}
-              paperlessConnected={paperlessSettings?.paperless_enabled && paperlessSettings?.paperless_url && paperlessSettings?.paperless_has_credentials}
+              paperlessConnected={
+                paperlessSettings?.paperless_enabled &&
+                paperlessSettings?.paperless_url &&
+                paperlessSettings?.paperless_has_credentials
+              }
               disabled={loading}
               size="sm"
             />
@@ -499,7 +514,11 @@ const DocumentManager = ({
               value={selectedStorageBackend}
               onChange={setSelectedStorageBackend}
               paperlessEnabled={paperlessSettings?.paperless_enabled || false}
-              paperlessConnected={paperlessSettings?.paperless_enabled && paperlessSettings?.paperless_url && paperlessSettings?.paperless_has_credentials}
+              paperlessConnected={
+                paperlessSettings?.paperless_enabled &&
+                paperlessSettings?.paperless_url &&
+                paperlessSettings?.paperless_has_credentials
+              }
               disabled={loading}
               size="sm"
             />
@@ -522,7 +541,7 @@ const DocumentManager = ({
 
           {/* Add New Files */}
           <FileUploadZone
-            onUpload={(uploadedFiles) => {
+            onUpload={uploadedFiles => {
               uploadedFiles.forEach(({ file, description }) => {
                 handleAddPendingFile(file, description);
               });
@@ -539,7 +558,7 @@ const DocumentManager = ({
             <Stack gap="md">
               <Title order={5}>Files to Upload:</Title>
               <Stack gap="sm">
-                {pendingFiles.map((pendingFile) => (
+                {pendingFiles.map(pendingFile => (
                   <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
                     <Group justify="space-between" align="flex-start">
                       <Group gap="xs" style={{ flex: 1 }}>
@@ -558,7 +577,7 @@ const DocumentManager = ({
                           <TextInput
                             placeholder="Description (optional)"
                             value={pendingFile.description}
-                            onChange={(e) => {
+                            onChange={e => {
                               setPendingFiles(prev =>
                                 prev.map(f =>
                                   f.id === pendingFile.id
@@ -598,14 +617,18 @@ const DocumentManager = ({
               value={selectedStorageBackend}
               onChange={setSelectedStorageBackend}
               paperlessEnabled={paperlessSettings?.paperless_enabled || false}
-              paperlessConnected={paperlessSettings?.paperless_enabled && paperlessSettings?.paperless_url && paperlessSettings?.paperless_has_credentials}
+              paperlessConnected={
+                paperlessSettings?.paperless_enabled &&
+                paperlessSettings?.paperless_url &&
+                paperlessSettings?.paperless_has_credentials
+              }
               disabled={loading}
               size="sm"
             />
           )}
 
           <FileUploadZone
-            onUpload={(uploadedFiles) => {
+            onUpload={uploadedFiles => {
               uploadedFiles.forEach(({ file, description }) => {
                 handleAddPendingFile(file, description);
               });
@@ -622,7 +645,7 @@ const DocumentManager = ({
             <Stack gap="md">
               <Title order={5}>Files to Upload:</Title>
               <Stack gap="sm">
-                {pendingFiles.map((pendingFile) => (
+                {pendingFiles.map(pendingFile => (
                   <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
                     <Group justify="space-between" align="center">
                       <Group gap="xs">
@@ -689,16 +712,14 @@ const DocumentManager = ({
             <FileInput
               placeholder="Select a file to upload"
               value={fileUpload.file}
-              onChange={(file) =>
-                setFileUpload(prev => ({ ...prev, file }))
-              }
+              onChange={file => setFileUpload(prev => ({ ...prev, file }))}
               accept={config.acceptedTypes?.join(',')}
               leftSection={<IconUpload size={16} />}
             />
             <TextInput
               placeholder="File description (optional)"
               value={fileUpload.description}
-              onChange={(e) =>
+              onChange={e =>
                 setFileUpload(prev => ({
                   ...prev,
                   description: e.target.value,

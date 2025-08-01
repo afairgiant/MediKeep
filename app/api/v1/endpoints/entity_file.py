@@ -21,7 +21,7 @@ from app.schemas.entity_file import (
     FileBatchCountRequest,
     FileBatchCountResponse,
     FileOperationResult,
-    FileUploadRequest
+    FileUploadRequest,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
 
@@ -44,32 +44,34 @@ def get_entity_files(
 ) -> List[EntityFileResponse]:
     """
     Get all files for a specific entity.
-    
+
     Args:
         entity_type: Type of entity (lab-result, insurance, visit, procedure)
         entity_id: ID of the entity
-    
+
     Returns:
         List of entity files
     """
     try:
         # TODO: Add permission check - ensure user has access to this entity
         # This would depend on your user model and permission system
-        
+
         return file_service.get_entity_files(db, entity_type, entity_id)
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve files: {str(e)}"
+            detail=f"Failed to retrieve files: {str(e)}",
         )
 
 
-@router.post("/{entity_type}/{entity_id}/files", 
-             response_model=EntityFileResponse, 
-             status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{entity_type}/{entity_id}/files",
+    response_model=EntityFileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def upload_entity_file(
     *,
     db: Session = Depends(deps.get_db),
@@ -78,12 +80,12 @@ async def upload_entity_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
-    storage_backend: Optional[str] = Form("local"),
+    storage_backend: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> EntityFileResponse:
     """
     Upload a file for any entity type.
-    
+
     Args:
         entity_type: Type of entity (lab-result, insurance, visit, procedure)
         entity_id: ID of the entity
@@ -91,29 +93,31 @@ async def upload_entity_file(
         description: Optional description
         category: Optional category
         storage_backend: Storage backend to use ('local' or 'paperless')
-    
+
     Returns:
         Created entity file details
     """
     try:
         # Debug logging to see what storage_backend was received
-        logger.info(f"File upload request for {entity_type} {entity_id}", extra={
-            "entity_type": entity_type,
-            "entity_id": entity_id,
-            "storage_backend": storage_backend,
-            "file_name": file.filename,
-            "current_user_id": current_user_id
-        })
+        logger.info(
+            f"File upload request for {entity_type} {entity_id}",
+            extra={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "storage_backend": storage_backend,
+                "file_name": file.filename,
+                "current_user_id": current_user_id,
+            },
+        )
         # TODO: Add permission check - ensure user has access to this entity
         # This would depend on your user model and permission system
-        
+
         # Validate file type and size
         if not file.filename:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No file provided"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided"
             )
-        
+
         # Upload the file using the service
         result = await file_service.upload_file(
             db=db,
@@ -123,9 +127,9 @@ async def upload_entity_file(
             description=description,
             category=category,
             storage_backend=storage_backend,
-            current_user_id=current_user_id
+            current_user_id=current_user_id,
         )
-        
+
         # Log the creation activity
         try:
             # Get the database record for logging
@@ -140,15 +144,15 @@ async def upload_entity_file(
         except Exception as log_error:
             # Don't fail the request if logging fails
             print(f"Failed to log file creation: {log_error}")
-        
+
         return result
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload file: {str(e)}"
+            detail=f"Failed to upload file: {str(e)}",
         )
 
 
@@ -161,43 +165,44 @@ async def download_file(
 ):
     """
     Download a file by its ID from both local and paperless storage.
-    
+
     Args:
         file_id: ID of the file to download
-    
+
     Returns:
         File response for download
     """
     try:
         # TODO: Add permission check - ensure user has access to this file
         # This would involve checking if the user has access to the entity that owns the file
-        
+
         # Get file information
-        file_info, filename, content_type = await file_service.get_file_download_info(db, file_id)
-        
+        file_info, filename, content_type = await file_service.get_file_download_info(
+            db, file_id
+        )
+
         # Handle different return types (local path vs paperless content)
         if isinstance(file_info, bytes):
             # Paperless file - return as StreamingResponse
             from fastapi.responses import Response
+
             return Response(
                 content=file_info,
                 media_type=content_type,
-                headers={"Content-Disposition": f"attachment; filename={filename}"}
+                headers={"Content-Disposition": f"attachment; filename={filename}"},
             )
         else:
             # Local file - return as FileResponse
             return FileResponse(
-                path=file_info,
-                filename=filename,
-                media_type=content_type
+                path=file_info, filename=filename, media_type=content_type
             )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to download file: {str(e)}"
+            detail=f"Failed to download file: {str(e)}",
         )
 
 
@@ -210,27 +215,26 @@ async def delete_file(
 ) -> FileOperationResult:
     """
     Delete a file by its ID.
-    
+
     Args:
         file_id: ID of the file to delete
-    
+
     Returns:
         File operation result
     """
     try:
         # TODO: Add permission check - ensure user has access to this file
-        
+
         # Get file record before deletion for logging
         file_record = file_service.get_file_by_id(db, file_id)
         if not file_record:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="File not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
             )
-        
+
         # Delete the file
         result = await file_service.delete_file(db, file_id)
-        
+
         # Log the deletion activity
         try:
             log_delete(
@@ -242,15 +246,15 @@ async def delete_file(
         except Exception as log_error:
             # Don't fail the request if logging fails
             print(f"Failed to log file deletion: {log_error}")
-        
+
         return result
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete file: {str(e)}"
+            detail=f"Failed to delete file: {str(e)}",
         )
 
 
@@ -265,34 +269,30 @@ def update_file_metadata(
 ) -> EntityFileResponse:
     """
     Update file metadata (description, category).
-    
+
     Args:
         file_id: ID of the file to update
         description: New description
         category: New category
-    
+
     Returns:
         Updated entity file details
     """
     try:
         # TODO: Add permission check - ensure user has access to this file
-        
+
         # Get original file record for logging
         original_file = file_service.get_file_by_id(db, file_id)
         if not original_file:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="File not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
             )
-        
+
         # Update metadata
         result = file_service.update_file_metadata(
-            db=db,
-            file_id=file_id,
-            description=description,
-            category=category
+            db=db, file_id=file_id, description=description, category=category
         )
-        
+
         # Log the update activity
         try:
             updated_file = file_service.get_file_by_id(db, file_id)
@@ -307,15 +307,15 @@ def update_file_metadata(
         except Exception as log_error:
             # Don't fail the request if logging fails
             print(f"Failed to log file update: {log_error}")
-        
+
         return result
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update file metadata: {str(e)}"
+            detail=f"Failed to update file metadata: {str(e)}",
         )
 
 
@@ -328,35 +328,33 @@ def get_batch_file_counts(
 ) -> List[FileBatchCountResponse]:
     """
     Get file counts for multiple entities in batch.
-    
+
     Args:
         request: Batch count request with entity type and IDs
-    
+
     Returns:
         List of file counts per entity
     """
     try:
         # TODO: Add permission check - ensure user has access to these entities
-        
+
         # Get file counts from service
         file_counts = file_service.get_files_count_batch(
-            db=db,
-            entity_type=request.entity_type.value,
-            entity_ids=request.entity_ids
+            db=db, entity_type=request.entity_type.value, entity_ids=request.entity_ids
         )
-        
+
         # Convert to response format
         return [
             FileBatchCountResponse(entity_id=entity_id, file_count=count)
             for entity_id, count in file_counts.items()
         ]
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get batch file counts: {str(e)}"
+            detail=f"Failed to get batch file counts: {str(e)}",
         )
 
 
@@ -369,29 +367,28 @@ def get_file_details(
 ) -> EntityFileResponse:
     """
     Get details of a specific file.
-    
+
     Args:
         file_id: ID of the file
-    
+
     Returns:
         Entity file details
     """
     try:
         # TODO: Add permission check - ensure user has access to this file
-        
+
         file_record = file_service.get_file_by_id(db, file_id)
         if not file_record:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="File not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
             )
-        
+
         return EntityFileResponse.from_orm(file_record)
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get file details: {str(e)}"
+            detail=f"Failed to get file details: {str(e)}",
         )

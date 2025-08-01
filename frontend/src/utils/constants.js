@@ -9,10 +9,8 @@ export const API_ENDPOINTS = {
     REFRESH: '/api/v1/auth/refresh',
   },
   // Special endpoints that don't follow the standard entity pattern
-  LAB_RESULTS: {
-    FILES: labResultId => `/api/v1/lab-results/${labResultId}/files`,
-    FILE_DOWNLOAD: fileId => `/api/v1/lab-result-files/${fileId}/download`,
-  },
+  // NOTE: Lab results files now use the generic entity file system
+  // via ApiService.uploadLabResultFile() -> uploadEntityFile()
 };
 
 // Form Validation Rules

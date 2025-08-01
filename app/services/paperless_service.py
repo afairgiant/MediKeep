@@ -291,9 +291,13 @@ class PaperlessService:
                         "note": "Connection successful",
                     }
                 elif response.status == 401:
-                    raise PaperlessAuthenticationError("Authentication failed - invalid username or password")
+                    raise PaperlessAuthenticationError(
+                        "Authentication failed - invalid username or password"
+                    )
                 elif response.status == 403:
-                    raise PaperlessAuthenticationError("Access forbidden - check user permissions")
+                    raise PaperlessAuthenticationError(
+                        "Access forbidden - check user permissions"
+                    )
                 else:
                     raise PaperlessConnectionError(
                         f"Server returned HTTP {response.status}"
@@ -361,18 +365,20 @@ class PaperlessService:
             }
 
             # Add tags including entity context
-            all_tags = tags or []
-            all_tags.extend(
-                [
-                    f"medical-record-{entity_type}",
-                    f"user-{self.user_id}",
-                    f"entity-{entity_id}",
-                ]
-            )
+            # TODO: Implement proper tag creation/lookup for Paperless
+            # For now, skip custom tags to avoid validation errors
+            # all_tags = tags or []
+            # all_tags.extend(
+            #     [
+            #         f"medical-record-{entity_type}",
+            #         f"user-{self.user_id}",
+            #         f"entity-{entity_id}",
+            #     ]
+            # )
 
-            if all_tags:
-                # Convert tags to paperless format
-                form_data.add_field("tags", ",".join(all_tags))
+            # if all_tags:
+            #     # Convert tags to paperless format
+            #     form_data.add_field("tags", ",".join(all_tags))
 
             if correspondent:
                 form_data.add_field("correspondent", correspondent)
@@ -382,7 +388,7 @@ class PaperlessService:
 
             # Make upload request
             async with self._make_request(
-                "POST", "/api/documents/", data=form_data
+                "POST", "/api/documents/post_document/", data=form_data
             ) as response:
 
                 if response.status == 400:
@@ -394,22 +400,46 @@ class PaperlessService:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during upload"
                     )
-                elif response.status != 200:
-                    raise PaperlessUploadError(f"Upload failed: HTTP {response.status}")
+                elif response.status not in [200, 201]:
+                    response_text = await response.text()
+                    raise PaperlessUploadError(
+                        f"Upload failed: HTTP {response.status} - {response_text}"
+                    )
 
-                result = await response.json()
+                # Handle both JSON and string responses from Paperless
+                try:
+                    result = await response.json()
+                    # If JSON parsing succeeds, use it
+                    if isinstance(result, dict):
+                        task_id = result.get("task_id")
+                        document_id = result.get("id")
+                    else:
+                        # Handle case where JSON is not a dict (shouldn't happen but be safe)
+                        task_id = None
+                        document_id = str(result) if result else None
+                except Exception:
+                    # Paperless might return a simple string (UUID) for successful uploads
+                    response_text = await response.text().strip()
+                    if response_text:
+                        # Assume the text response is a document ID or task ID
+                        task_id = response_text
+                        document_id = response_text
+                    else:
+                        task_id = None
+                        document_id = None
 
                 logger.info(f"Document uploaded to paperless successfully: {filename}")
 
                 return {
                     "status": "uploaded",
-                    "task_id": result.get("task_id"),
+                    "task_id": task_id,
+                    "document_id": document_id,
                     "document_filename": filename,
                     "file_size": len(file_data),
                     "upload_timestamp": datetime.utcnow().isoformat(),
                     "entity_type": entity_type,
                     "entity_id": entity_id,
-                    "tags": all_tags,
+                    "tags": [],  # No custom tags for now
                 }
 
         except PaperlessUploadError:
@@ -639,7 +669,7 @@ def create_paperless_service_with_username_password(
 
 def create_paperless_service_with_token(
     paperless_url: str, encrypted_token: str, user_id: int
-) -> 'PaperlessServiceToken':
+) -> "PaperlessServiceToken":
     """
     Create paperless service with decrypted token (legacy support).
 

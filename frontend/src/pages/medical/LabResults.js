@@ -103,10 +103,11 @@ const LabResults = () => {
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
   const [labResultConditions, setLabResultConditions] = useState({});
-  
+
   useEffect(() => {
     if (currentPatient?.id) {
-      apiService.getPatientConditions(currentPatient.id)
+      apiService
+        .getPatientConditions(currentPatient.id)
         .then(response => {
           setConditions(response || []);
         })
@@ -115,7 +116,7 @@ const LabResults = () => {
             message: 'Failed to fetch conditions for lab results',
             patientId: currentPatient.id,
             error: error.message,
-            component: 'LabResults'
+            component: 'LabResults',
           });
           setConditions([]);
         });
@@ -123,18 +124,19 @@ const LabResults = () => {
   }, [currentPatient?.id]);
 
   // Helper function to get condition details
-  const getConditionDetails = (conditionId) => {
+  const getConditionDetails = conditionId => {
     if (!conditionId || conditions.length === 0) return null;
     return conditions.find(cond => cond.id === conditionId);
   };
 
   // Helper function to fetch condition relationships for a lab result
-  const fetchLabResultConditions = async (labResultId) => {
+  const fetchLabResultConditions = async labResultId => {
     try {
-      const relationships = await apiService.getLabResultConditions(labResultId);
+      const relationships =
+        await apiService.getLabResultConditions(labResultId);
       setLabResultConditions(prev => ({
         ...prev,
-        [labResultId]: relationships || []
+        [labResultId]: relationships || [],
       }));
       return relationships || [];
     } catch (error) {
@@ -142,7 +144,7 @@ const LabResults = () => {
         message: 'Failed to fetch lab result conditions',
         labResultId,
         error: error.message,
-        component: 'LabResults'
+        component: 'LabResults',
       });
       return [];
     }
@@ -215,7 +217,7 @@ const LabResults = () => {
         message: 'Error loading file counts for lab results',
         resultsCount: results?.length,
         error: error.message,
-        component: 'LabResults'
+        component: 'LabResults',
       });
     }
   }, []);
@@ -259,7 +261,7 @@ const LabResults = () => {
               labResultId: labResult.id,
               labResultName: labResult.test_name,
               error: error.message,
-              component: 'LabResults'
+              component: 'LabResults',
             });
             setSelectedFiles([]);
           }
@@ -300,7 +302,7 @@ const LabResults = () => {
           fileSize: pendingFile.file.size,
           labResultId,
           error: error.message,
-          component: 'LabResults'
+          component: 'LabResults',
         });
         throw error;
       }
@@ -318,7 +320,7 @@ const LabResults = () => {
           message: 'Failed to delete lab result file',
           fileId,
           error: error.message,
-          component: 'LabResults'
+          component: 'LabResults',
         });
         throw error;
       }
@@ -374,7 +376,7 @@ const LabResults = () => {
         labResultId: labResult.id,
         labResultName: labResult.test_name,
         error: error.message,
-        component: 'LabResults'
+        component: 'LabResults',
       });
       setSelectedFiles([]);
     }
@@ -398,7 +400,7 @@ const LabResults = () => {
         labResultId: labResult.id,
         labResultName: labResult.test_name,
         error: error.message,
-        component: 'LabResults'
+        component: 'LabResults',
       });
       setSelectedFiles([]);
     }
@@ -531,15 +533,15 @@ const LabResults = () => {
     if (!fileUpload.file || !viewingLabResult) return;
 
     try {
-      const formData = new FormData();
-      formData.append('file', fileUpload.file);
-      if (fileUpload.description?.trim()) {
-        formData.append('description', fileUpload.description);
-      }
-
-      await apiService.post(
-        `/lab-results/${viewingLabResult.id}/files`,
-        formData
+      // Use the proper API method that supports paperless integration
+      // Note: We let the backend determine the storage backend based on user preferences
+      // by not specifying it here (undefined will use user's default_storage_backend)
+      await apiService.uploadLabResultFile(
+        viewingLabResult.id,
+        fileUpload.file,
+        fileUpload.description?.trim() || '',
+        '', // category
+        undefined // storageBackend - let backend use user preference
       );
 
       // Refresh files list
@@ -557,7 +559,7 @@ const LabResults = () => {
         labResultId: viewingLabResult?.id,
         labResultName: viewingLabResult?.test_name,
         error: error.message,
-        component: 'LabResults'
+        component: 'LabResults',
       });
       setError(error.message);
     }
@@ -589,7 +591,7 @@ const LabResults = () => {
         fileId,
         fileName,
         error: error.message,
-        component: 'LabResults'
+        component: 'LabResults',
       });
       setError(error.message);
     }
@@ -612,7 +614,7 @@ const LabResults = () => {
           labResultId: viewingLabResult?.id,
           labResultName: viewingLabResult?.test_name,
           error: error.message,
-          component: 'LabResults'
+          component: 'LabResults',
         });
         setError(error.message);
       }
@@ -1214,7 +1216,7 @@ const LabResults = () => {
             {/* Related Conditions Section */}
             <Stack gap="lg">
               <Title order={3}>Related Conditions</Title>
-              <ConditionRelationships 
+              <ConditionRelationships
                 labResultId={viewingLabResult.id}
                 labResultConditions={labResultConditions}
                 conditions={conditions}
@@ -1345,10 +1347,7 @@ const LabResults = () => {
               >
                 Edit Lab Result
               </Button>
-              <Button 
-                variant="filled" 
-                onClick={handleCloseViewModal}
-              >
+              <Button variant="filled" onClick={handleCloseViewModal}>
                 Close
               </Button>
             </Group>

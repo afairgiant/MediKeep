@@ -402,13 +402,19 @@ class EntityFile(Base):
         String(100), nullable=True
     )  # File category (result, report, card, etc.)
     uploaded_at = Column(DateTime, nullable=False)  # Upload timestamp
-    
+
     # Storage backend tracking
-    storage_backend = Column(String(20), default="local", nullable=False)  # 'local' or 'paperless'
-    paperless_document_id = Column(Integer, nullable=True)  # ID in paperless-ngx system
-    sync_status = Column(String(20), default="synced", nullable=False)  # 'synced', 'pending', 'failed'
+    storage_backend = Column(
+        String(20), default="local", nullable=False
+    )  # 'local' or 'paperless'
+    paperless_document_id = Column(
+        String(255), nullable=True
+    )  # ID in paperless-ngx system
+    sync_status = Column(
+        String(20), default="synced", nullable=False
+    )  # 'synced', 'pending', 'failed'
     last_sync_at = Column(DateTime, nullable=True)  # Last successful sync timestamp
-    
+
     created_at = Column(DateTime, nullable=False, default=get_utc_now)
     updated_at = Column(
         DateTime, nullable=False, default=get_utc_now, onupdate=get_utc_now
@@ -1065,7 +1071,9 @@ class UserPreferences(Base):
     paperless_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
     paperless_username_encrypted = Column(Text, nullable=True)  # Encrypted username
     paperless_password_encrypted = Column(Text, nullable=True)  # Encrypted password
-    default_storage_backend = Column(String(20), default="local", nullable=False)  # 'local' or 'paperless'
+    default_storage_backend = Column(
+        String(20), default="local", nullable=False
+    )  # 'local' or 'paperless'
     paperless_auto_sync = Column(Boolean, default=False, nullable=False)
     paperless_sync_tags = Column(Boolean, default=True, nullable=False)
 
