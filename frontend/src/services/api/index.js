@@ -399,7 +399,14 @@ class ApiService {
         component: 'ApiService',
       });
 
-      return this.get(endpoint, { signal });
+      return this.get(endpoint, { 
+        signal,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
     } catch (error) {
       logger.error('api_get_entity_files_error', 'Failed to get entity files', {
         entityType,
@@ -567,6 +574,34 @@ class ApiService {
         {
           entityType,
           entityCount: entityIds?.length,
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+      throw error;
+    }
+  }
+
+  // Check Paperless document sync status
+  checkPaperlessSyncStatus(signal) {
+    try {
+      logger.debug('api_paperless_sync_check', 'Checking Paperless sync status', {
+        component: 'ApiService',
+      });
+
+      return this.post('/entity-files/sync/paperless', {}, { 
+        signal,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+    } catch (error) {
+      logger.error(
+        'api_paperless_sync_check_error',
+        'Failed to check Paperless sync status',
+        {
           error: error.message,
           component: 'ApiService',
         }

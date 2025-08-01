@@ -387,15 +387,21 @@ class PaperlessService:
                 form_data.add_field("document_type", document_type)
 
             # Make upload request
+            logger.info(f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)")
             async with self._make_request(
                 "POST", "/api/documents/post_document/", data=form_data
             ) as response:
 
+                logger.info(f"Paperless upload response: HTTP {response.status}")
                 if response.status == 400:
-                    error_data = await response.json()
-                    raise PaperlessUploadError(
-                        f"Upload validation failed: {error_data}"
-                    )
+                    try:
+                        error_data = await response.json()
+                        error_message = self._parse_upload_error(error_data, filename)
+                        raise PaperlessUploadError(error_message)
+                    except Exception:
+                        error_text = await response.text()
+                        error_message = self._parse_upload_error(error_text, filename)
+                        raise PaperlessUploadError(error_message)
                 elif response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during upload"
@@ -459,6 +465,84 @@ class PaperlessService:
             )
             raise PaperlessUploadError(f"Upload failed: {str(e)}")
 
+    def _parse_upload_error(self, error_data: Union[Dict, str], filename: str) -> str:
+        """
+        Parse Paperless upload error and return user-friendly message.
+        
+        Args:
+            error_data: Error response from Paperless API
+            filename: Original filename for context
+            
+        Returns:
+            User-friendly error message
+        """
+        if isinstance(error_data, dict):
+            # Handle structured error responses
+            if "non_field_errors" in error_data:
+                errors = error_data["non_field_errors"]
+                if isinstance(errors, list) and errors:
+                    error_msg = errors[0]
+                else:
+                    error_msg = str(errors)
+            elif "detail" in error_data:
+                error_msg = error_data["detail"]
+            elif "error" in error_data:
+                error_msg = error_data["error"]
+            else:
+                error_msg = str(error_data)
+        else:
+            error_msg = str(error_data)
+        
+        # Check for common error patterns and provide user-friendly messages
+        error_lower = error_msg.lower()
+        
+        # Duplicate document detection
+        if any(keyword in error_lower for keyword in [
+            "duplicate", "already exists", "similar document", 
+            "document with this checksum", "identical file"
+        ]):
+            return f"Document '{filename}' appears to be a duplicate. A similar or identical document already exists in Paperless. Please check your Paperless instance for existing documents."
+        
+        # File format/type errors
+        if any(keyword in error_lower for keyword in [
+            "unsupported file", "invalid file type", "file format", 
+            "not supported", "invalid format"
+        ]):
+            return f"File '{filename}' has an unsupported format. Please check that the file type is supported by Paperless-ngx."
+        
+        # File size errors
+        if any(keyword in error_lower for keyword in [
+            "file too large", "size exceeds", "maximum file size", "too big"
+        ]):
+            return f"File '{filename}' is too large for Paperless. Please reduce the file size or check your Paperless configuration."
+        
+        # Permission/access errors
+        if any(keyword in error_lower for keyword in [
+            "permission denied", "access denied", "not authorized", "forbidden"
+        ]):
+            return f"Permission denied uploading '{filename}'. Please check your Paperless user permissions."
+        
+        # Storage/disk space errors
+        if any(keyword in error_lower for keyword in [
+            "disk space", "storage full", "no space", "insufficient space"
+        ]):
+            return f"Paperless storage is full. Unable to upload '{filename}'. Please contact your administrator."
+        
+        # OCR/processing errors
+        if any(keyword in error_lower for keyword in [
+            "ocr failed", "processing failed", "document processing", "text extraction"
+        ]):
+            return f"Paperless had trouble processing '{filename}'. The document was uploaded but text extraction may have failed."
+        
+        # Network/timeout errors
+        if any(keyword in error_lower for keyword in [
+            "timeout", "connection", "network", "request failed"
+        ]):
+            return f"Network error uploading '{filename}' to Paperless. Please try again."
+        
+        # Default message for unknown errors
+        return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
+
     async def download_document(self, document_id: int) -> bytes:
         """
         Download document from paperless-ngx.
@@ -511,6 +595,67 @@ class PaperlessService:
                 },
             )
             raise PaperlessError(f"Download failed: {str(e)}")
+
+    async def check_document_exists(self, document_id: int) -> bool:
+        """
+        Check if a document exists in paperless-ngx without downloading it.
+
+        Args:
+            document_id: Paperless document ID
+
+        Returns:
+            True if document exists, False otherwise
+        """
+        try:
+            async with self._make_request(
+                "GET", f"/api/documents/{document_id}/"
+            ) as response:
+                if response.status == 404:
+                    logger.info(
+                        f"Document {document_id} does not exist in paperless",
+                        extra={
+                            "user_id": self.user_id,
+                            "document_id": document_id,
+                        },
+                    )
+                    return False
+                elif response.status == 401:
+                    raise PaperlessAuthenticationError(
+                        "Authentication failed during document check"
+                    )
+                elif response.status == 200:
+                    logger.debug(
+                        f"Document {document_id} exists in paperless",
+                        extra={
+                            "user_id": self.user_id,
+                            "document_id": document_id,
+                        },
+                    )
+                    return True
+                else:
+                    logger.warning(
+                        f"Unexpected status code when checking document existence: {response.status}",
+                        extra={
+                            "user_id": self.user_id,
+                            "document_id": document_id,
+                            "status": response.status,
+                        },
+                    )
+                    return False
+
+        except PaperlessAuthenticationError:
+            raise
+        except Exception as e:
+            logger.error(
+                f"Document existence check failed unexpectedly",
+                extra={
+                    "user_id": self.user_id,
+                    "document_id": document_id,
+                    "error": str(e),
+                },
+            )
+            # Return False on any error to be safe
+            return False
 
     async def delete_document(self, document_id: int) -> bool:
         """

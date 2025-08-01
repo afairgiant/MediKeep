@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -87,9 +87,11 @@ const Procedures = () => {
       if (!procedures || procedures.length === 0) return;
       
       const countPromises = procedures.map(async (procedure) => {
-        if (fileCounts[procedure.id] !== undefined) return; // Already loaded
+        setFileCountsLoading(prev => {
+          if (prev[procedure.id] !== undefined) return prev; // Already loading
+          return { ...prev, [procedure.id]: true };
+        });
         
-        setFileCountsLoading(prev => ({ ...prev, [procedure.id]: true }));
         try {
           const files = await apiService.getEntityFiles('procedure', procedure.id);
           const count = Array.isArray(files) ? files.length : 0;
@@ -106,7 +108,18 @@ const Procedures = () => {
     };
 
     loadFileCountsForProcedures();
-  }, [procedures, fileCounts]);
+  }, [procedures]); // Remove fileCounts from dependencies
+
+  // Function to refresh file counts for all procedures
+  const refreshFileCount = useCallback(async (procedureId) => {
+    try {
+      const files = await apiService.getEntityFiles('procedure', procedureId);
+      const count = Array.isArray(files) ? files.length : 0;
+      setFileCounts(prev => ({ ...prev, [procedureId]: count }));
+    } catch (error) {
+      console.error(`Error refreshing file count for procedure ${procedureId}:`, error);
+    }
+  }, []);
 
   // Form state
   const [showModal, setShowModal] = useState(false);
@@ -163,6 +176,11 @@ const Procedures = () => {
   };
 
   const handleCloseViewModal = () => {
+    // Refresh file count for the viewed procedure before closing
+    if (viewingProcedure) {
+      refreshFileCount(viewingProcedure.id);
+    }
+    
     setShowViewModal(false);
     setViewingProcedure(null);
     // Remove view parameter from URL

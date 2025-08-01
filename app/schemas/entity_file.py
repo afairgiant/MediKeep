@@ -197,9 +197,13 @@ class EntityFileResponse(EntityFileBase):
     id: int
     entity_type: str
     entity_id: int
+    storage_backend: Optional[str] = "local"  # 'local' or 'paperless'
+    paperless_document_id: Optional[str] = None
+    sync_status: Optional[str] = "synced"  # 'synced', 'pending', 'failed'
     uploaded_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    last_sync_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

@@ -26,6 +26,7 @@ import {
   IconRestore,
   IconFileText,
   IconAlertTriangle,
+  IconRefresh,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
 import { getPaperlessSettings } from '../../services/api/paperlessApi';
@@ -52,6 +53,8 @@ const DocumentManager = ({
   const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [syncStatus, setSyncStatus] = useState({});
+  const [syncLoading, setSyncLoading] = useState(false);
 
   // File upload state for modal
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
@@ -60,18 +63,6 @@ const DocumentManager = ({
   const [paperlessSettings, setPaperlessSettings] = useState(null);
   const [selectedStorageBackend, setSelectedStorageBackend] = useState('local');
   const [paperlessLoading, setPaperlessLoading] = useState(true);
-
-  // Load files when component mounts or entityId changes
-  useEffect(() => {
-    if (entityId && mode !== 'create') {
-      loadFiles();
-    }
-  }, [entityId, mode]);
-
-  // Load paperless settings separately (independent of entityId)
-  useEffect(() => {
-    loadPaperlessSettings();
-  }, [loadPaperlessSettings]);
 
   // Load paperless settings
   const loadPaperlessSettings = useCallback(async () => {
@@ -112,7 +103,6 @@ const DocumentManager = ({
   const loadFiles = useCallback(async () => {
     if (!entityId) return;
 
-    setLoading(true);
     setError('');
 
     try {
@@ -139,10 +129,49 @@ const DocumentManager = ({
         error: err.message,
         component: 'DocumentManager',
       });
-    } finally {
-      setLoading(false);
     }
   }, [entityType, entityId, onFileCountChange, onError]);
+
+  // Check sync status for Paperless documents
+  const checkSyncStatus = useCallback(async (isManualSync = false) => {
+    if (isManualSync) setSyncLoading(true);
+    
+    try {
+      const status = await apiService.checkPaperlessSyncStatus();
+      setSyncStatus(status);
+      
+      // Refresh file list to get updated sync status from database
+      await loadFiles();
+    } catch (err) {
+      logger.error('document_manager_sync_check_error', {
+        message: 'Failed to check Paperless sync status',
+        entityType,
+        entityId,
+        error: err.message,
+        component: 'DocumentManager',
+      });
+      // Don't show error to user for sync checks - it's optional
+    } finally {
+      if (isManualSync) setSyncLoading(false);
+    }
+  }, [entityType, entityId, loadFiles]);
+
+  // Load files when component mounts or entityId changes
+  useEffect(() => {
+    if (entityId && mode !== 'create') {
+      setLoading(true);
+      
+      loadFiles().finally(() => {
+        setLoading(false);
+        // Note: Sync check now only happens manually via button to avoid UI changes
+      });
+    }
+  }, [entityId, mode, loadFiles]);
+
+  // Load paperless settings separately (independent of entityId)
+  useEffect(() => {
+    loadPaperlessSettings();
+  }, [loadPaperlessSettings]);
 
   // Add pending file for batch upload (edit/create mode)
   const handleAddPendingFile = useCallback((file, description = '') => {
@@ -221,9 +250,12 @@ const DocumentManager = ({
         } else if (errorMessage.includes('configuration is incomplete')) {
           errorMessage =
             'Paperless configuration is incomplete. Please check your settings.';
+        } else if (errorMessage.includes('appears to be a duplicate')) {
+          // Duplicate error - use the detailed message from backend
+          errorMessage = errorMessage;
         } else if (errorMessage.includes('Failed to upload to paperless')) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
-        } else if (!errorMessage.includes('Paperless')) {
+        } else if (!errorMessage.includes('Paperless') && !errorMessage.includes('duplicate')) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
         }
       }
@@ -369,9 +401,12 @@ const DocumentManager = ({
           } else if (errorMessage.includes('configuration is incomplete')) {
             errorMessage =
               'Paperless configuration is incomplete. Please check your settings.';
+          } else if (errorMessage.includes('appears to be a duplicate')) {
+            // Duplicate error - use the detailed message from backend
+            errorMessage = errorMessage;
           } else if (errorMessage.includes('Failed to upload to paperless')) {
             errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
-          } else if (!errorMessage.includes('Paperless')) {
+          } else if (!errorMessage.includes('Paperless') && !errorMessage.includes('duplicate')) {
             errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
           }
         }
@@ -440,13 +475,8 @@ const DocumentManager = ({
     await handleImmediateUpload(fileUpload.file, fileUpload.description);
   };
 
-  // Expose batch operations for parent components (create/edit mode)
-  React.useImperativeHandle(React.forwardRef(), () => ({
-    uploadPendingFiles,
-    deleteMarkedFiles,
-    getPendingFilesCount: () => pendingFiles.length,
-    getFilesToDeleteCount: () => filesToDelete.length,
-  }));
+  // Note: Batch operations (uploadPendingFiles, deleteMarkedFiles) are available
+  // but not currently exposed via imperative handle since no parent components use refs
 
   // Render based on mode
   const renderContent = () => {
@@ -497,6 +527,7 @@ const DocumentManager = ({
           {/* Files List */}
           <FileList
             files={files}
+            syncStatus={syncStatus}
             showActions={true}
             onDownload={handleDownloadFile}
             onDelete={handleImmediateDelete}
@@ -527,10 +558,23 @@ const DocumentManager = ({
           {/* Existing Files */}
           {files.length > 0 && (
             <Stack gap="md">
-              <Title order={5}>Current Files:</Title>
+              <Group justify="space-between" align="center">
+                <Title order={5}>Current Files:</Title>
+                <Button
+                  variant="light"
+                  size="xs"
+                  leftSection={<IconRefresh size={14} />}
+                  loading={syncLoading}
+                  onClick={() => checkSyncStatus(true)}
+                  title="Check sync status with Paperless"
+                >
+                  Sync Check
+                </Button>
+              </Group>
               <FileList
                 files={files}
                 filesToDelete={filesToDelete}
+                syncStatus={syncStatus}
                 showActions={true}
                 onDownload={handleDownloadFile}
                 onDelete={handleMarkFileForDeletion}

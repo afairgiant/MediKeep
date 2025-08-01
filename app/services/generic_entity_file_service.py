@@ -241,7 +241,7 @@ class GenericEntityFileService:
                 .all()
             )
 
-            return [EntityFileResponse.from_orm(file) for file in files]
+            return [EntityFileResponse.model_validate(file) for file in files]
 
         except HTTPException:
             raise
@@ -482,7 +482,7 @@ class GenericEntityFileService:
                 f"File uploaded to local storage: {file.filename} for {entity_type} {entity_id}"
             )
 
-            return EntityFileResponse.from_orm(entity_file)
+            return EntityFileResponse.model_validate(entity_file)
 
         except Exception as e:
             # Clean up file if database operation failed
@@ -547,6 +547,53 @@ class GenericEntityFileService:
             )
 
         try:
+            # Check if this file already exists in our database for this user
+            existing_paperless_file = (
+                db.query(EntityFile)
+                .filter(
+                    EntityFile.file_name == file.filename,
+                    EntityFile.storage_backend == "paperless",
+                    EntityFile.paperless_document_id.isnot(None)
+                )
+                .first()
+            )
+
+            if existing_paperless_file:
+                logger.info(
+                    f"Found existing Paperless document for '{file.filename}': {existing_paperless_file.paperless_document_id}"
+                )
+                
+                # Create new database record pointing to same Paperless document
+                entity_file = EntityFile(
+                    entity_type=entity_type,
+                    entity_id=entity_id,
+                    file_name=file.filename,
+                    file_path="paperless://",
+                    file_type=file.content_type,
+                    file_size=file_size,
+                    description=description,
+                    category=category,
+                    storage_backend="paperless",
+                    paperless_document_id=existing_paperless_file.paperless_document_id,
+                    sync_status="synced",
+                    last_sync_at=get_utc_now(),
+                    uploaded_at=get_utc_now(),
+                )
+
+                db.add(entity_file)
+                db.commit()
+                db.refresh(entity_file)
+
+                logger.info(
+                    f"Created reference to existing Paperless document: {file.filename} for {entity_type} {entity_id} (reusing document {existing_paperless_file.paperless_document_id})"
+                )
+                
+                # Note: We could add a success message here if we want to inform users
+                # that we reused an existing document instead of uploading a duplicate
+
+                return EntityFileResponse.model_validate(entity_file)
+
+            # File doesn't exist, proceed with upload
             # Create paperless service
             paperless_service = create_paperless_service_with_username_password(
                 user_prefs.paperless_url,
@@ -590,7 +637,7 @@ class GenericEntityFileService:
                 f"File uploaded to paperless: {file.filename} for {entity_type} {entity_id} (task_id: {upload_result.get('task_id')})"
             )
 
-            return EntityFileResponse.from_orm(entity_file)
+            return EntityFileResponse.model_validate(entity_file)
 
         except Exception as e:
             logger.error(f"Error uploading to paperless: {str(e)}")
@@ -637,7 +684,7 @@ class GenericEntityFileService:
 
             logger.info(f"File metadata updated: {file_id}")
 
-            return EntityFileResponse.from_orm(file_record)
+            return EntityFileResponse.model_validate(file_record)
 
         except HTTPException:
             raise
@@ -767,3 +814,85 @@ class GenericEntityFileService:
                 status_code=500,
                 detail=f"Failed to download file from paperless: {str(e)}",
             )
+
+    async def check_paperless_sync_status(
+        self, db: Session, current_user_id: int
+    ) -> Dict[int, bool]:
+        """
+        Check sync status for all Paperless documents for a user.
+
+        Args:
+            db: Database session
+            current_user_id: User ID to check documents for
+
+        Returns:
+            Dictionary mapping file_id to existence status (True = exists, False = missing)
+        """
+        try:
+            # Get all paperless files for the user
+            paperless_files = (
+                db.query(EntityFile)
+                .filter(
+                    EntityFile.storage_backend == "paperless",
+                    EntityFile.paperless_document_id.isnot(None),
+                    # Filter by user would require joining with entities, for now check all
+                )
+                .all()
+            )
+
+            if not paperless_files:
+                return {}
+
+            # Get user's paperless configuration
+            user_prefs = (
+                db.query(UserPreferences)
+                .filter(UserPreferences.user_id == current_user_id)
+                .first()
+            )
+
+            if not user_prefs or not user_prefs.paperless_enabled:
+                logger.warning("Cannot check paperless sync: user preferences not found or disabled")
+                return {}
+
+            # Create paperless service
+            paperless_service = create_paperless_service_with_username_password(
+                user_prefs.paperless_url,
+                user_prefs.paperless_username_encrypted,
+                user_prefs.paperless_password_encrypted,
+                current_user_id,
+            )
+
+            sync_status = {}
+            
+            # Check each document
+            async with paperless_service:
+                for file_record in paperless_files:
+                    try:
+                        exists = await paperless_service.check_document_exists(
+                            file_record.paperless_document_id
+                        )
+                        sync_status[file_record.id] = exists
+                        
+                        # Update sync status in database
+                        if not exists:
+                            file_record.sync_status = "missing"
+                            file_record.last_sync_at = get_utc_now()
+                        else:
+                            file_record.sync_status = "synced"
+                            file_record.last_sync_at = get_utc_now()
+                        
+                    except Exception as e:
+                        logger.error(f"Error checking document {file_record.paperless_document_id}: {str(e)}")
+                        sync_status[file_record.id] = False
+                        file_record.sync_status = "error"
+                        file_record.last_sync_at = get_utc_now()
+
+            # Commit database updates
+            db.commit()
+
+            logger.info(f"Checked sync status for {len(paperless_files)} paperless documents")
+            return sync_status
+
+        except Exception as e:
+            logger.error(f"Error checking paperless sync status: {str(e)}")
+            return {}

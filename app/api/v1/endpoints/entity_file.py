@@ -392,3 +392,32 @@ def get_file_details(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get file details: {str(e)}",
         )
+
+
+@router.post("/sync/paperless")
+async def check_paperless_sync_status(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Dict[int, bool]:
+    """
+    Check sync status for all Paperless documents.
+    
+    Returns:
+        Dictionary mapping file_id to existence status (True = exists, False = missing)
+    """
+    try:
+        sync_status = await file_service.check_paperless_sync_status(db, current_user_id)
+        
+        logger.info(
+            f"Checked paperless sync status for user {current_user_id}: {len(sync_status)} files checked"
+        )
+        
+        return sync_status
+
+    except Exception as e:
+        logger.error(f"Failed to check paperless sync status: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check paperless sync status: {str(e)}",
+        )

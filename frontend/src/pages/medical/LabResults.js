@@ -16,6 +16,7 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ConditionRelationships from '../../components/medical/ConditionRelationships';
+import DocumentManager from '../../components/shared/DocumentManager';
 import {
   Badge,
   Button,
@@ -30,9 +31,7 @@ import {
   Center,
   Divider,
   Paper,
-  FileInput,
   TextInput,
-  ActionIcon,
   Title,
   SimpleGrid,
   ThemeIcon,
@@ -41,13 +40,7 @@ import {
   ScrollArea,
 } from '@mantine/core';
 import {
-  IconDownload,
-  IconTrash,
-  IconFile,
-  IconFileText,
-  IconUpload,
-  IconX,
-  IconRestore,
+  IconFile, // Still needed for file count badges
 } from '@tabler/icons-react';
 
 const LabResults = () => {
@@ -156,11 +149,7 @@ const LabResults = () => {
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
 
-  // Additional file management state
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
-  const [pendingFiles, setPendingFiles] = useState([]);
-  const [filesToDelete, setFilesToDelete] = useState([]);
+  // Note: File management now handled by DocumentManager component
   const abortControllerRef = useRef(null);
 
   // Form and modal state
@@ -238,6 +227,7 @@ const LabResults = () => {
     }
   }, [labResults, loadFilesCounts]);
 
+
   // Handle URL parameters for direct linking to specific lab results
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -250,23 +240,7 @@ const LabResults = () => {
         setViewingLabResult(labResult);
         setShowViewModal(true);
 
-        // Load files for this specific lab result
-        const loadFiles = async () => {
-          try {
-            const files = await apiService.getLabResultFiles(labResult.id);
-            setSelectedFiles(files);
-          } catch (error) {
-            logger.error('medical_file_download_error', {
-              message: 'Error fetching lab result files for view',
-              labResultId: labResult.id,
-              labResultName: labResult.test_name,
-              error: error.message,
-              component: 'LabResults',
-            });
-            setSelectedFiles([]);
-          }
-        };
-        loadFiles();
+        // Note: File loading now handled by DocumentManager
       }
     }
   }, [location.search, labResults, loading, showViewModal]);
@@ -390,20 +364,7 @@ const LabResults = () => {
     setViewingLabResult(labResult);
     setShowViewModal(true);
 
-    // Load files for this specific lab result
-    try {
-      const files = await apiService.getLabResultFiles(labResult.id);
-      setSelectedFiles(files);
-    } catch (error) {
-      logger.error('medical_data_fetch_error', {
-        message: 'Error fetching lab result files for view',
-        labResultId: labResult.id,
-        labResultName: labResult.test_name,
-        error: error.message,
-        component: 'LabResults',
-      });
-      setSelectedFiles([]);
-    }
+    // Note: File loading now handled by DocumentManager
 
     // Update URL with lab result ID for sharing/bookmarking
     const searchParams = new URLSearchParams(location.search);
@@ -416,7 +377,7 @@ const LabResults = () => {
   const handleCloseViewModal = () => {
     setShowViewModal(false);
     setViewingLabResult(null);
-    setSelectedFiles([]); // Clear files when closing view modal
+    // Note: File state now managed by DocumentManager
     // Remove view parameter from URL
     const searchParams = new URLSearchParams(location.search);
     searchParams.delete('view');
@@ -456,10 +417,6 @@ const LabResults = () => {
       let resultId;
 
       if (editingLabResult) {
-        // Delete marked files first
-        if (filesToDelete.length > 0) {
-          await deleteMarkedFiles();
-        }
         success = await updateItem(editingLabResult.id, labResultData);
         resultId = editingLabResult.id;
       } else {
@@ -469,10 +426,7 @@ const LabResults = () => {
       }
 
       if (success && resultId) {
-        // Upload pending files
-        if (pendingFiles.length > 0) {
-          await uploadPendingFiles(resultId);
-        }
+        // Note: File operations now handled by DocumentManager component
 
         // Reset all form and modal state
         setShowModal(false);
@@ -490,9 +444,7 @@ const LabResults = () => {
           notes: '',
           practitioner_id: '',
         });
-        setPendingFiles([]);
-        setFilesToDelete([]);
-        setSelectedFiles([]);
+        // Note: File state now managed by DocumentManager
 
         await refreshData();
       }
@@ -522,104 +474,11 @@ const LabResults = () => {
       notes: '',
       practitioner_id: '',
     });
-    setPendingFiles([]);
-    setFilesToDelete([]);
-    setSelectedFiles([]);
+    // Note: File state now managed by DocumentManager
   };
 
   // File operations for view modal
-  const handleFileUpload = async e => {
-    e.preventDefault();
-    if (!fileUpload.file || !viewingLabResult) return;
-
-    try {
-      // Use the proper API method that supports paperless integration
-      // Note: We let the backend determine the storage backend based on user preferences
-      // by not specifying it here (undefined will use user's default_storage_backend)
-      await apiService.uploadLabResultFile(
-        viewingLabResult.id,
-        fileUpload.file,
-        fileUpload.description?.trim() || '',
-        '', // category
-        undefined // storageBackend - let backend use user preference
-      );
-
-      // Refresh files list
-      const files = await apiService.getLabResultFiles(viewingLabResult.id);
-      setSelectedFiles(files);
-      setFilesCounts(prev => ({
-        ...prev,
-        [viewingLabResult.id]: files.length,
-      }));
-      setFileUpload({ file: null, description: '' });
-    } catch (error) {
-      logger.error('medical_file_upload_error', {
-        message: 'Error uploading file from view modal',
-        fileName: fileUpload.file?.name,
-        labResultId: viewingLabResult?.id,
-        labResultName: viewingLabResult?.test_name,
-        error: error.message,
-        component: 'LabResults',
-      });
-      setError(error.message);
-    }
-  };
-
-  const handleDownloadFile = async (fileId, fileName) => {
-    try {
-      const blob = await apiService.get(
-        `/lab-result-files/${fileId}/download`,
-        {
-          responseType: 'blob',
-        }
-      );
-
-      if (blob instanceof Blob) {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }
-    } catch (error) {
-      logger.error('medical_file_download_error', {
-        message: 'Error downloading lab result file',
-        fileId,
-        fileName,
-        error: error.message,
-        component: 'LabResults',
-      });
-      setError(error.message);
-    }
-  };
-
-  const handleDeleteFile = async fileId => {
-    if (window.confirm('Are you sure you want to delete this file?')) {
-      try {
-        await apiService.deleteLabResultFile(fileId);
-        const files = await apiService.getLabResultFiles(viewingLabResult.id);
-        setSelectedFiles(files);
-        setFilesCounts(prev => ({
-          ...prev,
-          [viewingLabResult.id]: files.length,
-        }));
-      } catch (error) {
-        logger.error('medical_file_delete_error', {
-          message: 'Error deleting lab result file',
-          fileId,
-          labResultId: viewingLabResult?.id,
-          labResultName: viewingLabResult?.test_name,
-          error: error.message,
-          component: 'LabResults',
-        });
-        setError(error.message);
-      }
-    }
-  };
+  // Note: File operations now handled by DocumentManager component
 
   if (loading) {
     return (
@@ -942,159 +801,24 @@ const LabResults = () => {
               <Title order={4} mb="md">
                 Manage Files
               </Title>
-
-              {/* Existing Files */}
-              {selectedFiles.length > 0 && (
-                <Stack gap="md" mb="md">
-                  <Title order={5}>Current Files:</Title>
-                  <Stack gap="sm">
-                    {selectedFiles.map(file => (
-                      <Paper
-                        key={file.id}
-                        withBorder
-                        p="sm"
-                        bg={filesToDelete.includes(file.id) ? 'red.0' : 'white'}
-                        style={{
-                          opacity: filesToDelete.includes(file.id) ? 0.7 : 1,
-                          borderColor: filesToDelete.includes(file.id)
-                            ? 'var(--mantine-color-red-3)'
-                            : undefined,
-                        }}
-                      >
-                        <Group justify="space-between" align="center">
-                          <Group gap="xs" style={{ flex: 1 }}>
-                            <ThemeIcon variant="light" size="sm">
-                              <IconFile size={14} />
-                            </ThemeIcon>
-                            <Stack gap={2} style={{ flex: 1 }}>
-                              <Text fw={500} size="sm">
-                                {file.file_name}
-                              </Text>
-                              <Group gap="md">
-                                <Text size="xs" c="dimmed">
-                                  {(file.file_size / 1024).toFixed(1)} KB
-                                </Text>
-                                {file.description && (
-                                  <Text size="xs" c="dimmed" fs="italic">
-                                    {file.description}
-                                  </Text>
-                                )}
-                              </Group>
-                            </Stack>
-                          </Group>
-                          <Group gap="xs">
-                            <ActionIcon
-                              variant="light"
-                              color="blue"
-                              size="sm"
-                              onClick={() =>
-                                handleDownloadFile(file.id, file.file_name)
-                              }
-                            >
-                              <IconDownload size={14} />
-                            </ActionIcon>
-                            {filesToDelete.includes(file.id) ? (
-                              <ActionIcon
-                                variant="light"
-                                color="green"
-                                size="sm"
-                                onClick={() =>
-                                  handleUnmarkFileForDeletion(file.id)
-                                }
-                              >
-                                <IconRestore size={14} />
-                              </ActionIcon>
-                            ) : (
-                              <ActionIcon
-                                variant="light"
-                                color="red"
-                                size="sm"
-                                onClick={() =>
-                                  handleMarkFileForDeletion(file.id)
-                                }
-                              >
-                                <IconTrash size={14} />
-                              </ActionIcon>
-                            )}
-                          </Group>
-                        </Group>
-                      </Paper>
-                    ))}
-                  </Stack>
-                </Stack>
-              )}
-
-              {/* Add New Files */}
-              <Group mb="md">
-                <FileInput
-                  placeholder="Select files to upload"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif,.txt,.csv,.xml,.json,.doc,.docx,.xls,.xlsx"
-                  onChange={files => {
-                    if (files) {
-                      files.forEach(file => {
-                        handleAddPendingFile(file, '');
-                      });
-                    }
-                  }}
-                  leftSection={<IconUpload size={16} />}
-                  style={{ flex: 1 }}
-                />
-              </Group>
-
-              {/* Pending Files */}
-              {pendingFiles.length > 0 && (
-                <Stack gap="md">
-                  <Title order={5}>Files to Upload:</Title>
-                  <Stack gap="sm">
-                    {pendingFiles.map(pendingFile => (
-                      <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
-                        <Group justify="space-between" align="flex-start">
-                          <Group gap="xs" style={{ flex: 1 }}>
-                            <ThemeIcon variant="light" color="blue" size="sm">
-                              <IconFileText size={14} />
-                            </ThemeIcon>
-                            <Stack gap="xs" style={{ flex: 1 }}>
-                              <Group gap="md">
-                                <Text fw={500} size="sm">
-                                  {pendingFile.file.name}
-                                </Text>
-                                <Text size="xs" c="dimmed">
-                                  {(pendingFile.file.size / 1024).toFixed(1)} KB
-                                </Text>
-                              </Group>
-                              <TextInput
-                                placeholder="Description (optional)"
-                                value={pendingFile.description}
-                                onChange={e => {
-                                  setPendingFiles(prev =>
-                                    prev.map(f =>
-                                      f.id === pendingFile.id
-                                        ? { ...f, description: e.target.value }
-                                        : f
-                                    )
-                                  );
-                                }}
-                                size="xs"
-                              />
-                            </Stack>
-                          </Group>
-                          <ActionIcon
-                            variant="light"
-                            color="red"
-                            size="sm"
-                            onClick={() =>
-                              handleRemovePendingFile(pendingFile.id)
-                            }
-                          >
-                            <IconX size={14} />
-                          </ActionIcon>
-                        </Group>
-                      </Paper>
-                    ))}
-                  </Stack>
-                </Stack>
-              )}
+              <DocumentManager
+                entityType="lab-result"
+                entityId={editingLabResult.id}
+                mode="edit"
+                config={{
+                  acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+                  maxSize: 10 * 1024 * 1024, // 10MB
+                  maxFiles: 10
+                }}
+                onError={(error) => {
+                  logger.error('document_manager_error', {
+                    message: 'Document manager error in lab results edit',
+                    labResultId: editingLabResult.id,
+                    error: error,
+                    component: 'LabResults',
+                  });
+                }}
+              />
             </Paper>
           )}
         </MantineLabResultForm>
@@ -1228,111 +952,24 @@ const LabResults = () => {
 
             <Stack gap="lg">
               <Title order={3}>Associated Files</Title>
-
-              {/* File Upload Form */}
-              <Paper withBorder p="md" bg="gray.1">
-                <form onSubmit={handleFileUpload}>
-                  <Stack gap="md">
-                    <Group align="flex-end">
-                      <FileInput
-                        placeholder="Select a file to upload"
-                        value={fileUpload.file}
-                        onChange={file =>
-                          setFileUpload(prev => ({
-                            ...prev,
-                            file: file,
-                          }))
-                        }
-                        accept=".pdf,.jpg,.jpeg,.png,.tiff,.bmp,.gif"
-                        leftSection={<IconUpload size={16} />}
-                        style={{ flex: 1 }}
-                      />
-                      <TextInput
-                        placeholder="File description (optional)"
-                        value={fileUpload.description}
-                        onChange={e =>
-                          setFileUpload(prev => ({
-                            ...prev,
-                            description: e.target.value,
-                          }))
-                        }
-                        style={{ flex: 1 }}
-                      />
-                      <Button
-                        type="submit"
-                        disabled={!fileUpload.file}
-                        leftSection={<IconUpload size={16} />}
-                      >
-                        Upload
-                      </Button>
-                    </Group>
-                  </Stack>
-                </form>
-              </Paper>
-
-              {/* Files List */}
-              <Stack gap="md">
-                {selectedFiles.length === 0 ? (
-                  <Paper withBorder p="md" ta="center">
-                    <Stack align="center" gap="sm">
-                      <ThemeIcon size="xl" variant="light" color="gray">
-                        <IconFile size={24} />
-                      </ThemeIcon>
-                      <Text c="dimmed">
-                        No files attached to this lab result.
-                      </Text>
-                    </Stack>
-                  </Paper>
-                ) : (
-                  <Stack gap="sm">
-                    {selectedFiles.map(file => (
-                      <Paper key={file.id} withBorder p="md">
-                        <Group justify="space-between" align="center">
-                          <Group gap="md" style={{ flex: 1 }}>
-                            <ThemeIcon variant="light" color="blue">
-                              <IconFile size={20} />
-                            </ThemeIcon>
-                            <Stack gap={2} style={{ flex: 1 }}>
-                              <Text fw={500}>{file.file_name}</Text>
-                              <Group gap="md">
-                                <Text size="sm" c="dimmed">
-                                  {(file.file_size / 1024).toFixed(1)} KB
-                                </Text>
-                                <Text size="sm" c="dimmed">
-                                  {file.file_type}
-                                </Text>
-                                {file.description && (
-                                  <Text size="sm" c="dimmed" fs="italic">
-                                    {file.description}
-                                  </Text>
-                                )}
-                              </Group>
-                            </Stack>
-                          </Group>
-                          <Group gap="xs">
-                            <ActionIcon
-                              variant="light"
-                              color="blue"
-                              onClick={() =>
-                                handleDownloadFile(file.id, file.file_name)
-                              }
-                            >
-                              <IconDownload size={16} />
-                            </ActionIcon>
-                            <ActionIcon
-                              variant="light"
-                              color="red"
-                              onClick={() => handleDeleteFile(file.id)}
-                            >
-                              <IconTrash size={16} />
-                            </ActionIcon>
-                          </Group>
-                        </Group>
-                      </Paper>
-                    ))}
-                  </Stack>
-                )}
-              </Stack>
+              <DocumentManager
+                entityType="lab-result"
+                entityId={viewingLabResult.id}
+                mode="view"
+                config={{
+                  acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+                  maxSize: 10 * 1024 * 1024, // 10MB
+                  maxFiles: 10
+                }}
+                onError={(error) => {
+                  logger.error('document_manager_error', {
+                    message: 'Document manager error in lab results view',
+                    labResultId: viewingLabResult.id,
+                    error: error,
+                    component: 'LabResults',
+                  });
+                }}
+              />
             </Stack>
 
             {/* Modal Action Buttons */}

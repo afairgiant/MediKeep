@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -109,9 +109,11 @@ const Visits = () => {
       if (!visits || visits.length === 0) return;
       
       const countPromises = visits.map(async (visit) => {
-        if (fileCounts[visit.id] !== undefined) return; // Already loaded
+        setFileCountsLoading(prev => {
+          if (prev[visit.id] !== undefined) return prev; // Already loading
+          return { ...prev, [visit.id]: true };
+        });
         
-        setFileCountsLoading(prev => ({ ...prev, [visit.id]: true }));
         try {
           const files = await apiService.getEntityFiles('visit', visit.id);
           const count = Array.isArray(files) ? files.length : 0;
@@ -128,7 +130,8 @@ const Visits = () => {
     };
 
     loadFileCountsForVisits();
-  }, [visits, fileCounts]);
+  }, [visits]); // Remove fileCounts from dependencies
+
 
   // Helper function to get condition details
   const getConditionDetails = (conditionId) => {
