@@ -16,7 +16,7 @@ const ConnectionConfigCard = ({
   testingConnection = false,
   serverInfo = null
 }) => {
-  const [showToken, setShowToken] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
   /**
@@ -59,14 +59,26 @@ const ConnectionConfigCard = ({
   };
 
   /**
-   * Validate API token format
+   * Validate username format
    */
-  const validateToken = (token) => {
-    if (!token) return 'API token is required';
+  const validateUsername = (username) => {
+    if (!username) return 'Username is required';
     
-    // Basic validation - allow various token formats
-    if (token.length < 10) {
-      return 'API token seems too short';
+    if (username.length < 2) {
+      return 'Username too short';
+    }
+    
+    return null;
+  };
+
+  /**
+   * Validate password format
+   */
+  const validatePassword = (password) => {
+    if (!password) return 'Password is required';
+    
+    if (password.length < 3) {
+      return 'Password too short';
     }
     
     return null;
@@ -88,18 +100,33 @@ const ConnectionConfigCard = ({
   };
 
   /**
-   * Handle API token input change
+   * Handle username input change
    */
-  const handleTokenChange = (event) => {
+  const handleUsernameChange = (event) => {
     const value = event.target.value.trim();
-    const error = validateToken(value);
+    const error = validateUsername(value);
     
     setValidationErrors(prev => ({
       ...prev,
-      token: error
+      username: error
     }));
     
-    onUpdate({ paperless_api_token: value });
+    onUpdate({ paperless_username: value });
+  };
+
+  /**
+   * Handle password input change
+   */
+  const handlePasswordChange = (event) => {
+    const value = event.target.value;
+    const error = validatePassword(value);
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      password: error
+    }));
+    
+    onUpdate({ paperless_password: value });
   };
 
   /**
@@ -107,18 +134,31 @@ const ConnectionConfigCard = ({
    */
   const handleTestConnection = () => {
     const urlError = validateUrl(preferences.paperless_url);
-    const tokenError = validateToken(preferences.paperless_api_token);
     
-    if (urlError || tokenError) {
+    // Only validate credentials if they are provided (may use saved credentials)
+    let usernameError = null;
+    let passwordError = null;
+    
+    if (preferences.paperless_username) {
+      usernameError = validateUsername(preferences.paperless_username);
+    }
+    
+    if (preferences.paperless_password) {
+      passwordError = validatePassword(preferences.paperless_password);
+    }
+    
+    if (urlError || usernameError || passwordError) {
       setValidationErrors({
         url: urlError,
-        token: tokenError
+        username: usernameError,
+        password: passwordError
       });
       
       frontendLogger.logWarning('Connection test blocked by validation errors', {
         component: 'ConnectionConfigCard',
         urlError,
-        tokenError
+        usernameError,
+        passwordError
       });
       return;
     }
@@ -165,8 +205,8 @@ const ConnectionConfigCard = ({
   };
 
   const statusInfo = getConnectionStatusInfo();
-  // Can test if we have both URL and token
-  const canTest = preferences.paperless_url && preferences.paperless_api_token && !testingConnection;
+  // Can test if we have URL (credentials can be saved or provided)
+  const canTest = preferences.paperless_url && !testingConnection;
 
   return (
     <Card>
@@ -208,33 +248,54 @@ const ConnectionConfigCard = ({
           </div>
 
           <div className="paperless-form-group">
-            <label htmlFor="paperless-token" className="paperless-form-label">
-              API Token *
+            <label htmlFor="paperless-username" className="paperless-form-label">
+              Username *
+            </label>
+            <input
+              id="paperless-username"
+              type="text"
+              className={`paperless-form-input ${validationErrors.username ? 'error' : ''}`}
+              placeholder="Enter your username"
+              value={preferences.paperless_username || ''}
+              onChange={handleUsernameChange}
+              disabled={testingConnection}
+            />
+            {validationErrors.username && (
+              <div className="paperless-form-error">{validationErrors.username}</div>
+            )}
+            <div className="paperless-form-help">
+              Your paperless-ngx username
+            </div>
+          </div>
+
+          <div className="paperless-form-group">
+            <label htmlFor="paperless-password" className="paperless-form-label">
+              Password *
             </label>
             <div className="paperless-token-input-group">
               <input
-                id="paperless-token"
-                type={showToken ? 'text' : 'password'}
-                className={`paperless-form-input ${validationErrors.token ? 'error' : ''}`}
-                placeholder="Enter your API token"
-                value={preferences.paperless_api_token || ''}
-                onChange={handleTokenChange}
+                id="paperless-password"
+                type={showPassword ? 'text' : 'password'}
+                className={`paperless-form-input ${validationErrors.password ? 'error' : ''}`}
+                placeholder="Enter your password"
+                value={preferences.paperless_password || ''}
+                onChange={handlePasswordChange}
                 disabled={testingConnection}
               />
               <button
                 type="button"
                 className="paperless-token-toggle"
-                onClick={() => setShowToken(!showToken)}
+                onClick={() => setShowPassword(!showPassword)}
                 disabled={testingConnection}
               >
-                {showToken ? '👁️' : '👁️‍🗨️'}
+                {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
             </div>
-            {validationErrors.token && (
-              <div className="paperless-form-error">{validationErrors.token}</div>
+            {validationErrors.password && (
+              <div className="paperless-form-error">{validationErrors.password}</div>
             )}
             <div className="paperless-form-help">
-              Generate this token in your paperless-ngx profile settings
+              Your paperless-ngx password
             </div>
           </div>
         </div>
@@ -250,23 +311,18 @@ const ConnectionConfigCard = ({
           </Button>
 
           {/* Server Information */}
-          {connectionStatus === 'connected' && serverInfo && (
+          {connectionStatus === 'connected' && (
             <div className="paperless-server-info">
               <div className="server-info-item">
-                <span className="server-info-label">✓ API v{serverInfo.apiVersion} Compatible</span>
+                <span className="server-info-label">✓ Connection successful</span>
               </div>
-              {serverInfo.version && (
-                <div className="server-info-item">
-                  <span className="server-info-label">📡 Server: Paperless-ngx {serverInfo.version}</span>
-                </div>
-              )}
             </div>
           )}
 
           {connectionStatus === 'failed' && (
             <div className="paperless-connection-error">
               <div className="connection-error-message">
-                Unable to connect to paperless-ngx. Please check your URL and API token.
+                Unable to connect to paperless-ngx. Please check your URL, username, and password.
               </div>
             </div>
           )}

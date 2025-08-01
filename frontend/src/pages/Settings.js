@@ -17,7 +17,7 @@ const Settings = () => {
   const {
     preferences: userPreferences,
     loading: loadingPreferences,
-    updatePreferences,
+    updateLocalPreferences,
   } = useUserPreferences();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
@@ -27,6 +27,7 @@ const Settings = () => {
   const [localPreferences, setLocalPreferences] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
   const handleOpenPasswordModal = () => {
     setIsPasswordModalOpen(true);
@@ -47,7 +48,12 @@ const Settings = () => {
   // Initialize local preferences when context loads
   useEffect(() => {
     if (userPreferences && Object.keys(userPreferences).length > 0) {
-      setLocalPreferences({ ...userPreferences });
+      setLocalPreferences({ 
+        ...userPreferences,
+        // Ensure new fields have default values if they're missing
+        paperless_username: userPreferences.paperless_username || '',
+        paperless_password: userPreferences.paperless_password || ''
+      });
     }
   }, [userPreferences]);
 
@@ -57,19 +63,19 @@ const Settings = () => {
       setHasChanges(false);
       return;
     }
-    
+
     const hasChanged = Object.keys(localPreferences).some(key => {
       return localPreferences[key] !== userPreferences[key];
     });
     setHasChanges(hasChanged);
   }, [localPreferences, userPreferences]);
 
-  const handleUnitSystemChange = (newUnitSystem) => {
+  const handleUnitSystemChange = newUnitSystem => {
     setLocalPreferences(prev => ({
       ...prev,
-      unit_system: newUnitSystem
+      unit_system: newUnitSystem,
     }));
-    
+
     frontendLogger.logInfo('Unit system preference changed (not saved yet)', {
       newUnitSystem,
       component: 'Settings',
@@ -79,7 +85,7 @@ const Settings = () => {
   const handleSavePreferences = async () => {
     try {
       setSavingPreferences(true);
-      
+
       // Filter out unchanged fields to avoid validation issues
       const fieldsToUpdate = {};
       Object.keys(localPreferences).forEach(key => {
@@ -87,23 +93,40 @@ const Settings = () => {
           fieldsToUpdate[key] = localPreferences[key];
         }
       });
-      
+
       // Only send the update if there are actual changes
       if (Object.keys(fieldsToUpdate).length === 0) {
         frontendLogger.logInfo('No changes to save', { component: 'Settings' });
         return userPreferences;
       }
+
+      // Check if we're updating paperless settings
+      const hasPaperlessSettings = ['paperless_enabled', 'paperless_url', 'paperless_username', 'paperless_password', 'default_storage_backend', 'paperless_auto_sync', 'paperless_sync_tags'].some(key => key in fieldsToUpdate);
       
-      const updatedPreferences = await updateUserPreferences(fieldsToUpdate);
-      
-      // Update the context
-      updatePreferences(updatedPreferences);
+      let updatedPreferences;
+      if (hasPaperlessSettings) {
+        // Use paperless-specific API for paperless settings (handles encryption)
+        const { updatePaperlessSettings } = await import('../services/api/paperlessApi');
+        updatedPreferences = await updatePaperlessSettings(fieldsToUpdate);
+      } else {
+        // Use general user preferences API for other settings
+        updatedPreferences = await updateUserPreferences(fieldsToUpdate);
+      }
+
+      // Update the context but preserve local form values for credentials
+      const updatedPreferencesWithLocalCredentials = {
+        ...updatedPreferences,
+        // Preserve local credential values that weren't returned by API for security
+        paperless_username: localPreferences.paperless_username || '',
+        paperless_password: localPreferences.paperless_password || ''
+      };
+      updateLocalPreferences(updatedPreferencesWithLocalCredentials);
 
       frontendLogger.logInfo('User preferences saved successfully', {
         updatedFields: Object.keys(fieldsToUpdate),
         component: 'Settings',
       });
-      
+
       return updatedPreferences;
     } catch (error) {
       frontendLogger.logError('Failed to save user preferences', {
@@ -117,7 +140,12 @@ const Settings = () => {
   };
 
   const handleResetPreferences = () => {
-    setLocalPreferences({ ...userPreferences });
+    setLocalPreferences({ 
+      ...userPreferences,
+      // Ensure new fields have default values if they're missing
+      paperless_username: userPreferences.paperless_username || '',
+      paperless_password: userPreferences.paperless_password || ''
+    });
     frontendLogger.logInfo('User preferences reset to original values', {
       component: 'Settings',
     });
@@ -282,7 +310,6 @@ const Settings = () => {
                     </label>
                   </div>
                 )}
-
               </div>
             </div>
           </div>
@@ -295,10 +322,10 @@ const Settings = () => {
             <div className="settings-section-description">
               Configure how your medical documents are stored and managed
             </div>
-            
-            <PaperlessSettings 
+
+            <PaperlessSettings
               preferences={localPreferences}
-              onPreferencesUpdate={(newPrefs) => setLocalPreferences(newPrefs)}
+              onPreferencesUpdate={newPrefs => setLocalPreferences(newPrefs)}
               loading={loadingPreferences}
             />
           </div>
@@ -313,17 +340,17 @@ const Settings = () => {
                   You have unsaved changes
                 </div>
               </div>
-              
+
               <div className="settings-actions-buttons">
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={handleResetPreferences}
                   disabled={savingPreferences}
                 >
                   Reset Changes
                 </Button>
-                
-                <Button 
+
+                <Button
                   onClick={handleSavePreferences}
                   disabled={savingPreferences}
                   loading={savingPreferences}

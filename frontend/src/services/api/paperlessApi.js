@@ -9,13 +9,15 @@ import { apiService } from './index';
 /**
  * Test connection to paperless-ngx instance
  * @param {string} paperlessUrl - Paperless-ngx instance URL
- * @param {string} apiToken - API token for authentication
+ * @param {string} username - Username for authentication
+ * @param {string} password - Password for authentication
  * @returns {Promise} Connection test results
  */
-export const testPaperlessConnection = async (paperlessUrl, apiToken) => {
+export const testPaperlessConnection = async (paperlessUrl, username, password) => {
   return apiService.post('/paperless/test-connection', {
     paperless_url: paperlessUrl,
-    paperless_api_token: apiToken
+    paperless_username: username,
+    paperless_password: password
   });
 };
 
@@ -24,7 +26,8 @@ export const testPaperlessConnection = async (paperlessUrl, apiToken) => {
  * @param {Object} settings - Paperless settings to update
  * @param {boolean} settings.paperless_enabled - Enable/disable paperless integration
  * @param {string} settings.paperless_url - Paperless-ngx instance URL
- * @param {string} settings.paperless_api_token - API token
+ * @param {string} settings.paperless_username - Username for authentication
+ * @param {string} settings.paperless_password - Password for authentication
  * @param {string} settings.default_storage_backend - Default storage backend ('local' or 'paperless')
  * @param {boolean} settings.paperless_auto_sync - Enable automatic sync
  * @param {boolean} settings.paperless_sync_tags - Enable tag synchronization

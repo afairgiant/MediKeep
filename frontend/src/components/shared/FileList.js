@@ -21,7 +21,9 @@ import {
   IconPhoto,
   IconSearch,
   IconSortAscending,
-  IconSortDescending
+  IconSortDescending,
+  IconFolder,
+  IconCloud
 } from '@tabler/icons-react';
 import { formatDate } from '../../utils/helpers';
 
@@ -63,6 +65,24 @@ const FileList = ({
     }
     
     return { icon: IconFile, color: 'gray' };
+  };
+
+  // Get storage backend icon and info
+  const getStorageBackendInfo = (storageBackend) => {
+    if (storageBackend === 'paperless') {
+      return {
+        icon: IconCloud,
+        color: 'green',
+        label: 'Paperless',
+        description: 'Stored in paperless-ngx'
+      };
+    }
+    return {
+      icon: IconFolder,
+      color: 'blue',
+      label: 'Local',
+      description: 'Stored locally'
+    };
   };
 
   // Format file size
@@ -244,6 +264,23 @@ const FileList = ({
                             <Text size="xs" c="dimmed">
                               {formatFileSize(file.file_size)}
                             </Text>
+                            
+                            {/* Storage Backend Badge */}
+                            {(() => {
+                              const storageInfo = getStorageBackendInfo(file.storage_backend);
+                              return (
+                                <Badge 
+                                  variant="light" 
+                                  color={storageInfo.color} 
+                                  size="xs"
+                                  leftSection={<storageInfo.icon size={10} />}
+                                  title={storageInfo.description}
+                                >
+                                  {storageInfo.label}
+                                </Badge>
+                              );
+                            })()}
+                            
                             {file.file_type && (
                               <Badge variant="light" color="gray" size="xs">
                                 {file.file_type}

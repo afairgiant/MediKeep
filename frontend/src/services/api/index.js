@@ -394,7 +394,7 @@ class ApiService {
   }
 
   // Upload file to an entity
-  uploadEntityFile(entityType, entityId, file, description = '', signal) {
+  uploadEntityFile(entityType, entityId, file, description = '', category = '', storageBackend = 'local', signal) {
     try {
       const endpoint = this.getFileEndpoint(entityType, entityId);
       
@@ -403,6 +403,11 @@ class ApiService {
       if (description && description.trim()) {
         formData.append('description', description.trim());
       }
+      if (category && category.trim()) {
+        formData.append('category', category.trim());
+      }
+      // Always send storage_backend, default to 'local' if not specified
+      formData.append('storage_backend', storageBackend || 'local');
       
       logger.info('api_upload_entity_file', 'Uploading file to entity', {
         entityType,
@@ -410,6 +415,9 @@ class ApiService {
         fileName: file.name,
         fileSize: file.size,
         hasDescription: !!description,
+        hasCategory: !!category,
+        storageBackend,
+        actualStorageBackend: storageBackend || 'local',
         endpoint,
         component: 'ApiService'
       });
@@ -529,8 +537,8 @@ class ApiService {
     return this.getEntityFiles('lab-result', labResultId, signal);
   }
   
-  uploadLabResultFile(labResultId, file, description = '', signal) {
-    return this.uploadEntityFile('lab-result', labResultId, file, description, signal);
+  uploadLabResultFile(labResultId, file, description = '', category = '', storageBackend = 'local', signal) {
+    return this.uploadEntityFile('lab-result', labResultId, file, description, category, storageBackend, signal);
   }
   
   downloadLabResultFile(fileId, fileName, signal) {

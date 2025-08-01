@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
+from app.core.logging_config import get_logger
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
@@ -28,6 +29,9 @@ router = APIRouter()
 
 # Initialize service
 file_service = GenericEntityFileService()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.get("/{entity_type}/{entity_id}/files", response_model=List[EntityFileResponse])
@@ -74,6 +78,7 @@ async def upload_entity_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
+    storage_backend: Optional[str] = Form("local"),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> EntityFileResponse:
     """
@@ -85,11 +90,20 @@ async def upload_entity_file(
         file: File to upload
         description: Optional description
         category: Optional category
+        storage_backend: Storage backend to use ('local' or 'paperless')
     
     Returns:
         Created entity file details
     """
     try:
+        # Debug logging to see what storage_backend was received
+        logger.info(f"File upload request for {entity_type} {entity_id}", extra={
+            "entity_type": entity_type,
+            "entity_id": entity_id,
+            "storage_backend": storage_backend,
+            "file_name": file.filename,
+            "current_user_id": current_user_id
+        })
         # TODO: Add permission check - ensure user has access to this entity
         # This would depend on your user model and permission system
         
@@ -107,7 +121,9 @@ async def upload_entity_file(
             entity_id=entity_id,
             file=file,
             description=description,
-            category=category
+            category=category,
+            storage_backend=storage_backend,
+            current_user_id=current_user_id
         )
         
         # Log the creation activity
@@ -144,7 +160,7 @@ async def download_file(
     current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """
-    Download a file by its ID.
+    Download a file by its ID from both local and paperless storage.
     
     Args:
         file_id: ID of the file to download
@@ -157,14 +173,24 @@ async def download_file(
         # This would involve checking if the user has access to the entity that owns the file
         
         # Get file information
-        file_path, filename, content_type = file_service.get_file_download_info(db, file_id)
+        file_info, filename, content_type = await file_service.get_file_download_info(db, file_id)
         
-        # Return file response
-        return FileResponse(
-            path=file_path,
-            filename=filename,
-            media_type=content_type
-        )
+        # Handle different return types (local path vs paperless content)
+        if isinstance(file_info, bytes):
+            # Paperless file - return as StreamingResponse
+            from fastapi.responses import Response
+            return Response(
+                content=file_info,
+                media_type=content_type,
+                headers={"Content-Disposition": f"attachment; filename={filename}"}
+            )
+        else:
+            # Local file - return as FileResponse
+            return FileResponse(
+                path=file_info,
+                filename=filename,
+                media_type=content_type
+            )
         
     except HTTPException:
         raise

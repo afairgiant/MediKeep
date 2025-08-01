@@ -72,17 +72,19 @@ class CredentialEncryption:
             return None
         
         try:
-            # Validate token format (basic check for paperless tokens)
-            if not self._is_valid_token_format(token):
-                logger.warning("Invalid token format provided for encryption")
-                raise SecurityError("Invalid API token format")
+            # Basic validation - ensure token is not empty and reasonable length
+            if len(token.strip()) < 2:
+                logger.warning("Token too short for encryption")
+                raise SecurityError("Invalid credential format")
             
             encrypted_token = self.cipher.encrypt(token.encode())
             return base64.urlsafe_b64encode(encrypted_token).decode()
             
+        except SecurityError:
+            raise
         except Exception as e:
             logger.error(f"Token encryption failed: {str(e)}")
-            raise SecurityError("Failed to encrypt API token")
+            raise SecurityError("Failed to encrypt credential")
     
     def decrypt_token(self, encrypted_token: str) -> Optional[str]:
         """

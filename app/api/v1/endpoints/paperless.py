@@ -13,7 +13,7 @@ from app.core.database import get_db
 from app.api.deps import get_current_user
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
-from app.services.paperless_service import create_paperless_service, PaperlessConnectionError, PaperlessAuthenticationError
+from app.services.paperless_service import create_paperless_service_with_username_password, PaperlessConnectionError, PaperlessAuthenticationError
 from app.crud.user_preferences import user_preferences
 from app.services.credential_encryption import credential_encryption
 from app.core.logging_config import get_logger
@@ -32,7 +32,7 @@ async def test_paperless_connection(
     Test connection to paperless-ngx instance.
     
     Args:
-        connection_data: Paperless connection details (URL and API token)
+        connection_data: Paperless connection details (URL, username, and password)
         current_user: Current authenticated user
         db: Database session
         
@@ -49,16 +49,38 @@ async def test_paperless_connection(
             "endpoint": "test_paperless_connection"
         })
         
-        # Debug: test encryption first
-        logger.info("Encrypting token...")
-        encrypted_token = credential_encryption.encrypt_token(connection_data.paperless_api_token)
-        logger.info(f"Token encrypted successfully, length: {len(encrypted_token) if encrypted_token else 0}")
+        # Check if we need to use saved credentials
+        use_saved_credentials = (not connection_data.paperless_username or 
+                               not connection_data.paperless_password)
+        
+        if use_saved_credentials:
+            logger.info("Using saved credentials for connection test")
+            # Get user preferences with saved credentials
+            user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
+            
+            if not user_prefs or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No saved credentials found. Please enter username and password."
+                )
+            
+            # Use saved encrypted credentials
+            encrypted_username = user_prefs.paperless_username_encrypted
+            encrypted_password = user_prefs.paperless_password_encrypted
+            logger.info("Using saved encrypted credentials for test")
+        else:
+            # Use provided credentials, encrypt them
+            logger.info("Encrypting provided credentials...")
+            encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
+            encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
+            logger.info("Credentials encrypted successfully")
         
         # Create paperless service for testing
         logger.info("Creating paperless service...")
-        async with create_paperless_service(
+        async with create_paperless_service_with_username_password(
             connection_data.paperless_url,
-            encrypted_token,
+            encrypted_username,
+            encrypted_password,
             current_user.id
         ) as paperless_service:
             logger.info("Paperless service created successfully")
@@ -69,7 +91,8 @@ async def test_paperless_connection(
             logger.info(f"Paperless connection test successful for user {current_user.id}", extra={
                 "user_id": current_user.id,
                 "server_version": result.get("server_version"),
-                "api_version": result.get("api_version")
+                "api_version": result.get("api_version"),
+                "used_saved_credentials": use_saved_credentials
             })
             
             return result
@@ -82,7 +105,7 @@ async def test_paperless_connection(
         })
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API token or authentication failed"
+            detail="Invalid username/password or authentication failed"
         )
         
     except PaperlessConnectionError as e:
@@ -192,15 +215,17 @@ async def get_paperless_settings(
             return {
                 "paperless_enabled": False,
                 "paperless_url": "",
+                "paperless_has_credentials": False,
                 "default_storage_backend": "local",
                 "paperless_auto_sync": False,
                 "paperless_sync_tags": True
             }
         
-        # Return settings without encrypted token
+        # Return settings without encrypted credentials, but include whether they exist
         return {
             "paperless_enabled": user_prefs.paperless_enabled or False,
             "paperless_url": user_prefs.paperless_url or "",
+            "paperless_has_credentials": bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted),
             "default_storage_backend": user_prefs.default_storage_backend or "local",
             "paperless_auto_sync": user_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": user_prefs.paperless_sync_tags or True
@@ -250,10 +275,16 @@ async def update_paperless_settings(
         if "paperless_url" in settings:
             update_data["paperless_url"] = settings["paperless_url"]
             
-        if "paperless_api_token" in settings and settings["paperless_api_token"]:
-            # Encrypt the token before storing
-            update_data["paperless_api_token_encrypted"] = credential_encryption.encrypt_token(
-                settings["paperless_api_token"]
+        if "paperless_username" in settings and settings["paperless_username"]:
+            # Encrypt the username before storing
+            update_data["paperless_username_encrypted"] = credential_encryption.encrypt_token(
+                settings["paperless_username"]
+            )
+            
+        if "paperless_password" in settings and settings["paperless_password"]:
+            # Encrypt the password before storing
+            update_data["paperless_password_encrypted"] = credential_encryption.encrypt_token(
+                settings["paperless_password"]
             )
             
         if "default_storage_backend" in settings:
@@ -277,6 +308,7 @@ async def update_paperless_settings(
         return {
             "paperless_enabled": updated_prefs.paperless_enabled or False,
             "paperless_url": updated_prefs.paperless_url or "",
+            "paperless_has_credentials": bool(updated_prefs.paperless_username_encrypted and updated_prefs.paperless_password_encrypted),
             "default_storage_backend": updated_prefs.default_storage_backend or "local",
             "paperless_auto_sync": updated_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": updated_prefs.paperless_sync_tags or True,

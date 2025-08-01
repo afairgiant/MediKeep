@@ -10,6 +10,8 @@ class UserPreferencesBase(BaseModel):
     unit_system: str
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None
+    paperless_username: Optional[str] = None
+    paperless_password: Optional[str] = None
     default_storage_backend: Optional[str] = "local"
     paperless_auto_sync: Optional[bool] = False
     paperless_sync_tags: Optional[bool] = True
@@ -110,6 +112,8 @@ class UserPreferencesUpdate(BaseModel):
     unit_system: Optional[str] = None
     paperless_enabled: Optional[bool] = None
     paperless_url: Optional[str] = None
+    paperless_username: Optional[str] = None
+    paperless_password: Optional[str] = None
     default_storage_backend: Optional[str] = None
     paperless_auto_sync: Optional[bool] = None
     paperless_sync_tags: Optional[bool] = None
@@ -207,7 +211,8 @@ class PaperlessConnectionData(BaseModel):
     """Schema for paperless connection data with validation."""
     
     paperless_url: str
-    paperless_api_token: str
+    paperless_username: str
+    paperless_password: str
     
     @validator('paperless_url')
     def validate_url(cls, v):
@@ -255,13 +260,20 @@ class PaperlessConnectionData(BaseModel):
         
         return v.rstrip('/')
     
-    @validator('paperless_api_token')
-    def validate_token(cls, v):
-        """Validate API token format."""
-        # Basic validation - tokens should be non-empty strings
+    @validator('paperless_username')
+    def validate_username(cls, v):
+        """Validate username format."""
         if not v or len(v.strip()) == 0:
-            raise ValueError('API token is required')
-        # Allow various token formats as paperless may use different formats
-        if len(v) < 10:
-            raise ValueError('API token seems too short')
+            raise ValueError('Username is required')
+        if len(v) < 2:
+            raise ValueError('Username too short')
+        return v.strip()
+    
+    @validator('paperless_password')
+    def validate_password(cls, v):
+        """Validate password format."""
+        if not v or len(v.strip()) == 0:
+            raise ValueError('Password is required')
+        if len(v) < 3:
+            raise ValueError('Password too short')
         return v

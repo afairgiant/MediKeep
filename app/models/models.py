@@ -1063,6 +1063,8 @@ class UserPreferences(Base):
     paperless_enabled = Column(Boolean, default=False, nullable=False)
     paperless_url = Column(String(500), nullable=True)
     paperless_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
+    paperless_username_encrypted = Column(Text, nullable=True)  # Encrypted username
+    paperless_password_encrypted = Column(Text, nullable=True)  # Encrypted password
     default_storage_backend = Column(String(20), default="local", nullable=False)  # 'local' or 'paperless'
     paperless_auto_sync = Column(Boolean, default=False, nullable=False)
     paperless_sync_tags = Column(Boolean, default=True, nullable=False)
