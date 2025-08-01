@@ -233,7 +233,7 @@ async def delete_file(
             )
 
         # Delete the file
-        result = await file_service.delete_file(db, file_id)
+        result = await file_service.delete_file(db, file_id, current_user_id)
 
         # Log the deletion activity
         try:

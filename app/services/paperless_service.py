@@ -412,33 +412,49 @@ class PaperlessService:
                         f"Upload failed: HTTP {response.status} - {response_text}"
                     )
 
-                # Handle both JSON and string responses from Paperless
+                # Get task UUID from response - read as text first then try to parse
+                response_text = await response.text()
+                logger.info(f"Raw upload response text: '{response_text}'")
+                
+                task_uuid = None
+                
+                # Try to parse as JSON
                 try:
-                    result = await response.json()
-                    # If JSON parsing succeeds, use it
-                    if isinstance(result, dict):
-                        task_id = result.get("task_id")
-                        document_id = result.get("id")
-                    else:
-                        # Handle case where JSON is not a dict (shouldn't happen but be safe)
-                        task_id = None
-                        document_id = str(result) if result else None
-                except Exception:
-                    # Paperless might return a simple string (UUID) for successful uploads
-                    response_text = await response.text().strip()
-                    if response_text:
-                        # Assume the text response is a document ID or task ID
-                        task_id = response_text
-                        document_id = response_text
-                    else:
-                        task_id = None
-                        document_id = None
+                    import json
+                    result = json.loads(response_text)
+                    logger.info(f"Parsed JSON response: {result}")
+                    # Response should be just the task UUID as a string
+                    if isinstance(result, str):
+                        task_uuid = result
+                    elif isinstance(result, dict):
+                        task_uuid = result.get("task_id") or result.get("id")
+                except Exception as e:
+                    logger.info(f"Not JSON, treating as plain text: {e}")
+                    # Paperless returns a simple string (UUID) for successful uploads
+                    response_text_clean = response_text.strip().strip('"')
+                    if response_text_clean:
+                        task_uuid = response_text_clean
 
-                logger.info(f"Document uploaded to paperless successfully: {filename}")
+                if not task_uuid:
+                    raise PaperlessUploadError("No task UUID returned from upload")
+
+                logger.info(f"Document upload started with task UUID: {task_uuid}")
+
+                # Poll task status to get actual document ID
+                try:
+                    document_id = await self._wait_for_task_completion(task_uuid, filename)
+                    logger.info(f"Successfully got document ID: {document_id}")
+                except Exception as e:
+                    logger.error(f"Failed to get document ID from task {task_uuid}: {str(e)}")
+                    # Temporarily return task UUID for debugging - remove this later
+                    logger.warning(f"Falling back to task UUID as document ID for debugging")
+                    document_id = task_uuid
+                
+                logger.info(f"Document uploaded to paperless successfully: {filename} (document_id: {document_id})")
 
                 return {
                     "status": "uploaded",
-                    "task_id": task_id,
+                    "task_id": task_uuid,
                     "document_id": document_id,
                     "document_filename": filename,
                     "file_size": len(file_data),
@@ -542,6 +558,118 @@ class PaperlessService:
         
         # Default message for unknown errors
         return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
+
+    async def _wait_for_task_completion(self, task_uuid: str, filename: str, max_wait_time: int = 60) -> str:
+        """
+        Poll the tasks endpoint to wait for document consumption completion and get document ID.
+        
+        Args:
+            task_uuid: Task UUID returned from upload
+            filename: Original filename for logging
+            max_wait_time: Maximum time to wait in seconds
+            
+        Returns:
+            Document ID as string
+            
+        Raises:
+            PaperlessUploadError: If task fails or times out
+        """
+        logger.info(f"Polling task status for {filename} (task: {task_uuid})")
+        
+        start_time = datetime.utcnow()
+        poll_interval = 2  # Start with 2 second intervals
+        max_poll_interval = 10  # Cap at 10 seconds
+        
+        while True:
+            try:
+                async with self._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                    if response.status != 200:
+                        logger.warning(f"Task status check failed: HTTP {response.status}")
+                        await asyncio.sleep(poll_interval)
+                        continue
+                    
+                    data = await response.json()
+                    logger.debug(f"Raw task API response: {data}")
+                    
+                    # Handle both single task and list responses
+                    if isinstance(data, list):
+                        if not data:
+                            logger.warning(f"No task found with UUID {task_uuid}")
+                            await asyncio.sleep(poll_interval)
+                            continue
+                        task_data = data[0]
+                    elif isinstance(data, dict):
+                        # If results key exists, it's paginated
+                        if "results" in data and data["results"]:
+                            task_data = data["results"][0]
+                        else:
+                            task_data = data
+                    else:
+                        logger.warning(f"Unexpected task response format: {type(data)}")
+                        await asyncio.sleep(poll_interval)
+                        continue
+                    
+                    status = task_data.get("status", "").lower()
+                    task_name = task_data.get("task_name", "")
+                    
+                    logger.debug(f"Task {task_uuid} status: {status} ({task_name})")
+                    
+                    if status == "success":
+                        # Task completed successfully - get document ID
+                        result = task_data.get("result", {})
+                        document_id = None
+                        
+                        # Log the full result for debugging
+                        logger.info(f"Task result: {result}")
+                        
+                        if isinstance(result, dict):
+                            document_id = result.get("document_id") or result.get("id")
+                        elif isinstance(result, str):
+                            # Parse document ID from string like "Success. New document id 2677 created"
+                            import re
+                            match = re.search(r'document id (\d+)', result)
+                            if match:
+                                document_id = match.group(1)
+                            else:
+                                document_id = result
+                        else:
+                            document_id = result
+                            
+                        if document_id:
+                            logger.info(f"Task completed successfully: document_id={document_id}")
+                            return str(document_id)
+                        else:
+                            raise PaperlessUploadError(f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected.")
+                    
+                    elif status == "failure":
+                        # Task failed
+                        error_info = task_data.get("result", "Unknown error")
+                        raise PaperlessUploadError(f"Document processing failed for '{filename}': {error_info}")
+                    
+                    elif status in ["pending", "started", "retry"]:
+                        # Task still in progress
+                        elapsed = (datetime.utcnow() - start_time).total_seconds()
+                        if elapsed > max_wait_time:
+                            raise PaperlessUploadError(f"Upload of '{filename}' timed out after {max_wait_time} seconds")
+                        
+                        # Wait before next poll with exponential backoff
+                        await asyncio.sleep(poll_interval)
+                        poll_interval = min(poll_interval * 1.5, max_poll_interval)
+                        continue
+                    
+                    else:
+                        logger.warning(f"Unknown task status: {status}")
+                        await asyncio.sleep(poll_interval)
+                        continue
+                        
+            except Exception as e:
+                elapsed = (datetime.utcnow() - start_time).total_seconds()
+                if elapsed > max_wait_time:
+                    raise PaperlessUploadError(f"Upload of '{filename}' timed out after {max_wait_time} seconds")
+                
+                logger.warning(f"Error checking task status: {e}")
+                await asyncio.sleep(poll_interval)
+                continue
 
     async def download_document(self, document_id: int) -> bytes:
         """

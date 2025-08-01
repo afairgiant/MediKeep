@@ -272,7 +272,7 @@ class GenericEntityFileService:
                 status_code=500, detail=f"Failed to retrieve file: {str(e)}"
             )
 
-    async def delete_file(self, db: Session, file_id: int) -> FileOperationResult:
+    async def delete_file(self, db: Session, file_id: int, current_user_id: Optional[int] = None) -> FileOperationResult:
         """
         Delete a file by its ID from both local and paperless storage.
 
@@ -293,7 +293,31 @@ class GenericEntityFileService:
 
             # Route to appropriate storage backend for deletion
             if file_record.storage_backend == "paperless":
-                await self._delete_from_paperless(db, file_record)
+                # Check if other records reference the same Paperless document
+                other_references = (
+                    db.query(EntityFile)
+                    .filter(
+                        EntityFile.paperless_document_id == file_record.paperless_document_id,
+                        EntityFile.storage_backend == "paperless",
+                        EntityFile.id != file_record.id
+                    )
+                    .count()
+                )
+                
+                if other_references > 0:
+                    logger.info(
+                        f"Paperless document {file_record.paperless_document_id} has {other_references} other references. "
+                        f"Skipping Paperless deletion, only removing database record."
+                    )
+                    # Don't delete from Paperless since other records reference it
+                else:
+                    # No other references, safe to delete from Paperless
+                    paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
+                    if not paperless_deleted:
+                        raise HTTPException(
+                            status_code=500,
+                            detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
+                        )
             else:
                 # Handle local file deletion
                 file_path = file_record.file_path
@@ -304,7 +328,7 @@ class GenericEntityFileService:
                     )
                     logger.info(f"File moved to trash: {trash_result}")
 
-            # Remove from database
+            # Remove from database only after successful deletion from storage backend
             db.delete(file_record)
             db.commit()
 
@@ -695,26 +719,31 @@ class GenericEntityFileService:
             )
 
     async def _delete_from_paperless(
-        self, db: Session, file_record: EntityFile
-    ) -> None:
+        self, db: Session, file_record: EntityFile, current_user_id: Optional[int] = None
+    ) -> bool:
         """
-        Delete file from paperless-ngx storage.
+        Delete file from paperless-ngx storage and verify deletion.
 
         Args:
             db: Database session
             file_record: EntityFile record
+            current_user_id: User ID for paperless service
+
+        Returns:
+            True if successfully deleted and verified, False otherwise
         """
         if not file_record.paperless_document_id:
             logger.warning(
                 f"File {file_record.id} marked as paperless but has no document ID"
             )
-            return
+            return False
 
         # Get user preferences to create paperless service
+        user_id = current_user_id or 1  # Fallback to user 1 if no user ID provided
         user_prefs = (
             db.query(UserPreferences)
             .filter(
-                UserPreferences.user_id == 1  # TODO: Get actual user ID from context
+                UserPreferences.user_id == user_id
             )
             .first()
         )
@@ -723,7 +752,7 @@ class GenericEntityFileService:
             logger.warning(
                 f"Cannot delete from paperless: user preferences not found or disabled"
             )
-            return
+            return False
 
         try:
             # Create paperless service
@@ -731,23 +760,34 @@ class GenericEntityFileService:
                 user_prefs.paperless_url,
                 user_prefs.paperless_username_encrypted,
                 user_prefs.paperless_password_encrypted,
-                1,  # TODO: Get actual user ID from context
+                user_id,
             )
 
-            # Delete from paperless
             async with paperless_service:
+                # Delete from paperless
                 await paperless_service.delete_document(
                     file_record.paperless_document_id
                 )
 
+                # Verify deletion by checking if document still exists
+                still_exists = await paperless_service.check_document_exists(
+                    file_record.paperless_document_id
+                )
+
+                if still_exists:
+                    logger.error(
+                        f"Document {file_record.paperless_document_id} still exists after deletion attempt"
+                    )
+                    return False
+
             logger.info(
-                f"File deleted from paperless: document_id={file_record.paperless_document_id}"
+                f"File successfully deleted from paperless and verified: document_id={file_record.paperless_document_id}"
             )
+            return True
 
         except Exception as e:
             logger.error(f"Failed to delete file from paperless: {str(e)}")
-            # Don't fail the entire operation if paperless deletion fails
-            # The database record will still be removed
+            return False
 
     async def _get_paperless_download_info(
         self, db: Session, file_record: EntityFile
