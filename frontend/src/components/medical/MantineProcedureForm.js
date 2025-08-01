@@ -11,6 +11,7 @@ const MantineProcedureForm = ({
   onSubmit,
   practitioners = [],
   editingProcedure = null,
+  children,
 }) => {
   // Convert practitioners to Mantine format
   const practitionerOptions = practitioners.map(practitioner => ({
@@ -59,7 +60,9 @@ const MantineProcedureForm = ({
       fields={procedureFormFields}
       dynamicOptions={dynamicOptions}
       modalSize="xl"
-    />
+    >
+      {children}
+    </BaseMedicalForm>
   );
 };
 

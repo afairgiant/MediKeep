@@ -68,6 +68,181 @@ def get_entity_files(
 
 
 @router.post(
+    "/{entity_type}/{entity_id}/files/pending",
+    response_model=EntityFileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_pending_file_record(
+    *,
+    db: Session = Depends(deps.get_db),
+    entity_type: str,
+    entity_id: int,
+    file_name: str = Form(...),
+    file_size: int = Form(...),
+    file_type: str = Form(...),
+    description: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
+    storage_backend: Optional[str] = Form(None),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> EntityFileResponse:
+    """
+    Create a pending file record without actual file upload.
+    This allows tracking files that will be uploaded asynchronously.
+
+    Args:
+        entity_type: Type of entity (lab-result, insurance, visit, procedure)
+        entity_id: ID of the entity
+        file_name: Name of the file
+        file_size: Size of the file in bytes
+        file_type: MIME type of the file
+        description: Optional description
+        category: Optional category
+        storage_backend: Storage backend to use ('local' or 'paperless')
+
+    Returns:
+        Created pending file record
+    """
+    try:
+        logger.info(
+            f"Creating pending file record for {entity_type} {entity_id}",
+            extra={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "file_name": file_name,
+                "file_size": file_size,
+                "storage_backend": storage_backend,
+                "current_user_id": current_user_id,
+            },
+        )
+
+        # Create pending file record
+        result = await file_service.create_pending_file_record(
+            db=db,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            file_name=file_name,
+            file_size=file_size,
+            file_type=file_type,
+            description=description,
+            category=category,
+            storage_backend=storage_backend or "local",
+            user_id=current_user_id,
+        )
+
+        if not result.success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
+            )
+
+        # Log activity
+        log_create(
+            db=db,
+            entity_type=ActivityEntityType.ENTITY_FILE,
+            entity_obj=result.file_record,
+            user_id=current_user_id,
+            details=f"Created pending file record: {file_name}",
+        )
+
+        return result.file_record
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to create pending file record for {entity_type} {entity_id}",
+            extra={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "file_name": file_name,
+                "error": str(e),
+                "current_user_id": current_user_id,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create pending file record",
+        )
+
+
+@router.put(
+    "/files/{file_id}/status",
+    response_model=EntityFileResponse,
+)
+async def update_file_upload_status(
+    *,
+    db: Session = Depends(deps.get_db),
+    file_id: int,
+    actual_file_path: str = Form(...),
+    sync_status: str = Form("synced"),
+    paperless_document_id: Optional[str] = Form(None),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> EntityFileResponse:
+    """
+    Update the upload status of a pending file record.
+
+    Args:
+        file_id: ID of the file record to update
+        actual_file_path: Actual path where the file was saved
+        sync_status: New sync status ('synced', 'failed')
+        paperless_document_id: Paperless document ID if uploaded to paperless
+
+    Returns:
+        Updated file record
+    """
+    try:
+        logger.info(
+            f"Updating file {file_id} status to {sync_status}",
+            extra={
+                "file_id": file_id,
+                "sync_status": sync_status,
+                "actual_file_path": actual_file_path,
+                "current_user_id": current_user_id,
+            },
+        )
+
+        result = await file_service.update_file_upload_status(
+            db=db,
+            file_id=file_id,
+            actual_file_path=actual_file_path,
+            sync_status=sync_status,
+            paperless_document_id=paperless_document_id,
+        )
+
+        if not result.success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
+            )
+
+        # Log activity
+        log_update(
+            db=db,
+            entity_type=ActivityEntityType.ENTITY_FILE,
+            entity_obj=result.file_record,
+            user_id=current_user_id,
+            details=f"Updated file status to {sync_status}",
+        )
+
+        return result.file_record
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to update file {file_id} status",
+            extra={
+                "file_id": file_id,
+                "sync_status": sync_status,
+                "error": str(e),
+                "current_user_id": current_user_id,
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update file status",
+        )
+
+
+@router.post(
     "/{entity_type}/{entity_id}/files",
     response_model=EntityFileResponse,
     status_code=status.HTTP_201_CREATED,
@@ -420,4 +595,76 @@ async def check_paperless_sync_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to check paperless sync status: {str(e)}",
+        )
+
+
+@router.post("/processing/update")
+async def update_processing_files(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Dict[str, str]:
+    """
+    Update files with 'processing' status by checking their task completion.
+    
+    Returns:
+        Dictionary mapping file_id to new status
+    """
+    try:
+        status_updates = await file_service.update_processing_files(db, current_user_id)
+        
+        logger.info(
+            f"Updated processing files for user {current_user_id}: {len(status_updates)} files updated"
+        )
+        
+        return status_updates
+
+    except Exception as e:
+        logger.error(f"Failed to update processing files: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update processing files: {str(e)}",
+        )
+
+
+@router.post("/{entity_type}/{entity_id}/cleanup")
+async def cleanup_entity_files_on_deletion(
+    *,
+    db: Session = Depends(deps.get_db),
+    entity_type: str,
+    entity_id: int,
+    preserve_paperless: bool = True,
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Dict[str, int]:
+    """
+    Clean up EntityFiles when an entity is deleted.
+    Preserves Paperless documents by default, deletes local files.
+    
+    Args:
+        entity_type: Type of entity being deleted
+        entity_id: ID of the entity being deleted  
+        preserve_paperless: If True, preserve Paperless documents (default: True)
+    
+    Returns:
+        Dictionary with cleanup statistics
+    """
+    try:
+        cleanup_stats = file_service.cleanup_entity_files_on_deletion(
+            db=db,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            preserve_paperless=preserve_paperless
+        )
+        
+        logger.info(
+            f"Entity file cleanup completed for {entity_type} {entity_id} by user {current_user_id}: {cleanup_stats}"
+        )
+        
+        return cleanup_stats
+
+    except Exception as e:
+        logger.error(f"Failed to cleanup entity files: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to cleanup entity files: {str(e)}",
         )

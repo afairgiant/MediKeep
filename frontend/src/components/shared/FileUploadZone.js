@@ -32,6 +32,7 @@ const FileUploadZone = ({
   maxFiles = 5,
   multiple = true,
   disabled = false,
+  autoUpload = false, // Automatically upload files when added
   className = '',
   selectedStorageBackend = 'local',
   paperlessSettings = null
@@ -99,7 +100,28 @@ const FileUploadZone = ({
     }
 
     setUploadQueue(prev => [...prev, ...newQueueItems]);
-  }, [disabled, uploadQueue.length, maxFiles, validateFile, onValidationError]);
+
+    // Auto-upload if enabled and all new files are valid
+    if (autoUpload && newQueueItems.every(item => item.status === 'ready')) {
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        const filesToUpload = newQueueItems
+          .filter(item => item.status === 'ready')
+          .map(item => ({
+            file: item.file,
+            description: item.description
+          }));
+        
+        if (filesToUpload.length > 0 && onUpload) {
+          onUpload(filesToUpload);
+          // Remove auto-uploaded items from queue
+          setUploadQueue(prev => prev.filter(item => 
+            !newQueueItems.some(newItem => newItem.id === item.id)
+          ));
+        }
+      }, 100);
+    }
+  }, [disabled, uploadQueue.length, maxFiles, validateFile, onValidationError, autoUpload, onUpload]);
 
   // Remove file from queue
   const removeFromQueue = useCallback((itemId) => {

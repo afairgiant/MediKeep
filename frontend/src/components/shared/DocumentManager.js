@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Stack,
   Paper,
@@ -16,6 +16,7 @@ import {
   FileInput,
   TextInput,
   ThemeIcon,
+  Progress,
 } from '@mantine/core';
 import {
   IconFile,
@@ -27,6 +28,9 @@ import {
   IconFileText,
   IconAlertTriangle,
   IconRefresh,
+  IconCheck,
+  IconLoader,
+  IconExclamationMark,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
 import { getPaperlessSettings } from '../../services/api/paperlessApi';
@@ -43,8 +47,20 @@ const DocumentManager = ({
   config = {},
   onFileCountChange,
   onError,
+  onUploadPendingFiles, // Callback to expose upload function
   className = '',
 }) => {
+  // Add spinning animation styles
+  const spinKeyframes = `
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  `;
   // State management
   const [files, setFiles] = useState([]);
   const [pendingFiles, setPendingFiles] = useState([]);
@@ -62,6 +78,24 @@ const DocumentManager = ({
   // Paperless settings state
   const [paperlessSettings, setPaperlessSettings] = useState(null);
   const [selectedStorageBackend, setSelectedStorageBackend] = useState('local');
+  
+  // Use refs to access current state in stable callback  
+  const pendingFilesRef = useRef(pendingFiles);
+  const selectedStorageBackendRef = useRef(selectedStorageBackend);
+  const paperlessSettingsRef = useRef(paperlessSettings);
+  
+  useEffect(() => {
+    pendingFilesRef.current = pendingFiles;
+  }, [pendingFiles]);
+  
+  useEffect(() => {
+    selectedStorageBackendRef.current = selectedStorageBackend;
+  }, [selectedStorageBackend]);
+  
+  useEffect(() => {
+    paperlessSettingsRef.current = paperlessSettings;
+  }, [paperlessSettings]);
+  
   const [paperlessLoading, setPaperlessLoading] = useState(true);
 
   // Load paperless settings
@@ -180,8 +214,18 @@ const DocumentManager = ({
 
   // Remove pending file
   const handleRemovePendingFile = useCallback(fileId => {
+    const fileIndex = pendingFiles.findIndex(f => f.id === fileId);
     setPendingFiles(prev => prev.filter(f => f.id !== fileId));
-  }, []);
+    
+    // Clear progress for this file
+    if (fileIndex !== -1) {
+      setUploadProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[fileIndex];
+        return newProgress;
+      });
+    }
+  }, [pendingFiles]);
 
   // Mark file for deletion (edit mode)
   const handleMarkFileForDeletion = useCallback(fileId => {
@@ -357,31 +401,137 @@ const DocumentManager = ({
   };
 
   // Batch upload pending files (for create/edit mode)
-  const uploadPendingFiles = async targetEntityId => {
-    if (pendingFiles.length === 0) return true;
+  const uploadPendingFiles = useCallback(async targetEntityId => {
+    const currentPendingFiles = pendingFilesRef.current;
+    
+    logger.info('document_manager_upload_pending_start', {
+      message: 'uploadPendingFiles function called',
+      entityType,
+      targetEntityId,
+      pendingFilesCount: currentPendingFiles.length,
+      component: 'DocumentManager',
+    });
+    
+    if (currentPendingFiles.length === 0) {
+      logger.info('document_manager_no_pending_files', {
+        message: 'No pending files to upload',
+        entityType,
+        targetEntityId,
+        component: 'DocumentManager',
+      });
+      return true;
+    }
 
-    const uploadPromises = pendingFiles.map(async pendingFile => {
+    // Initialize progress tracking for all files
+    const initialProgress = {};
+    currentPendingFiles.forEach((file, index) => {
+      initialProgress[index] = { progress: 0, status: 'pending', error: null };
+    });
+    setUploadProgress(initialProgress);
+
+    const uploadPromises = currentPendingFiles.map(async (pendingFile, index) => {
+      logger.info('document_manager_individual_upload_start', {
+        message: 'Starting individual file upload',
+        entityType,
+        targetEntityId,
+        fileName: pendingFile.file.name,
+        fileIndex: index,
+        selectedStorageBackend,
+        component: 'DocumentManager',
+      });
+      
       try {
+        // Mark as uploading
+        setUploadProgress(prev => ({
+          ...prev,
+          [index]: { progress: 0, status: 'uploading', error: null }
+        }));
+
+        const currentStorageBackend = selectedStorageBackendRef.current;
+        const currentPaperlessSettings = paperlessSettingsRef.current;
+        
         logger.info('document_manager_batch_upload_attempt', {
           message: 'Attempting batch file upload',
           entityType,
           entityId: targetEntityId,
           fileName: pendingFile.file.name,
-          selectedStorageBackend,
-          paperlessEnabled: paperlessSettings?.paperless_enabled,
-          paperlessHasCredentials: paperlessSettings?.paperless_has_credentials,
-          paperlessUrl: paperlessSettings?.paperless_url,
+          selectedStorageBackend: currentStorageBackend,
+          paperlessEnabled: currentPaperlessSettings?.paperless_enabled,
+          paperlessHasCredentials: currentPaperlessSettings?.paperless_has_credentials,
+          paperlessUrl: currentPaperlessSettings?.paperless_url,
           component: 'DocumentManager',
         });
 
-        await apiService.uploadEntityFile(
-          entityType,
-          targetEntityId,
-          pendingFile.file,
-          pendingFile.description,
-          '',
-          selectedStorageBackend
-        );
+        // Show progress updates for Paperless uploads (they take longer)
+        let progressInterval = null;
+        
+        if (currentStorageBackend === 'paperless') {
+          // Set initial progress
+          setUploadProgress(prev => ({
+            ...prev,
+            [index]: { progress: 10, status: 'uploading', error: null }
+          }));
+          
+          // Simulate progress for better UX since we don't have real progress from API
+          progressInterval = setInterval(() => {
+            setUploadProgress(prev => {
+              const current = prev[index]?.progress || 10;
+              if (current < 85) {
+                const newProgress = Math.min(current + Math.random() * 15, 85);
+                return {
+                  ...prev,
+                  [index]: { ...prev[index], progress: newProgress }
+                };
+              }
+              return prev;
+            });
+          }, 800);
+        }
+
+        try {
+          logger.info('document_manager_calling_api_upload', {
+            message: 'About to call apiService.uploadEntityFile',
+            entityType,
+            targetEntityId,
+            fileName: pendingFile.file.name,
+            selectedStorageBackend: currentStorageBackend,
+            component: 'DocumentManager',
+          });
+          
+          await apiService.uploadEntityFile(
+            entityType,
+            targetEntityId,
+            pendingFile.file,
+            pendingFile.description,
+            '',
+            currentStorageBackend
+          );
+          
+          logger.info('document_manager_api_upload_success', {
+            message: 'apiService.uploadEntityFile completed successfully',
+            entityType,
+            targetEntityId,
+            fileName: pendingFile.file.name,
+            component: 'DocumentManager',
+          });
+          
+          if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+          }
+        } catch (error) {
+          if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+          }
+          throw error;
+        }
+
+        // Mark as completed
+        setUploadProgress(prev => ({
+          ...prev,
+          [index]: { progress: 100, status: 'completed', error: null }
+        }));
 
         logger.info('document_manager_batch_upload_success', {
           message: 'Batch file uploaded successfully',
@@ -394,7 +544,7 @@ const DocumentManager = ({
         // Enhance error message for Paperless issues
         let errorMessage = error.message || 'Failed to upload file';
 
-        if (selectedStorageBackend === 'paperless') {
+        if (currentStorageBackend === 'paperless') {
           if (errorMessage.includes('not enabled')) {
             errorMessage =
               'Paperless integration is not enabled. Please enable it in Settings.';
@@ -411,12 +561,18 @@ const DocumentManager = ({
           }
         }
 
+        // Mark as failed
+        setUploadProgress(prev => ({
+          ...prev,
+          [index]: { progress: 0, status: 'failed', error: errorMessage }
+        }));
+
         logger.error('document_manager_batch_upload_error', {
           message: 'Failed to upload file in batch',
           entityType,
           entityId: targetEntityId,
           fileName: pendingFile.file.name,
-          selectedStorageBackend,
+          selectedStorageBackend: currentStorageBackend,
           error: error.message,
           enhancedError: errorMessage,
           component: 'DocumentManager',
@@ -429,10 +585,68 @@ const DocumentManager = ({
       }
     });
 
-    await Promise.all(uploadPromises);
-    setPendingFiles([]);
-    return true;
-  };
+    logger.info('document_manager_about_to_promise_all', {
+      message: 'About to execute Promise.all for file uploads',
+      entityType,
+      targetEntityId,
+      promiseCount: uploadPromises.length,
+      component: 'DocumentManager',
+    });
+
+    try {
+      const results = await Promise.all(uploadPromises);
+      logger.info('document_manager_batch_upload_complete', {
+        message: 'All files uploaded successfully in batch',
+        entityType,
+        entityId: targetEntityId,
+        fileCount: currentPendingFiles.length,
+        component: 'DocumentManager',
+      });
+      
+      setPendingFiles([]);
+      
+      // Clear upload progress after a brief delay to show completion
+      setTimeout(() => {
+        setUploadProgress({});
+      }, 2000);
+      
+      return true;
+    } catch (error) {
+      logger.error('document_manager_batch_upload_failed', {
+        message: 'Batch upload failed',
+        entityType,
+        entityId: targetEntityId,
+        error: error.message,
+        component: 'DocumentManager',
+      });
+      
+      // Don't clear pending files if upload failed
+      // Let user see the error state and retry if needed
+      throw error;
+    }
+  }, [entityType]);
+
+
+  // Expose upload function to parent via callback (only once)
+  useEffect(() => {
+    if (onUploadPendingFiles) {
+      logger.info('document_manager_exposing_methods', {
+        message: 'Exposing upload methods to parent component',
+        entityType,
+        entityId,
+        exposingMethodsCount: 1, // Track how many times this runs
+        pendingFilesCount: pendingFilesRef.current.length,
+        component: 'DocumentManager',
+      });
+      
+      onUploadPendingFiles({
+        uploadPendingFiles,
+        getPendingFilesCount: () => pendingFilesRef.current.length,
+        hasPendingFiles: () => pendingFilesRef.current.length > 0,
+        clearPendingFiles: () => setPendingFiles([]),
+      });
+    }
+  }, [onUploadPendingFiles, uploadPendingFiles]);
 
   // Batch delete marked files (for edit mode)
   const deleteMarkedFiles = async () => {
@@ -602,49 +816,121 @@ const DocumentManager = ({
             <Stack gap="md">
               <Title order={5}>Files to Upload:</Title>
               <Stack gap="sm">
-                {pendingFiles.map(pendingFile => (
-                  <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
-                    <Group justify="space-between" align="flex-start">
-                      <Group gap="xs" style={{ flex: 1 }}>
-                        <ThemeIcon variant="light" color="blue" size="sm">
-                          <IconFileText size={14} />
-                        </ThemeIcon>
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Group gap="md">
-                            <Text fw={500} size="sm">
-                              {pendingFile.file.name}
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              {(pendingFile.file.size / 1024).toFixed(1)} KB
-                            </Text>
-                          </Group>
-                          <TextInput
-                            placeholder="Description (optional)"
-                            value={pendingFile.description}
-                            onChange={e => {
-                              setPendingFiles(prev =>
-                                prev.map(f =>
-                                  f.id === pendingFile.id
-                                    ? { ...f, description: e.target.value }
-                                    : f
-                                )
-                              );
-                            }}
-                            size="xs"
-                          />
-                        </Stack>
+                {pendingFiles.map((pendingFile, index) => {
+                  const fileProgress = uploadProgress[index];
+                  const isUploading = fileProgress?.status === 'uploading';
+                  const isCompleted = fileProgress?.status === 'completed';
+                  const isFailed = fileProgress?.status === 'failed';
+                  const progressValue = fileProgress?.progress || 0;
+
+                  return (
+                    <Paper key={pendingFile.id} withBorder p="sm" bg={
+                      isCompleted ? "green.1" : 
+                      isFailed ? "red.1" : 
+                      isUploading ? "yellow.1" : 
+                      "blue.1"
+                    }>
+                      <Group justify="space-between" align="flex-start">
+                        <Group gap="xs" style={{ flex: 1 }}>
+                          <ThemeIcon 
+                            variant="light" 
+                            color={
+                              isCompleted ? "green" : 
+                              isFailed ? "red" : 
+                              isUploading ? "yellow" : 
+                              "blue"
+                            } 
+                            size="sm"
+                          >
+                            {isCompleted ? (
+                              <IconCheck size={14} />
+                            ) : isFailed ? (
+                              <IconExclamationMark size={14} />
+                            ) : isUploading ? (
+                              <IconLoader size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                            ) : (
+                              <IconFileText size={14} />
+                            )}
+                          </ThemeIcon>
+                          <Stack gap="xs" style={{ flex: 1 }}>
+                            <Group gap="md">
+                              <Text fw={500} size="sm">
+                                {pendingFile.file.name}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {(pendingFile.file.size / 1024).toFixed(1)} KB
+                              </Text>
+                              {isUploading && selectedStorageBackend === 'paperless' && (
+                                <Badge variant="light" color="yellow" size="xs">
+                                  Uploading to Paperless...
+                                </Badge>
+                              )}
+                              {isCompleted && (
+                                <Badge variant="light" color="green" size="xs">
+                                  Uploaded
+                                </Badge>
+                              )}
+                              {isFailed && (
+                                <Badge variant="light" color="red" size="xs">
+                                  Failed
+                                </Badge>
+                              )}
+                            </Group>
+                            
+                            {/* Progress bar for uploads */}
+                            {(isUploading || isCompleted || isFailed) && (
+                              <Progress 
+                                value={progressValue}
+                                color={
+                                  isCompleted ? "green" : 
+                                  isFailed ? "red" : 
+                                  "blue"
+                                }
+                                size="sm"
+                                striped={isUploading}
+                                animated={isUploading}
+                              />
+                            )}
+                            
+                            {/* Error message for failed uploads */}
+                            {isFailed && fileProgress?.error && (
+                              <Alert variant="light" color="red" size="xs" p="xs">
+                                <Text size="xs">{fileProgress.error}</Text>
+                              </Alert>
+                            )}
+                            
+                            {!isUploading && !isCompleted && (
+                              <TextInput
+                                placeholder="Description (optional)"
+                                value={pendingFile.description}
+                                onChange={e => {
+                                  setPendingFiles(prev =>
+                                    prev.map(f =>
+                                      f.id === pendingFile.id
+                                        ? { ...f, description: e.target.value }
+                                        : f
+                                    )
+                                  );
+                                }}
+                                size="xs"
+                              />
+                            )}
+                          </Stack>
+                        </Group>
+                        {!isUploading && !isCompleted && (
+                          <ActionIcon
+                            variant="light"
+                            color="red"
+                            size="sm"
+                            onClick={() => handleRemovePendingFile(pendingFile.id)}
+                          >
+                            <IconX size={14} />
+                          </ActionIcon>
+                        )}
                       </Group>
-                      <ActionIcon
-                        variant="light"
-                        color="red"
-                        size="sm"
-                        onClick={() => handleRemovePendingFile(pendingFile.id)}
-                      >
-                        <IconX size={14} />
-                      </ActionIcon>
-                    </Group>
-                  </Paper>
-                ))}
+                    </Paper>
+                  );
+                })}
               </Stack>
             </Stack>
           )}
@@ -680,6 +966,7 @@ const DocumentManager = ({
             acceptedTypes={config.acceptedTypes}
             maxSize={config.maxSize}
             maxFiles={config.maxFiles}
+            autoUpload={true} // Auto-upload in create mode for better UX
             selectedStorageBackend={selectedStorageBackend}
             paperlessSettings={paperlessSettings}
           />
@@ -689,31 +976,104 @@ const DocumentManager = ({
             <Stack gap="md">
               <Title order={5}>Files to Upload:</Title>
               <Stack gap="sm">
-                {pendingFiles.map(pendingFile => (
-                  <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
-                    <Group justify="space-between" align="center">
-                      <Group gap="xs">
-                        <ThemeIcon variant="light" color="blue" size="sm">
-                          <IconFileText size={14} />
-                        </ThemeIcon>
-                        <Text fw={500} size="sm">
-                          {pendingFile.file.name}
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                          {(pendingFile.file.size / 1024).toFixed(1)} KB
-                        </Text>
+                {pendingFiles.map((pendingFile, index) => {
+                  const fileProgress = uploadProgress[index];
+                  const isUploading = fileProgress?.status === 'uploading';
+                  const isCompleted = fileProgress?.status === 'completed';
+                  const isFailed = fileProgress?.status === 'failed';
+                  const progressValue = fileProgress?.progress || 0;
+
+                  return (
+                    <Paper key={pendingFile.id} withBorder p="sm" bg={
+                      isCompleted ? "green.1" : 
+                      isFailed ? "red.1" : 
+                      isUploading ? "yellow.1" : 
+                      "blue.1"
+                    }>
+                      <Group justify="space-between" align="flex-start">
+                        <Group gap="xs" style={{ flex: 1 }}>
+                          <ThemeIcon 
+                            variant="light" 
+                            color={
+                              isCompleted ? "green" : 
+                              isFailed ? "red" : 
+                              isUploading ? "yellow" : 
+                              "blue"
+                            } 
+                            size="sm"
+                          >
+                            {isCompleted ? (
+                              <IconCheck size={14} />
+                            ) : isFailed ? (
+                              <IconExclamationMark size={14} />
+                            ) : isUploading ? (
+                              <IconLoader size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                            ) : (
+                              <IconFileText size={14} />
+                            )}
+                          </ThemeIcon>
+                          <Stack gap="xs" style={{ flex: 1 }}>
+                            <Group gap="md">
+                              <Text fw={500} size="sm">
+                                {pendingFile.file.name}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                {(pendingFile.file.size / 1024).toFixed(1)} KB
+                              </Text>
+                              {isUploading && selectedStorageBackend === 'paperless' && (
+                                <Badge variant="light" color="yellow" size="xs">
+                                  Uploading to Paperless...
+                                </Badge>
+                              )}
+                              {isCompleted && (
+                                <Badge variant="light" color="green" size="xs">
+                                  Uploaded
+                                </Badge>
+                              )}
+                              {isFailed && (
+                                <Badge variant="light" color="red" size="xs">
+                                  Failed
+                                </Badge>
+                              )}
+                            </Group>
+                            
+                            {/* Progress bar for uploads */}
+                            {(isUploading || isCompleted || isFailed) && (
+                              <Progress 
+                                value={progressValue}
+                                color={
+                                  isCompleted ? "green" : 
+                                  isFailed ? "red" : 
+                                  "blue"
+                                }
+                                size="sm"
+                                striped={isUploading}
+                                animated={isUploading}
+                              />
+                            )}
+                            
+                            {/* Error message for failed uploads */}
+                            {isFailed && fileProgress?.error && (
+                              <Alert variant="light" color="red" size="xs" p="xs">
+                                <Text size="xs">{fileProgress.error}</Text>
+                              </Alert>
+                            )}
+                          </Stack>
+                        </Group>
+                        {!isUploading && !isCompleted && (
+                          <ActionIcon
+                            variant="light"
+                            color="red"
+                            size="sm"
+                            onClick={() => handleRemovePendingFile(pendingFile.id)}
+                          >
+                            <IconX size={14} />
+                          </ActionIcon>
+                        )}
                       </Group>
-                      <ActionIcon
-                        variant="light"
-                        color="red"
-                        size="sm"
-                        onClick={() => handleRemovePendingFile(pendingFile.id)}
-                      >
-                        <IconX size={14} />
-                      </ActionIcon>
-                    </Group>
-                  </Paper>
-                ))}
+                    </Paper>
+                  );
+                })}
               </Stack>
             </Stack>
           )}
@@ -723,8 +1083,11 @@ const DocumentManager = ({
   };
 
   return (
-    <Stack gap="md" className={className}>
-      {/* Error Display */}
+    <>
+      {/* Inject CSS for spin animation */}
+      <style>{spinKeyframes}</style>
+      <Stack gap="md" className={className}>
+        {/* Error Display */}
       {error && (
         <Alert
           variant="light"
@@ -792,6 +1155,7 @@ const DocumentManager = ({
         </form>
       </Modal>
     </Stack>
+    </>
   );
 };
 

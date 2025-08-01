@@ -412,7 +412,7 @@ class EntityFile(Base):
     )  # ID in paperless-ngx system
     sync_status = Column(
         String(20), default="synced", nullable=False
-    )  # 'synced', 'pending', 'failed'
+    )  # 'synced', 'pending', 'processing', 'failed', 'missing'
     last_sync_at = Column(DateTime, nullable=True)  # Last successful sync timestamp
 
     created_at = Column(DateTime, nullable=False, default=get_utc_now)

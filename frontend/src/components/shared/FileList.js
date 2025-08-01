@@ -24,7 +24,8 @@ import {
   IconSortDescending,
   IconFolder,
   IconCloud,
-  IconAlertTriangle
+  IconAlertTriangle,
+  IconClock
 } from '@tabler/icons-react';
 import { formatDate } from '../../utils/helpers';
 
@@ -241,6 +242,9 @@ const FileList = ({
             const isMissing = file.storage_backend === 'paperless' && 
                              (file.sync_status === 'missing' || syncStatus[file.id] === false);
             
+            // Check if file is still processing
+            const isProcessing = file.storage_backend === 'paperless' && file.sync_status === 'processing';
+            
             return (
               <Paper
                 key={file.id}
@@ -283,6 +287,17 @@ const FileList = ({
                                 title="This document is missing from Paperless"
                               >
                                 Missing
+                              </Badge>
+                            )}
+                            {isProcessing && (
+                              <Badge 
+                                color="orange" 
+                                variant="light" 
+                                size="xs"
+                                leftSection={<IconClock size={10} />}
+                                title="Document is being processed by Paperless"
+                              >
+                                Processing
                               </Badge>
                             )}
                           </Group>

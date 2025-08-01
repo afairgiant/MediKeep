@@ -474,6 +474,7 @@ class ApiService {
     }
   }
 
+
   // Download file (generic - file ID is enough)
   async downloadEntityFile(fileId, fileName, signal) {
     try {

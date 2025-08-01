@@ -151,6 +151,7 @@ const LabResults = () => {
 
   // Note: File management now handled by DocumentManager component
   const abortControllerRef = useRef(null);
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
 
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
@@ -245,63 +246,7 @@ const LabResults = () => {
     }
   }, [location.search, labResults, loading, showViewModal]);
 
-  const handleAddPendingFile = (file, description = '') => {
-    setPendingFiles(prev => [...prev, { file, description, id: Date.now() }]);
-  };
-
-  const handleRemovePendingFile = fileId => {
-    setPendingFiles(prev => prev.filter(f => f.id !== fileId));
-  };
-
-  const handleMarkFileForDeletion = fileId => {
-    setFilesToDelete(prev => [...prev, fileId]);
-  };
-
-  const handleUnmarkFileForDeletion = fileId => {
-    setFilesToDelete(prev => prev.filter(id => id !== fileId));
-  };
-
-  const uploadPendingFiles = async labResultId => {
-    const uploadPromises = pendingFiles.map(async pendingFile => {
-      try {
-        await apiService.uploadLabResultFile(
-          labResultId,
-          pendingFile.file,
-          pendingFile.description
-        );
-      } catch (error) {
-        logger.error('medical_file_upload_error', {
-          message: 'Failed to upload file to lab result',
-          fileName: pendingFile.file.name,
-          fileSize: pendingFile.file.size,
-          labResultId,
-          error: error.message,
-          component: 'LabResults',
-        });
-        throw error;
-      }
-    });
-    await Promise.all(uploadPromises);
-    setPendingFiles([]);
-  };
-
-  const deleteMarkedFiles = async () => {
-    const deletePromises = filesToDelete.map(async fileId => {
-      try {
-        await apiService.deleteLabResultFile(fileId);
-      } catch (error) {
-        logger.error('medical_file_delete_error', {
-          message: 'Failed to delete lab result file',
-          fileId,
-          error: error.message,
-          component: 'LabResults',
-        });
-        throw error;
-      }
-    });
-    await Promise.all(deletePromises);
-    setFilesToDelete([]);
-  };
+  // Note: File management functions removed - now handled by DocumentManager component
 
   // Modern CRUD handlers using useMedicalData
   const handleAddLabResult = () => {
@@ -319,8 +264,6 @@ const LabResults = () => {
       notes: '',
       practitioner_id: '',
     });
-    setPendingFiles([]);
-    setFilesToDelete([]);
     setShowModal(true);
   };
 
@@ -340,23 +283,7 @@ const LabResults = () => {
       practitioner_id: labResult.practitioner_id || '',
     });
 
-    // Load existing files
-    try {
-      const files = await apiService.getLabResultFiles(labResult.id);
-      setSelectedFiles(files);
-    } catch (error) {
-      logger.error('medical_data_fetch_error', {
-        message: 'Error loading files for lab result edit',
-        labResultId: labResult.id,
-        labResultName: labResult.test_name,
-        error: error.message,
-        component: 'LabResults',
-      });
-      setSelectedFiles([]);
-    }
-
-    setPendingFiles([]);
-    setFilesToDelete([]);
+    // Note: File loading is now handled by DocumentManager component
     setShowModal(true);
   };
 
@@ -426,7 +353,82 @@ const LabResults = () => {
       }
 
       if (success && resultId) {
-        // Note: File operations now handled by DocumentManager component
+        // Debug: Check if documentManagerMethods is available
+        logger.info('lab_results_checking_file_methods', {
+          message: 'Checking document manager methods availability',
+          labResultId: resultId,
+          isEditMode: !!editingLabResult,
+          hasDocumentManagerMethods: !!documentManagerMethods,
+          hasPendingFiles: documentManagerMethods?.hasPendingFiles?.(),
+          pendingFilesCount: documentManagerMethods?.getPendingFilesCount?.(),
+          availableMethods: documentManagerMethods ? Object.keys(documentManagerMethods) : [],
+          component: 'LabResults',
+        });
+
+        // Handle background file upload for create mode
+        if (!editingLabResult && documentManagerMethods?.hasPendingFiles()) {
+          logger.info('lab_results_starting_file_upload', {
+            message: 'Starting background file upload process',
+            labResultId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'LabResults',
+          });
+
+          // Show success message immediately
+          const fileCount = documentManagerMethods.getPendingFilesCount();
+          setSuccessMessage(`Lab result created successfully. ${fileCount} file(s) are being uploaded in the background...`);
+          
+          // Upload files in the background using the existing working method
+          setTimeout(async () => {
+            try {
+              await documentManagerMethods.uploadPendingFiles(resultId);
+              setSuccessMessage('Lab result and all files saved successfully!');
+              
+              // Clear success message after a few seconds
+              setTimeout(() => setSuccessMessage(''), 4000);
+              
+              // Refresh data to show uploaded files
+              await refreshData();
+              
+              // Update the file count for this specific lab result
+              try {
+                const files = await apiService.getLabResultFiles(resultId);
+                setFilesCounts(prev => ({
+                  ...prev,
+                  [resultId]: files.length
+                }));
+                
+                logger.info('file_count_updated', {
+                  message: 'Updated file count after background upload',
+                  labResultId: resultId,
+                  fileCount: files.length,
+                  component: 'LabResults',
+                });
+              } catch (fileCountError) {
+                logger.warn('file_count_update_error', {
+                  message: 'Failed to update file count after upload',
+                  labResultId: resultId,
+                  error: fileCountError.message,
+                  component: 'LabResults',
+                });
+              }
+            } catch (error) {
+              logger.error('background_file_upload_error', {
+                message: 'Failed to upload files in background',
+                labResultId: resultId,
+                error: error.message,
+                component: 'LabResults',
+              });
+              setError(`Lab result created but file upload failed: ${error.message}`);
+            }
+          }, 100); // Small delay to ensure UI updates first
+        } else if (!editingLabResult) {
+          setSuccessMessage('Lab result created successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+        } else {
+          setSuccessMessage('Lab result updated successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+        }
 
         // Reset all form and modal state
         setShowModal(false);
@@ -444,7 +446,6 @@ const LabResults = () => {
           notes: '',
           practitioner_id: '',
         });
-        // Note: File state now managed by DocumentManager
 
         await refreshData();
       }
@@ -474,7 +475,6 @@ const LabResults = () => {
       notes: '',
       practitioner_id: '',
     });
-    // Note: File state now managed by DocumentManager
   };
 
   // File operations for view modal
@@ -795,32 +795,31 @@ const LabResults = () => {
           fetchLabResultConditions={fetchLabResultConditions}
           navigate={navigate}
         >
-          {/* File Management Section for Edit Mode */}
-          {editingLabResult && (
-            <Paper withBorder p="md" mt="md">
-              <Title order={4} mb="md">
-                Manage Files
-              </Title>
-              <DocumentManager
-                entityType="lab-result"
-                entityId={editingLabResult.id}
-                mode="edit"
-                config={{
-                  acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-                  maxSize: 10 * 1024 * 1024, // 10MB
-                  maxFiles: 10
-                }}
-                onError={(error) => {
-                  logger.error('document_manager_error', {
-                    message: 'Document manager error in lab results edit',
-                    labResultId: editingLabResult.id,
-                    error: error,
-                    component: 'LabResults',
-                  });
-                }}
-              />
-            </Paper>
-          )}
+          {/* File Management Section for Both Create and Edit Mode */}
+          <Paper withBorder p="md" mt="md">
+            <Title order={4} mb="md">
+              {editingLabResult ? 'Manage Files' : 'Add Files (Optional)'}
+            </Title>
+            <DocumentManager
+              entityType="lab-result"
+              entityId={editingLabResult?.id}
+              mode={editingLabResult ? 'edit' : 'create'}
+              config={{
+                acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+                maxSize: 10 * 1024 * 1024, // 10MB
+                maxFiles: 10
+              }}
+              onUploadPendingFiles={setDocumentManagerMethods}
+              onError={(error) => {
+                logger.error('document_manager_error', {
+                  message: `Document manager error in lab results ${editingLabResult ? 'edit' : 'create'}`,
+                  labResultId: editingLabResult?.id,
+                  error: error,
+                  component: 'LabResults',
+                });
+              }}
+            />
+          </Paper>
         </MantineLabResultForm>
       )}
 

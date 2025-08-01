@@ -272,6 +272,165 @@ class GenericEntityFileService:
                 status_code=500, detail=f"Failed to retrieve file: {str(e)}"
             )
 
+    async def create_pending_file_record(
+        self,
+        db: Session,
+        entity_type: str,
+        entity_id: int,
+        file_name: str,
+        file_size: int,
+        file_type: str,
+        description: Optional[str] = None,
+        category: Optional[str] = None,
+        storage_backend: str = "local",
+        user_id: Optional[int] = None,
+    ) -> FileOperationResult:
+        """
+        Create a pending file record without actual file upload.
+        This allows tracking files that will be uploaded asynchronously.
+
+        Args:
+            db: Database session
+            entity_type: Type of entity
+            entity_id: ID of the entity
+            file_name: Name of the file
+            file_size: Size of the file in bytes
+            file_type: MIME type of the file
+            description: Optional description
+            category: Optional category
+            storage_backend: Storage backend to use
+            user_id: ID of the user creating the record
+
+        Returns:
+            FileOperationResult with the created pending file record
+        """
+        try:
+            # Create entity directory
+            entity_dir = self._get_entity_directory(entity_type)
+            os.makedirs(entity_dir, exist_ok=True)
+
+            # Generate a placeholder file path for the pending record
+            file_extension = Path(file_name).suffix
+            unique_filename = f"pending_{uuid.uuid4()}{file_extension}"
+            file_path = entity_dir / unique_filename
+
+            # Create pending file record
+            file_create = EntityFileCreate(
+                entity_type=entity_type,
+                entity_id=entity_id,
+                file_name=file_name,
+                file_path=str(file_path),
+                file_type=file_type,
+                file_size=file_size,
+                description=description,
+                category=category,
+                uploaded_at=get_utc_now(),
+                storage_backend=storage_backend,
+                sync_status="pending",  # Mark as pending
+                last_sync_at=None,
+            )
+
+            db_file = EntityFile(**file_create.model_dump())
+            db.add(db_file)
+            db.commit()
+            db.refresh(db_file)
+
+            logger.info(
+                f"Created pending file record: {file_name} for {entity_type} {entity_id}",
+                extra={
+                    "file_id": db_file.id,
+                    "entity_type": entity_type,
+                    "entity_id": entity_id,
+                    "file_name": file_name,
+                    "storage_backend": storage_backend,
+                    "user_id": user_id,
+                },
+            )
+
+            return FileOperationResult(
+                success=True, file_record=db_file, message="Pending file record created"
+            )
+
+        except Exception as e:
+            db.rollback()
+            logger.error(
+                f"Failed to create pending file record: {file_name}",
+                extra={
+                    "entity_type": entity_type,
+                    "entity_id": entity_id,
+                    "file_name": file_name,
+                    "error": str(e),
+                    "user_id": user_id,
+                },
+            )
+            return FileOperationResult(
+                success=False,
+                error_message=f"Failed to create pending file record: {str(e)}",
+            )
+
+    async def update_file_upload_status(
+        self,
+        db: Session,
+        file_id: int,
+        actual_file_path: str,
+        sync_status: str = "synced",
+        paperless_document_id: Optional[str] = None,
+    ) -> FileOperationResult:
+        """
+        Update a pending file record after successful upload.
+
+        Args:
+            db: Database session
+            file_id: ID of the file record to update
+            actual_file_path: Actual path where the file was saved
+            sync_status: New sync status ('synced', 'failed')
+            paperless_document_id: Paperless document ID if uploaded to paperless
+
+        Returns:
+            FileOperationResult with the updated file record
+        """
+        try:
+            db_file = db.query(EntityFile).filter(EntityFile.id == file_id).first()
+            if not db_file:
+                return FileOperationResult(
+                    success=False, error_message=f"File record {file_id} not found"
+                )
+
+            # Update file record
+            db_file.file_path = actual_file_path
+            db_file.sync_status = sync_status
+            db_file.last_sync_at = get_utc_now() if sync_status == "synced" else None
+            if paperless_document_id:
+                db_file.paperless_document_id = paperless_document_id
+
+            db.commit()
+            db.refresh(db_file)
+
+            logger.info(
+                f"Updated file record {file_id} status to {sync_status}",
+                extra={
+                    "file_id": file_id,
+                    "sync_status": sync_status,
+                    "actual_file_path": actual_file_path,
+                    "paperless_document_id": paperless_document_id,
+                },
+            )
+
+            return FileOperationResult(
+                success=True, file_record=db_file, message="File status updated"
+            )
+
+        except Exception as e:
+            db.rollback()
+            logger.error(
+                f"Failed to update file record {file_id}",
+                extra={"file_id": file_id, "error": str(e)},
+            )
+            return FileOperationResult(
+                success=False,
+                error_message=f"Failed to update file record: {str(e)}",
+            )
+
     async def delete_file(self, db: Session, file_id: int, current_user_id: Optional[int] = None) -> FileOperationResult:
         """
         Delete a file by its ID from both local and paperless storage.
@@ -636,6 +795,23 @@ class GenericEntityFileService:
                     description=description,
                 )
 
+            # Check if we got a document_id immediately (already processed) or just task_id (processing)
+            document_id = upload_result.get("document_id")
+            task_id = upload_result.get("task_id")
+            
+            if document_id:
+                # Document was processed immediately - use normal flow
+                sync_status = "synced"
+                paperless_id = document_id
+                last_sync = get_utc_now()
+                logger.info(f"Document processed immediately: {file.filename} -> document_id: {document_id}")
+            else:
+                # Document is being processed - store task_id temporarily and mark as processing
+                sync_status = "processing"
+                paperless_id = task_id  # Store task UUID temporarily
+                last_sync = None
+                logger.info(f"Document queued for processing: {file.filename} -> task_id: {task_id}")
+
             # Create database record for paperless file
             entity_file = EntityFile(
                 entity_type=entity_type,
@@ -647,9 +823,9 @@ class GenericEntityFileService:
                 description=description,
                 category=category,
                 storage_backend="paperless",
-                paperless_document_id=upload_result.get("document_id"),
-                sync_status="synced",
-                last_sync_at=get_utc_now(),
+                paperless_document_id=paperless_id,  # Either document_id or task_id
+                sync_status=sync_status,
+                last_sync_at=last_sync,
                 uploaded_at=get_utc_now(),
             )
 
@@ -658,8 +834,13 @@ class GenericEntityFileService:
             db.refresh(entity_file)
 
             logger.info(
-                f"File uploaded to paperless: {file.filename} for {entity_type} {entity_id} (task_id: {upload_result.get('task_id')})"
+                f"File uploaded to paperless: {file.filename} for {entity_type} {entity_id} "
+                f"(status: {sync_status}, id: {paperless_id})"
             )
+            
+            # TODO: If sync_status is "processing", start background task to poll for completion
+            # For now, you can manually call update_processing_files() to check status
+            # Future: Implement with Celery, background threads, or cron job
 
             return EntityFileResponse.model_validate(entity_file)
 
@@ -936,3 +1117,179 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error checking paperless sync status: {str(e)}")
             return {}
+
+    async def update_processing_files(
+        self, db: Session, current_user_id: int
+    ) -> Dict[str, str]:
+        """
+        Update files with 'processing' status by checking their task completion.
+        
+        Args:
+            db: Database session
+            current_user_id: User ID for paperless service
+            
+        Returns:
+            Dictionary mapping file_id to new status
+        """
+        try:
+            # Get all processing files
+            processing_files = (
+                db.query(EntityFile)
+                .filter(
+                    EntityFile.storage_backend == "paperless",
+                    EntityFile.sync_status == "processing",
+                    EntityFile.paperless_document_id.isnot(None),
+                )
+                .all()
+            )
+
+            if not processing_files:
+                return {}
+
+            # Get user's paperless configuration
+            user_prefs = (
+                db.query(UserPreferences)
+                .filter(UserPreferences.user_id == current_user_id)
+                .first()
+            )
+
+            if not user_prefs or not user_prefs.paperless_enabled:
+                logger.warning("Cannot update processing files: user preferences not found or disabled")
+                return {}
+
+            # Create paperless service
+            paperless_service = create_paperless_service_with_username_password(
+                user_prefs.paperless_url,
+                user_prefs.paperless_username_encrypted,
+                user_prefs.paperless_password_encrypted,
+                current_user_id,
+            )
+
+            status_updates = {}
+            
+            # Check each processing file
+            async with paperless_service:
+                for file_record in processing_files:
+                    try:
+                        task_uuid = file_record.paperless_document_id  # Currently storing task UUID
+                        
+                        # Check if task is complete and get document ID
+                        document_id = await paperless_service.wait_for_task_completion(
+                            task_uuid, timeout_seconds=5  # Short timeout for polling
+                        )
+                        
+                        if document_id:
+                            # Task completed! Update record with actual document ID
+                            file_record.paperless_document_id = str(document_id)
+                            file_record.sync_status = "synced"
+                            file_record.last_sync_at = get_utc_now()
+                            status_updates[str(file_record.id)] = "synced"
+                            
+                            logger.info(
+                                f"Processing complete: {file_record.file_name} -> document_id: {document_id} "
+                                f"(was task: {task_uuid})"
+                            )
+                        else:
+                            # Still processing
+                            status_updates[str(file_record.id)] = "processing"
+                        
+                    except Exception as e:
+                        logger.error(f"Error checking task {file_record.paperless_document_id}: {str(e)}")
+                        # Mark as failed if we can't check status
+                        file_record.sync_status = "failed"
+                        file_record.last_sync_at = get_utc_now()
+                        status_updates[str(file_record.id)] = "failed"
+
+            # Commit all database updates
+            db.commit()
+
+            logger.info(f"Updated {len(status_updates)} processing files")
+            return status_updates
+
+        except Exception as e:
+            logger.error(f"Error updating processing files: {str(e)}")
+            return {}
+
+    def cleanup_entity_files_on_deletion(
+        self, db: Session, entity_type: str, entity_id: int, preserve_paperless: bool = True
+    ) -> Dict[str, int]:
+        """
+        Clean up EntityFiles when an entity is deleted.
+        
+        Args:
+            db: Database session
+            entity_type: Type of entity being deleted
+            entity_id: ID of the entity being deleted
+            preserve_paperless: If True, preserve Paperless documents (default: True)
+            
+        Returns:
+            Dictionary with cleanup statistics
+        """
+        try:
+            # Get all entity files for this entity
+            entity_files = (
+                db.query(EntityFile)
+                .filter(
+                    EntityFile.entity_type == entity_type,
+                    EntityFile.entity_id == entity_id
+                )
+                .all()
+            )
+            
+            if not entity_files:
+                logger.info(f"No EntityFiles found for {entity_type} {entity_id}")
+                return {"files_deleted": 0, "files_preserved": 0, "errors": 0}
+            
+            deleted_local_files = 0
+            preserved_paperless_files = 0
+            errors = 0
+            
+            for file_record in entity_files:
+                try:
+                    if file_record.storage_backend == "local":
+                        # Delete local files (move to trash)
+                        if file_record.file_path and os.path.exists(file_record.file_path):
+                            trash_result = self.file_management_service.move_to_trash(
+                                file_record.file_path,
+                                reason=f"{entity_type} {entity_id} deletion"
+                            )
+                            logger.info(f"Moved local file to trash: {file_record.file_name} -> {trash_result}")
+                            deleted_local_files += 1
+                        else:
+                            logger.warning(f"Local file not found for deletion: {file_record.file_path}")
+                            
+                    elif file_record.storage_backend == "paperless":
+                        if preserve_paperless:
+                            # Preserve Paperless files - just log for audit
+                            logger.info(f"Preserving Paperless document: {file_record.file_name} (ID: {file_record.paperless_document_id})")
+                            preserved_paperless_files += 1
+                        else:
+                            # This path could be used if we ever want to delete from Paperless
+                            logger.info(f"Would delete Paperless document: {file_record.file_name} (preserve_paperless=False)")
+                            # TODO: Implement Paperless deletion if needed
+                    
+                    # Always remove database record
+                    db.delete(file_record)
+                    
+                except Exception as file_error:
+                    logger.error(f"Error processing file {file_record.file_name}: {str(file_error)}")
+                    errors += 1
+                    # Continue with other files
+            
+            # Commit all file record deletions
+            db.commit()
+            
+            logger.info(f"EntityFile cleanup completed for {entity_type} {entity_id}: "
+                       f"{deleted_local_files} local files deleted, "
+                       f"{preserved_paperless_files} Paperless files preserved, "
+                       f"{errors} errors")
+            
+            return {
+                "files_deleted": deleted_local_files,
+                "files_preserved": preserved_paperless_files,
+                "errors": errors
+            }
+            
+        except Exception as e:
+            logger.error(f"Error during entity file cleanup for {entity_type} {entity_id}: {str(e)}")
+            return {"files_deleted": 0, "files_preserved": 0, "errors": 1}

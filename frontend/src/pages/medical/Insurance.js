@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -26,6 +26,7 @@ import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
 import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFormWrapper';
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
+import DocumentManager from '../../components/shared/DocumentManager';
 import {
   Badge,
   Button,
@@ -41,6 +42,7 @@ import {
   Divider,
   Modal,
   Title,
+  Paper,
 } from '@mantine/core';
 
 const Insurance = () => {
@@ -104,6 +106,9 @@ const Insurance = () => {
   // View modal state management
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingInsurance, setViewingInsurance] = useState(null);
+
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
 
   // Table formatters - consistent with medication table approach
   const formatters = {
@@ -206,38 +211,124 @@ const Insurance = () => {
         submitData.patient_id = currentPatient?.id;
       }
 
+      let success;
+      let resultId;
+
       if (editingInsurance) {
         logger.info('Updating insurance', {
           insuranceId: editingInsurance.id,
           insurance_type: formData.insurance_type,
           company: formData.company_name
         });
-        await updateItem(editingInsurance.id, submitData);
-        notifications.show({
-          title: 'Insurance Updated',
-          message: `${formData.insurance_type} insurance updated successfully`,
-          color: 'green',
-        });
+        success = await updateItem(editingInsurance.id, submitData);
+        resultId = editingInsurance.id;
+        
+        if (success) {
+          notifications.show({
+            title: 'Insurance Updated',
+            message: `${formData.insurance_type} insurance updated successfully`,
+            color: 'green',
+          });
+        }
       } else {
         logger.info('Creating new insurance', {
           insurance_type: formData.insurance_type,
           company: formData.company_name
         });
-        await createItem(submitData);
-        notifications.show({
-          title: 'Insurance Added',
-          message: `${formData.insurance_type} insurance added successfully`,
-          color: 'green',
-        });
+        const result = await createItem(submitData);
+        success = !!result;
+        resultId = result?.id;
       }
 
-      // Close form and reset
-      setIsFormOpen(false);
-      setEditingInsurance(null);
-      setFormData(initializeFormData());
-      
-      // Refresh the data to show the new insurance
-      await refreshData();
+      if (success && resultId) {
+        // Debug: Check if documentManagerMethods is available
+        logger.info('insurance_checking_file_methods', {
+          message: 'Checking document manager methods availability',
+          insuranceId: resultId,
+          isEditMode: !!editingInsurance,
+          hasDocumentManagerMethods: !!documentManagerMethods,
+          hasPendingFiles: documentManagerMethods?.hasPendingFiles?.(),
+          pendingFilesCount: documentManagerMethods?.getPendingFilesCount?.(),
+          availableMethods: documentManagerMethods ? Object.keys(documentManagerMethods) : [],
+          component: 'Insurance',
+        });
+
+        // Handle background file upload for create mode
+        if (!editingInsurance && documentManagerMethods?.hasPendingFiles()) {
+          logger.info('insurance_starting_file_upload', {
+            message: 'Starting background file upload process',
+            insuranceId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Insurance',
+          });
+
+          // Show success message immediately
+          const fileCount = documentManagerMethods.getPendingFilesCount();
+          notifications.show({
+            title: 'Insurance Added',
+            message: `${formData.insurance_type} insurance added successfully. ${fileCount} file(s) are being uploaded in the background...`,
+            color: 'green',
+          });
+          
+          // Upload files in the background - DON'T close form until upload is complete
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            notifications.show({
+              title: 'Files Uploaded',
+              message: 'Insurance and all files saved successfully!',
+              color: 'green',
+            });
+            
+            // Refresh data to show uploaded files
+            await refreshData();
+            
+            // Update the file count for this specific insurance
+            try {
+              const files = await apiService.getEntityFiles('insurance', resultId);
+              logger.info('file_count_updated', {
+                message: 'Updated file count after background upload',
+                insuranceId: resultId,
+                fileCount: files.length,
+                component: 'Insurance',
+              });
+            } catch (fileCountError) {
+              logger.warn('file_count_update_error', {
+                message: 'Failed to update file count after upload',
+                insuranceId: resultId,
+                error: fileCountError.message,
+                component: 'Insurance',
+              });
+            }
+          } catch (error) {
+            logger.error('background_file_upload_error', {
+              message: 'Failed to upload files in background',
+              insuranceId: resultId,
+              error: error.message,
+              component: 'Insurance',
+            });
+            notifications.show({
+              title: 'File Upload Error',
+              message: `Insurance created but file upload failed: ${error.message}`,
+              color: 'red',
+            });
+            // Still close the form even if file upload fails
+          }
+        } else if (!editingInsurance) {
+          notifications.show({
+            title: 'Insurance Added',
+            message: `${formData.insurance_type} insurance added successfully`,
+            color: 'green',
+          });
+        }
+
+        // Close form and reset
+        setIsFormOpen(false);
+        setEditingInsurance(null);
+        setFormData(initializeFormData());
+        
+        // Refresh the data to show the new insurance
+        await refreshData();
+      }
     } catch (error) {
       logger.error('Error saving insurance:', error);
       
@@ -515,7 +606,33 @@ const Insurance = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingItem={editingInsurance}
-      />
+      >
+        {/* File Management Section for Both Create and Edit Mode */}
+        <Paper withBorder p="md" mt="md">
+          <Title order={4} mb="md">
+            {editingInsurance ? 'Manage Files' : 'Add Files (Optional)'}
+          </Title>
+          <DocumentManager
+            entityType="insurance"
+            entityId={editingInsurance?.id}
+            mode={editingInsurance ? 'edit' : 'create'}
+            config={{
+              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+              maxSize: 10 * 1024 * 1024, // 10MB
+              maxFiles: 10
+            }}
+            onUploadPendingFiles={setDocumentManagerMethods}
+            onError={(error) => {
+              logger.error('document_manager_error', {
+                message: `Document manager error in insurance ${editingInsurance ? 'edit' : 'create'}`,
+                insuranceId: editingInsurance?.id,
+                error: error,
+                component: 'Insurance',
+              });
+            }}
+          />
+        </Paper>
+      </InsuranceFormWrapper>
 
       {/* View Modal */}
       <InsuranceViewModal

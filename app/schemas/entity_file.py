@@ -100,6 +100,10 @@ class EntityFileCreate(EntityFileBase):
     entity_type: EntityType
     entity_id: int
     uploaded_at: Optional[datetime] = None
+    storage_backend: Optional[str] = "local"
+    sync_status: Optional[str] = "synced"
+    last_sync_at: Optional[datetime] = None
+    paperless_document_id: Optional[str] = None
 
     @validator("entity_id")
     def validate_entity_id(cls, v):

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -35,6 +35,7 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -169,6 +170,9 @@ const Visits = () => {
     priority: '',
   });
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
   const handleAddVisit = () => {
     setEditingVisit(null);
     setFormData({
@@ -279,16 +283,114 @@ const Visits = () => {
       patient_id: currentPatient.id,
     };
 
-    let success;
-    if (editingVisit) {
-      success = await updateItem(editingVisit.id, visitData);
-    } else {
-      success = await createItem(visitData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+      if (editingVisit) {
+        success = await updateItem(editingVisit.id, visitData);
+        resultId = editingVisit.id;
+      } else {
+        const result = await createItem(visitData);
+        success = !!result;
+        resultId = result?.id;
+      }
+
+      if (success && resultId) {
+        // Debug: Check if documentManagerMethods is available
+        logger.info('visits_checking_file_methods', {
+          message: 'Checking document manager methods availability',
+          visitId: resultId,
+          isEditMode: !!editingVisit,
+          hasDocumentManagerMethods: !!documentManagerMethods,
+          hasPendingFiles: documentManagerMethods?.hasPendingFiles?.(),
+          pendingFilesCount: documentManagerMethods?.getPendingFilesCount?.(),
+          availableMethods: documentManagerMethods ? Object.keys(documentManagerMethods) : [],
+          component: 'Visits',
+        });
+
+        // Handle background file upload for create mode
+        if (!editingVisit && documentManagerMethods?.hasPendingFiles()) {
+          logger.info('visits_starting_file_upload', {
+            message: 'Starting background file upload process',
+            visitId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Visits',
+          });
+
+          // Show success message immediately
+          const fileCount = documentManagerMethods.getPendingFilesCount();
+          setSuccessMessage(`Visit created successfully. ${fileCount} file(s) are being uploaded in the background...`);
+          
+          // Upload files in the background - DON'T close form until upload is complete
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            setSuccessMessage('Visit and all files saved successfully!');
+            
+            // Clear success message after a few seconds
+            setTimeout(() => setSuccessMessage(''), 4000);
+            
+            // Refresh data to show uploaded files
+            await refreshData();
+            
+            // Update the file count for this specific visit
+            try {
+              const files = await apiService.getEntityFiles('visit', resultId);
+              logger.info('file_count_updated', {
+                message: 'Updated file count after background upload',
+                visitId: resultId,
+                fileCount: files.length,
+                component: 'Visits',
+              });
+            } catch (fileCountError) {
+              logger.warn('file_count_update_error', {
+                message: 'Failed to update file count after upload',
+                visitId: resultId,
+                error: fileCountError.message,
+                component: 'Visits',
+              });
+            }
+          } catch (error) {
+            logger.error('background_file_upload_error', {
+              message: 'Failed to upload files in background',
+              visitId: resultId,
+              error: error.message,
+              component: 'Visits',
+            });
+            setError(`Visit created but file upload failed: ${error.message}`);
+            // Still close the form even if file upload fails
+          }
+        } else if (!editingVisit) {
+          setSuccessMessage('Visit created successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+        } else {
+          setSuccessMessage('Visit updated successfully!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+        }
+
+        // Reset all form and modal state
+        setShowModal(false);
+        setEditingVisit(null);
+        setFormData({
+          reason: '',
+          date: '',
+          notes: '',
+          practitioner_id: '',
+          condition_id: '',
+          visit_type: '',
+          chief_complaint: '',
+          diagnosis: '',
+          treatment_plan: '',
+          follow_up_instructions: '',
+          duration_minutes: '',
+          location: '',
+          priority: '',
+        });
+
+        await refreshData();
+      }
+    } catch (error) {
+      setError(error.message || 'Failed to save visit');
     }
   };
 
@@ -746,7 +848,33 @@ const Visits = () => {
         conditionsOptions={conditions}
         conditionsLoading={false}
         editingVisit={editingVisit}
-      />
+      >
+        {/* File Management Section for Both Create and Edit Mode */}
+        <Paper withBorder p="md" mt="md">
+          <Title order={4} mb="md">
+            {editingVisit ? 'Manage Files' : 'Add Files (Optional)'}
+          </Title>
+          <DocumentManager
+            entityType="visit"
+            entityId={editingVisit?.id}
+            mode={editingVisit ? 'edit' : 'create'}
+            config={{
+              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+              maxSize: 10 * 1024 * 1024, // 10MB
+              maxFiles: 10
+            }}
+            onUploadPendingFiles={setDocumentManagerMethods}
+            onError={(error) => {
+              logger.error('document_manager_error', {
+                message: `Document manager error in visits ${editingVisit ? 'edit' : 'create'}`,
+                visitId: editingVisit?.id,
+                error: error,
+                component: 'Visits',
+              });
+            }}
+          />
+        </Paper>
+      </MantineVisitForm>
 
       {/* Visit View Modal */}
       <Modal

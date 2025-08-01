@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -9,6 +9,8 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
+import { notifications } from '@mantine/notifications';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -31,6 +33,7 @@ import {
   Divider,
   Modal,
   Title,
+  Paper,
 } from '@mantine/core';
 
 const Procedures = () => {
@@ -142,6 +145,10 @@ const Procedures = () => {
     anesthesia_type: '',
     anesthesia_notes: '',
   });
+
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
 
   const handleAddProcedure = () => {
     setEditingProcedure(null);
@@ -281,16 +288,205 @@ const Procedures = () => {
       patient_id: currentPatient.id,
     };
 
-    let success;
-    if (editingProcedure) {
-      success = await updateItem(editingProcedure.id, procedureData);
-    } else {
-      success = await createItem(procedureData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+      if (editingProcedure) {
+        success = await updateItem(editingProcedure.id, procedureData);
+        resultId = editingProcedure.id;
+      } else {
+        const result = await createItem(procedureData);
+        success = !!result;
+        resultId = result?.id;
+      }
+
+      if (success && resultId) {
+        // Debug: Check if documentManagerMethods is available
+        logger.info('procedures_checking_file_methods', {
+          message: 'Checking document manager methods availability',
+          procedureId: resultId,
+          isEditMode: !!editingProcedure,
+          hasDocumentManagerMethods: !!documentManagerMethods,
+          hasPendingFiles: documentManagerMethods?.hasPendingFiles?.(),
+          pendingFilesCount: documentManagerMethods?.getPendingFilesCount?.(),
+          availableMethods: documentManagerMethods ? Object.keys(documentManagerMethods) : [],
+          component: 'Procedures',
+        });
+
+        // Handle background file upload for create mode
+        if (!editingProcedure && documentManagerMethods?.hasPendingFiles()) {
+          logger.info('procedures_starting_file_upload', {
+            message: 'Starting background file upload process',
+            procedureId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            uploadMethodExists: typeof documentManagerMethods.uploadPendingFiles === 'function',
+            component: 'Procedures',
+          });
+
+          // Show success message immediately
+          logger.info('procedures_getting_file_count', {
+            message: 'About to get pending files count',
+            procedureId: resultId,
+            hasGetPendingFilesCount: typeof documentManagerMethods?.getPendingFilesCount === 'function',
+            component: 'Procedures',
+          });
+          
+          const fileCount = documentManagerMethods?.getPendingFilesCount?.() || 0;
+          
+          logger.info('procedures_got_file_count', {
+            message: 'Got pending files count',
+            procedureId: resultId,
+            fileCount,
+            component: 'Procedures',
+          });
+          
+          // Show success message immediately using notifications
+          notifications.show({
+            title: 'Procedure Added',
+            message: `${formData.procedure_name} added successfully. ${fileCount} file(s) are being uploaded in the background...`,
+            color: 'green',
+          });
+          
+          logger.info('procedures_after_notification_show', {
+            message: 'Notification shown, about to enter try block',
+            procedureId: resultId,
+            fileCount,
+            component: 'Procedures',
+          });
+          
+          // Upload files in the background - DON'T close form until upload is complete
+          try {
+            logger.info('procedures_about_to_check_upload_method', {
+              message: 'About to check if uploadPendingFiles is available',
+              procedureId: resultId,
+              documentManagerMethodsExists: !!documentManagerMethods,
+              uploadMethodType: typeof documentManagerMethods?.uploadPendingFiles,
+              component: 'Procedures',
+            });
+            
+            if (typeof documentManagerMethods.uploadPendingFiles !== 'function') {
+              throw new Error('uploadPendingFiles method is not available');
+            }
+            
+            logger.info('procedures_starting_upload_await', {
+              message: 'About to await uploadPendingFiles',
+              procedureId: resultId,
+              uploadFunctionType: typeof documentManagerMethods.uploadPendingFiles,
+              component: 'Procedures',
+            });
+            
+            // Add timeout to prevent hanging
+            logger.info('procedures_calling_upload_function', {
+              message: 'Calling uploadPendingFiles function now',
+              procedureId: resultId,
+              component: 'Procedures',
+            });
+            
+            const uploadResult = await Promise.race([
+              documentManagerMethods.uploadPendingFiles(resultId),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Upload timeout after 30 seconds')), 30000)
+              )
+            ]);
+            
+            logger.info('procedures_upload_completed', {
+              message: 'uploadPendingFiles completed successfully',
+              procedureId: resultId,
+              uploadResult,
+              component: 'Procedures',
+            });
+            
+            notifications.show({
+              title: 'Files Uploaded',
+              message: 'Procedure and all files saved successfully!',
+              color: 'green',
+            });
+            
+            // Refresh data to show uploaded files
+            await refreshData();
+            
+            // Update the file count for this specific procedure
+            try {
+              const files = await apiService.getEntityFiles('procedure', resultId);
+              logger.info('file_count_updated', {
+                message: 'Updated file count after background upload',
+                procedureId: resultId,
+                fileCount: files.length,
+                component: 'Procedures',
+              });
+            } catch (fileCountError) {
+              logger.warn('file_count_update_error', {
+                message: 'Failed to update file count after upload',
+                procedureId: resultId,
+                error: fileCountError.message,
+                component: 'Procedures',
+              });
+            }
+          } catch (error) {
+            logger.error('background_file_upload_error', {
+              message: 'Failed to upload files in background',
+              procedureId: resultId,
+              error: error.message,
+              stack: error.stack,
+              component: 'Procedures',
+            });
+            notifications.show({
+              title: 'File Upload Error',
+              message: `Procedure created but file upload failed: ${error.message}`,
+              color: 'red',
+            });
+            // Still close the form even if file upload fails
+          }
+        } else if (!editingProcedure) {
+          notifications.show({
+            title: 'Procedure Added',
+            message: `${formData.procedure_name} added successfully`,
+            color: 'green',
+          });
+        } else {
+          notifications.show({
+            title: 'Procedure Updated',
+            message: `${formData.procedure_name} updated successfully`,
+            color: 'green',
+          });
+        }
+
+        logger.info('procedures_about_to_close_form', {
+          message: 'About to close form and reset state',
+          procedureId: resultId,
+          component: 'Procedures',
+        });
+
+        // Reset all form and modal state (moved after file upload completion)
+        setShowModal(false);
+        setEditingProcedure(null);
+        setFormData({
+          procedure_name: '',
+          procedure_type: '',
+          procedure_code: '',
+          description: '',
+          procedure_date: '',
+          status: 'scheduled',
+          notes: '',
+          facility: '',
+          procedure_setting: '',
+          procedure_complications: '',
+          procedure_duration: '',
+          practitioner_id: '',
+          anesthesia_type: '',
+          anesthesia_notes: '',
+        });
+
+        await refreshData();
+      }
+    } catch (error) {
+      logger.error('Error saving procedure:', error);
+      notifications.show({
+        title: 'Error',
+        message: error.message || 'Failed to save procedure',
+        color: 'red',
+      });
     }
   };
 
@@ -588,7 +784,33 @@ const Procedures = () => {
         onSubmit={handleSubmit}
         practitioners={practitioners}
         editingProcedure={editingProcedure}
-      />
+      >
+        {/* File Management Section for Both Create and Edit Mode */}
+        <Paper withBorder p="md" mt="md">
+          <Title order={4} mb="md">
+            {editingProcedure ? 'Manage Files' : 'Add Files (Optional)'}
+          </Title>
+          <DocumentManager
+            entityType="procedure"
+            entityId={editingProcedure?.id}
+            mode={editingProcedure ? 'edit' : 'create'}
+            config={{
+              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+              maxSize: 10 * 1024 * 1024, // 10MB
+              maxFiles: 10
+            }}
+            onUploadPendingFiles={setDocumentManagerMethods}
+            onError={(error) => {
+              logger.error('document_manager_error', {
+                message: `Document manager error in procedures ${editingProcedure ? 'edit' : 'create'}`,
+                procedureId: editingProcedure?.id,
+                error: error,
+                component: 'Procedures',
+              });
+            }}
+          />
+        </Paper>
+      </MantineProcedureForm>
 
       {/* Procedure View Modal */}
       <Modal
