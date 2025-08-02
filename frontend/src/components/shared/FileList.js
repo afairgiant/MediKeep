@@ -21,13 +21,18 @@ import {
   IconPhoto,
   IconSearch,
   IconSortAscending,
-  IconSortDescending
+  IconSortDescending,
+  IconFolder,
+  IconCloud,
+  IconAlertTriangle,
+  IconClock
 } from '@tabler/icons-react';
 import { formatDate } from '../../utils/helpers';
 
 const FileList = ({
   files = [],
   filesToDelete = [],
+  syncStatus = {}, // Object mapping file.id to sync status
   showActions = true,
   showDescriptions = true,
   onDownload,
@@ -63,6 +68,24 @@ const FileList = ({
     }
     
     return { icon: IconFile, color: 'gray' };
+  };
+
+  // Get storage backend icon and info
+  const getStorageBackendInfo = (storageBackend) => {
+    if (storageBackend === 'paperless') {
+      return {
+        icon: IconCloud,
+        color: 'green',
+        label: 'Paperless',
+        description: 'Stored in paperless-ngx'
+      };
+    }
+    return {
+      icon: IconFolder,
+      color: 'blue',
+      label: 'Local',
+      description: 'Stored locally'
+    };
   };
 
   // Format file size
@@ -215,6 +238,12 @@ const FileList = ({
           processedFiles.map((file) => {
             const { icon: FileIcon, color } = getFileIcon(file.file_name, file.file_type);
             const isMarkedForDeletion = filesToDelete.includes(file.id);
+            // Check if file is missing based on database sync_status or real-time syncStatus
+            const isMissing = file.storage_backend === 'paperless' && 
+                             (file.sync_status === 'missing' || syncStatus[file.id] === false);
+            
+            // Check if file is still processing
+            const isProcessing = file.storage_backend === 'paperless' && file.sync_status === 'processing';
             
             return (
               <Paper
@@ -237,13 +266,62 @@ const FileList = ({
                       {/* File name and metadata */}
                       <Group gap="md" align="flex-start">
                         <Stack gap={2} style={{ flex: 1 }}>
-                          <Text fw={500} size="sm">
-                            {file.file_name}
-                          </Text>
+                          <Group gap="xs" wrap="nowrap">
+                            <Text 
+                              fw={500} 
+                              size="sm"
+                              c={isMissing ? 'red' : undefined}
+                              style={{
+                                textDecoration: isMissing ? 'line-through' : 'none',
+                                flex: 1
+                              }}
+                            >
+                              {file.file_name}
+                            </Text>
+                            {isMissing && (
+                              <Badge 
+                                color="red" 
+                                variant="light" 
+                                size="xs"
+                                leftSection={<IconAlertTriangle size={10} />}
+                                title="This document is missing from Paperless"
+                              >
+                                Missing
+                              </Badge>
+                            )}
+                            {isProcessing && (
+                              <Badge 
+                                color="orange" 
+                                variant="light" 
+                                size="xs"
+                                leftSection={<IconClock size={10} />}
+                                title="Document is being processed by Paperless"
+                              >
+                                Processing
+                              </Badge>
+                            )}
+                          </Group>
                           <Group gap="md">
                             <Text size="xs" c="dimmed">
                               {formatFileSize(file.file_size)}
                             </Text>
+                            
+                            {/* Storage Backend Badge */}
+                            {(() => {
+                              const storageInfo = getStorageBackendInfo(file.storage_backend);
+                              return (
+                                <Badge 
+                                  variant="light" 
+                                  color={storageInfo.color} 
+                                  size="xs"
+                                  leftSection={<storageInfo.icon size={10} />}
+                                  title={storageInfo.description}
+                                >
+                                  {storageInfo.label}
+                                </Badge>
+                              );
+                            })()}
+                            
                             {file.file_type && (
                               <Badge variant="light" color="gray" size="xs">
                                 {file.file_type}

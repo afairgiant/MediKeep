@@ -1,8 +1,10 @@
 from pathlib import Path
 from typing import Any, Optional, Type
+import traceback
 
 from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DatabaseError
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
@@ -382,3 +384,141 @@ def ensure_directory_with_permissions(directory: Path, directory_name: str = "di
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_msg,
         )
+
+
+def sanitize_error_for_client(error: Exception, operation_context: str = "operation") -> str:
+    """
+    Sanitize error messages for client responses to prevent information disclosure.
+    
+    This function strips internal details like stack traces, database schema information,
+    file paths, and other sensitive system details from error messages.
+    
+    Args:
+        error: The exception that occurred
+        operation_context: Brief description of the operation that failed (for logging)
+        
+    Returns:
+        A safe, generic error message suitable for client responses
+    """
+    # Map specific exception types to safe, generic error messages
+    error_type = type(error).__name__
+    
+    # Database-related errors - never expose schema details
+    if isinstance(error, (SQLAlchemyError, IntegrityError, DatabaseError)):
+        return "A database error occurred. Please try again later."
+    
+    # Permission/authentication errors - keep generic
+    if "permission" in str(error).lower() or "access" in str(error).lower():
+        return "Access denied."
+    
+    # Authentication-related errors - don't reveal specifics
+    if any(keyword in str(error).lower() for keyword in ["auth", "token", "login", "credential"]):
+        return "Authentication failed."
+    
+    # Connection/network errors - keep minimal
+    if any(keyword in str(error).lower() for keyword in ["connection", "network", "timeout", "refused"]):
+        return "Service temporarily unavailable. Please try again later."
+    
+    # Validation errors - can be more specific but still safe
+    if "validation" in str(error).lower() or "invalid" in str(error).lower():
+        return "Invalid input provided."
+    
+    # File/IO errors - don't expose paths
+    if isinstance(error, (IOError, OSError, FileNotFoundError, PermissionError)):
+        return "File operation failed."
+    
+    # Default safe message for any other errors
+    return f"An error occurred during {operation_context}. Please try again later."
+
+
+def log_and_sanitize_error(
+    logger_instance: Any,
+    error: Exception, 
+    operation_context: str,
+    user_id: Optional[int] = None,
+    extra_context: Optional[dict] = None
+) -> str:
+    """
+    Log the full error details server-side and return a sanitized message for the client.
+    
+    This function ensures that:
+    1. Full error details (including stack traces) are logged server-side for debugging
+    2. Only safe, sanitized error messages are returned to clients
+    3. No internal system details are exposed to clients
+    
+    Args:
+        logger_instance: Logger to use for server-side error logging
+        error: The exception that occurred
+        operation_context: Brief description of what operation failed
+        user_id: ID of the user (if available) for correlation
+        extra_context: Additional context data for logging
+        
+    Returns:
+        Sanitized error message safe for client responses
+    """
+    # Prepare extra logging context
+    log_context = {
+        "error_type": type(error).__name__,
+        "operation": operation_context,
+    }
+    
+    if user_id:
+        log_context["user_id"] = user_id
+        
+    if extra_context:
+        log_context.update(extra_context)
+    
+    # Log full error details server-side (including stack trace for debugging)
+    logger_instance.error(
+        f"Error during {operation_context}: {str(error)}",
+        extra=log_context,
+        exc_info=True  # This includes the full stack trace in server logs
+    )
+    
+    # Return sanitized message for client
+    return sanitize_error_for_client(error, operation_context)
+
+
+def create_sanitized_http_exception(
+    error: Exception,
+    operation_context: str,
+    status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+    logger_instance: Optional[Any] = None,
+    user_id: Optional[int] = None,
+    extra_context: Optional[dict] = None
+) -> HTTPException:
+    """
+    Create an HTTPException with a sanitized error message that doesn't expose internal details.
+    
+    This function handles the complete flow of:
+    1. Logging the full error details server-side
+    2. Creating a safe HTTPException for the client
+    3. Ensuring no sensitive information is leaked
+    
+    Args:
+        error: The original exception
+        operation_context: Description of the operation that failed
+        status_code: HTTP status code to return
+        logger_instance: Logger for server-side logging (uses default if None)
+        user_id: User ID for correlation (if available)
+        extra_context: Additional context for logging
+        
+    Returns:
+        HTTPException with sanitized error message
+    """
+    # Use provided logger or fall back to module logger
+    log_instance = logger_instance or logger
+    
+    # Log error and get sanitized message
+    sanitized_message = log_and_sanitize_error(
+        log_instance, 
+        error, 
+        operation_context, 
+        user_id, 
+        extra_context
+    )
+    
+    return HTTPException(
+        status_code=status_code,
+        detail=sanitized_message
+    )

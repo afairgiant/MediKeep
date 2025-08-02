@@ -181,7 +181,7 @@ def create_default_user():
             print("   🔐 Please change the default password after first login!")
         else:
             print(
-                f"ℹ️  Admin users already exist ({admin_count} found) - skipping default user creation"
+                f"Admin users already exist ({admin_count} found) - skipping default user creation"
             )
     finally:
         db.close()

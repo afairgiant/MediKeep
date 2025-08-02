@@ -31,6 +31,8 @@ from app.crud.condition import condition as condition_crud
 from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType
+from app.models.models import EntityFile, User
+from app.services.generic_entity_file_service import GenericEntityFileService
 from app.schemas.lab_result import (
     LabResultConditionCreate,
     LabResultConditionResponse,
@@ -205,6 +207,9 @@ def delete_lab_result(
     try:
         # Log the deletion activity BEFORE deleting
         from app.api.activity_logging import log_delete
+        from app.core.logging_config import get_logger
+        
+        logger = get_logger(__name__)
 
         log_delete(
             db=db,
@@ -214,12 +219,32 @@ def delete_lab_result(
             request=request,
         )
 
-        # Delete associated files first
+        # Delete associated files from both old and new systems
+        # 1. Delete old system files (LabResultFile table)
         lab_result_file.delete_by_lab_result(db, lab_result_id=lab_result_id)
+        
+        # 2. Delete new system files (EntityFile table) with selective deletion
+        entity_file_service = GenericEntityFileService()
+        file_cleanup_stats = entity_file_service.cleanup_entity_files_on_deletion(
+            db=db,
+            entity_type="lab-result",
+            entity_id=lab_result_id,
+            preserve_paperless=True
+        )
+        
+        deleted_local_files = file_cleanup_stats.get("files_deleted", 0)
+        preserved_paperless_files = file_cleanup_stats.get("files_preserved", 0)
+        
+        logger.info(f"EntityFile cleanup completed: {deleted_local_files} local files deleted, {preserved_paperless_files} Paperless files preserved")
 
         # Delete the lab result
         lab_result.delete(db, id=lab_result_id)
-        return {"message": "Lab result and associated files deleted successfully"}
+        
+        return {
+            "message": "Lab result and associated files deleted successfully",
+            "files_deleted": deleted_local_files,
+            "files_preserved": preserved_paperless_files
+        }
     except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Error deleting lab result: {str(e)}"
@@ -502,14 +527,26 @@ def get_lab_result_conditions(
     *,
     lab_result_id: int,
     db: Session = Depends(get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get all condition relationships for a specific lab result."""
-    # Verify lab result exists and belongs to user
+    # Verify lab result exists
     db_lab_result = lab_result.get(db, id=lab_result_id)
     handle_not_found(db_lab_result, "Lab result")
 
-    if db_lab_result.patient_id != current_user_patient_id:
+    # Verify user has access to this lab result's patient
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+    
+    patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+    if not patient_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient record not found for this lab result",
+        )
+    
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, "view"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied to this lab result",

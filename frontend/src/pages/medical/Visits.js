@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -10,12 +10,7 @@ import {
   Alert,
   Loader,
   Center,
-  Badge,
   Grid,
-  Card,
-  Box,
-  Divider,
-  Modal,
   Button,
 } from '@mantine/core';
 import {
@@ -35,12 +30,22 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
+import { 
+  ERROR_MESSAGES, 
+  SUCCESS_MESSAGES,
+  getUserFriendlyError
+} from '../../constants/errorMessages';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineVisitForm from '../../components/medical/MantineVisitForm';
-import DocumentManager from '../../components/shared/DocumentManager';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import FileCountBadge from '../../components/shared/FileCountBadge';
+// Import new modular components
+import VisitCard from '../../components/medical/visits/VisitCard';
+import VisitViewModal from '../../components/medical/visits/VisitViewModal';
+import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 
 const Visits = () => {
   const [viewMode, setViewMode] = useState('cards');
@@ -80,6 +85,57 @@ const Visits = () => {
   // Get standardized configuration
   const config = getMedicalPageConfig('visits');
 
+  // Form submission with uploads hook
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'visit',
+    onSuccess: () => {
+      // Reset form and close modal on complete success
+      setShowModal(false);
+      setEditingVisit(null);
+      setFormData({
+        reason: '',
+        date: '',
+        notes: '',
+        practitioner_id: '',
+        condition_id: '',
+        visit_type: '',
+        chief_complaint: '',
+        diagnosis: '',
+        treatment_plan: '',
+        follow_up_instructions: '',
+        duration_minutes: '',
+        location: '',
+        priority: '',
+      });
+      
+      // Only refresh if we created a new visit during form submission
+      // Don't refresh after uploads complete to prevent resource exhaustion
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('visits_form_error', {
+        message: 'Form submission error in visits',
+        error,
+        component: 'Visits',
+      });
+    },
+    component: 'Visits',
+  });
+
   // Use standardized data management
   const dataManagement = useDataManagement(visits, config);
 
@@ -89,6 +145,17 @@ const Visits = () => {
   // File count management for cards
   const [fileCounts, setFileCounts] = useState({});
   const [fileCountsLoading, setFileCountsLoading] = useState({});
+
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission (but not after uploads)
+  const needsRefreshAfterSubmissionRef = useRef(false);
+  
+  // Debouncing refs for file count loading
+  const fileCountLoadingTimeoutRef = useRef(null);
+  const lastVisitsVersionRef = useRef(null);
   
   useEffect(() => {
     if (currentPatient?.id) {
@@ -103,32 +170,75 @@ const Visits = () => {
     }
   }, [currentPatient?.id]);
 
-  // Load file counts for visits
-  useEffect(() => {
-    const loadFileCountsForVisits = async () => {
-      if (!visits || visits.length === 0) return;
-      
-      const countPromises = visits.map(async (visit) => {
-        if (fileCounts[visit.id] !== undefined) return; // Already loaded
-        
-        setFileCountsLoading(prev => ({ ...prev, [visit.id]: true }));
-        try {
-          const files = await apiService.getEntityFiles('visit', visit.id);
-          const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [visit.id]: count }));
-        } catch (error) {
-          console.error(`Error loading file count for visit ${visit.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
-        } finally {
-          setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
-        }
+  // Create a memoized version string of visits to detect actual changes
+  const visitsVersion = useMemo(() => {
+    if (!visits || visits.length === 0) return '';
+    return visits.map(v => `${v.id}-${v.updated_at || v.created_at || ''}`).join('|');
+  }, [visits]);
+
+  // Debounced file count loading function
+  const debouncedLoadFileCounts = useCallback(async (visitsToLoad) => {
+    if (!visitsToLoad || visitsToLoad.length === 0) return;
+    
+    const countPromises = visitsToLoad.map(async (visit) => {
+      setFileCountsLoading(prev => {
+        if (prev[visit.id] !== undefined) return prev; // Already loading
+        return { ...prev, [visit.id]: true };
       });
       
-      await Promise.all(countPromises);
-    };
+      try {
+        const files = await apiService.getEntityFiles('visit', visit.id);
+        const count = Array.isArray(files) ? files.length : 0;
+        setFileCounts(prev => ({ ...prev, [visit.id]: count }));
+      } catch (error) {
+        console.error(`Error loading file count for visit ${visit.id}:`, error);
+        setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
+      } finally {
+        setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
+      }
+    });
+    
+    await Promise.all(countPromises);
+  }, []);
 
-    loadFileCountsForVisits();
-  }, [visits, fileCounts]);
+  // Load file counts for visits with debouncing
+  useEffect(() => {
+    // Only proceed if we have visits and the version has actually changed
+    if (!visits || visits.length === 0 || visitsVersion === lastVisitsVersionRef.current) {
+      return;
+    }
+
+    // Clear any existing timeout
+    if (fileCountLoadingTimeoutRef.current) {
+      clearTimeout(fileCountLoadingTimeoutRef.current);
+    }
+
+    // Set up debounced call
+    fileCountLoadingTimeoutRef.current = setTimeout(() => {
+      lastVisitsVersionRef.current = visitsVersion;
+      debouncedLoadFileCounts(visits);
+    }, 300); // 300ms debounce delay
+
+    // Cleanup function
+    return () => {
+      if (fileCountLoadingTimeoutRef.current) {
+        clearTimeout(fileCountLoadingTimeoutRef.current);
+        fileCountLoadingTimeoutRef.current = null;
+      }
+    };
+  }, [visits, visitsVersion, debouncedLoadFileCounts]);
+
+  // Function to refresh file counts for all visits
+  const refreshFileCount = useCallback(async (visitId) => {
+    try {
+      const files = await apiService.getEntityFiles('visit', visitId);
+      const count = Array.isArray(files) ? files.length : 0;
+      setFileCounts(prev => ({ ...prev, [visitId]: count }));
+    } catch (error) {
+      console.error(`Error refreshing file count for visit ${visitId}:`, error);
+    }
+  }, []);
+
 
   // Helper function to get condition details
   const getConditionDetails = (conditionId) => {
@@ -167,7 +277,9 @@ const Visits = () => {
   });
 
   const handleAddVisit = () => {
+    resetSubmission(); // Reset submission state
     setEditingVisit(null);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
       reason: '',
       date: '',
@@ -218,6 +330,11 @@ const Visits = () => {
   };
 
   const handleCloseViewModal = () => {
+    // Refresh file count for the viewed visit before closing
+    if (viewingVisit) {
+      refreshFileCount(viewingVisit.id);
+    }
+    
     setShowViewModal(false);
     setViewingVisit(null);
     // Remove view parameter from URL
@@ -231,8 +348,20 @@ const Visits = () => {
 
   const handleDeleteVisit = async visitId => {
     const success = await deleteItem(visitId);
+    // Note: deleteItem already updates local state, no need to refresh all data
+    // The useMedicalData hook handles state updates automatically
     if (success) {
-      await refreshData();
+      // Only refresh file counts as they might be affected by deletion
+      setFileCounts(prev => {
+        const updated = { ...prev };
+        delete updated[visitId];
+        return updated;
+      });
+      setFileCountsLoading(prev => {
+        const updated = { ...prev };
+        delete updated[visitId];
+        return updated;
+      });
     }
   };
 
@@ -245,17 +374,28 @@ const Visits = () => {
     e.preventDefault();
 
     if (!formData.reason.trim()) {
-      setError('Reason for visit is required');
+      setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
       return;
     }
 
     if (!formData.date) {
-      setError('Visit date is required');
+      setError(ERROR_MESSAGES.INVALID_DATE);
       return;
     }
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+      return;
+    }
+
+    // Start submission immediately to prevent race conditions
+    startSubmission();
+
+    if (!canSubmit) {
+      logger.warn('visits_race_condition_prevented', {
+        message: 'Form submission prevented due to race condition',
+        component: 'Visits',
+      });
       return;
     }
 
@@ -276,16 +416,76 @@ const Visits = () => {
       patient_id: currentPatient.id,
     };
 
-    let success;
-    if (editingVisit) {
-      success = await updateItem(editingVisit.id, visitData);
-    } else {
-      success = await createItem(visitData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+      // Submit form data
+      if (editingVisit) {
+        success = await updateItem(editingVisit.id, visitData);
+        resultId = editingVisit.id;
+        // No refresh needed for updates - user stays on same page
+      } else {
+        const result = await createItem(visitData);
+        success = !!result;
+        resultId = result?.id;
+        // Set flag to refresh after new visit creation (but only after form submission, not uploads)
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
+      }
+
+      // Complete form submission
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        // Check if we have files to upload
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+        
+        if (hasPendingFiles) {
+          logger.info('visits_starting_file_upload', {
+            message: 'Starting file upload process',
+            visitId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Visits',
+          });
+
+          // Start file upload process
+          startFileUpload();
+
+          try {
+            // Upload files with progress tracking
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            
+            // File upload completed successfully
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            
+            // Refresh file count
+            refreshFileCount(resultId);
+          } catch (uploadError) {
+            logger.error('visits_file_upload_error', {
+              message: 'File upload failed',
+              visitId: resultId,
+              error: uploadError.message,
+              component: 'Visits',
+            });
+            
+            // File upload failed
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          // No files to upload, complete immediately
+          completeFileUpload(true, 0, 0);
+        }
+      }
+    } catch (error) {
+      logger.error('visits_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Visits',
+      });
+      
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -471,223 +671,17 @@ const Visits = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <Card shadow="sm" padding="lg" radius="md" withBorder>
-                        <Card.Section withBorder inheritPadding py="xs">
-                          <Group justify="space-between">
-                            <Group gap="xs">
-                              <IconCalendar
-                                size={20}
-                                color="var(--mantine-color-blue-6)"
-                              />
-                              <Text fw={600} size="lg">
-                                {visit.reason || 'General Visit'}
-                              </Text>
-                            </Group>
-                            <Group gap="xs">
-                              {visit.visit_type && (
-                                <Badge
-                                  color={getVisitTypeColor(visit.visit_type)}
-                                  variant="light"
-                                  size="sm"
-                                >
-                                  {visit.visit_type}
-                                </Badge>
-                              )}
-                              {visit.priority && (
-                                <Badge
-                                  color={getPriorityColor(visit.priority)}
-                                  variant="filled"
-                                  size="sm"
-                                >
-                                  {visit.priority}
-                                </Badge>
-                              )}
-                              <FileCountBadge
-                                count={fileCounts[visit.id] || 0}
-                                entityType="visit"
-                                variant="badge"
-                                size="sm"
-                                loading={fileCountsLoading[visit.id] || false}
-                                onClick={() => handleViewVisit(visit)}
-                              />
-                            </Group>
-                          </Group>
-                        </Card.Section>
-
-                        <Stack gap="md" mt="md">
-                          <Group justify="space-between">
-                            <Text size="sm" c="dimmed">
-                              Date:
-                            </Text>
-                            <Text size="sm" fw={500}>
-                              {formatDate(visit.date)}
-                            </Text>
-                          </Group>
-
-                          <Group justify="space-between">
-                            <Text size="sm" c="dimmed">
-                              Practitioner:
-                            </Text>
-                            <Text size="sm" fw={500}>
-                              {getPractitionerDisplay(visit.practitioner_id)}
-                            </Text>
-                          </Group>
-
-                          {(() => {
-                            const condition = getConditionDetails(visit.condition_id);
-                            return condition ? (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Related Condition:
-                                </Text>
-                                <Text
-                                  size="sm"
-                                  fw={500}
-                                  c="blue"
-                                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                                  onClick={() => navigateToEntity('condition', condition.id, navigate)}
-                                  title="View condition details"
-                                >
-                                  {condition.diagnosis}
-                                </Text>
-                              </Group>
-                            ) : null;
-                          })()}
-
-                          {visit.chief_complaint && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Chief Complaint:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {visit.chief_complaint}
-                              </Text>
-                            </Group>
-                          )}
-
-                          {visit.location && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Location:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {visit.location}
-                              </Text>
-                            </Group>
-                          )}
-
-                          {visit.duration_minutes && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Duration:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {visit.duration_minutes} minutes
-                              </Text>
-                            </Group>
-                          )}
-                        </Stack>
-
-                        {visit.diagnosis && (
-                          <Box
-                            mt="md"
-                            pt="md"
-                            style={{
-                              borderTop:
-                                '1px solid var(--mantine-color-gray-3)',
-                            }}
-                          >
-                            <Text size="sm" c="dimmed" mb="xs">
-                              📋 Diagnosis/Assessment
-                            </Text>
-                            <Text size="sm">
-                              {visit.diagnosis}
-                            </Text>
-                          </Box>
-                        )}
-
-                        {visit.treatment_plan && (
-                          <Box
-                            mt="md"
-                            pt="md"
-                            style={{
-                              borderTop:
-                                '1px solid var(--mantine-color-gray-3)',
-                            }}
-                          >
-                            <Text size="sm" c="dimmed" mb="xs">
-                              💊 Treatment Plan
-                            </Text>
-                            <Text size="sm">
-                              {visit.treatment_plan}
-                            </Text>
-                          </Box>
-                        )}
-
-                        {visit.follow_up_instructions && (
-                          <Box
-                            mt="md"
-                            pt="md"
-                            style={{
-                              borderTop:
-                                '1px solid var(--mantine-color-gray-3)',
-                            }}
-                          >
-                            <Text size="sm" c="dimmed" mb="xs">
-                              📅 Follow-up Instructions
-                            </Text>
-                            <Text size="sm">
-                              {visit.follow_up_instructions}
-                            </Text>
-                          </Box>
-                        )}
-
-                        {visit.notes && (
-                          <Box
-                            mt="md"
-                            pt="md"
-                            style={{
-                              borderTop:
-                                '1px solid var(--mantine-color-gray-3)',
-                            }}
-                          >
-                            <Text size="sm" c="dimmed" mb="xs">
-                              📝 Additional Notes
-                            </Text>
-                            <Text size="sm">
-                              {visit.notes}
-                            </Text>
-                          </Box>
-                        )}
-
-                        <Stack gap={0} mt="auto">
-                          <Divider />
-                          <Group justify="flex-end" gap="xs" pt="sm">
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onClick={() => handleViewVisit(visit)}
-                            >
-                              View
-                            </Button>
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onClick={() => handleEditVisit(visit)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="filled"
-                              color="red"
-                              size="xs"
-                              onClick={() => handleDeleteVisit(visit.id)}
-                            >
-                              Delete
-                            </Button>
-                          </Group>
-                        </Stack>
-                      </Card>
+                      <VisitCard
+                        visit={visit}
+                        onEdit={handleEditVisit}
+                        onDelete={() => handleDeleteVisit(visit.id)}
+                        onView={handleViewVisit}
+                        practitioners={practitioners}
+                        conditions={conditions}
+                        fileCount={fileCounts[visit.id] || 0}
+                        fileCountLoading={fileCountsLoading[visit.id] || false}
+                        navigate={navigate}
+                      />
                     </motion.div>
                   </Grid.Col>
                 ))}
@@ -732,331 +726,48 @@ const Visits = () => {
         </motion.div>
       </Container>
 
-      <MantineVisitForm
+      <VisitFormWrapper
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => !isBlocking && setShowModal(false)}
         title={editingVisit ? 'Edit Visit' : 'Add New Visit'}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         practitioners={practitioners}
-        conditionsOptions={conditions}
-        conditionsLoading={false}
-        editingVisit={editingVisit}
-      />
+        conditions={conditions}
+        editingItem={editingVisit}
+        onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={(success) => {
+          if (success && editingVisit) {
+            refreshFileCount(editingVisit.id);
+          }
+        }}
+      >
+        {/* Form Loading Overlay */}
+        <FormLoadingOverlay
+          visible={isBlocking}
+          message={statusMessage?.title || 'Processing...'}
+          submessage={statusMessage?.message}
+          type={statusMessage?.type || 'loading'}
+        />
+      </VisitFormWrapper>
 
       {/* Visit View Modal */}
-      <Modal
-        opened={showViewModal}
+      <VisitViewModal
+        isOpen={showViewModal}
         onClose={handleCloseViewModal}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              Visit Details
-            </Text>
-            {viewingVisit && (
-              <Group gap="xs">
-                {viewingVisit.visit_type && (
-                  <Badge
-                    color={getVisitTypeColor(viewingVisit.visit_type)}
-                    variant="light"
-                    size="sm"
-                  >
-                    {viewingVisit.visit_type}
-                  </Badge>
-                )}
-                {viewingVisit.priority && (
-                  <Badge
-                    color={getPriorityColor(viewingVisit.priority)}
-                    variant="filled"
-                    size="sm"
-                  >
-                    {viewingVisit.priority}
-                  </Badge>
-                )}
-              </Group>
-            )}
-          </Group>
-        }
-        size="lg"
-        centered
-      >
-        {viewingVisit && (
-          <Stack gap="md">
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Title order={3}>
-                      {viewingVisit.reason || 'General Visit'}
-                    </Title>
-                    <Text size="sm" c="dimmed">
-                      {formatDate(viewingVisit.date)}
-                    </Text>
-                  </Stack>
-                </Group>
-              </Stack>
-            </Card>
-
-            <Grid>
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      VISIT INFORMATION
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Reason:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.reason ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.reason || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Visit Type:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.visit_type ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.visit_type || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Priority:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.priority ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.priority || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Location:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.location ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.location || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Duration:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.duration_minutes ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.duration_minutes
-                          ? `${viewingVisit.duration_minutes} minutes`
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      CLINICAL DETAILS
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Practitioner:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.practitioner_id ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.practitioner_id
-                          ? practitioners.find(
-                              p =>
-                                p.id === parseInt(viewingVisit.practitioner_id)
-                            )?.name ||
-                            `Practitioner ID: ${viewingVisit.practitioner_id}`
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                    {(() => {
-                      const condition = getConditionDetails(viewingVisit.condition_id);
-                      return condition ? (
-                        <Group>
-                          <Text size="sm" fw={500} w={80}>
-                            Condition:
-                          </Text>
-                          <Text
-                            size="sm"
-                            c="blue"
-                            style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                            onClick={() => navigateToEntity('condition', condition.id, navigate)}
-                            title="View condition details"
-                          >
-                            {condition.diagnosis}
-                          </Text>
-                        </Group>
-                      ) : null;
-                    })()}
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Practice:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          viewingVisit.practitioner_id &&
-                          practitioners.find(
-                            p => p.id === parseInt(viewingVisit.practitioner_id)
-                          )?.specialty
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {viewingVisit.practitioner_id &&
-                        practitioners.find(
-                          p => p.id === parseInt(viewingVisit.practitioner_id)
-                        )?.specialty
-                          ? practitioners.find(
-                              p =>
-                                p.id === parseInt(viewingVisit.practitioner_id)
-                            )?.specialty
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Chief Complaint:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.chief_complaint ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.chief_complaint || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Diagnosis:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingVisit.diagnosis ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingVisit.diagnosis || 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-            </Grid>
-
-            {viewingVisit.treatment_plan && (
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    TREATMENT PLAN
-                  </Text>
-                  <Divider />
-                  <Text
-                    size="sm"
-                    c={viewingVisit.treatment_plan ? 'inherit' : 'dimmed'}
-                  >
-                    {viewingVisit.treatment_plan ||
-                      'No treatment plan available'}
-                  </Text>
-                </Stack>
-              </Card>
-            )}
-
-            {viewingVisit.follow_up_instructions && (
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    FOLLOW-UP INSTRUCTIONS
-                  </Text>
-                  <Divider />
-                  <Text
-                    size="sm"
-                    c={
-                      viewingVisit.follow_up_instructions ? 'inherit' : 'dimmed'
-                    }
-                  >
-                    {viewingVisit.follow_up_instructions ||
-                      'No follow-up instructions available'}
-                  </Text>
-                </Stack>
-              </Card>
-            )}
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  ADDITIONAL NOTES
-                </Text>
-                <Divider />
-                <Text size="sm" c={viewingVisit.notes ? 'inherit' : 'dimmed'}>
-                  {viewingVisit.notes || 'No notes available'}
-                </Text>
-              </Stack>
-            </Card>
-
-            {/* Document Management */}
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  ATTACHED DOCUMENTS
-                </Text>
-                <Divider />
-                <DocumentManager
-                  entityType="visit"
-                  entityId={viewingVisit.id}
-                  mode="view"
-                  config={{
-                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                    maxSize: 10 * 1024 * 1024, // 10MB
-                    maxFiles: 10
-                  }}
-                  onError={(error) => {
-                    console.error('Document manager error:', error);
-                  }}
-                />
-              </Stack>
-            </Card>
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                variant="filled"
-                size="xs"
-                onClick={() => {
-                  handleCloseViewModal();
-                  // Small delay to ensure view modal is closed before opening edit modal
-                  setTimeout(() => {
-                    handleEditVisit(viewingVisit);
-                  }, 100);
-                }}
-              >
-                Edit Visit
-              </Button>
-              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                Close
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+        visit={viewingVisit}
+        onEdit={handleEditVisit}
+        practitioners={practitioners}
+        conditions={conditions}
+        navigate={navigate}
+        isBlocking={isBlocking}
+        onFileUploadComplete={(success) => {
+          if (success && viewingVisit) {
+            refreshFileCount(viewingVisit.id);
+          }
+        }}
+      />
     </motion.div>
   );
 };

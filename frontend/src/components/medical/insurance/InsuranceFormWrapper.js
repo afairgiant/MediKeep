@@ -12,6 +12,7 @@ const InsuranceFormWrapper = ({
   onInputChange,
   onSubmit,
   editingItem = null,
+  children,
 }) => {
   // Get insurance form fields
   const fields = getFormFields('insurance');
@@ -288,7 +289,9 @@ const InsuranceFormWrapper = ({
       fields={getFilteredFields()}
       dynamicOptions={{}}
       fieldErrors={fieldErrors}
-    />
+    >
+      {children}
+    </BaseMedicalForm>
   );
 };
 

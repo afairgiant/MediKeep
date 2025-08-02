@@ -18,7 +18,9 @@ import {
   IconFile,
   IconX,
   IconCheck,
-  IconAlertCircle
+  IconAlertCircle,
+  IconFolder,
+  IconCloud
 } from '@tabler/icons-react';
 import { Dropzone } from '@mantine/dropzone';
 
@@ -30,7 +32,10 @@ const FileUploadZone = ({
   maxFiles = 5,
   multiple = true,
   disabled = false,
-  className = ''
+  autoUpload = false, // Automatically upload files when added
+  className = '',
+  selectedStorageBackend = 'local',
+  paperlessSettings = null
 }) => {
   const [uploadQueue, setUploadQueue] = useState([]);
   const [dragActive, setDragActive] = useState(false);
@@ -95,7 +100,28 @@ const FileUploadZone = ({
     }
 
     setUploadQueue(prev => [...prev, ...newQueueItems]);
-  }, [disabled, uploadQueue.length, maxFiles, validateFile, onValidationError]);
+
+    // Auto-upload if enabled and all new files are valid
+    if (autoUpload && newQueueItems.every(item => item.status === 'ready')) {
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        const filesToUpload = newQueueItems
+          .filter(item => item.status === 'ready')
+          .map(item => ({
+            file: item.file,
+            description: item.description
+          }));
+        
+        if (filesToUpload.length > 0 && onUpload) {
+          onUpload(filesToUpload);
+          // Remove auto-uploaded items from queue
+          setUploadQueue(prev => prev.filter(item => 
+            !newQueueItems.some(newItem => newItem.id === item.id)
+          ));
+        }
+      }, 100);
+    }
+  }, [disabled, uploadQueue.length, maxFiles, validateFile, onValidationError, autoUpload, onUpload]);
 
   // Remove file from queue
   const removeFromQueue = useCallback((itemId) => {
@@ -167,6 +193,26 @@ const FileUploadZone = ({
   const validFilesCount = uploadQueue.filter(item => item.status === 'ready').length;
   const hasErrors = uploadQueue.some(item => item.status === 'error');
 
+  // Get storage backend info for display
+  const getStorageBackendInfo = () => {
+    if (selectedStorageBackend === 'paperless') {
+      return {
+        icon: IconCloud,
+        color: 'green',
+        label: 'Paperless-ngx',
+        description: 'Files will be uploaded to your paperless-ngx instance'
+      };
+    }
+    return {
+      icon: IconFolder,
+      color: 'blue',
+      label: 'Local Storage',
+      description: 'Files will be stored locally on this server'
+    };
+  };
+
+  const storageInfo = getStorageBackendInfo();
+
   return (
     <Stack gap="md" className={className}>
       {/* Dropzone */}
@@ -233,6 +279,21 @@ const FileUploadZone = ({
             <Text size="sm" c="dimmed" mt={7}>
               Supported formats: {acceptedTypes.join(', ')}
             </Text>
+            
+            {/* Storage Backend Indicator */}
+            <Group gap="xs" mt="md" justify="center">
+              <Badge
+                color={storageInfo.color}
+                leftSection={<storageInfo.icon size={12} />}
+                size="sm"
+                variant="light"
+              >
+                {storageInfo.label}
+              </Badge>
+            </Group>
+            <Text size="xs" c="dimmed" ta="center" mt={4}>
+              {storageInfo.description}
+            </Text>
           </div>
         </Group>
       </Dropzone>
@@ -264,9 +325,19 @@ const FileUploadZone = ({
         <Paper withBorder p="md">
           <Stack gap="md">
             <Group justify="space-between" align="center">
-              <Text fw={500}>
-                Files to Upload ({validFilesCount} valid, {uploadQueue.length - validFilesCount} with errors)
-              </Text>
+              <Group gap="md">
+                <Text fw={500}>
+                  Files to Upload ({validFilesCount} valid, {uploadQueue.length - validFilesCount} with errors)
+                </Text>
+                <Badge
+                  color={storageInfo.color}
+                  leftSection={<storageInfo.icon size={10} />}
+                  size="xs"
+                  variant="light"
+                >
+                  → {storageInfo.label}
+                </Badge>
+              </Group>
               <Group gap="xs">
                 <Button
                   size="xs"
@@ -279,7 +350,7 @@ const FileUploadZone = ({
                   size="xs"
                   onClick={handleUploadAll}
                   disabled={validFilesCount === 0}
-                  leftSection={<IconUpload size={14} />}
+                  leftSection={<storageInfo.icon size={14} />}
                 >
                   Upload {validFilesCount} File{validFilesCount !== 1 ? 's' : ''}
                 </Button>

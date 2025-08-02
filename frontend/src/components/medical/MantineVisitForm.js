@@ -13,6 +13,7 @@ const MantineVisitForm = ({
   conditionsOptions = [],
   conditionsLoading = false,
   editingVisit = null,
+  children,
 }) => {
   // Convert practitioners to dynamic options format
   const practitionerOptions = practitioners.map(practitioner => ({
@@ -43,7 +44,9 @@ const MantineVisitForm = ({
       fields={visitFormFields}
       dynamicOptions={dynamicOptions}
       modalSize="xl"
-    />
+    >
+      {children}
+    </BaseMedicalForm>
   );
 };
 

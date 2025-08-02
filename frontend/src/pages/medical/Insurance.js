@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -18,6 +18,11 @@ import {
 import { printInsuranceRecord } from '../../utils/printTemplateGenerator';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
+import { 
+  ERROR_MESSAGES, 
+  SUCCESS_MESSAGES,
+  getUserFriendlyError
+} from '../../constants/errorMessages';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -26,6 +31,9 @@ import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
 import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFormWrapper';
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
+import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Badge,
   Button,
@@ -41,6 +49,7 @@ import {
   Divider,
   Modal,
   Title,
+  Paper,
 } from '@mantine/core';
 
 const Insurance = () => {
@@ -75,6 +84,50 @@ const Insurance = () => {
   // Get configuration for filtering and sorting
   const config = getMedicalPageConfig('insurances');
 
+  // File count management for cards
+  const [fileCounts, setFileCounts] = useState({});
+  const [fileCountsLoading, setFileCountsLoading] = useState({});
+
+  // Track if we need to refresh after form submission (but not after uploads)
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  // Form submission with uploads hook
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'insurance',
+    onSuccess: () => {
+      // Reset form and close modal on complete success
+      setIsFormOpen(false);
+      setEditingInsurance(null);
+      setFormData(initializeFormData());
+      
+      // Only refresh if we created a new insurance during form submission
+      // Don't refresh after uploads complete to prevent resource exhaustion
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('insurance_form_error', {
+        message: 'Form submission error in insurance',
+        error,
+        component: 'Insurance',
+      });
+    },
+    component: 'Insurance',
+  });
+
   // Data management (filtering, sorting, pagination)
   const dataManagement = useDataManagement(insurances || [], config) || {};
   
@@ -104,6 +157,50 @@ const Insurance = () => {
   // View modal state management
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingInsurance, setViewingInsurance] = useState(null);
+
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+
+  // Function to refresh file counts for all insurances
+  const refreshFileCount = useCallback(async (insuranceId) => {
+    try {
+      const files = await apiService.getEntityFiles('insurance', insuranceId);
+      const count = Array.isArray(files) ? files.length : 0;
+      setFileCounts(prev => ({ ...prev, [insuranceId]: count }));
+    } catch (error) {
+      console.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
+    }
+  }, []);
+
+  // Load file counts for insurances
+  useEffect(() => {
+    const loadFileCountsForInsurances = async () => {
+      if (!insurances || insurances.length === 0) return;
+      
+      const countPromises = insurances.map(async (insurance) => {
+        setFileCountsLoading(prev => {
+          if (prev[insurance.id] !== undefined) return prev; // Already loading
+          return { ...prev, [insurance.id]: true };
+        });
+        
+        try {
+          const files = await apiService.getEntityFiles('insurance', insurance.id);
+          const count = Array.isArray(files) ? files.length : 0;
+          setFileCounts(prev => ({ ...prev, [insurance.id]: count }));
+        } catch (error) {
+          console.error(`Error loading file count for insurance ${insurance.id}:`, error);
+          setFileCounts(prev => ({ ...prev, [insurance.id]: 0 }));
+        } finally {
+          setFileCountsLoading(prev => ({ ...prev, [insurance.id]: false }));
+        }
+      });
+      
+      await Promise.all(countPromises);
+    };
+
+    loadFileCountsForInsurances();
+  }, [insurances]); // Remove fileCounts from dependencies
 
   // Table formatters - consistent with medication table approach
   const formatters = {
@@ -197,6 +294,18 @@ const Insurance = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Start submission immediately to prevent race conditions
+    startSubmission();
+
+    if (!canSubmit) {
+      logger.warn('insurance_race_condition_prevented', {
+        message: 'Form submission prevented due to race condition',
+        component: 'Insurance',
+      });
+      return;
+    }
+
     try {
       // Use utility to restructure form data
       const submitData = restructureFormData(formData, insuranceFieldConfig);
@@ -206,55 +315,88 @@ const Insurance = () => {
         submitData.patient_id = currentPatient?.id;
       }
 
+      let success;
+      let resultId;
+
+      // Submit form data
       if (editingInsurance) {
         logger.info('Updating insurance', {
           insuranceId: editingInsurance.id,
           insurance_type: formData.insurance_type,
           company: formData.company_name
         });
-        await updateItem(editingInsurance.id, submitData);
-        notifications.show({
-          title: 'Insurance Updated',
-          message: `${formData.insurance_type} insurance updated successfully`,
-          color: 'green',
-        });
+        success = await updateItem(editingInsurance.id, submitData);
+        resultId = editingInsurance.id;
+        // No refresh needed for updates - user stays on same page
       } else {
         logger.info('Creating new insurance', {
           insurance_type: formData.insurance_type,
           company: formData.company_name
         });
-        await createItem(submitData);
-        notifications.show({
-          title: 'Insurance Added',
-          message: `${formData.insurance_type} insurance added successfully`,
-          color: 'green',
-        });
+        const result = await createItem(submitData);
+        success = !!result;
+        resultId = result?.id;
+        // Set flag to refresh after new insurance creation (but only after form submission, not uploads)
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
       }
 
-      // Close form and reset
-      setIsFormOpen(false);
-      setEditingInsurance(null);
-      setFormData(initializeFormData());
-      
-      // Refresh the data to show the new insurance
-      await refreshData();
+      // Complete form submission
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        // Check if we have files to upload
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+        
+        if (hasPendingFiles) {
+          logger.info('insurance_starting_file_upload', {
+            message: 'Starting file upload process',
+            insuranceId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Insurance',
+          });
+
+          // Start file upload process
+          startFileUpload();
+
+          try {
+            // Upload files with progress tracking
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            
+            // File upload completed successfully
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            
+            // Refresh file count
+            refreshFileCount(resultId);
+          } catch (uploadError) {
+            logger.error('insurance_file_upload_error', {
+              message: 'File upload failed',
+              insuranceId: resultId,
+              error: uploadError.message,
+              component: 'Insurance',
+            });
+            
+            // File upload failed
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          // No files to upload, complete immediately
+          completeFileUpload(true, 0, 0);
+        }
+      }
     } catch (error) {
-      logger.error('Error saving insurance:', error);
+      logger.error('insurance_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Insurance',
+      });
       
       // Check if it's a validation error
       if (error.validationErrors) {
-        notifications.show({
-          title: 'Validation Error',
-          message: error.validationErrors.join('\n'),
-          color: 'red',
-          autoClose: 8000, // Give more time to read validation errors
-        });
+        handleSubmissionFailure(error.validationErrors.join('\n'), 'form');
       } else {
-        notifications.show({
-          title: 'Error',
-          message: error.message || 'Failed to save insurance information',
-          color: 'red',
-        });
+        handleSubmissionFailure(error, 'form');
       }
     }
   };
@@ -271,7 +413,7 @@ const Insurance = () => {
       logger.error('Error initiating insurance edit:', error);
       notifications.show({
         title: 'Error',
-        message: 'Failed to open edit form',
+        message: ERROR_MESSAGES.UNKNOWN_ERROR,
         color: 'red',
       });
     }
@@ -287,7 +429,7 @@ const Insurance = () => {
     if (!insurance) {
       notifications.show({
         title: 'Error',
-        message: 'Insurance not found',
+        message: ERROR_MESSAGES.ENTITY_NOT_FOUND,
         color: 'red',
       });
       return;
@@ -295,8 +437,20 @@ const Insurance = () => {
 
     if (window.confirm(`Are you sure you want to delete this ${insurance.insurance_type} insurance?`)) {
       const success = await deleteItem(insuranceId);
+      // Note: deleteItem already updates local state, no need to refresh all data
+      // The useMedicalData hook handles state updates automatically
       if (success) {
-        await refreshData();
+        // Only refresh file counts as they might be affected by deletion
+        setFileCounts(prev => {
+          const updated = { ...prev };
+          delete updated[insuranceId];
+          return updated;
+        });
+        setFileCountsLoading(prev => {
+          const updated = { ...prev };
+          delete updated[insuranceId];
+          return updated;
+        });
       }
     }
   };
@@ -329,7 +483,7 @@ const Insurance = () => {
       logger.error('Error setting primary insurance:', error);
       notifications.show({
         title: 'Error',
-        message: 'Failed to set as primary insurance',
+        message: ERROR_MESSAGES.SERVER_ERROR,
         color: 'red',
       });
     }
@@ -337,15 +491,24 @@ const Insurance = () => {
 
   // Handle add new
   const handleAddNew = () => {
+    resetSubmission(); // Reset submission state
     setEditingInsurance(null);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData(initializeFormData());
     setIsFormOpen(true);
   };
 
   // Handle close form
   const handleCloseForm = () => {
+    // Prevent closing during upload
+    if (isBlocking) {
+      return;
+    }
+    
+    resetSubmission(); // Reset submission state
     setIsFormOpen(false);
     setEditingInsurance(null);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData(initializeFormData());
   };
 
@@ -363,7 +526,7 @@ const Insurance = () => {
       logger.error('Error opening insurance view modal:', error);
       notifications.show({
         title: 'Error',
-        message: 'Failed to open insurance details',
+        message: ERROR_MESSAGES.ENTITY_NOT_FOUND,
         color: 'red',
       });
     }
@@ -371,6 +534,11 @@ const Insurance = () => {
 
   // Handle close view modal
   const handleCloseViewModal = () => {
+    // Refresh file count for the viewed insurance before closing
+    if (viewingInsurance) {
+      refreshFileCount(viewingInsurance.id);
+    }
+    
     setShowViewModal(false);
     setViewingInsurance(null);
     
@@ -411,7 +579,7 @@ const Insurance = () => {
     return (
       <Container size="xl">
         <Alert color="red" title="Error loading insurance records">
-          {error.message || 'Failed to load insurance data'}
+          {getUserFriendlyError(error, 'load')}
         </Alert>
       </Container>
     );
@@ -485,6 +653,8 @@ const Insurance = () => {
                     onDelete={handleDelete}
                     onSetPrimary={handleSetPrimary}
                     onView={handleViewInsurance}
+                    fileCount={fileCounts[insurance.id] || 0}
+                    fileCountLoading={fileCountsLoading[insurance.id] || false}
                   />
                 </Grid.Col>
               ))}
@@ -509,13 +679,55 @@ const Insurance = () => {
       {/* Form Modal */}
       <InsuranceFormWrapper
         isOpen={isFormOpen}
-        onClose={handleCloseForm}
+        onClose={() => {
+          if (!isBlocking) {
+            resetSubmission();
+            setIsFormOpen(false);
+            setEditingInsurance(null);
+            setDocumentManagerMethods(null);
+            setFormData(initializeFormData());
+          }
+        }}
         title={editingInsurance ? 'Edit Insurance' : 'Add New Insurance'}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingItem={editingInsurance}
-      />
+      >
+        {/* Form Loading Overlay */}
+        <FormLoadingOverlay
+          visible={isBlocking}
+          message={statusMessage?.title || 'Processing...'}
+          submessage={statusMessage?.message}
+          type={statusMessage?.type || 'loading'}
+        />
+        {/* File Management Section for Both Create and Edit Mode */}
+        <Paper withBorder p="md" mt="md">
+          <Title order={4} mb="md">
+            {editingInsurance ? 'Manage Files' : 'Add Files (Optional)'}
+          </Title>
+          <DocumentManagerWithProgress
+            entityType="insurance"
+            entityId={editingInsurance?.id}
+            mode={editingInsurance ? 'edit' : 'create'}
+            config={{
+              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+              maxSize: 10 * 1024 * 1024, // 10MB
+              maxFiles: 10
+            }}
+            onUploadPendingFiles={setDocumentManagerMethods}
+            onError={(error) => {
+              logger.error('document_manager_error', {
+                message: `Document manager error in insurance ${editingInsurance ? 'edit' : 'create'}`,
+                insuranceId: editingInsurance?.id,
+                error: error,
+                component: 'Insurance',
+              });
+            }}
+            showProgressModal={true}
+          />
+        </Paper>
+      </InsuranceFormWrapper>
 
       {/* View Modal */}
       <InsuranceViewModal
@@ -536,13 +748,18 @@ const Insurance = () => {
             (error) => {
               notifications.show({
                 title: 'Print Error',
-                message: 'Failed to prepare insurance details for printing',
+                message: ERROR_MESSAGES.FILE_PROCESSING_FAILED,
                 color: 'red',
               });
             }
           );
         }}
         onSetPrimary={handleSetPrimary}
+        onFileUploadComplete={(success) => {
+          if (success && viewingInsurance) {
+            refreshFileCount(viewingInsurance.id);
+          }
+        }}
       />
     </Container>
   );

@@ -106,7 +106,12 @@ class ApiService {
     return response.text();
   } // Core request method with logging and fallback
   async request(method, url, data = null, options = {}) {
-    const { signal, headers: customHeaders = {}, responseType, params } = options;
+    const {
+      signal,
+      headers: customHeaders = {},
+      responseType,
+      params,
+    } = options;
 
     // Handle query parameters
     if (params && Object.keys(params).length > 0) {
@@ -150,7 +155,7 @@ class ApiService {
           {
             url: fullUrl,
             hasAuth: !!token,
-            method: method
+            method: method,
           }
         );
 
@@ -249,10 +254,16 @@ class ApiService {
 
   async getRecentActivity(patientId = null, signal) {
     // Always send patient_id parameter if we have one, even if it's 0
-    const params = (patientId !== null && patientId !== undefined) ? { patient_id: patientId } : {};
-    
+    const params =
+      patientId !== null && patientId !== undefined
+        ? { patient_id: patientId }
+        : {};
+
     try {
-      const result = await this.get('/patients/recent-activity/', { params, signal });
+      const result = await this.get('/patients/recent-activity/', {
+        params,
+        signal,
+      });
       return result;
     } catch (error) {
       throw error;
@@ -262,9 +273,9 @@ class ApiService {
   getDashboardStats(patientId, signal) {
     // Support both Phase 1 patient switching and legacy single patient mode
     if (patientId) {
-      return this.get('/patients/me/dashboard-stats', { 
+      return this.get('/patients/me/dashboard-stats', {
         params: { patient_id: patientId },
-        signal 
+        signal,
       });
     } else {
       // Fallback for legacy mode
@@ -297,7 +308,7 @@ class ApiService {
       apiPath,
       url,
       baseURL: this.baseURL,
-      fallbackURL: this.fallbackURL
+      fallbackURL: this.fallbackURL,
     });
     return this.put(url, entityData, { signal });
   }
@@ -316,7 +327,9 @@ class ApiService {
       }
     });
     const queryString = params.toString();
-    return this.get(`/${apiPath}/${queryString ? `?${queryString}` : ''}`, { signal });
+    return this.get(`/${apiPath}/${queryString ? `?${queryString}` : ''}`, {
+      signal,
+    });
   }
 
   getPatientEntities(entityType, patientId, signal) {
@@ -326,7 +339,7 @@ class ApiService {
       entityType,
       patientId,
       url,
-      apiPath
+      apiPath,
     });
     return this.get(url, { signal });
   }
@@ -347,7 +360,12 @@ class ApiService {
   }
 
   updateLabResult(labResultId, labResultData, signal) {
-    return this.updateEntity(ENTITY_TYPES.LAB_RESULT, labResultId, labResultData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.LAB_RESULT,
+      labResultId,
+      labResultData,
+      signal
+    );
   }
 
   deleteLabResult(labResultId, signal) {
@@ -357,12 +375,12 @@ class ApiService {
   // ==========================================
   // GENERIC FILE MANAGEMENT METHODS
   // ==========================================
-  
+
   /**
    * Generic file management methods that work with any entity type
    * Supports: lab-result, insurance, visit, procedure, etc.
    */
-  
+
   // Map entity types to their file endpoint paths
   getFileEndpoint(entityType, entityId) {
     // Use the new generic backend API endpoints
@@ -373,59 +391,215 @@ class ApiService {
   getEntityFiles(entityType, entityId, signal) {
     try {
       const endpoint = this.getFileEndpoint(entityType, entityId);
-      
+
       logger.debug('api_get_entity_files', 'Fetching entity files', {
         entityType,
         entityId,
         endpoint,
-        component: 'ApiService'
+        component: 'ApiService',
       });
-      
-      return this.get(endpoint, { signal });
+
+      return this.get(endpoint, { 
+        signal,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
     } catch (error) {
       logger.error('api_get_entity_files_error', 'Failed to get entity files', {
         entityType,
         entityId,
         error: error.message,
-        component: 'ApiService'
+        component: 'ApiService',
       });
       throw error;
     }
   }
 
   // Upload file to an entity
-  uploadEntityFile(entityType, entityId, file, description = '', signal) {
+  uploadEntityFile(
+    entityType,
+    entityId,
+    file,
+    description = '',
+    category = '',
+    storageBackend = undefined,
+    signal
+  ) {
     try {
       const endpoint = this.getFileEndpoint(entityType, entityId);
-      
+
       const formData = new FormData();
       formData.append('file', file);
       if (description && description.trim()) {
         formData.append('description', description.trim());
       }
-      
+      if (category && category.trim()) {
+        formData.append('category', category.trim());
+      }
+      // Only send storage_backend if explicitly specified, otherwise let backend use user's default
+      if (storageBackend) {
+        formData.append('storage_backend', storageBackend);
+      }
+
       logger.info('api_upload_entity_file', 'Uploading file to entity', {
         entityType,
         entityId,
         fileName: file.name,
         fileSize: file.size,
         hasDescription: !!description,
+        hasCategory: !!category,
+        storageBackend,
+        actualStorageBackend: storageBackend || 'local',
         endpoint,
-        component: 'ApiService'
+        component: 'ApiService',
       });
-      
+
       return this.post(endpoint, formData, { signal });
     } catch (error) {
-      logger.error('api_upload_entity_file_error', 'Failed to upload entity file', {
+      logger.error(
+        'api_upload_entity_file_error',
+        'Failed to upload entity file',
+        {
+          entityType,
+          entityId,
+          fileName: file?.name,
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+      throw error;
+    }
+  }
+
+  // Upload file to an entity with Paperless task status monitoring
+  async uploadEntityFileWithTaskMonitoring(
+    entityType,
+    entityId,
+    file,
+    description = '',
+    category = '',
+    storageBackend = undefined,
+    signal,
+    onProgress = null
+  ) {
+    try {
+      logger.info('api_upload_entity_file_with_monitoring', 'Starting monitored upload', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        fileSize: file.size,
+        storageBackend,
+        component: 'ApiService',
+      });
+
+      // Perform the initial upload
+      const uploadResult = await this.uploadEntityFile(
+        entityType,
+        entityId,
+        file,
+        description,
+        category,
+        storageBackend,
+        signal
+      );
+
+      // If not using Paperless or no task UUID returned, return immediately
+      if (storageBackend !== 'paperless' || !uploadResult?.paperless_task_uuid) {
+        logger.info('api_upload_no_monitoring_needed', 'Upload completed without task monitoring', {
+          entityType,
+          entityId,
+          fileName: file.name,
+          storageBackend,
+          hasTaskUuid: !!uploadResult?.paperless_task_uuid,
+          component: 'ApiService',
+        });
+        return {
+          ...uploadResult,
+          taskMonitored: false,
+          documentId: null,
+          isDuplicate: false
+        };
+      }
+
+      // Monitor Paperless task status
+      const taskUuid = uploadResult.paperless_task_uuid;
+      
+      if (onProgress) {
+        onProgress({ status: 'processing', message: 'Processing document in Paperless...' });
+      }
+
+      logger.info('api_upload_task_monitoring', 'Starting Paperless task monitoring', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        taskUuid,
+        component: 'ApiService',
+      });
+
+      // Import the pollPaperlessTaskStatus function
+      const { pollPaperlessTaskStatus } = await import('./paperlessApi');
+      
+      // Poll task status
+      const taskResult = await pollPaperlessTaskStatus(taskUuid, 30, 1000);
+
+      logger.info('api_upload_task_complete', 'Paperless task monitoring completed', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        taskUuid,
+        taskStatus: taskResult.status,
+        hasError: !!taskResult.error,
+        hasDocumentId: !!(taskResult.result?.document_id || taskResult.document_id),
+        component: 'ApiService',
+      });
+
+      // Import utilities for task result processing
+      const { 
+        isDuplicateDocumentError,
+        isPaperlessTaskSuccessful,
+        extractDocumentIdFromTaskResult
+      } = await import('../utils/errorMessageUtils');
+
+      const isSuccess = isPaperlessTaskSuccessful(taskResult);
+      const isDuplicate = isDuplicateDocumentError(taskResult);
+      const documentId = extractDocumentIdFromTaskResult(taskResult);
+
+      if (onProgress) {
+        const status = isSuccess ? 'completed' : 'failed';
+        const message = isSuccess ? 'Document processed successfully' :
+                       isDuplicate ? 'Document already exists in Paperless' :
+                       'Document processing failed';
+        onProgress({ status, message, isDuplicate });
+      }
+
+      return {
+        ...uploadResult,
+        taskMonitored: true,
+        taskResult,
+        documentId,
+        isDuplicate,
+        success: isSuccess
+      };
+
+    } catch (error) {
+      logger.error('api_upload_entity_file_monitoring_error', 'Failed to upload and monitor entity file', {
         entityType,
         entityId,
         fileName: file?.name,
         error: error.message,
-        component: 'ApiService'
+        component: 'ApiService',
       });
-      throw error;
+      
+      // Re-throw with additional context
+      const enhancedError = new Error(`Upload monitoring failed: ${error.message}`);
+      enhancedError.originalError = error;
+      throw enhancedError;
     }
   }
+
 
   // Download file (generic - file ID is enough)
   async downloadEntityFile(fileId, fileName, signal) {
@@ -433,14 +607,14 @@ class ApiService {
       logger.info('api_download_entity_file', 'Downloading entity file', {
         fileId,
         fileName,
-        component: 'ApiService'
+        component: 'ApiService',
       });
-      
+
       const blob = await this.get(`/entity-files/files/${fileId}/download`, {
         responseType: 'blob',
-        signal
+        signal,
       });
-      
+
       // Handle blob download in browser
       if (blob instanceof Blob) {
         const url = window.URL.createObjectURL(blob);
@@ -452,22 +626,30 @@ class ApiService {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
-        logger.info('api_download_entity_file_success', 'File download completed', {
-          fileId,
-          fileName,
-          component: 'ApiService'
-        });
+
+        logger.info(
+          'api_download_entity_file_success',
+          'File download completed',
+          {
+            fileId,
+            fileName,
+            component: 'ApiService',
+          }
+        );
       } else {
         throw new Error('Invalid blob response from server');
       }
     } catch (error) {
-      logger.error('api_download_entity_file_error', 'Failed to download entity file', {
-        fileId,
-        fileName,
-        error: error.message,
-        component: 'ApiService'
-      });
+      logger.error(
+        'api_download_entity_file_error',
+        'Failed to download entity file',
+        {
+          fileId,
+          fileName,
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
       throw error;
     }
   }
@@ -477,16 +659,20 @@ class ApiService {
     try {
       logger.info('api_delete_entity_file', 'Deleting entity file', {
         fileId,
-        component: 'ApiService'
+        component: 'ApiService',
       });
-      
+
       return this.delete(`/entity-files/files/${fileId}`, { signal });
     } catch (error) {
-      logger.error('api_delete_entity_file_error', 'Failed to delete entity file', {
-        fileId,
-        error: error.message,
-        component: 'ApiService'
-      });
+      logger.error(
+        'api_delete_entity_file_error',
+        'Failed to delete entity file',
+        {
+          fileId,
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
       throw error;
     }
   }
@@ -497,20 +683,56 @@ class ApiService {
       logger.debug('api_batch_file_counts', 'Getting batch file counts', {
         entityType,
         entityCount: entityIds?.length,
-        component: 'ApiService'
+        component: 'ApiService',
       });
-      
-      return this.post('/entity-files/files/batch-counts', {
-        entity_type: entityType,
-        entity_ids: entityIds
-      }, { signal });
+
+      return this.post(
+        '/entity-files/files/batch-counts',
+        {
+          entity_type: entityType,
+          entity_ids: entityIds,
+        },
+        { signal }
+      );
     } catch (error) {
-      logger.error('api_batch_file_counts_error', 'Failed to get batch file counts', {
-        entityType,
-        entityCount: entityIds?.length,
-        error: error.message,
-        component: 'ApiService'
+      logger.error(
+        'api_batch_file_counts_error',
+        'Failed to get batch file counts',
+        {
+          entityType,
+          entityCount: entityIds?.length,
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+      throw error;
+    }
+  }
+
+  // Check Paperless document sync status
+  checkPaperlessSyncStatus(signal) {
+    try {
+      logger.debug('api_paperless_sync_check', 'Checking Paperless sync status', {
+        component: 'ApiService',
       });
+
+      return this.post('/entity-files/sync/paperless', {}, { 
+        signal,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+    } catch (error) {
+      logger.error(
+        'api_paperless_sync_check_error',
+        'Failed to check Paperless sync status',
+        {
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
       throw error;
     }
   }
@@ -518,25 +740,40 @@ class ApiService {
   // ==========================================
   // BACKWARD COMPATIBILITY WRAPPERS
   // ==========================================
-  
+
   /**
    * Maintain backward compatibility with existing LabResult file methods
    * These now use the generic methods internally
    */
-  
+
   // Backward compatibility for lab result files
   getLabResultFiles(labResultId, signal) {
     return this.getEntityFiles('lab-result', labResultId, signal);
   }
-  
-  uploadLabResultFile(labResultId, file, description = '', signal) {
-    return this.uploadEntityFile('lab-result', labResultId, file, description, signal);
+
+  uploadLabResultFile(
+    labResultId,
+    file,
+    description = '',
+    category = '',
+    storageBackend = undefined,
+    signal
+  ) {
+    return this.uploadEntityFile(
+      'lab-result',
+      labResultId,
+      file,
+      description,
+      category,
+      storageBackend,
+      signal
+    );
   }
-  
+
   downloadLabResultFile(fileId, fileName, signal) {
     return this.downloadEntityFile(fileId, fileName, signal);
   }
-  
+
   deleteLabResultFile(fileId, signal) {
     return this.deleteEntityFile(fileId, signal);
   }
@@ -546,13 +783,22 @@ class ApiService {
     return this.get(`/lab-results/${labResultId}/conditions`, { signal });
   }
   createLabResultCondition(labResultId, conditionData, signal) {
-    return this.post(`/lab-results/${labResultId}/conditions`, conditionData, { signal });
+    return this.post(`/lab-results/${labResultId}/conditions`, conditionData, {
+      signal,
+    });
   }
   updateLabResultCondition(labResultId, relationshipId, conditionData, signal) {
-    return this.put(`/lab-results/${labResultId}/conditions/${relationshipId}`, conditionData, { signal });
+    return this.put(
+      `/lab-results/${labResultId}/conditions/${relationshipId}`,
+      conditionData,
+      { signal }
+    );
   }
   deleteLabResultCondition(labResultId, relationshipId, signal) {
-    return this.delete(`/lab-results/${labResultId}/conditions/${relationshipId}`, { signal });
+    return this.delete(
+      `/lab-results/${labResultId}/conditions/${relationshipId}`,
+      { signal }
+    );
   }
 
   // Medication methods
@@ -563,7 +809,11 @@ class ApiService {
     return this.getPatientEntities(ENTITY_TYPES.MEDICATION, patientId, signal);
   }
   getMedicationsWithFilters(filters = {}, signal) {
-    return this.getEntitiesWithFilters(ENTITY_TYPES.MEDICATION, filters, signal);
+    return this.getEntitiesWithFilters(
+      ENTITY_TYPES.MEDICATION,
+      filters,
+      signal
+    );
   }
 
   createMedication(medicationData, signal) {
@@ -584,7 +834,12 @@ class ApiService {
     return this.post(`/medications/`, cleanPayload, { signal });
   }
   updateMedication(medicationId, medicationData, signal) {
-    return this.updateEntity(ENTITY_TYPES.MEDICATION, medicationId, medicationData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.MEDICATION,
+      medicationId,
+      medicationData,
+      signal
+    );
   }
 
   deleteMedication(medicationId, signal) {
@@ -632,9 +887,14 @@ class ApiService {
     logger.debug('api_update_insurance', 'Updating insurance via API', {
       insuranceId,
       insuranceData,
-      hasData: !!insuranceData
+      hasData: !!insuranceData,
     });
-    return this.updateEntity(ENTITY_TYPES.INSURANCE, insuranceId, insuranceData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.INSURANCE,
+      insuranceId,
+      insuranceData,
+      signal
+    );
   }
 
   deleteInsurance(insuranceId, signal) {
@@ -642,7 +902,12 @@ class ApiService {
   }
 
   setPrimaryInsurance(insuranceId, signal) {
-    return this.request('PATCH', `/insurances/${insuranceId}/set-primary`, null, { signal });
+    return this.request(
+      'PATCH',
+      `/insurances/${insuranceId}/set-primary`,
+      null,
+      { signal }
+    );
   }
 
   // Immunization methods
@@ -650,17 +915,34 @@ class ApiService {
     return this.getEntities(ENTITY_TYPES.IMMUNIZATION, signal);
   }
   getPatientImmunizations(patientId, signal) {
-    return this.getPatientEntities(ENTITY_TYPES.IMMUNIZATION, patientId, signal);
+    return this.getPatientEntities(
+      ENTITY_TYPES.IMMUNIZATION,
+      patientId,
+      signal
+    );
   }
   getImmunizationsWithFilters(filters = {}, signal) {
-    return this.getEntitiesWithFilters(ENTITY_TYPES.IMMUNIZATION, filters, signal);
+    return this.getEntitiesWithFilters(
+      ENTITY_TYPES.IMMUNIZATION,
+      filters,
+      signal
+    );
   }
 
   createImmunization(immunizationData, signal) {
-    return this.createEntity(ENTITY_TYPES.IMMUNIZATION, immunizationData, signal);
+    return this.createEntity(
+      ENTITY_TYPES.IMMUNIZATION,
+      immunizationData,
+      signal
+    );
   }
   updateImmunization(immunizationId, immunizationData, signal) {
-    return this.updateEntity(ENTITY_TYPES.IMMUNIZATION, immunizationId, immunizationData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.IMMUNIZATION,
+      immunizationId,
+      immunizationData,
+      signal
+    );
   }
 
   deleteImmunization(immunizationId, signal) {
@@ -676,15 +958,28 @@ class ApiService {
     return this.getEntity(ENTITY_TYPES.PRACTITIONER, practitionerId, signal);
   }
   getPractitionersWithFilters(filters = {}, signal) {
-    return this.getEntitiesWithFilters(ENTITY_TYPES.PRACTITIONER, filters, signal);
+    return this.getEntitiesWithFilters(
+      ENTITY_TYPES.PRACTITIONER,
+      filters,
+      signal
+    );
   }
 
   createPractitioner(practitionerData, signal) {
-    return this.createEntity(ENTITY_TYPES.PRACTITIONER, practitionerData, signal);
+    return this.createEntity(
+      ENTITY_TYPES.PRACTITIONER,
+      practitionerData,
+      signal
+    );
   }
 
   updatePractitioner(practitionerId, practitionerData, signal) {
-    return this.updateEntity(ENTITY_TYPES.PRACTITIONER, practitionerId, practitionerData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.PRACTITIONER,
+      practitionerId,
+      practitionerData,
+      signal
+    );
   }
 
   deletePractitioner(practitionerId, signal) {
@@ -705,7 +1000,12 @@ class ApiService {
   }
 
   updatePharmacy(pharmacyId, pharmacyData, signal) {
-    return this.updateEntity(ENTITY_TYPES.PHARMACY, pharmacyId, pharmacyData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.PHARMACY,
+      pharmacyId,
+      pharmacyData,
+      signal
+    );
   }
 
   deletePharmacy(pharmacyId, signal) {
@@ -728,7 +1028,12 @@ class ApiService {
   }
 
   updateAllergy(allergyId, allergyData, signal) {
-    return this.updateEntity(ENTITY_TYPES.ALLERGY, allergyId, allergyData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.ALLERGY,
+      allergyId,
+      allergyData,
+      signal
+    );
   }
 
   deleteAllergy(allergyId, signal) {
@@ -754,7 +1059,12 @@ class ApiService {
   }
 
   updateTreatment(treatmentId, treatmentData, signal) {
-    return this.updateEntity(ENTITY_TYPES.TREATMENT, treatmentId, treatmentData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.TREATMENT,
+      treatmentId,
+      treatmentData,
+      signal
+    );
   }
 
   deleteTreatment(treatmentId, signal) {
@@ -779,7 +1089,12 @@ class ApiService {
     return this.createEntity(ENTITY_TYPES.PROCEDURE, procedureData, signal);
   }
   updateProcedure(procedureId, procedureData, signal) {
-    return this.updateEntity(ENTITY_TYPES.PROCEDURE, procedureId, procedureData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.PROCEDURE,
+      procedureId,
+      procedureData,
+      signal
+    );
   }
 
   deleteProcedure(procedureId, signal) {
@@ -805,7 +1120,12 @@ class ApiService {
   }
 
   updateCondition(conditionId, conditionData, signal) {
-    return this.updateEntity(ENTITY_TYPES.CONDITION, conditionId, conditionData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.CONDITION,
+      conditionId,
+      conditionData,
+      signal
+    );
   }
 
   deleteCondition(conditionId, signal) {
@@ -822,18 +1142,34 @@ class ApiService {
     return this.get(`/conditions/${conditionId}/medications`, { signal });
   }
   createConditionMedication(conditionId, medicationData, signal) {
-    return this.post(`/conditions/${conditionId}/medications`, medicationData, { signal });
+    return this.post(`/conditions/${conditionId}/medications`, medicationData, {
+      signal,
+    });
   }
-  updateConditionMedication(conditionId, relationshipId, medicationData, signal) {
-    return this.put(`/conditions/${conditionId}/medications/${relationshipId}`, medicationData, { signal });
+  updateConditionMedication(
+    conditionId,
+    relationshipId,
+    medicationData,
+    signal
+  ) {
+    return this.put(
+      `/conditions/${conditionId}/medications/${relationshipId}`,
+      medicationData,
+      { signal }
+    );
   }
   deleteConditionMedication(conditionId, relationshipId, signal) {
-    return this.delete(`/conditions/${conditionId}/medications/${relationshipId}`, { signal });
+    return this.delete(
+      `/conditions/${conditionId}/medications/${relationshipId}`,
+      { signal }
+    );
   }
 
   // Medication - Condition Relationship methods (for showing conditions on medication view)
   getMedicationConditions(medicationId, signal) {
-    return this.get(`/conditions/medication/${medicationId}/conditions`, { signal });
+    return this.get(`/conditions/medication/${medicationId}/conditions`, {
+      signal,
+    });
   }
 
   // Encounter methods
@@ -855,7 +1191,12 @@ class ApiService {
   }
 
   updateEncounter(encounterId, encounterData, signal) {
-    return this.updateEntity(ENTITY_TYPES.ENCOUNTER, encounterId, encounterData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.ENCOUNTER,
+      encounterId,
+      encounterData,
+      signal
+    );
   }
 
   deleteEncounter(encounterId, signal) {
@@ -867,22 +1208,43 @@ class ApiService {
     return this.getEntities(ENTITY_TYPES.EMERGENCY_CONTACT, signal);
   }
   getPatientEmergencyContacts(patientId, signal) {
-    return this.getPatientEntities(ENTITY_TYPES.EMERGENCY_CONTACT, patientId, signal);
+    return this.getPatientEntities(
+      ENTITY_TYPES.EMERGENCY_CONTACT,
+      patientId,
+      signal
+    );
   }
   getEmergencyContact(emergencyContactId, signal) {
-    return this.getEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactId, signal);
+    return this.getEntity(
+      ENTITY_TYPES.EMERGENCY_CONTACT,
+      emergencyContactId,
+      signal
+    );
   }
 
   createEmergencyContact(emergencyContactData, signal) {
-    return this.createEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactData, signal);
+    return this.createEntity(
+      ENTITY_TYPES.EMERGENCY_CONTACT,
+      emergencyContactData,
+      signal
+    );
   }
 
   updateEmergencyContact(emergencyContactId, emergencyContactData, signal) {
-    return this.updateEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactId, emergencyContactData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.EMERGENCY_CONTACT,
+      emergencyContactId,
+      emergencyContactData,
+      signal
+    );
   }
 
   deleteEmergencyContact(emergencyContactId, signal) {
-    return this.deleteEntity(ENTITY_TYPES.EMERGENCY_CONTACT, emergencyContactId, signal);
+    return this.deleteEntity(
+      ENTITY_TYPES.EMERGENCY_CONTACT,
+      emergencyContactId,
+      signal
+    );
   }
 
   // Generic method for fetching entities with relationship filters
@@ -895,23 +1257,44 @@ class ApiService {
     return this.getEntities(ENTITY_TYPES.FAMILY_MEMBER, signal);
   }
   getPatientFamilyMembers(patientId, signal) {
-    return this.getPatientEntities(ENTITY_TYPES.FAMILY_MEMBER, patientId, signal);
+    return this.getPatientEntities(
+      ENTITY_TYPES.FAMILY_MEMBER,
+      patientId,
+      signal
+    );
   }
   getFamilyMember(familyMemberId, signal) {
     return this.getEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberId, signal);
   }
   getFamilyMembersWithFilters(filters = {}, signal) {
-    return this.getEntitiesWithFilters(ENTITY_TYPES.FAMILY_MEMBER, filters, signal);
+    return this.getEntitiesWithFilters(
+      ENTITY_TYPES.FAMILY_MEMBER,
+      filters,
+      signal
+    );
   }
 
   createFamilyMember(familyMemberData, signal) {
-    return this.createEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberData, signal);
+    return this.createEntity(
+      ENTITY_TYPES.FAMILY_MEMBER,
+      familyMemberData,
+      signal
+    );
   }
   updateFamilyMember(familyMemberId, familyMemberData, signal) {
-    return this.updateEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberId, familyMemberData, signal);
+    return this.updateEntity(
+      ENTITY_TYPES.FAMILY_MEMBER,
+      familyMemberId,
+      familyMemberData,
+      signal
+    );
   }
   deleteFamilyMember(familyMemberId, signal) {
-    return this.deleteEntity(ENTITY_TYPES.FAMILY_MEMBER, familyMemberId, signal);
+    return this.deleteEntity(
+      ENTITY_TYPES.FAMILY_MEMBER,
+      familyMemberId,
+      signal
+    );
   }
 
   // Family Condition methods (nested under family members)
@@ -919,18 +1302,32 @@ class ApiService {
     return this.get(`/family-members/${familyMemberId}/conditions`, { signal });
   }
   createFamilyCondition(familyMemberId, conditionData, signal) {
-    return this.post(`/family-members/${familyMemberId}/conditions`, conditionData, { signal });
+    return this.post(
+      `/family-members/${familyMemberId}/conditions`,
+      conditionData,
+      { signal }
+    );
   }
   updateFamilyCondition(familyMemberId, conditionId, conditionData, signal) {
-    return this.put(`/family-members/${familyMemberId}/conditions/${conditionId}`, conditionData, { signal });
+    return this.put(
+      `/family-members/${familyMemberId}/conditions/${conditionId}`,
+      conditionData,
+      { signal }
+    );
   }
   deleteFamilyCondition(familyMemberId, conditionId, signal) {
-    return this.delete(`/family-members/${familyMemberId}/conditions/${conditionId}`, { signal });
+    return this.delete(
+      `/family-members/${familyMemberId}/conditions/${conditionId}`,
+      { signal }
+    );
   }
 
   // Search family members
   searchFamilyMembers(searchTerm, signal) {
-    return this.get(`/family-members/search/?name=${encodeURIComponent(searchTerm)}`, { signal });
+    return this.get(
+      `/family-members/search/?name=${encodeURIComponent(searchTerm)}`,
+      { signal }
+    );
   }
 }
 

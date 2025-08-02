@@ -402,6 +402,19 @@ class EntityFile(Base):
         String(100), nullable=True
     )  # File category (result, report, card, etc.)
     uploaded_at = Column(DateTime, nullable=False)  # Upload timestamp
+
+    # Storage backend tracking
+    storage_backend = Column(
+        String(20), default="local", nullable=False
+    )  # 'local' or 'paperless'
+    paperless_document_id = Column(
+        String(255), nullable=True
+    )  # ID in paperless-ngx system
+    sync_status = Column(
+        String(20), default="synced", nullable=False
+    )  # 'synced', 'pending', 'processing', 'failed', 'missing'
+    last_sync_at = Column(DateTime, nullable=True)  # Last successful sync timestamp
+
     created_at = Column(DateTime, nullable=False, default=get_utc_now)
     updated_at = Column(
         DateTime, nullable=False, default=get_utc_now, onupdate=get_utc_now
@@ -413,6 +426,9 @@ class EntityFile(Base):
         Index("idx_category", "category"),
         Index("idx_uploaded_at", "uploaded_at"),
         Index("idx_created_at", "created_at"),
+        Index("idx_storage_backend", "storage_backend"),
+        Index("idx_paperless_document_id", "paperless_document_id"),
+        Index("idx_sync_status", "sync_status"),
     )
 
 
@@ -1048,6 +1064,18 @@ class UserPreferences(Base):
 
     # Unit system preference: 'imperial' or 'metric'
     unit_system = Column(String, default="imperial", nullable=False)
+
+    # Paperless-ngx integration fields
+    paperless_enabled = Column(Boolean, default=False, nullable=False)
+    paperless_url = Column(String(500), nullable=True)
+    paperless_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
+    paperless_username_encrypted = Column(Text, nullable=True)  # Encrypted username
+    paperless_password_encrypted = Column(Text, nullable=True)  # Encrypted password
+    default_storage_backend = Column(
+        String(20), default="local", nullable=False
+    )  # 'local' or 'paperless'
+    paperless_auto_sync = Column(Boolean, default=False, nullable=False)
+    paperless_sync_tags = Column(Boolean, default=True, nullable=False)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)

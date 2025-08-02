@@ -2,6 +2,7 @@
 Data migration utilities for transitioning to the generic document management system.
 """
 
+import os
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -19,20 +20,27 @@ def migrate_lab_result_files_to_entity_files():
     Returns:
         tuple: (migrated_count, errors_list)
     """
-    logger.info("Starting lab result files migration to entity_files table")
-    
     # Get database session
     db = next(get_db())
     
     try:
-        # Step 1: Count existing records
+        # Quick check: Are there any old-style lab result files at all?
         lab_files_count = db.query(LabResultFile).count()
+        
+        if lab_files_count == 0:
+            logger.debug("No old-style lab result files found - skipping migration")
+            return 0, []
+        
+        logger.info("Starting lab result files migration to entity_files table")
+        
+        # Step 1: Count existing records
         entity_files_count = db.query(EntityFile).filter(EntityFile.entity_type == 'lab-result').count()
         
         logger.info(f"Migration status: {lab_files_count} lab files, {entity_files_count} already migrated")
         
-        if lab_files_count == 0:
-            logger.info("No lab result files to migrate")
+        # If we have the same number of entity files as lab files, migration is likely complete
+        if entity_files_count >= lab_files_count:
+            logger.info("Migration appears complete - all files already migrated")
             return 0, []
         
         # Step 2: Find files that haven't been migrated yet
@@ -55,7 +63,7 @@ def migrate_lab_result_files_to_entity_files():
             logger.info("All lab result files have already been migrated")
             return 0, []
         
-        logger.info(f"Migrating {len(unmigrated_files)} lab result files")
+        logger.info(f"Migrating {len(unmigrated_files)} lab result files with storage backend detection")
         
         # Step 3: Migrate files
         migrated_count = 0
@@ -63,6 +71,18 @@ def migrate_lab_result_files_to_entity_files():
         
         for lab_file in unmigrated_files:
             try:
+                # Determine storage backend based on file existence
+                # If file exists on disk, it's local storage
+                # If file doesn't exist on disk, it might be in paperless
+                storage_backend = 'local'
+                paperless_document_id = None
+                
+                if lab_file.file_path and not os.path.exists(lab_file.file_path):
+                    # File doesn't exist locally, might be in paperless
+                    # For now, we'll mark it as local but log it for manual review
+                    logger.warning(f"File not found on disk: {lab_file.file_path} - may need manual paperless migration")
+                    storage_backend = 'local'  # Keep as local for safety
+                
                 # Create new EntityFile record from LabResultFile
                 entity_file = EntityFile(
                     entity_type='lab-result',
@@ -73,6 +93,9 @@ def migrate_lab_result_files_to_entity_files():
                     file_size=lab_file.file_size,
                     description=lab_file.description,
                     category='lab-result',  # Default category for migrated files
+                    storage_backend=storage_backend,
+                    paperless_document_id=paperless_document_id,
+                    sync_status='synced' if storage_backend == 'local' else None,
                     uploaded_at=lab_file.uploaded_at,
                     created_at=get_utc_now(),
                     updated_at=get_utc_now()
@@ -81,7 +104,7 @@ def migrate_lab_result_files_to_entity_files():
                 db.add(entity_file)
                 migrated_count += 1
                 
-                logger.debug(f"Migrated file: {lab_file.file_name} (Lab Result ID: {lab_file.lab_result_id})")
+                logger.debug(f"Migrated file: {lab_file.file_name} (Lab Result ID: {lab_file.lab_result_id}, Storage: {storage_backend})")
                 
             except Exception as e:
                 error_msg = f"Failed to migrate {lab_file.file_name}: {str(e)}"
@@ -115,7 +138,7 @@ def run_startup_data_migrations():
     Run all necessary data migrations during application startup.
     This function is called automatically when the application starts.
     """
-    logger.info("Running startup data migrations")
+    logger.debug("Checking for pending data migrations")
     
     try:
         # Migration 1: Lab result files to entity files
@@ -125,8 +148,10 @@ def run_startup_data_migrations():
             logger.info(f"Lab result files migration completed: {migrated_count} files migrated")
             if errors:
                 logger.warning(f"Migration completed with {len(errors)} errors")
+        elif migrated_count == 0:
+            logger.debug("No migrations were needed")
         
-        logger.info("All startup data migrations completed successfully")
+        logger.debug("All startup data migrations completed successfully")
         
     except Exception as e:
         logger.error(f"Startup data migrations failed: {str(e)}")
