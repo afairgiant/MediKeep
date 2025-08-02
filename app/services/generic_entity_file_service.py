@@ -512,7 +512,7 @@ class GenericEntityFileService:
             )
 
     async def get_file_download_info(
-        self, db: Session, file_id: int
+        self, db: Session, file_id: int, current_user_id: Optional[int] = None
     ) -> Tuple[str, str, str]:
         """
         Get file information for download from both local and paperless storage.
@@ -520,6 +520,7 @@ class GenericEntityFileService:
         Args:
             db: Database session
             file_id: ID of the file
+            current_user_id: ID of the current user for paperless access
 
         Returns:
             Tuple of (file_path_or_content, filename, content_type)
@@ -533,7 +534,7 @@ class GenericEntityFileService:
 
             # Route to appropriate storage backend for download
             if file_record.storage_backend == "paperless":
-                return await self._get_paperless_download_info(db, file_record)
+                return await self._get_paperless_download_info(db, file_record, current_user_id)
             else:
                 # Handle local file download
                 if not os.path.exists(file_record.file_path):
@@ -592,8 +593,13 @@ class GenericEntityFileService:
                 # Use existing paperless service to get file content
                 
                 # Get user for paperless credentials
-                user_id = current_user_id or 1  # Fallback to user ID 1 if not provided
-                user = db.query(User).filter(User.id == user_id).first()
+                if not current_user_id:
+                    raise HTTPException(
+                        status_code=401,
+                        detail="User authentication required for file viewing"
+                    )
+                
+                user = db.query(User).filter(User.id == current_user_id).first()
                 if not user:
                     raise HTTPException(
                         status_code=404,
@@ -1007,18 +1013,23 @@ class GenericEntityFileService:
             return False
 
         # Get user preferences to create paperless service
-        user_id = current_user_id or 1  # Fallback to user 1 if no user ID provided
+        if not current_user_id:
+            logger.warning(
+                f"Cannot delete from paperless: no user ID provided for authentication"
+            )
+            return False
+            
         user_prefs = (
             db.query(UserPreferences)
             .filter(
-                UserPreferences.user_id == user_id
+                UserPreferences.user_id == current_user_id
             )
             .first()
         )
 
         if not user_prefs or not user_prefs.paperless_enabled:
             logger.warning(
-                f"Cannot delete from paperless: user preferences not found or disabled"
+                f"Cannot delete from paperless: user preferences not found or disabled for user {current_user_id}"
             )
             return False
 
@@ -1058,7 +1069,7 @@ class GenericEntityFileService:
             return False
 
     async def _get_paperless_download_info(
-        self, db: Session, file_record: EntityFile
+        self, db: Session, file_record: EntityFile, current_user_id: Optional[int] = None
     ) -> Tuple[bytes, str, str]:
         """
         Get file download info from paperless-ngx storage.
@@ -1066,6 +1077,7 @@ class GenericEntityFileService:
         Args:
             db: Database session
             file_record: EntityFile record
+            current_user_id: ID of the current user for paperless access
 
         Returns:
             Tuple of (file_content_bytes, filename, content_type)
@@ -1077,10 +1089,16 @@ class GenericEntityFileService:
             )
 
         # Get user preferences to create paperless service
+        if not current_user_id:
+            raise HTTPException(
+                status_code=401,
+                detail="User authentication required for paperless file download"
+            )
+        
         user_prefs = (
             db.query(UserPreferences)
             .filter(
-                UserPreferences.user_id == 1  # TODO: Get actual user ID from context
+                UserPreferences.user_id == current_user_id
             )
             .first()
         )
@@ -1097,7 +1115,7 @@ class GenericEntityFileService:
                 user_prefs.paperless_url,
                 user_prefs.paperless_username_encrypted,
                 user_prefs.paperless_password_encrypted,
-                1,  # TODO: Get actual user ID from context
+                current_user_id,
             )
 
             # Download from paperless

@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.logging_config import get_logger, log_security_event
+from app.api.v1.endpoints.system import get_client_ip
+from app.core.logging_constants import sanitize_log_input
 from app.crud.user import user
 from app.models.models import User
 
@@ -33,6 +35,7 @@ def get_db() -> Generator:
 
 
 def get_current_user(
+    request: Request,
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> User:
@@ -40,6 +43,7 @@ def get_current_user(
     Get current authenticated user from JWT token.
 
     Args:
+        request: FastAPI request object for extracting client info
         db: Database session
         credentials: JWT token from Authorization header
 
@@ -49,7 +53,9 @@ def get_current_user(
     Raises:
         HTTPException 401: If token is invalid or user not found
     """
-    # Note: IP address logging is handled by middleware for request-level context
+    # Extract client information for security logging
+    client_ip = get_client_ip(request)
+    user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,9 +64,35 @@ def get_current_user(
     )
 
     try:
+        # Validate token format before attempting to decode
+        token_str = credentials.credentials.strip()
+        if not token_str:
+            security_logger.info("🔍 AUTH: Empty token provided")
+            log_security_event(
+                security_logger,
+                event="token_empty",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message="Empty JWT token provided",
+            )
+            raise credentials_exception
+            
+        # Basic JWT format validation (should have 3 parts separated by dots)
+        token_parts = token_str.split('.')
+        if len(token_parts) != 3:
+            security_logger.info(f"🔍 AUTH: Invalid token format - expected 3 parts, got {len(token_parts)}")
+            log_security_event(
+                security_logger,
+                event="token_invalid_format",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)}",
+            )
+            raise credentials_exception
+
         # Decode JWT token
         payload = jwt.decode(
-            credentials.credentials,
+            token_str,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
@@ -70,7 +102,8 @@ def get_current_user(
             log_security_event(
                 security_logger,
                 event="token_invalid_no_subject",
-                ip_address="middleware",  # IP will be captured by middleware
+                ip_address=client_ip,
+                user_agent=user_agent,
                 message="JWT token missing subject claim",
             )
             raise credentials_exception
@@ -84,7 +117,8 @@ def get_current_user(
         log_security_event(
             security_logger,
             event="token_decode_failed",
-            ip_address="middleware",  # IP will be captured by middleware
+            ip_address=client_ip,
+            user_agent=user_agent,
             message=f"JWT token decode failed: {str(e)}",
         )
         raise credentials_exception
@@ -96,7 +130,8 @@ def get_current_user(
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
-                ip_address="middleware",  # IP will be captured by middleware
+                ip_address=client_ip,
+                user_agent=user_agent,
                 message=f"Token valid but user not found: {username}",
                 username=username,
             )
@@ -106,7 +141,8 @@ def get_current_user(
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
-            ip_address="middleware",
+            ip_address=client_ip,
+            user_agent=user_agent,
             message=f"Database error during user lookup for {username}: {str(e)}",
             username=username,
         )
@@ -118,7 +154,8 @@ def get_current_user(
         security_logger,
         event="token_validated_success",
         user_id=user_id,
-        ip_address="middleware",  # IP will be captured by middleware
+        ip_address=client_ip,
+        user_agent=user_agent,
         message=f"Token successfully validated for user: {username}",
         username=username,
     )
@@ -157,6 +194,9 @@ def get_current_user_flexible_auth(
     Raises:
         HTTPException 401: If no valid token is provided or token is invalid
     """
+    # Extract client information for security logging
+    client_ip = get_client_ip(request)
+    user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -180,15 +220,42 @@ def get_current_user_flexible_auth(
         log_security_event(
             security_logger,
             event="auth_no_token_provided",
-            ip_address="middleware",
+            ip_address=client_ip,
+            user_agent=user_agent,
             message="No JWT token provided in header or query parameter",
         )
         raise credentials_exception
     
     try:
+        # Validate token format before attempting to decode
+        token_str = jwt_token.strip()
+        if not token_str:
+            security_logger.info(f"AUTH ({auth_method}): Empty token provided")
+            log_security_event(
+                security_logger,
+                event="token_empty",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Empty JWT token provided (auth method: {auth_method})",
+            )
+            raise credentials_exception
+            
+        # Basic JWT format validation (should have 3 parts separated by dots)
+        token_parts = token_str.split('.')
+        if len(token_parts) != 3:
+            security_logger.info(f"AUTH ({auth_method}): Invalid token format - expected 3 parts, got {len(token_parts)}")
+            log_security_event(
+                security_logger,
+                event="token_invalid_format",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)} (auth method: {auth_method})",
+            )
+            raise credentials_exception
+
         # Decode JWT token using the same validation as get_current_user
         payload = jwt.decode(
-            jwt_token,
+            token_str,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
@@ -198,7 +265,8 @@ def get_current_user_flexible_auth(
             log_security_event(
                 security_logger,
                 event="token_invalid_no_subject",
-                ip_address="middleware",
+                ip_address=client_ip,
+                user_agent=user_agent,
                 message=f"JWT token missing subject claim (auth method: {auth_method})",
             )
             raise credentials_exception
@@ -212,7 +280,8 @@ def get_current_user_flexible_auth(
         log_security_event(
             security_logger,
             event="token_decode_failed",
-            ip_address="middleware",
+            ip_address=client_ip,
+            user_agent=user_agent,
             message=f"JWT token decode failed (auth method: {auth_method}): {str(e)}",
         )
         raise credentials_exception
@@ -224,7 +293,8 @@ def get_current_user_flexible_auth(
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
-                ip_address="middleware",
+                ip_address=client_ip,
+                user_agent=user_agent,
                 message=f"Token valid but user not found: {username} (auth method: {auth_method})",
                 username=username,
             )
@@ -234,7 +304,8 @@ def get_current_user_flexible_auth(
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
-            ip_address="middleware",
+            ip_address=client_ip,
+            user_agent=user_agent,
             message=f"Database error during user lookup for {username} (auth method: {auth_method}): {str(e)}",
             username=username,
         )
@@ -246,7 +317,8 @@ def get_current_user_flexible_auth(
         security_logger,
         event="token_validated_success",
         user_id=user_id,
-        ip_address="middleware",
+        ip_address=client_ip,
+        user_agent=user_agent,
         message=f"Token successfully validated for user: {username} (auth method: {auth_method})",
         username=username,
     )

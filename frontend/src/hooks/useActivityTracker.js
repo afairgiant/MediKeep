@@ -163,9 +163,18 @@ export function useActivityTracker(options = {}) {
       // Add event listeners with proper error handling
       events.forEach(eventType => {
         try {
-          const options = eventType === 'mousemove' || eventType === 'scroll' 
-            ? config.EVENT_LISTENER_OPTIONS
-            : { capture: true };
+          // Use different options based on event type to avoid interfering with navigation
+          let options;
+          if (eventType === 'mousemove' || eventType === 'scroll') {
+            // Keep passive for performance-critical events
+            options = config.EVENT_LISTENER_OPTIONS;
+          } else if (eventType === 'click' || eventType === 'mousedown') {
+            // Don't use capture for click events to avoid interfering with React Router
+            options = { passive: true };
+          } else {
+            // Use capture for other events
+            options = { capture: true };
+          }
           
           document.addEventListener(eventType, handleActivity, options);
           addedListeners.push({ eventType, options });

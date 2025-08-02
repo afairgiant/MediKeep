@@ -353,7 +353,7 @@ async def download_file(
 
         # Get file information
         file_info, filename, content_type = await file_service.get_file_download_info(
-            db, file_id
+            db, file_id, current_user_id
         )
 
         # Handle different return types (local path vs paperless content)
