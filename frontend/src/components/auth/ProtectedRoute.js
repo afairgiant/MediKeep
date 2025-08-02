@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -18,36 +18,73 @@ function ProtectedRoute({
 }) {
   const { isAuthenticated, isLoading, user, hasRole, hasAnyRole } = useAuth();
   const location = useLocation();
+  const toastShownRef = useRef(false);
+
+  // Determine redirect reason and target
+  const getRedirectInfo = () => {
+    if (isLoading) return null;
+    
+    if (!isAuthenticated) {
+      return { to: redirectTo, reason: 'unauthenticated' };
+    }
+    
+    if (adminOnly && !user?.isAdmin) {
+      return { to: '/dashboard', reason: 'admin-required' };
+    }
+    
+    if (requiredRole && !hasRole(requiredRole)) {
+      return { to: '/dashboard', reason: 'role-required', role: requiredRole };
+    }
+    
+    if (requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
+      return { to: '/dashboard', reason: 'roles-required', roles: requiredRoles };
+    }
+    
+    return null;
+  };
+
+  const redirectInfo = getRedirectInfo();
+
+  // Show toast notifications after render using useEffect
+  useEffect(() => {
+    // Reset toast flag when authentication state changes
+    toastShownRef.current = false;
+  }, [isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    // Only show toast if we have redirect info and haven't shown one yet
+    if (redirectInfo && !toastShownRef.current && !isLoading) {
+      toastShownRef.current = true;
+      
+      switch (redirectInfo.reason) {
+        case 'unauthenticated':
+          toast.warn('Please log in to access this page');
+          break;
+        case 'admin-required':
+          toast.error('Access denied: Administrator privileges required');
+          break;
+        case 'role-required':
+          toast.error(`Access denied: ${redirectInfo.role} role required`);
+          break;
+        case 'roles-required':
+          toast.error(
+            `Access denied: One of these roles required: ${redirectInfo.roles.join(', ')}`
+          );
+          break;
+        default:
+          break;
+      }
+    }
+  }, [redirectInfo, isLoading]);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
     return fallback || <LoadingSpinner message="Verifying authentication..." />;
   }
 
-  // Not authenticated - redirect to login
-  if (!isAuthenticated) {
-    toast.warn('Please log in to access this page');
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
-  }
-
-  // Check admin-only access
-  if (adminOnly && !user?.isAdmin) {
-    toast.error('Access denied: Administrator privileges required');
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  // Check specific role requirement
-  if (requiredRole && !hasRole(requiredRole)) {
-    toast.error(`Access denied: ${requiredRole} role required`);
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  // Check multiple roles requirement (user must have at least one)
-  if (requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
-    toast.error(
-      `Access denied: One of these roles required: ${requiredRoles.join(', ')}`
-    );
-    return <Navigate to="/dashboard" replace />;
+  // If we need to redirect, do it without showing toast (toast handled in useEffect)
+  if (redirectInfo) {
+    return <Navigate to={redirectInfo.to} state={{ from: location }} replace />;
   }
 
   // All checks passed - render the protected content

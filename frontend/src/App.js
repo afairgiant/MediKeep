@@ -12,8 +12,10 @@ import 'react-toastify/dist/ReactToastify.css';
 // Mantine
 import { MantineProvider } from '@mantine/core';
 import { DatesProvider } from '@mantine/dates';
+import { Notifications } from '@mantine/notifications';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
 
 import { theme } from './theme';
 
@@ -210,6 +212,7 @@ function App() {
           <UserPreferencesProvider>
             <AppDataProvider>
               <MantineProvider theme={theme}>
+                <Notifications />
                 <DatesProvider settings={{ timezone: 'UTC' }}>
                   <MantineIntegratedThemeProvider>
                     <NavigationTracker />

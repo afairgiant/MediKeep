@@ -36,11 +36,18 @@ import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
+import { 
+  ERROR_MESSAGES, 
+  SUCCESS_MESSAGES,
+  getUserFriendlyError
+} from '../../constants/errorMessages';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineVisitForm from '../../components/medical/MantineVisitForm';
-import DocumentManager from '../../components/shared/DocumentManager';
+import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 
 const Visits = () => {
@@ -81,6 +88,57 @@ const Visits = () => {
   // Get standardized configuration
   const config = getMedicalPageConfig('visits');
 
+  // Form submission with uploads hook
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'visit',
+    onSuccess: () => {
+      // Reset form and close modal on complete success
+      setShowModal(false);
+      setEditingVisit(null);
+      setFormData({
+        reason: '',
+        date: '',
+        notes: '',
+        practitioner_id: '',
+        condition_id: '',
+        visit_type: '',
+        chief_complaint: '',
+        diagnosis: '',
+        treatment_plan: '',
+        follow_up_instructions: '',
+        duration_minutes: '',
+        location: '',
+        priority: '',
+      });
+      
+      // Only refresh if we created a new visit during form submission
+      // Don't refresh after uploads complete to prevent resource exhaustion
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('visits_form_error', {
+        message: 'Form submission error in visits',
+        error,
+        component: 'Visits',
+      });
+    },
+    component: 'Visits',
+  });
+
   // Use standardized data management
   const dataManagement = useDataManagement(visits, config);
 
@@ -90,6 +148,13 @@ const Visits = () => {
   // File count management for cards
   const [fileCounts, setFileCounts] = useState({});
   const [fileCountsLoading, setFileCountsLoading] = useState({});
+
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission (but not after uploads)
+  const needsRefreshAfterSubmissionRef = useRef(false);
   
   useEffect(() => {
     if (currentPatient?.id) {
@@ -133,6 +198,17 @@ const Visits = () => {
     loadFileCountsForVisits();
   }, [visits]); // Remove fileCounts from dependencies
 
+  // Function to refresh file counts for all visits
+  const refreshFileCount = useCallback(async (visitId) => {
+    try {
+      const files = await apiService.getEntityFiles('visit', visitId);
+      const count = Array.isArray(files) ? files.length : 0;
+      setFileCounts(prev => ({ ...prev, [visitId]: count }));
+    } catch (error) {
+      console.error(`Error refreshing file count for visit ${visitId}:`, error);
+    }
+  }, []);
+
 
   // Helper function to get condition details
   const getConditionDetails = (conditionId) => {
@@ -170,11 +246,10 @@ const Visits = () => {
     priority: '',
   });
 
-  // Document management state
-  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-
   const handleAddVisit = () => {
+    resetSubmission(); // Reset submission state
     setEditingVisit(null);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
       reason: '',
       date: '',
@@ -238,8 +313,20 @@ const Visits = () => {
 
   const handleDeleteVisit = async visitId => {
     const success = await deleteItem(visitId);
+    // Note: deleteItem already updates local state, no need to refresh all data
+    // The useMedicalData hook handles state updates automatically
     if (success) {
-      await refreshData();
+      // Only refresh file counts as they might be affected by deletion
+      setFileCounts(prev => {
+        const updated = { ...prev };
+        delete updated[visitId];
+        return updated;
+      });
+      setFileCountsLoading(prev => {
+        const updated = { ...prev };
+        delete updated[visitId];
+        return updated;
+      });
     }
   };
 
@@ -252,17 +339,28 @@ const Visits = () => {
     e.preventDefault();
 
     if (!formData.reason.trim()) {
-      setError('Reason for visit is required');
+      setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
       return;
     }
 
     if (!formData.date) {
-      setError('Visit date is required');
+      setError(ERROR_MESSAGES.INVALID_DATE);
       return;
     }
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+      return;
+    }
+
+    // Start submission immediately to prevent race conditions
+    startSubmission();
+
+    if (!canSubmit) {
+      logger.warn('visits_race_condition_prevented', {
+        message: 'Form submission prevented due to race condition',
+        component: 'Visits',
+      });
       return;
     }
 
@@ -287,110 +385,72 @@ const Visits = () => {
       let success;
       let resultId;
 
+      // Submit form data
       if (editingVisit) {
         success = await updateItem(editingVisit.id, visitData);
         resultId = editingVisit.id;
+        // No refresh needed for updates - user stays on same page
       } else {
         const result = await createItem(visitData);
         success = !!result;
         resultId = result?.id;
+        // Set flag to refresh after new visit creation (but only after form submission, not uploads)
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
       }
 
-      if (success && resultId) {
-        // Debug: Check if documentManagerMethods is available
-        logger.info('visits_checking_file_methods', {
-          message: 'Checking document manager methods availability',
-          visitId: resultId,
-          isEditMode: !!editingVisit,
-          hasDocumentManagerMethods: !!documentManagerMethods,
-          hasPendingFiles: documentManagerMethods?.hasPendingFiles?.(),
-          pendingFilesCount: documentManagerMethods?.getPendingFilesCount?.(),
-          availableMethods: documentManagerMethods ? Object.keys(documentManagerMethods) : [],
-          component: 'Visits',
-        });
+      // Complete form submission
+      completeFormSubmission(success, resultId);
 
-        // Handle background file upload for create mode
-        if (!editingVisit && documentManagerMethods?.hasPendingFiles()) {
+      if (success && resultId) {
+        // Check if we have files to upload
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+        
+        if (hasPendingFiles) {
           logger.info('visits_starting_file_upload', {
-            message: 'Starting background file upload process',
+            message: 'Starting file upload process',
             visitId: resultId,
             pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
             component: 'Visits',
           });
 
-          // Show success message immediately
-          const fileCount = documentManagerMethods.getPendingFilesCount();
-          setSuccessMessage(`Visit created successfully. ${fileCount} file(s) are being uploaded in the background...`);
-          
-          // Upload files in the background - DON'T close form until upload is complete
+          // Start file upload process
+          startFileUpload();
+
           try {
+            // Upload files with progress tracking
             await documentManagerMethods.uploadPendingFiles(resultId);
-            setSuccessMessage('Visit and all files saved successfully!');
             
-            // Clear success message after a few seconds
-            setTimeout(() => setSuccessMessage(''), 4000);
+            // File upload completed successfully
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
             
-            // Refresh data to show uploaded files
-            await refreshData();
-            
-            // Update the file count for this specific visit
-            try {
-              const files = await apiService.getEntityFiles('visit', resultId);
-              logger.info('file_count_updated', {
-                message: 'Updated file count after background upload',
-                visitId: resultId,
-                fileCount: files.length,
-                component: 'Visits',
-              });
-            } catch (fileCountError) {
-              logger.warn('file_count_update_error', {
-                message: 'Failed to update file count after upload',
-                visitId: resultId,
-                error: fileCountError.message,
-                component: 'Visits',
-              });
-            }
-          } catch (error) {
-            logger.error('background_file_upload_error', {
-              message: 'Failed to upload files in background',
+            // Refresh file count
+            refreshFileCount(resultId);
+          } catch (uploadError) {
+            logger.error('visits_file_upload_error', {
+              message: 'File upload failed',
               visitId: resultId,
-              error: error.message,
+              error: uploadError.message,
               component: 'Visits',
             });
-            setError(`Visit created but file upload failed: ${error.message}`);
-            // Still close the form even if file upload fails
+            
+            // File upload failed
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
           }
-        } else if (!editingVisit) {
-          setSuccessMessage('Visit created successfully!');
-          setTimeout(() => setSuccessMessage(''), 3000);
         } else {
-          setSuccessMessage('Visit updated successfully!');
-          setTimeout(() => setSuccessMessage(''), 3000);
+          // No files to upload, complete immediately
+          completeFileUpload(true, 0, 0);
         }
-
-        // Reset all form and modal state
-        setShowModal(false);
-        setEditingVisit(null);
-        setFormData({
-          reason: '',
-          date: '',
-          notes: '',
-          practitioner_id: '',
-          condition_id: '',
-          visit_type: '',
-          chief_complaint: '',
-          diagnosis: '',
-          treatment_plan: '',
-          follow_up_instructions: '',
-          duration_minutes: '',
-          location: '',
-          priority: '',
-        });
-
-        await refreshData();
       }
     } catch (error) {
-      setError(error.message || 'Failed to save visit');
+      logger.error('visits_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Visits',
+      });
+      
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -839,7 +899,7 @@ const Visits = () => {
 
       <MantineVisitForm
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => !isBlocking && setShowModal(false)}
         title={editingVisit ? 'Edit Visit' : 'Add New Visit'}
         formData={formData}
         onInputChange={handleInputChange}
@@ -849,12 +909,19 @@ const Visits = () => {
         conditionsLoading={false}
         editingVisit={editingVisit}
       >
+        {/* Form Loading Overlay */}
+        <FormLoadingOverlay
+          visible={isBlocking}
+          message={statusMessage?.title || 'Processing...'}
+          submessage={statusMessage?.message}
+          type={statusMessage?.type || 'loading'}
+        />
         {/* File Management Section for Both Create and Edit Mode */}
         <Paper withBorder p="md" mt="md">
           <Title order={4} mb="md">
             {editingVisit ? 'Manage Files' : 'Add Files (Optional)'}
           </Title>
-          <DocumentManager
+          <DocumentManagerWithProgress
             entityType="visit"
             entityId={editingVisit?.id}
             mode={editingVisit ? 'edit' : 'create'}
@@ -872,6 +939,7 @@ const Visits = () => {
                 component: 'Visits',
               });
             }}
+            showProgressModal={true}
           />
         </Paper>
       </MantineVisitForm>
@@ -879,7 +947,7 @@ const Visits = () => {
       {/* Visit View Modal */}
       <Modal
         opened={showViewModal}
-        onClose={handleCloseViewModal}
+        onClose={() => !isBlocking && handleCloseViewModal()}
         title={
           <Group>
             <Text size="lg" fw={600}>
@@ -1151,7 +1219,7 @@ const Visits = () => {
                   ATTACHED DOCUMENTS
                 </Text>
                 <Divider />
-                <DocumentManager
+                <DocumentManagerWithProgress
                   entityType="visit"
                   entityId={viewingVisit.id}
                   mode="view"
@@ -1160,9 +1228,29 @@ const Visits = () => {
                     maxSize: 10 * 1024 * 1024, // 10MB
                     maxFiles: 10
                   }}
-                  onError={(error) => {
-                    console.error('Document manager error:', error);
+                  onUploadComplete={(success, completedCount, failedCount) => {
+                    if (success) {
+                      // Refresh file count after successful upload
+                      refreshFileCount(viewingVisit.id);
+                    }
+                    logger.info('visits_view_upload_completed', {
+                      message: 'File upload completed in visits view',
+                      visitId: viewingVisit.id,
+                      success,
+                      completedCount,
+                      failedCount,
+                      component: 'Visits',
+                    });
                   }}
+                  onError={(error) => {
+                    logger.error('document_manager_view_error', {
+                      message: 'Document manager error in visits view',
+                      visitId: viewingVisit.id,
+                      error: error,
+                      component: 'Visits',
+                    });
+                  }}
+                  showProgressModal={true}
                 />
               </Stack>
             </Card>

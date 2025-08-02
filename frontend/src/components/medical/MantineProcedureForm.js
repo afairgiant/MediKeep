@@ -1,5 +1,7 @@
 import React from 'react';
 import BaseMedicalForm from './BaseMedicalForm';
+import FormLoadingOverlay from '../shared/FormLoadingOverlay';
+import UploadProgressErrorBoundary from '../shared/UploadProgressErrorBoundary';
 import { procedureFormFields } from '../../utils/medicalFormFields';
 
 const MantineProcedureForm = ({
@@ -12,6 +14,8 @@ const MantineProcedureForm = ({
   practitioners = [],
   editingProcedure = null,
   children,
+  isLoading = false,
+  statusMessage = null,
 }) => {
   // Convert practitioners to Mantine format
   const practitionerOptions = practitioners.map(practitioner => ({
@@ -60,8 +64,21 @@ const MantineProcedureForm = ({
       fields={procedureFormFields}
       dynamicOptions={dynamicOptions}
       modalSize="xl"
+      isLoading={isLoading}
     >
       {children}
+      
+      {/* Loading Overlay */}
+      <UploadProgressErrorBoundary>
+        <FormLoadingOverlay
+          visible={isLoading && statusMessage}
+          message={statusMessage?.title || 'Processing...'}
+          submessage={statusMessage?.message || ''}
+          type={statusMessage?.type || 'loading'}
+          blur={3}
+          opacity={0.85}
+        />
+      </UploadProgressErrorBoundary>
     </BaseMedicalForm>
   );
 };

@@ -6,6 +6,7 @@ settings management, and document operations.
 """
 
 from typing import Dict, Any
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -324,3 +325,125 @@ async def update_paperless_settings(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update paperless settings"
         )
+
+
+@router.get("/health/paperless", response_model=Dict[str, Any])
+async def check_paperless_health(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Check health of paperless-ngx connectivity.
+    
+    This endpoint verifies that:
+    1. User has paperless enabled
+    2. Valid credentials are stored
+    3. Connection to paperless instance is working
+    
+    Args:
+        current_user: Current authenticated user
+        db: Database session
+        
+    Returns:
+        Health check results with status and details
+    """
+    try:
+        # Get user preferences
+        user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
+        
+        # Check if paperless is enabled
+        if not user_prefs or not user_prefs.paperless_enabled:
+            return {
+                "status": "disabled",
+                "message": "Paperless integration is not enabled",
+                "details": {
+                    "paperless_enabled": False,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            }
+        
+        # Check if credentials exist
+        if not user_prefs.paperless_url or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+            return {
+                "status": "unconfigured",
+                "message": "Paperless credentials not configured",
+                "details": {
+                    "has_url": bool(user_prefs.paperless_url),
+                    "has_credentials": bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted),
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            }
+        
+        # Test actual connection
+        logger.info(f"Performing paperless health check for user {current_user.id}", extra={
+            "user_id": current_user.id,
+            "paperless_url": user_prefs.paperless_url
+        })
+        
+        async with create_paperless_service_with_username_password(
+            user_prefs.paperless_url,
+            user_prefs.paperless_username_encrypted,
+            user_prefs.paperless_password_encrypted,
+            current_user.id
+        ) as paperless_service:
+            result = await paperless_service.test_connection()
+            
+            logger.info(f"Paperless health check successful for user {current_user.id}", extra={
+                "user_id": current_user.id,
+                "status": "healthy"
+            })
+            
+            return {
+                "status": "healthy",
+                "message": "Paperless connection is working",
+                "details": {
+                    "server_url": user_prefs.paperless_url,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "connection_test": result
+                }
+            }
+            
+    except PaperlessAuthenticationError as e:
+        logger.warning(f"Paperless health check failed - authentication error for user {current_user.id}", extra={
+            "user_id": current_user.id,
+            "error": str(e)
+        })
+        return {
+            "status": "unhealthy",
+            "message": "Authentication failed",
+            "error": str(e),
+            "details": {
+                "error_type": "authentication",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }
+        
+    except PaperlessConnectionError as e:
+        logger.warning(f"Paperless health check failed - connection error for user {current_user.id}", extra={
+            "user_id": current_user.id,
+            "error": str(e)
+        })
+        return {
+            "status": "unhealthy", 
+            "message": "Connection failed",
+            "error": str(e),
+            "details": {
+                "error_type": "connection",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Paperless health check failed unexpectedly for user {current_user.id}", extra={
+            "user_id": current_user.id,
+            "error": str(e)
+        })
+        return {
+            "status": "unhealthy",
+            "message": "Health check failed",
+            "error": str(e),
+            "details": {
+                "error_type": "unexpected",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }

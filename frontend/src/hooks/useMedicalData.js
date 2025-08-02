@@ -180,6 +180,9 @@ export const useMedicalData = config => {
       );
 
       if (result) {
+        // Update local state to remove the deleted item
+        setItems(prevItems => prevItems.filter(item => item.id !== id));
+        
         setSuccessMessage(`${entityName} deleted successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;

@@ -10,13 +10,20 @@ import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
+import { 
+  ERROR_MESSAGES, 
+  SUCCESS_MESSAGES,
+  getUserFriendlyError
+} from '../../constants/errorMessages';
 import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ConditionRelationships from '../../components/medical/ConditionRelationships';
-import DocumentManager from '../../components/shared/DocumentManager';
+import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Badge,
   Button,
@@ -39,9 +46,6 @@ import {
   Modal,
   ScrollArea,
 } from '@mantine/core';
-import {
-  IconFile, // Still needed for file count badges
-} from '@tabler/icons-react';
 
 const LabResults = () => {
   const navigate = useNavigate();
@@ -79,19 +83,71 @@ const LabResults = () => {
   // Get practitioners data
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
+  // File count management for cards
+  const [fileCounts, setFileCounts] = useState({});
+  const [fileCountsLoading, setFileCountsLoading] = useState({});
+
+  // Track if we need to refresh after form submission (but not after uploads)
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  // Form submission with uploads hook
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'lab-result',
+    onSuccess: () => {
+      // Reset form and close modal on complete success
+      setShowModal(false);
+      setEditingLabResult(null);
+      setFormData({
+        test_name: '',
+        test_code: '',
+        test_category: '',
+        test_type: '',
+        facility: '',
+        status: 'ordered',
+        labs_result: '',
+        ordered_date: '',
+        completed_date: '',
+        notes: '',
+        practitioner_id: '',
+      });
+      
+      // Only refresh if we created a new lab result during form submission
+      // Don't refresh after uploads complete to prevent resource exhaustion
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('lab_results_form_error', {
+        message: 'Form submission error in lab results',
+        error,
+        component: 'LabResults',
+      });
+    },
+    component: 'LabResults',
+  });
+
   // Get standardized configuration
   const config = getMedicalPageConfig('labresults');
 
   // Get standardized formatters for lab results
   const formatters = getEntityFormatters('lab_results', practitioners);
 
-  // File management state (moved up before useDataManagement)
-  const [filesCounts, setFilesCounts] = useState({});
 
   // Use standardized data management
-  const dataManagement = useDataManagement(labResults || [], config, {
-    filesCounts,
-  });
+  const dataManagement = useDataManagement(labResults || [], config);
 
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
@@ -149,9 +205,20 @@ const LabResults = () => {
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
 
-  // Note: File management now handled by DocumentManager component
-  const abortControllerRef = useRef(null);
+  // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+
+  // Function to refresh file counts for all lab results
+  const refreshFileCount = useCallback(async (labResultId) => {
+    try {
+      const files = await apiService.getEntityFiles('lab-result', labResultId);
+      const count = Array.isArray(files) ? files.length : 0;
+      setFileCounts(prev => ({ ...prev, [labResultId]: count }));
+    } catch (error) {
+      console.error(`Error refreshing file count for lab result ${labResultId}:`, error);
+    }
+  }, []);
 
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
@@ -172,61 +239,34 @@ const LabResults = () => {
     practitioner_id: '',
   });
 
-  // File management functions (preserve complex logic)
-  const loadFilesCounts = useCallback(async (results, abortController) => {
-    try {
-      const counts = {};
-      const batchSize = 1;
-
-      for (let i = 0; i < results.length; i += batchSize) {
-        if (abortController?.signal.aborted) return;
-
-        const batch = results.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map(async result => {
-            try {
-              if (abortController?.signal.aborted) return;
-              const files = await apiService.getLabResultFiles(result.id);
-              counts[result.id] = files.length;
-            } catch (error) {
-              counts[result.id] = 0;
-            }
-          })
-        );
-
-        if (i + batchSize < results.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+  // Load file counts for lab results
+  useEffect(() => {
+    const loadFileCountsForLabResults = async () => {
+      if (!labResults || labResults.length === 0) return;
+      
+      const countPromises = labResults.map(async (labResult) => {
+        setFileCountsLoading(prev => {
+          if (prev[labResult.id] !== undefined) return prev; // Already loading
+          return { ...prev, [labResult.id]: true };
+        });
+        
+        try {
+          const files = await apiService.getEntityFiles('lab-result', labResult.id);
+          const count = Array.isArray(files) ? files.length : 0;
+          setFileCounts(prev => ({ ...prev, [labResult.id]: count }));
+        } catch (error) {
+          console.error(`Error loading file count for lab result ${labResult.id}:`, error);
+          setFileCounts(prev => ({ ...prev, [labResult.id]: 0 }));
+        } finally {
+          setFileCountsLoading(prev => ({ ...prev, [labResult.id]: false }));
         }
-      }
-
-      if (!abortController?.signal.aborted) {
-        setFilesCounts(counts);
-      }
-    } catch (error) {
-      logger.error('medical_data_fetch_error', {
-        message: 'Error loading file counts for lab results',
-        resultsCount: results?.length,
-        error: error.message,
-        component: 'LabResults',
       });
-    }
-  }, []);
+      
+      await Promise.all(countPromises);
+    };
 
-  // Load file counts when lab results change
-  React.useEffect(() => {
-    if (labResults && labResults.length > 0 && labResults.length <= 20) {
-      const controller = new AbortController();
-      loadFilesCounts(labResults, controller);
-      return () => controller.abort();
-    } else if (labResults) {
-      // Initialize counts to 0 for large datasets
-      const counts = {};
-      labResults.forEach(result => {
-        counts[result.id] = 0;
-      });
-      setFilesCounts(counts);
-    }
-  }, [labResults, loadFilesCounts]);
+    loadFileCountsForLabResults();
+  }, [labResults]); // Remove fileCounts from dependencies
 
 
   // Handle URL parameters for direct linking to specific lab results
@@ -250,7 +290,9 @@ const LabResults = () => {
 
   // Modern CRUD handlers using useMedicalData
   const handleAddLabResult = () => {
+    resetSubmission(); // Reset submission state
     setEditingLabResult(null);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
       test_name: '',
       test_code: '',
@@ -302,9 +344,13 @@ const LabResults = () => {
   };
 
   const handleCloseViewModal = () => {
+    // Refresh file count for the viewed lab result before closing
+    if (viewingLabResult) {
+      refreshFileCount(viewingLabResult.id);
+    }
+    
     setShowViewModal(false);
     setViewingLabResult(null);
-    // Note: File state now managed by DocumentManager
     // Remove view parameter from URL
     const searchParams = new URLSearchParams(location.search);
     searchParams.delete('view');
@@ -316,8 +362,20 @@ const LabResults = () => {
 
   const handleDeleteLabResult = async labResultId => {
     const success = await deleteItem(labResultId);
+    // Note: deleteItem already updates local state, no need to refresh all data
+    // The useMedicalData hook handles state updates automatically
     if (success) {
-      await refreshData();
+      // Only refresh file counts as they might be affected by deletion
+      setFileCounts(prev => {
+        const updated = { ...prev };
+        delete updated[labResultId];
+        return updated;
+      });
+      setFileCountsLoading(prev => {
+        const updated = { ...prev };
+        delete updated[labResultId];
+        return updated;
+      });
     }
   };
 
@@ -325,7 +383,18 @@ const LabResults = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+      return;
+    }
+
+    // Start submission immediately to prevent race conditions
+    startSubmission();
+
+    if (!canSubmit) {
+      logger.warn('lab_results_race_condition_prevented', {
+        message: 'Form submission prevented due to race condition',
+        component: 'LabResults',
+      });
       return;
     }
 
@@ -343,114 +412,66 @@ const LabResults = () => {
       let success;
       let resultId;
 
+      // Submit form data
       if (editingLabResult) {
         success = await updateItem(editingLabResult.id, labResultData);
         resultId = editingLabResult.id;
+        // No refresh needed for updates - user stays on same page
       } else {
         const result = await createItem(labResultData);
         success = !!result;
         resultId = result?.id;
+        // Set flag to refresh after new lab result creation (but only after form submission, not uploads)
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
       }
 
-      if (success && resultId) {
-        // Debug: Check if documentManagerMethods is available
-        logger.info('lab_results_checking_file_methods', {
-          message: 'Checking document manager methods availability',
-          labResultId: resultId,
-          isEditMode: !!editingLabResult,
-          hasDocumentManagerMethods: !!documentManagerMethods,
-          hasPendingFiles: documentManagerMethods?.hasPendingFiles?.(),
-          pendingFilesCount: documentManagerMethods?.getPendingFilesCount?.(),
-          availableMethods: documentManagerMethods ? Object.keys(documentManagerMethods) : [],
-          component: 'LabResults',
-        });
+      // Complete form submission
+      completeFormSubmission(success, resultId);
 
-        // Handle background file upload for create mode
-        if (!editingLabResult && documentManagerMethods?.hasPendingFiles()) {
+      if (success && resultId) {
+        // Check if we have files to upload
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+        
+        if (hasPendingFiles) {
           logger.info('lab_results_starting_file_upload', {
-            message: 'Starting background file upload process',
+            message: 'Starting file upload process',
             labResultId: resultId,
             pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
             component: 'LabResults',
           });
 
-          // Show success message immediately
-          const fileCount = documentManagerMethods.getPendingFilesCount();
-          setSuccessMessage(`Lab result created successfully. ${fileCount} file(s) are being uploaded in the background...`);
-          
-          // Upload files in the background using the existing working method
-          setTimeout(async () => {
-            try {
-              await documentManagerMethods.uploadPendingFiles(resultId);
-              setSuccessMessage('Lab result and all files saved successfully!');
-              
-              // Clear success message after a few seconds
-              setTimeout(() => setSuccessMessage(''), 4000);
-              
-              // Refresh data to show uploaded files
-              await refreshData();
-              
-              // Update the file count for this specific lab result
-              try {
-                const files = await apiService.getLabResultFiles(resultId);
-                setFilesCounts(prev => ({
-                  ...prev,
-                  [resultId]: files.length
-                }));
-                
-                logger.info('file_count_updated', {
-                  message: 'Updated file count after background upload',
-                  labResultId: resultId,
-                  fileCount: files.length,
-                  component: 'LabResults',
-                });
-              } catch (fileCountError) {
-                logger.warn('file_count_update_error', {
-                  message: 'Failed to update file count after upload',
-                  labResultId: resultId,
-                  error: fileCountError.message,
-                  component: 'LabResults',
-                });
-              }
-            } catch (error) {
-              logger.error('background_file_upload_error', {
-                message: 'Failed to upload files in background',
-                labResultId: resultId,
-                error: error.message,
-                component: 'LabResults',
-              });
-              setError(`Lab result created but file upload failed: ${error.message}`);
-            }
-          }, 100); // Small delay to ensure UI updates first
-        } else if (!editingLabResult) {
-          setSuccessMessage('Lab result created successfully!');
-          setTimeout(() => setSuccessMessage(''), 3000);
+          // Start file upload process
+          startFileUpload();
+
+          try {
+            // Upload files with progress tracking
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            
+            // File upload completed successfully
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            
+            // Refresh file count
+            refreshFileCount(resultId);
+          } catch (uploadError) {
+            logger.error('lab_results_file_upload_error', {
+              message: 'File upload failed',
+              labResultId: resultId,
+              error: uploadError.message,
+              component: 'LabResults',
+            });
+            
+            // File upload failed
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
         } else {
-          setSuccessMessage('Lab result updated successfully!');
-          setTimeout(() => setSuccessMessage(''), 3000);
+          // No files to upload, complete immediately
+          completeFileUpload(true, 0, 0);
         }
-
-        // Reset all form and modal state
-        setShowModal(false);
-        setEditingLabResult(null);
-        setFormData({
-          test_name: '',
-          test_code: '',
-          test_category: '',
-          test_type: '',
-          facility: '',
-          status: 'ordered',
-          labs_result: '',
-          ordered_date: '',
-          completed_date: '',
-          notes: '',
-          practitioner_id: '',
-        });
-
-        await refreshData();
       }
     } catch (error) {
-      setError(error.message || 'Failed to save lab result');
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -460,8 +481,15 @@ const LabResults = () => {
   };
 
   const handleCloseModal = () => {
+    // Prevent closing during upload
+    if (isBlocking) {
+      return;
+    }
+    
+    resetSubmission(); // Reset submission state
     setShowModal(false);
     setEditingLabResult(null);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
       test_name: '',
       test_code: '',
@@ -669,20 +697,14 @@ const LabResults = () => {
                           <Text size="sm" fw={500} c="dimmed" w={120}>
                             Files:
                           </Text>
-                          {filesCounts[result.id] > 0 ? (
-                            <Badge
-                              variant="light"
-                              color="green"
-                              size="sm"
-                              leftSection={<IconFile size={12} />}
-                            >
-                              {filesCounts[result.id]} attached
-                            </Badge>
-                          ) : (
-                            <Text c="dimmed" size="sm">
-                              No files
-                            </Text>
-                          )}
+                          <FileCountBadge
+                            count={fileCounts[result.id] || 0}
+                            entityType="lab-result"
+                            variant="badge"
+                            size="sm"
+                            loading={fileCountsLoading[result.id] || false}
+                            onClick={() => handleViewLabResult(result)}
+                          />
                         </Group>
                       </Stack>
 
@@ -762,17 +784,15 @@ const LabResults = () => {
                   return practitioner ? practitioner.name : `ID: ${value}`;
                 },
                 // Custom files formatter for lab results
-                files: (value, item) =>
-                  filesCounts[item.id] > 0 ? (
-                    <span style={{ color: '#2e7d32', fontWeight: 500 }}>
-                      {filesCounts[item.id]} file
-                      {filesCounts[item.id] !== 1 ? 's' : ''}
-                    </span>
-                  ) : (
-                    <span style={{ color: '#9e9e9e', fontStyle: 'italic' }}>
-                      None
-                    </span>
-                  ),
+                files: (value, item) => (
+                  <FileCountBadge
+                    count={fileCounts[item.id] || 0}
+                    entityType="lab-result"
+                    variant="text"
+                    size="sm"
+                    loading={fileCountsLoading[item.id] || false}
+                  />
+                ),
               }}
             />
           )}
@@ -795,12 +815,19 @@ const LabResults = () => {
           fetchLabResultConditions={fetchLabResultConditions}
           navigate={navigate}
         >
+          {/* Form Loading Overlay */}
+          <FormLoadingOverlay
+            visible={isBlocking}
+            message={statusMessage?.title || 'Processing...'}
+            submessage={statusMessage?.message}
+            type={statusMessage?.type || 'loading'}
+          />
           {/* File Management Section for Both Create and Edit Mode */}
           <Paper withBorder p="md" mt="md">
             <Title order={4} mb="md">
               {editingLabResult ? 'Manage Files' : 'Add Files (Optional)'}
             </Title>
-            <DocumentManager
+            <DocumentManagerWithProgress
               entityType="lab-result"
               entityId={editingLabResult?.id}
               mode={editingLabResult ? 'edit' : 'create'}
@@ -818,6 +845,7 @@ const LabResults = () => {
                   component: 'LabResults',
                 });
               }}
+              showProgressModal={true}
             />
           </Paper>
         </MantineLabResultForm>
@@ -826,7 +854,7 @@ const LabResults = () => {
       {/* View Details Modal */}
       <Modal
         opened={showViewModal}
-        onClose={handleCloseViewModal}
+        onClose={() => !isBlocking && handleCloseViewModal()}
         title={viewingLabResult?.test_name || 'Lab Result Details'}
         size="xl"
         scrollAreaComponent={ScrollArea.Autosize}
@@ -951,7 +979,7 @@ const LabResults = () => {
 
             <Stack gap="lg">
               <Title order={3}>Associated Files</Title>
-              <DocumentManager
+              <DocumentManagerWithProgress
                 entityType="lab-result"
                 entityId={viewingLabResult.id}
                 mode="view"
@@ -968,6 +996,7 @@ const LabResults = () => {
                     component: 'LabResults',
                   });
                 }}
+                showProgressModal={true}
               />
             </Stack>
 
