@@ -69,6 +69,8 @@ import { ErrorBoundary } from './components';
 import logger from './services/logger';
 import { timezoneService } from './services/timezoneService';
 import { ENTITY_TYPES } from './utils/entityRelationships';
+import { useActivityTracker, useNavigationActivityTracker, useApiActivityTracker } from './hooks/useActivityTracker';
+import { apiClient } from './services/apiClient';
 import './App.css';
 
 // Entity to component mapping for dynamic route generation
@@ -129,11 +131,20 @@ const generateEntityRoutes = () => {
 function NavigationTracker() {
   const location = useLocation();
   const previousLocation = React.useRef(location.pathname);
+  const { trackNavigationActivity } = useNavigationActivityTracker();
 
   useEffect(() => {
     const currentPath = location.pathname;
     const previousPath = previousLocation.current;
     if (currentPath !== previousPath) {
+      // Track navigation as user activity (for session timeout)
+      trackNavigationActivity({
+        fromPath: previousPath,
+        toPath: currentPath,
+        search: location.search,
+        hash: location.hash,
+      });
+
       // Log navigation as a user interaction
       logger.userAction('navigation', 'App', {
         fromPath: previousPath,
@@ -153,7 +164,7 @@ function NavigationTracker() {
     }
 
     previousLocation.current = currentPath;
-  }, [location]);
+  }, [location, trackNavigationActivity]);
 
   return null;
 }
@@ -176,6 +187,90 @@ function ThemedToastContainer() {
       theme={theme}
     />
   );
+}
+
+// Component to initialize global activity tracking with enhanced error handling
+function ActivityTracker() {
+  const { isTracking, isEnabled, getStats } = useActivityTracker({
+    // Use default configuration from activityConfig
+    trackMouseMove: true,
+    trackKeyboard: true,
+    trackClicks: true,
+    trackTouch: true,
+    enabled: true,
+  });
+  
+  const { trackApiActivity, getStats: getApiStats } = useApiActivityTracker();
+
+  // Log activity tracking status changes
+  useEffect(() => {
+    if (isTracking) {
+      const stats = getStats();
+      logger.debug('Global activity tracking enabled', {
+        category: 'activity_tracking',
+        component: 'ActivityTracker',
+        timestamp: new Date().toISOString(),
+        stats,
+      });
+    }
+  }, [isTracking, getStats]);
+
+  // Set up API activity tracking with proper error handling
+  useEffect(() => {
+    try {
+      // Set the race-safe activity tracker on the API client
+      apiClient.setActivityTracker(trackApiActivity);
+      
+      logger.debug('API activity tracking configured', {
+        category: 'activity_tracking',
+        component: 'ActivityTracker',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Failed to configure API activity tracking', {
+        category: 'activity_tracking_error',
+        component: 'ActivityTracker',
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return () => {
+      try {
+        // Clean up API activity tracking
+        apiClient.setActivityTracker(null);
+      } catch (error) {
+        logger.error('Failed to cleanup API activity tracking', {
+          category: 'activity_tracking_error',
+          component: 'ActivityTracker',
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    };
+  }, [trackApiActivity]);
+
+  // Performance monitoring for activity tracking
+  useEffect(() => {
+    const performanceTimer = setInterval(() => {
+      if (isTracking) {
+        const uiStats = getStats();
+        const apiStats = getApiStats();
+        
+        logger.debug('Activity tracking performance', {
+          category: 'activity_tracking_performance',
+          component: 'ActivityTracker',
+          uiStats,
+          apiStats,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes
+
+    return () => clearInterval(performanceTimer);
+  }, [isTracking, getStats, getApiStats]);
+
+  return null;
 }
 
 function App() {
@@ -216,6 +311,7 @@ function App() {
                 <DatesProvider settings={{ timezone: 'UTC' }}>
                   <MantineIntegratedThemeProvider>
                     <NavigationTracker />
+                    <ActivityTracker />
                     <div className="App">
                       <Routes>
                         {/* Public Routes */}
