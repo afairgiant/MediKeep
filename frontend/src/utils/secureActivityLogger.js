@@ -206,7 +206,7 @@ class SecureActivityLogger {
       ...sessionData
     });
 
-    logger.info('Session event', sanitized);
+    logger.debug('Session event', sanitized);
   }
 
   /**

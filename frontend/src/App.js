@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -71,6 +71,7 @@ import { timezoneService } from './services/timezoneService';
 import { ENTITY_TYPES } from './utils/entityRelationships';
 import { useActivityTracker, useNavigationActivityTracker, useApiActivityTracker } from './hooks/useActivityTracker';
 import { apiClient } from './services/apiClient';
+import { useAuth } from './contexts/AuthContext';
 import './App.css';
 
 // Entity to component mapping for dynamic route generation
@@ -192,15 +193,34 @@ function ThemedToastContainer() {
 // Component to initialize global activity tracking with enhanced error handling
 function ActivityTracker() {
   const { isTracking, isEnabled, getStats } = useActivityTracker({
-    // Use default configuration from activityConfig
-    trackMouseMove: false, // Temporarily disable to reduce noise and potential interference
-    trackKeyboard: false, // Temporarily disable for testing
-    trackClicks: false, // Temporarily disable for testing
-    trackTouch: false, // Temporarily disable for testing
-    enabled: false, // Temporarily disable entire activity tracking
+    // Re-enable basic tracking but avoid clicks to prevent navigation interference
+    trackMouseMove: false, // Keep disabled
+    trackKeyboard: true,   // Safe for session management
+    trackClicks: false,    // Keep disabled to avoid navigation interference
+    trackTouch: true,      // Safe for mobile
+    enabled: true,
+
   });
   
-  const { trackApiActivity, getStats: getApiStats } = useApiActivityTracker();
+  // Create a working API activity tracker that heavily throttles updateActivity calls
+  const { updateActivity } = useAuth();
+  const trackApiActivity = useCallback((apiInfo = {}) => {
+    // Only call updateActivity every 60 seconds to avoid navigation interference
+    const now = Date.now();
+    const lastUpdate = window._lastActivityUpdate || 0;
+    if (now - lastUpdate > 60000) { // 1 minute throttle
+      window._lastActivityUpdate = now;
+      // Call updateActivity asynchronously to avoid blocking navigation
+      setTimeout(() => {
+        try {
+          updateActivity();
+        } catch (error) {
+          console.debug('Activity update failed:', error);
+        }
+      }, 0);
+    }
+  }, [updateActivity]);
+  const getApiStats = () => ({});
 
   // Log activity tracking status changes
   useEffect(() => {
@@ -215,13 +235,13 @@ function ActivityTracker() {
     }
   }, [isTracking, getStats]);
 
-  // Set up API activity tracking with proper error handling
+  // Set up API activity tracking with proper error handling  
   useEffect(() => {
     try {
-      // Set the race-safe activity tracker on the API client
+      // Set the simplified activity tracker on the API client
       apiClient.setActivityTracker(trackApiActivity);
       
-      logger.debug('API activity tracking configured', {
+      logger.debug('API activity tracking configured with simplified tracker', {
         category: 'activity_tracking',
         component: 'ActivityTracker',
         timestamp: new Date().toISOString(),
