@@ -15,36 +15,26 @@ import {
   SUCCESS_MESSAGES,
   getUserFriendlyError
 } from '../../constants/errorMessages';
-import MantineLabResultForm from '../../components/medical/MantineLabResultForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import StatusBadge from '../../components/medical/StatusBadge';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import ConditionRelationships from '../../components/medical/ConditionRelationships';
-import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
+import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+// Import new modular components
+import LabResultCard from '../../components/medical/labresults/LabResultCard';
+import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
+import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
-  Badge,
   Button,
-  Card,
-  Group,
-  Stack,
-  Text,
   Grid,
   Container,
   Alert,
   Loader,
   Center,
-  Divider,
-  Paper,
-  TextInput,
-  Title,
-  SimpleGrid,
-  ThemeIcon,
-  Anchor,
-  Modal,
-  ScrollArea,
+  Stack,
+  Text,
+  Card,
 } from '@mantine/core';
 
 const LabResults = () => {
@@ -603,153 +593,18 @@ const LabResults = () => {
             </Card>
           ) : viewMode === 'cards' ? (
             <Grid>
-              {filteredLabResults.map(result => (
+              {filteredLabResults.map((result) => (
                 <Grid.Col key={result.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <Card
-                    withBorder
-                    shadow="sm"
-                    radius="md"
-                    h="100%"
-                    style={{ display: 'flex', flexDirection: 'column' }}
-                  >
-                    <Stack gap="sm" style={{ flex: 1 }}>
-                      <Group justify="space-between" align="flex-start">
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Text fw={600} size="lg">
-                            {result.test_name}
-                          </Text>
-                          {result.test_category && (
-                            <Badge variant="light" color="blue" size="md">
-                              {result.test_category}
-                            </Badge>
-                          )}
-                        </Stack>
-                        <StatusBadge status={result.status} />
-                      </Group>
-
-                      <Stack gap="xs">
-                        {result.test_code && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Test Code:
-                            </Text>
-                            <Text size="sm">{result.test_code}</Text>
-                          </Group>
-                        )}
-                        {result.test_type && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Type:
-                            </Text>
-                            <Badge variant="light" color="cyan" size="sm">
-                              {result.test_type}
-                            </Badge>
-                          </Group>
-                        )}
-                        {result.facility && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Facility:
-                            </Text>
-                            <Text size="sm">{result.facility}</Text>
-                          </Group>
-                        )}
-                        <Group>
-                          <Text size="sm" fw={500} c="dimmed" w={120}>
-                            Ordered:
-                          </Text>
-                          <Text size="sm">
-                            {formatDate(result.ordered_date)}
-                          </Text>
-                        </Group>
-                        {result.completed_date && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Completed:
-                            </Text>
-                            <Text size="sm">
-                              {formatDate(result.completed_date)}
-                            </Text>
-                          </Group>
-                        )}
-                        {result.labs_result && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Result:
-                            </Text>
-                            <StatusBadge status={result.labs_result} />
-                          </Group>
-                        )}
-                        {result.practitioner_id && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Doctor:
-                            </Text>
-                            <Text size="sm">
-                              {practitioners.find(
-                                p => p.id === result.practitioner_id
-                              )?.name ||
-                                `Practitioner ID: ${result.practitioner_id}`}
-                            </Text>
-                          </Group>
-                        )}
-                        <Group>
-                          <Text size="sm" fw={500} c="dimmed" w={120}>
-                            Files:
-                          </Text>
-                          <FileCountBadge
-                            count={fileCounts[result.id] || 0}
-                            entityType="lab-result"
-                            variant="badge"
-                            size="sm"
-                            loading={fileCountsLoading[result.id] || false}
-                            onClick={() => handleViewLabResult(result)}
-                          />
-                        </Group>
-                      </Stack>
-
-                      {result.notes && (
-                        <Stack gap="xs">
-                          <Divider />
-                          <Stack gap="xs">
-                            <Text size="sm" fw={500} c="dimmed">
-                              Notes
-                            </Text>
-                            <Text size="sm">{result.notes}</Text>
-                          </Stack>
-                        </Stack>
-                      )}
-                    </Stack>
-
-                    {/* Buttons always at bottom */}
-                    <Stack gap={0} mt="auto">
-                      <Divider />
-                      <Group justify="flex-end" gap="xs" pt="sm">
-                        <Button
-                          variant="filled"
-                          size="xs"
-                          onClick={() => handleViewLabResult(result)}
-                        >
-                          View
-                        </Button>
-                        <Button
-                          variant="filled"
-                          size="xs"
-                          onClick={() => handleEditLabResult(result)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="filled"
-                          color="red"
-                          size="xs"
-                          onClick={() => handleDeleteLabResult(result.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </Card>
+                  <LabResultCard
+                    labResult={result}
+                    onEdit={handleEditLabResult}
+                    onDelete={() => handleDeleteLabResult(result.id)}
+                    onView={handleViewLabResult}
+                    practitioners={practitioners}
+                    fileCount={fileCounts[result.id] || 0}
+                    fileCountLoading={fileCountsLoading[result.id] || false}
+                    navigate={navigate}
+                  />
                 </Grid.Col>
               ))}
             </Grid>
@@ -801,7 +656,7 @@ const LabResults = () => {
 
       {/* Create/Edit Form Modal */}
       {showModal && (
-        <MantineLabResultForm
+        <LabResultFormWrapper
           isOpen={showModal}
           onClose={handleCloseModal}
           title={editingLabResult ? 'Edit Lab Result' : 'Add New Lab Result'}
@@ -809,11 +664,17 @@ const LabResults = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           practitioners={practitioners}
-          editingLabResult={editingLabResult}
+          editingItem={editingLabResult}
           conditions={conditions}
           labResultConditions={labResultConditions}
           fetchLabResultConditions={fetchLabResultConditions}
           navigate={navigate}
+          onDocumentManagerRef={setDocumentManagerMethods}
+          onFileUploadComplete={(success) => {
+            if (success && editingLabResult) {
+              refreshFileCount(editingLabResult.id);
+            }
+          }}
         >
           {/* Form Loading Overlay */}
           <FormLoadingOverlay
@@ -822,203 +683,27 @@ const LabResults = () => {
             submessage={statusMessage?.message}
             type={statusMessage?.type || 'loading'}
           />
-          {/* File Management Section for Both Create and Edit Mode */}
-          <Paper withBorder p="md" mt="md">
-            <Title order={4} mb="md">
-              {editingLabResult ? 'Manage Files' : 'Add Files (Optional)'}
-            </Title>
-            <DocumentManagerWithProgress
-              entityType="lab-result"
-              entityId={editingLabResult?.id}
-              mode={editingLabResult ? 'edit' : 'create'}
-              config={{
-                acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-                maxSize: 10 * 1024 * 1024, // 10MB
-                maxFiles: 10
-              }}
-              onUploadPendingFiles={setDocumentManagerMethods}
-              onError={(error) => {
-                logger.error('document_manager_error', {
-                  message: `Document manager error in lab results ${editingLabResult ? 'edit' : 'create'}`,
-                  labResultId: editingLabResult?.id,
-                  error: error,
-                  component: 'LabResults',
-                });
-              }}
-              showProgressModal={true}
-            />
-          </Paper>
-        </MantineLabResultForm>
+        </LabResultFormWrapper>
       )}
 
       {/* View Details Modal */}
-      <Modal
-        opened={showViewModal}
-        onClose={() => !isBlocking && handleCloseViewModal()}
-        title={viewingLabResult?.test_name || 'Lab Result Details'}
-        size="xl"
-        scrollAreaComponent={ScrollArea.Autosize}
-        centered
-      >
-        {viewingLabResult && (
-          <>
-            <Stack gap="lg" mb="lg">
-              <Title order={3}>Lab Result Details</Title>
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Test Name
-                  </Text>
-                  <Text>{viewingLabResult.test_name}</Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Test Code
-                  </Text>
-                  <Text>{viewingLabResult.test_code || 'N/A'}</Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Category
-                  </Text>
-                  <Text>{viewingLabResult.test_category || 'N/A'}</Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Test Type
-                  </Text>
-                  <Text c={viewingLabResult.test_type ? 'inherit' : 'dimmed'}>
-                    {viewingLabResult.test_type || 'Not specified'}
-                  </Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Facility
-                  </Text>
-                  <Text c={viewingLabResult.facility ? 'inherit' : 'dimmed'}>
-                    {viewingLabResult.facility || 'Not specified'}
-                  </Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Status
-                  </Text>
-                  <StatusBadge status={viewingLabResult.status} />
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Lab Result
-                  </Text>
-                  {viewingLabResult.labs_result ? (
-                    <StatusBadge status={viewingLabResult.labs_result} />
-                  ) : (
-                    <Text c="dimmed">Not specified</Text>
-                  )}
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Ordering Practitioner
-                  </Text>
-                  <Text
-                    c={viewingLabResult.practitioner_id ? 'inherit' : 'dimmed'}
-                  >
-                    {viewingLabResult.practitioner_id
-                      ? practitioners.find(
-                          p => p.id === viewingLabResult.practitioner_id
-                        )?.name ||
-                        `Practitioner ID: ${viewingLabResult.practitioner_id}`
-                      : 'Not specified'}
-                  </Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Ordered Date
-                  </Text>
-                  <Text>{formatDate(viewingLabResult.ordered_date)}</Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    Completed Date
-                  </Text>
-                  <Text
-                    c={viewingLabResult.completed_date ? 'inherit' : 'dimmed'}
-                  >
-                    {viewingLabResult.completed_date
-                      ? formatDate(viewingLabResult.completed_date)
-                      : 'Not specified'}
-                  </Text>
-                </Stack>
-              </SimpleGrid>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">
-                  Notes
-                </Text>
-                <Paper withBorder p="sm" bg="gray.1">
-                  <Text
-                    style={{ whiteSpace: 'pre-wrap' }}
-                    c={viewingLabResult.notes ? 'inherit' : 'dimmed'}
-                  >
-                    {viewingLabResult.notes || 'No notes available'}
-                  </Text>
-                </Paper>
-              </Stack>
-            </Stack>
-
-            {/* Related Conditions Section */}
-            <Stack gap="lg">
-              <Title order={3}>Related Conditions</Title>
-              <ConditionRelationships
-                labResultId={viewingLabResult.id}
-                labResultConditions={labResultConditions}
-                conditions={conditions}
-                fetchLabResultConditions={fetchLabResultConditions}
-                navigate={navigate}
-                isViewMode={true}
-              />
-            </Stack>
-
-            <Stack gap="lg">
-              <Title order={3}>Associated Files</Title>
-              <DocumentManagerWithProgress
-                entityType="lab-result"
-                entityId={viewingLabResult.id}
-                mode="view"
-                config={{
-                  acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-                  maxSize: 10 * 1024 * 1024, // 10MB
-                  maxFiles: 10
-                }}
-                onError={(error) => {
-                  logger.error('document_manager_error', {
-                    message: 'Document manager error in lab results view',
-                    labResultId: viewingLabResult.id,
-                    error: error,
-                    component: 'LabResults',
-                  });
-                }}
-                showProgressModal={true}
-              />
-            </Stack>
-
-            {/* Modal Action Buttons */}
-            <Group justify="flex-end" mt="md">
-              <Button
-                variant="filled"
-                size="xs"
-                onClick={() => {
-                  handleCloseViewModal();
-                  handleEditLabResult(viewingLabResult);
-                }}
-              >
-                Edit Lab Result
-              </Button>
-              <Button variant="filled" onClick={handleCloseViewModal}>
-                Close
-              </Button>
-            </Group>
-          </>
-        )}
-      </Modal>
+      <LabResultViewModal
+        isOpen={showViewModal}
+        onClose={handleCloseViewModal}
+        labResult={viewingLabResult}
+        onEdit={handleEditLabResult}
+        practitioners={practitioners}
+        conditions={conditions}
+        labResultConditions={labResultConditions}
+        fetchLabResultConditions={fetchLabResultConditions}
+        navigate={navigate}
+        isBlocking={isBlocking}
+        onFileUploadComplete={(success) => {
+          if (success && viewingLabResult) {
+            refreshFileCount(viewingLabResult.id);
+          }
+        }}
+      />
     </>
   );
 };

@@ -19,16 +19,12 @@ import {
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineProcedureForm from '../../components/medical/MantineProcedureForm';
-import StatusBadge from '../../components/medical/StatusBadge';
-import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
-import FileCountBadge from '../../components/shared/FileCountBadge';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
+import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
+import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
-  Badge,
   Button,
-  Card,
   Group,
   Stack,
   Text,
@@ -37,10 +33,7 @@ import {
   Alert,
   Loader,
   Center,
-  Divider,
-  Modal,
-  Title,
-  Paper,
+  Card,
 } from '@mantine/core';
 
 const Procedures = () => {
@@ -537,171 +530,18 @@ const Procedures = () => {
             </Card>
           ) : viewMode === 'cards' ? (
             <Grid>
-              {filteredProcedures.map(procedure => (
+              {filteredProcedures.map((procedure) => (
                 <Grid.Col key={procedure.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <Card
-                    withBorder
-                    shadow="sm"
-                    radius="md"
-                    h="100%"
-                    style={{ display: 'flex', flexDirection: 'column' }}
-                  >
-                    <Stack gap="sm" style={{ flex: 1 }}>
-                      <Group justify="space-between" align="flex-start">
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Text fw={600} size="lg">
-                            {procedure.procedure_name}
-                          </Text>
-                          <Group gap="xs">
-                            {procedure.procedure_type && (
-                              <Badge variant="light" color="blue" size="md">
-                                {procedure.procedure_type}
-                              </Badge>
-                            )}
-                            <FileCountBadge
-                              count={fileCounts[procedure.id] || 0}
-                              entityType="procedure"
-                              variant="badge"
-                              size="sm"
-                              loading={fileCountsLoading[procedure.id] || false}
-                              onClick={() => handleViewProcedure(procedure)}
-                            />
-                          </Group>
-                        </Stack>
-                        <StatusBadge status={procedure.status} />
-                      </Group>
-
-                      <Stack gap="xs">
-                        {procedure.date && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Procedure Date:
-                            </Text>
-                            <Text size="sm">{formatDate(procedure.date)}</Text>
-                          </Group>
-                        )}
-                        {procedure.procedure_code && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Code:
-                            </Text>
-                            <Text size="sm">{procedure.procedure_code}</Text>
-                          </Group>
-                        )}
-                        {procedure.procedure_setting && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Setting:
-                            </Text>
-                            <Badge variant="light" color="cyan" size="sm">
-                              {procedure.procedure_setting}
-                            </Badge>
-                          </Group>
-                        )}
-                        {procedure.procedure_duration && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Duration:
-                            </Text>
-                            <Text size="sm">
-                              {procedure.procedure_duration} minutes
-                            </Text>
-                          </Group>
-                        )}
-                        {procedure.facility && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Facility:
-                            </Text>
-                            <Text size="sm">{procedure.facility}</Text>
-                          </Group>
-                        )}
-                        {procedure.practitioner_id && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Doctor:
-                            </Text>
-                            <Text 
-                              size="sm"
-                              c="blue"
-                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                              onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
-                              title="View practitioner details"
-                            >
-                              {practitioners.find(
-                                p => p.id === procedure.practitioner_id
-                              )?.name ||
-                                `Practitioner ID: ${procedure.practitioner_id}`}
-                            </Text>
-                          </Group>
-                        )}
-                        {procedure.description && (
-                          <Group align="flex-start">
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Description:
-                            </Text>
-                            <Text size="sm" style={{ flex: 1 }}>
-                              {procedure.description}
-                            </Text>
-                          </Group>
-                        )}
-                        {procedure.procedure_complications && (
-                          <Group align="flex-start">
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Complications:
-                            </Text>
-                            <Text
-                              size="sm"
-                              style={{ flex: 1, color: '#d63384' }}
-                            >
-                              {procedure.procedure_complications}
-                            </Text>
-                          </Group>
-                        )}
-                      </Stack>
-
-                      {procedure.notes && (
-                        <Stack gap="xs">
-                          <Divider />
-                          <Stack gap="xs">
-                            <Text size="sm" fw={500} c="dimmed">
-                              Notes
-                            </Text>
-                            <Text size="sm">{procedure.notes}</Text>
-                          </Stack>
-                        </Stack>
-                      )}
-                    </Stack>
-
-                    {/* Buttons always at bottom */}
-                    <Stack gap={0} mt="auto">
-                      <Divider />
-                      <Group justify="flex-end" gap="xs" pt="sm">
-                        <Button
-                          variant="filled"
-                          size="xs"
-                          onClick={() => handleViewProcedure(procedure)}
-                        >
-                          View
-                        </Button>
-                        <Button
-                          variant="filled"
-                          size="xs"
-                          onClick={() => handleEditProcedure(procedure)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="filled"
-                          color="red"
-                          size="xs"
-                          onClick={() => handleDeleteProcedure(procedure.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </Card>
+                  <ProcedureCard
+                    procedure={procedure}
+                    onEdit={handleEditProcedure}
+                    onDelete={() => handleDeleteProcedure(procedure.id)}
+                    onView={handleViewProcedure}
+                    practitioners={practitioners}
+                    fileCount={fileCounts[procedure.id] || 0}
+                    fileCountLoading={fileCountsLoading[procedure.id] || false}
+                    navigate={navigate}
+                  />
                 </Grid.Col>
               ))}
             </Grid>
@@ -730,377 +570,38 @@ const Procedures = () => {
         </Stack>
       </Container>
 
-      <MantineProcedureForm
+      <ProcedureFormWrapper
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
         title={editingProcedure ? 'Edit Procedure' : 'Add New Procedure'}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
+        editingItem={editingProcedure}
         practitioners={practitioners}
-        editingProcedure={editingProcedure}
         isLoading={isBlocking}
         statusMessage={statusMessage}
-      >
-        {/* File Management Section for Both Create and Edit Mode */}
-        <Paper withBorder p="md" mt="md">
-          <Title order={4} mb="md">
-            {editingProcedure ? 'Manage Files' : 'Add Files (Optional)'}
-          </Title>
-          <DocumentManagerWithProgress
-            entityType="procedure"
-            entityId={editingProcedure?.id}
-            mode={editingProcedure ? 'edit' : 'create'}
-            config={{
-              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-              maxSize: 10 * 1024 * 1024, // 10MB
-              maxFiles: 10
-            }}
-            onUploadPendingFiles={setDocumentManagerMethods}
-            showProgressModal={true}
-            onUploadComplete={(success, completedCount, failedCount) => {
-              if (success) {
-                // Refresh file count after successful upload
-                if (editingProcedure?.id) {
-                  refreshFileCount(editingProcedure.id);
-                }
-              }
-              logger.info('procedures_upload_completed', {
-                message: 'File upload completed in procedures form',
-                procedureId: editingProcedure?.id,
-                success,
-                completedCount,
-                failedCount,
-                component: 'Procedures',
-              });
-            }}
-            onError={(error) => {
-              logger.error('document_manager_error', {
-                message: `Document manager error in procedures ${editingProcedure ? 'edit' : 'create'}`,
-                procedureId: editingProcedure?.id,
-                error: error,
-                component: 'Procedures',
-              });
-            }}
-          />
-        </Paper>
-      </MantineProcedureForm>
+        onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={(success, completedCount, failedCount) => {
+          if (success && editingProcedure?.id) {
+            refreshFileCount(editingProcedure.id);
+          }
+        }}
+      />
 
-      {/* Procedure View Modal */}
-      <Modal
-        opened={showViewModal}
+      <ProcedureViewModal
+        isOpen={showViewModal}
         onClose={handleCloseViewModal}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              Procedure Details
-            </Text>
-            {viewingProcedure && (
-              <StatusBadge status={viewingProcedure.status} />
-            )}
-          </Group>
-        }
-        size="lg"
-        centered
-      >
-        {viewingProcedure && (
-          <Stack gap="md">
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Title order={3}>{viewingProcedure.procedure_name}</Title>
-                    <Group gap="xs">
-                      {viewingProcedure.procedure_type && (
-                        <Badge variant="light" color="blue" size="lg">
-                          {viewingProcedure.procedure_type}
-                        </Badge>
-                      )}
-                      {viewingProcedure.procedure_code && (
-                        <Badge variant="light" color="teal" size="lg">
-                          {viewingProcedure.procedure_code}
-                        </Badge>
-                      )}
-                    </Group>
-                  </Stack>
-                </Group>
-              </Stack>
-            </Card>
-
-            <Grid>
-              <Grid.Col span={6}>
-                <Card withBorder p="md">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      PROCEDURE INFORMATION
-                    </Text>
-                    <Divider />
-                    <Stack gap="xs">
-                      <Group>
-                        <Text size="sm" fw={500} w={100}>
-                          Date:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingProcedure.date ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingProcedure.date
-                            ? formatDate(viewingProcedure.date)
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={100}>
-                          Setting:
-                        </Text>
-                        {viewingProcedure.procedure_setting ? (
-                          <Badge variant="light" color="cyan" size="sm">
-                            {viewingProcedure.procedure_setting}
-                          </Badge>
-                        ) : (
-                          <Text size="sm" c="dimmed">
-                            Not specified
-                          </Text>
-                        )}
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={100}>
-                          Duration:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingProcedure.procedure_duration
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingProcedure.procedure_duration
-                            ? `${viewingProcedure.procedure_duration} minutes`
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={100}>
-                          Facility:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingProcedure.facility ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingProcedure.facility || 'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      PRACTITIONER INFORMATION
-                    </Text>
-                    <Divider />
-                    <Stack gap="xs">
-                      <Group>
-                        <Text size="sm" fw={500} w={100}>
-                          Doctor:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingProcedure.practitioner_id
-                              ? 'blue'
-                              : 'dimmed'
-                          }
-                          style={viewingProcedure.practitioner_id ? { cursor: 'pointer', textDecoration: 'underline' } : {}}
-                          onClick={viewingProcedure.practitioner_id ? () => navigateToEntity('practitioner', viewingProcedure.practitioner_id, navigate) : undefined}
-                          title={viewingProcedure.practitioner_id ? "View practitioner details" : undefined}
-                        >
-                          {viewingProcedure.practitioner_id
-                            ? practitioners.find(
-                                p => p.id === viewingProcedure.practitioner_id
-                              )?.name ||
-                              `Practitioner ID: ${viewingProcedure.practitioner_id}`
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={100}>
-                          Specialty:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingProcedure.practitioner_id
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingProcedure.practitioner_id
-                            ? practitioners.find(
-                                p => p.id === viewingProcedure.practitioner_id
-                              )?.specialty || 'Not specified'
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-            </Grid>
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  PROCEDURE DESCRIPTION
-                </Text>
-                <Divider />
-                <Text
-                  size="sm"
-                  c={viewingProcedure.description ? 'inherit' : 'dimmed'}
-                >
-                  {viewingProcedure.description || 'No description available'}
-                </Text>
-              </Stack>
-            </Card>
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  COMPLICATIONS
-                </Text>
-                <Divider />
-                <Text
-                  size="sm"
-                  c={
-                    viewingProcedure.procedure_complications
-                      ? '#d63384'
-                      : 'dimmed'
-                  }
-                >
-                  {viewingProcedure.procedure_complications ||
-                    'No complications reported'}
-                </Text>
-              </Stack>
-            </Card>
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  ANESTHESIA INFORMATION
-                </Text>
-                <Divider />
-                <Stack gap="xs">
-                  <Group>
-                    <Text size="sm" fw={500} w={100}>
-                      Type:
-                    </Text>
-                    {viewingProcedure.anesthesia_type ? (
-                      <Badge variant="light" color="purple" size="sm">
-                        {viewingProcedure.anesthesia_type}
-                      </Badge>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        Not specified
-                      </Text>
-                    )}
-                  </Group>
-                  <Group align="flex-start">
-                    <Text size="sm" fw={500} w={100}>
-                      Notes:
-                    </Text>
-                    <Text
-                      size="sm"
-                      style={{ flex: 1 }}
-                      c={
-                        viewingProcedure.anesthesia_notes ? 'inherit' : 'dimmed'
-                      }
-                    >
-                      {viewingProcedure.anesthesia_notes ||
-                        'No anesthesia notes available'}
-                    </Text>
-                  </Group>
-                </Stack>
-              </Stack>
-            </Card>
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  CLINICAL NOTES
-                </Text>
-                <Divider />
-                <Text
-                  size="sm"
-                  c={viewingProcedure.notes ? 'inherit' : 'dimmed'}
-                >
-                  {viewingProcedure.notes || 'No clinical notes available'}
-                </Text>
-              </Stack>
-            </Card>
-
-            {/* Document Management */}
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  ATTACHED DOCUMENTS
-                </Text>
-                <Divider />
-                <DocumentManagerWithProgress
-                  entityType="procedure"
-                  entityId={viewingProcedure.id}
-                  mode="view"
-                  config={{
-                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                    maxSize: 10 * 1024 * 1024, // 10MB
-                    maxFiles: 10
-                  }}
-                  showProgressModal={true}
-                  onUploadComplete={(success, completedCount, failedCount) => {
-                    // DocumentManagerWithProgress already handles file list refresh internally
-                    // No need to refresh file count from here to prevent flicker
-                    logger.info('procedures_view_upload_completed', {
-                      message: 'File upload completed in procedures view',
-                      procedureId: viewingProcedure.id,
-                      success,
-                      completedCount,
-                      failedCount,
-                      component: 'Procedures',
-                    });
-                  }}
-                  onError={(error) => {
-                    logger.error('document_manager_view_error', {
-                      message: 'Document manager error in procedures view',
-                      procedureId: viewingProcedure.id,
-                      error: error,
-                      component: 'Procedures',
-                    });
-                  }}
-                />
-              </Stack>
-            </Card>
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                variant="filled"
-                size="xs"
-                onClick={() => {
-                  handleCloseViewModal();
-                  handleEditProcedure(viewingProcedure);
-                }}
-              >
-                Edit Procedure
-              </Button>
-              <Button variant="filled" onClick={handleCloseViewModal}>
-                Close
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+        procedure={viewingProcedure}
+        onEdit={handleEditProcedure}
+        practitioners={practitioners}
+        navigate={navigate}
+        onFileUploadComplete={(success) => {
+          if (success && viewingProcedure) {
+            refreshFileCount(viewingProcedure.id);
+          }
+        }}
+      />
     </>
   );
 };
