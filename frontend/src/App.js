@@ -199,6 +199,7 @@ function ActivityTracker() {
     trackClicks: false,    // Keep disabled to avoid navigation interference
     trackTouch: true,      // Safe for mobile
     enabled: true,
+
   });
   
   // Create a working API activity tracker that heavily throttles updateActivity calls
@@ -330,7 +331,7 @@ function App() {
                 <DatesProvider settings={{ timezone: 'UTC' }}>
                   <MantineIntegratedThemeProvider>
                     <NavigationTracker />
-                    <ActivityTracker />
+                    {/* <ActivityTracker /> */}
                     <div className="App">
                       <Routes>
                         {/* Public Routes */}
