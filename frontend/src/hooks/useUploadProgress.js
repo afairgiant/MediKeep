@@ -37,6 +37,7 @@ export const useUploadProgress = () => {
 
   const uploadStartTimeRef = useRef(null);
   const progressUpdateIntervalRef = useRef(null);
+  const uploadStateRef = useRef(null);
 
   // Calculate estimated time remaining based on progress
   const calculateTimeRemaining = useCallback((progress, startTime) => {
@@ -307,6 +308,7 @@ export const useUploadProgress = () => {
     }
     
     uploadStartTimeRef.current = null;
+    lastLogTimeRef.current = 0;
     
     setUploadState({
       isUploading: false,
@@ -367,12 +369,22 @@ export const useUploadProgress = () => {
     };
   }, [uploadState.files, uploadState.startTime, uploadState.overallProgress, uploadState.isUploading, calculateTimeRemaining, calculateUploadSpeed]);
 
+  // Keep uploadStateRef in sync with uploadState
+  useEffect(() => {
+    uploadStateRef.current = uploadState;
+  }, [uploadState]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (progressUpdateIntervalRef.current) {
         clearInterval(progressUpdateIntervalRef.current);
+        progressUpdateIntervalRef.current = null;
       }
+      // Reset refs to prevent memory leaks
+      uploadStartTimeRef.current = null;
+      uploadStateRef.current = null;
+      lastLogTimeRef.current = 0;
     };
   }, []);
 

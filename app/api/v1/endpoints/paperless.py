@@ -5,22 +5,66 @@ Provides API endpoints for paperless-ngx integration including connection testin
 settings management, and document operations.
 """
 
+import traceback
 from typing import Dict, Any
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.database import get_db
 from app.api.deps import get_current_user
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
-from app.services.paperless_service import create_paperless_service_with_username_password, PaperlessConnectionError, PaperlessAuthenticationError
+from app.services.paperless_service import create_paperless_service_with_username_password, PaperlessConnectionError, PaperlessAuthenticationError, PaperlessUploadError, PaperlessError
 from app.crud.user_preferences import user_preferences
-from app.services.credential_encryption import credential_encryption
+from app.services.credential_encryption import credential_encryption, SecurityError
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+
+def create_sanitized_error_response(
+    status_code: int,
+    public_message: str,
+    internal_error: Exception,
+    user_id: int,
+    operation: str,
+    **log_context
+) -> HTTPException:
+    """
+    Create a sanitized error response that hides internal details from clients.
+    
+    Args:
+        status_code: HTTP status code to return
+        public_message: Safe message to show to client
+        internal_error: The actual exception that occurred
+        user_id: User ID for logging context
+        operation: Description of the operation that failed
+        **log_context: Additional context for logging
+        
+    Returns:
+        HTTPException with sanitized error message
+    """
+    # Log the full error details server-side for debugging
+    logger.error(
+        f"Internal error during {operation} for user {user_id}",
+        extra={
+            "user_id": user_id,
+            "operation": operation,
+            "error_type": type(internal_error).__name__,
+            "error_message": str(internal_error),
+            "stack_trace": traceback.format_exc(),
+            **log_context
+        }
+    )
+    
+    # Return generic error message to client
+    return HTTPException(
+        status_code=status_code,
+        detail=public_message
+    )
 
 
 @router.post("/test-connection", response_model=Dict[str, Any])
@@ -106,7 +150,7 @@ async def test_paperless_connection(
         })
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username/password or authentication failed"
+            detail="Authentication failed. Please check your credentials."
         )
         
     except PaperlessConnectionError as e:
@@ -117,18 +161,47 @@ async def test_paperless_connection(
         })
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Connection failed: {str(e)}"
+            detail="Unable to connect to the Paperless server. Please check the URL and network connectivity."
+        )
+    
+    except SecurityError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            public_message="A security error occurred during connection test",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="paperless_connection_test",
+            paperless_url=connection_data.paperless_url
+        )
+    
+    except SQLAlchemyError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            public_message="A database error occurred during connection test",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="paperless_connection_test",
+            paperless_url=connection_data.paperless_url
+        )
+        
+    except ValueError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            public_message="Invalid connection parameters provided",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="paperless_connection_test",
+            paperless_url=connection_data.paperless_url
         )
         
     except Exception as e:
-        logger.error(f"Unexpected error during paperless connection test for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "error": str(e),
-            "paperless_url": connection_data.paperless_url
-        })
-        raise HTTPException(
+        raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred during connection test"
+            public_message="An internal error occurred during connection test",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="paperless_connection_test",
+            paperless_url=connection_data.paperless_url
         )
 
 
@@ -181,15 +254,23 @@ async def get_storage_usage_stats(
             "local": local_stats,
             "paperless": paperless_stats
         }
+    
+    except SQLAlchemyError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            public_message="A database error occurred while retrieving storage statistics",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="get_storage_stats"
+        )
         
     except Exception as e:
-        logger.error(f"Failed to get storage stats for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "error": str(e)
-        })
-        raise HTTPException(
+        raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve storage statistics"
+            public_message="An internal error occurred while retrieving storage statistics",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="get_storage_stats"
         )
 
 
@@ -231,15 +312,23 @@ async def get_paperless_settings(
             "paperless_auto_sync": user_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": user_prefs.paperless_sync_tags or True
         }
+    
+    except SQLAlchemyError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            public_message="A database error occurred while retrieving settings",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="get_paperless_settings"
+        )
         
     except Exception as e:
-        logger.error(f"Failed to get paperless settings for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "error": str(e)
-        })
-        raise HTTPException(
+        raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve paperless settings"
+            public_message="An internal error occurred while retrieving settings",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="get_paperless_settings"
         )
 
 
@@ -315,15 +404,42 @@ async def update_paperless_settings(
             "paperless_sync_tags": updated_prefs.paperless_sync_tags or True,
             "unit_system": updated_prefs.unit_system
         }
+    
+    except SecurityError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            public_message="A security error occurred while updating settings",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="update_paperless_settings"
+        )
+    
+    except SQLAlchemyError as e:
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            public_message="A database error occurred while updating settings",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="update_paperless_settings"
+        )
+    
+    except ValueError as e:
+        # Handle validation errors for settings
+        raise create_sanitized_error_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            public_message="Invalid settings data provided",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="update_paperless_settings"
+        )
         
     except Exception as e:
-        logger.error(f"Failed to update paperless settings for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "error": str(e)
-        })
-        raise HTTPException(
+        raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update paperless settings"
+            public_message="An internal error occurred while updating settings",
+            internal_error=e,
+            user_id=current_user.id,
+            operation="update_paperless_settings"
         )
 
 
@@ -366,10 +482,8 @@ async def check_paperless_health(
         if not user_prefs.paperless_url or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
             return {
                 "status": "unconfigured",
-                "message": "Paperless credentials not configured",
+                "message": "Paperless configuration incomplete",
                 "details": {
-                    "has_url": bool(user_prefs.paperless_url),
-                    "has_credentials": bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted),
                     "timestamp": datetime.utcnow().isoformat()
                 }
             }
@@ -411,7 +525,6 @@ async def check_paperless_health(
         return {
             "status": "unhealthy",
             "message": "Authentication failed",
-            "error": str(e),
             "details": {
                 "error_type": "authentication",
                 "timestamp": datetime.utcnow().isoformat()
@@ -426,24 +539,42 @@ async def check_paperless_health(
         return {
             "status": "unhealthy", 
             "message": "Connection failed",
-            "error": str(e),
             "details": {
                 "error_type": "connection",
                 "timestamp": datetime.utcnow().isoformat()
             }
         }
-        
-    except Exception as e:
-        logger.error(f"Paperless health check failed unexpectedly for user {current_user.id}", extra={
+    
+    except SQLAlchemyError as e:
+        # Log the full error but return sanitized response
+        logger.error(f"Database error during paperless health check for user {current_user.id}", extra={
             "user_id": current_user.id,
-            "error": str(e)
+            "error": str(e),
+            "error_type": type(e).__name__,
+            "stack_trace": traceback.format_exc()
         })
         return {
             "status": "unhealthy",
-            "message": "Health check failed",
-            "error": str(e),
+            "message": "Health check failed due to internal error",
             "details": {
-                "error_type": "unexpected",
+                "error_type": "internal",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        }
+        
+    except Exception as e:
+        # Log the full error but return sanitized response
+        logger.error(f"Paperless health check failed unexpectedly for user {current_user.id}", extra={
+            "user_id": current_user.id,
+            "error": str(e),
+            "error_type": type(e).__name__,
+            "stack_trace": traceback.format_exc()
+        })
+        return {
+            "status": "unhealthy",
+            "message": "Health check failed due to internal error",
+            "details": {
+                "error_type": "internal",
                 "timestamp": datetime.utcnow().isoformat()
             }
         }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -153,6 +153,10 @@ const Visits = () => {
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
   
+  // Debouncing refs for file count loading
+  const fileCountLoadingTimeoutRef = useRef(null);
+  const lastVisitsVersionRef = useRef(null);
+  
   useEffect(() => {
     if (currentPatient?.id) {
       apiService.getPatientConditions(currentPatient.id)
@@ -166,34 +170,63 @@ const Visits = () => {
     }
   }, [currentPatient?.id]);
 
-  // Load file counts for visits
-  useEffect(() => {
-    const loadFileCountsForVisits = async () => {
-      if (!visits || visits.length === 0) return;
-      
-      const countPromises = visits.map(async (visit) => {
-        setFileCountsLoading(prev => {
-          if (prev[visit.id] !== undefined) return prev; // Already loading
-          return { ...prev, [visit.id]: true };
-        });
-        
-        try {
-          const files = await apiService.getEntityFiles('visit', visit.id);
-          const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [visit.id]: count }));
-        } catch (error) {
-          console.error(`Error loading file count for visit ${visit.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
-        } finally {
-          setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
-        }
+  // Create a memoized version string of visits to detect actual changes
+  const visitsVersion = useMemo(() => {
+    if (!visits || visits.length === 0) return '';
+    return visits.map(v => `${v.id}-${v.updated_at || v.created_at || ''}`).join('|');
+  }, [visits]);
+
+  // Debounced file count loading function
+  const debouncedLoadFileCounts = useCallback(async (visitsToLoad) => {
+    if (!visitsToLoad || visitsToLoad.length === 0) return;
+    
+    const countPromises = visitsToLoad.map(async (visit) => {
+      setFileCountsLoading(prev => {
+        if (prev[visit.id] !== undefined) return prev; // Already loading
+        return { ...prev, [visit.id]: true };
       });
       
-      await Promise.all(countPromises);
-    };
+      try {
+        const files = await apiService.getEntityFiles('visit', visit.id);
+        const count = Array.isArray(files) ? files.length : 0;
+        setFileCounts(prev => ({ ...prev, [visit.id]: count }));
+      } catch (error) {
+        console.error(`Error loading file count for visit ${visit.id}:`, error);
+        setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
+      } finally {
+        setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
+      }
+    });
+    
+    await Promise.all(countPromises);
+  }, []);
 
-    loadFileCountsForVisits();
-  }, [visits]); // Remove fileCounts from dependencies
+  // Load file counts for visits with debouncing
+  useEffect(() => {
+    // Only proceed if we have visits and the version has actually changed
+    if (!visits || visits.length === 0 || visitsVersion === lastVisitsVersionRef.current) {
+      return;
+    }
+
+    // Clear any existing timeout
+    if (fileCountLoadingTimeoutRef.current) {
+      clearTimeout(fileCountLoadingTimeoutRef.current);
+    }
+
+    // Set up debounced call
+    fileCountLoadingTimeoutRef.current = setTimeout(() => {
+      lastVisitsVersionRef.current = visitsVersion;
+      debouncedLoadFileCounts(visits);
+    }, 300); // 300ms debounce delay
+
+    // Cleanup function
+    return () => {
+      if (fileCountLoadingTimeoutRef.current) {
+        clearTimeout(fileCountLoadingTimeoutRef.current);
+        fileCountLoadingTimeoutRef.current = null;
+      }
+    };
+  }, [visits, visitsVersion, debouncedLoadFileCounts]);
 
   // Function to refresh file counts for all visits
   const refreshFileCount = useCallback(async (visitId) => {

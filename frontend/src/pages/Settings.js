@@ -10,6 +10,7 @@ import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
 import { updateUserPreferences } from '../services/api/userPreferencesApi';
 import frontendLogger from '../services/frontendLogger';
+import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
@@ -101,7 +102,7 @@ const Settings = () => {
       }
 
       // Check if we're updating paperless settings
-      const hasPaperlessSettings = ['paperless_enabled', 'paperless_url', 'paperless_username', 'paperless_password', 'default_storage_backend', 'paperless_auto_sync', 'paperless_sync_tags'].some(key => key in fieldsToUpdate);
+      const hasPaperlessSettings = PAPERLESS_SETTING_KEYS.some(key => key in fieldsToUpdate);
       
       let updatedPreferences;
       if (hasPaperlessSettings) {

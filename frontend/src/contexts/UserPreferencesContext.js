@@ -5,6 +5,7 @@ import {
 } from '../services/api/userPreferencesApi';
 import { useAuth } from './AuthContext';
 import frontendLogger from '../services/frontendLogger';
+import { PAPERLESS_SETTING_DEFAULTS } from '../constants/paperlessSettings';
 
 /**
  * User Preferences Context
@@ -51,12 +52,8 @@ export const UserPreferencesProvider = ({ children }) => {
         // Set default preferences on error
         const defaultPrefs = {
           unit_system: 'imperial',
-          paperless_enabled: false,
-          paperless_url: '',
-          paperless_username: '',
-          paperless_password: '',
-          default_storage_backend: 'local',
-          paperless_auto_sync: false,
+          ...PAPERLESS_SETTING_DEFAULTS,
+          // Override the sync tags default for this context
           paperless_sync_tags: true,
         };
         setPreferences(defaultPrefs);
