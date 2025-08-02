@@ -276,7 +276,14 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
       act(() => {
         result.current.startSubmission();
+      });
+      
+      act(() => {
         result.current.completeFormSubmission(false);
+      });
+      
+      act(() => {
+        result.current.completeFileUpload(false, 0, 0);
       });
 
       const statusMessage = result.current.statusMessage;
@@ -316,13 +323,13 @@ describe('useFormSubmissionWithUploads Hook', () => {
         })
       );
 
-      expect(mockOnError).toHaveBeenCalledWith('User friendly: Network connection failed');
+      expect(mockOnError).toHaveBeenCalledWith('Connection error. Please check your network and try again.');
     });
 
     test('should handle upload failure with error details', () => {
       const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
 
-      const testError = { message: 'File too large' };
+      const testError = { message: 'File size too large' };
 
       act(() => {
         result.current.handleSubmissionFailure(testError, 'upload');
@@ -338,7 +345,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
         })
       );
 
-      expect(mockOnError).toHaveBeenCalledWith('User friendly: File too large');
+      expect(mockOnError).toHaveBeenCalledWith('File size exceeds the maximum limit.');
     });
 
     test('should handle unknown error gracefully', () => {
@@ -349,7 +356,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
       });
 
       expect(result.current.submissionState.hasErrors).toBe(true);
-      expect(mockOnError).toHaveBeenCalledWith('User friendly: null');
+      expect(mockOnError).toHaveBeenCalledWith('An unexpected error occurred. Please try again.');
     });
   });
 
