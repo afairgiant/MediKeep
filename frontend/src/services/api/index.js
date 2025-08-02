@@ -23,11 +23,10 @@ const ENTITY_TO_API_PATH = {
 // Streamlined API service with proper logging integration
 class ApiService {
   constructor() {
-    // Always use relative URLs in production for Docker compatibility
-    this.baseURL =
-      process.env.NODE_ENV === 'production'
-        ? '/api/v1'
-        : 'http://localhost:8000/api/v1';
+    // Use environment variable for configurable API URL
+    // Docker and production set REACT_APP_API_URL=/api/v1 for relative paths
+    // Development uses REACT_APP_API_URL=http://localhost:8000/api/v1
+    this.baseURL = process.env.REACT_APP_API_URL || '/api/v1';
     // Fallback URLs for better Docker compatibility
     this.fallbackURL = '/api/v1';
   }
@@ -38,10 +37,28 @@ class ApiService {
 
     if (token) {
       try {
-        // Check if token is expired
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Date.now() / 1000;
+        // Validate token format before parsing
+        if (typeof token !== 'string' || token.trim() === '') {
+          throw new Error('Token is empty or not a string');
+        }
 
+        const tokenParts = token.split('.');
+        if (tokenParts.length !== 3) {
+          throw new Error(`Invalid JWT format - expected 3 parts, got ${tokenParts.length}`);
+        }
+
+        // Check if token is expired
+        const payload = JSON.parse(atob(tokenParts[1]));
+        
+        // Validate required JWT claims
+        if (!payload.sub) {
+          throw new Error('Token missing subject claim');
+        }
+        if (!payload.exp) {
+          throw new Error('Token missing expiration claim');
+        }
+
+        const currentTime = Date.now() / 1000;
         if (payload.exp < currentTime) {
           logger.warn('Token expired, removing from storage');
           localStorage.removeItem('token');
@@ -600,6 +617,91 @@ class ApiService {
     }
   }
 
+
+  // View file in new tab (generic - file ID is enough)
+  async viewEntityFile(fileId, fileName, signal) {
+    try {
+      logger.info('api_view_entity_file', 'Opening entity file for viewing', {
+        fileId,
+        fileName,
+        component: 'ApiService',
+      });
+
+      // Get authentication token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required to view files');
+      }
+
+      // Validate and check token
+      try {
+        // Validate token format
+        if (typeof token !== 'string' || token.trim() === '') {
+          throw new Error('Token is empty or not a string');
+        }
+
+        const tokenParts = token.split('.');
+        if (tokenParts.length !== 3) {
+          throw new Error(`Invalid JWT format - expected 3 parts, got ${tokenParts.length}`);
+        }
+
+        const payload = JSON.parse(atob(tokenParts[1]));
+        
+        // Validate required JWT claims
+        if (!payload.sub) {
+          throw new Error('Token missing subject claim');
+        }
+        if (!payload.exp) {
+          throw new Error('Token missing expiration claim');
+        }
+
+        const currentTime = Date.now() / 1000;
+        if (payload.exp < currentTime) {
+          throw new Error('Session expired. Please log in again.');
+        }
+      } catch (e) {
+        if (e.message.includes('Session expired') || e.message.includes('Token missing')) {
+          throw e; // Re-throw specific errors as-is
+        }
+        throw new Error('Invalid authentication token. Please log in again.');
+      }
+
+      // Construct view URL with authentication token
+      // Use the base URL from environment variable, removing /api/v1 suffix if present
+      const envBaseUrl = process.env.REACT_APP_API_URL || '/api/v1';
+      const baseUrl = envBaseUrl.endsWith('/api/v1') ? envBaseUrl.slice(0, -7) : envBaseUrl;
+      const viewUrl = `${baseUrl}/api/v1/entity-files/files/${fileId}/view?token=${encodeURIComponent(token)}`;
+
+      // Open in new tab
+      const newWindow = window.open(viewUrl, '_blank', 'noopener,noreferrer');
+      
+      if (!newWindow) {
+        throw new Error('Failed to open file viewer. Please check if pop-ups are blocked.');
+      }
+
+      // Note: window.open() for external URLs doesn't provide success/failure feedback
+      // We log success here assuming the tab opened successfully
+      logger.info('api_view_entity_file_success', 'File viewer opened successfully', {
+        fileId,
+        fileName,
+        viewUrl: viewUrl.replace(/token=[^&]+/, 'token=***'), // Hide token in logs
+        component: 'ApiService',
+      });
+      
+      // Return success - we can't actually verify if the file loaded successfully
+      // since it opens in a new tab/window, but if window.open() didn't return null,
+      // the tab was created
+      return { success: true, message: 'File opened in new tab' };
+    } catch (error) {
+      logger.error('api_view_entity_file_error', 'Failed to view entity file', {
+        fileId,
+        fileName,
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
 
   // Download file (generic - file ID is enough)
   async downloadEntityFile(fileId, fileName, signal) {

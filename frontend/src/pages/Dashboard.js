@@ -442,13 +442,27 @@ const Dashboard = () => {
   const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
+    const handleClick = (e) => {
+      console.log('ModuleCard clicked:', module.link);
+      try {
+        navigate(module.link);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        frontendLogger.logError('Navigation error from ModuleCard', {
+          error: error.message,
+          component: 'Dashboard',
+          link: module.link,
+        });
+      }
+    };
+
     return (
       <Card
         shadow="sm"
         padding="lg"
         radius="md"
         withBorder
-        onClick={() => navigate(module.link)}
+        onClick={handleClick}
         style={{
           cursor: 'pointer',
           transition: 'all 0.2s ease',
@@ -831,7 +845,19 @@ const Dashboard = () => {
                         key={index}
                         p="sm"
                         radius="md"
-                        onClick={() => navigate(module.link)}
+                        onClick={(e) => {
+                          console.log('Additional resource clicked:', module.link);
+                          try {
+                            navigate(module.link);
+                          } catch (error) {
+                            console.error('Navigation error:', error);
+                            frontendLogger.logError('Navigation error from additional resource', {
+                              error: error.message,
+                              component: 'Dashboard',
+                              link: module.link,
+                            });
+                          }
+                        }}
                         style={{ cursor: 'pointer' }}
                         withBorder
                         styles={(theme) => ({

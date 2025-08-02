@@ -25,7 +25,8 @@ import {
   IconFolder,
   IconCloud,
   IconAlertTriangle,
-  IconClock
+  IconClock,
+  IconEye
 } from '@tabler/icons-react';
 import { formatDate } from '../../utils/helpers';
 
@@ -39,12 +40,14 @@ const FileList = ({
   onDelete,
   onPreview,
   onRestore,
+  onView,
   className = ''
 }) => {
   const [sortBy, setSortBy] = useState('uploaded_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByType, setFilterByType] = useState('');
+
 
   // Get file icon and color based on type
   const getFileIcon = (fileName, fileType) => {
@@ -86,6 +89,36 @@ const FileList = ({
       label: 'Local',
       description: 'Stored locally'
     };
+  };
+
+  // Check if file type is viewable in browser
+  const isFileViewable = (fileName, fileType) => {
+    const extension = fileName?.split('.').pop()?.toLowerCase();
+    const mimeType = fileType?.toLowerCase();
+
+
+    // PDF files
+    if (extension === 'pdf' || mimeType === 'application/pdf') {
+      return true;
+    }
+
+    // Image files
+    if (mimeType?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) {
+      return true;
+    }
+
+    // Text files
+    if (mimeType?.startsWith('text/') || ['txt', 'md', 'csv', 'log'].includes(extension)) {
+      return true;
+    }
+
+    // Web files (HTML, XML, etc.)
+    if (['html', 'htm', 'xml', 'json'].includes(extension) || 
+        ['text/html', 'application/xml', 'text/xml', 'application/json'].includes(mimeType)) {
+      return true;
+    }
+
+    return false;
   };
 
   // Format file size
@@ -357,6 +390,17 @@ const FileList = ({
                   {/* Actions */}
                   {showActions && (
                     <Group gap="xs" style={{ flexShrink: 0 }}>
+                      {onView && isFileViewable(file.file_name, file.file_type) && (
+                        <ActionIcon
+                          variant="light"
+                          color="green"
+                          onClick={() => onView(file.id, file.file_name)}
+                          title="View file in new tab"
+                        >
+                          <IconEye size={16} />
+                        </ActionIcon>
+                      )}
+                      
                       {onDownload && (
                         <ActionIcon
                           variant="light"
@@ -371,7 +415,7 @@ const FileList = ({
                       {onPreview && (
                         <ActionIcon
                           variant="light"
-                          color="green"
+                          color="orange"
                           onClick={() => onPreview(file)}
                           title="Preview file"
                         >

@@ -353,7 +353,7 @@ async def download_file(
 
         # Get file information
         file_info, filename, content_type = await file_service.get_file_download_info(
-            db, file_id
+            db, file_id, current_user_id
         )
 
         # Handle different return types (local path vs paperless content)
@@ -378,6 +378,93 @@ async def download_file(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to download file: {str(e)}",
+        )
+
+
+@router.get("/files/{file_id}/view")
+async def view_file(
+    *,
+    db: Session = Depends(deps.get_db),
+    file_id: int,
+    current_user_id: int = Depends(deps.get_current_user_id_flexible_auth),
+):
+    """
+    View a file by its ID in browser (inline display).
+    
+    Supports authentication via both Authorization header and query parameter.
+    This enables opening files in new browser tabs where Authorization headers
+    are not automatically included.
+
+    Args:
+        file_id: ID of the file to view
+        token: Optional JWT token as query parameter (alternative to Authorization header)
+
+    Returns:
+        File response for inline viewing in browser with Content-Disposition: inline
+        
+    Example URLs:
+        - With Authorization header: GET /api/v1/entity-files/files/123/view
+        - With query token: GET /api/v1/entity-files/files/123/view?token=<jwt_token>
+    """
+    try:
+        logger.info(f"Viewing file {file_id} for user {current_user_id}")
+
+        # Basic permission check - ensure file exists and user has access
+        file_record = file_service.get_file_by_id(db, file_id)
+        if not file_record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="File not found"
+            )
+        
+        # TODO: Implement entity-level permission checking
+        # For now, we allow access to any authenticated user's files
+        # In the future, this should check if the user has access to the entity that owns the file
+        
+        # Get file information
+        file_info, filename, content_type = await file_service.get_file_view_info(
+            db, file_id, current_user_id
+        )
+
+        # Handle different return types (local path vs paperless content)
+        if isinstance(file_info, bytes):
+            # Paperless file - return as StreamingResponse
+            from fastapi.responses import Response
+
+            # Set secure headers for inline file viewing
+            headers = {
+                "Content-Disposition": f"inline; filename={filename}",
+                "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
+                "X-Frame-Options": "SAMEORIGIN",     # Prevent embedding in frames from other domains
+            }
+            
+            return Response(
+                content=file_info,
+                media_type=content_type,
+                headers=headers,
+            )
+        else:
+            # Local file - return as FileResponse with inline disposition and security headers
+            headers = {
+                "Content-Disposition": f"inline; filename={filename}",
+                "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
+                "X-Frame-Options": "SAMEORIGIN",     # Prevent embedding in frames from other domains
+            }
+            
+            return FileResponse(
+                path=file_info, 
+                filename=filename, 
+                media_type=content_type,
+                headers=headers
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to view file {file_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to view file: {str(e)}",
         )
 
 

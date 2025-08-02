@@ -1,6 +1,6 @@
 from typing import Generator, Optional
 
-from fastapi import Depends, HTTPException, Query, status
+from fastapi import Depends, HTTPException, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.logging_config import get_logger, log_security_event
+from app.api.v1.endpoints.system import get_client_ip
+from app.core.logging_constants import sanitize_log_input
 from app.crud.user import user
 from app.models.models import User
 
@@ -33,6 +35,7 @@ def get_db() -> Generator:
 
 
 def get_current_user(
+    request: Request,
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> User:
@@ -40,6 +43,7 @@ def get_current_user(
     Get current authenticated user from JWT token.
 
     Args:
+        request: FastAPI request object for extracting client info
         db: Database session
         credentials: JWT token from Authorization header
 
@@ -49,7 +53,9 @@ def get_current_user(
     Raises:
         HTTPException 401: If token is invalid or user not found
     """
-    # Note: IP address logging is handled by middleware for request-level context
+    # Extract client information for security logging
+    client_ip = get_client_ip(request)
+    user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,9 +64,35 @@ def get_current_user(
     )
 
     try:
+        # Validate token format before attempting to decode
+        token_str = credentials.credentials.strip()
+        if not token_str:
+            security_logger.info("🔍 AUTH: Empty token provided")
+            log_security_event(
+                security_logger,
+                event="token_empty",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message="Empty JWT token provided",
+            )
+            raise credentials_exception
+            
+        # Basic JWT format validation (should have 3 parts separated by dots)
+        token_parts = token_str.split('.')
+        if len(token_parts) != 3:
+            security_logger.info(f"🔍 AUTH: Invalid token format - expected 3 parts, got {len(token_parts)}")
+            log_security_event(
+                security_logger,
+                event="token_invalid_format",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)}",
+            )
+            raise credentials_exception
+
         # Decode JWT token
         payload = jwt.decode(
-            credentials.credentials,
+            token_str,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
@@ -70,7 +102,8 @@ def get_current_user(
             log_security_event(
                 security_logger,
                 event="token_invalid_no_subject",
-                ip_address="middleware",  # IP will be captured by middleware
+                ip_address=client_ip,
+                user_agent=user_agent,
                 message="JWT token missing subject claim",
             )
             raise credentials_exception
@@ -84,7 +117,8 @@ def get_current_user(
         log_security_event(
             security_logger,
             event="token_decode_failed",
-            ip_address="middleware",  # IP will be captured by middleware
+            ip_address=client_ip,
+            user_agent=user_agent,
             message=f"JWT token decode failed: {str(e)}",
         )
         raise credentials_exception
@@ -96,7 +130,8 @@ def get_current_user(
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
-                ip_address="middleware",  # IP will be captured by middleware
+                ip_address=client_ip,
+                user_agent=user_agent,
                 message=f"Token valid but user not found: {username}",
                 username=username,
             )
@@ -106,7 +141,8 @@ def get_current_user(
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
-            ip_address="middleware",
+            ip_address=client_ip,
+            user_agent=user_agent,
             message=f"Database error during user lookup for {username}: {str(e)}",
             username=username,
         )
@@ -118,11 +154,175 @@ def get_current_user(
         security_logger,
         event="token_validated_success",
         user_id=user_id,
-        ip_address="middleware",  # IP will be captured by middleware
+        ip_address=client_ip,
+        user_agent=user_agent,
         message=f"Token successfully validated for user: {username}",
         username=username,
     )
 
+    return db_user
+
+
+def get_current_user_flexible_auth(
+    request: Request,
+    db: Session = Depends(get_db),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
+    token: Optional[str] = Query(None, description="JWT token for query parameter authentication")
+) -> User:
+    """
+    Get current authenticated user with flexible authentication.
+    
+    Supports both Authorization header and query parameter token authentication.
+    This is primarily intended for file viewing endpoints where Authorization headers
+    may not be available (e.g., when opening files in new browser tabs).
+    
+    SECURITY CONSIDERATIONS:
+    - Query parameter tokens may be logged in server access logs
+    - Query parameter tokens appear in browser history
+    - Authorization header is preferred when available
+    - This method should only be used for endpoints that require browser-native access
+    
+    Args:
+        request: FastAPI request object
+        db: Database session
+        credentials: JWT token from Authorization header (optional)
+        token: JWT token from query parameter (optional)
+        
+    Returns:
+        Current user object
+        
+    Raises:
+        HTTPException 401: If no valid token is provided or token is invalid
+    """
+    # Extract client information for security logging
+    client_ip = get_client_ip(request)
+    user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    # Try to get token from Authorization header first, then query parameter
+    jwt_token = None
+    auth_method = None
+    
+    if credentials and credentials.credentials:
+        jwt_token = credentials.credentials
+        auth_method = "header"
+    elif token:
+        jwt_token = token
+        auth_method = "query_param"
+        # Log query parameter usage for security monitoring
+        security_logger.info("Authentication via query parameter token (for file viewing)")
+    else:
+        security_logger.warning("No authentication token provided (header or query param)")
+        log_security_event(
+            security_logger,
+            event="auth_no_token_provided",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message="No JWT token provided in header or query parameter",
+        )
+        raise credentials_exception
+    
+    try:
+        # Validate token format before attempting to decode
+        token_str = jwt_token.strip()
+        if not token_str:
+            security_logger.info(f"AUTH ({auth_method}): Empty token provided")
+            log_security_event(
+                security_logger,
+                event="token_empty",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Empty JWT token provided (auth method: {auth_method})",
+            )
+            raise credentials_exception
+            
+        # Basic JWT format validation (should have 3 parts separated by dots)
+        token_parts = token_str.split('.')
+        if len(token_parts) != 3:
+            security_logger.info(f"AUTH ({auth_method}): Invalid token format - expected 3 parts, got {len(token_parts)}")
+            log_security_event(
+                security_logger,
+                event="token_invalid_format",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)} (auth method: {auth_method})",
+            )
+            raise credentials_exception
+
+        # Decode JWT token using the same validation as get_current_user
+        payload = jwt.decode(
+            token_str,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        username = payload.get("sub")
+        if username is None:
+            security_logger.info(f"AUTH ({auth_method}): Token missing subject claim")
+            log_security_event(
+                security_logger,
+                event="token_invalid_no_subject",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"JWT token missing subject claim (auth method: {auth_method})",
+            )
+            raise credentials_exception
+            
+        security_logger.info(
+            f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
+        )
+        
+    except JWTError as e:
+        security_logger.info(f"AUTH ({auth_method}): Token decode failed: {str(e)}")
+        log_security_event(
+            security_logger,
+            event="token_decode_failed",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message=f"JWT token decode failed (auth method: {auth_method}): {str(e)}",
+        )
+        raise credentials_exception
+    
+    # Get user from database (same logic as get_current_user)
+    try:
+        db_user = user.get_by_username(db, username=username)
+        if db_user is None:
+            log_security_event(
+                security_logger,
+                event="token_user_not_found",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Token valid but user not found: {username} (auth method: {auth_method})",
+                username=username,
+            )
+            raise credentials_exception
+            
+    except Exception as e:
+        log_security_event(
+            security_logger,
+            event="token_user_lookup_error",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message=f"Database error during user lookup for {username} (auth method: {auth_method}): {str(e)}",
+            username=username,
+        )
+        raise credentials_exception
+    
+    # Log successful token validation with auth method
+    user_id = getattr(db_user, "id", None)
+    log_security_event(
+        security_logger,
+        event="token_validated_success",
+        user_id=user_id,
+        ip_address=client_ip,
+        user_agent=user_agent,
+        message=f"Token successfully validated for user: {username} (auth method: {auth_method})",
+        username=username,
+    )
+    
     return db_user
 
 
@@ -136,6 +336,26 @@ def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     Args:
         current_user: The current authenticated user
 
+    Returns:
+        User ID as integer
+    """
+    # Use getattr to safely access the id value from the SQLAlchemy model
+    user_id = getattr(current_user, "id", None)
+    if user_id is None:
+        raise HTTPException(status_code=500, detail="User ID not found")
+    return user_id
+
+
+def get_current_user_id_flexible_auth(current_user: User = Depends(get_current_user_flexible_auth)) -> int:
+    """
+    Get the current user's ID as an integer using flexible authentication.
+    
+    This helper function works with the flexible authentication dependency
+    that supports both header and query parameter authentication.
+    
+    Args:
+        current_user: The current authenticated user from flexible auth
+        
     Returns:
         User ID as integer
     """

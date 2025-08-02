@@ -357,6 +357,39 @@ const DocumentManager = ({
     }
   };
 
+  // View file in new tab
+  const handleViewFile = async (fileId, fileName) => {
+    try {
+      await apiService.viewEntityFile(fileId, fileName);
+
+      logger.info('document_manager_view_success', {
+        message: 'File opened for viewing',
+        entityType,
+        entityId,
+        fileId,
+        fileName,
+        component: 'DocumentManager',
+      });
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to view file';
+      setError(errorMessage);
+
+      if (onError) {
+        onError(errorMessage);
+      }
+
+      logger.error('document_manager_view_error', {
+        message: 'Failed to view file',
+        entityType,
+        entityId,
+        fileId,
+        fileName,
+        error: err.message,
+        component: 'DocumentManager',
+      });
+    }
+  };
+
   // Delete file immediately (view mode)
   const handleImmediateDelete = async fileId => {
     if (!window.confirm('Are you sure you want to delete this file?')) {
@@ -743,6 +776,7 @@ const DocumentManager = ({
             files={files}
             syncStatus={syncStatus}
             showActions={true}
+            onView={handleViewFile}
             onDownload={handleDownloadFile}
             onDelete={handleImmediateDelete}
           />
@@ -790,6 +824,7 @@ const DocumentManager = ({
                 filesToDelete={filesToDelete}
                 syncStatus={syncStatus}
                 showActions={true}
+                onView={handleViewFile}
                 onDownload={handleDownloadFile}
                 onDelete={handleMarkFileForDeletion}
                 onRestore={handleUnmarkFileForDeletion}

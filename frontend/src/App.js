@@ -193,11 +193,11 @@ function ThemedToastContainer() {
 function ActivityTracker() {
   const { isTracking, isEnabled, getStats } = useActivityTracker({
     // Use default configuration from activityConfig
-    trackMouseMove: true,
-    trackKeyboard: true,
-    trackClicks: true,
-    trackTouch: true,
-    enabled: true,
+    trackMouseMove: false, // Temporarily disable to reduce noise and potential interference
+    trackKeyboard: false, // Temporarily disable for testing
+    trackClicks: false, // Temporarily disable for testing
+    trackTouch: false, // Temporarily disable for testing
+    enabled: false, // Temporarily disable entire activity tracking
   });
   
   const { trackApiActivity, getStats: getApiStats } = useApiActivityTracker();
@@ -311,7 +311,7 @@ function App() {
                 <DatesProvider settings={{ timezone: 'UTC' }}>
                   <MantineIntegratedThemeProvider>
                     <NavigationTracker />
-                    <ActivityTracker />
+                    {/* <ActivityTracker /> */}
                     <div className="App">
                       <Routes>
                         {/* Public Routes */}

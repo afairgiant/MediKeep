@@ -45,6 +45,7 @@ const RenderModeContent = memo(({
   onUploadModalOpen,
   onCheckSyncStatus,
   onDownloadFile,
+  onViewFile,
   onImmediateDelete,
   onMarkFileForDeletion,
   onUnmarkFileForDeletion,
@@ -181,6 +182,7 @@ const RenderModeContent = memo(({
           syncStatus={syncStatus}
           showActions={true}
           onDownload={onDownloadFile}
+          onView={onViewFile}
           onDelete={onImmediateDelete}
         />
       </Stack>
@@ -218,6 +220,7 @@ const RenderModeContent = memo(({
               syncStatus={syncStatus}
               showActions={true}
               onDownload={onDownloadFile}
+              onView={onViewFile}
               onDelete={onMarkFileForDeletion}
               onRestore={onUnmarkFileForDeletion}
             />
