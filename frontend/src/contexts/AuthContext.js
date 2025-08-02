@@ -6,6 +6,8 @@ import {
   isFirstLogin,
 } from '../utils/profileUtils';
 import logger from '../services/logger';
+import { getActivityConfig } from '../config/activityConfig';
+import secureActivityLogger from '../utils/secureActivityLogger';
 
 // Auth State Management
 const initialState = {
@@ -240,21 +242,77 @@ export function AuthProvider({ children }) {
     }
   }, [state.tokenExpiry, state.isAuthenticated]);
 
-  // Activity tracking for auto-logout
+  // Enhanced activity tracking for auto-logout with proper error handling
   useEffect(() => {
     if (!state.isAuthenticated) return;
 
-    const activityTimeout = 30 * 60 * 1000; // 30 minutes
+    const config = getActivityConfig();
+    let activityTimer = null;
+
     const checkActivity = () => {
-      if (Date.now() - state.lastActivity > activityTimeout) {
-        toast.info('Session expired due to inactivity');
+      try {
+        const timeSinceLastActivity = Date.now() - state.lastActivity;
+        
+        if (timeSinceLastActivity > config.SESSION_TIMEOUT) {
+          secureActivityLogger.logSessionEvent({
+            action: 'session_expired',
+            reason: 'inactivity',
+            timeSinceLastActivity,
+            sessionTimeout: config.SESSION_TIMEOUT
+          });
+          
+          toast.info('Session expired due to inactivity');
+          clearAuthData();
+          dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'AuthContext',
+          action: 'checkActivity'
+        });
+        
+        // On error, err on the side of caution and logout
+        logger.error('Session check failed, logging out for security', {
+          error: error.message,
+          category: 'auth_context_error'
+        });
         clearAuthData();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
     };
 
-    const activityTimer = setInterval(checkActivity, 60000); // Check every minute
-    return () => clearInterval(activityTimer);
+    // Set up the activity check timer
+    try {
+      activityTimer = setInterval(checkActivity, config.SESSION_CHECK_INTERVAL);
+      
+      secureActivityLogger.logSessionEvent({
+        action: 'session_monitoring_started',
+        sessionTimeout: config.SESSION_TIMEOUT,
+        checkInterval: config.SESSION_CHECK_INTERVAL
+      });
+    } catch (error) {
+      secureActivityLogger.logActivityError(error, {
+        component: 'AuthContext',
+        action: 'setup_activity_timer'
+      });
+    }
+
+    // Cleanup function
+    return () => {
+      try {
+        if (activityTimer) {
+          clearInterval(activityTimer);
+          secureActivityLogger.logSessionEvent({
+            action: 'session_monitoring_stopped'
+          });
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'AuthContext',
+          action: 'cleanup_activity_timer'
+        });
+      }
+    };
   }, [state.lastActivity, state.isAuthenticated]);
 
   // Helper functions
@@ -400,7 +458,28 @@ export function AuthProvider({ children }) {
   };
 
   const updateActivity = () => {
-    dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
+    try {
+      dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
+      
+      // Log activity update in development mode only
+      if (process.env.NODE_ENV === 'development') {
+        secureActivityLogger.logActivityDetected({
+          component: 'AuthContext',
+          action: 'activity_updated'
+        });
+      }
+    } catch (error) {
+      secureActivityLogger.logActivityError(error, {
+        component: 'AuthContext',
+        action: 'updateActivity'
+      });
+      
+      // Don't throw the error to prevent breaking the app
+      logger.error('Failed to update activity', {
+        error: error.message,
+        category: 'auth_context_error'
+      });
+    }
   };
 
   const clearError = () => {
