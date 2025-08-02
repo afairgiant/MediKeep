@@ -15,7 +15,6 @@ const BackupManagement = () => {
   const [restoring, setRestoring] = useState({});
   const [uploading, setUploading] = useState(false);
   const [showAdvancedMenu, setShowAdvancedMenu] = useState(false);
-  const [loadingNotifications, setLoadingNotifications] = useState({});
 
   // Enhanced notification system
   const { showSuccess, showError, showLoading, hideLoading, showWarning } = useBackupNotifications();
@@ -78,7 +77,6 @@ const BackupManagement = () => {
 
     // Show loading notification for longer operations
     const loadingId = showLoading(actionName);
-    setLoadingNotifications(prev => ({ ...prev, [type]: loadingId }));
 
     try {
       const description = `Manual ${type} backup created on ${formatDateTime(new Date().toISOString())}`;
@@ -105,11 +103,6 @@ const BackupManagement = () => {
       console.error(`${actionName} failed:`, error);
     } finally {
       setCreating(prev => ({ ...prev, [type]: false }));
-      setLoadingNotifications(prev => {
-        const newState = { ...prev };
-        delete newState[type];
-        return newState;
-      });
     }
   };
 

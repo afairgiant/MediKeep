@@ -1,6 +1,15 @@
 import { notifications } from '@mantine/notifications';
 import { useCallback } from 'react';
 
+// Utility function for file size formatting
+function formatFileSize(bytes) {
+  if (!bytes) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 /**
  * Custom hook for backup-specific notifications with user-friendly messaging
  */
@@ -205,11 +214,3 @@ export const useBackupNotifications = () => {
   };
 };
 
-// Utility function for file size formatting
-function formatFileSize(bytes) {
-  if (!bytes || bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
