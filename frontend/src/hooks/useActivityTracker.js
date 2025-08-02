@@ -70,20 +70,27 @@ export function useActivityTracker(options = {}) {
     );
   }, [updateActivity, isAuthenticated, throttleMs, config]);
 
-  // Initialize cleanup manager
-  if (!cleanupManager.current) {
-    cleanupManager.current = createThrottleCleanupManager();
-  }
-
   // Create throttled activity updater with proper error handling
   const throttledUpdateActivity = useMemo(() => {
+    // Initialize cleanup manager inside useMemo to handle HMR properly
+    if (!cleanupManager.current || cleanupManager.current.isDestroyed) {
+      cleanupManager.current = createThrottleCleanupManager();
+    }
+    
     const throttledFunc = createActivityThrottle(
       safeUpdateActivity,
       throttleMs,
       'ui-activity'
     );
 
-    cleanupManager.current.add(throttledFunc);
+    try {
+      cleanupManager.current.add(throttledFunc);
+    } catch (error) {
+      // Handle destroyed cleanup manager during HMR
+      cleanupManager.current = createThrottleCleanupManager();
+      cleanupManager.current.add(throttledFunc);
+    }
+    
     return throttledFunc;
   }, [safeUpdateActivity, throttleMs]);
 
@@ -294,20 +301,27 @@ export function useApiActivityTracker() {
     );
   }, [updateActivity, isAuthenticated, config]);
 
-  // Initialize cleanup manager
-  if (!cleanupManager.current) {
-    cleanupManager.current = createThrottleCleanupManager();
-  }
-
   // Create throttled API activity tracker
   const throttledTrackActivity = useMemo(() => {
+    // Initialize cleanup manager inside useMemo to handle HMR properly
+    if (!cleanupManager.current || cleanupManager.current.isDestroyed) {
+      cleanupManager.current = createThrottleCleanupManager();
+    }
+    
     const throttledFunc = createActivityThrottle(
       safeUpdateActivity,
       config.API_ACTIVITY_THROTTLE,
       'api-activity'
     );
 
-    cleanupManager.current.add(throttledFunc);
+    try {
+      cleanupManager.current.add(throttledFunc);
+    } catch (error) {
+      // Handle destroyed cleanup manager during HMR
+      cleanupManager.current = createThrottleCleanupManager();
+      cleanupManager.current.add(throttledFunc);
+    }
+    
     return throttledFunc;
   }, [safeUpdateActivity, config.API_ACTIVITY_THROTTLE]);
 
@@ -396,20 +410,27 @@ export function useNavigationActivityTracker() {
     );
   }, [updateActivity, isAuthenticated, config]);
 
-  // Initialize cleanup manager
-  if (!cleanupManager.current) {
-    cleanupManager.current = createThrottleCleanupManager();
-  }
-
   // Create throttled navigation activity tracker
   const throttledTrackActivity = useMemo(() => {
+    // Initialize cleanup manager inside useMemo to handle HMR properly
+    if (!cleanupManager.current || cleanupManager.current.isDestroyed) {
+      cleanupManager.current = createThrottleCleanupManager();
+    }
+    
     const throttledFunc = createActivityThrottle(
       safeUpdateActivity,
       config.NAVIGATION_ACTIVITY_THROTTLE,
       'navigation-activity'
     );
 
-    cleanupManager.current.add(throttledFunc);
+    try {
+      cleanupManager.current.add(throttledFunc);
+    } catch (error) {
+      // Handle destroyed cleanup manager during HMR
+      cleanupManager.current = createThrottleCleanupManager();
+      cleanupManager.current.add(throttledFunc);
+    }
+    
     return throttledFunc;
   }, [safeUpdateActivity, config.NAVIGATION_ACTIVITY_THROTTLE]);
 

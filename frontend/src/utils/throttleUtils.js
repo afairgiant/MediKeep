@@ -247,6 +247,10 @@ export function createThrottleCleanupManager() {
       throttles.clear();
       isDestroyed = true;
     },
+    
+    get isDestroyed() {
+      return isDestroyed;
+    },
 
     size() {
       return throttles.size;

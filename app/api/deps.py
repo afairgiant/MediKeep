@@ -1,6 +1,6 @@
 from typing import Generator, Optional
 
-from fastapi import Depends, HTTPException, Query, status
+from fastapi import Depends, HTTPException, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -126,6 +126,134 @@ def get_current_user(
     return db_user
 
 
+def get_current_user_flexible_auth(
+    request: Request,
+    db: Session = Depends(get_db),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
+    token: Optional[str] = Query(None, description="JWT token for query parameter authentication")
+) -> User:
+    """
+    Get current authenticated user with flexible authentication.
+    
+    Supports both Authorization header and query parameter token authentication.
+    This is primarily intended for file viewing endpoints where Authorization headers
+    may not be available (e.g., when opening files in new browser tabs).
+    
+    SECURITY CONSIDERATIONS:
+    - Query parameter tokens may be logged in server access logs
+    - Query parameter tokens appear in browser history
+    - Authorization header is preferred when available
+    - This method should only be used for endpoints that require browser-native access
+    
+    Args:
+        request: FastAPI request object
+        db: Database session
+        credentials: JWT token from Authorization header (optional)
+        token: JWT token from query parameter (optional)
+        
+    Returns:
+        Current user object
+        
+    Raises:
+        HTTPException 401: If no valid token is provided or token is invalid
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    # Try to get token from Authorization header first, then query parameter
+    jwt_token = None
+    auth_method = None
+    
+    if credentials and credentials.credentials:
+        jwt_token = credentials.credentials
+        auth_method = "header"
+    elif token:
+        jwt_token = token
+        auth_method = "query_param"
+        # Log query parameter usage for security monitoring
+        security_logger.info("Authentication via query parameter token (for file viewing)")
+    else:
+        security_logger.warning("No authentication token provided (header or query param)")
+        log_security_event(
+            security_logger,
+            event="auth_no_token_provided",
+            ip_address="middleware",
+            message="No JWT token provided in header or query parameter",
+        )
+        raise credentials_exception
+    
+    try:
+        # Decode JWT token using the same validation as get_current_user
+        payload = jwt.decode(
+            jwt_token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        username = payload.get("sub")
+        if username is None:
+            security_logger.info(f"AUTH ({auth_method}): Token missing subject claim")
+            log_security_event(
+                security_logger,
+                event="token_invalid_no_subject",
+                ip_address="middleware",
+                message=f"JWT token missing subject claim (auth method: {auth_method})",
+            )
+            raise credentials_exception
+            
+        security_logger.info(
+            f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
+        )
+        
+    except JWTError as e:
+        security_logger.info(f"AUTH ({auth_method}): Token decode failed: {str(e)}")
+        log_security_event(
+            security_logger,
+            event="token_decode_failed",
+            ip_address="middleware",
+            message=f"JWT token decode failed (auth method: {auth_method}): {str(e)}",
+        )
+        raise credentials_exception
+    
+    # Get user from database (same logic as get_current_user)
+    try:
+        db_user = user.get_by_username(db, username=username)
+        if db_user is None:
+            log_security_event(
+                security_logger,
+                event="token_user_not_found",
+                ip_address="middleware",
+                message=f"Token valid but user not found: {username} (auth method: {auth_method})",
+                username=username,
+            )
+            raise credentials_exception
+            
+    except Exception as e:
+        log_security_event(
+            security_logger,
+            event="token_user_lookup_error",
+            ip_address="middleware",
+            message=f"Database error during user lookup for {username} (auth method: {auth_method}): {str(e)}",
+            username=username,
+        )
+        raise credentials_exception
+    
+    # Log successful token validation with auth method
+    user_id = getattr(db_user, "id", None)
+    log_security_event(
+        security_logger,
+        event="token_validated_success",
+        user_id=user_id,
+        ip_address="middleware",
+        message=f"Token successfully validated for user: {username} (auth method: {auth_method})",
+        username=username,
+    )
+    
+    return db_user
+
+
 def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     """
     Get the current user's ID as an integer.
@@ -136,6 +264,26 @@ def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     Args:
         current_user: The current authenticated user
 
+    Returns:
+        User ID as integer
+    """
+    # Use getattr to safely access the id value from the SQLAlchemy model
+    user_id = getattr(current_user, "id", None)
+    if user_id is None:
+        raise HTTPException(status_code=500, detail="User ID not found")
+    return user_id
+
+
+def get_current_user_id_flexible_auth(current_user: User = Depends(get_current_user_flexible_auth)) -> int:
+    """
+    Get the current user's ID as an integer using flexible authentication.
+    
+    This helper function works with the flexible authentication dependency
+    that supports both header and query parameter authentication.
+    
+    Args:
+        current_user: The current authenticated user from flexible auth
+        
     Returns:
         User ID as integer
     """

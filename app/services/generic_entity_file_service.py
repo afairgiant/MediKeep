@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging_config import get_logger
-from app.models.models import EntityFile, UserPreferences, get_utc_now
+from app.models.models import EntityFile, User, UserPreferences, get_utc_now
 from app.schemas.entity_file import (
     EntityFileCreate,
     EntityFileResponse,
@@ -554,6 +554,97 @@ class GenericEntityFileService:
             logger.error(f"Error getting download info for file {file_id}: {str(e)}")
             raise HTTPException(
                 status_code=500, detail=f"Failed to get file download info: {str(e)}"
+            )
+
+    async def get_file_view_info(
+        self, db: Session, file_id: int, current_user_id: Optional[int] = None
+    ) -> Tuple[str, str, str]:
+        """
+        Get file information for viewing (inline display).
+        Similar to get_file_download_info but optimized for viewing.
+        
+        Args:
+            db: Database session
+            file_id: ID of the file
+            
+        Returns:
+            Tuple of (file_path_or_content, filename, content_type)
+        """
+        try:
+            # Get file record from database
+            file_record = db.query(EntityFile).filter(EntityFile.id == file_id).first()
+            if not file_record:
+                raise HTTPException(
+                    status_code=404,
+                    detail="File not found"
+                )
+
+            logger.info(f"Retrieving file for viewing: {file_record.file_name}")
+            
+            if file_record.storage_backend == 'paperless':
+                # Handle Paperless files
+                if not file_record.paperless_document_id:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Paperless document ID not found"
+                    )
+                
+                # Use existing paperless service to get file content
+                
+                # Get user for paperless credentials
+                user_id = current_user_id or 1  # Fallback to user ID 1 if not provided
+                user = db.query(User).filter(User.id == user_id).first()
+                if not user:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="User not found"
+                    )
+                
+                # Get user preferences for paperless configuration
+                user_prefs = (
+                    db.query(UserPreferences)
+                    .filter(UserPreferences.user_id == user.id)
+                    .first()
+                )
+                
+                if not user_prefs or not user_prefs.paperless_enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Paperless integration is not enabled"
+                    )
+                
+                # Create paperless service and download content
+                paperless_service = create_paperless_service_with_username_password(
+                    user_prefs.paperless_url,
+                    user_prefs.paperless_username_encrypted,
+                    user_prefs.paperless_password_encrypted,
+                    user.id,
+                )
+                
+                async with paperless_service:
+                    file_content = await paperless_service.download_document(
+                        document_id=file_record.paperless_document_id
+                    )
+                
+                return file_content, file_record.file_name, file_record.file_type
+            else:
+                # Handle local files
+                file_path = file_record.file_path
+                if not os.path.exists(file_path):
+                    raise HTTPException(
+                        status_code=404,
+                        detail="File not found on disk"
+                    )
+                
+                return file_path, file_record.file_name, file_record.file_type
+                
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error retrieving file for viewing: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to retrieve file for viewing: {str(e)}"
             )
 
     def get_files_count_batch(

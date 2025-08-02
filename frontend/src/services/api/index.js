@@ -601,6 +601,61 @@ class ApiService {
   }
 
 
+  // View file in new tab (generic - file ID is enough)
+  async viewEntityFile(fileId, fileName, signal) {
+    try {
+      logger.info('api_view_entity_file', 'Opening entity file for viewing', {
+        fileId,
+        fileName,
+        component: 'ApiService',
+      });
+
+      // Get authentication token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required to view files');
+      }
+
+      // Check if token is expired
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Date.now() / 1000;
+        if (payload.exp < currentTime) {
+          throw new Error('Session expired. Please log in again.');
+        }
+      } catch (e) {
+        throw new Error('Invalid authentication token. Please log in again.');
+      }
+
+      // Construct view URL with authentication token
+      const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000';
+      const viewUrl = `${baseUrl}/api/v1/entity-files/files/${fileId}/view?token=${encodeURIComponent(token)}`;
+
+      // Open in new tab
+      const newWindow = window.open(viewUrl, '_blank', 'noopener,noreferrer');
+      
+      if (!newWindow) {
+        throw new Error('Failed to open file viewer. Please check if pop-ups are blocked.');
+      }
+
+      logger.info('api_view_entity_file_success', 'File viewer opened successfully', {
+        fileId,
+        fileName,
+        component: 'ApiService',
+      });
+      
+      return true;
+    } catch (error) {
+      logger.error('api_view_entity_file_error', 'Failed to view entity file', {
+        fileId,
+        fileName,
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
   // Download file (generic - file ID is enough)
   async downloadEntityFile(fileId, fileName, signal) {
     try {

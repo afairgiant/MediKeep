@@ -140,6 +140,7 @@ const DocumentManagerWithProgress = React.memo(({
                 onUploadModalOpen={() => setShowUploadModal(true)}
                 onCheckSyncStatus={coreHandlers.handleCheckSyncStatus}
                 onDownloadFile={coreHandlers.handleDownloadFile}
+                onViewFile={coreHandlers.handleViewFile}
                 onImmediateDelete={coreHandlers.handleImmediateDelete}
                 onMarkFileForDeletion={coreHandlers.handleMarkFileForDeletion}
                 onUnmarkFileForDeletion={coreHandlers.handleUnmarkFileForDeletion}

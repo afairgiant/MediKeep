@@ -1209,6 +1209,39 @@ const useDocumentManagerCore = ({
     }
   }, [entityType, entityId, onError]);
 
+  // View file in new tab
+  const handleViewFile = useCallback(async (fileId, fileName) => {
+    try {
+      await apiService.viewEntityFile(fileId, fileName);
+
+      logger.info('document_manager_view_success', {
+        message: 'File viewed successfully',
+        entityType,
+        entityId,
+        fileId,
+        fileName,
+        component: 'DocumentManagerCore',
+      });
+    } catch (err) {
+      const errorMessage = getUserFriendlyError(err, 'view');
+      setError(errorMessage);
+
+      if (onError) {
+        onError(errorMessage);
+      }
+
+      logger.error('document_manager_view_error', {
+        message: 'Failed to view file',
+        entityType,
+        entityId,
+        fileId,
+        fileName,
+        error: err.message,
+        component: 'DocumentManagerCore',
+      });
+    }
+  }, [entityType, entityId, onError]);
+
   // Performance optimization: Memoize delete handler
   const handleImmediateDelete = useCallback(async fileId => {
     if (!window.confirm('Are you sure you want to delete this file?')) {
@@ -1321,6 +1354,7 @@ const useDocumentManagerCore = ({
     handleImmediateUpload,
     uploadPendingFiles,
     handleDownloadFile,
+    handleViewFile,
     handleImmediateDelete,
     handlePendingFileDescriptionChange,
     handleCheckSyncStatus,
@@ -1352,6 +1386,7 @@ const useDocumentManagerCore = ({
     handleImmediateUpload,
     uploadPendingFiles,
     handleDownloadFile,
+    handleViewFile,
     handleImmediateDelete,
     handlePendingFileDescriptionChange,
     handleCheckSyncStatus,
