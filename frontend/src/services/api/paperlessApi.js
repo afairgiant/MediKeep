@@ -139,6 +139,39 @@ export const exportPaperlessData = async () => {
   });
 };
 
+/**
+ * Poll Paperless task status by UUID
+ * @param {string} taskUuid - Task UUID returned from Paperless upload
+ * @param {number} maxAttempts - Maximum polling attempts (default: 30)
+ * @param {number} intervalMs - Polling interval in milliseconds (default: 1000)
+ * @returns {Promise} Task status and result
+ */
+export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 30, intervalMs = 1000) => {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await apiService.get(`/paperless/tasks/${taskUuid}/status`);
+      
+      // Check if task is completed (SUCCESS or FAILURE)
+      if (response.status === 'SUCCESS' || response.status === 'FAILURE') {
+        return response;
+      }
+      
+      // Wait before next attempt if task is still pending/running
+      if (attempt < maxAttempts - 1) {
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
+      }
+    } catch (error) {
+      // If we can't get task status, continue polling unless it's the last attempt
+      if (attempt === maxAttempts - 1) {
+        throw new Error(`Task status polling failed: ${error.message}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+    }
+  }
+  
+  throw new Error('Task polling timeout - task may still be processing');
+};
+
 export default {
   testPaperlessConnection,
   updatePaperlessSettings,
@@ -151,5 +184,6 @@ export default {
   getMigrationStatus,
   cancelMigration,
   deletePaperlessConfiguration,
-  exportPaperlessData
+  exportPaperlessData,
+  pollPaperlessTaskStatus
 };

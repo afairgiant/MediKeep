@@ -36,6 +36,9 @@ export const ERROR_MESSAGES = {
   PAPERLESS_UPLOAD_FAILED: 'Failed to upload to Paperless document management system.',
   PAPERLESS_CONNECTION_FAILED: 'Unable to connect to Paperless service. Please check configuration.',
   PAPERLESS_AUTH_FAILED: 'Authentication failed with Paperless service. Please check credentials.',
+  PAPERLESS_DUPLICATE_DOCUMENT: 'This document already exists in Paperless. Identical documents cannot be uploaded twice.',
+  PAPERLESS_TASK_FAILED: 'Document upload to Paperless failed. Please try again or contact support.',
+  PAPERLESS_TASK_TIMEOUT: 'Document processing timed out. The document may still be processing in Paperless.',
   
   // Form submission errors
   REQUIRED_FIELD_MISSING: 'Please fill in all required fields.',
@@ -108,6 +111,9 @@ export const ERROR_TYPE_MAPPING = {
   [ERROR_MESSAGES.PAPERLESS_NOT_ENABLED]: ERROR_CATEGORIES.PAPERLESS,
   [ERROR_MESSAGES.PAPERLESS_CONFIG_INCOMPLETE]: ERROR_CATEGORIES.PAPERLESS,
   [ERROR_MESSAGES.PAPERLESS_UPLOAD_FAILED]: ERROR_CATEGORIES.PAPERLESS,
+  [ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT]: ERROR_CATEGORIES.PAPERLESS,
+  [ERROR_MESSAGES.PAPERLESS_TASK_FAILED]: ERROR_CATEGORIES.PAPERLESS,
+  [ERROR_MESSAGES.PAPERLESS_TASK_TIMEOUT]: ERROR_CATEGORIES.PAPERLESS,
   
   [ERROR_MESSAGES.FORM_SUBMISSION_FAILED]: ERROR_CATEGORIES.FORM,
   [ERROR_MESSAGES.PATIENT_NOT_SELECTED]: ERROR_CATEGORIES.FORM,
@@ -187,8 +193,20 @@ export const enhancePaperlessError = (originalError) => {
     return ERROR_MESSAGES.PAPERLESS_CONFIG_INCOMPLETE;
   }
   
-  if (lowerError.includes('appears to be a duplicate')) {
-    return ERROR_MESSAGES.DUPLICATE_FILE;
+  if (lowerError.includes('appears to be a duplicate') || 
+      lowerError.includes('already exists') ||
+      lowerError.includes('duplicate') ||
+      lowerError.includes('hash collision') ||
+      lowerError.includes('identical document')) {
+    return ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT;
+  }
+  
+  if (lowerError.includes('task') && lowerError.includes('timeout')) {
+    return ERROR_MESSAGES.PAPERLESS_TASK_TIMEOUT;
+  }
+  
+  if (lowerError.includes('task') && lowerError.includes('failed')) {
+    return ERROR_MESSAGES.PAPERLESS_TASK_FAILED;
   }
   
   if (lowerError.includes('failed to upload to paperless') || 

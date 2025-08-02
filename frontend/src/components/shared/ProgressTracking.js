@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import UploadProgressModal from './UploadProgressModal';
 import UploadProgressErrorBoundary from './UploadProgressErrorBoundary';
 import { useUploadProgress } from '../../hooks/useUploadProgress';
@@ -7,7 +7,7 @@ import { useUploadProgress } from '../../hooks/useUploadProgress';
  * ProgressTracking - Handles all progress-related functionality
  * Manages progress modal rendering, progress calculations, and upload completion handling
  */
-const ProgressTracking = ({
+const ProgressTracking = React.memo(({
   showProgressModal = true,
   onUploadComplete,
   children, // Render prop pattern to provide progress functions to children
@@ -49,23 +49,36 @@ const ProgressTracking = ({
     }
   }, [uploadState.files, resetUpload, onUploadComplete]);
 
+  // Memoize progress props to prevent unnecessary re-renders
+  const progressProps = useMemo(() => ({
+    uploadState,
+    startUpload,
+    updateFileProgress,
+    completeUpload,
+    resetUpload,
+    isModalOpen,
+    canRetry,
+    estimatedTimeRemaining,
+    uploadSpeed,
+  }), [
+    uploadState,
+    startUpload,
+    updateFileProgress,
+    completeUpload,
+    resetUpload,
+    isModalOpen,
+    canRetry,
+    estimatedTimeRemaining,
+    uploadSpeed,
+  ]);
+
   // Render children with progress functions
-  const renderChildren = () => {
+  const renderChildren = useCallback(() => {
     if (typeof children === 'function') {
-      return children({
-        uploadState,
-        startUpload,
-        updateFileProgress,
-        completeUpload,
-        resetUpload,
-        isModalOpen,
-        canRetry,
-        estimatedTimeRemaining,
-        uploadSpeed,
-      });
+      return children(progressProps);
     }
     return children;
-  };
+  }, [children, progressProps]);
 
   return (
     <>
@@ -93,6 +106,11 @@ const ProgressTracking = ({
       )}
     </>
   );
-};
+}, (prevProps, nextProps) => {
+  // Only re-render if showProgressModal or onUploadComplete changes
+  return prevProps.showProgressModal === nextProps.showProgressModal &&
+         prevProps.onUploadComplete === nextProps.onUploadComplete &&
+         prevProps.children === nextProps.children;
+});
 
 export default ProgressTracking;

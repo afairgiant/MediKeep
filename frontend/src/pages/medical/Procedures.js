@@ -19,6 +19,7 @@ import {
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
@@ -239,8 +240,11 @@ const Procedures = () => {
   };
 
   const handleCloseViewModal = () => {
-    // No need to refresh file count when just closing view modal
-    // File count should only be refreshed when files are actually modified
+    // Refresh file count for the viewed procedure before closing
+    if (viewingProcedure) {
+      refreshFileCount(viewingProcedure.id);
+    }
+    
     setShowViewModal(false);
     setViewingProcedure(null);
     // Remove view parameter from URL
@@ -587,7 +591,15 @@ const Procedures = () => {
             refreshFileCount(editingProcedure.id);
           }
         }}
-      />
+      >
+        {/* Form Loading Overlay */}
+        <FormLoadingOverlay
+          visible={isBlocking}
+          message={statusMessage?.title || 'Processing...'}
+          submessage={statusMessage?.message}
+          type={statusMessage?.type || 'loading'}
+        />
+      </ProcedureFormWrapper>
 
       <ProcedureViewModal
         isOpen={showViewModal}

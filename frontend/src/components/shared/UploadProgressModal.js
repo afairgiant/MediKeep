@@ -24,6 +24,7 @@ import {
   IconAlertTriangle,
   IconRefresh,
 } from '@tabler/icons-react';
+import PaperlessUploadStatus from './PaperlessUploadStatus';
 
 const UploadProgressModal = ({
   opened,
@@ -247,70 +248,16 @@ const UploadProgressModal = ({
                   : 'gray.0'
               }
             >
-              <Stack gap="xs">
-                <Group justify="space-between" align="flex-start">
-                  <Group gap="sm" style={{ flex: 1 }}>
-                    <ThemeIcon
-                      size="sm"
-                      color={getFileStatusColor(file.status)}
-                      variant="light"
-                    >
-                      {getFileStatusIcon(file.status)}
-                    </ThemeIcon>
-                    
-                    <Stack gap={2} style={{ flex: 1 }}>
-                      <Text fw={500} size="sm" truncate>
-                        {file.name}
-                      </Text>
-                      <Group gap="md">
-                        <Text size="xs" c="dimmed">
-                          {((file.size || 0) / 1024).toFixed(1)} KB
-                        </Text>
-                        {file.description && (
-                          <Text size="xs" c="dimmed" truncate>
-                            {file.description}
-                          </Text>
-                        )}
-                      </Group>
-                    </Stack>
-                  </Group>
-                  
-                  <Badge
-                    variant="light"
-                    color={getFileStatusColor(file.status)}
-                    size="sm"
-                  >
-                    {file.status === 'uploading' ? (
-                      `${Math.round(file.progress || 0)}%`
-                    ) : (
-                      file.status
-                    )}
-                  </Badge>
-                </Group>
-                
-                {/* Individual file progress bar */}
-                {(file.status === 'uploading' || file.status === 'completed') && (
-                  <Progress
-                    value={file.progress || (file.status === 'completed' ? 100 : 0)}
-                    color={getFileStatusColor(file.status)}
-                    size="xs"
-                    striped={file.status === 'uploading'}
-                    animated={file.status === 'uploading'}
-                  />
-                )}
-                
-                {/* Error message */}
-                {file.status === 'failed' && file.error && (
-                  <Alert
-                    variant="light"
-                    color="red"
-                    size="xs"
-                    icon={<IconAlertTriangle size={14} />}
-                  >
-                    <Text size="xs">{file.error}</Text>
-                  </Alert>
-                )}
-              </Stack>
+              <PaperlessUploadStatus
+                status={file.status}
+                progress={file.progress}
+                fileName={file.name}
+                message={file.error || file.statusMessage}
+                isDuplicate={file.isDuplicate || false}
+                documentId={file.documentId}
+                storageBackend={file.storageBackend || 'local'}
+                showDetailedStatus={true}
+              />
             </Paper>
           ))}
         </Stack>

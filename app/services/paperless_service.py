@@ -559,6 +559,30 @@ class PaperlessService:
         # Default message for unknown errors
         return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
 
+    async def wait_for_task_completion(self, task_uuid: str, timeout_seconds: int = 60) -> Optional[str]:
+        """
+        Public method to wait for task completion and get document ID.
+        
+        Args:
+            task_uuid: Task UUID to check
+            timeout_seconds: Maximum time to wait in seconds
+            
+        Returns:
+            Document ID as string if completed successfully, None if still processing
+            
+        Raises:
+            PaperlessUploadError: If task fails
+        """
+        try:
+            return await self._wait_for_task_completion(task_uuid, "document", timeout_seconds)
+        except PaperlessUploadError as e:
+            # Re-raise upload errors
+            raise e
+        except Exception as e:
+            # For other errors, return None to indicate still processing
+            logger.warning(f"Task check failed for {task_uuid}: {str(e)}")
+            return None
+
     async def _wait_for_task_completion(self, task_uuid: str, filename: str, max_wait_time: int = 60) -> str:
         """
         Poll the tasks endpoint to wait for document consumption completion and get document ID.
@@ -724,26 +748,64 @@ class PaperlessService:
             )
             raise PaperlessError(f"Download failed: {str(e)}")
 
-    async def check_document_exists(self, document_id: int) -> bool:
+    async def check_document_exists(self, document_id: Union[int, str]) -> bool:
         """
         Check if a document exists in paperless-ngx without downloading it.
+        Handles both numeric document IDs and task UUIDs.
 
         Args:
-            document_id: Paperless document ID
+            document_id: Paperless document ID (int) or task UUID (str)
 
         Returns:
             True if document exists, False otherwise
         """
         try:
+            # Convert document_id to string and validate format
+            doc_id_str = str(document_id).strip()
+            
+            # Check if it's a UUID (task ID) vs numeric document ID
+            if len(doc_id_str) == 36 and '-' in doc_id_str:
+                # This is likely a task UUID, not a document ID
+                logger.info(
+                    f"Document ID {doc_id_str} appears to be a task UUID, not a document ID",
+                    extra={
+                        "user_id": self.user_id,
+                        "document_id": doc_id_str,
+                    },
+                )
+                return False
+            
+            # Validate numeric document ID
+            try:
+                numeric_id = int(doc_id_str)
+                if numeric_id <= 0:
+                    logger.warning(
+                        f"Invalid document ID: {numeric_id} (must be positive)",
+                        extra={
+                            "user_id": self.user_id,
+                            "document_id": doc_id_str,
+                        },
+                    )
+                    return False
+            except ValueError:
+                logger.warning(
+                    f"Invalid document ID format: {doc_id_str} (not numeric)",
+                    extra={
+                        "user_id": self.user_id,
+                        "document_id": doc_id_str,
+                    },
+                )
+                return False
+
             async with self._make_request(
-                "GET", f"/api/documents/{document_id}/"
+                "GET", f"/api/documents/{numeric_id}/"
             ) as response:
                 if response.status == 404:
                     logger.info(
-                        f"Document {document_id} does not exist in paperless",
+                        f"Document {numeric_id} does not exist in paperless (deleted or never existed)",
                         extra={
                             "user_id": self.user_id,
-                            "document_id": document_id,
+                            "document_id": numeric_id,
                         },
                     )
                     return False
@@ -751,21 +813,54 @@ class PaperlessService:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during document check"
                     )
-                elif response.status == 200:
-                    logger.debug(
-                        f"Document {document_id} exists in paperless",
+                elif response.status == 403:
+                    logger.warning(
+                        f"Access denied for document {numeric_id} - may not exist or user lacks permission",
                         extra={
                             "user_id": self.user_id,
-                            "document_id": document_id,
+                            "document_id": numeric_id,
                         },
                     )
-                    return True
+                    return False
+                elif response.status == 200:
+                    # Additional validation: check response content
+                    try:
+                        doc_data = await response.json()
+                        if doc_data and doc_data.get('id') == numeric_id:
+                            logger.debug(
+                                f"Document {numeric_id} exists and is accessible in paperless",
+                                extra={
+                                    "user_id": self.user_id,
+                                    "document_id": numeric_id,
+                                    "title": doc_data.get('title', 'Unknown'),
+                                },
+                            )
+                            return True
+                        else:
+                            logger.warning(
+                                f"Document {numeric_id} returned invalid data",
+                                extra={
+                                    "user_id": self.user_id,
+                                    "document_id": numeric_id,
+                                },
+                            )
+                            return False
+                    except Exception as json_error:
+                        logger.warning(
+                            f"Failed to parse document {numeric_id} response: {str(json_error)}",
+                            extra={
+                                "user_id": self.user_id,
+                                "document_id": numeric_id,
+                            },
+                        )
+                        # If we can't parse the response but got 200, assume it exists
+                        return True
                 else:
                     logger.warning(
                         f"Unexpected status code when checking document existence: {response.status}",
                         extra={
                             "user_id": self.user_id,
-                            "document_id": document_id,
+                            "document_id": numeric_id,
                             "status": response.status,
                         },
                     )
@@ -782,7 +877,8 @@ class PaperlessService:
                     "error": str(e),
                 },
             )
-            # Return False on any error to be safe
+            # Return False on any error to be safe - this marks documents as missing
+            # which is safer than assuming they exist
             return False
 
     async def delete_document(self, document_id: int) -> bool:

@@ -42,9 +42,26 @@ const createPerformanceMonitor = () => {
         const now = Date.now();
         const timeSinceLastRender = now - performanceMonitorInstance.lastRenderTime;
         
-        // Only log if renders are frequent (potential performance issue)
-        if (timeSinceLastRender < 100) {
+        // Performance monitoring: Reduced logging frequency to prevent log spam
+        if (performanceMonitorInstance.renderCount <= 5) {
+          // Log first 5 renders for debugging
+          logger.info('performance_initial_render', {
+            component: componentName,
+            renderCount: performanceMonitorInstance.renderCount,
+            timeSinceLastRender,
+            reason,
+          });
+        } else if (timeSinceLastRender < 50 && performanceMonitorInstance.renderCount % 10 === 0) {
+          // Log frequent renders as potential issues (throttled)
           logger.warn('performance_frequent_render', {
+            component: componentName,
+            renderCount: performanceMonitorInstance.renderCount,
+            timeSinceLastRender,
+            reason,
+          });
+        } else if (performanceMonitorInstance.renderCount % 100 === 0) {
+          // Log every 100th render for monitoring (reduced frequency)
+          logger.info('performance_render_milestone', {
             component: componentName,
             renderCount: performanceMonitorInstance.renderCount,
             timeSinceLastRender,
@@ -72,10 +89,10 @@ const createPerformanceMonitor = () => {
 };
 
 /**
- * DocumentManagerCore - Main coordination and state management component
+ * DocumentManagerCore - Main coordination and state management hook
  * Handles all business logic, API calls, and state management for document operations
  */
-const DocumentManagerCore = ({
+const useDocumentManagerCore = ({
   entityType,
   entityId,
   mode = 'view',
@@ -89,9 +106,17 @@ const DocumentManagerCore = ({
   completeUpload,
   resetUpload,
 }) => {
-  // Performance monitoring: Track component renders
+  // Performance monitoring: Track component renders (throttled in view mode)
   const performanceMonitor = createPerformanceMonitor();
-  performanceMonitor.logRender('DocumentManagerCore', `mode=${mode}, entityId=${entityId}`);
+  // PERFORMANCE FIX: Reduce logging frequency in view mode
+  const now = Date.now();
+  const shouldLogRender = mode !== 'view' || (now - (performanceMonitor.lastViewModeLog || 0)) > 5000;
+  if (shouldLogRender) {
+    performanceMonitor.logRender('DocumentManagerCore', `mode=${mode}, entityId=${entityId}`);
+    if (mode === 'view') {
+      performanceMonitor.lastViewModeLog = now;
+    }
+  }
   
   // State management
   const [files, setFiles] = useState([]);
@@ -157,31 +182,39 @@ const DocumentManagerCore = ({
   }, [pendingFiles]);
 
   // Performance optimization: Debounced progress update function
-  const debouncedUpdateProgress = useMemo(
-    () => debounce((fileId, progress, status, error) => {
+  // Only create in upload modes to prevent unnecessary function creation in view mode
+  const debouncedUpdateProgress = useMemo(() => {
+    if (mode === 'view' && !uploadState.isUploading) {
+      // Return a no-op function in view mode when not uploading
+      return () => {};
+    }
+    return debounce((fileId, progress, status, error) => {
       updateFileProgress(fileId, progress, status, error);
-    }, 100),
-    [updateFileProgress]
-  );
+    }, 150); // Increased debounce for better performance
+  }, [mode, uploadState.isUploading, updateFileProgress]);
 
   // Rate limiting for logging
   const lastLogTimeRef = useRef(0);
   const LOG_THROTTLE_MS = 1000; // 1 second throttle
 
   // Refs for stable callbacks
+  const filesRef = useRef(files);
   const pendingFilesRef = useRef(pendingFiles);
   const selectedStorageBackendRef = useRef(selectedStorageBackend);
   const paperlessSettingsRef = useRef(paperlessSettings);
+  const paperlessAutoSyncRef = useRef(paperlessSettings?.paperless_auto_sync);
   
   // Ref to track progress intervals for proper cleanup
   const progressIntervalsRef = useRef(new Set());
 
   // Performance optimization: Batch ref updates to reduce effect executions
   useEffect(() => {
+    filesRef.current = files;
     pendingFilesRef.current = pendingFiles;
     selectedStorageBackendRef.current = selectedStorageBackend;
     paperlessSettingsRef.current = paperlessSettings;
-  }, [pendingFiles, selectedStorageBackend, paperlessSettings]);
+    paperlessAutoSyncRef.current = paperlessSettings?.paperless_auto_sync;
+  }, [files, pendingFiles, selectedStorageBackend, paperlessSettings]);
 
   // Load paperless settings
   const loadPaperlessSettings = useCallback(async () => {
@@ -190,10 +223,39 @@ const DocumentManagerCore = ({
       const settings = await getPaperlessSettings();
       setPaperlessSettings(settings);
 
+      // Enhanced debugging for settings loading
+      console.log('📋 DEBUG: Paperless settings loaded', {
+        paperlessEnabled: settings?.paperless_enabled,
+        paperlessAutoSync: settings?.paperless_auto_sync,
+        paperlessUrl: settings?.paperless_url ? 'Set' : 'Not set',
+        paperlessCredentials: settings?.paperless_has_credentials ? 'Set' : 'Not set',
+        defaultBackend: settings?.default_storage_backend,
+        fullSettings: settings,
+        entityType,
+        entityId,
+        component: 'DocumentManagerCore'
+      });
+
+      // Determine the storage backend to use
       if (settings?.default_storage_backend) {
+        // User has explicitly set a default - always respect it
         setSelectedStorageBackend(settings.default_storage_backend);
       } else {
-        setSelectedStorageBackend('local');
+        // No default set - check if Paperless is fully configured
+        if (settings?.paperless_enabled && 
+            settings?.paperless_url && 
+            settings?.paperless_has_credentials) {
+          // Paperless is fully configured - use it as default for better UX
+          setSelectedStorageBackend('paperless');
+          logger.info('Auto-selected Paperless storage (no default set but Paperless configured)', {
+            entityType,
+            entityId,
+            component: 'DocumentManagerCore',
+          });
+        } else {
+          // Paperless not configured or incomplete - fallback to local
+          setSelectedStorageBackend('local');
+        }
       }
 
       logger.info('Paperless settings loaded successfully', {
@@ -201,11 +263,30 @@ const DocumentManagerCore = ({
         hasUrl: !!settings?.paperless_url,
         hasCredentials: !!settings?.paperless_has_credentials,
         defaultBackend: settings?.default_storage_backend,
+        entityType,
+        entityId,
         component: 'DocumentManagerCore',
       });
+
+      // Enhanced debugging for lab results specifically
+      if (entityType === 'lab-result') {
+        logger.info('LAB_RESULTS_PAPERLESS_DEBUG', {
+          message: 'Lab Results Paperless settings debug',
+          entityType,
+          entityId,
+          paperlessEnabled: settings?.paperless_enabled,
+          hasUrl: !!settings?.paperless_url,
+          hasCredentials: !!settings?.paperless_has_credentials,
+          defaultBackend: settings?.default_storage_backend,
+          willUsePaperless: settings?.default_storage_backend === 'paperless',
+          component: 'DocumentManagerCore',
+        });
+      }
     } catch (err) {
       logger.warn('Failed to load paperless settings', {
         error: err.message,
+        entityType,
+        entityId,
         component: 'DocumentManagerCore',
       });
       setPaperlessSettings(null);
@@ -213,7 +294,7 @@ const DocumentManagerCore = ({
     } finally {
       setPaperlessLoading(false);
     }
-  }, []);
+  }, [entityType, entityId]);
 
   // Load files from server
   const loadFiles = useCallback(async () => {
@@ -224,6 +305,18 @@ const DocumentManagerCore = ({
     try {
       const response = await apiService.getEntityFiles(entityType, entityId);
       const fileList = Array.isArray(response) ? response : [];
+      
+      // Enhanced debugging for file loading
+      const paperlessFiles = fileList.filter(f => f.storage_backend === 'paperless');
+      console.log('📁 DEBUG: Files loaded', {
+        entityType,
+        entityId,
+        totalFiles: fileList.length,
+        paperlessFiles: paperlessFiles,
+        paperlessFileCount: paperlessFiles.length,
+        localFiles: fileList.filter(f => f.storage_backend === 'local').length,
+        component: 'DocumentManagerCore'
+      });
       
       // Performance optimization: Prevent unnecessary re-renders with enhanced comparison
       monitoredSetFiles(prevFiles => {
@@ -263,25 +356,141 @@ const DocumentManagerCore = ({
   }, [entityType, entityId, onFileCountChange, onError]);
 
   // Check sync status for Paperless documents
+  // Performance optimization: Use stable references to prevent infinite loops
   const checkSyncStatus = useCallback(async (isManualSync = false) => {
     if (isManualSync) setSyncLoading(true);
+
+    // Use current values from refs for stable dependencies
+    const currentFiles = filesRef.current || files;
+    const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
+    
+    // Enhanced debugging for sync status check
+    console.log('🔄 DEBUG: checkSyncStatus called', {
+      isManualSync,
+      paperlessFiles: paperlessFiles,
+      paperlessFileCount: paperlessFiles.length,
+      paperlessEnabled: paperlessSettings?.paperless_enabled,
+      paperlessAutoSync: paperlessSettings?.paperless_auto_sync,
+      entityType,
+      entityId,
+      component: 'DocumentManagerCore'
+    });
+    
+    // Don't proceed if no paperless files or paperless not enabled
+    if (paperlessFiles.length === 0) {
+      console.log('⚠️ No Paperless files found, skipping sync check');
+      logger.debug('No Paperless files found, skipping sync check', {
+        entityType,
+        entityId,
+        isManualSync,
+        component: 'DocumentManagerCore',
+      });
+      if (isManualSync) setSyncLoading(false);
+      return;
+    }
+
+    if (!paperlessSettings?.paperless_enabled) {
+      console.log('⚠️ Paperless not enabled, skipping sync check');
+      logger.warn('Paperless not enabled, skipping sync check', {
+        entityType,
+        entityId,
+        isManualSync,
+        paperlessFilesCount: paperlessFiles.length,
+        component: 'DocumentManagerCore',
+      });
+      if (isManualSync) setSyncLoading(false);
+      return;
+    }
+    
+    console.log('🚀 STARTING sync status check', {
+      entityType,
+      entityId,
+      isManualSync,
+      paperlessFilesCount: paperlessFiles.length,
+    });
+    
+    logger.info('Starting Paperless sync status check', {
+      entityType,
+      entityId,
+      isManualSync,
+      paperlessFilesCount: paperlessFiles.length,
+      paperlessEnabled: paperlessSettings?.paperless_enabled,
+      autoSyncEnabled: paperlessSettings?.paperless_auto_sync,
+      component: 'DocumentManagerCore',
+    });
 
     try {
       const status = await apiService.checkPaperlessSyncStatus();
       setSyncStatus(status);
+      
+      // Count missing files for logging and user notification
+      const missingCount = Object.values(status).filter(exists => !exists).length;
+      const totalChecked = Object.keys(status).length;
+      
+      logger.info('Paperless sync status check completed', {
+        entityType,
+        entityId,
+        isManualSync,
+        totalFilesChecked: totalChecked,
+        missingFilesFound: missingCount,
+        syncStatus: status,
+        component: 'DocumentManagerCore',
+      });
+
+      // Show notification for manual sync with results
+      if (isManualSync) {
+        const { notifications } = await import('@mantine/notifications');
+        const { IconCheck, IconAlertTriangle } = await import('@tabler/icons-react');
+        
+        if (missingCount > 0) {
+          notifications.show({
+            title: 'Sync Check Complete',
+            message: `Found ${missingCount} missing document(s) out of ${totalChecked} checked. Missing documents are marked with red strikethrough.`,
+            color: 'yellow',
+            icon: <IconAlertTriangle size={16} />,
+            autoClose: 8000,
+          });
+        } else {
+          notifications.show({
+            title: 'Sync Check Complete',
+            message: `All ${totalChecked} Paperless documents are synced and available.`,
+            color: 'green',
+            icon: <IconCheck size={16} />,
+            autoClose: 5000,
+          });
+        }
+      }
+      
+      // Reload files to refresh the UI with updated sync status
       await loadFiles();
     } catch (err) {
       logger.error('document_manager_sync_check_error', {
         message: 'Failed to check Paperless sync status',
         entityType,
         entityId,
+        isManualSync,
         error: err.message,
+        paperlessFilesCount: paperlessFiles.length,
         component: 'DocumentManagerCore',
       });
+
+      // Show error notification for manual sync
+      if (isManualSync) {
+        const { notifications } = await import('@mantine/notifications');
+        const { IconX } = await import('@tabler/icons-react');
+        
+        notifications.show({
+          title: 'Sync Check Failed',
+          message: `Failed to check Paperless sync status: ${err.message}. Please check your Paperless connection.`,
+          color: 'red',
+          icon: <IconX size={16} />,
+          autoClose: 8000,
+        });
+      }
     } finally {
       if (isManualSync) setSyncLoading(false);
     }
-  }, [entityType, entityId, loadFiles]);
+  }, [entityType, entityId, loadFiles, paperlessSettings]);
 
   // Performance optimization: Split file loading effect from paperless settings
   // This prevents unnecessary file reloads when paperless settings change
@@ -298,6 +507,118 @@ const DocumentManagerCore = ({
   useEffect(() => {
     loadPaperlessSettings();
   }, []);
+
+  // Performance optimization: Memoize sync check to prevent infinite loops
+  const memoizedCheckSyncStatus = useCallback(() => {
+    const currentFiles = filesRef.current;
+    const currentAutoSync = paperlessAutoSyncRef.current;
+    
+    const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
+    const shouldAutoSync = currentAutoSync && paperlessFiles.length > 0;
+    
+    // Enhanced debugging for sync detection
+    console.log('🔍 DEBUG: Auto-sync evaluation', {
+      paperlessAutoSync: currentAutoSync,
+      paperlessEnabled: paperlessSettings?.paperless_enabled,
+      paperlessFiles: paperlessFiles,
+      paperlessFileCount: paperlessFiles.length,
+      totalFiles: currentFiles.length,
+      shouldAutoSync,
+      entityType,
+      entityId,
+      component: 'DocumentManagerCore'
+    });
+    
+    if (shouldAutoSync) {
+      console.log('✅ AUTO-SYNC TRIGGERING on component load', {
+        entityType,
+        entityId,
+        paperlessFilesCount: paperlessFiles.length,
+        autoSyncEnabled: currentAutoSync,
+      });
+      
+      logger.info('Auto-sync triggered on component load', {
+        entityType,
+        entityId,
+        paperlessFilesCount: paperlessFiles.length,
+        autoSyncEnabled: currentAutoSync,
+        component: 'DocumentManagerCore',
+      });
+      
+      checkSyncStatus();
+    } else {
+      console.log('❌ Auto-sync NOT triggered', {
+        reason: !currentAutoSync ? 'Auto-sync disabled' : 
+                paperlessFiles.length === 0 ? 'No Paperless files' : 'Unknown',
+        paperlessAutoSync: currentAutoSync,
+        paperlessFileCount: paperlessFiles.length
+      });
+    }
+  }, [paperlessSettings?.paperless_enabled, checkSyncStatus, entityType, entityId]);
+
+  // Run auto-sync check when files or settings change (debounced)
+  // Performance optimization: Skip in view mode to prevent frequent triggers
+  useEffect(() => {
+    // PERFORMANCE FIX: Skip auto-sync checks in view mode
+    if (mode === 'view') {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      memoizedCheckSyncStatus();
+    }, 500); // Increased debounce to 500ms to reduce frequency
+    
+    return () => clearTimeout(timeoutId);
+  }, [mode, memoizedCheckSyncStatus]);
+
+  // Optional: Periodic sync checking every 5 minutes when auto-sync is enabled
+  // Performance optimization: Only run in edit/create modes, skip in view mode
+  const periodicSyncIntervalRef = useRef(null);
+  
+  useEffect(() => {
+    // PERFORMANCE FIX: Skip periodic sync in view mode to prevent frequent renders
+    if (mode === 'view') {
+      if (periodicSyncIntervalRef.current) {
+        clearInterval(periodicSyncIntervalRef.current);
+        periodicSyncIntervalRef.current = null;
+        logger.debug('Periodic auto-sync disabled in view mode', {
+          entityType,
+          entityId,
+          component: 'DocumentManagerCore',
+        });
+      }
+      return;
+    }
+
+    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
+    const shouldRunPeriodicSync = paperlessSettings?.paperless_auto_sync && hasPaperlessFiles;
+    
+    if (shouldRunPeriodicSync && !periodicSyncIntervalRef.current) {
+      periodicSyncIntervalRef.current = setInterval(() => {
+        logger.info('Periodic auto-sync check triggered', {
+          entityType,
+          entityId,
+          component: 'DocumentManagerCore',
+        });
+        checkSyncStatus();
+      }, 5 * 60 * 1000); // 5 minutes
+    } else if (!shouldRunPeriodicSync && periodicSyncIntervalRef.current) {
+      clearInterval(periodicSyncIntervalRef.current);
+      periodicSyncIntervalRef.current = null;
+      logger.debug('Periodic auto-sync interval cleared', {
+        entityType,
+        entityId,
+        component: 'DocumentManagerCore',
+      });
+    }
+    
+    return () => {
+      if (periodicSyncIntervalRef.current) {
+        clearInterval(periodicSyncIntervalRef.current);
+        periodicSyncIntervalRef.current = null;
+      }
+    };
+  }, [mode, paperlessSettings?.paperless_auto_sync, files.length, checkSyncStatus, entityType, entityId]);
 
   // Add pending file for batch upload
   const handleAddPendingFile = useCallback((file, description = '') => {
@@ -326,10 +647,12 @@ const DocumentManagerCore = ({
       return;
     }
 
+    const fileId = `single-${Date.now()}`;
+
     // Show progress modal for single file upload
     if (showProgressModal) {
       startUpload([{ 
-        id: `single-${Date.now()}`, 
+        id: fileId, 
         name: file.name, 
         size: file.size, 
         description 
@@ -342,7 +665,7 @@ const DocumentManagerCore = ({
 
     try {
       logger.info('document_manager_upload_attempt', {
-        message: 'Attempting file upload',
+        message: 'Attempting file upload with task monitoring',
         entityType,
         entityId,
         fileName: file.name,
@@ -351,45 +674,158 @@ const DocumentManagerCore = ({
         component: 'DocumentManagerCore',
       });
 
-      // Update progress for single file
-      if (showProgressModal) {
-        updateFileProgress(`single-${Date.now()}`, 10, 'uploading');
+      // Enhanced debugging for lab results specifically
+      if (entityType === 'lab-result') {
+        logger.info('LAB_RESULTS_UPLOAD_DEBUG', {
+          message: 'Lab Results upload attempt debug',
+          entityType,
+          entityId,
+          fileName: file.name,
+          selectedStorageBackend,
+          paperlessSettings: paperlessSettings ? {
+            paperless_enabled: paperlessSettings.paperless_enabled,
+            has_url: !!paperlessSettings.paperless_url,
+            has_credentials: !!paperlessSettings.paperless_has_credentials,
+            default_storage_backend: paperlessSettings.default_storage_backend
+          } : null,
+          component: 'DocumentManagerCore',
+        });
+
+        // Warning if Paperless is configured but upload is going to local storage
+        if (selectedStorageBackend === 'local' && 
+            paperlessSettings?.paperless_enabled && 
+            paperlessSettings?.paperless_url && 
+            paperlessSettings?.paperless_has_credentials) {
+          logger.warn('LAB_RESULTS_PAPERLESS_MISCONFIGURATION', {
+            message: 'Lab Results: Paperless is configured but upload going to local storage',
+            entityType,
+            entityId,
+            fileName: file.name,
+            selectedStorageBackend,
+            paperlessConfigured: true,
+            recommendation: 'User should change storage backend to Paperless or update default in Settings',
+            component: 'DocumentManagerCore',
+          });
+
+          // Show user-facing notification for this scenario
+          if (!showProgressModal) {
+            notifications.show({
+              title: 'Storage Backend Notice',
+              message: 'File uploading to local storage. Use the storage selector to send to Paperless if desired.',
+              color: 'blue',
+              autoClose: 8000,
+            });
+          }
+        }
       }
 
-      await apiService.uploadEntityFile(
+      // Update initial progress
+      if (showProgressModal) {
+        updateFileProgress(fileId, 10, 'uploading', 'Uploading to server...');
+      }
+
+      // Use the new upload method with task monitoring
+      const uploadResult = await apiService.uploadEntityFileWithTaskMonitoring(
         entityType,
         entityId,
         file,
         description,
         '',
-        selectedStorageBackend
+        selectedStorageBackend,
+        null, // signal
+        (progressUpdate) => {
+          // Handle progress updates during task monitoring
+          if (showProgressModal) {
+            let progress = 50; // Start at 50% after initial upload
+            let status = 'uploading';
+            let message = progressUpdate.message || 'Processing...';
+
+            if (progressUpdate.status === 'processing') {
+              progress = 75;
+              status = 'uploading';
+            } else if (progressUpdate.status === 'completed') {
+              progress = 100;
+              status = 'completed';
+            } else if (progressUpdate.status === 'failed') {
+              progress = 0;
+              status = 'failed';
+            }
+
+            updateFileProgress(fileId, progress, status, message);
+          }
+        }
       );
 
-      // Update progress to completion
-      if (showProgressModal) {
-        updateFileProgress(`single-${Date.now()}`, 100, 'completed');
-        completeUpload(true, `${file.name} uploaded successfully!`);
-      }
+      // Handle different upload outcomes
+      if (uploadResult.taskMonitored && selectedStorageBackend === 'paperless') {
+        // Import duplicate handling utilities
+        const { handlePaperlessTaskCompletion } = await import('../../utils/errorMessageUtils');
+        
+        // Handle task completion with appropriate notifications
+        const result = handlePaperlessTaskCompletion(
+          uploadResult.taskResult, 
+          file.name, 
+          { skipNotification: showProgressModal }
+        );
 
-      // Reload files
-      await loadFiles();
+        if (showProgressModal) {
+          if (result.success) {
+            updateFileProgress(fileId, 100, 'completed');
+            completeUpload(true, result.message);
+          } else if (result.isDuplicate) {
+            updateFileProgress(fileId, 0, 'failed', result.message);
+            completeUpload(false, result.message);
+          } else {
+            updateFileProgress(fileId, 0, 'failed', result.message);
+            completeUpload(false, result.message);
+          }
+        }
 
-      if (!showProgressModal) {
-        notifications.show({
-          title: 'File Uploaded',
-          message: formatErrorWithContext(SUCCESS_MESSAGES.UPLOAD_SUCCESS, file.name),
-          color: 'green',
-          icon: <IconCheck size={16} />,
+        // Log the result
+        logger.info('document_manager_paperless_upload_result', {
+          message: 'Paperless upload completed with task monitoring',
+          entityType,
+          entityId,
+          fileName: file.name,
+          success: result.success,
+          isDuplicate: result.isDuplicate,
+          documentId: result.documentId,
+          component: 'DocumentManagerCore',
+        });
+
+        // If it's a duplicate, don't set error (it's expected behavior)
+        if (!result.success && !result.isDuplicate) {
+          setError(result.message);
+          if (onError) {
+            onError(result.message);
+          }
+        }
+      } else {
+        // Local storage or upload without task monitoring
+        if (showProgressModal) {
+          updateFileProgress(fileId, 100, 'completed');
+          completeUpload(true, `${file.name} uploaded successfully!`);
+        } else {
+          notifications.show({
+            title: 'File Uploaded',
+            message: formatErrorWithContext(SUCCESS_MESSAGES.UPLOAD_SUCCESS, file.name),
+            color: 'green',
+            icon: <IconCheck size={16} />,
+          });
+        }
+
+        logger.info('document_manager_local_upload_success', {
+          message: 'File uploaded successfully to local storage',
+          entityType,
+          entityId,
+          fileName: file.name,
+          component: 'DocumentManagerCore',
         });
       }
 
-      logger.info('document_manager_upload_success', {
-        message: 'File uploaded successfully',
-        entityType,
-        entityId,
-        fileName: file.name,
-        component: 'DocumentManagerCore',
-      });
+      // Reload files to show updated state
+      await loadFiles();
+
     } catch (err) {
       let errorMessage;
 
@@ -404,7 +840,7 @@ const DocumentManagerCore = ({
       errorMessage = formatErrorWithContext(errorMessage, file.name);
 
       if (showProgressModal) {
-        updateFileProgress(`single-${Date.now()}`, 0, 'failed', errorMessage);
+        updateFileProgress(fileId, 0, 'failed', errorMessage);
         completeUpload(false, errorMessage);
       } else {
         notifications.show({
@@ -483,6 +919,41 @@ const DocumentManagerCore = ({
           component: 'DocumentManagerCore',
         });
 
+        // Enhanced debugging for lab results specifically
+        if (entityType === 'lab-result') {
+          logger.info('LAB_RESULTS_BATCH_UPLOAD_DEBUG', {
+            message: 'Lab Results batch upload debug',
+            entityType,
+            targetEntityId,
+            fileName: pendingFile.file.name,
+            selectedStorageBackend: currentStorageBackend,
+            paperlessSettings: currentPaperlessSettings ? {
+              paperless_enabled: currentPaperlessSettings.paperless_enabled,
+              has_url: !!currentPaperlessSettings.paperless_url,
+              has_credentials: !!currentPaperlessSettings.paperless_has_credentials,
+              default_storage_backend: currentPaperlessSettings.default_storage_backend
+            } : null,
+            component: 'DocumentManagerCore',
+          });
+
+          // Warning if Paperless is configured but upload is going to local storage
+          if (currentStorageBackend === 'local' && 
+              currentPaperlessSettings?.paperless_enabled && 
+              currentPaperlessSettings?.paperless_url && 
+              currentPaperlessSettings?.paperless_has_credentials) {
+            logger.warn('LAB_RESULTS_BATCH_PAPERLESS_MISCONFIGURATION', {
+              message: 'Lab Results Batch: Paperless is configured but upload going to local storage',
+              entityType,
+              targetEntityId,
+              fileName: pendingFile.file.name,
+              selectedStorageBackend: currentStorageBackend,
+              paperlessConfigured: true,
+              recommendation: 'User should change storage backend to Paperless or update default in Settings',
+              component: 'DocumentManagerCore',
+            });
+          }
+        }
+
         // Simulate progress updates for better UX with proper interval tracking
         let progressInterval = null;
         if (showProgressModal && currentStorageBackend === 'paperless') {
@@ -499,13 +970,29 @@ const DocumentManagerCore = ({
         }
 
         try {
-          await apiService.uploadEntityFile(
+          // Use the new upload method with task monitoring
+          const uploadResult = await apiService.uploadEntityFileWithTaskMonitoring(
             entityType,
             targetEntityId,
             pendingFile.file,
             pendingFile.description,
             '',
-            currentStorageBackend
+            currentStorageBackend,
+            null, // signal
+            (progressUpdate) => {
+              // Handle progress updates during task monitoring for batch uploads
+              if (showProgressModal) {
+                let progress = 50; // Start at 50% after initial upload
+                if (progressUpdate.status === 'processing') {
+                  progress = 75;
+                } else if (progressUpdate.status === 'completed') {
+                  progress = 100;
+                } else if (progressUpdate.status === 'failed') {
+                  progress = 0;
+                }
+                debouncedUpdateProgress(fileId, progress, 'uploading', progressUpdate.message);
+              }
+            }
           );
 
           // Clean up interval properly
@@ -514,18 +1001,79 @@ const DocumentManagerCore = ({
             progressIntervalsRef.current.delete(progressInterval);
           }
 
-          // Mark as completed
-          if (showProgressModal) {
-            updateFileProgress(fileId, 100, 'completed');
-          }
+          // Handle different upload outcomes for batch uploads
+          if (uploadResult.taskMonitored && currentStorageBackend === 'paperless') {
+            // Import duplicate handling utilities
+            const { handlePaperlessTaskCompletion } = await import('../../utils/errorMessageUtils');
+            
+            // Handle task completion with appropriate notifications (skip notification for batch)
+            const result = handlePaperlessTaskCompletion(
+              uploadResult.taskResult, 
+              pendingFile.file.name, 
+              { skipNotification: true }
+            );
 
-          logger.info('document_manager_individual_batch_success', {
-            message: 'Individual file uploaded successfully in batch',
-            entityType,
-            targetEntityId,
-            fileName: pendingFile.file.name,
-            component: 'DocumentManagerCore',
-          });
+            if (result.success) {
+              // Mark as completed
+              if (showProgressModal) {
+                updateFileProgress(fileId, 100, 'completed');
+              }
+
+              logger.info('document_manager_batch_paperless_success', {
+                message: 'Individual Paperless file uploaded successfully in batch',
+                entityType,
+                targetEntityId,
+                fileName: pendingFile.file.name,
+                documentId: result.documentId,
+                component: 'DocumentManagerCore',
+              });
+            } else if (result.isDuplicate) {
+              // Mark as failed but log as duplicate
+              if (showProgressModal) {
+                updateFileProgress(fileId, 0, 'failed', result.message);
+              }
+
+              logger.warn('document_manager_batch_paperless_duplicate', {
+                message: 'Duplicate document detected in batch upload',
+                entityType,
+                targetEntityId,
+                fileName: pendingFile.file.name,
+                component: 'DocumentManagerCore',
+              });
+
+              // Throw error to be caught and handled properly
+              throw new Error(result.message);
+            } else {
+              // Mark as failed
+              if (showProgressModal) {
+                updateFileProgress(fileId, 0, 'failed', result.message);
+              }
+
+              logger.error('document_manager_batch_paperless_error', {
+                message: 'Individual Paperless file failed in batch upload',
+                entityType,
+                targetEntityId,
+                fileName: pendingFile.file.name,
+                error: result.message,
+                component: 'DocumentManagerCore',
+              });
+
+              throw new Error(result.message);
+            }
+          } else {
+            // Local storage or upload without task monitoring
+            if (showProgressModal) {
+              updateFileProgress(fileId, 100, 'completed');
+            }
+
+            logger.info('document_manager_batch_local_success', {
+              message: 'Individual file uploaded successfully in batch (local storage)',
+              entityType,
+              targetEntityId,
+              fileName: pendingFile.file.name,
+              component: 'DocumentManagerCore',
+            });
+          }
         } catch (error) {
           // Clean up interval on error
           if (progressInterval) {
@@ -744,8 +1292,8 @@ const DocumentManagerCore = ({
     };
   }, []);
 
-  // Return all state and handlers for the main component to use
-  return {
+  // Performance optimization: Memoize the handlers object to prevent unnecessary re-renders
+  const handlers = useMemo(() => ({
     // State
     files,
     pendingFiles,
@@ -783,7 +1331,37 @@ const DocumentManagerCore = ({
     getPendingFilesCount: () => pendingFilesRef.current.length,
     hasPendingFiles: () => pendingFilesRef.current.length > 0,
     clearPendingFiles: () => monitoredSetPendingFiles([]),
-  };
+  }), [
+    files,
+    pendingFiles,
+    filesToDelete,
+    loading,
+    error,
+    syncStatus,
+    syncLoading,
+    paperlessSettings,
+    selectedStorageBackend,
+    paperlessLoading,
+    progressStats,
+    fileStats,
+    pendingStats,
+    handleAddPendingFile,
+    handleRemovePendingFile,
+    handleMarkFileForDeletion,
+    handleUnmarkFileForDeletion,
+    handleImmediateUpload,
+    uploadPendingFiles,
+    handleDownloadFile,
+    handleImmediateDelete,
+    handlePendingFileDescriptionChange,
+    handleCheckSyncStatus,
+    loadFiles,
+    checkSyncStatus,
+    monitoredSetPendingFiles,
+  ]);
+
+  // Return handlers object
+  return handlers;
 };
 
-export default DocumentManagerCore;
+export default useDocumentManagerCore;

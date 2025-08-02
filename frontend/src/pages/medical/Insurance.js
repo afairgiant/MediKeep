@@ -679,7 +679,15 @@ const Insurance = () => {
       {/* Form Modal */}
       <InsuranceFormWrapper
         isOpen={isFormOpen}
-        onClose={() => !isBlocking && handleCloseForm()}
+        onClose={() => {
+          if (!isBlocking) {
+            resetSubmission();
+            setIsFormOpen(false);
+            setEditingInsurance(null);
+            setDocumentManagerMethods(null);
+            setFormData(initializeFormData());
+          }
+        }}
         title={editingInsurance ? 'Edit Insurance' : 'Add New Insurance'}
         formData={formData}
         onInputChange={handleInputChange}

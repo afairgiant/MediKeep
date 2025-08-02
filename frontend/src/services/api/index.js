@@ -474,6 +474,132 @@ class ApiService {
     }
   }
 
+  // Upload file to an entity with Paperless task status monitoring
+  async uploadEntityFileWithTaskMonitoring(
+    entityType,
+    entityId,
+    file,
+    description = '',
+    category = '',
+    storageBackend = undefined,
+    signal,
+    onProgress = null
+  ) {
+    try {
+      logger.info('api_upload_entity_file_with_monitoring', 'Starting monitored upload', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        fileSize: file.size,
+        storageBackend,
+        component: 'ApiService',
+      });
+
+      // Perform the initial upload
+      const uploadResult = await this.uploadEntityFile(
+        entityType,
+        entityId,
+        file,
+        description,
+        category,
+        storageBackend,
+        signal
+      );
+
+      // If not using Paperless or no task UUID returned, return immediately
+      if (storageBackend !== 'paperless' || !uploadResult?.paperless_task_uuid) {
+        logger.info('api_upload_no_monitoring_needed', 'Upload completed without task monitoring', {
+          entityType,
+          entityId,
+          fileName: file.name,
+          storageBackend,
+          hasTaskUuid: !!uploadResult?.paperless_task_uuid,
+          component: 'ApiService',
+        });
+        return {
+          ...uploadResult,
+          taskMonitored: false,
+          documentId: null,
+          isDuplicate: false
+        };
+      }
+
+      // Monitor Paperless task status
+      const taskUuid = uploadResult.paperless_task_uuid;
+      
+      if (onProgress) {
+        onProgress({ status: 'processing', message: 'Processing document in Paperless...' });
+      }
+
+      logger.info('api_upload_task_monitoring', 'Starting Paperless task monitoring', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        taskUuid,
+        component: 'ApiService',
+      });
+
+      // Import the pollPaperlessTaskStatus function
+      const { pollPaperlessTaskStatus } = await import('./paperlessApi');
+      
+      // Poll task status
+      const taskResult = await pollPaperlessTaskStatus(taskUuid, 30, 1000);
+
+      logger.info('api_upload_task_complete', 'Paperless task monitoring completed', {
+        entityType,
+        entityId,
+        fileName: file.name,
+        taskUuid,
+        taskStatus: taskResult.status,
+        hasError: !!taskResult.error,
+        hasDocumentId: !!(taskResult.result?.document_id || taskResult.document_id),
+        component: 'ApiService',
+      });
+
+      // Import utilities for task result processing
+      const { 
+        isDuplicateDocumentError,
+        isPaperlessTaskSuccessful,
+        extractDocumentIdFromTaskResult
+      } = await import('../utils/errorMessageUtils');
+
+      const isSuccess = isPaperlessTaskSuccessful(taskResult);
+      const isDuplicate = isDuplicateDocumentError(taskResult);
+      const documentId = extractDocumentIdFromTaskResult(taskResult);
+
+      if (onProgress) {
+        const status = isSuccess ? 'completed' : 'failed';
+        const message = isSuccess ? 'Document processed successfully' :
+                       isDuplicate ? 'Document already exists in Paperless' :
+                       'Document processing failed';
+        onProgress({ status, message, isDuplicate });
+      }
+
+      return {
+        ...uploadResult,
+        taskMonitored: true,
+        taskResult,
+        documentId,
+        isDuplicate,
+        success: isSuccess
+      };
+
+    } catch (error) {
+      logger.error('api_upload_entity_file_monitoring_error', 'Failed to upload and monitor entity file', {
+        entityType,
+        entityId,
+        fileName: file?.name,
+        error: error.message,
+        component: 'ApiService',
+      });
+      
+      // Re-throw with additional context
+      const enhancedError = new Error(`Upload monitoring failed: ${error.message}`);
+      enhancedError.originalError = error;
+      throw enhancedError;
+    }
+  }
+
 
   // Download file (generic - file ID is enough)
   async downloadEntityFile(fileId, fileName, signal) {

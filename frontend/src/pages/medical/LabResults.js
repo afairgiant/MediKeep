@@ -35,6 +35,7 @@ import {
   Stack,
   Text,
   Card,
+  Group,
 } from '@mantine/core';
 
 const LabResults = () => {
@@ -300,6 +301,7 @@ const LabResults = () => {
   };
 
   const handleEditLabResult = async labResult => {
+    resetSubmission(); // Reset submission state to prevent modal flash
     setEditingLabResult(labResult);
     setFormData({
       test_name: labResult.test_name || '',
@@ -372,19 +374,22 @@ const LabResults = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
+    // Basic validation first
+    if (!formData.test_name.trim()) {
+      setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
+      return;
+    }
+
     if (!currentPatient?.id) {
       setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
       return;
     }
 
-    // Start submission immediately to prevent race conditions
+    // Start submission process
     startSubmission();
 
+    // Prevent double submission - check after startSubmission() to avoid race condition
     if (!canSubmit) {
-      logger.warn('lab_results_race_condition_prevented', {
-        message: 'Form submission prevented due to race condition',
-        component: 'LabResults',
-      });
       return;
     }
 
@@ -658,7 +663,7 @@ const LabResults = () => {
       {showModal && (
         <LabResultFormWrapper
           isOpen={showModal}
-          onClose={handleCloseModal}
+          onClose={() => !isBlocking && handleCloseModal()}
           title={editingLabResult ? 'Edit Lab Result' : 'Add New Lab Result'}
           formData={formData}
           onInputChange={handleInputChange}

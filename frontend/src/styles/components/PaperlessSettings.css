@@ -314,6 +314,13 @@
   color: var(--text-primary, #2c3e50);
 }
 
+.paperless-checkbox-description {
+  margin-top: 0.25rem;
+  color: #6c757d;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 /* Storage Statistics */
 .paperless-storage-stats {
   display: flex;

@@ -163,7 +163,7 @@ const StoragePreferencesCard = ({
           </div>
         </div>
 
-        {/* Sync Options - hidden for now, will be implemented in future phases
+        {/* Sync Options */}
         {connectionEnabled && (
           <div className="paperless-form-section">
             <div className="paperless-form-group">
@@ -173,31 +173,41 @@ const StoragePreferencesCard = ({
                 <label className="paperless-checkbox-option">
                   <input
                     type="checkbox"
-                    checked={preferences.paperless_auto_sync || false}
+                    checked={preferences.paperless_auto_sync !== undefined ? preferences.paperless_auto_sync : true}
                     onChange={(e) => handleSyncPreferenceChange('paperless_auto_sync', e.target.checked)}
                     className="paperless-checkbox"
                   />
-                  <span className="paperless-checkbox-label">
-                    Enable automatic sync to paperless-ngx
-                  </span>
+                  <div>
+                    <span className="paperless-checkbox-label">
+                      Enable automatic sync status checking
+                    </span>
+                    <div className="paperless-checkbox-description">
+                      Automatically check if documents still exist in Paperless when pages load
+                    </div>
+                  </div>
                 </label>
 
-                <label className="paperless-checkbox-option">
+                <label className="paperless-checkbox-option" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
                   <input
                     type="checkbox"
-                    checked={preferences.paperless_sync_tags || false}
+                    checked={preferences.paperless_sync_tags !== undefined ? preferences.paperless_sync_tags : true}
                     onChange={(e) => handleSyncPreferenceChange('paperless_sync_tags', e.target.checked)}
                     className="paperless-checkbox"
+                    disabled={true}
                   />
-                  <span className="paperless-checkbox-label">
-                    Sync document tags and categories
-                  </span>
+                  <div>
+                    <span className="paperless-checkbox-label">
+                      Sync document tags and categories
+                    </span>
+                    <div className="paperless-checkbox-description">
+                      Keep document metadata synchronized with Paperless (Coming Soon)
+                    </div>
+                  </div>
                 </label>
               </div>
             </div>
           </div>
         )}
-        */}
 
         {/* Storage Usage Statistics */}
         <div className="paperless-form-section">

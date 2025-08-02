@@ -11,12 +11,14 @@ import {
   ActionIcon,
   ThemeIcon,
   TextInput,
+  Badge,
 } from '@mantine/core';
 import {
   IconUpload,
   IconRefresh,
   IconX,
   IconFileText,
+  IconCheck,
 } from '@tabler/icons-react';
 import FileList from './FileList';
 import FileUploadZone from './FileUploadZone';
@@ -62,20 +64,32 @@ const RenderModeContent = memo(({
     );
   }
 
-  // Performance optimization: Memoized storage backend selector
+  // Performance optimization: Memoized storage backend selector with auto-sync indicator
   const storageBackendSelector = !paperlessLoading && (
-    <StorageBackendSelector
-      value={selectedStorageBackend}
-      onChange={onStorageBackendChange}
-      paperlessEnabled={paperlessSettings?.paperless_enabled || false}
-      paperlessConnected={
-        paperlessSettings?.paperless_enabled &&
-        paperlessSettings?.paperless_url &&
-        paperlessSettings?.paperless_has_credentials
-      }
-      disabled={loading}
-      size="sm"
-    />
+    <Stack gap="xs">
+      <StorageBackendSelector
+        value={selectedStorageBackend}
+        onChange={onStorageBackendChange}
+        paperlessEnabled={paperlessSettings?.paperless_enabled || false}
+        paperlessConnected={
+          paperlessSettings?.paperless_enabled &&
+          paperlessSettings?.paperless_url &&
+          paperlessSettings?.paperless_has_credentials
+        }
+        disabled={loading}
+        size="sm"
+      />
+      {paperlessSettings?.paperless_auto_sync && (
+        <Badge 
+          size="xs" 
+          color="green" 
+          variant="light"
+          leftSection={<IconCheck size={10} />}
+        >
+          Auto-sync enabled
+        </Badge>
+      )}
+    </Stack>
   );
 
   // Performance optimization: Memoized pending files list
@@ -125,6 +139,8 @@ const RenderModeContent = memo(({
   );
 
   if (mode === 'view') {
+    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
+    
     return (
       <Stack gap="md">
         {storageBackendSelector}
@@ -143,7 +159,23 @@ const RenderModeContent = memo(({
           </Group>
         </Paper>
 
-        {/* Files List */}
+        {/* Files List with Sync Check for Paperless files */}
+        {hasPaperlessFiles && (
+          <Group justify="space-between" align="center">
+            <Text fw={500}>Files</Text>
+            <Button
+              variant="light"
+              size="xs"
+              leftSection={<IconRefresh size={14} />}
+              loading={syncLoading}
+              onClick={onCheckSyncStatus}
+              title="Check sync status with Paperless"
+            >
+              Sync Check
+            </Button>
+          </Group>
+        )}
+        
         <FileList
           files={files}
           syncStatus={syncStatus}
@@ -156,6 +188,8 @@ const RenderModeContent = memo(({
   }
 
   if (mode === 'edit') {
+    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
+    
     return (
       <Stack gap="md">
         {storageBackendSelector}
@@ -165,16 +199,18 @@ const RenderModeContent = memo(({
           <Stack gap="md">
             <Group justify="space-between" align="center">
               <Title order={5}>Current Files:</Title>
-              <Button
-                variant="light"
-                size="xs"
-                leftSection={<IconRefresh size={14} />}
-                loading={syncLoading}
-                onClick={onCheckSyncStatus}
-                title="Check sync status with Paperless"
-              >
-                Sync Check
-              </Button>
+              {hasPaperlessFiles && (
+                <Button
+                  variant="light"
+                  size="xs"
+                  leftSection={<IconRefresh size={14} />}
+                  loading={syncLoading}
+                  onClick={onCheckSyncStatus}
+                  title="Check sync status with Paperless"
+                >
+                  Sync Check
+                </Button>
+              )}
             </Group>
             <FileList
               files={files}

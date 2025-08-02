@@ -156,6 +156,13 @@ export const useMedicalData = config => {
       );
 
       if (result) {
+        // Update local state immediately with the updated item
+        setItems(prevItems => 
+          prevItems.map(item => 
+            item.id === id ? { ...item, ...result } : item
+          )
+        );
+        
         setSuccessMessage(`${entityName} updated successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;

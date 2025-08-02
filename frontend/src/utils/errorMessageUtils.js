@@ -345,6 +345,135 @@ export const handleBatchResults = (results, operation = 'operation', options = {
 };
 
 /**
+ * Check if a Paperless task result indicates a duplicate document error
+ * @param {Object} taskResult - The task result from Paperless
+ * @returns {boolean} True if the error indicates a duplicate document
+ */
+export const isDuplicateDocumentError = (taskResult) => {
+  if (!taskResult?.error && !taskResult?.result?.error) return false;
+  
+  const errorMessage = (taskResult.error || taskResult.result?.error || '').toLowerCase();
+  
+  return errorMessage.includes('already exists') || 
+         errorMessage.includes('duplicate') ||
+         errorMessage.includes('hash collision') ||
+         errorMessage.includes('identical document') ||
+         errorMessage.includes('same content hash') ||
+         errorMessage.includes('document with identical content');
+};
+
+/**
+ * Check if a Paperless task result indicates the task failed
+ * @param {Object} taskResult - The task result from Paperless
+ * @returns {boolean} True if the task failed
+ */
+export const isPaperlessTaskFailed = (taskResult) => {
+  return taskResult?.status === 'FAILURE' || taskResult?.status === 'RETRY';
+};
+
+/**
+ * Check if a Paperless task result indicates the task succeeded
+ * @param {Object} taskResult - The task result from Paperless
+ * @returns {boolean} True if the task succeeded and has a document ID
+ */
+export const isPaperlessTaskSuccessful = (taskResult) => {
+  return taskResult?.status === 'SUCCESS' && 
+         (taskResult?.result?.document_id || taskResult?.document_id);
+};
+
+/**
+ * Extract document ID from successful Paperless task result
+ * @param {Object} taskResult - The task result from Paperless
+ * @returns {string|null} Document ID if available, null otherwise
+ */
+export const extractDocumentIdFromTaskResult = (taskResult) => {
+  if (!isPaperlessTaskSuccessful(taskResult)) return null;
+  
+  return taskResult?.result?.document_id || taskResult?.document_id || null;
+};
+
+/**
+ * Get user-friendly error message from Paperless task result
+ * @param {Object} taskResult - The task result from Paperless
+ * @param {string} fileName - Name of the file for context
+ * @returns {string} User-friendly error message
+ */
+export const getPaperlessTaskErrorMessage = (taskResult, fileName) => {
+  if (isDuplicateDocumentError(taskResult)) {
+    return formatErrorWithContext(ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT, fileName);
+  }
+  
+  if (isPaperlessTaskFailed(taskResult)) {
+    return formatErrorWithContext(ERROR_MESSAGES.PAPERLESS_TASK_FAILED, fileName);
+  }
+  
+  return formatErrorWithContext(ERROR_MESSAGES.PAPERLESS_UPLOAD_FAILED, fileName);
+};
+
+/**
+ * Handle Paperless task completion with appropriate notifications
+ * @param {Object} taskResult - The task result from Paperless
+ * @param {string} fileName - Name of the file for context
+ * @param {Object} options - Additional options
+ * @returns {Object} Result object with success status and message
+ */
+export const handlePaperlessTaskCompletion = (taskResult, fileName, options = {}) => {
+  if (isPaperlessTaskSuccessful(taskResult)) {
+    const documentId = extractDocumentIdFromTaskResult(taskResult);
+    const message = `"${fileName}" uploaded to Paperless successfully!`;
+    
+    if (!options.skipNotification) {
+      showSuccessNotification(message, {
+        title: 'Document Added to Paperless',
+        ...options.notificationOptions
+      });
+    }
+    
+    return {
+      success: true,
+      message,
+      documentId,
+      isDuplicate: false
+    };
+  }
+  
+  if (isDuplicateDocumentError(taskResult)) {
+    const message = getPaperlessTaskErrorMessage(taskResult, fileName);
+    
+    if (!options.skipNotification) {
+      showWarningNotification(message, {
+        title: 'Duplicate Document',
+        ...options.notificationOptions
+      });
+    }
+    
+    return {
+      success: false,
+      message,
+      documentId: null,
+      isDuplicate: true
+    };
+  }
+  
+  // Task failed for other reasons
+  const message = getPaperlessTaskErrorMessage(taskResult, fileName);
+  
+  if (!options.skipNotification) {
+    showErrorNotification(message, 'upload', {
+      title: 'Paperless Upload Failed',
+      ...options.notificationOptions
+    });
+  }
+  
+  return {
+    success: false,
+    message,
+    documentId: null,
+    isDuplicate: false
+  };
+};
+
+/**
  * Create a standardized error handler for async operations
  * @param {string} operation - The operation being performed
  * @param {Object} context - Context for error logging
@@ -379,4 +508,10 @@ export default {
   handleFileUploadError,
   handleBatchResults,
   createErrorHandler,
+  isDuplicateDocumentError,
+  isPaperlessTaskFailed,
+  isPaperlessTaskSuccessful,
+  extractDocumentIdFromTaskResult,
+  getPaperlessTaskErrorMessage,
+  handlePaperlessTaskCompletion,
 };

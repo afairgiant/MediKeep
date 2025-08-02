@@ -297,6 +297,11 @@ const Visits = () => {
   };
 
   const handleCloseViewModal = () => {
+    // Refresh file count for the viewed visit before closing
+    if (viewingVisit) {
+      refreshFileCount(viewingVisit.id);
+    }
+    
     setShowViewModal(false);
     setViewingVisit(null);
     // Remove view parameter from URL
