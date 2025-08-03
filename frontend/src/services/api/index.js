@@ -722,7 +722,7 @@ class ApiService {
         throw new Error('Authentication required to view files');
       }
 
-      // Validate and check token
+      // Validate and check token (with improved error handling)
       try {
         // Validate token format
         if (typeof token !== 'string' || token.trim() === '') {
@@ -734,25 +734,49 @@ class ApiService {
           throw new Error(`Invalid JWT format - expected 3 parts, got ${tokenParts.length}`);
         }
 
-        const payload = JSON.parse(atob(tokenParts[1]));
+        // More robust JWT payload parsing
+        let payload;
+        try {
+          // Add padding if needed for base64 decoding
+          let base64Payload = tokenParts[1];
+          while (base64Payload.length % 4) {
+            base64Payload += '=';
+          }
+          const decodedPayload = atob(base64Payload);
+          payload = JSON.parse(decodedPayload);
+        } catch (parseError) {
+          logger.warn('jwt_payload_parse_warning', 'JWT payload parsing failed but continuing with file view', {
+            error: parseError.message,
+            fileId,
+            fileName,
+            component: 'ApiService',
+          });
+          // For file viewing, we'll continue even if payload parsing fails
+          // as long as we have a token - the server will validate it properly
+          payload = {};
+        }
         
-        // Validate required JWT claims
-        if (!payload.sub) {
-          throw new Error('Token missing subject claim');
-        }
-        if (!payload.exp) {
-          throw new Error('Token missing expiration claim');
-        }
-
-        const currentTime = Date.now() / 1000;
-        if (payload.exp < currentTime) {
-          throw new Error('Session expired. Please log in again.');
+        // Only validate claims if we successfully parsed the payload
+        if (payload.exp) {
+          const currentTime = Date.now() / 1000;
+          if (payload.exp < currentTime) {
+            throw new Error('Session expired. Please log in again.');
+          }
         }
       } catch (e) {
-        if (e.message.includes('Session expired') || e.message.includes('Token missing')) {
-          throw e; // Re-throw specific errors as-is
+        // Only throw errors for critical authentication issues
+        if (e.message.includes('Session expired') || 
+            e.message.includes('Token is empty') ||
+            e.message.includes('Invalid JWT format')) {
+          throw e;
         }
-        throw new Error('Invalid authentication token. Please log in again.');
+        // For other token validation issues during file viewing, log warning but continue
+        logger.warn('jwt_validation_warning', 'Token validation warning during file view, continuing anyway', {
+          error: e.message,
+          fileId,
+          fileName,
+          component: 'ApiService',
+        });
       }
 
       // Construct view URL with authentication token
@@ -764,8 +788,17 @@ class ApiService {
       // Open in new tab
       const newWindow = window.open(viewUrl, '_blank', 'noopener,noreferrer');
       
+      // Note: In modern browsers, window.open() may return null even when successful
+      // due to security restrictions, especially with 'noopener' flag
+      // We'll log a warning but not fail the operation since the file often opens anyway
       if (!newWindow) {
-        throw new Error('Failed to open file viewer. Please check if pop-ups are blocked.');
+        logger.warn('popup_detection_warning', 'window.open returned null, but file may still open', {
+          fileId,
+          fileName,
+          viewUrl: viewUrl.replace(/token=[^&]+/, 'token=***'),
+          component: 'ApiService',
+        });
+        // Don't throw error - let the operation succeed since file often opens despite null return
       }
 
       // Note: window.open() for external URLs doesn't provide success/failure feedback
@@ -786,6 +819,8 @@ class ApiService {
         fileId,
         fileName,
         error: error.message,
+        errorStack: error.stack,
+        errorType: error.constructor.name,
         component: 'ApiService',
       });
       throw error;
