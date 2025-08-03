@@ -70,7 +70,6 @@ def _update_entity_file_from_task_result(db: Session, task_uuid: str, task_resul
                 # Also delete the physical file if it exists locally
                 if file_path:
                     try:
-                        import os
                         if os.path.exists(file_path):
                             os.remove(file_path)
                             logger.info(f"Deleted local file: {file_path}")
