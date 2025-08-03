@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import logger from './logger';
 
 class TimezoneService {
   constructor() {
@@ -12,9 +13,15 @@ class TimezoneService {
     try {
       const data = await apiClient.get('/utils/timezone-info');
       this.facilityTimezone = data.facility_timezone;
-      console.log(`Timezone initialized: ${this.facilityTimezone}`);
+      logger.debug('timezone_service_initialized', 'Timezone service initialized', {
+        timezone: this.facilityTimezone,
+        component: 'TimezoneService'
+      });
     } catch (error) {
-      console.warn('Failed to load timezone, using UTC:', error.message);
+      logger.warn('timezone_service_fallback', 'Failed to load timezone, using UTC as fallback', {
+        error: error.message,
+        component: 'TimezoneService'
+      });
       this.facilityTimezone = 'UTC';
     }
 
@@ -53,7 +60,11 @@ class TimezoneService {
 
       return date.toLocaleString('en-US', dateTimeOptions);
     } catch (error) {
-      console.error('Date formatting error:', error);
+      logger.debug('timezone_service_format_error', 'Date formatting failed', {
+        utcString,
+        error: error.message,
+        component: 'TimezoneService'
+      });
       return 'Invalid Date';
     }
   }

@@ -310,7 +310,10 @@ export function AppDataProvider({ children }) {
           }
         } catch (e) {
           // Fall back to old API if Phase 1 fails
-          console.warn('Phase 1 active patient API failed, falling back to /patients/me', e);
+          logger.debug('active_patient_api_fallback', 'Phase 1 active patient API failed, falling back to /patients/me', {
+            error: e.message,
+            component: 'AppDataContext'
+          });
         }
         
         // Fallback to original API

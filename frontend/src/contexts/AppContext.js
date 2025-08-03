@@ -96,7 +96,7 @@ export const AppProvider = ({ children }) => {
         dispatch({ type: ACTION_TYPES.SET_USER, payload: userData });
         dispatch({ type: ACTION_TYPES.SET_PATIENT, payload: userData });
       } catch (error) {
-        console.error('Failed to initialize app:', error);
+        // Failed to initialize app - session will be cleared
         localStorage.removeItem('token');
         dispatch({ type: ACTION_TYPES.SET_ERROR, payload: 'Session expired' });
       }
