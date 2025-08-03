@@ -5,25 +5,19 @@ import {
   Paper,
   Group,
   Text,
-  Title,
   Stack,
   Alert,
   Loader,
   Center,
-  Badge,
   Grid,
-  Card,
-  Divider,
-  Anchor,
-  Modal,
   Button,
+  Title,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
   IconCheck,
   IconPlus,
   IconShieldCheck,
-  IconPill,
 } from '@tabler/icons-react';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -31,9 +25,12 @@ import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MantinePharmacyForm from '../../components/medical/MantinePharmacyForm';
-import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { usePharmacies } from '../../hooks/useGlobalData';
+
+// Modular components
+import PharmacyCard from '../../components/medical/pharmacy/PharmacyCard';
+import PharmacyViewModal from '../../components/medical/pharmacy/PharmacyViewModal';
+import PharmacyFormWrapper from '../../components/medical/pharmacy/PharmacyFormWrapper';
 
 const Pharmacies = () => {
   const [error, setError] = useState('');
@@ -323,121 +320,14 @@ const Pharmacies = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <Card shadow="sm" padding="lg" radius="md" withBorder>
-                        <Card.Section withBorder inheritPadding py="xs">
-                          <Group justify="space-between">
-                            <Group gap="xs">
-                              <IconPill
-                                size={20}
-                                color="var(--mantine-color-blue-6)"
-                              />
-                              <Text fw={600} size="lg">
-                                {pharmacy.name}
-                              </Text>
-                            </Group>
-                            {pharmacy.brand && (
-                              <Badge color="blue" variant="light">
-                                {pharmacy.brand}
-                              </Badge>
-                            )}
-                          </Group>
-                        </Card.Section>
-
-                        <Stack gap="md" mt="md">
-                          {pharmacy.street_address && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Address:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {pharmacy.street_address}
-                              </Text>
-                            </Group>
-                          )}
-
-                          {pharmacy.city && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                City:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {pharmacy.city}
-                              </Text>
-                            </Group>
-                          )}
-
-                          {pharmacy.store_number && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Store Number:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {pharmacy.store_number}
-                              </Text>
-                            </Group>
-                          )}
-
-                          {pharmacy.phone_number && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Phone:
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {formatPhoneNumber(pharmacy.phone_number)}
-                              </Text>
-                            </Group>
-                          )}
-
-                          {pharmacy.website && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Website:
-                              </Text>
-                              <Anchor
-                                href={
-                                  pharmacy.website.startsWith('http')
-                                    ? pharmacy.website
-                                    : `https://${pharmacy.website}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                size="sm"
-                                c="blue"
-                              >
-                                Visit Website
-                              </Anchor>
-                            </Group>
-                          )}
-                        </Stack>
-
-                        <Stack gap={0} mt="auto">
-                          <Divider />
-                          <Group justify="flex-end" gap="xs" pt="sm">
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onClick={() => handleViewPharmacy(pharmacy)}
-                            >
-                              View
-                            </Button>
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onClick={() => handleEditPharmacy(pharmacy)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="filled"
-                              color="red"
-                              size="xs"
-                              onClick={() => handleDeletePharmacy(pharmacy.id)}
-                            >
-                              Delete
-                            </Button>
-                          </Group>
-                        </Stack>
-                      </Card>
+                      <PharmacyCard
+                        pharmacy={pharmacy}
+                        onEdit={handleEditPharmacy}
+                        onDelete={() => handleDeletePharmacy(pharmacy.id)}
+                        onView={handleViewPharmacy}
+                        navigate={navigate}
+                        onError={setError}
+                      />
                     </motion.div>
                   </Grid.Col>
                 ))}
@@ -447,7 +337,7 @@ const Pharmacies = () => {
         </motion.div>
       </Container>
 
-      <MantinePharmacyForm
+      <PharmacyFormWrapper
         isOpen={showModal}
         onClose={resetForm}
         title={editingPharmacy ? 'Edit Pharmacy' : 'Add New Pharmacy'}
@@ -457,157 +347,13 @@ const Pharmacies = () => {
         editingPharmacy={editingPharmacy}
       />
 
-      {/* View Details Modal */}
-      <Modal
-        opened={showViewModal}
+      <PharmacyViewModal
+        isOpen={showViewModal}
         onClose={handleCloseViewModal}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              Pharmacy Details
-            </Text>
-            {viewingPharmacy && viewingPharmacy.brand && (
-              <Badge color="blue" variant="light" size="lg">
-                {viewingPharmacy.brand}
-              </Badge>
-            )}
-          </Group>
-        }
-        size="lg"
-        centered
-      >
-        {viewingPharmacy && (
-          <Stack gap="md">
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Title order={3}>{viewingPharmacy.name}</Title>
-                    <Text size="sm" c="dimmed">
-                      Pharmacy
-                    </Text>
-                  </Stack>
-                </Group>
-              </Stack>
-            </Card>
-
-            <Grid>
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      LOCATION
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Address:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          viewingPharmacy.street_address ? 'inherit' : 'dimmed'
-                        }
-                      >
-                        {viewingPharmacy.street_address || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        City:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingPharmacy.city ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingPharmacy.city || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Store #:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingPharmacy.store_number ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingPharmacy.store_number || 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      CONTACT INFORMATION
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Phone:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingPharmacy.phone_number ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingPharmacy.phone_number
-                          ? formatPhoneNumber(viewingPharmacy.phone_number)
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Website:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingPharmacy.website ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingPharmacy.website ? (
-                          <Anchor
-                            href={
-                              viewingPharmacy.website.startsWith('http')
-                                ? viewingPharmacy.website
-                                : `https://${viewingPharmacy.website}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            size="sm"
-                            c="blue"
-                          >
-                            Visit Website
-                          </Anchor>
-                        ) : (
-                          'Not specified'
-                        )}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-            </Grid>
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                variant="filled"
-                size="xs"
-                onClick={() => {
-                  handleCloseViewModal();
-                  handleEditPharmacy(viewingPharmacy);
-                }}
-              >
-                Edit Pharmacy
-              </Button>
-              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                Close
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+        pharmacy={viewingPharmacy}
+        onEdit={handleEditPharmacy}
+        navigate={navigate}
+      />
     </motion.div>
   );
 };

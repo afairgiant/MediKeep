@@ -78,14 +78,16 @@ const BaseMedicalCard = ({
                     {badge.label}
                   </Badge>
                 ))}
-                <FileCountBadge
-                  count={fileCount}
-                  entityType={entityType}
-                  variant="badge"
-                  size="sm"
-                  loading={fileCountLoading}
-                  onClick={safeOnView}
-                />
+                {entityType && (
+                  <FileCountBadge
+                    count={fileCount}
+                    entityType={entityType}
+                    variant="badge"
+                    size="sm"
+                    loading={fileCountLoading}
+                    onClick={safeOnView}
+                  />
+                )}
               </Group>
             </Stack>
             <StatusBadge status={status} />
