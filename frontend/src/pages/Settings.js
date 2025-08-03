@@ -9,8 +9,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
 import { updateUserPreferences } from '../services/api/userPreferencesApi';
+import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
+import { toast } from 'react-toastify';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
@@ -29,6 +31,7 @@ const Settings = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [cleaningFiles, setCleaningFiles] = useState(false);
 
   const handleOpenPasswordModal = () => {
     setIsPasswordModalOpen(true);
@@ -150,6 +153,45 @@ const Settings = () => {
     frontendLogger.logInfo('User preferences reset to original values', {
       component: 'Settings',
     });
+  };
+
+  const handleCleanupFiles = async () => {
+    try {
+      setCleaningFiles(true);
+      
+      frontendLogger.logInfo('Starting cleanup of out-of-sync files', {
+        component: 'Settings'
+      });
+      
+      const results = await cleanupOutOfSyncFiles();
+      
+      frontendLogger.logInfo('File cleanup completed', {
+        results,
+        component: 'Settings'
+      });
+      
+      const totalCleaned = results.files_cleaned || 0;
+      const totalDeleted = results.files_deleted || 0;
+      
+      if (totalCleaned > 0 || totalDeleted > 0) {
+        toast.success(
+          `Cleanup completed: ${totalCleaned} files cleaned, ${totalDeleted} files deleted`, 
+          { autoClose: 5000 }
+        );
+      } else {
+        toast.info('No out-of-sync files found to clean up', { autoClose: 3000 });
+      }
+      
+    } catch (error) {
+      frontendLogger.logError('Failed to cleanup out-of-sync files', {
+        error: error.message,
+        component: 'Settings'
+      });
+      
+      toast.error('Failed to cleanup files. Please try again later.', { autoClose: 5000 });
+    } finally {
+      setCleaningFiles(false);
+    }
   };
 
   useEffect(() => {
@@ -329,6 +371,26 @@ const Settings = () => {
               onPreferencesUpdate={newPrefs => setLocalPreferences(newPrefs)}
               loading={loadingPreferences}
             />
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">File Cleanup</div>
+                <div className="settings-option-description">
+                  Clean up out-of-sync files and resolve document storage inconsistencies. 
+                  This will reset failed uploads, clear orphaned tasks, and fix database sync issues.
+                </div>
+              </div>
+              <div className="settings-option-control">
+                <Button
+                  variant="secondary"
+                  onClick={handleCleanupFiles}
+                  disabled={cleaningFiles || loadingPreferences}
+                  loading={cleaningFiles}
+                >
+                  {cleaningFiles ? 'Cleaning...' : 'Cleanup Files'}
+                </Button>
+              </div>
+            </div>
           </div>
         </Card>
 

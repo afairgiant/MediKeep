@@ -5,6 +5,7 @@ Provides API endpoints for paperless-ngx integration including connection testin
 settings management, and document operations.
 """
 
+import os
 import traceback
 from typing import Dict, Any
 from datetime import datetime
@@ -649,6 +650,69 @@ async def check_paperless_health(
                 "timestamp": datetime.utcnow().isoformat()
             }
         }
+
+
+@router.post("/cleanup", response_model=Dict[str, Any])
+async def cleanup_out_of_sync_files(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Clean up out-of-sync EntityFile records.
+    """
+    try:
+        from app.models.models import EntityFile
+        
+        logger.info(f"Starting cleanup for user {current_user.id}")
+        
+        # First, let's see what sync_status values actually exist
+        all_statuses = db.query(EntityFile.sync_status).distinct().all()
+        status_list = [status[0] for status in all_statuses]
+        logger.info(f"Found sync statuses: {status_list}")
+        
+        # Find all EntityFile records and their statuses
+        all_files = db.query(EntityFile).all()
+        logger.info(f"Total EntityFile records: {len(all_files)}")
+        
+        # Count by status
+        status_counts = {}
+        for file_record in all_files:
+            status = file_record.sync_status
+            status_counts[status] = status_counts.get(status, 0) + 1
+        
+        logger.info(f"Status counts: {status_counts}")
+        
+        # Find and delete EntityFile records with missing or failed status
+        failed_missing_files = db.query(EntityFile).filter(
+            EntityFile.sync_status.in_(["failed", "missing"])
+        ).all()
+        
+        logger.info(f"Found {len(failed_missing_files)} files with failed/missing status")
+        
+        deleted_count = 0
+        for file_record in failed_missing_files:
+            logger.info(f"Deleting {file_record.sync_status} file: {file_record.id} - {file_record.file_name} (DocID: {file_record.paperless_document_id})")
+            db.delete(file_record)
+            deleted_count += 1
+        
+        # Commit changes
+        db.commit()
+        
+        return {
+            "files_deleted": deleted_count,
+            "total_files": len(all_files),
+            "status_counts": status_counts,
+            "all_statuses": status_list,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Cleanup error: {str(e)}")
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Cleanup failed: {str(e)}"
+        )
 
 
 @router.get("/tasks/{task_uuid}/status", response_model=Dict[str, Any])

@@ -172,6 +172,14 @@ export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 30, interv
   throw new Error('Task polling timeout - task may still be processing');
 };
 
+/**
+ * Clean up out-of-sync EntityFile records
+ * @returns {Promise} Cleanup results with counts of cleaned items
+ */
+export const cleanupOutOfSyncFiles = async () => {
+  return apiService.post('/paperless/cleanup');
+};
+
 export default {
   testPaperlessConnection,
   updatePaperlessSettings,
@@ -185,5 +193,6 @@ export default {
   cancelMigration,
   deletePaperlessConfiguration,
   exportPaperlessData,
-  pollPaperlessTaskStatus
+  pollPaperlessTaskStatus,
+  cleanupOutOfSyncFiles
 };
