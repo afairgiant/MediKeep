@@ -420,6 +420,30 @@ const useDocumentManagerCore = ({
     });
 
     try {
+      // First, update any processing files to check if tasks have completed
+      try {
+        console.log('🔄 Updating processing files status...');
+        const processingUpdates = await apiService.updateProcessingFiles();
+        if (Object.keys(processingUpdates).length > 0) {
+          console.log('📋 Processing file updates:', processingUpdates);
+          logger.info('Processing files updated', {
+            entityType,
+            entityId,
+            updates: processingUpdates,
+            component: 'DocumentManagerCore',
+          });
+        }
+      } catch (processingError) {
+        console.warn('⚠️ Failed to update processing files:', processingError.message);
+        logger.warn('Failed to update processing files', {
+          entityType,
+          entityId,
+          error: processingError.message,
+          component: 'DocumentManagerCore',
+        });
+        // Continue with sync check even if processing update fails
+      }
+
       const status = await apiService.checkPaperlessSyncStatus();
       setSyncStatus(status);
       

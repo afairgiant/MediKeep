@@ -896,14 +896,19 @@ class GenericEntityFileService:
                 # Document was processed immediately - use normal flow
                 sync_status = "synced"
                 paperless_id = document_id
+                paperless_task_uuid = None  # No need to track task when already processed
                 last_sync = get_utc_now()
                 logger.info(f"Document processed immediately: {file.filename} -> document_id: {document_id}")
-            else:
-                # Document is being processed - store task_id temporarily and mark as processing
+            elif task_id:
+                # Document is being processed - store task_id for polling
                 sync_status = "processing"
-                paperless_id = task_id  # Store task UUID temporarily
+                paperless_id = None  # No document ID yet - don't set until processing completes
+                paperless_task_uuid = task_id  # Store task UUID for polling
                 last_sync = None
                 logger.info(f"Document queued for processing: {file.filename} -> task_id: {task_id}")
+            else:
+                # No document ID or task ID - something went wrong
+                raise Exception("No document ID or task ID returned from Paperless")
 
             # Create database record for paperless file
             entity_file = EntityFile(
@@ -916,7 +921,8 @@ class GenericEntityFileService:
                 description=description,
                 category=category,
                 storage_backend="paperless",
-                paperless_document_id=paperless_id,  # Either document_id or task_id
+                paperless_document_id=paperless_id,  # Only set when document is processed
+                paperless_task_uuid=paperless_task_uuid,  # Set when document is processing
                 sync_status=sync_status,
                 last_sync_at=last_sync,
                 uploaded_at=get_utc_now(),
@@ -928,14 +934,16 @@ class GenericEntityFileService:
 
             logger.info(
                 f"File uploaded to paperless: {file.filename} for {entity_type} {entity_id} "
-                f"(status: {sync_status}, id: {paperless_id})"
+                f"(status: {sync_status}, id: {paperless_id}, task_uuid: {paperless_task_uuid})"
             )
             
             # TODO: If sync_status is "processing", start background task to poll for completion
             # For now, you can manually call update_processing_files() to check status
             # Future: Implement with Celery, background threads, or cron job
 
-            return EntityFileResponse.model_validate(entity_file)
+            response = EntityFileResponse.model_validate(entity_file)
+            logger.info(f"Returning response with task_uuid: {response.paperless_task_uuid}")
+            return response
 
         except Exception as e:
             logger.error(f"Error uploading to paperless: {str(e)}")
@@ -1300,18 +1308,19 @@ class GenericEntityFileService:
             Dictionary mapping file_id to new status
         """
         try:
-            # Get all processing files
+            # Get all processing files - use paperless_task_uuid field for processing files
             processing_files = (
                 db.query(EntityFile)
                 .filter(
                     EntityFile.storage_backend == "paperless",
                     EntityFile.sync_status == "processing",
-                    EntityFile.paperless_document_id.isnot(None),
+                    EntityFile.paperless_task_uuid.isnot(None),
                 )
                 .all()
             )
 
             if not processing_files:
+                logger.info(f"No processing files found for user {current_user_id}")
                 return {}
 
             # Get user's paperless configuration
@@ -1335,35 +1344,134 @@ class GenericEntityFileService:
 
             status_updates = {}
             
+            logger.info(f"Checking {len(processing_files)} processing files for task completion")
+            
             # Check each processing file
             async with paperless_service:
                 for file_record in processing_files:
                     try:
-                        task_uuid = file_record.paperless_document_id  # Currently storing task UUID
+                        task_uuid = file_record.paperless_task_uuid
                         
-                        # Check if task is complete and get document ID
-                        document_id = await paperless_service.wait_for_task_completion(
-                            task_uuid, timeout_seconds=5  # Short timeout for polling
-                        )
+                        if not task_uuid:
+                            logger.warning(f"File {file_record.id} has processing status but no task UUID")
+                            continue
                         
-                        if document_id:
-                            # Task completed! Update record with actual document ID
-                            file_record.paperless_document_id = str(document_id)
-                            file_record.sync_status = "synced"
-                            file_record.last_sync_at = get_utc_now()
-                            status_updates[str(file_record.id)] = "synced"
-                            
-                            logger.info(
-                                f"Processing complete: {file_record.file_name} -> document_id: {document_id} "
-                                f"(was task: {task_uuid})"
-                            )
-                        else:
-                            # Still processing
+                        # Check task status directly using the endpoint logic
+                        try:
+                            # Use the session to make direct API call to check task status
+                            async with paperless_service._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                                if response.status == 200:
+                                    data = await response.json()
+                                    
+                                    # Handle both single task and list responses
+                                    if isinstance(data, list):
+                                        if not data:
+                                            logger.warning(f"No task found with UUID {task_uuid}")
+                                            continue
+                                        task_data = data[0]
+                                    elif isinstance(data, dict):
+                                        # If results key exists, it's paginated
+                                        if "results" in data and data["results"]:
+                                            task_data = data["results"][0]
+                                        else:
+                                            task_data = data
+                                    else:
+                                        logger.warning(f"Unexpected task response format: {type(data)}")
+                                        continue
+                                    
+                                    status = task_data.get("status", "").lower()
+                                    task_name = task_data.get("task_name", "")
+                                    
+                                    logger.debug(f"Task {task_uuid} status: {status} ({task_name})")
+                                    
+                                    if status == "success":
+                                        # Task completed successfully - extract document ID
+                                        result = task_data.get("result", {})
+                                        document_id = None
+                                        
+                                        if isinstance(result, dict):
+                                            document_id = result.get("document_id") or result.get("id")
+                                        elif isinstance(result, str):
+                                            # Parse document ID from string like "Success. New document id 2677 created"
+                                            import re
+                                            match = re.search(r'document id (\d+)', result)
+                                            if match:
+                                                document_id = match.group(1)
+                                            else:
+                                                document_id = result
+                                        else:
+                                            document_id = result
+                                            
+                                        if document_id:
+                                            # Update record with actual document ID
+                                            file_record.paperless_document_id = str(document_id)
+                                            file_record.paperless_task_uuid = None  # Clear task UUID since it's complete
+                                            file_record.sync_status = "synced"
+                                            file_record.last_sync_at = get_utc_now()
+                                            status_updates[str(file_record.id)] = "synced"
+                                            
+                                            logger.info(
+                                                f"Task {task_uuid} completed successfully: {file_record.file_name} -> document_id: {document_id}"
+                                            )
+                                        else:
+                                            # Success but no document ID - might be a duplicate
+                                            file_record.paperless_task_uuid = None  # Clear task UUID
+                                            file_record.sync_status = "duplicate"
+                                            file_record.last_sync_at = get_utc_now()
+                                            status_updates[str(file_record.id)] = "duplicate"
+                                            
+                                            logger.info(
+                                                f"Task {task_uuid} completed but no document ID returned for {file_record.file_name} - likely duplicate"
+                                            )
+                                    
+                                    elif status == "failure":
+                                        # Task failed - extract error information
+                                        error_info = task_data.get("result", "Unknown error")
+                                        
+                                        # Check if it's a duplicate error
+                                        error_str = str(error_info).lower()
+                                        is_duplicate = any(keyword in error_str for keyword in [
+                                            "duplicate", "already exists", "similar document", 
+                                            "document with this checksum", "identical file", "not consuming"
+                                        ])
+                                        
+                                        # Update record accordingly
+                                        file_record.paperless_task_uuid = None  # Clear task UUID
+                                        if is_duplicate:
+                                            file_record.sync_status = "duplicate"
+                                            status_updates[str(file_record.id)] = "duplicate"
+                                            logger.info(
+                                                f"Task {task_uuid} failed with duplicate for {file_record.file_name}: {error_info}"
+                                            )
+                                        else:
+                                            file_record.sync_status = "failed"
+                                            status_updates[str(file_record.id)] = "failed"
+                                            logger.error(
+                                                f"Task {task_uuid} failed for {file_record.file_name}: {error_info}"
+                                            )
+                                        
+                                        file_record.last_sync_at = get_utc_now()
+                                    
+                                    elif status in ["pending", "started", "retry"]:
+                                        # Task still in progress - keep as processing
+                                        status_updates[str(file_record.id)] = "processing"
+                                        logger.debug(f"Task {task_uuid} still processing for {file_record.file_name}")
+                                    
+                                    else:
+                                        logger.warning(f"Unknown task status: {status} for task {task_uuid}")
+                                        status_updates[str(file_record.id)] = "processing"  # Keep checking
+                                else:
+                                    logger.warning(f"Failed to check task status: HTTP {response.status}")
+                                    status_updates[str(file_record.id)] = "processing"  # Keep trying
+                                    
+                        except Exception as task_check_error:
+                            logger.error(f"Error checking task {task_uuid} status: {str(task_check_error)}")
+                            # Don't immediately mark as failed - might be a temporary network issue
                             status_updates[str(file_record.id)] = "processing"
                         
                     except Exception as e:
-                        logger.error(f"Error checking task {file_record.paperless_document_id}: {str(e)}")
-                        # Mark as failed if we can't check status
+                        logger.error(f"Error processing file {file_record.id} with task {file_record.paperless_task_uuid}: {str(e)}")
+                        # Only mark as failed if we can't process the file record itself
                         file_record.sync_status = "failed"
                         file_record.last_sync_at = get_utc_now()
                         status_updates[str(file_record.id)] = "failed"
@@ -1371,7 +1479,12 @@ class GenericEntityFileService:
             # Commit all database updates
             db.commit()
 
-            logger.info(f"Updated {len(status_updates)} processing files")
+            # Log summary
+            status_counts = {}
+            for status in status_updates.values():
+                status_counts[status] = status_counts.get(status, 0) + 1
+            
+            logger.info(f"Updated {len(status_updates)} processing files for user {current_user_id}: {status_counts}")
             return status_updates
 
         except Exception as e:

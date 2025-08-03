@@ -410,6 +410,9 @@ class EntityFile(Base):
     paperless_document_id = Column(
         String(255), nullable=True
     )  # ID in paperless-ngx system
+    paperless_task_uuid = Column(
+        String(255), nullable=True
+    )  # UUID of the task in paperless-ngx system
     sync_status = Column(
         String(20), default="synced", nullable=False
     )  # 'synced', 'pending', 'processing', 'failed', 'missing'

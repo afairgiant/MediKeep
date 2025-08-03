@@ -203,7 +203,8 @@ class EntityFileResponse(EntityFileBase):
     entity_id: int
     storage_backend: Optional[str] = "local"  # 'local' or 'paperless'
     paperless_document_id: Optional[str] = None
-    sync_status: Optional[str] = "synced"  # 'synced', 'pending', 'failed'
+    paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
+    sync_status: Optional[str] = "synced"  # 'synced', 'pending', 'failed', 'processing', 'duplicate', 'missing'
     uploaded_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
