@@ -26,7 +26,10 @@ import {
   IconCloud,
   IconAlertTriangle,
   IconClock,
-  IconEye
+  IconEye,
+  IconAlertCircle,
+  IconCopy,
+  IconX
 } from '@tabler/icons-react';
 import { formatDate } from '../../utils/helpers';
 
@@ -278,6 +281,12 @@ const FileList = ({
             // Check if file is still processing
             const isProcessing = file.storage_backend === 'paperless' && file.sync_status === 'processing';
             
+            // Check if file is a duplicate
+            const isDuplicate = file.storage_backend === 'paperless' && file.sync_status === 'duplicate';
+            
+            // Check if file processing failed  
+            const isFailed = file.storage_backend === 'paperless' && file.sync_status === 'failed';
+            
             return (
               <Paper
                 key={file.id}
@@ -331,6 +340,28 @@ const FileList = ({
                                 title="Document is being processed by Paperless"
                               >
                                 Processing
+                              </Badge>
+                            )}
+                            {isDuplicate && (
+                              <Badge 
+                                color="yellow" 
+                                variant="light" 
+                                size="xs"
+                                leftSection={<IconCopy size={10} />}
+                                title="Document was detected as a duplicate in Paperless"
+                              >
+                                Duplicate
+                              </Badge>
+                            )}
+                            {isFailed && (
+                              <Badge 
+                                color="red" 
+                                variant="light" 
+                                size="xs"
+                                leftSection={<IconX size={10} />}
+                                title="Document upload/processing failed in Paperless"
+                              >
+                                Failed
                               </Badge>
                             )}
                           </Group>

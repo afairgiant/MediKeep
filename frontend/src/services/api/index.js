@@ -445,50 +445,58 @@ class ApiService {
     storageBackend = undefined,
     signal
   ) {
-    try {
-      const endpoint = this.getFileEndpoint(entityType, entityId);
+    const endpoint = this.getFileEndpoint(entityType, entityId);
 
-      const formData = new FormData();
-      formData.append('file', file);
-      if (description && description.trim()) {
-        formData.append('description', description.trim());
-      }
-      if (category && category.trim()) {
-        formData.append('category', category.trim());
-      }
-      // Only send storage_backend if explicitly specified, otherwise let backend use user's default
-      if (storageBackend) {
-        formData.append('storage_backend', storageBackend);
-      }
-
-      logger.info('api_upload_entity_file', 'Uploading file to entity', {
-        entityType,
-        entityId,
-        fileName: file.name,
-        fileSize: file.size,
-        hasDescription: !!description,
-        hasCategory: !!category,
-        storageBackend,
-        actualStorageBackend: storageBackend || 'local',
-        endpoint,
-        component: 'ApiService',
-      });
-
-      return this.post(endpoint, formData, { signal });
-    } catch (error) {
-      logger.error(
-        'api_upload_entity_file_error',
-        'Failed to upload entity file',
-        {
-          entityType,
-          entityId,
-          fileName: file?.name,
-          error: error.message,
-          component: 'ApiService',
-        }
-      );
-      throw error;
+    const formData = new FormData();
+    formData.append('file', file);
+    if (description && description.trim()) {
+      formData.append('description', description.trim());
     }
+    if (category && category.trim()) {
+      formData.append('category', category.trim());
+    }
+    // Only send storage_backend if explicitly specified, otherwise let backend use user's default
+    if (storageBackend) {
+      formData.append('storage_backend', storageBackend);
+    }
+
+    logger.info('api_upload_entity_file', 'Uploading file to entity', {
+      entityType,
+      entityId,
+      fileName: file.name,
+      fileSize: file.size,
+      hasDescription: !!description,
+      hasCategory: !!category,
+      storageBackend,
+      actualStorageBackend: storageBackend || 'local',
+      endpoint,
+      component: 'ApiService',
+    });
+
+    return this.post(endpoint, formData, { signal })
+      .then(response => {
+        logger.info('api_upload_entity_file_response', 'File upload response received', {
+          response: JSON.stringify(response),
+          hasPaperlessTaskUuid: !!response?.paperless_task_uuid,
+          component: 'ApiService',
+        });
+        
+        return response;
+      })
+      .catch(error => {
+        logger.error(
+          'api_upload_entity_file_error',
+          'Failed to upload entity file',
+          {
+            entityType,
+            entityId,
+            fileName: file?.name,
+            error: error.message,
+            component: 'ApiService',
+          }
+        );
+        throw error;
+      });
   }
 
   // Upload file to an entity with Paperless task status monitoring
@@ -522,6 +530,13 @@ class ApiService {
         storageBackend,
         signal
       );
+
+      logger.info('api_upload_result', 'Upload result received', {
+        uploadResult: JSON.stringify(uploadResult),
+        hasTaskUuid: !!uploadResult?.paperless_task_uuid,
+        storageBackend,
+        component: 'ApiService',
+      });
 
       // If not using Paperless or no task UUID returned, return immediately
       if (storageBackend !== 'paperless' || !uploadResult?.paperless_task_uuid) {
@@ -573,23 +588,83 @@ class ApiService {
         component: 'ApiService',
       });
 
-      // Import utilities for task result processing
-      const { 
-        isDuplicateDocumentError,
-        isPaperlessTaskSuccessful,
-        extractDocumentIdFromTaskResult
-      } = await import('../utils/errorMessageUtils');
+      // Process task result directly
+      logger.debug('api_upload_task_processing', 'Processing task result', {
+        taskResultStatus: taskResult?.status,
+        taskResultErrorType: taskResult?.error_type,
+        taskResultHasResult: !!taskResult?.result,
+        component: 'ApiService',
+      });
 
-      const isSuccess = isPaperlessTaskSuccessful(taskResult);
-      const isDuplicate = isDuplicateDocumentError(taskResult);
-      const documentId = extractDocumentIdFromTaskResult(taskResult);
+      // Check if task was successful
+      const isSuccess = taskResult?.status === 'SUCCESS' && 
+                       (taskResult?.result?.document_id || taskResult?.document_id);
+      
+      // Check if task failed due to duplicate
+      const isDuplicate = taskResult?.error_type === 'duplicate' || 
+                         (taskResult?.status === 'FAILURE' && 
+                          taskResult?.result && 
+                          (taskResult.result.toLowerCase().includes('duplicate') || 
+                           taskResult.result.toLowerCase().includes('already exists')));
+      
+      // Get user-friendly error message based on error type
+      const getUserFriendlyErrorMessage = (taskResult, fileName) => {
+        const errorType = taskResult?.error_type;
+        const originalError = taskResult?.result || 'Upload failed';
+        
+        switch (errorType) {
+          case 'duplicate':
+            return `"${fileName}" already exists in Paperless. This document appears to be a duplicate.`;
+          case 'corrupted_file':
+            return `"${fileName}" appears to be corrupted or in an unsupported format. Please check the file and try again.`;
+          case 'permission_error':
+            return `Permission denied uploading "${fileName}". Please check your Paperless access rights.`;
+          case 'file_too_large':
+            return `"${fileName}" is too large for Paperless. Please reduce the file size or check your Paperless configuration.`;
+          case 'storage_full':
+            return `Paperless storage is full. Unable to upload "${fileName}". Please contact your administrator.`;
+          case 'ocr_failed':
+            return `"${fileName}" was uploaded but Paperless had trouble extracting text from it. The document is still stored.`;
+          case 'network_error':
+            return `Network error uploading "${fileName}" to Paperless. Please check your connection and try again.`;
+          case 'processing_error':
+          default:
+            return `Paperless was unable to process "${fileName}". Please try again or contact support if the problem persists.`;
+        }
+      };
+      
+      // Extract document ID if successful
+      const documentId = isSuccess ? 
+                        (taskResult?.result?.document_id || taskResult?.document_id) : 
+                        null;
+
+      logger.debug('api_upload_task_processed', 'Task result processed', {
+        isSuccess,
+        isDuplicate,
+        documentId,
+        component: 'ApiService',
+      });
 
       if (onProgress) {
-        const status = isSuccess ? 'completed' : 'failed';
-        const message = isSuccess ? 'Document processed successfully' :
-                       isDuplicate ? 'Document already exists in Paperless' :
-                       'Document processing failed';
-        onProgress({ status, message, isDuplicate });
+        const status = isSuccess ? 'completed' : 
+                      isDuplicate ? 'completed_duplicate' : 
+                      'failed';
+        
+        let message;
+        if (isSuccess) {
+          message = 'Document processed successfully';
+        } else if (isDuplicate) {
+          message = getUserFriendlyErrorMessage(taskResult, file.name);
+        } else {
+          message = getUserFriendlyErrorMessage(taskResult, file.name);
+        }
+        
+        onProgress({ 
+          status, 
+          message, 
+          isDuplicate,
+          errorType: taskResult?.error_type 
+        });
       }
 
       return {
@@ -830,6 +905,34 @@ class ApiService {
       logger.error(
         'api_paperless_sync_check_error',
         'Failed to check Paperless sync status',
+        {
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+      throw error;
+    }
+  }
+
+  // Update processing files status by checking Paperless task completion
+  updateProcessingFiles(signal) {
+    try {
+      logger.info('api_update_processing_files', 'Updating processing files status', {
+        component: 'ApiService',
+      });
+
+      return this.post('/entity-files/processing/update', {}, { 
+        signal,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+    } catch (error) {
+      logger.error(
+        'api_update_processing_files_error',
+        'Failed to update processing files status',
         {
           error: error.message,
           component: 'ApiService',

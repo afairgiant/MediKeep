@@ -4,6 +4,7 @@
  */
 
 import { apiService } from './api';
+import logger from './logger';
 
 class SearchService {
   /**
@@ -251,7 +252,12 @@ class SearchService {
 
       return matchedResults;
     } catch (error) {
-      console.error('Search failed:', error);
+      logger.debug('patient_records_search_error', 'Search failed, returning empty results', {
+        query,
+        patientId,
+        error: error.message,
+        component: 'SearchService'
+      });
       return [];
     }
   }

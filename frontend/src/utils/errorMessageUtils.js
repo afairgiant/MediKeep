@@ -350,16 +350,28 @@ export const handleBatchResults = (results, operation = 'operation', options = {
  * @returns {boolean} True if the error indicates a duplicate document
  */
 export const isDuplicateDocumentError = (taskResult) => {
-  if (!taskResult?.error && !taskResult?.result?.error) return false;
+  if (!taskResult) return false;
   
-  const errorMessage = (taskResult.error || taskResult.result?.error || '').toLowerCase();
+  // First check if the backend explicitly marked this as a duplicate
+  if (taskResult.error_type === 'duplicate') {
+    return true;
+  }
+  
+  // Fallback to checking error message content
+  const errorMessage = (
+    taskResult.error || 
+    taskResult.result?.error || 
+    taskResult.result || 
+    ''
+  ).toLowerCase();
   
   return errorMessage.includes('already exists') || 
          errorMessage.includes('duplicate') ||
          errorMessage.includes('hash collision') ||
          errorMessage.includes('identical document') ||
          errorMessage.includes('same content hash') ||
-         errorMessage.includes('document with identical content');
+         errorMessage.includes('document with identical content') ||
+         errorMessage.includes('not consuming') || errorMessage.includes('duplicate of');
 };
 
 /**

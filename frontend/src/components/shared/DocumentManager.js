@@ -31,6 +31,11 @@ import {
   IconCheck,
   IconLoader,
   IconExclamationMark,
+  IconFileX,
+  IconFileOff,
+  IconLock,
+  IconDatabase,
+  IconWifi,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
 import { getPaperlessSettings } from '../../services/api/paperlessApi';
@@ -61,6 +66,24 @@ const DocumentManager = ({
       }
     }
   `;
+
+  // Helper function to get actionable error guidance
+  const getErrorGuidance = (errorMessage, storageBackend) => {
+    if (storageBackend !== 'paperless') return null;
+    
+    if (errorMessage.includes('not enabled')) {
+      return 'Go to Settings → Storage to enable Paperless integration.';
+    } else if (errorMessage.includes('configuration is incomplete')) {
+      return 'Go to Settings → Storage to complete your Paperless configuration.';
+    } else if (errorMessage.includes('duplicate') || errorMessage.includes('already exists')) {
+      return 'This document already exists in Paperless. No action needed.';
+    } else if (errorMessage.includes('connection')) {
+      return 'Check your Paperless server connection in Settings → Storage.';
+    } else if (errorMessage.includes('authentication') || errorMessage.includes('unauthorized')) {
+      return 'Check your Paperless credentials in Settings → Storage.';
+    }
+    return null;
+  };
   // State management
   const [files, setFiles] = useState([]);
   const [pendingFiles, setPendingFiles] = useState([]);
@@ -74,6 +97,7 @@ const DocumentManager = ({
 
   // File upload state for modal
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
+  const [modalProgress, setModalProgress] = useState({ status: null, error: null });
 
   // Paperless settings state
   const [paperlessSettings, setPaperlessSettings] = useState(null);
@@ -246,6 +270,7 @@ const DocumentManager = ({
 
     setLoading(true);
     setError('');
+    setModalProgress({ status: 'uploading', error: null });
 
     try {
       logger.info('document_manager_upload_attempt', {
@@ -260,14 +285,99 @@ const DocumentManager = ({
         component: 'DocumentManager',
       });
 
-      await apiService.uploadEntityFile(
+      // Use task monitoring for Paperless uploads to handle rejections and duplicates
+      const uploadResult = await apiService.uploadEntityFileWithTaskMonitoring(
         entityType,
         entityId,
         file,
         description,
         '',
-        selectedStorageBackend
+        selectedStorageBackend,
+        null, // signal
+        (progress) => {
+          // Progress callback for Paperless task monitoring
+          logger.debug('upload_progress', {
+            message: 'Upload progress update',
+            status: progress.status,
+            fileName: file.name,
+            isDuplicate: progress.isDuplicate,
+            component: 'DocumentManager',
+          });
+          
+          // Update modal progress state
+          setModalProgress({ 
+            status: progress.status, 
+            error: progress.status === 'failed' ? progress.message : null,
+            isDuplicate: progress.isDuplicate,
+            errorType: progress.errorType,
+            message: progress.message
+          });
+        }
       );
+
+      // Handle the result appropriately
+      if (uploadResult.taskMonitored && uploadResult.isDuplicate) {
+        // Document was a duplicate - show warning but don't treat as error
+        logger.warn('document_manager_duplicate_document', {
+          message: 'Document was identified as duplicate during Paperless processing',
+          entityType,
+          entityId,
+          fileName: file.name,
+          component: 'DocumentManager',
+        });
+        
+        setModalProgress({ 
+          status: 'completed_duplicate', 
+          error: null,
+          isDuplicate: true,
+          errorType: uploadResult.taskResult?.error_type,
+          message: uploadResult.taskResult?.message || 'Document already exists in Paperless'
+        });
+        
+        // For duplicates, don't reload files since no new file was created
+        // The backend has already deleted the database record
+        // Just show success message and close modal after a delay
+        setTimeout(() => {
+          setShowUploadModal(false);
+          setFileUpload({ file: null, description: '' });
+          setModalProgress({ status: null, error: null });
+        }, 3000); // Show duplicate message for 3 seconds
+        
+        return; // Don't continue with normal success flow
+      } else if (uploadResult.taskMonitored && !uploadResult.success) {
+        // Task failed for other reasons (processing error, etc.)
+        // Use the user-friendly error message if available, otherwise fall back to raw error
+        const errorMsg = uploadResult.taskResult?.message || 
+                        uploadResult.taskResult?.result || 
+                        uploadResult.taskResult?.error || 
+                        'Paperless document processing failed';
+        setModalProgress({ 
+          status: 'failed', 
+          error: errorMsg,
+          isDuplicate: false,
+          errorType: uploadResult.taskResult?.error_type
+        });
+        
+        // For failed tasks, don't reload files since the backend deleted the record
+        // Just show the error and keep the modal open so user can try again
+        logger.error('document_manager_task_failed', {
+          message: 'Paperless task failed, file record deleted from database',
+          entityType,
+          entityId,
+          fileName: file.name,
+          error: errorMsg,
+          component: 'DocumentManager',
+        });
+        
+        return; // Don't continue with success flow or throw error (stay in modal)
+      } else {
+        // Success
+        setModalProgress({ 
+          status: 'completed', 
+          error: null,
+          isDuplicate: false 
+        });
+      }
 
       // Reload files to show the new upload
       await loadFiles();
@@ -305,6 +415,11 @@ const DocumentManager = ({
       }
 
       setError(errorMessage);
+      setModalProgress({ 
+        status: 'failed', 
+        error: errorMessage,
+        isDuplicate: false 
+      });
 
       if (onError) {
         onError(errorMessage);
@@ -321,6 +436,7 @@ const DocumentManager = ({
       });
     } finally {
       setLoading(false);
+      // Don't reset modal progress here - let user see the final state
     }
   };
 
@@ -531,14 +647,65 @@ const DocumentManager = ({
             component: 'DocumentManager',
           });
           
-          await apiService.uploadEntityFile(
+          // Use task monitoring for Paperless uploads to handle rejections and duplicates
+          const uploadResult = await apiService.uploadEntityFileWithTaskMonitoring(
             entityType,
             targetEntityId,
             pendingFile.file,
             pendingFile.description,
             '',
-            currentStorageBackend
+            currentStorageBackend,
+            null, // signal
+            (progress) => {
+              // Progress callback for Paperless task monitoring
+              logger.debug('batch_upload_progress', {
+                message: 'Batch upload progress update',
+                status: progress.status,
+                fileName: pendingFile.file.name,
+                isDuplicate: progress.isDuplicate,
+                fileIndex: index,
+                component: 'DocumentManager',
+              });
+
+              // Update progress UI for this specific file
+              if (progress.status === 'processing') {
+                setUploadProgress(prev => ({
+                  ...prev,
+                  [index]: { progress: 90, status: 'processing', error: null }
+                }));
+              }
+            }
           );
+
+          // Handle the result appropriately
+          if (uploadResult.taskMonitored && uploadResult.isDuplicate) {
+            // Document was a duplicate - mark as completed with warning
+            setUploadProgress(prev => ({
+              ...prev,
+              [index]: { 
+                progress: 100, 
+                status: 'completed_duplicate', 
+                error: 'Document already exists in Paperless',
+                isDuplicate: true
+              }
+            }));
+
+            logger.warn('document_manager_batch_duplicate', {
+              message: 'Document was identified as duplicate during batch upload',
+              entityType,
+              entityId: targetEntityId,
+              fileName: pendingFile.file.name,
+              fileIndex: index,
+              component: 'DocumentManager',
+            });
+            
+            // Don't throw error for duplicates - they're handled gracefully
+            return;
+          } else if (uploadResult.taskMonitored && !uploadResult.success) {
+            // Task failed for other reasons
+            const errorMessage = uploadResult.taskResult?.error || 'Paperless document processing failed';
+            throw new Error(errorMessage);
+          }
           
           logger.info('document_manager_api_upload_success', {
             message: 'apiService.uploadEntityFile completed successfully',
@@ -574,23 +741,33 @@ const DocumentManager = ({
           component: 'DocumentManager',
         });
       } catch (error) {
-        // Enhance error message for Paperless issues
+        // Enhanced error message handling with improved context
         let errorMessage = error.message || 'Failed to upload file';
+        let enhancedError = error;
 
-        if (currentStorageBackend === 'paperless') {
-          if (errorMessage.includes('not enabled')) {
-            errorMessage =
-              'Paperless integration is not enabled. Please enable it in Settings.';
-          } else if (errorMessage.includes('configuration is incomplete')) {
-            errorMessage =
-              'Paperless configuration is incomplete. Please check your settings.';
-          } else if (errorMessage.includes('appears to be a duplicate')) {
-            // Duplicate error - use the detailed message from backend
-            errorMessage = errorMessage;
-          } else if (errorMessage.includes('Failed to upload to paperless')) {
-            errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
-          } else if (!errorMessage.includes('Paperless') && !errorMessage.includes('duplicate')) {
-            errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
+        // Import error handling utilities dynamically if needed
+        try {
+          if (currentStorageBackend === 'paperless') {
+            // Use the error utilities from errorMessageUtils for consistent handling
+            const { enhancePaperlessError } = await import('../../utils/errorMessageUtils');
+            errorMessage = enhancePaperlessError(errorMessage);
+          }
+        } catch (importError) {
+          // Fallback to existing error handling if import fails
+          if (currentStorageBackend === 'paperless') {
+            if (errorMessage.includes('not enabled')) {
+              errorMessage =
+                'Paperless integration is not enabled. Please enable it in Settings.';
+            } else if (errorMessage.includes('configuration is incomplete')) {
+              errorMessage =
+                'Paperless configuration is incomplete. Please check your settings.';
+            } else if (errorMessage.includes('appears to be a duplicate')) {
+              errorMessage = errorMessage;
+            } else if (errorMessage.includes('Failed to upload to paperless')) {
+              errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
+            } else if (!errorMessage.includes('Paperless') && !errorMessage.includes('duplicate')) {
+              errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
+            }
           }
         }
 
@@ -853,14 +1030,16 @@ const DocumentManager = ({
               <Stack gap="sm">
                 {pendingFiles.map((pendingFile, index) => {
                   const fileProgress = uploadProgress[index];
-                  const isUploading = fileProgress?.status === 'uploading';
+                  const isUploading = fileProgress?.status === 'uploading' || fileProgress?.status === 'processing';
                   const isCompleted = fileProgress?.status === 'completed';
+                  const isDuplicate = fileProgress?.status === 'completed_duplicate';
                   const isFailed = fileProgress?.status === 'failed';
                   const progressValue = fileProgress?.progress || 0;
 
                   return (
                     <Paper key={pendingFile.id} withBorder p="sm" bg={
                       isCompleted ? "green.1" : 
+                      isDuplicate ? "orange.1" :
                       isFailed ? "red.1" : 
                       isUploading ? "yellow.1" : 
                       "blue.1"
@@ -871,6 +1050,7 @@ const DocumentManager = ({
                             variant="light" 
                             color={
                               isCompleted ? "green" : 
+                              isDuplicate ? "orange" :
                               isFailed ? "red" : 
                               isUploading ? "yellow" : 
                               "blue"
@@ -879,6 +1059,8 @@ const DocumentManager = ({
                           >
                             {isCompleted ? (
                               <IconCheck size={14} />
+                            ) : isDuplicate ? (
+                              <IconAlertTriangle size={14} />
                             ) : isFailed ? (
                               <IconExclamationMark size={14} />
                             ) : isUploading ? (
@@ -905,6 +1087,11 @@ const DocumentManager = ({
                                   Uploaded
                                 </Badge>
                               )}
+                              {isDuplicate && (
+                                <Badge variant="light" color="orange" size="xs">
+                                  Duplicate
+                                </Badge>
+                              )}
                               {isFailed && (
                                 <Badge variant="light" color="red" size="xs">
                                   Failed
@@ -913,11 +1100,12 @@ const DocumentManager = ({
                             </Group>
                             
                             {/* Progress bar for uploads */}
-                            {(isUploading || isCompleted || isFailed) && (
+                            {(isUploading || isCompleted || isDuplicate || isFailed) && (
                               <Progress 
                                 value={progressValue}
                                 color={
                                   isCompleted ? "green" : 
+                                  isDuplicate ? "orange" :
                                   isFailed ? "red" : 
                                   "blue"
                                 }
@@ -930,11 +1118,38 @@ const DocumentManager = ({
                             {/* Error message for failed uploads */}
                             {isFailed && fileProgress?.error && (
                               <Alert variant="light" color="red" size="xs" p="xs">
-                                <Text size="xs">{fileProgress.error}</Text>
+                                <Stack gap="xs">
+                                  <Text size="xs">{fileProgress.error}</Text>
+                                  {(() => {
+                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    return guidance ? (
+                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                        💡 {guidance}
+                                      </Text>
+                                    ) : null;
+                                  })()}
+                                </Stack>
                               </Alert>
                             )}
                             
-                            {!isUploading && !isCompleted && (
+                            {/* Warning message for duplicate uploads */}
+                            {isDuplicate && fileProgress?.error && (
+                              <Alert variant="light" color="orange" size="xs" p="xs">
+                                <Stack gap="xs">
+                                  <Text size="xs">{fileProgress.error}</Text>
+                                  {(() => {
+                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    return guidance ? (
+                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                        💡 {guidance}
+                                      </Text>
+                                    ) : null;
+                                  })()}
+                                </Stack>
+                              </Alert>
+                            )}
+                            
+                            {!isUploading && !isCompleted && !isDuplicate && (
                               <TextInput
                                 placeholder="Description (optional)"
                                 value={pendingFile.description}
@@ -952,7 +1167,7 @@ const DocumentManager = ({
                             )}
                           </Stack>
                         </Group>
-                        {!isUploading && !isCompleted && (
+                        {!isUploading && !isCompleted && !isDuplicate && (
                           <ActionIcon
                             variant="light"
                             color="red"
@@ -1013,14 +1228,16 @@ const DocumentManager = ({
               <Stack gap="sm">
                 {pendingFiles.map((pendingFile, index) => {
                   const fileProgress = uploadProgress[index];
-                  const isUploading = fileProgress?.status === 'uploading';
+                  const isUploading = fileProgress?.status === 'uploading' || fileProgress?.status === 'processing';
                   const isCompleted = fileProgress?.status === 'completed';
+                  const isDuplicate = fileProgress?.status === 'completed_duplicate';
                   const isFailed = fileProgress?.status === 'failed';
                   const progressValue = fileProgress?.progress || 0;
 
                   return (
                     <Paper key={pendingFile.id} withBorder p="sm" bg={
                       isCompleted ? "green.1" : 
+                      isDuplicate ? "orange.1" :
                       isFailed ? "red.1" : 
                       isUploading ? "yellow.1" : 
                       "blue.1"
@@ -1031,6 +1248,7 @@ const DocumentManager = ({
                             variant="light" 
                             color={
                               isCompleted ? "green" : 
+                              isDuplicate ? "orange" :
                               isFailed ? "red" : 
                               isUploading ? "yellow" : 
                               "blue"
@@ -1039,6 +1257,8 @@ const DocumentManager = ({
                           >
                             {isCompleted ? (
                               <IconCheck size={14} />
+                            ) : isDuplicate ? (
+                              <IconAlertTriangle size={14} />
                             ) : isFailed ? (
                               <IconExclamationMark size={14} />
                             ) : isUploading ? (
@@ -1065,6 +1285,11 @@ const DocumentManager = ({
                                   Uploaded
                                 </Badge>
                               )}
+                              {isDuplicate && (
+                                <Badge variant="light" color="orange" size="xs">
+                                  Duplicate
+                                </Badge>
+                              )}
                               {isFailed && (
                                 <Badge variant="light" color="red" size="xs">
                                   Failed
@@ -1073,11 +1298,12 @@ const DocumentManager = ({
                             </Group>
                             
                             {/* Progress bar for uploads */}
-                            {(isUploading || isCompleted || isFailed) && (
+                            {(isUploading || isCompleted || isDuplicate || isFailed) && (
                               <Progress 
                                 value={progressValue}
                                 color={
                                   isCompleted ? "green" : 
+                                  isDuplicate ? "orange" :
                                   isFailed ? "red" : 
                                   "blue"
                                 }
@@ -1090,12 +1316,39 @@ const DocumentManager = ({
                             {/* Error message for failed uploads */}
                             {isFailed && fileProgress?.error && (
                               <Alert variant="light" color="red" size="xs" p="xs">
-                                <Text size="xs">{fileProgress.error}</Text>
+                                <Stack gap="xs">
+                                  <Text size="xs">{fileProgress.error}</Text>
+                                  {(() => {
+                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    return guidance ? (
+                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                        💡 {guidance}
+                                      </Text>
+                                    ) : null;
+                                  })()}
+                                </Stack>
+                              </Alert>
+                            )}
+                            
+                            {/* Warning message for duplicate uploads */}
+                            {isDuplicate && fileProgress?.error && (
+                              <Alert variant="light" color="orange" size="xs" p="xs">
+                                <Stack gap="xs">
+                                  <Text size="xs">{fileProgress.error}</Text>
+                                  {(() => {
+                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    return guidance ? (
+                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                        💡 {guidance}
+                                      </Text>
+                                    ) : null;
+                                  })()}
+                                </Stack>
                               </Alert>
                             )}
                           </Stack>
                         </Group>
-                        {!isUploading && !isCompleted && (
+                        {!isUploading && !isCompleted && !isDuplicate && (
                           <ActionIcon
                             variant="light"
                             color="red"
@@ -1145,6 +1398,7 @@ const DocumentManager = ({
         onClose={() => {
           setShowUploadModal(false);
           setFileUpload({ file: null, description: '' });
+          setModalProgress({ status: null, error: null });
         }}
         title="Upload File"
         centered
@@ -1157,6 +1411,7 @@ const DocumentManager = ({
               onChange={file => setFileUpload(prev => ({ ...prev, file }))}
               accept={config.acceptedTypes?.join(',')}
               leftSection={<IconUpload size={16} />}
+              disabled={loading}
             />
             <TextInput
               placeholder="File description (optional)"
@@ -1167,23 +1422,105 @@ const DocumentManager = ({
                   description: e.target.value,
                 }))
               }
+              disabled={loading}
             />
+            
+            {/* Progress/Status Display */}
+            {modalProgress.status && (
+              <Stack gap="sm">
+                {modalProgress.status === 'uploading' && (
+                  <Group gap="sm">
+                    <Loader size="sm" />
+                    <Text size="sm">Uploading file...</Text>
+                  </Group>
+                )}
+                
+                {modalProgress.status === 'processing' && (
+                  <Group gap="sm">
+                    <Loader size="sm" />
+                    <Text size="sm">Processing document in Paperless...</Text>
+                  </Group>
+                )}
+                
+                {modalProgress.status === 'completed' && (
+                  <Alert icon={<IconCheck size={16} />} color="green">
+                    Document uploaded successfully!
+                  </Alert>
+                )}
+                
+                {modalProgress.status === 'completed_duplicate' && (
+                  <Alert icon={<IconAlertTriangle size={16} />} color="orange">
+                    <Text size="sm" fw={500}>Duplicate Document</Text>
+                    <Text size="sm" c="dimmed" mt="xs">
+                      {modalProgress.message || 'This document already exists in Paperless and cannot be uploaded again.'}
+                    </Text>
+                  </Alert>
+                )}
+                
+                {modalProgress.status === 'failed' && (
+                  <Alert 
+                    icon={
+                      modalProgress.errorType === 'corrupted_file' ? <IconFileX size={16} /> :
+                      modalProgress.errorType === 'file_too_large' ? <IconFileOff size={16} /> :
+                      modalProgress.errorType === 'permission_error' ? <IconLock size={16} /> :
+                      modalProgress.errorType === 'storage_full' ? <IconDatabase size={16} /> :
+                      modalProgress.errorType === 'network_error' ? <IconWifi size={16} /> :
+                      <IconExclamationMark size={16} />
+                    } 
+                    color={
+                      modalProgress.errorType === 'ocr_failed' ? 'yellow' : 'red'
+                    }
+                  >
+                    <Text size="sm" fw={500}>
+                      {modalProgress.errorType === 'corrupted_file' ? 'File Error' :
+                       modalProgress.errorType === 'file_too_large' ? 'File Too Large' :
+                       modalProgress.errorType === 'permission_error' ? 'Permission Denied' :
+                       modalProgress.errorType === 'storage_full' ? 'Storage Full' :
+                       modalProgress.errorType === 'network_error' ? 'Network Error' :
+                       modalProgress.errorType === 'ocr_failed' ? 'Processing Warning' :
+                       'Upload Failed'}
+                    </Text>
+                    {modalProgress.error && (
+                      <Text size="sm" c="dimmed" mt="xs">
+                        {modalProgress.error}
+                      </Text>
+                    )}
+                  </Alert>
+                )}
+              </Stack>
+            )}
             <Group justify="flex-end">
               <Button
                 variant="outline"
                 onClick={() => {
                   setShowUploadModal(false);
                   setFileUpload({ file: null, description: '' });
+                  setModalProgress({ status: null, error: null });
                 }}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={!fileUpload.file || loading}
-                leftSection={<IconUpload size={16} />}
+                disabled={!fileUpload.file || loading || modalProgress.status === 'processing'}
+                leftSection={
+                  loading || modalProgress.status === 'processing' ? 
+                    <Loader size={16} /> : 
+                    <IconUpload size={16} />
+                }
+                color={
+                  modalProgress.status === 'completed' ? 'green' :
+                  modalProgress.status === 'completed_duplicate' ? 'orange' :
+                  modalProgress.status === 'failed' ? 'red' :
+                  undefined
+                }
               >
-                Upload
+                {modalProgress.status === 'uploading' ? 'Uploading...' :
+                 modalProgress.status === 'processing' ? 'Processing...' :
+                 modalProgress.status === 'completed' ? 'Completed' :
+                 modalProgress.status === 'completed_duplicate' ? 'Duplicate Found' :
+                 modalProgress.status === 'failed' ? 'Failed' :
+                 'Upload'}
               </Button>
             </Group>
           </Stack>

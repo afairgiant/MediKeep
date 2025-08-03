@@ -215,7 +215,8 @@ function ActivityTracker() {
         try {
           updateActivity();
         } catch (error) {
-          console.debug('Activity update failed:', error);
+          // Activity update failed - this is expected during logout/navigation
+          // No need to log as it's normal behavior
         }
       }, 0);
     }
@@ -305,7 +306,10 @@ function App() {
 
     // Initialize timezone service
     timezoneService.init().catch(error => {
-      console.warn('Timezone service initialization failed:', error);
+      logger.warn('timezone_service_init_failed', 'Timezone service initialization failed', {
+        error: error.message,
+        component: 'App',
+      });
     });
 
     // Set up performance monitoring

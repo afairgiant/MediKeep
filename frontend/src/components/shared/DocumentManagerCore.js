@@ -223,18 +223,7 @@ const useDocumentManagerCore = ({
       const settings = await getPaperlessSettings();
       setPaperlessSettings(settings);
 
-      // Enhanced debugging for settings loading
-      console.log('📋 DEBUG: Paperless settings loaded', {
-        paperlessEnabled: settings?.paperless_enabled,
-        paperlessAutoSync: settings?.paperless_auto_sync,
-        paperlessUrl: settings?.paperless_url ? 'Set' : 'Not set',
-        paperlessCredentials: settings?.paperless_has_credentials ? 'Set' : 'Not set',
-        defaultBackend: settings?.default_storage_backend,
-        fullSettings: settings,
-        entityType,
-        entityId,
-        component: 'DocumentManagerCore'
-      });
+      // Paperless settings loaded successfully
 
       // Determine the storage backend to use
       if (settings?.default_storage_backend) {
@@ -306,17 +295,7 @@ const useDocumentManagerCore = ({
       const response = await apiService.getEntityFiles(entityType, entityId);
       const fileList = Array.isArray(response) ? response : [];
       
-      // Enhanced debugging for file loading
-      const paperlessFiles = fileList.filter(f => f.storage_backend === 'paperless');
-      console.log('📁 DEBUG: Files loaded', {
-        entityType,
-        entityId,
-        totalFiles: fileList.length,
-        paperlessFiles: paperlessFiles,
-        paperlessFileCount: paperlessFiles.length,
-        localFiles: fileList.filter(f => f.storage_backend === 'local').length,
-        component: 'DocumentManagerCore'
-      });
+      // Files loaded successfully
       
       // Performance optimization: Prevent unnecessary re-renders with enhanced comparison
       monitoredSetFiles(prevFiles => {
@@ -364,21 +343,11 @@ const useDocumentManagerCore = ({
     const currentFiles = filesRef.current || files;
     const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
     
-    // Enhanced debugging for sync status check
-    console.log('🔄 DEBUG: checkSyncStatus called', {
-      isManualSync,
-      paperlessFiles: paperlessFiles,
-      paperlessFileCount: paperlessFiles.length,
-      paperlessEnabled: paperlessSettings?.paperless_enabled,
-      paperlessAutoSync: paperlessSettings?.paperless_auto_sync,
-      entityType,
-      entityId,
-      component: 'DocumentManagerCore'
-    });
+    // Check sync status for Paperless files
     
     // Don't proceed if no paperless files or paperless not enabled
     if (paperlessFiles.length === 0) {
-      console.log('⚠️ No Paperless files found, skipping sync check');
+      // No Paperless files found, skipping sync check
       logger.debug('No Paperless files found, skipping sync check', {
         entityType,
         entityId,
@@ -390,8 +359,7 @@ const useDocumentManagerCore = ({
     }
 
     if (!paperlessSettings?.paperless_enabled) {
-      console.log('⚠️ Paperless not enabled, skipping sync check');
-      logger.warn('Paperless not enabled, skipping sync check', {
+      logger.warn('paperless_not_enabled_sync_skip', 'Paperless not enabled, skipping sync check', {
         entityType,
         entityId,
         isManualSync,
@@ -402,14 +370,7 @@ const useDocumentManagerCore = ({
       return;
     }
     
-    console.log('🚀 STARTING sync status check', {
-      entityType,
-      entityId,
-      isManualSync,
-      paperlessFilesCount: paperlessFiles.length,
-    });
-    
-    logger.info('Starting Paperless sync status check', {
+    logger.info('sync_status_check_start', 'Starting Paperless sync status check', {
       entityType,
       entityId,
       isManualSync,
@@ -420,6 +381,32 @@ const useDocumentManagerCore = ({
     });
 
     try {
+      // First, update any processing files to check if tasks have completed
+      try {
+        logger.debug('processing_files_update_start', 'Updating processing files status', {
+          entityType,
+          entityId,
+          component: 'DocumentManagerCore'
+        });
+        const processingUpdates = await apiService.updateProcessingFiles();
+        if (Object.keys(processingUpdates).length > 0) {
+          logger.info('processing_files_updated', 'Processing files updated', {
+            entityType,
+            entityId,
+            updates: processingUpdates,
+            component: 'DocumentManagerCore',
+          });
+        }
+      } catch (processingError) {
+        logger.warn('processing_files_update_failed', 'Failed to update processing files', {
+          entityType,
+          entityId,
+          error: processingError.message,
+          component: 'DocumentManagerCore',
+        });
+        // Continue with sync check even if processing update fails
+      }
+
       const status = await apiService.checkPaperlessSyncStatus();
       setSyncStatus(status);
       
@@ -516,26 +503,10 @@ const useDocumentManagerCore = ({
     const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
     const shouldAutoSync = currentAutoSync && paperlessFiles.length > 0;
     
-    // Enhanced debugging for sync detection
-    console.log('🔍 DEBUG: Auto-sync evaluation', {
-      paperlessAutoSync: currentAutoSync,
-      paperlessEnabled: paperlessSettings?.paperless_enabled,
-      paperlessFiles: paperlessFiles,
-      paperlessFileCount: paperlessFiles.length,
-      totalFiles: currentFiles.length,
-      shouldAutoSync,
-      entityType,
-      entityId,
-      component: 'DocumentManagerCore'
-    });
+    // Evaluate auto-sync conditions
     
     if (shouldAutoSync) {
-      console.log('✅ AUTO-SYNC TRIGGERING on component load', {
-        entityType,
-        entityId,
-        paperlessFilesCount: paperlessFiles.length,
-        autoSyncEnabled: currentAutoSync,
-      });
+      // Auto-sync triggering on component load
       
       logger.info('Auto-sync triggered on component load', {
         entityType,
@@ -547,11 +518,12 @@ const useDocumentManagerCore = ({
       
       checkSyncStatus();
     } else {
-      console.log('❌ Auto-sync NOT triggered', {
+      logger.debug('auto_sync_not_triggered', 'Auto-sync not triggered', {
         reason: !currentAutoSync ? 'Auto-sync disabled' : 
                 paperlessFiles.length === 0 ? 'No Paperless files' : 'Unknown',
         paperlessAutoSync: currentAutoSync,
-        paperlessFileCount: paperlessFiles.length
+        paperlessFileCount: paperlessFiles.length,
+        component: 'DocumentManagerCore'
       });
     }
   }, [paperlessSettings?.paperless_enabled, checkSyncStatus, entityType, entityId]);

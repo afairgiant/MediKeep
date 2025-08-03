@@ -440,22 +440,14 @@ class PaperlessService:
 
                 logger.info(f"Document upload started with task UUID: {task_uuid}")
 
-                # Poll task status to get actual document ID
-                try:
-                    document_id = await self._wait_for_task_completion(task_uuid, filename)
-                    logger.info(f"Successfully got document ID: {document_id}")
-                except Exception as e:
-                    logger.error(f"Failed to get document ID from task {task_uuid}: {str(e)}")
-                    # Temporarily return task UUID for debugging - remove this later
-                    logger.warning(f"Falling back to task UUID as document ID for debugging")
-                    document_id = task_uuid
-                
-                logger.info(f"Document uploaded to paperless successfully: {filename} (document_id: {document_id})")
+                # Return immediately with task UUID - don't wait for completion
+                # The frontend will poll the task status separately
+                logger.info(f"Document uploaded to paperless, returning task UUID for polling: {filename} (task_id: {task_uuid})")
 
                 return {
-                    "status": "uploaded",
+                    "status": "processing",
                     "task_id": task_uuid,
-                    "document_id": document_id,
+                    "document_id": None,  # Will be set once task completes
                     "document_filename": filename,
                     "file_size": len(file_data),
                     "upload_timestamp": datetime.utcnow().isoformat(),

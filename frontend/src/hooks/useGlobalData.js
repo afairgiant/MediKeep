@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAppData } from '../contexts/AppDataContext';
+import logger from '../services/logger';
 
 /**
  * Hook for accessing current patient data with automatic caching
@@ -58,7 +59,10 @@ export function usePractitioners(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          console.error('Error in initial practitioners fetch:', error);
+          logger.debug('practitioners_initial_fetch_error', 'Error in initial practitioners fetch', {
+            error: error.message,
+            component: 'useGlobalData'
+          });
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
@@ -98,7 +102,10 @@ export function usePharmacies(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          console.error('Error in initial pharmacy fetch:', error);
+          logger.debug('pharmacies_initial_fetch_error', 'Error in initial pharmacy fetch', {
+            error: error.message,
+            component: 'useGlobalData'
+          });
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
@@ -196,7 +203,10 @@ export function usePatientList(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          console.error('Error in initial patient list fetch:', error);
+          logger.debug('patient_list_initial_fetch_error', 'Error in initial patient list fetch', {
+            error: error.message,
+            component: 'useGlobalData'
+          });
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
