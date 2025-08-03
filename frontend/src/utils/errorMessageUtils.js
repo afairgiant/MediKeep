@@ -371,7 +371,7 @@ export const isDuplicateDocumentError = (taskResult) => {
          errorMessage.includes('identical document') ||
          errorMessage.includes('same content hash') ||
          errorMessage.includes('document with identical content') ||
-         errorMessage.includes('not consuming') && errorMessage.includes('duplicate of');
+         errorMessage.includes('not consuming') || errorMessage.includes('duplicate of');
 };
 
 /**
