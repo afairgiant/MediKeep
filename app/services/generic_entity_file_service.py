@@ -1393,7 +1393,6 @@ class GenericEntityFileService:
                                             document_id = result.get("document_id") or result.get("id")
                                         elif isinstance(result, str):
                                             # Parse document ID from string like "Success. New document id 2677 created"
-                                            import re
                                             match = re.search(r'document id (\d+)', result)
                                             if match:
                                                 document_id = match.group(1)
