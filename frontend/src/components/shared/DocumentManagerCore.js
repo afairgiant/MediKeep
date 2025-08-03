@@ -359,8 +359,7 @@ const useDocumentManagerCore = ({
     }
 
     if (!paperlessSettings?.paperless_enabled) {
-      console.log('⚠️ Paperless not enabled, skipping sync check');
-      logger.warn('Paperless not enabled, skipping sync check', {
+      logger.warn('paperless_not_enabled_sync_skip', 'Paperless not enabled, skipping sync check', {
         entityType,
         entityId,
         isManualSync,
@@ -371,14 +370,7 @@ const useDocumentManagerCore = ({
       return;
     }
     
-    console.log('🚀 STARTING sync status check', {
-      entityType,
-      entityId,
-      isManualSync,
-      paperlessFilesCount: paperlessFiles.length,
-    });
-    
-    logger.info('Starting Paperless sync status check', {
+    logger.info('sync_status_check_start', 'Starting Paperless sync status check', {
       entityType,
       entityId,
       isManualSync,
@@ -391,11 +383,14 @@ const useDocumentManagerCore = ({
     try {
       // First, update any processing files to check if tasks have completed
       try {
-        console.log('🔄 Updating processing files status...');
+        logger.debug('processing_files_update_start', 'Updating processing files status', {
+          entityType,
+          entityId,
+          component: 'DocumentManagerCore'
+        });
         const processingUpdates = await apiService.updateProcessingFiles();
         if (Object.keys(processingUpdates).length > 0) {
-          console.log('📋 Processing file updates:', processingUpdates);
-          logger.info('Processing files updated', {
+          logger.info('processing_files_updated', 'Processing files updated', {
             entityType,
             entityId,
             updates: processingUpdates,
@@ -403,8 +398,7 @@ const useDocumentManagerCore = ({
           });
         }
       } catch (processingError) {
-        console.warn('⚠️ Failed to update processing files:', processingError.message);
-        logger.warn('Failed to update processing files', {
+        logger.warn('processing_files_update_failed', 'Failed to update processing files', {
           entityType,
           entityId,
           error: processingError.message,
@@ -524,11 +518,12 @@ const useDocumentManagerCore = ({
       
       checkSyncStatus();
     } else {
-      console.log('❌ Auto-sync NOT triggered', {
+      logger.debug('auto_sync_not_triggered', 'Auto-sync not triggered', {
         reason: !currentAutoSync ? 'Auto-sync disabled' : 
                 paperlessFiles.length === 0 ? 'No Paperless files' : 'Unknown',
         paperlessAutoSync: currentAutoSync,
-        paperlessFileCount: paperlessFiles.length
+        paperlessFileCount: paperlessFiles.length,
+        component: 'DocumentManagerCore'
       });
     }
   }, [paperlessSettings?.paperless_enabled, checkSyncStatus, entityType, entityId]);
