@@ -51,6 +51,7 @@ export const ERROR_MESSAGES = {
   // File management errors
   FILE_DELETE_FAILED: 'Failed to delete file. Please try again.',
   FILE_DOWNLOAD_FAILED: 'Failed to download file. Please try again.',
+  FILE_VIEW_FAILED: 'Failed to open file for viewing. Please try again.',
   FILE_NOT_FOUND: 'File not found.',
   
   // Batch upload errors
@@ -105,6 +106,7 @@ export const ERROR_TYPE_MAPPING = {
   [ERROR_MESSAGES.DUPLICATE_FILE]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_DELETE_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_DOWNLOAD_FAILED]: ERROR_CATEGORIES.FILE,
+  [ERROR_MESSAGES.FILE_VIEW_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_NOT_FOUND]: ERROR_CATEGORIES.FILE,
   
   [ERROR_MESSAGES.PAPERLESS_UNAVAILABLE]: ERROR_CATEGORIES.PAPERLESS,
@@ -286,6 +288,8 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
       return ERROR_MESSAGES.FILE_DELETE_FAILED;
     case 'download':
       return ERROR_MESSAGES.FILE_DOWNLOAD_FAILED;
+    case 'view':
+      return ERROR_MESSAGES.FILE_VIEW_FAILED;
     case 'submit':
     case 'save':
       return ERROR_MESSAGES.FORM_SUBMISSION_FAILED;
