@@ -11,35 +11,25 @@ import {
   Alert,
   Loader,
   Center,
-  Badge,
   Grid,
-  Card,
-  Box,
-  Divider,
-  Modal,
   Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
   IconCheck,
   IconPlus,
-  IconExclamationCircle,
-  IconShieldCheck,
-  IconAlertCircle,
-  IconShield,
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 
 const Allergies = () => {
   const navigate = useNavigate();
@@ -94,17 +84,11 @@ const Allergies = () => {
     }
   }, [currentPatient?.id]);
 
-  // Helper function to get medication details
-  const getMedicationDetails = (medicationId) => {
-    if (!medicationId || medications.length === 0) return null;
-    return medications.find(med => med.id === medicationId);
-  };
-
   // Get standardized formatters for allergies with medication linking
   const formatters = {
     ...getEntityFormatters('allergies', [], navigate),
     medication_name: (value, allergy) => {
-      const medication = getMedicationDetails(allergy.medication_id);
+      const medication = medications.find(med => med.id === allergy.medication_id);
       return medication?.medication_name || '';
     },
   };
@@ -240,49 +224,6 @@ const Allergies = () => {
   // Get processed data from data management
   const processedAllergies = dataManagement.data;
 
-  const getSeverityIcon = severity => {
-    switch (severity) {
-      case 'life-threatening':
-        return IconExclamationCircle;
-      case 'severe':
-        return IconAlertTriangle;
-      case 'moderate':
-        return IconAlertCircle;
-      case 'mild':
-        return IconShield;
-      default:
-        return IconShieldCheck;
-    }
-  };
-
-  const getSeverityColor = severity => {
-    switch (severity) {
-      case 'life-threatening':
-        return 'red';
-      case 'severe':
-        return 'orange';
-      case 'moderate':
-        return 'yellow';
-      case 'mild':
-        return 'blue';
-      default:
-        return 'gray';
-    }
-  };
-
-  const getStatusColor = status => {
-    switch (status) {
-      case 'active':
-        return 'green';
-      case 'inactive':
-        return 'gray';
-      case 'resolved':
-        return 'blue';
-      default:
-        return 'gray';
-    }
-  };
-
   if (loading) {
     return (
       <Container size="xl" py="lg">
@@ -367,7 +308,7 @@ const Allergies = () => {
         />
 
         {/* Form Modal */}
-        <MantineAllergyForm
+        <AllergyFormWrapper
           isOpen={showAddForm}
           onClose={resetForm}
           title={editingAllergy ? 'Edit Allergy' : 'Add New Allergy'}
@@ -408,144 +349,29 @@ const Allergies = () => {
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>
-                {processedAllergies.map((allergy, index) => {
-                  const SeverityIcon = getSeverityIcon(allergy.severity);
-
-                  return (
-                    <Grid.Col
-                      key={allergy.id}
-                      span={{ base: 12, md: 6, lg: 4 }}
+                {processedAllergies.map((allergy, index) => (
+                  <Grid.Col
+                    key={allergy.id}
+                    span={{ base: 12, md: 6, lg: 4 }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                      >
-                        <Card shadow="sm" padding="lg" radius="md" withBorder>
-                          <Card.Section withBorder inheritPadding py="xs">
-                            <Group justify="space-between">
-                              <Group gap="xs">
-                                {React.createElement(SeverityIcon, {
-                                  size: 20,
-                                  color: `var(--mantine-color-${getSeverityColor(allergy.severity)}-6)`,
-                                })}
-                                <Text fw={600} size="lg">
-                                  {allergy.allergen}
-                                </Text>
-                              </Group>
-                              <Badge
-                                color={getStatusColor(allergy.status)}
-                                variant="light"
-                              >
-                                {allergy.status}
-                              </Badge>
-                            </Group>
-                          </Card.Section>
-
-                          <Stack gap="md" mt="md">
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Severity:
-                              </Text>
-                              <Badge
-                                color={getSeverityColor(allergy.severity)}
-                                variant="filled"
-                                leftSection={React.createElement(SeverityIcon, {
-                                  size: 12,
-                                })}
-                              >
-                                {allergy.severity}
-                              </Badge>
-                            </Group>
-
-                            {allergy.reaction && (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Reaction:
-                                </Text>
-                                <Text size="sm" fw={500}>
-                                  {allergy.reaction}
-                                </Text>
-                              </Group>
-                            )}
-
-                            {allergy.onset_date && (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Onset Date:
-                                </Text>
-                                <Text size="sm" fw={500}>
-                                  {formatDate(allergy.onset_date)}
-                                </Text>
-                              </Group>
-                            )}
-
-                            {(() => {
-                              const medication = getMedicationDetails(allergy.medication_id);
-                              return medication ? (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Related Medication:
-                                  </Text>
-                                  <Text
-                                    size="sm"
-                                    fw={500}
-                                    c="blue"
-                                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                                    onClick={() => navigateToEntity('medication', medication.id, navigate)}
-                                    title="View medication details"
-                                  >
-                                    {medication.medication_name}
-                                  </Text>
-                                </Group>
-                              ) : null;
-                            })()}
-
-                            {allergy.notes && (
-                              <Box>
-                                <Text size="sm" c="dimmed" mb="xs">
-                                  Notes:
-                                </Text>
-                                <Text size="sm" c="dimmed">
-                                  {allergy.notes}
-                                </Text>
-                              </Box>
-                            )}
-                          </Stack>
-
-                          <Stack gap={0} mt="auto">
-                            <Divider />
-                            <Group justify="flex-end" gap="xs" pt="sm">
-                              <Button
-                                variant="filled"
-                                size="xs"
-                                onClick={() => handleViewAllergy(allergy)}
-                              >
-                                View
-                              </Button>
-                              <Button
-                                variant="filled"
-                                size="xs"
-                                onClick={() => handleEditAllergy(allergy)}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="filled"
-                                color="red"
-                                size="xs"
-                                onClick={() => handleDeleteAllergy(allergy.id)}
-                              >
-                                Delete
-                              </Button>
-                            </Group>
-                          </Stack>
-                        </Card>
-                      </motion.div>
-                    </Grid.Col>
-                  );
-                })}
+                      <AllergyCard
+                        allergy={allergy}
+                        onView={handleViewAllergy}
+                        onEdit={handleEditAllergy}
+                        onDelete={handleDeleteAllergy}
+                        medications={medications}
+                        navigate={navigate}
+                        onError={setError}
+                      />
+                    </motion.div>
+                  </Grid.Col>
+                ))}
               </AnimatePresence>
             </Grid>
           ) : (
@@ -573,184 +399,15 @@ const Allergies = () => {
         </motion.div>
 
         {/* Allergy View Modal */}
-        <Modal
-          opened={showViewModal}
+        <AllergyViewModal
+          isOpen={showViewModal}
           onClose={handleCloseViewModal}
-          title={
-            <Group>
-              <Text size="lg" fw={600}>
-                Allergy Details
-              </Text>
-              {viewingAllergy && (
-                <Badge
-                  color={getStatusColor(viewingAllergy.status)}
-                  variant="light"
-                >
-                  {viewingAllergy.status}
-                </Badge>
-              )}
-            </Group>
-          }
-          size="lg"
-          centered
-        >
-          {viewingAllergy && (
-            <Stack gap="md">
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Group justify="space-between" align="flex-start">
-                    <Stack gap="xs" style={{ flex: 1 }}>
-                      <Title order={3}>{viewingAllergy.allergen}</Title>
-                      {viewingAllergy.severity && (
-                        <Badge
-                          color={getSeverityColor(viewingAllergy.severity)}
-                          variant="filled"
-                          leftSection={React.createElement(
-                            getSeverityIcon(viewingAllergy.severity),
-                            { size: 16 }
-                          )}
-                        >
-                          {viewingAllergy.severity}
-                        </Badge>
-                      )}
-                    </Stack>
-                  </Group>
-                </Stack>
-              </Card>
-
-              <Grid>
-                <Grid.Col span={6}>
-                  <Card withBorder p="md" h="100%">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        ALLERGY INFORMATION
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Allergen:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingAllergy.allergen ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingAllergy.allergen || 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Severity:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingAllergy.severity ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingAllergy.severity || 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Reaction:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingAllergy.reaction ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingAllergy.reaction || 'Not specified'}
-                        </Text>
-                      </Group>
-                      {(() => {
-                        const medication = getMedicationDetails(viewingAllergy.medication_id);
-                        return medication ? (
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              Medication:
-                            </Text>
-                            <Text
-                              size="sm"
-                              c="blue"
-                              style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                              onClick={() => navigateToEntity('medication', medication.id, navigate)}
-                              title="View medication details"
-                            >
-                              {medication.medication_name}
-                            </Text>
-                          </Group>
-                        ) : null;
-                      })()}
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-
-                <Grid.Col span={6}>
-                  <Card withBorder p="md" h="100%">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        TIMELINE
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Onset Date:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingAllergy.onset_date ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingAllergy.onset_date
-                            ? formatDate(viewingAllergy.onset_date)
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Status:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingAllergy.status ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingAllergy.status || 'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-              </Grid>
-
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    NOTES
-                  </Text>
-                  <Divider />
-                  <Text
-                    size="sm"
-                    c={viewingAllergy.notes ? 'inherit' : 'dimmed'}
-                  >
-                    {viewingAllergy.notes || 'No notes available'}
-                  </Text>
-                </Stack>
-              </Card>
-
-              <Group justify="flex-end" mt="md">
-                <Button
-                  variant="filled"
-                  size="xs"
-                  onClick={() => {
-                    handleCloseViewModal();
-                    handleEditAllergy(viewingAllergy);
-                  }}
-                >
-                  Edit Allergy
-                </Button>
-                <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                  Close
-                </Button>
-              </Group>
-            </Stack>
-          )}
-        </Modal>
+          allergy={viewingAllergy}
+          onEdit={handleEditAllergy}
+          medications={medications}
+          navigate={navigate}
+          onError={setError}
+        />
       </Container>
     </motion.div>
   );

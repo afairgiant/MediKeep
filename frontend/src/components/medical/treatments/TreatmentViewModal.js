@@ -84,18 +84,23 @@ const TreatmentViewModal = ({
                     </Badge>
                   )}
                   {treatment.condition_id && (
-                    <Badge
-                      variant="light"
-                      color="teal"
-                      size="lg"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleConditionClick(treatment.condition_id)}
-                    >
-                      Related to:{' '}
-                      {treatment.condition?.diagnosis ||
-                        getConditionName(treatment.condition_id) ||
-                        `Condition #${treatment.condition_id}`}
-                    </Badge>
+                    <Group gap="xs">
+                      <Text size="sm" c="dimmed">
+                        Related to:
+                      </Text>
+                      <Text
+                        size="sm"
+                        fw={500}
+                        c="blue"
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => handleConditionClick(treatment.condition_id)}
+                        title="View condition details"
+                      >
+                        {treatment.condition?.diagnosis ||
+                          getConditionName(treatment.condition_id) ||
+                          `Condition #${treatment.condition_id}`}
+                      </Text>
+                    </Group>
                   )}
                 </Group>
               </Stack>
@@ -255,6 +260,7 @@ const TreatmentViewModal = ({
                         style={{
                           cursor: 'pointer',
                           color: 'var(--mantine-color-blue-6)',
+                          textDecoration: 'underline',
                         }}
                         onClick={() => handleConditionClick(treatment.condition_id)}
                       >

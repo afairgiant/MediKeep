@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Text } from '@mantine/core';
+import { Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
 import { formatDate } from '../../../utils/helpers';
@@ -105,19 +105,25 @@ const TreatmentCard = ({
       </div>
     );
 
-    // Custom content for clickable condition badge
+    // Custom content for clickable condition link
     const customContent = treatment.condition_id ? (
-      <Badge
-        variant="light"
-        color="teal"
-        size="md"
-        style={{ cursor: 'pointer', marginBottom: '8px' }}
-        onClick={() => handleConditionClick(treatment.condition_id)}
-      >
-        Related to: {treatment.condition?.diagnosis ||
-                    getConditionName(treatment.condition_id) ||
-                    `Condition #${treatment.condition_id}`}
-      </Badge>
+      <Group gap="xs" style={{ marginBottom: '8px' }}>
+        <Text size="sm" c="dimmed">
+          Related Condition:
+        </Text>
+        <Text
+          size="sm"
+          fw={500}
+          c="blue"
+          style={{ cursor: 'pointer', textDecoration: 'underline' }}
+          onClick={() => handleConditionClick(treatment.condition_id)}
+          title="View condition details"
+        >
+          {treatment.condition?.diagnosis ||
+           getConditionName(treatment.condition_id) ||
+           `Condition #${treatment.condition_id}`}
+        </Text>
+      </Group>
     ) : null;
 
     return (

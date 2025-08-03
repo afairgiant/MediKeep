@@ -44,7 +44,14 @@ const MedicationRelationships = ({
   // Load relationships when component mounts
   useEffect(() => {
     if (conditionId && fetchConditionMedications) {
-      fetchConditionMedications(conditionId);
+      // Only fetch if we don't already have the data for this condition
+      const hasExistingData = conditionMedications && conditionMedications[conditionId];
+      if (!hasExistingData) {
+        fetchConditionMedications(conditionId).catch(error => {
+          console.error('Failed to fetch condition medications:', error);
+          setError(error.message || 'Failed to load medication relationships');
+        });
+      }
     }
   }, [conditionId]); // Remove fetchConditionMedications from dependencies to prevent infinite loop
 
@@ -58,7 +65,7 @@ const MedicationRelationships = ({
     setError(null);
 
     try {
-      await apiService.createConditionMedication(conditionId, {
+      const result = await apiService.createConditionMedication(conditionId, {
         condition_id: conditionId,
         medication_id: parseInt(newRelationship.medication_id),
       });
@@ -72,7 +79,8 @@ const MedicationRelationships = ({
       setNewRelationship({ medication_id: '' });
       setShowAddModal(false);
     } catch (err) {
-      setError(err.message || 'Failed to add medication relationship');
+      console.error('Error adding medication relationship:', err);
+      setError(err.response?.data?.detail || err.message || 'Failed to add medication relationship');
     } finally {
       setLoading(false);
     }
@@ -95,7 +103,8 @@ const MedicationRelationships = ({
         await fetchConditionMedications(conditionId);
       }
     } catch (err) {
-      setError(err.message || 'Failed to delete medication relationship');
+      console.error('Error deleting medication relationship:', err);
+      setError(err.response?.data?.detail || err.message || 'Failed to delete medication relationship');
     } finally {
       setLoading(false);
     }
@@ -184,15 +193,20 @@ const MedicationRelationships = ({
       )}
 
       {/* Add New Relationship Button */}
-      {!isViewMode && availableMedicationOptions.length > 0 && (
-        <Button
-          variant="light"
-          leftSection={<IconPlus size={16} />}
-          onClick={() => setShowAddModal(true)}
-          disabled={loading}
-        >
-          Link Medication
-        </Button>
+      {!isViewMode && (
+        <Group justify="space-between" align="center">
+          <Text size="sm" c="dimmed">
+            {availableMedicationOptions.length} medications available to link
+          </Text>
+          <Button
+            variant="light"
+            leftSection={<IconPlus size={16} />}
+            onClick={() => setShowAddModal(true)}
+            disabled={loading || availableMedicationOptions.length === 0}
+          >
+            Link Medication
+          </Button>
+        </Group>
       )}
 
       {/* Add Relationship Modal */}

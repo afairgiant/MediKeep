@@ -15,11 +15,14 @@ import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineFamilyMemberForm from '../../components/medical/MantineFamilyMemberForm';
-import MantineFamilyConditionForm from '../../components/medical/MantineFamilyConditionForm';
 import StatusBadge from '../../components/medical/StatusBadge';
 import { InvitationManager } from '../../components/invitations';
 import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
+import {
+  FamilyHistoryCard,
+  FamilyHistoryViewModal,
+  FamilyHistoryFormWrapper,
+} from '../../components/medical/family-history';
 import {
   Badge,
   Button,
@@ -27,21 +30,13 @@ import {
   Group,
   Stack,
   Text,
-  Grid,
   Container,
   Alert,
   Loader,
   Center,
-  Divider,
-  Modal,
   Title,
-  ActionIcon,
-  Collapse,
-  Box,
   SimpleGrid,
   Tabs,
-  Menu,
-  Tooltip,
   Checkbox,
   Paper,
   useMantineColorScheme,
@@ -49,59 +44,17 @@ import {
 import {
   IconUsers,
   IconPlus,
-  IconEdit,
-  IconTrash,
-  IconChevronDown,
-  IconChevronUp,
-  IconMedicalCross,
   IconUserPlus,
-  IconStethoscope,
   IconShare,
   IconMail,
   IconSend2,
-  IconUser,
-  IconDots,
   IconX,
   IconSend,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 
-// Style constants
-const CARD_STYLES = {
-  selectable: {
-    cursor: 'pointer',
-    opacity: 0.8,
-    transition: 'all 0.2s ease',
-    transform: 'scale(1)',
-  },
-  selected: {
-    border: '2px solid var(--mantine-color-blue-6)',
-    backgroundColor: 'var(--mantine-color-blue-0)',
-    transform: 'scale(1.02)',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-  },
-  conditionBox: (colorScheme, severityColor) => ({
-    borderLeft: `3px solid var(--mantine-color-${severityColor}-6)`,
-    backgroundColor:
-      colorScheme === 'dark'
-        ? 'var(--mantine-color-dark-6)'
-        : 'var(--mantine-color-gray-0)',
-    borderRadius: '4px',
-  }),
-  viewModalConditionBox: (colorScheme, severityColor) => ({
-    borderLeft: `4px solid var(--mantine-color-${severityColor}-6)`,
-    backgroundColor:
-      colorScheme === 'dark'
-        ? 'var(--mantine-color-dark-6)'
-        : 'var(--mantine-color-gray-0)',
-    borderRadius: '8px',
-  }),
-  disabledAction: {
-    opacity: 0.5,
-    cursor: 'not-allowed',
-  },
-};
+// Removed style constants - now handled in extracted components
 
 const FamilyHistory = () => {
   const navigate = useNavigate();
@@ -945,45 +898,7 @@ const FamilyHistory = () => {
     refreshData();
   };
 
-  const getSeverityColor = severity => {
-    switch (severity?.toLowerCase()) {
-      case 'mild':
-        return 'green';
-      case 'moderate':
-        return 'yellow';
-      case 'severe':
-        return 'red';
-      case 'critical':
-        return 'red';
-      default:
-        return 'gray';
-    }
-  };
-
-  const getConditionTypeColor = type => {
-    switch (type?.toLowerCase()) {
-      case 'cardiovascular':
-        return 'red';
-      case 'diabetes':
-        return 'blue';
-      case 'cancer':
-        return 'purple';
-      case 'mental_health':
-        return 'teal';
-      case 'neurological':
-        return 'indigo';
-      case 'genetic':
-        return 'orange';
-      default:
-        return 'gray';
-    }
-  };
-
-  const calculateAge = (birthYear, deathYear = null) => {
-    const currentYear = new Date().getFullYear();
-    const endYear = deathYear || currentYear;
-    return birthYear ? endYear - birthYear : null;
-  };
+  // Utility functions moved to extracted components
 
   if (loading) {
     return (
@@ -1286,304 +1201,25 @@ const FamilyHistory = () => {
                   </Group>
 
                   <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                    {group.members.map(member => {
-                      const isExpanded = expandedMembers.has(member.id);
-                      const conditionCount =
-                        member.family_conditions?.length || 0;
-                      const age = calculateAge(
-                        member.birth_year,
-                        member.death_year
-                      );
-
-                      const isSelected = selectedMembersForBulkSharing.includes(
-                        member.id
-                      );
-                      const isSelectable =
-                        bulkSelectionMode && !member.is_shared;
-
-                      return (
-                        <Card
-                          key={member.id}
-                          shadow="sm"
-                          padding="md"
-                          radius="md"
-                          style={{
-                            ...CARD_STYLES.selectable,
-                            ...(isSelected ? CARD_STYLES.selected : {}),
-                            opacity: isSelectable && !isSelected ? 0.8 : 1,
-                          }}
-                          onMouseEnter={e => {
-                            if (isSelectable) {
-                              e.currentTarget.style.transform = isSelected
-                                ? 'scale(1.02)'
-                                : 'scale(1.01)';
-                              e.currentTarget.style.opacity = '1';
-                            }
-                          }}
-                          onMouseLeave={e => {
-                            if (isSelectable) {
-                              e.currentTarget.style.transform = isSelected
-                                ? 'scale(1.02)'
-                                : 'scale(1)';
-                              e.currentTarget.style.opacity = isSelected
-                                ? '1'
-                                : '0.8';
-                            }
-                          }}
-                          onClick={() => {
-                            if (isSelectable) {
-                              handleBulkMemberToggle(member.id);
-                            } else {
-                              toggleExpanded(member.id);
-                            }
-                          }}
-                        >
-                          <Group position="apart" mb="xs">
-                            <div style={{ flex: 1 }}>
-                              <Group gap="xs" align="center">
-                                <Text weight={500} size="lg">
-                                  {member.name}
-                                </Text>
-                                {member.is_shared && (
-                                  <Badge
-                                    size="xs"
-                                    color={bulkSelectionMode ? 'gray' : 'blue'}
-                                    variant={
-                                      bulkSelectionMode ? 'filled' : 'light'
-                                    }
-                                  >
-                                    {bulkSelectionMode
-                                      ? 'Not Selectable'
-                                      : 'Shared'}
-                                  </Badge>
-                                )}
-                              </Group>
-                              <Text
-                                size="sm"
-                                color="dimmed"
-                                transform="capitalize"
-                              >
-                                {member.relationship.replace('_', ' ')}
-                                {age && ` • Age ${age}`}
-                                {member.is_deceased && ' • Deceased'}
-                                {member.is_shared &&
-                                  member.shared_by &&
-                                  ` • Shared by ${member.shared_by.name}`}
-                              </Text>
-                            </div>
-
-                            <Group spacing="xs">
-                              {/* Show selection indicator */}
-                              {isSelected && (
-                                <Badge size="sm" color="blue" variant="filled">
-                                  Selected
-                                </Badge>
-                              )}
-
-                              <Button
-                                size="xs"
-                                variant="filled"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleViewFamilyMember(member);
-                                }}
-                              >
-                                View Details
-                              </Button>
-                              <Menu
-                                shadow="md"
-                                width={150}
-                                position="bottom-end"
-                              >
-                                <Menu.Target>
-                                  <ActionIcon
-                                    variant="light"
-                                    onClick={e => e.stopPropagation()}
-                                  >
-                                    <IconDots size={16} />
-                                  </ActionIcon>
-                                </Menu.Target>
-                                <Menu.Dropdown>
-                                  {!member.is_shared && (
-                                    <>
-                                      <Menu.Item
-                                        leftSection={<IconEdit size={14} />}
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          handleEditMember(member);
-                                        }}
-                                      >
-                                        Edit
-                                      </Menu.Item>
-                                    </>
-                                  )}
-                                  {!member.is_shared && (
-                                    <>
-                                      <Menu.Divider />
-                                      <Menu.Item
-                                        leftSection={<IconTrash size={14} />}
-                                        color="red"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          handleDeleteMember(member.id);
-                                        }}
-                                      >
-                                        Delete
-                                      </Menu.Item>
-                                    </>
-                                  )}
-                                </Menu.Dropdown>
-                              </Menu>
-                            </Group>
-                          </Group>
-
-                          <Group position="apart" mb={isExpanded ? 'md' : 0}>
-                            <Badge
-                              variant="light"
-                              size="sm"
-                              color={conditionCount > 0 ? 'blue' : 'gray'}
-                            >
-                              {conditionCount} Condition
-                              {conditionCount !== 1 ? 's' : ''}
-                            </Badge>
-                            {isExpanded ? (
-                              <IconChevronUp size={16} />
-                            ) : (
-                              <IconChevronDown size={16} />
-                            )}
-                          </Group>
-
-                          <Collapse in={isExpanded}>
-                            <Divider mb="md" />
-                            <Text weight={500} mb="md">
-                              Medical Conditions
-                            </Text>
-
-                            {conditionCount === 0 ? (
-                              <Box
-                                style={{
-                                  textAlign: 'center',
-                                  padding: '1rem 0',
-                                }}
-                              >
-                                <Text size="sm" color="dimmed" mb="md">
-                                  No medical conditions recorded
-                                </Text>
-                                {!member.is_shared && (
-                                  <Button
-                                    size="xs"
-                                    variant="filled"
-                                    leftSection={<IconStethoscope size={14} />}
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      handleAddCondition(member);
-                                    }}
-                                  >
-                                    Add Condition
-                                  </Button>
-                                )}
-                              </Box>
-                            ) : (
-                              <Stack spacing="xs">
-                                {member.family_conditions?.map(condition => (
-                                  <Box
-                                    key={condition.id}
-                                    p="xs"
-                                    style={CARD_STYLES.conditionBox(
-                                      colorScheme,
-                                      getSeverityColor(condition.severity)
-                                    )}
-                                  >
-                                    <Group position="apart">
-                                      <div style={{ flex: 1 }}>
-                                        <Group spacing="xs" mb="xs">
-                                          <Text weight={500}>
-                                            {condition.condition_name}
-                                          </Text>
-                                          {condition.severity && (
-                                            <Badge
-                                              size="xs"
-                                              color={getSeverityColor(
-                                                condition.severity
-                                              )}
-                                            >
-                                              {condition.severity}
-                                            </Badge>
-                                          )}
-                                          {condition.condition_type && (
-                                            <Badge
-                                              size="xs"
-                                              variant="outline"
-                                              color={getConditionTypeColor(
-                                                condition.condition_type
-                                              )}
-                                            >
-                                              {condition.condition_type.replace(
-                                                '_',
-                                                ' '
-                                              )}
-                                            </Badge>
-                                          )}
-                                        </Group>
-
-                                        {condition.diagnosis_age && (
-                                          <Text size="xs" color="dimmed">
-                                            Diagnosed at age{' '}
-                                            {condition.diagnosis_age}
-                                          </Text>
-                                        )}
-
-                                        {condition.notes && (
-                                          <Text
-                                            size="xs"
-                                            color="dimmed"
-                                            lineClamp={2}
-                                          >
-                                            {condition.notes}
-                                          </Text>
-                                        )}
-                                      </div>
-
-                                      {!member.is_shared && (
-                                        <Group spacing="xs">
-                                          <Button
-                                            size="xs"
-                                            variant="filled"
-                                            onClick={e => {
-                                              e.stopPropagation();
-                                              handleEditCondition(
-                                                member,
-                                                condition
-                                              );
-                                            }}
-                                          >
-                                            Edit
-                                          </Button>
-                                          <Button
-                                            size="xs"
-                                            variant="filled"
-                                            color="red"
-                                            onClick={e => {
-                                              e.stopPropagation();
-                                              handleDeleteCondition(
-                                                member.id,
-                                                condition.id
-                                              );
-                                            }}
-                                          >
-                                            Delete
-                                          </Button>
-                                        </Group>
-                                      )}
-                                    </Group>
-                                  </Box>
-                                ))}
-                              </Stack>
-                            )}
-                          </Collapse>
-                        </Card>
-                      );
-                    })}
+                    {group.members.map(member => (
+                      <FamilyHistoryCard
+                        key={member.id}
+                        member={member}
+                        onView={handleViewFamilyMember}
+                        onEdit={handleEditMember}
+                        onDelete={handleDeleteMember}
+                        onAddCondition={handleAddCondition}
+                        onEditCondition={handleEditCondition}
+                        onDeleteCondition={handleDeleteCondition}
+                        onShare={handleShareMember}
+                        expandedMembers={expandedMembers}
+                        onToggleExpanded={toggleExpanded}
+                        bulkSelectionMode={bulkSelectionMode}
+                        isSelected={selectedMembersForBulkSharing.includes(member.id)}
+                        onBulkToggle={handleBulkMemberToggle}
+                        onError={setError}
+                      />
+                    ))}
                   </SimpleGrid>
                 </div>
               ))}
@@ -1661,29 +1297,30 @@ const FamilyHistory = () => {
 
                   <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                     {group.members.map(item => {
-                      const member = item.family_member;
-                      const isExpanded = expandedMembers.has(
-                        `shared-${member.id}`
-                      );
+                      const member = {
+                        ...item.family_member,
+                        is_shared: true,
+                        shared_by: item.share_details?.shared_by,
+                        shared_at: item.share_details?.shared_at,
+                        sharing_note: item.share_details?.sharing_note,
+                      };
 
                       return (
-                        <Card
+                        <FamilyHistoryCard
                           key={`shared-${member.id}`}
-                          shadow="sm"
-                          padding="md"
-                          radius="md"
-                          style={{
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
+                          member={member}
+                          onView={handleViewFamilyMember}
+                          onEdit={handleEditMember}
+                          onDelete={handleDeleteMember}
+                          onAddCondition={handleAddCondition}
+                          onEditCondition={handleEditCondition}
+                          onDeleteCondition={handleDeleteCondition}
+                          onShare={handleShareMember}
+                          expandedMembers={{
+                            has: (id) => expandedMembers.has(`shared-${id}`),
                           }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.transform = 'scale(1.01)';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                          }}
-                          onClick={() => {
-                            const memberId = `shared-${member.id}`;
+                          onToggleExpanded={(id) => {
+                            const memberId = `shared-${id}`;
                             setExpandedMembers(prev => {
                               const newSet = new Set(prev);
                               if (newSet.has(memberId)) {
@@ -1694,154 +1331,11 @@ const FamilyHistory = () => {
                               return newSet;
                             });
                           }}
-                        >
-                          <Group position="apart" mb="xs">
-                            <div style={{ flex: 1 }}>
-                              <Group gap="xs" align="center">
-                                <Text weight={500} size="lg">
-                                  {member.name}
-                                </Text>
-                                <Badge color="blue" variant="light" size="sm">
-                                  Shared
-                                </Badge>
-                              </Group>
-                              <Text
-                                size="sm"
-                                color="dimmed"
-                                transform="capitalize"
-                              >
-                                {member.relationship.replace('_', ' ')}
-                                {calculateAge(
-                                  member.birth_year,
-                                  member.death_year
-                                ) &&
-                                  ` • Age ${calculateAge(member.birth_year, member.death_year)}`}
-                                {member.is_deceased && ' • Deceased'}
-                                {item.share_details?.shared_by &&
-                                  ` • Shared by ${item.share_details.shared_by.name}`}
-                              </Text>
-                            </div>
-
-                            <Group spacing="xs">
-                              <Button
-                                size="xs"
-                                variant="filled"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleViewFamilyMember(member);
-                                }}
-                              >
-                                View Details
-                              </Button>
-                            </Group>
-                          </Group>
-
-                          <Group position="apart" mb={isExpanded ? 'md' : 0}>
-                            <Badge
-                              variant="light"
-                              size="sm"
-                              color={
-                                (member.family_conditions?.length || 0) > 0
-                                  ? 'blue'
-                                  : 'gray'
-                              }
-                            >
-                              {member.family_conditions?.length || 0} Condition
-                              {(member.family_conditions?.length || 0) !== 1
-                                ? 's'
-                                : ''}
-                            </Badge>
-                            {isExpanded ? (
-                              <IconChevronUp size={16} />
-                            ) : (
-                              <IconChevronDown size={16} />
-                            )}
-                          </Group>
-
-                          <Collapse in={isExpanded}>
-                            <Divider mb="md" />
-                            <Text weight={500} mb="md">
-                              Medical Conditions
-                            </Text>
-
-                            {(member.family_conditions?.length || 0) === 0 ? (
-                              <Box
-                                style={{
-                                  textAlign: 'center',
-                                  padding: '1rem 0',
-                                }}
-                              >
-                                <Text size="sm" color="dimmed" mb="md">
-                                  No medical conditions recorded
-                                </Text>
-                              </Box>
-                            ) : (
-                              <Stack spacing="xs">
-                                {member.family_conditions?.map(condition => (
-                                  <Box
-                                    key={condition.id}
-                                    p="xs"
-                                    style={CARD_STYLES.conditionBox(
-                                      colorScheme,
-                                      getSeverityColor(condition.severity)
-                                    )}
-                                  >
-                                    <Group position="apart">
-                                      <div style={{ flex: 1 }}>
-                                        <Group spacing="xs" mb="xs">
-                                          <Text weight={500}>
-                                            {condition.condition_name}
-                                          </Text>
-                                          {condition.severity && (
-                                            <Badge
-                                              size="xs"
-                                              color={getSeverityColor(
-                                                condition.severity
-                                              )}
-                                            >
-                                              {condition.severity}
-                                            </Badge>
-                                          )}
-                                          {condition.condition_type && (
-                                            <Badge
-                                              size="xs"
-                                              variant="outline"
-                                              color={getConditionTypeColor(
-                                                condition.condition_type
-                                              )}
-                                            >
-                                              {condition.condition_type.replace(
-                                                '_',
-                                                ' '
-                                              )}
-                                            </Badge>
-                                          )}
-                                        </Group>
-
-                                        {condition.diagnosis_age && (
-                                          <Text size="xs" color="dimmed">
-                                            Diagnosed at age{' '}
-                                            {condition.diagnosis_age}
-                                          </Text>
-                                        )}
-
-                                        {condition.notes && (
-                                          <Text
-                                            size="xs"
-                                            color="dimmed"
-                                            lineClamp={2}
-                                          >
-                                            {condition.notes}
-                                          </Text>
-                                        )}
-                                      </div>
-                                    </Group>
-                                  </Box>
-                                ))}
-                              </Stack>
-                            )}
-                          </Collapse>
-                        </Card>
+                          bulkSelectionMode={false}
+                          isSelected={false}
+                          onBulkToggle={() => {}}
+                          onError={setError}
+                        />
                       );
                     })}
                   </SimpleGrid>
@@ -1852,266 +1346,49 @@ const FamilyHistory = () => {
         </Tabs.Panel>
       </Tabs>
 
-      {/* Family Member Form Modal */}
-      <MantineFamilyMemberForm
-        isOpen={showModal}
-        onClose={handleCancel}
-        title={editingMember ? 'Edit Family Member' : 'Add Family Member'}
-        formData={formData}
-        onInputChange={handleInputChange}
-        onSubmit={handleSubmit}
+      {/* Family History Forms */}
+      <FamilyHistoryFormWrapper
+        // Family Member Form Props
+        memberFormOpen={showModal}
+        onMemberFormClose={handleCancel}
+        memberFormTitle={editingMember ? 'Edit Family Member' : 'Add Family Member'}
         editingMember={editingMember}
-      />
-
-      {/* Family Condition Form Modal */}
-      <MantineFamilyConditionForm
-        isOpen={showConditionModal}
-        onClose={
+        memberFormData={formData}
+        onMemberInputChange={handleInputChange}
+        onMemberSubmit={handleSubmit}
+        memberFormLoading={loading}
+        
+        // Family Condition Form Props
+        conditionFormOpen={showConditionModal}
+        onConditionFormClose={
           viewingFamilyMemberId
             ? handleConditionCancelFromView
             : handleConditionCancel
         }
-        title={
+        conditionFormTitle={
           editingCondition
             ? `Edit Condition for ${selectedFamilyMember?.name}`
             : `Add Condition for ${selectedFamilyMember?.name}`
         }
-        formData={conditionFormData}
-        onInputChange={handleConditionInputChange}
-        onSubmit={handleConditionSubmit}
         editingCondition={editingCondition}
+        conditionFormData={conditionFormData}
+        onConditionInputChange={handleConditionInputChange}
+        onConditionSubmit={handleConditionSubmit}
+        conditionFormLoading={loading}
+        selectedFamilyMember={selectedFamilyMember}
       />
 
       {/* Family Member View Modal */}
-      {viewingFamilyMember && (
-        <Modal
-          opened={!!viewingFamilyMemberId}
-          onClose={handleCloseViewModal}
-          title={`${viewingFamilyMember.name} - Family Medical History`}
-          size="lg"
-          zIndex={1000}
-          withinPortal
-        >
-          <Stack spacing="md">
-            {/* Family Member Info */}
-            <Card withBorder p="md">
-              <Group position="apart" mb="xs">
-                <Text weight={500} size="lg">
-                  {viewingFamilyMember.name}
-                  {viewingFamilyMember.is_shared && (
-                    <Badge color="blue" variant="light" size="sm" ml="xs">
-                      Shared
-                    </Badge>
-                  )}
-                </Text>
-                <Group spacing="xs">
-                  <ActionIcon
-                    variant="light"
-                    onClick={() => handleEditMember(viewingFamilyMember)}
-                    disabled={viewingFamilyMember.is_shared}
-                    title={
-                      viewingFamilyMember.is_shared
-                        ? 'Cannot edit shared family member'
-                        : 'Edit family member'
-                    }
-                    aria-label={
-                      viewingFamilyMember.is_shared
-                        ? 'Cannot edit shared family member'
-                        : 'Edit family member'
-                    }
-                    style={
-                      viewingFamilyMember.is_shared
-                        ? CARD_STYLES.disabledAction
-                        : {}
-                    }
-                  >
-                    <IconEdit size={16} />
-                  </ActionIcon>
-                </Group>
-              </Group>
-
-              <Stack spacing="xs">
-                <Text size="sm">
-                  <strong>Relationship:</strong>{' '}
-                  {viewingFamilyMember.relationship?.replace('_', ' ')}
-                </Text>
-                {viewingFamilyMember.gender && (
-                  <Text size="sm">
-                    <strong>Gender:</strong> {viewingFamilyMember.gender}
-                  </Text>
-                )}
-                {viewingFamilyMember.birth_year && (
-                  <Text size="sm">
-                    <strong>Birth Year:</strong>{' '}
-                    {viewingFamilyMember.birth_year}
-                    {calculateAge(
-                      viewingFamilyMember.birth_year,
-                      viewingFamilyMember.death_year
-                    ) &&
-                      ` (Age ${calculateAge(viewingFamilyMember.birth_year, viewingFamilyMember.death_year)})`}
-                  </Text>
-                )}
-                {viewingFamilyMember.is_deceased &&
-                  viewingFamilyMember.death_year && (
-                    <Text size="sm">
-                      <strong>Death Year:</strong>{' '}
-                      {viewingFamilyMember.death_year}
-                    </Text>
-                  )}
-                {viewingFamilyMember.notes && (
-                  <Text size="sm">
-                    <strong>Notes:</strong> {viewingFamilyMember.notes}
-                  </Text>
-                )}
-              </Stack>
-            </Card>
-
-            {/* Medical Conditions Section */}
-            <Card withBorder p="md">
-              <Group position="apart" mb="md">
-                <Text weight={500} size="lg">
-                  Medical Conditions
-                </Text>
-                <Button
-                  size="xs"
-                  variant="filled"
-                  leftSection={<IconStethoscope size={16} />}
-                  onClick={handleAddConditionFromView}
-                  disabled={viewingFamilyMember.is_shared}
-                  title={
-                    viewingFamilyMember.is_shared
-                      ? 'Cannot add conditions to shared family member'
-                      : 'Add medical condition'
-                  }
-                  aria-label={
-                    viewingFamilyMember.is_shared
-                      ? 'Cannot add conditions to shared family member'
-                      : 'Add medical condition'
-                  }
-                >
-                  Add Condition
-                </Button>
-              </Group>
-
-              {!viewingFamilyMember.family_conditions ||
-              viewingFamilyMember.family_conditions.length === 0 ? (
-                <Text
-                  size="sm"
-                  color="dimmed"
-                  style={{ textAlign: 'center', padding: '2rem 0' }}
-                >
-                  No medical conditions recorded
-                </Text>
-              ) : (
-                <Stack spacing="md">
-                  {viewingFamilyMember.family_conditions.map(condition => (
-                    <Box
-                      key={condition.id}
-                      p="md"
-                      style={CARD_STYLES.viewModalConditionBox(
-                        colorScheme,
-                        getSeverityColor(condition.severity)
-                      )}
-                    >
-                      <Group position="apart" mb="xs">
-                        <Group spacing="xs">
-                          <Text weight={500} size="md">
-                            {condition.condition_name}
-                          </Text>
-                          {condition.severity && (
-                            <Badge color={getSeverityColor(condition.severity)}>
-                              {condition.severity}
-                            </Badge>
-                          )}
-                          {condition.condition_type && (
-                            <Badge
-                              variant="outline"
-                              color={getConditionTypeColor(
-                                condition.condition_type
-                              )}
-                            >
-                              {condition.condition_type.replace('_', ' ')}
-                            </Badge>
-                          )}
-                        </Group>
-
-                        <Group spacing="xs">
-                          <Button
-                            size="xs"
-                            variant="filled"
-                            onClick={() =>
-                              handleEditConditionFromView(condition)
-                            }
-                            disabled={viewingFamilyMember.is_shared}
-                            title={
-                              viewingFamilyMember.is_shared
-                                ? 'Cannot edit conditions of shared family member'
-                                : 'Edit condition'
-                            }
-                            aria-label={
-                              viewingFamilyMember.is_shared
-                                ? 'Cannot edit conditions of shared family member'
-                                : 'Edit condition'
-                            }
-                            style={
-                              viewingFamilyMember.is_shared
-                                ? CARD_STYLES.disabledAction
-                                : {}
-                            }
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="xs"
-                            variant="filled"
-                            color="red"
-                            onClick={() =>
-                              handleDeleteCondition(
-                                viewingFamilyMember.id,
-                                condition.id
-                              )
-                            }
-                            disabled={viewingFamilyMember.is_shared}
-                            title={
-                              viewingFamilyMember.is_shared
-                                ? 'Cannot delete conditions of shared family member'
-                                : 'Delete condition'
-                            }
-                            aria-label={
-                              viewingFamilyMember.is_shared
-                                ? 'Cannot delete conditions of shared family member'
-                                : 'Delete condition'
-                            }
-                            style={
-                              viewingFamilyMember.is_shared
-                                ? CARD_STYLES.disabledAction
-                                : {}
-                            }
-                          >
-                            Delete
-                          </Button>
-                        </Group>
-                      </Group>
-
-                      {condition.diagnosis_age && (
-                        <Text size="sm" color="dimmed" mb="xs">
-                          Diagnosed at age {condition.diagnosis_age}
-                        </Text>
-                      )}
-
-                      {condition.notes && (
-                        <Text size="sm" color="dimmed">
-                          {condition.notes}
-                        </Text>
-                      )}
-                    </Box>
-                  ))}
-                </Stack>
-              )}
-            </Card>
-          </Stack>
-        </Modal>
-      )}
+      <FamilyHistoryViewModal
+        isOpen={!!viewingFamilyMemberId}
+        onClose={handleCloseViewModal}
+        member={viewingFamilyMember}
+        onEdit={handleEditMember}
+        onAddCondition={handleAddConditionFromView}
+        onEditCondition={handleEditConditionFromView}
+        onDeleteCondition={handleDeleteCondition}
+        onError={setError}
+      />
 
       {/* Invitation Manager Modal */}
       <InvitationManager

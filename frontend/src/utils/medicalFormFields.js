@@ -123,6 +123,17 @@ export const conditionFormFields = [
     dynamicOptions: 'severity',
   },
   {
+    name: 'medication_id',
+    type: 'select',
+    label: 'Related Medication',
+    placeholder: 'Select medication (optional)',
+    description: 'Link this condition to a specific medication',
+    gridColumn: 12,
+    searchable: true,
+    clearable: true,
+    dynamicOptions: 'medications',
+  },
+  {
     name: 'onset_date',
     type: 'date',
     label: 'Onset Date',
