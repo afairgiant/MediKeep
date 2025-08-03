@@ -316,23 +316,37 @@ class ApiService {
     return this.post(`/${apiPath}/`, entityData, { signal });
   }
 
-  updateEntity(entityType, entityId, entityData, signal) {
+  updateEntity(entityType, entityId, entityData, signal, patientId = null) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
-    const url = `/${apiPath}/${entityId}`;
+    let url = `/${apiPath}/${entityId}`;
+    
+    // Add patient_id query parameter if provided
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    
     logger.debug('api_update_entity', 'Update entity URL construction', {
       entityType,
       entityId,
       apiPath,
       url,
+      patientId,
       baseURL: this.baseURL,
       fallbackURL: this.fallbackURL,
     });
     return this.put(url, entityData, { signal });
   }
 
-  deleteEntity(entityType, entityId, signal) {
+  deleteEntity(entityType, entityId, signal, patientId = null) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
-    return this.delete(`/${apiPath}/${entityId}`, { signal });
+    let url = `/${apiPath}/${entityId}`;
+    
+    // Add patient_id query parameter if provided
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    
+    return this.delete(url, { signal });
   }
 
   getEntitiesWithFilters(entityType, filters = {}, signal) {
@@ -1486,19 +1500,21 @@ class ApiService {
       signal
     );
   }
-  updateFamilyMember(familyMemberId, familyMemberData, signal) {
+  updateFamilyMember(familyMemberId, familyMemberData, signal, patientId = null) {
     return this.updateEntity(
       ENTITY_TYPES.FAMILY_MEMBER,
       familyMemberId,
       familyMemberData,
-      signal
+      signal,
+      patientId
     );
   }
-  deleteFamilyMember(familyMemberId, signal) {
+  deleteFamilyMember(familyMemberId, signal, patientId = null) {
     return this.deleteEntity(
       ENTITY_TYPES.FAMILY_MEMBER,
       familyMemberId,
-      signal
+      signal,
+      patientId
     );
   }
 
@@ -1506,25 +1522,26 @@ class ApiService {
   getFamilyMemberConditions(familyMemberId, signal) {
     return this.get(`/family-members/${familyMemberId}/conditions`, { signal });
   }
-  createFamilyCondition(familyMemberId, conditionData, signal) {
-    return this.post(
-      `/family-members/${familyMemberId}/conditions`,
-      conditionData,
-      { signal }
-    );
+  createFamilyCondition(familyMemberId, conditionData, signal, patientId = null) {
+    let url = `/family-members/${familyMemberId}/conditions`;
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    return this.post(url, conditionData, { signal });
   }
-  updateFamilyCondition(familyMemberId, conditionId, conditionData, signal) {
-    return this.put(
-      `/family-members/${familyMemberId}/conditions/${conditionId}`,
-      conditionData,
-      { signal }
-    );
+  updateFamilyCondition(familyMemberId, conditionId, conditionData, signal, patientId = null) {
+    let url = `/family-members/${familyMemberId}/conditions/${conditionId}`;
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    return this.put(url, conditionData, { signal });
   }
-  deleteFamilyCondition(familyMemberId, conditionId, signal) {
-    return this.delete(
-      `/family-members/${familyMemberId}/conditions/${conditionId}`,
-      { signal }
-    );
+  deleteFamilyCondition(familyMemberId, conditionId, signal, patientId = null) {
+    let url = `/family-members/${familyMemberId}/conditions/${conditionId}`;
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    return this.delete(url, { signal });
   }
 
   // Search family members
