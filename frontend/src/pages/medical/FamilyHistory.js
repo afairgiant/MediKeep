@@ -503,7 +503,24 @@ const FamilyHistory = () => {
       // Find the family member to get its patient_id
       const familyMember = familyMembers.find(member => member.id === familyMemberId);
       const patientId = familyMember?.patient_id;
-      await apiService.deleteFamilyCondition(familyMemberId, conditionId, null, patientId);
+      
+      logger.debug('Deleting family condition', {
+        component: 'FamilyHistory',
+        familyMemberId,
+        conditionId,
+        patientId,
+        familyMember: familyMember ? 'found' : 'not found'
+      });
+      
+      const result = await apiService.deleteFamilyCondition(familyMemberId, conditionId, undefined, patientId);
+      
+      logger.debug('Family condition delete result', {
+        component: 'FamilyHistory',
+        result,
+        familyMemberId,
+        conditionId,
+      });
+      
       await refreshData();
     } catch (error) {
       logger.error('Failed to delete family condition', {
@@ -563,11 +580,11 @@ const FamilyHistory = () => {
           familyMemberId,
           editingCondition.id,
           conditionData,
-          null,
+          undefined,
           patientId
         );
       } else {
-        await apiService.createFamilyCondition(familyMemberId, conditionData, null, patientId);
+        await apiService.createFamilyCondition(familyMemberId, conditionData, undefined, patientId);
       }
 
       setShowConditionModal(false);
