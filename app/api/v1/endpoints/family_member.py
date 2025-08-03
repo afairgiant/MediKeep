@@ -76,10 +76,10 @@ def read_family_members(
 def get_family_members_for_dropdown(
     *,
     db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Get family members formatted for dropdown selection in forms."""
-    family_members = family_member.get_by_patient(db, patient_id=current_user_patient_id)
+    family_members = family_member.get_by_patient(db, patient_id=target_patient_id)
     return family_members
 
 
@@ -88,16 +88,16 @@ def read_family_member(
     *,
     db: Session = Depends(deps.get_db),
     family_member_id: int,
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Get family member by ID with conditions - only allows access to user's own family members."""
+    """Get family member by ID with conditions - supports patient switching."""
     family_member_obj = family_member.get_with_relations(
         db=db,
         record_id=family_member_id,
         relations=["family_conditions"],
     )
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     return family_member_obj
 
 
@@ -109,13 +109,13 @@ def update_family_member(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Update a family member."""
-    # Verify family member exists and belongs to the current user
+    """Update a family member - supports patient switching."""
+    # Verify family member exists and belongs to the accessible patient
     family_member_obj = family_member.get(db, id=family_member_id)
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     
     return handle_update_with_logging(
         db=db,
@@ -136,13 +136,13 @@ def delete_family_member(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Delete a family member."""
-    # Verify family member exists and belongs to the current user
+    """Delete a family member - supports patient switching."""
+    # Verify family member exists and belongs to the accessible patient
     family_member_obj = family_member.get(db, id=family_member_id)
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     
     return handle_delete_with_logging(
         db=db,
@@ -160,11 +160,11 @@ def search_family_members(
     *,
     db: Session = Depends(deps.get_db),
     name: str = Query(..., min_length=2),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Search family members by name."""
+    """Search family members by name - supports patient switching."""
     family_members = family_member.search_by_name(
-        db, patient_id=current_user_patient_id, name_term=name
+        db, patient_id=target_patient_id, name_term=name
     )
     return family_members
 
@@ -176,13 +176,13 @@ def get_family_member_conditions(
     *,
     family_member_id: int,
     db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Get all conditions for a specific family member."""
-    # Verify family member exists and belongs to the current user
+    """Get all conditions for a specific family member - supports patient switching."""
+    # Verify family member exists and belongs to the accessible patient
     family_member_obj = family_member.get(db, id=family_member_id)
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     
     # Get conditions
     conditions = family_condition.get_by_family_member(db, family_member_id=family_member_id)
@@ -197,13 +197,13 @@ def create_family_condition(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Create a new condition for a family member."""
-    # Verify family member exists and belongs to the current user
+    """Create a new condition for a family member - supports patient switching."""
+    # Verify family member exists and belongs to the accessible patient
     family_member_obj = family_member.get(db, id=family_member_id)
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     
     # Set family_member_id
     condition_in.family_member_id = family_member_id
@@ -228,13 +228,13 @@ def update_family_condition(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Update a family member condition."""
-    # Verify family member exists and belongs to the current user
+    """Update a family member condition - supports patient switching."""
+    # Verify family member exists and belongs to the accessible patient
     family_member_obj = family_member.get(db, id=family_member_id)
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     
     # Get the condition
     condition_obj = family_condition.get(db, id=condition_id)
@@ -267,13 +267,13 @@ def delete_family_condition(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Delete a family member condition."""
-    # Verify family member exists and belongs to the current user
+    """Delete a family member condition - supports patient switching."""
+    # Verify family member exists and belongs to the accessible patient
     family_member_obj = family_member.get(db, id=family_member_id)
     handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     
     # Get the condition
     condition_obj = family_condition.get(db, id=condition_id)
