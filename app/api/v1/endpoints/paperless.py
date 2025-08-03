@@ -659,28 +659,24 @@ async def cleanup_out_of_sync_files(
 ) -> Dict[str, Any]:
     """
     Clean up out-of-sync EntityFile records.
+    
+    This endpoint identifies and deletes EntityFile records with:
+    - sync_status of "failed" or "missing"
+    
+    Args:
+        current_user: Current authenticated user
+        db: Database session
+        
+    Returns:
+        Cleanup results with counts of cleaned items
     """
     try:
         from app.models.models import EntityFile
         
-        logger.info(f"Starting cleanup for user {current_user.id}")
-        
-        # First, let's see what sync_status values actually exist
-        all_statuses = db.query(EntityFile.sync_status).distinct().all()
-        status_list = [status[0] for status in all_statuses]
-        logger.info(f"Found sync statuses: {status_list}")
-        
-        # Find all EntityFile records and their statuses
-        all_files = db.query(EntityFile).all()
-        logger.info(f"Total EntityFile records: {len(all_files)}")
-        
-        # Count by status
-        status_counts = {}
-        for file_record in all_files:
-            status = file_record.sync_status
-            status_counts[status] = status_counts.get(status, 0) + 1
-        
-        logger.info(f"Status counts: {status_counts}")
+        logger.info(f"Starting cleanup of out-of-sync files for user {current_user.id}", extra={
+            "user_id": current_user.id,
+            "operation": "cleanup_out_of_sync_files"
+        })
         
         # Find and delete EntityFile records with missing or failed status
         failed_missing_files = db.query(EntityFile).filter(
@@ -691,27 +687,50 @@ async def cleanup_out_of_sync_files(
         
         deleted_count = 0
         for file_record in failed_missing_files:
-            logger.info(f"Deleting {file_record.sync_status} file: {file_record.id} - {file_record.file_name} (DocID: {file_record.paperless_document_id})")
+            logger.info(f"Deleting {file_record.sync_status} file: {file_record.id} - {file_record.file_name}", extra={
+                "user_id": current_user.id,
+                "file_id": file_record.id,
+                "filename": file_record.file_name,
+                "sync_status": file_record.sync_status,
+                "paperless_document_id": file_record.paperless_document_id
+            })
             db.delete(file_record)
             deleted_count += 1
         
         # Commit changes
         db.commit()
         
+        logger.info(f"Cleanup completed for user {current_user.id}: {deleted_count} files deleted", extra={
+            "user_id": current_user.id,
+            "files_deleted": deleted_count
+        })
+        
         return {
+            "files_cleaned": deleted_count,
             "files_deleted": deleted_count,
-            "total_files": len(all_files),
-            "status_counts": status_counts,
-            "all_statuses": status_list,
             "timestamp": datetime.utcnow().isoformat()
         }
         
-    except Exception as e:
-        logger.error(f"Cleanup error: {str(e)}")
+    except SQLAlchemyError as e:
         db.rollback()
+        logger.error(f"Database error during cleanup for user {current_user.id}: {str(e)}", extra={
+            "user_id": current_user.id,
+            "error": str(e)
+        })
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Cleanup failed: {str(e)}"
+            detail="A database error occurred during cleanup"
+        )
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Cleanup error for user {current_user.id}: {str(e)}", extra={
+            "user_id": current_user.id,
+            "error": str(e)
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal error occurred during cleanup"
         )
 
 
