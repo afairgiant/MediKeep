@@ -1,25 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { apiService } from '../../services/api';
+// React and routing
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+// API and utilities
 import patientApi from '../../services/api/patientApi';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
+import { formatMeasurement, convertForDisplay } from '../../utils/unitConversion';
+import { getUserFriendlyError } from '../../constants/errorMessages';
+import logger from '../../services/logger';
+
+// Hooks and contexts
 import { useCurrentPatient, usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
-import {
-  formatMeasurement,
-  convertForDisplay,
-} from '../../utils/unitConversion';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+
+// Components
 import { PageHeader } from '../../components';
-import { Button } from '@mantine/core';
-import MantinePatientForm from '../../components/medical/MantinePatientForm';
-import frontendLogger from '../../services/frontendLogger';
+import PatientFormWrapper from '../../components/medical/patient-info/PatientFormWrapper';
+
+// Mantine UI
+import {
+  Button,
+  Group,
+  Stack,
+  Text,
+  Container,
+  Alert,
+  Card,
+} from '@mantine/core';
+
+// Styles
 import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const needsRefreshAfterSubmissionRef = useRef(false);
+  const processedEditParamRef = useRef(false);
 
   // Using global state for patient and practitioners data
   const {
@@ -35,8 +54,9 @@ const PatientInfo = () => {
   // Combine loading states
   const loading = patientLoading || practitionersLoading;
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  // State management
+  const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [patientExists, setPatientExists] = useState(true);
   const [formData, setFormData] = useState({
     first_name: '',
@@ -44,61 +64,125 @@ const PatientInfo = () => {
     birth_date: '',
     gender: '',
     address: '',
+    blood_type: '',
+    height: '',
+    weight: '',
+    physician_id: '',
   });
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+
+  // Form submission hook
+  const {
+    isBlocking,
+    canSubmit,
+    statusMessage,
+    resetSubmission,
+    startSubmission,
+    completeFormSubmission,
+    completeFileUpload,
+    handleSubmissionFailure,
+  } = useFormSubmissionWithUploads({
+    entityType: 'patient',
+    onSuccess: () => {
+      setShowModal(false);
+      setEditingItem(null);
+      resetFormData();
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshPatient();
+      }
+    },
+    onError: (error) => {
+      logger.error('patient_form_error', {
+        message: 'Form submission error in Patient-Info',
+        error: error.message,
+        component: 'Patient-Info',
+      });
+    },
+    component: 'Patient-Info',
+  });
 
   // Determine if this is a new user based on patient existence
   const isNewUser = !patientExists;
 
+  // Form data reset function
+  const resetFormData = useCallback(() => {
+    setFormData({
+      first_name: '',
+      last_name: '',
+      birth_date: '',
+      gender: '',
+      address: '',
+      blood_type: '',
+      height: '',
+      weight: '',
+      physician_id: '',
+    });
+  }, []);
+
+  // Populate form data from patient
+  const populateFormData = useCallback((patient) => {
+    setFormData({
+      first_name: patient.first_name || '',
+      last_name: patient.last_name || '',
+      birth_date: patient.birth_date || '',
+      gender: patient.gender || '',
+      address: patient.address || '',
+      blood_type: patient.blood_type || '',
+      height: patient.height || '',
+      weight: patient.weight || '',
+      physician_id: patient.physician_id || '',
+    });
+  }, []);
+
+  // Form handlers
+  const handleEditPatient = useCallback(() => {
+    resetSubmission();
+    if (patientData) {
+      setEditingItem(patientData);
+      populateFormData(patientData);
+    } else {
+      setEditingItem(null);
+      resetFormData();
+    }
+    setShowModal(true);
+    setError('');
+  }, [patientData, resetSubmission, populateFormData, resetFormData]);
+
   // Check for edit mode from URL parameter
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    if (urlParams.get('edit') === 'true') {
-      setIsEditing(true);
+    const hasEditParam = urlParams.get('edit') === 'true';
+    
+    if (hasEditParam && !processedEditParamRef.current) {
+      processedEditParamRef.current = true;
+      handleEditPatient();
+      
       // Remove the edit parameter from URL to clean it up
       urlParams.delete('edit');
       const newSearch = urlParams.toString();
       navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
         replace: true,
       });
+    } else if (!hasEditParam) {
+      // Reset the ref when edit param is not present
+      processedEditParamRef.current = false;
     }
-  }, [location.search, navigate, location.pathname]);
+  }, [location.search, location.pathname, navigate, handleEditPatient]);
 
   // Initialize form data when patient data becomes available or changes
   useEffect(() => {
     if (patientData) {
       setPatientExists(true);
-      setFormData({
-        first_name: patientData.first_name || '',
-        last_name: patientData.last_name || '',
-        birth_date: patientData.birth_date || '',
-        gender: patientData.gender || '',
-        address: patientData.address || '',
-        blood_type: patientData.blood_type || '',
-        height: patientData.height || '',
-        weight: patientData.weight || '',
-        physician_id: patientData.physician_id || '',
-      });
+      populateFormData(patientData);
     } else if (
       patientError &&
       patientError.includes('Patient record not found')
     ) {
       setPatientExists(false);
-      setFormData({
-        first_name: '',
-        last_name: '',
-        birth_date: '',
-        gender: '',
-        address: '',
-        blood_type: '',
-        height: '',
-        weight: '',
-        physician_id: '',
-      });
+      resetFormData();
     }
-  }, [patientData, patientError]);
+  }, [patientData, patientError, populateFormData, resetFormData]);
 
   // Handle global error state
   useEffect(() => {
@@ -109,17 +193,14 @@ const PatientInfo = () => {
     }
   }, [patientError]);
 
+  // Form handlers
   const handleInputChange = e => {
     const { name, value } = e.target;
     let processedValue = value;
 
     // Handle physician_id - convert empty string to null or empty for Mantine
     if (name === 'physician_id') {
-      if (value === '') {
-        processedValue = '';
-      } else {
-        processedValue = value; // Keep as string for Mantine compatibility
-      }
+      processedValue = value === '' ? '' : value;
     }
 
     setFormData(prev => ({
@@ -127,50 +208,15 @@ const PatientInfo = () => {
       [name]: processedValue,
     }));
   };
-  const handleEdit = () => {
-    setIsEditing(true);
-    setError('');
-    setSuccessMessage('');
-  };
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsCreating(false);
-    if (patientData) {
-      setFormData({
-        first_name: patientData.first_name || '',
-        last_name: patientData.last_name || '',
-        birth_date: patientData.birth_date || '',
-        gender: patientData.gender || '',
-        address: patientData.address || '',
-        blood_type: patientData.blood_type || '',
-        height: patientData.height || '',
-        weight: patientData.weight || '',
-        physician_id: patientData.physician_id || '',
-      });
-    } else {
-      setFormData({
-        first_name: '',
-        last_name: '',
-        birth_date: '',
-        gender: '',
-        address: '',
-        blood_type: '',
-        height: '',
-        weight: '',
-        physician_id: '',
-      });
-    }
-    setError('');
-    setSuccessMessage('');
-  };
 
-  const handleSave = async () => {
+
+  const handleSubmit = async () => {
     try {
-      setSaving(true);
-      setError('');
-      setSuccessMessage('');
-      let updatedData;
-      // Prepare data for API - convert physician_id to number if present
+      if (!canSubmit) return;
+
+      startSubmission();
+      
+      // Prepare data for API
       const apiData = {
         ...formData,
         physician_id: formData.physician_id
@@ -178,37 +224,34 @@ const PatientInfo = () => {
           : null,
       };
 
-      if (isCreating || !patientExists) {
-        updatedData = await patientApi.createPatient(apiData);
+      const isCreating = editingItem === null || !patientExists;
+
+      if (isCreating) {
+        await patientApi.createPatient(apiData);
         setPatientExists(true);
-        setIsCreating(false);
-        setSuccessMessage('Patient information created successfully!');
+        needsRefreshAfterSubmissionRef.current = true;
       } else {
-        // Use the new patient management system like PatientSelector does
-        updatedData = await patientApi.updatePatient(patientData.id, apiData);
-        setIsEditing(false);
-        setSuccessMessage('Patient information updated successfully!');
+        await patientApi.updatePatient(patientData.id, apiData);
+        needsRefreshAfterSubmissionRef.current = true;
       }
 
-      // Invalidate caches to ensure data consistency across the app
+      // Invalidate caches
       await invalidatePatientList();
       await invalidatePatient();
       
-      // Refresh global patient data to reflect changes across the app
-      await refreshPatient();
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
+      // Complete form submission
+      const submitSuccess = completeFormSubmission(true, isCreating ? 'Patient created successfully!' : 'Patient updated successfully!');
+      
+      // For forms without file uploads, we need to manually complete the upload process
+      // to trigger the success callback and close the modal
+      if (submitSuccess) {
+        completeFileUpload(true, 0, 0);
+      }
+      
     } catch (error) {
-      frontendLogger.logError('Error saving patient data', {
-        error: error.message,
-        component: 'Patient-Info',
-      });
-      setError(
-        error.message || 'Failed to save patient information. Please try again.'
-      );
-    } finally {
-      setSaving(false);
+      const userFriendlyMessage = getUserFriendlyError(error, 'patient');
+      handleSubmissionFailure(error, userFriendlyMessage);
+      setError(userFriendlyMessage);
     }
   };
 
@@ -224,6 +267,7 @@ const PatientInfo = () => {
         return 'Not specified';
     }
   };
+
   const getPractitionerDisplay = physicianId => {
     if (!physicianId) return 'Not assigned';
 
@@ -238,157 +282,172 @@ const PatientInfo = () => {
 
   if (loading) {
     return (
-      <div className="medical-page-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading patient information...</p>
-        </div>
-      </div>
+      <Container size="xl" py="md">
+        <PageHeader title="Patient Information" icon="📋" />
+        <Stack align="center" gap="md" py="xl">
+          <Text size="lg">Loading patient information...</Text>
+        </Stack>
+      </Container>
     );
   }
 
   return (
-    <div className="medical-page-container">
-      <PageHeader title="Patient Information" icon="📋" />
+    <>
+      <Container size="xl" py="md">
+        <PageHeader title="Patient Information" icon="📋" />
 
-      <div className="medical-page-content">
-        {isNewUser && (
-          <div
-            className="welcome-message"
-            style={{
-              background: 'var(--mantine-color-blue-1)',
-              border: '1px solid var(--mantine-color-blue-6)',
-              borderRadius: '8px',
-              padding: '16px',
-              marginBottom: '20px',
-              color: 'var(--mantine-color-blue-7)',
-            }}
-          >
-            <h3 style={{ margin: '0 0 8px 0', color: 'var(--mantine-color-blue-7)' }}>
-              Welcome to Your Medical Records!
-            </h3>
-            <p style={{ margin: '0', lineHeight: '1.4' }}>
+        <Stack gap="lg">
+          {isNewUser && (
+            <Alert
+              variant="light"
+              color="blue"
+              title="Welcome to Your Medical Records!"
+            >
               Your account has been created successfully. Please complete your
               patient profile below to get started with managing your medical
               records.
-            </p>
-          </div>
-        )}
-        {error && <div className="error-message">{error}</div>}
-        {successMessage && (
-          <div className="success-message">{successMessage}</div>
-        )}
-
-        <div className="patient-card">
-          <div className="card-header">
-            <h2>Personal Information</h2>
-            {!isEditing && (
-              <Button variant="filled" size="xs" onClick={handleEdit}>
-                ✏️ Edit
-              </Button>
-            )}
-          </div>
-
-          {isEditing ? (
-            <MantinePatientForm
-              formData={formData}
-              onInputChange={handleInputChange}
-              onSave={handleSave}
-              onCancel={handleCancel}
-              practitioners={practitioners}
-              saving={saving}
-              isCreating={isCreating}
-            />
-          ) : (
-            <div className="patient-details">
-              <div className="detail-row">
-                <div className="detail-group">
-                  <label>First Name:</label>
-                  <span>{patientData?.first_name || 'Not provided'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Last Name:</label>
-                  <span>{patientData?.last_name || 'Not provided'}</span>
-                </div>
-              </div>
-              <div className="detail-row">
-                {' '}
-                <div className="detail-group">
-                  <label>Birth Date:</label>
-                  <span>
-                    {formatDate(
-                      patientData?.birth_date,
-                      DATE_FORMATS.DISPLAY_LONG
-                    )}
-                  </span>
-                </div>
-                <div className="detail-group">
-                  <label>Gender:</label>
-                  <span>{getGenderDisplay(patientData?.gender)}</span>
-                </div>
-              </div>{' '}
-              <div className="detail-group full-width">
-                <label>Address:</label>
-                <span>{patientData?.address || 'Not provided'}</span>
-              </div>
-              <div className="detail-row">
-                <div className="detail-group">
-                  <label>Blood Type:</label>
-                  <span>{patientData?.blood_type || 'Not provided'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Height:</label>
-                  <span>
-                    {patientData?.height
-                      ? formatMeasurement(
-                          convertForDisplay(
-                            patientData.height,
-                            'height',
-                            unitSystem
-                          ),
-                          'height',
-                          unitSystem
-                        )
-                      : 'Not provided'}
-                  </span>
-                </div>
-              </div>
-              <div className="detail-row">
-                {' '}
-                <div className="detail-group">
-                  <label>Weight:</label>
-                  <span>
-                    {patientData?.weight
-                      ? formatMeasurement(
-                          convertForDisplay(
-                            patientData.weight,
-                            'weight',
-                            unitSystem
-                          ),
-                          'weight',
-                          unitSystem
-                        )
-                      : 'Not provided'}
-                  </span>
-                </div>{' '}
-                <div className="detail-group">
-                  <label>Primary Care Physician:</label>
-                  <span>
-                    {getPractitionerDisplay(patientData?.physician_id)}
-                  </span>
-                </div>
-              </div>
-              {patientData?.id && (
-                <div className="detail-group">
-                  <label>Patient ID:</label>
-                  <span>{patientData.id}</span>
-                </div>
-              )}
-            </div>
+            </Alert>
           )}
-        </div>
-      </div>
-    </div>
+
+          {/* Error Messages */}
+          {error && (
+            <Alert
+              variant="light"
+              color="red"
+              title="Error"
+              withCloseButton
+              onClose={() => setError('')}
+            >
+              {error}
+            </Alert>
+          )}
+
+          <Card withBorder shadow="sm" radius="md" className="patient-card">
+            <Stack gap="md">
+              <Group justify="space-between" align="center">
+                <Text size="xl" fw={600}>Personal Information</Text>
+                <Button variant="filled" size="sm" onClick={handleEditPatient}>
+                  Edit Profile
+                </Button>
+              </Group>
+
+              {/* Patient Summary Display */}
+              {patientData ? (
+                <div className="patient-details">
+                  <div className="detail-row">
+                    <div className="detail-group">
+                      <label>First Name:</label>
+                      <span>{patientData.first_name || 'Not provided'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Last Name:</label>
+                      <span>{patientData.last_name || 'Not provided'}</span>
+                    </div>
+                  </div>
+                  <div className="detail-row">
+                    <div className="detail-group">
+                      <label>Birth Date:</label>
+                      <span>
+                        {formatDate(
+                          patientData.birth_date,
+                          DATE_FORMATS.DISPLAY_LONG
+                        )}
+                      </span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Gender:</label>
+                      <span>{getGenderDisplay(patientData.gender)}</span>
+                    </div>
+                  </div>
+                  <div className="detail-group full-width">
+                    <label>Address:</label>
+                    <span>{patientData.address || 'Not provided'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <div className="detail-group">
+                      <label>Blood Type:</label>
+                      <span>{patientData.blood_type || 'Not provided'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Height:</label>
+                      <span>
+                        {patientData.height
+                          ? formatMeasurement(
+                              convertForDisplay(
+                                patientData.height,
+                                'height',
+                                unitSystem
+                              ),
+                              'height',
+                              unitSystem
+                            )
+                          : 'Not provided'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="detail-row">
+                    <div className="detail-group">
+                      <label>Weight:</label>
+                      <span>
+                        {patientData.weight
+                          ? formatMeasurement(
+                              convertForDisplay(
+                                patientData.weight,
+                                'weight',
+                                unitSystem
+                              ),
+                              'weight',
+                              unitSystem
+                            )
+                          : 'Not provided'}
+                      </span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Primary Care Physician:</label>
+                      <span>
+                        {getPractitionerDisplay(patientData.physician_id)}
+                      </span>
+                    </div>
+                  </div>
+                  {patientData.id && (
+                    <div className="detail-group">
+                      <label>Patient ID:</label>
+                      <span>{patientData.id}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Stack align="center" gap="md" py="xl">
+                  <Text size="lg" fw={500}>No Patient Profile Found</Text>
+                  <Text ta="center" c="dimmed">
+                    Please create your patient profile to get started.
+                  </Text>
+                  <Button variant="filled" onClick={handleEditPatient}>
+                    Create Profile
+                  </Button>
+                </Stack>
+              )}
+            </Stack>
+          </Card>
+        </Stack>
+      </Container>
+
+      {/* Edit Modal */}
+      <PatientFormWrapper
+        isOpen={showModal}
+        onClose={() => !isBlocking && setShowModal(false)}
+        title={editingItem ? 'Edit Patient Information' : 'Create Patient Profile'}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        editingItem={editingItem}
+        practitioners={practitioners}
+        isLoading={isBlocking}
+        statusMessage={statusMessage}
+        isCreating={editingItem === null || !patientExists}
+        error={error}
+      />
+    </>
   );
 };
 

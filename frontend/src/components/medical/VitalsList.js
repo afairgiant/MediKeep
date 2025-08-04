@@ -65,6 +65,7 @@ const VitalsList = ({
   patientId,
   onEdit,
   onDelete,
+  onView,
   onRefresh,
   vitalsData,
   loading,
@@ -156,8 +157,14 @@ const VitalsList = ({
   };
 
   const handleViewDetails = vital => {
-    setSelectedVital(vital);
-    setShowDetailsModal(true);
+    if (onView) {
+      // Use external view handler if provided
+      onView(vital);
+    } else {
+      // Fall back to internal modal
+      setSelectedVital(vital);
+      setShowDetailsModal(true);
+    }
   };
 
   const formatDate = dateString => {

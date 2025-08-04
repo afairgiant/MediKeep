@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -12,10 +11,12 @@ import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineTreatmentForm from '../../components/medical/MantineTreatmentForm';
-import StatusBadge from '../../components/medical/StatusBadge';
+
+// Modular components
+import TreatmentCard from '../../components/medical/treatments/TreatmentCard';
+import TreatmentViewModal from '../../components/medical/treatments/TreatmentViewModal';
+import TreatmentFormWrapper from '../../components/medical/treatments/TreatmentFormWrapper';
 import {
-  Badge,
   Button,
   Card,
   Group,
@@ -26,9 +27,6 @@ import {
   Alert,
   Loader,
   Center,
-  Divider,
-  Modal,
-  Title,
 } from '@mantine/core';
 
 const Treatments = () => {
@@ -54,7 +52,6 @@ const Treatments = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'treatment',
@@ -77,11 +74,11 @@ const Treatments = () => {
   } = useMedicalData({
     entityName: 'conditionsDropdown',
     apiMethodsConfig: {
-      getAll: signal => apiService.getConditionsDropdown(false, signal), // false to get all conditions, not just active
+      getAll: signal => apiService.getConditions(signal),
       getByPatient: (patientId, signal) =>
-        apiService.getConditionsDropdown(false, signal), // Use same method for consistency
+        apiService.getPatientConditions(patientId, signal),
     },
-    requiresPatient: false, // The endpoint handles patient context automatically
+    requiresPatient: true, // Get conditions for the current patient only
   });
 
   // Get standardized configuration
@@ -242,7 +239,7 @@ const Treatments = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Helper function to get condition name from ID
+  // Helper functions moved to component files, keeping these for table formatters
   const getConditionName = conditionId => {
     if (!conditionId || !conditions || conditions.length === 0) {
       return null;
@@ -251,7 +248,6 @@ const Treatments = () => {
     return condition ? condition.diagnosis || condition.name : null;
   };
 
-  // Helper function to get practitioner information from ID
   const getPractitionerInfo = practitionerId => {
     if (
       !practitionerId ||
@@ -269,10 +265,8 @@ const Treatments = () => {
   // Handler to navigate to condition page and open view modal
   const handleConditionClick = conditionId => {
     if (conditionId) {
-      // Store the condition ID in sessionStorage so the conditions page can auto-open the modal
-      sessionStorage.setItem('openConditionId', conditionId.toString());
-      // Navigate to conditions page
-      navigate('/conditions');
+      // Navigate to conditions page with view parameter to auto-open the modal
+      navigate(`/conditions?view=${conditionId}`);
     }
   };
 
@@ -395,136 +389,22 @@ const Treatments = () => {
             <Grid>
               {filteredTreatments.map(treatment => (
                 <Grid.Col key={treatment.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <Card
-                    withBorder
-                    shadow="sm"
-                    radius="md"
-                    h="100%"
-                    style={{ display: 'flex', flexDirection: 'column' }}
-                  >
-                    <Stack gap="sm" style={{ flex: 1 }}>
-                      <Group justify="space-between" align="flex-start">
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Text fw={600} size="lg">
-                            {treatment.treatment_name}
-                          </Text>
-                          <Group gap="xs">
-                            {treatment.treatment_type && (
-                              <Badge variant="light" color="blue" size="md">
-                                {treatment.treatment_type}
-                              </Badge>
-                            )}
-                            {treatment.condition_id && (
-                              <Badge
-                                variant="light"
-                                color="teal"
-                                size="md"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() =>
-                                  handleConditionClick(treatment.condition_id)
-                                }
-                              >
-                                {treatment.condition?.diagnosis ||
-                                  getConditionName(treatment.condition_id) ||
-                                  `Condition #${treatment.condition_id}`}
-                              </Badge>
-                            )}
-                          </Group>
-                        </Stack>
-                        <StatusBadge status={treatment.status} />
-                      </Group>
-
-                      <Stack gap="xs">
-                        {treatment.start_date && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Start Date:
-                            </Text>
-                            <Text size="sm">
-                              {formatDate(treatment.start_date)}
-                            </Text>
-                          </Group>
-                        )}
-                        {treatment.end_date && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              End Date:
-                            </Text>
-                            <Text size="sm">
-                              {formatDate(treatment.end_date)}
-                            </Text>
-                          </Group>
-                        )}
-                        {treatment.dosage && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Amount:
-                            </Text>
-                            <Text size="sm">{treatment.dosage}</Text>
-                          </Group>
-                        )}
-                        {treatment.frequency && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Frequency:
-                            </Text>
-                            <Text size="sm">{treatment.frequency}</Text>
-                          </Group>
-                        )}
-                        {treatment.description && (
-                          <Group align="flex-start">
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Description:
-                            </Text>
-                            <Text size="sm" style={{ flex: 1 }}>
-                              {treatment.description}
-                            </Text>
-                          </Group>
-                        )}
-                      </Stack>
-
-                      {treatment.notes && (
-                        <Stack gap="xs">
-                          <Divider />
-                          <Stack gap="xs">
-                            <Text size="sm" fw={500} c="dimmed">
-                              Notes
-                            </Text>
-                            <Text size="sm">{treatment.notes}</Text>
-                          </Stack>
-                        </Stack>
-                      )}
-                    </Stack>
-
-                    {/* Buttons always at bottom */}
-                    <Stack gap={0} mt="auto">
-                      <Divider />
-                      <Group justify="flex-end" gap="xs" pt="sm">
-                        <Button
-                          variant="filled"
-                          size="xs"
-                          onClick={() => handleViewTreatment(treatment)}
-                        >
-                          View
-                        </Button>
-                        <Button
-                          variant="filled"
-                          size="xs"
-                          onClick={() => handleEditTreatment(treatment)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="filled"
-                          color="red"
-                          size="xs"
-                          onClick={() => handleDeleteTreatment(treatment.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </Card>
+                  <TreatmentCard
+                    treatment={treatment}
+                    conditions={conditions}
+                    onEdit={handleEditTreatment}
+                    onDelete={handleDeleteTreatment}
+                    onView={handleViewTreatment}
+                    onConditionClick={handleConditionClick}
+                    navigate={navigate}
+                    onError={(error) => {
+                      logger.error('TreatmentCard error', {
+                        treatmentId: treatment.id,
+                        error: error.message,
+                        page: 'Treatments',
+                      });
+                    }}
+                  />
                 </Grid.Col>
               ))}
             </Grid>
@@ -588,309 +468,31 @@ const Treatments = () => {
         </Stack>
       </Container>
 
-      {/* Treatment Form Modal */}
-      <MantineTreatmentForm
+      <TreatmentFormWrapper
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
+        editingTreatment={editingTreatment}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
-        editingTreatment={editingTreatment}
         conditionsOptions={conditions}
         conditionsLoading={conditionsLoading}
         practitionersOptions={practitioners}
         practitionersLoading={false}
+        isLoading={false}
       />
 
-      {/* Treatment View Modal */}
-      <Modal
-        opened={showViewModal}
+      <TreatmentViewModal
+        isOpen={showViewModal}
         onClose={handleCloseViewModal}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              Treatment Details
-            </Text>
-            {viewingTreatment && (
-              <StatusBadge status={viewingTreatment.status} />
-            )}
-          </Group>
-        }
-        size="lg"
-        centered
-      >
-        {viewingTreatment && (
-          <Stack gap="md">
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Title order={3}>{viewingTreatment.treatment_name}</Title>
-                    <Group gap="xs">
-                      {viewingTreatment.treatment_type && (
-                        <Badge variant="light" color="blue" size="lg">
-                          {viewingTreatment.treatment_type}
-                        </Badge>
-                      )}
-                      {viewingTreatment.condition_id && (
-                        <Badge
-                          variant="light"
-                          color="teal"
-                          size="lg"
-                          style={{ cursor: 'pointer' }}
-                          onClick={() =>
-                            handleConditionClick(viewingTreatment.condition_id)
-                          }
-                        >
-                          Related to:{' '}
-                          {viewingTreatment.condition?.diagnosis ||
-                            getConditionName(viewingTreatment.condition_id) ||
-                            `Condition #${viewingTreatment.condition_id}`}
-                        </Badge>
-                      )}
-                    </Group>
-                  </Stack>
-                </Group>
-
-                <Stack gap="xs">
-                  <Text fw={500} c="dimmed" size="sm">
-                    Description
-                  </Text>
-                  <Text c={viewingTreatment.description ? 'inherit' : 'dimmed'}>
-                    {viewingTreatment.description || 'Not specified'}
-                  </Text>
-                </Stack>
-              </Stack>
-            </Card>
-
-            <Grid>
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      SCHEDULE
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Start:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingTreatment.start_date ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingTreatment.start_date
-                          ? formatDate(viewingTreatment.start_date)
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        End:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingTreatment.end_date ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingTreatment.end_date
-                          ? formatDate(viewingTreatment.end_date)
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      AMOUNT & FREQUENCY
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Amount:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingTreatment.dosage ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingTreatment.dosage || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Frequency:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingTreatment.frequency ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingTreatment.frequency || 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      PRACTITIONER
-                    </Text>
-                    <Divider />
-                    {viewingTreatment.practitioner_id ? (
-                      <Stack gap="xs">
-                        <Group>
-                          <Text size="sm" fw={500} w={80}>
-                            Doctor:
-                          </Text>
-                          <Text size="sm" fw={600}>
-                            {viewingTreatment.practitioner?.name ||
-                              getPractitionerInfo(
-                                viewingTreatment.practitioner_id
-                              )?.name ||
-                              `Practitioner #${viewingTreatment.practitioner_id}`}
-                          </Text>
-                        </Group>
-                        {(viewingTreatment.practitioner?.practice ||
-                          getPractitionerInfo(viewingTreatment.practitioner_id)
-                            ?.practice) && (
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              Practice:
-                            </Text>
-                            <Text size="sm">
-                              {viewingTreatment.practitioner?.practice ||
-                                getPractitionerInfo(
-                                  viewingTreatment.practitioner_id
-                                )?.practice}
-                            </Text>
-                          </Group>
-                        )}
-                        {(viewingTreatment.practitioner?.specialty ||
-                          getPractitionerInfo(viewingTreatment.practitioner_id)
-                            ?.specialty) && (
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              Specialty:
-                            </Text>
-                            <Badge variant="light" color="green" size="sm">
-                              {viewingTreatment.practitioner?.specialty ||
-                                getPractitionerInfo(
-                                  viewingTreatment.practitioner_id
-                                )?.specialty}
-                            </Badge>
-                          </Group>
-                        )}
-                      </Stack>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        No practitioner assigned
-                      </Text>
-                    )}
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      RELATED CONDITION
-                    </Text>
-                    <Divider />
-                    {viewingTreatment.condition_id ? (
-                      <Stack gap="xs">
-                        <Group>
-                          <Text size="sm" fw={500} w={80}>
-                            Diagnosis:
-                          </Text>
-                          <Text
-                            size="sm"
-                            fw={600}
-                            style={{
-                              cursor: 'pointer',
-                              color: 'var(--mantine-color-blue-6)',
-                            }}
-                            onClick={() =>
-                              handleConditionClick(
-                                viewingTreatment.condition_id
-                              )
-                            }
-                          >
-                            {viewingTreatment.condition?.diagnosis ||
-                              getConditionName(viewingTreatment.condition_id) ||
-                              `Condition #${viewingTreatment.condition_id}`}
-                          </Text>
-                        </Group>
-                        {viewingTreatment.condition?.severity && (
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              Severity:
-                            </Text>
-                            <Badge variant="light" color="orange" size="sm">
-                              {viewingTreatment.condition.severity}
-                            </Badge>
-                          </Group>
-                        )}
-                        {viewingTreatment.condition?.status && (
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              Status:
-                            </Text>
-                            <Badge variant="light" color="blue" size="sm">
-                              {viewingTreatment.condition.status}
-                            </Badge>
-                          </Group>
-                        )}
-                      </Stack>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        No condition linked
-                      </Text>
-                    )}
-                  </Stack>
-                </Card>
-              </Grid.Col>
-            </Grid>
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  NOTES
-                </Text>
-                <Divider />
-                <Text
-                  size="sm"
-                  c={viewingTreatment.notes ? 'inherit' : 'dimmed'}
-                >
-                  {viewingTreatment.notes || 'No notes available'}
-                </Text>
-              </Stack>
-            </Card>
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                variant="filled"
-                size="xs"
-                onClick={() => {
-                  handleCloseViewModal();
-                  handleEditTreatment(viewingTreatment);
-                }}
-              >
-                Edit Treatment
-              </Button>
-              <Button variant="filled" onClick={handleCloseViewModal}>
-                Close
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
+        treatment={viewingTreatment}
+        onEdit={handleEditTreatment}
+        conditions={conditions}
+        practitioners={practitioners}
+        onConditionClick={handleConditionClick}
+        navigate={navigate}
+      />
     </>
   );
 };

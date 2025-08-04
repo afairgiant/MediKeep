@@ -1393,7 +1393,7 @@ class ApiService {
 
   // Condition - Medication Relationship methods
   getConditionMedications(conditionId, signal) {
-    return this.get(`/conditions/${conditionId}/medications`, { signal });
+    return this.get(`/conditions/condition-medications/${conditionId}`, { signal });
   }
   createConditionMedication(conditionId, medicationData, signal) {
     return this.post(`/conditions/${conditionId}/medications`, medicationData, {
