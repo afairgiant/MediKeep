@@ -8,6 +8,10 @@ from app.crud.base import CRUDBase
 from app.models.models import Vitals
 from app.schemas.vitals import VitalsCreate, VitalsUpdate
 
+# BMI Calculation Constants
+# BMI = (weight_lbs / height_inches²) × 703 for imperial units
+# BMI = weight_kg / height_meters² for metric units (no conversion factor needed)
+BMI_IMPERIAL_CONVERSION_FACTOR = 703  # Conversion factor when using pounds and inches
 
 class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     """
@@ -240,7 +244,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         if weight_lbs <= 0 or height_inches <= 0:
             raise ValueError("Weight and height must be positive values")
 
-        bmi = (weight_lbs / (height_inches**2)) * 703
+        bmi = (weight_lbs / (height_inches**2)) * BMI_IMPERIAL_CONVERSION_FACTOR
         return round(bmi, 1)
 
     def create_with_bmi(self, db: Session, *, obj_in: VitalsCreate) -> Vitals:
