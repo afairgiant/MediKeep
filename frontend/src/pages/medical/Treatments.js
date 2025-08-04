@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -8,6 +8,7 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
+import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -53,6 +54,7 @@ const Treatments = () => {
     deleteItem,
     refreshData,
     clearError,
+    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'treatment',
@@ -67,7 +69,7 @@ const Treatments = () => {
     requiresPatient: true,
   });
 
-  // Conditions data for dropdown
+  // Conditions data for dropdown - following DRY principles with existing pattern
   const {
     items: conditions,
     loading: conditionsLoading,
@@ -77,7 +79,7 @@ const Treatments = () => {
     apiMethodsConfig: {
       getAll: signal => apiService.getConditionsDropdown(false, signal), // false to get all conditions, not just active
       getByPatient: (patientId, signal) =>
-        apiService.getPatientConditions(patientId, signal), // Use patient-specific method when patient is selected
+        apiService.getConditionsDropdown(false, signal), // Use same method for consistency
     },
     requiresPatient: false, // The endpoint handles patient context automatically
   });
@@ -551,7 +553,7 @@ const Treatments = () => {
                   getEntityFormatters('treatments').treatment_name,
                 treatment_type:
                   getEntityFormatters('treatments').treatment_type,
-                practitioner: (_value, row) => {
+                practitioner: (value, row) => {
                   if (row.practitioner_id) {
                     const practitionerInfo = getPractitionerInfo(
                       row.practitioner_id
@@ -564,7 +566,7 @@ const Treatments = () => {
                   }
                   return 'No practitioner';
                 },
-                condition: (_value, row) => {
+                condition: (value, row) => {
                   if (row.condition_id) {
                     return (
                       row.condition?.diagnosis ||
