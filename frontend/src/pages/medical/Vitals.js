@@ -205,7 +205,7 @@ const Vitals = () => {
     const viewId = searchParams.get('view');
 
     if (viewId && filteredVitals && filteredVitals.length > 0 && !vitalsLoading) {
-      const vital = filteredVitals.find(v => v.id.toString() === viewId);
+      const vital = filteredVitals.find(v => String(v.id) === String(viewId));
       if (vital && !showViewModal) {
         setViewingVital(vital);
         setShowViewModal(true);

@@ -35,6 +35,9 @@ import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
 
+// BMI conversion factor for imperial units (pounds and inches)
+const BMI_IMPERIAL_CONVERSION_FACTOR = 703;
+
 const VitalViewModal = ({
   isOpen,
   onClose,
@@ -60,8 +63,8 @@ const VitalViewModal = ({
 
   const getBMIDisplay = (weight, height) => {
     if (!weight || !height) return 'N/A';
-    // Simple BMI calculation: weight(lbs) / (height(inches))^2 * 703
-    const bmi = (weight / (height * height)) * 703;
+    // BMI calculation using imperial units: weight(lbs) / (height(inches))^2 * 703
+    const bmi = (weight / (height * height)) * BMI_IMPERIAL_CONVERSION_FACTOR;
     return bmi ? bmi.toFixed(1) : 'N/A';
   };
 

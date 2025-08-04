@@ -66,7 +66,7 @@ const Treatments = () => {
     requiresPatient: true,
   });
 
-  // Conditions data for dropdown - get patient-specific conditions
+  // Conditions data for dropdown - use dedicated dropdown endpoint
   const {
     items: conditions,
     loading: conditionsLoading,
@@ -74,9 +74,9 @@ const Treatments = () => {
   } = useMedicalData({
     entityName: 'conditionsDropdown',
     apiMethodsConfig: {
-      getAll: signal => apiService.getConditions(signal),
+      getAll: signal => apiService.getConditionsDropdown(true, signal),
       getByPatient: (patientId, signal) =>
-        apiService.getPatientConditions(patientId, signal),
+        apiService.getConditionsDropdown(true, signal),
     },
     requiresPatient: true, // Get conditions for the current patient only
   });
