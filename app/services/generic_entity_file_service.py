@@ -1071,24 +1071,33 @@ class GenericEntityFileService:
             return False
 
         try:
-            # Create paperless service
-            paperless_service = create_paperless_service_with_username_password(
+            logger.info(f"🔍 DELETE DEBUG - Deleting document {file_record.paperless_document_id} for user {current_user_id}")
+            
+            # Create paperless service using token auth (supports 2FA) - same as other operations
+            from app.services.paperless_service import create_paperless_service
+            paperless_service = create_paperless_service(
                 user_prefs.paperless_url,
-                user_prefs.paperless_username_encrypted,
-                user_prefs.paperless_password_encrypted,
-                user_id,
+                encrypted_token=user_prefs.paperless_api_token_encrypted,
+                encrypted_username=user_prefs.paperless_username_encrypted,
+                encrypted_password=user_prefs.paperless_password_encrypted,
+                user_id=current_user_id
             )
+            
+            logger.info(f"🔍 DELETE DEBUG - Paperless service created, starting deletion")
 
             async with paperless_service:
                 # Delete from paperless
+                logger.info(f"🔍 DELETE DEBUG - Calling delete_document for {file_record.paperless_document_id}")
                 await paperless_service.delete_document(
                     file_record.paperless_document_id
                 )
+                logger.info(f"🔍 DELETE DEBUG - Delete call completed, verifying deletion")
 
                 # Verify deletion by checking if document still exists
                 still_exists = await paperless_service.check_document_exists(
                     file_record.paperless_document_id
                 )
+                logger.info(f"🔍 DELETE DEBUG - Document still exists: {still_exists}")
 
                 if still_exists:
                     logger.error(
@@ -1469,6 +1478,13 @@ class GenericEntityFileService:
                         # Check if document exists in Paperless
                         exists = await paperless_service.check_document_exists(document_id)
                         logger.info(f"🔍 SYNC CHECK - Document {document_id} exists: {exists}")
+                        
+                        # Add detailed logging when marking documents as missing
+                        if not exists:
+                            logger.warning(f"🚨 SYNC CHECK - Document {document_id} (file: {file_record.file_name}, ID: {file_record.id}) will be marked as MISSING. "
+                                         f"This could be due to: 1) Document deleted from Paperless, 2) Authentication/permission issues, 3) Invalid document ID. "
+                                         f"Current sync_status: {file_record.sync_status}")
+                        
                         sync_status[file_record.id] = exists
                         
                         # Update sync status in database based on result

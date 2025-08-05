@@ -909,25 +909,46 @@ async def get_paperless_task_status(
                                 
                                 # Extract document ID from the task result
                                 # Paperless returns document ID in 'id' field for the created document
+                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - Full task result: {task}")
+                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('id'): {task.get('id')}")
+                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('related_document'): {task.get('related_document')}")
+                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('result'): {task.get('result')}")
+                                
                                 document_id = task.get('id')
+                                extraction_method = "task.id"
                                 
                                 # Fallback to other possible locations if not found
                                 if not document_id:
                                     document_id = task.get('related_document')
+                                    extraction_method = "task.related_document"
                                     if not document_id:
                                         if isinstance(task.get('result'), dict):
                                             document_id = task.get('result', {}).get('document_id')
+                                            extraction_method = "task.result.document_id"
                                         elif isinstance(task.get('result'), str):
                                             # Try to extract from result string like "Success. New document id 2744 created"
                                             match = re.search(r'document id (\d+)', task.get('result', ''))
                                             if match:
                                                 document_id = match.group(1)
+                                                extraction_method = "regex_from_result_string"
                                 
-                                logger.error(f"🔍 EXTRACTED DOCUMENT ID: {document_id} (type: {type(document_id)})", extra={
+                                logger.error(f"🔍 EXTRACTED DOCUMENT ID: {document_id} (type: {type(document_id)}) via {extraction_method}", extra={
                                     "user_id": current_user.id,
                                     "task_uuid": task_uuid,
-                                    "extracted_document_id": document_id
+                                    "extracted_document_id": document_id,
+                                    "extraction_method": extraction_method,
+                                    "full_task_result": task
                                 })
+                                
+                                # VALIDATE: Check if extracted document ID actually exists in Paperless
+                                if document_id:
+                                    try:
+                                        exists = await paperless_service.check_document_exists(document_id)
+                                        logger.error(f"🔍 VALIDATION - Document {document_id} exists in Paperless: {exists}")
+                                        if not exists:
+                                            logger.error(f"🚨 BUG DETECTED - Extracted document ID {document_id} does not exist in Paperless! Task result may be wrong.")
+                                    except Exception as e:
+                                        logger.error(f"🔍 VALIDATION - Failed to check document existence: {e}")
                                 
                                 # Update database record with successful completion
                                 _update_entity_file_from_task_result(db, task_uuid, {

@@ -962,47 +962,39 @@ class PaperlessServiceToken(PaperlessServiceBase):
                         "Authentication failed during document check"
                     )
                 elif response.status == 403:
-                    logger.warning(
-                        f"Access denied for document {numeric_id} - may not exist or user lacks permission",
-                        extra={
-                            "user_id": self.user_id,
-                            "document_id": numeric_id,
-                        },
-                    )
-                    return False
-                elif response.status == 200:
-                    # Additional validation: check response content
+                    # Try to get more details about the 403 error
                     try:
-                        doc_data = await response.json()
-                        if doc_data and doc_data.get('id') == numeric_id:
-                            logger.debug(
-                                f"Document {numeric_id} exists and is accessible in paperless",
-                                extra={
-                                    "user_id": self.user_id,
-                                    "document_id": numeric_id,
-                                    "title": doc_data.get('title', 'Unknown'),
-                                },
-                            )
-                            return True
-                        else:
-                            logger.warning(
-                                f"Document {numeric_id} returned invalid data",
-                                extra={
-                                    "user_id": self.user_id,
-                                    "document_id": numeric_id,
-                                },
-                            )
-                            return False
-                    except Exception as json_error:
+                        error_data = await response.json()
+                        detail = error_data.get("detail", "No detail provided")
                         logger.warning(
-                            f"Failed to parse document {numeric_id} response: {str(json_error)}",
+                            f"🚨 403 FORBIDDEN - Document {numeric_id} access denied: {detail}. "
+                            f"This suggests the document exists but auth/permissions are insufficient",
+                            extra={
+                                "user_id": self.user_id,
+                                "document_id": numeric_id,
+                                "error_detail": detail,
+                            },
+                        )
+                    except Exception:
+                        logger.warning(
+                            f"🚨 403 FORBIDDEN - Document {numeric_id} access denied (could not parse error response). "
+                            f"This suggests the document exists but auth/permissions are insufficient",
                             extra={
                                 "user_id": self.user_id,
                                 "document_id": numeric_id,
                             },
                         )
-                        # If we can't parse the response but got 200, assume it exists
-                        return True
+                    return False
+                elif response.status == 200:
+                    # HTTP 200 means document exists - that's all we need to check
+                    logger.debug(
+                        f"Document {numeric_id} exists in paperless (200 OK)",
+                        extra={
+                            "user_id": self.user_id,
+                            "document_id": numeric_id,
+                        },
+                    )
+                    return True
                 else:
                     logger.warning(
                         f"Unexpected status code when checking document existence: {response.status}",
@@ -1710,47 +1702,39 @@ class PaperlessService(PaperlessServiceBase):
                         "Authentication failed during document check"
                     )
                 elif response.status == 403:
-                    logger.warning(
-                        f"Access denied for document {numeric_id} - may not exist or user lacks permission",
-                        extra={
-                            "user_id": self.user_id,
-                            "document_id": numeric_id,
-                        },
-                    )
-                    return False
-                elif response.status == 200:
-                    # Additional validation: check response content
+                    # Try to get more details about the 403 error
                     try:
-                        doc_data = await response.json()
-                        if doc_data and doc_data.get('id') == numeric_id:
-                            logger.debug(
-                                f"Document {numeric_id} exists and is accessible in paperless",
-                                extra={
-                                    "user_id": self.user_id,
-                                    "document_id": numeric_id,
-                                    "title": doc_data.get('title', 'Unknown'),
-                                },
-                            )
-                            return True
-                        else:
-                            logger.warning(
-                                f"Document {numeric_id} returned invalid data",
-                                extra={
-                                    "user_id": self.user_id,
-                                    "document_id": numeric_id,
-                                },
-                            )
-                            return False
-                    except Exception as json_error:
+                        error_data = await response.json()
+                        detail = error_data.get("detail", "No detail provided")
                         logger.warning(
-                            f"Failed to parse document {numeric_id} response: {str(json_error)}",
+                            f"🚨 403 FORBIDDEN - Document {numeric_id} access denied: {detail}. "
+                            f"This suggests the document exists but auth/permissions are insufficient",
+                            extra={
+                                "user_id": self.user_id,
+                                "document_id": numeric_id,
+                                "error_detail": detail,
+                            },
+                        )
+                    except Exception:
+                        logger.warning(
+                            f"🚨 403 FORBIDDEN - Document {numeric_id} access denied (could not parse error response). "
+                            f"This suggests the document exists but auth/permissions are insufficient",
                             extra={
                                 "user_id": self.user_id,
                                 "document_id": numeric_id,
                             },
                         )
-                        # If we can't parse the response but got 200, assume it exists
-                        return True
+                    return False
+                elif response.status == 200:
+                    # HTTP 200 means document exists - that's all we need to check
+                    logger.debug(
+                        f"Document {numeric_id} exists in paperless (200 OK)",
+                        extra={
+                            "user_id": self.user_id,
+                            "document_id": numeric_id,
+                        },
+                    )
+                    return True
                 else:
                     logger.warning(
                         f"Unexpected status code when checking document existence: {response.status}",
