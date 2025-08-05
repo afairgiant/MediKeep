@@ -172,20 +172,19 @@ class PaperlessServiceBase(ABC):
             if not self.session:
                 await self._create_session()
 
-            # Debug logging - show what we're sending
-            headers_to_log = dict(self.session.headers)
-            if "Authorization" in headers_to_log:
-                auth_header = headers_to_log["Authorization"]
-                if auth_header.startswith("Token "):
-                    token = auth_header[6:]  # Remove "Token " prefix
-                    headers_to_log["Authorization"] = f"Token {token[:8]}...{token[-4:]}" if len(token) > 12 else f"Token {token}"
+            # Safe debug logging - no credential exposure
+            headers_to_log = {k: v for k, v in self.session.headers.items() if k.lower() != 'authorization'}
+            if any(k.lower() == 'authorization' for k in self.session.headers.keys()):
+                headers_to_log['Authorization'] = '[REDACTED]'
             
-            # Enhanced logging - show EXACT request details
-            logger.error(f"🔍 PAPERLESS REQUEST DEBUG - Method: {method}")
-            logger.error(f"🔍 PAPERLESS REQUEST DEBUG - Full URL: {full_url}")
-            logger.error(f"🔍 PAPERLESS REQUEST DEBUG - Session Headers: {dict(self.session.headers)}")
-            logger.error(f"🔍 PAPERLESS REQUEST DEBUG - Request kwargs: {kwargs}")
-            logger.error(f"🔍 PAPERLESS REQUEST DEBUG - User ID: {self.user_id}")
+            # Safe debug logging - no sensitive data
+            logger.debug(f"Paperless request - Method: {method}")
+            logger.debug(f"Paperless request - URL: {full_url}")
+            # Only log safe headers, excluding authorization
+            safe_headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'authorization'}
+            safe_headers['authorization'] = '[REDACTED]' if 'authorization' in [k.lower() for k in self.session.headers.keys()] else 'None'
+            logger.debug(f"Paperless request - Headers: {safe_headers}")
+            logger.debug(f"Paperless request - User ID: {self.user_id}")
             
             logger.info(
                 f"Making Paperless HTTP request",
@@ -200,15 +199,15 @@ class PaperlessServiceBase(ABC):
             )
 
             async with self.session.request(method, full_url, **kwargs) as response:
-                # Enhanced response logging
+                # Debug response logging
                 response_text = ""
                 try:
                     response_text = await response.text()
-                    logger.error(f"🔍 PAPERLESS RESPONSE DEBUG - Status: {response.status}")
-                    logger.error(f"🔍 PAPERLESS RESPONSE DEBUG - Headers: {dict(response.headers)}")
-                    logger.error(f"🔍 PAPERLESS RESPONSE DEBUG - Body: {response_text[:500]}...")
+                    logger.debug(f"Paperless response - Status: {response.status}")
+                    logger.debug(f"Paperless response - Headers: {dict(response.headers)}")
+                    logger.debug(f"Paperless response - Body: {response_text[:500]}...")
                 except Exception as read_error:
-                    logger.error(f"🔍 PAPERLESS RESPONSE DEBUG - Could not read response: {read_error}")
+                    logger.debug(f"Could not read response: {read_error}")
                 
                 # Validate response headers
                 self._validate_response_headers(response)
@@ -228,7 +227,7 @@ class PaperlessServiceBase(ABC):
                 yield response
 
         except aiohttp.ClientError as e:
-            logger.error(f"🔍 PAPERLESS ERROR DEBUG - ClientError: {type(e).__name__}: {str(e)}")
+            logger.debug(f"Paperless ClientError: {type(e).__name__}: {str(e)}")
             logger.error(
                 f"Paperless API request failed",
                 extra={
@@ -241,9 +240,9 @@ class PaperlessServiceBase(ABC):
             )
             raise PaperlessConnectionError(f"Request failed: {str(e)}")
         except Exception as e:
-            logger.error(f"🔍 PAPERLESS ERROR DEBUG - Unexpected Exception: {type(e).__name__}: {str(e)}")
+            logger.debug(f"Paperless unexpected error: {type(e).__name__}: {str(e)}")
             import traceback
-            logger.error(f"🔍 PAPERLESS ERROR DEBUG - Traceback: {traceback.format_exc()}")
+            logger.debug(f"Paperless error traceback: {traceback.format_exc()}")
             raise
 
     def _is_safe_endpoint(self, endpoint: str) -> bool:
@@ -403,17 +402,16 @@ class PaperlessServiceToken(PaperlessServiceBase):
             user_id: User ID for logging and context
         """
         super().__init__(base_url, user_id)
-        logger.error(f"🔍 TOKEN SERVICE DEBUG - Initializing with token: '{api_token[:10] if api_token else None}...'")
-        logger.error(f"🔍 TOKEN SERVICE DEBUG - Token length: {len(api_token) if api_token else 0}")
+        logger.debug(f"Initializing token service - Token provided: {bool(api_token)}")
         self.api_token = api_token
 
     async def _create_session(self):
         """Create HTTP session with token authentication."""
         # Add token to headers
         auth_headers = self.headers.copy()
-        logger.error(f"🔍 SESSION DEBUG - About to set Authorization header with token: '{self.api_token[:10] if self.api_token else None}...'")
+        logger.debug("Setting Authorization header with token")
         auth_headers["Authorization"] = f"Token {self.api_token}"
-        logger.error(f"🔍 SESSION DEBUG - Authorization header set to: '{auth_headers['Authorization'][:20]}...'")
+        logger.debug("Authorization header set successfully")
         logger.info("Creating Paperless session with token auth")
 
         # Debug logging to verify headers
@@ -422,7 +420,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
             extra={
                 "user_id": self.user_id,
                 "base_url": self.base_url,
-                "auth_header": f"Token {self.api_token[:8]}...{self.api_token[-4:]}" if len(self.api_token) > 12 else f"Token {self.api_token}",
+                "auth_type": "token",
                 "headers": {k: v for k, v in auth_headers.items() if k != "Authorization"}
             }
         )
@@ -2048,9 +2046,9 @@ def create_paperless_service(
         # Priority 1: Token authentication (supports 2FA)
         if encrypted_token:
             try:
-                logger.error(f"🔍 FACTORY DEBUG - Encrypted token received: '{encrypted_token[:50]}...'")
+                logger.debug("Encrypted token received, attempting decryption")
                 api_token = credential_encryption.decrypt_token(encrypted_token)
-                logger.error(f"🔍 FACTORY DEBUG - Decrypted token: '{api_token[:10] if api_token else None}...'")
+                logger.debug(f"Token decryption successful: {bool(api_token)}")
                 if api_token:
                     logger.info(f"Creating paperless service with token auth for user {user_id}")
                     return PaperlessServiceToken(paperless_url, api_token, user_id)

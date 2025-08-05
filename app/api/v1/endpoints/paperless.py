@@ -28,6 +28,15 @@ from app.services.paperless_service import (
     PaperlessUploadError, 
     PaperlessError
 )
+# New simplified architecture
+from app.services.paperless_client import (
+    create_paperless_client,
+    PaperlessClient,
+    PaperlessClientError,
+    PaperlessConnectionError as NewPaperlessConnectionError,
+    PaperlessUploadError as NewPaperlessUploadError
+)
+from app.services.paperless_auth import create_paperless_auth
 from app.crud.user_preferences import user_preferences
 from app.services.credential_encryption import credential_encryption, SecurityError
 from app.core.logging_config import get_logger
@@ -221,13 +230,11 @@ async def test_paperless_connection(
             logger.info(f"Using saved credentials: token={'yes' if has_token else 'no'}, basic={'yes' if has_basic else 'no'}")
         else:
             # Use provided credentials, encrypt them
-            logger.error(f"🔍 API DEBUG - Using provided credentials for test")
-            logger.error(f"🔍 API DEBUG - Raw token from request: '{connection_data.paperless_api_token}'")
-            logger.error(f"🔍 API DEBUG - Raw token length: {len(connection_data.paperless_api_token) if connection_data.paperless_api_token else 0}")
-            logger.error(f"🔍 API DEBUG - Raw token type: {type(connection_data.paperless_api_token)}")
+            logger.debug("Using provided credentials for test")
+            logger.debug(f"Token provided: {bool(connection_data.paperless_api_token)}")
             if connection_data.paperless_api_token:
                 encrypted_token = credential_encryption.encrypt_token(connection_data.paperless_api_token)
-                logger.error(f"🔍 API DEBUG - Token encrypted successfully, length: {len(encrypted_token) if encrypted_token else 0}")
+                logger.debug("Token encrypted successfully")
                 logger.info("Token provided and encrypted")
             
             if connection_data.paperless_username and connection_data.paperless_password:
@@ -236,12 +243,12 @@ async def test_paperless_connection(
                 logger.info("Username/password provided and encrypted")
         
         # Create paperless service for testing using smart factory
-        logger.error(f"🔍 API DEBUG - Creating paperless service with smart factory...")
-        logger.error(f"🔍 API DEBUG - URL: {connection_data.paperless_url}")
-        logger.error(f"🔍 API DEBUG - Has encrypted_token: {bool(encrypted_token)}")
-        logger.error(f"🔍 API DEBUG - Has encrypted_username: {bool(encrypted_username)}")
-        logger.error(f"🔍 API DEBUG - Has encrypted_password: {bool(encrypted_password)}")
-        logger.error(f"🔍 API DEBUG - User ID: {current_user.id}")
+        logger.debug("Creating paperless service with smart factory")
+        logger.debug(f"URL: {connection_data.paperless_url}")
+        logger.debug(f"Has encrypted_token: {bool(encrypted_token)}")
+        logger.debug(f"Has encrypted_username: {bool(encrypted_username)}")
+        logger.debug(f"Has encrypted_password: {bool(encrypted_password)}")
+        logger.debug(f"User ID: {current_user.id}")
         
         async with create_paperless_service(
             connection_data.paperless_url,
@@ -253,14 +260,14 @@ async def test_paperless_connection(
             logger.info("Paperless service created successfully")
             
             # Test the connection
-            logger.error(f"🔍 API DEBUG - About to call test_connection()")
+            logger.debug("About to call test_connection()")
             result = await paperless_service.test_connection()
-            logger.error(f"🔍 API DEBUG - test_connection() completed with result: {result}")
+            logger.debug(f"test_connection() completed with result: {result}")
             
             # Add authentication method to result
             result["auth_method"] = paperless_service.get_auth_type()
             result["used_saved_credentials"] = use_saved_credentials
-            logger.error(f"🔍 API DEBUG - Final result with auth method: {result}")
+            logger.debug(f"Final result with auth method: {result}")
             
             logger.info(f"Paperless connection test successful for user {current_user.id}", extra={
                 "user_id": current_user.id,
@@ -866,7 +873,7 @@ async def get_paperless_task_status(
         # FOUND THE BUG! Upload uses create_paperless_service_with_username_password
         # but task status was using create_paperless_service (which tries token first)
         # Let's use the EXACT same method as upload to ensure consistency
-        logger.error(f"🔍 TASK STATUS DEBUG - Using EXACT same auth method as upload (username/password)")
+        logger.debug("Using same auth method as upload (username/password)")
         
         # Import the same method used by upload
         from app.services.paperless_service import create_paperless_service_with_username_password
@@ -909,10 +916,10 @@ async def get_paperless_task_status(
                                 
                                 # Extract document ID from the task result
                                 # Paperless returns document ID in 'related_document' field, NOT 'id' (which is task ID)
-                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - Full task result: {task}")
-                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('id'): {task.get('id')}")
-                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('related_document'): {task.get('related_document')}")
-                                logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('result'): {task.get('result')}")
+                                logger.debug(f"Document ID extraction - Full task result: {task}")
+                                logger.debug(f"task.get('id'): {task.get('id')}")
+                                logger.debug(f"task.get('related_document'): {task.get('related_document')}")
+                                logger.debug(f"task.get('result'): {task.get('result')}")
                                 
                                 # FIXED: Try related_document FIRST (this is the actual document ID)
                                 document_id = task.get('related_document')
@@ -1244,3 +1251,106 @@ async def search_paperless_documents(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while searching documents: {str(e)}"
         )
+
+
+# =============================================================================
+# NEW SIMPLIFIED ARCHITECTURE ENDPOINTS
+# =============================================================================
+
+@router.post("/test-connection-v2", response_model=Dict[str, Any])
+async def test_paperless_connection_v2(
+    connection_data: PaperlessConnectionData,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Test connection to paperless-ngx instance using new simplified architecture.
+    
+    This is the new, cleaner implementation that will replace the original
+    test-connection endpoint once fully tested.
+    """
+    try:
+        # Determine if we should use saved credentials
+        use_saved_credentials = not any([
+            connection_data.paperless_api_token,
+            connection_data.paperless_username,
+            connection_data.paperless_password
+        ])
+        
+        if use_saved_credentials:
+            # Get saved credentials from database
+            user_prefs = user_preferences.get_by_user_id(db, current_user.id)
+            if not user_prefs:
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "No saved credentials found")
+            
+            # Use saved encrypted credentials
+            encrypted_token = user_prefs.paperless_api_token_encrypted
+            encrypted_username = user_prefs.paperless_username_encrypted
+            encrypted_password = user_prefs.paperless_password_encrypted
+            
+            logger.info(f"Testing with saved credentials for user {current_user.id}")
+        else:
+            # Encrypt provided credentials
+            encrypted_token = None
+            encrypted_username = None
+            encrypted_password = None
+            
+            if connection_data.paperless_api_token:
+                encrypted_token = credential_encryption.encrypt_token(connection_data.paperless_api_token)
+            
+            if connection_data.paperless_username and connection_data.paperless_password:
+                encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
+                encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
+            
+            logger.info(f"Testing with provided credentials for user {current_user.id}")
+        
+        # Create authentication handler
+        auth = create_paperless_auth(
+            url=connection_data.paperless_url,
+            encrypted_token=encrypted_token,
+            encrypted_username=encrypted_username,
+            encrypted_password=encrypted_password,
+            user_id=current_user.id
+        )
+        
+        # Test connection
+        success, message = await auth.test_connection()
+        
+        if success:
+            result = {
+                "status": "success",
+                "message": message,
+                "auth_method": auth.get_auth_type(),
+                "used_saved_credentials": use_saved_credentials,
+                "url": connection_data.paperless_url
+            }
+            
+            logger.info(f"Connection test successful for user {current_user.id}", extra={
+                "user_id": current_user.id,
+                "auth_method": result["auth_method"],
+                "used_saved_credentials": use_saved_credentials,
+                "url": connection_data.paperless_url
+            })
+            
+            return result
+        else:
+            # Connection failed
+            logger.warning(f"Connection test failed for user {current_user.id}: {message}")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Connection failed: {message}")
+            
+    except HTTPException:
+        raise
+    except ValueError as e:
+        # Authentication setup error (no credentials provided)
+        logger.warning(f"Invalid credentials for user {current_user.id}: {e}")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
+    except SecurityError as e:
+        logger.error(f"Security error during connection test for user {current_user.id}: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Security error occurred")
+    except Exception as e:
+        logger.error(f"Unexpected error during connection test for user {current_user.id}: {e}", extra={
+            "user_id": current_user.id,
+            "error": str(e),
+            "url": connection_data.paperless_url
+        })
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Connection test failed")

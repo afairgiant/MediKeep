@@ -25,6 +25,8 @@ from app.services.file_management_service import FileManagementService
 from app.services.paperless_service import (
     create_paperless_service_with_username_password,
 )
+# New simplified architecture
+from app.services.paperless_client import create_paperless_client, PaperlessClientError
 
 logger = get_logger(__name__, "app")
 
@@ -82,6 +84,21 @@ class GenericEntityFileService:
                 detail=f"Unsupported entity type: {entity_type}. "
                 f"Supported types: {[t.value for t in EntityType]}",
             )
+
+    async def _create_paperless_client(self, user_prefs, user_id: int):
+        """
+        Create a paperless client using the new simplified architecture.
+        
+        This is a transitional helper method that uses the new architecture
+        while maintaining compatibility with existing code.
+        """
+        return create_paperless_client(
+            url=user_prefs.paperless_url,
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=user_id
+        )
 
     async def upload_file(
         self,
@@ -470,13 +487,21 @@ class GenericEntityFileService:
                     )
                     # Don't delete from Paperless since other records reference it
                 else:
-                    # No other references, safe to delete from Paperless
-                    paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
-                    if not paperless_deleted:
-                        raise HTTPException(
-                            status_code=500,
-                            detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
+                    # Check if document is missing - if so, don't try to delete from Paperless
+                    if file_record.sync_status == "missing":
+                        logger.info(
+                            f"Document {file_record.paperless_document_id} is marked as missing. "
+                            f"Skipping Paperless deletion since document is not accessible."
                         )
+                        # Document is missing from Paperless, just remove database record
+                    else:
+                        # Document exists in Paperless, try to delete it
+                        paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
+                        if not paperless_deleted:
+                            raise HTTPException(
+                                status_code=500,
+                                detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
+                            )
             else:
                 # Handle local file deletion
                 file_path = file_record.file_path
@@ -620,11 +645,11 @@ class GenericEntityFileService:
                     )
                 
                 # Log authentication details for debugging
-                logger.error(f"🔍 VIEW DEBUG - User: {user.id}, URL: {user_prefs.paperless_url}")
-                logger.error(f"🔍 VIEW DEBUG - Has token: {bool(user_prefs.paperless_api_token_encrypted)}")
-                logger.error(f"🔍 VIEW DEBUG - Has username: {bool(user_prefs.paperless_username_encrypted)}")
-                logger.error(f"🔍 VIEW DEBUG - Has password: {bool(user_prefs.paperless_password_encrypted)}")
-                logger.error(f"🔍 VIEW DEBUG - Document ID: {file_record.paperless_document_id}")
+                logger.debug(f"View debug - User: {user.id}, URL: {user_prefs.paperless_url}")
+                logger.debug(f"View debug - Has token: {bool(user_prefs.paperless_api_token_encrypted)}")
+                logger.debug(f"View debug - Has username: {bool(user_prefs.paperless_username_encrypted)}")
+                logger.debug(f"View debug - Has password: {bool(user_prefs.paperless_password_encrypted)}")
+                logger.debug(f"View debug - Document ID: {file_record.paperless_document_id}")
                 
                 # Create paperless service using token auth (supports 2FA)
                 from app.services.paperless_service import create_paperless_service
@@ -636,28 +661,28 @@ class GenericEntityFileService:
                     user_id=user.id
                 )
                 
-                logger.error(f"🔍 VIEW DEBUG - Paperless service created successfully")
+                logger.debug("Paperless service created successfully")
                 
                 # First test if we can read document metadata (less restrictive than download)
-                logger.error(f"🔍 VIEW DEBUG - Testing document access for ID: {file_record.paperless_document_id}")
+                logger.debug(f"Testing document access for ID: {file_record.paperless_document_id}")
                 async with paperless_service:
                     try:
                         # Try to get document info first to test permissions
                         async with paperless_service._make_request("GET", f"/api/documents/{file_record.paperless_document_id}/") as doc_response:
                             if doc_response.status == 200:
                                 doc_info = await doc_response.json()
-                                logger.error(f"🔍 VIEW DEBUG - Document info accessible: {doc_info.get('title', 'N/A')}")
+                                logger.debug(f"Document info accessible: {doc_info.get('title', 'N/A')}")
                             else:
-                                logger.error(f"🔍 VIEW DEBUG - Document info failed: {doc_response.status}")
+                                logger.debug(f"Document info failed: {doc_response.status}")
                     except Exception as info_error:
-                        logger.error(f"🔍 VIEW DEBUG - Document info error: {info_error}")
+                        logger.debug(f"Document info error: {info_error}")
                     
                     # Now try download
-                    logger.error(f"🔍 VIEW DEBUG - Starting download for document ID: {file_record.paperless_document_id}")
+                    logger.debug(f"Starting download for document ID: {file_record.paperless_document_id}")
                     file_content = await paperless_service.download_document(
                         document_id=file_record.paperless_document_id
                     )
-                logger.error(f"🔍 VIEW DEBUG - Download completed, content size: {len(file_content) if file_content else 0}")
+                logger.debug(f"Download completed, content size: {len(file_content) if file_content else 0}")
                 
                 return file_content, file_record.file_name, file_record.file_type
             else:
@@ -1071,33 +1096,25 @@ class GenericEntityFileService:
             return False
 
         try:
-            logger.info(f"🔍 DELETE DEBUG - Deleting document {file_record.paperless_document_id} for user {current_user_id}")
+            logger.debug(f"Deleting document {file_record.paperless_document_id} for user {current_user_id}")
             
-            # Create paperless service using token auth (supports 2FA) - same as other operations
-            from app.services.paperless_service import create_paperless_service
-            paperless_service = create_paperless_service(
-                user_prefs.paperless_url,
-                encrypted_token=user_prefs.paperless_api_token_encrypted,
-                encrypted_username=user_prefs.paperless_username_encrypted,
-                encrypted_password=user_prefs.paperless_password_encrypted,
-                user_id=current_user_id
-            )
-            
-            logger.info(f"🔍 DELETE DEBUG - Paperless service created, starting deletion")
+            # Create paperless client using new simplified architecture
+            async with await self._create_paperless_client(user_prefs, current_user_id) as paperless_client:
+                logger.debug("Paperless client created, starting deletion")
 
-            async with paperless_service:
                 # Delete from paperless
-                logger.info(f"🔍 DELETE DEBUG - Calling delete_document for {file_record.paperless_document_id}")
-                await paperless_service.delete_document(
+                logger.debug(f"Calling delete_document for {file_record.paperless_document_id}")
+                await paperless_client.delete_document(
                     file_record.paperless_document_id
                 )
-                logger.info(f"🔍 DELETE DEBUG - Delete call completed, verifying deletion")
+                logger.debug("Delete call completed, verifying deletion")
 
                 # Verify deletion by checking if document still exists
-                still_exists = await paperless_service.check_document_exists(
+                doc_info = await paperless_client.get_document_info(
                     file_record.paperless_document_id
                 )
-                logger.info(f"🔍 DELETE DEBUG - Document still exists: {still_exists}")
+                still_exists = doc_info is not None
+                logger.debug(f"Document still exists: {still_exists}")
 
                 if still_exists:
                     logger.error(
@@ -1157,31 +1174,22 @@ class GenericEntityFileService:
 
         try:
             # Log authentication details for debugging
-            logger.error(f"🔍 DOWNLOAD DEBUG - User: {current_user_id}, URL: {user_prefs.paperless_url}")
-            logger.error(f"🔍 DOWNLOAD DEBUG - Has token: {bool(user_prefs.paperless_api_token_encrypted)}")
-            logger.error(f"🔍 DOWNLOAD DEBUG - Has username: {bool(user_prefs.paperless_username_encrypted)}")
-            logger.error(f"🔍 DOWNLOAD DEBUG - Has password: {bool(user_prefs.paperless_password_encrypted)}")
-            logger.error(f"🔍 DOWNLOAD DEBUG - Document ID: {file_record.paperless_document_id}")
+            logger.debug(f"Download debug - User: {current_user_id}, URL: {user_prefs.paperless_url}")
+            logger.debug(f"Download debug - Has token: {bool(user_prefs.paperless_api_token_encrypted)}")
+            logger.debug(f"Download debug - Has username: {bool(user_prefs.paperless_username_encrypted)}")
+            logger.debug(f"Download debug - Has password: {bool(user_prefs.paperless_password_encrypted)}")
+            logger.debug(f"Download debug - Document ID: {file_record.paperless_document_id}")
             
-            # Create paperless service using token auth (supports 2FA)
-            from app.services.paperless_service import create_paperless_service
-            paperless_service = create_paperless_service(
-                user_prefs.paperless_url,
-                encrypted_token=user_prefs.paperless_api_token_encrypted,
-                encrypted_username=user_prefs.paperless_username_encrypted,
-                encrypted_password=user_prefs.paperless_password_encrypted,
-                user_id=current_user_id
-            )
-            
-            logger.error(f"🔍 DOWNLOAD DEBUG - Paperless service created successfully")
+            # Create paperless client using new simplified architecture
+            async with await self._create_paperless_client(user_prefs, current_user_id) as paperless_client:
+                logger.debug("Paperless client created successfully")
 
-            # Download from paperless
-            logger.error(f"🔍 DOWNLOAD DEBUG - Starting download for document ID: {file_record.paperless_document_id}")
-            async with paperless_service:
-                file_content = await paperless_service.download_document(
+                # Download from paperless
+                logger.debug(f"Starting download for document ID: {file_record.paperless_document_id}")
+                file_content = await paperless_client.download_document(
                     file_record.paperless_document_id
                 )
-            logger.error(f"🔍 DOWNLOAD DEBUG - Download completed, content size: {len(file_content) if file_content else 0}")
+            logger.debug(f"Download completed, content size: {len(file_content) if file_content else 0}")
 
             logger.info(
                 f"File downloaded from paperless: document_id={file_record.paperless_document_id}, size={len(file_content)}"
@@ -1318,15 +1326,15 @@ class GenericEntityFileService:
                 .all()
             )
             
-            logger.info(f"🔍 DEBUG - Total paperless files in system: {len(all_paperless_files)}")
+            logger.debug(f"Total paperless files in system: {len(all_paperless_files)}")
             for f in all_paperless_files:
-                logger.info(f"🔍 DEBUG - File {f.id}: entity_type='{f.entity_type}', entity_id={f.entity_id}, document_id={f.paperless_document_id}")
+                logger.debug(f"File {f.id}: entity_type='{f.entity_type}', entity_id={f.entity_id}, document_id={f.paperless_document_id}")
             
             # Build a union query to find paperless files across all entity types for this user
             paperless_files = []
             
             # Query lab result files (need to join through Patient to get user_id)
-            logger.info(f"🔍 DEBUG - Querying lab result files for user {current_user_id}")
+            logger.debug(f"Querying lab result files for user {current_user_id}")
             from app.models.models import Patient
             lab_files = (
                 db.query(EntityFile)
@@ -1340,11 +1348,11 @@ class GenericEntityFileService:
                 )
                 .all()
             )
-            logger.info(f"🔍 DEBUG - Found {len(lab_files)} lab result files")
+            logger.debug(f"Found {len(lab_files)} lab result files")
             paperless_files.extend(lab_files)
             
             # Query procedure files (need to join through Patient to get user_id)
-            logger.info(f"🔍 DEBUG - Querying procedure files for user {current_user_id}")
+            logger.debug(f"Querying procedure files for user {current_user_id}")
             procedure_files = (
                 db.query(EntityFile)
                 .join(Procedure,
@@ -1357,7 +1365,7 @@ class GenericEntityFileService:
                 )
                 .all()
             )
-            logger.info(f"🔍 DEBUG - Found {len(procedure_files)} procedure files")
+            logger.debug(f"Found {len(procedure_files)} procedure files")
             paperless_files.extend(procedure_files)
             
             logger.info(f"Found {len(paperless_files)} paperless files for user {current_user_id}: "
