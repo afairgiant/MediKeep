@@ -99,8 +99,9 @@ class PaperlessServiceBase(ABC):
             connect=settings.PAPERLESS_CONNECT_TIMEOUT,
         )
 
+        # Test without API version to troubleshoot 403 errors
         self.headers = {
-            "Accept": "application/json; version=6",
+            "Accept": "application/json",
             "User-Agent": f"MedicalRecords-Paperless/1.0 (User:{user_id})",
         }
 
@@ -341,6 +342,50 @@ class PaperlessServiceBase(ABC):
                 extra={"user_id": self.user_id, "error": str(e)},
             )
             raise PaperlessConnectionError(f"Connection test failed: {str(e)}")
+
+    async def get_task_status(self, task_id: str) -> Dict[str, Any]:
+        """
+        Get the status of a task in paperless-ngx.
+        
+        Args:
+            task_id: Task UUID to check
+            
+        Returns:
+            Task status information
+            
+        Raises:
+            PaperlessError: If task status check fails
+        """
+        try:
+            async with self._make_request("GET", f"/api/tasks/{task_id}/") as response:
+                if response.status == 200:
+                    task_data = await response.json()
+                    logger.debug(
+                        f"Task {task_id} status retrieved",
+                        extra={
+                            "user_id": self.user_id,
+                            "task_id": task_id,
+                            "status": task_data.get("status"),
+                        },
+                    )
+                    return task_data
+                elif response.status == 404:
+                    raise PaperlessError(f"Task {task_id} not found")
+                elif response.status == 401:
+                    raise PaperlessAuthenticationError(
+                        "Authentication failed during task status check"
+                    )
+                else:
+                    raise PaperlessError(f"Task status check failed: HTTP {response.status}")
+
+        except PaperlessError:
+            raise
+        except Exception as e:
+            logger.error(
+                f"Task status check failed unexpectedly",
+                extra={"user_id": self.user_id, "task_id": task_id, "error": str(e)},
+            )
+            raise PaperlessError(f"Task status check failed: {str(e)}")
 
 
 class PaperlessServiceToken(PaperlessServiceBase):

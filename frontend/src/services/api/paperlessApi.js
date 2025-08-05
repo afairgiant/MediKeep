@@ -191,6 +191,83 @@ export const cleanupOutOfSyncFiles = async () => {
   return apiService.post('/paperless/cleanup');
 };
 
+/**
+ * Search for a document in Paperless by filename and approximate upload time
+ * Used as fallback when task monitoring returns invalid document IDs
+ * @param {string} filename - Original filename to search for
+ * @param {Date} uploadTime - Approximate upload time (optional, defaults to recent)
+ * @returns {Promise<number|null>} Document ID if found, null otherwise
+ */
+export const searchDocumentByFilenameAndTime = async (filename, uploadTime = null) => {
+  try {
+    // Calculate search time window (default: last 30 minutes)
+    const searchTime = uploadTime || new Date();
+    const searchStart = new Date(searchTime.getTime() - 30 * 60 * 1000); // 30 minutes ago
+    const searchEnd = new Date(searchTime.getTime() + 30 * 60 * 1000);   // 30 minutes from now
+    
+    // Format dates for API
+    const startDate = searchStart.toISOString().split('T')[0];
+    const endDate = searchEnd.toISOString().split('T')[0];
+    
+    // Try searching by title first
+    try {
+      const titleSearchResults = await apiService.get(`/paperless/documents/search?query=title:${encodeURIComponent(filename)}`);
+      
+      if (titleSearchResults && titleSearchResults.length > 0) {
+        // Check if any results are within our time window
+        for (const doc of titleSearchResults) {
+          if (doc.created) {
+            const docTime = new Date(doc.created);
+            if (docTime >= searchStart && docTime <= searchEnd) {
+              return doc.id;
+            }
+          }
+        }
+      }
+    } catch (titleSearchError) {
+      console.warn('Title search failed, trying date-based search:', titleSearchError);
+    }
+    
+    // Fallback: search with filename without title: prefix
+    try {
+      // Try searching just the filename without title prefix
+      const baseFilename = filename.replace(/\.[^/.]+$/, ""); // Remove extension
+      const simpleSearchResults = await apiService.get(`/paperless/documents/search?query=${encodeURIComponent(baseFilename)}`);
+      
+      if (simpleSearchResults && simpleSearchResults.length > 0) {
+        const lowerFilename = filename.toLowerCase();
+        
+        for (const doc of simpleSearchResults) {
+          const docTitle = (doc.title || '').toLowerCase();
+          const docOriginalName = (doc.original_file_name || '').toLowerCase();
+          
+          // Check if document is within our time window
+          if (doc.created) {
+            const docTime = new Date(doc.created);
+            if (docTime >= searchStart && docTime <= searchEnd) {
+              // Check for filename matches
+              if (lowerFilename === docTitle || 
+                  lowerFilename === docOriginalName ||
+                  docTitle.includes(lowerFilename) ||
+                  docOriginalName.includes(lowerFilename)) {
+                return doc.id;
+              }
+            }
+          }
+        }
+      }
+    } catch (dateSearchError) {
+      console.warn('Simple filename search failed:', dateSearchError);
+    }
+    
+    return null;
+    
+  } catch (error) {
+    console.error('Error searching for document by filename and time:', error);
+    return null;
+  }
+};
+
 export default {
   testPaperlessConnection,
   updatePaperlessSettings,
@@ -205,5 +282,6 @@ export default {
   deletePaperlessConfiguration,
   exportPaperlessData,
   pollPaperlessTaskStatus,
-  cleanupOutOfSyncFiles
+  cleanupOutOfSyncFiles,
+  searchDocumentByFilenameAndTime
 };

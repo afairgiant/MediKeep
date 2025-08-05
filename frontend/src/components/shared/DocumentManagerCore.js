@@ -556,7 +556,7 @@ const useDocumentManagerCore = ({
 
     const timeoutId = setTimeout(() => {
       memoizedCheckSyncStatus();
-    }, 500); // Increased debounce to 500ms to reduce frequency
+    }, 500); // Debounce to prevent frequent sync checks
     
     return () => clearTimeout(timeoutId);
   }, [mode, memoizedCheckSyncStatus]);

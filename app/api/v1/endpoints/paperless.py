@@ -6,6 +6,8 @@ settings management, and document operations.
 """
 
 import os
+import json
+import re
 import traceback
 from typing import Dict, Any
 from datetime import datetime
@@ -898,9 +900,34 @@ async def get_paperless_task_status(
                             task = task_list[0]
                             
                             if task['status'] == 'SUCCESS':
+                                # Log the raw task response from Paperless for debugging
+                                logger.error(f"🔍 RAW PAPERLESS TASK RESPONSE: {json.dumps(task, indent=2)}", extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                    "raw_paperless_response": task
+                                })
+                                
                                 # Extract document ID from the task result
-                                # This may need adjustment based on Paperless API response format
-                                document_id = task.get('result', {}).get('document_id') if isinstance(task.get('result'), dict) else None
+                                # Paperless returns document ID in 'id' field for the created document
+                                document_id = task.get('id')
+                                
+                                # Fallback to other possible locations if not found
+                                if not document_id:
+                                    document_id = task.get('related_document')
+                                    if not document_id:
+                                        if isinstance(task.get('result'), dict):
+                                            document_id = task.get('result', {}).get('document_id')
+                                        elif isinstance(task.get('result'), str):
+                                            # Try to extract from result string like "Success. New document id 2744 created"
+                                            match = re.search(r'document id (\d+)', task.get('result', ''))
+                                            if match:
+                                                document_id = match.group(1)
+                                
+                                logger.error(f"🔍 EXTRACTED DOCUMENT ID: {document_id} (type: {type(document_id)})", extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                    "extracted_document_id": document_id
+                                })
                                 
                                 # Update database record with successful completion
                                 _update_entity_file_from_task_result(db, task_uuid, {
@@ -912,7 +939,7 @@ async def get_paperless_task_status(
                                 result = {
                                     "status": "SUCCESS",
                                     "result": {
-                                        "document_id": document_id or "unknown"
+                                        "document_id": document_id
                                     },
                                     "task_id": task_uuid,
                                     "timestamp": datetime.utcnow().isoformat()
@@ -1090,4 +1117,107 @@ async def get_paperless_task_status(
             user_id=current_user.id,
             operation="paperless_task_status_check",
             task_uuid=task_uuid
+        )
+
+
+@router.get("/documents/search")
+async def search_paperless_documents(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    query: str = "",
+    page: int = 1,
+    page_size: int = 25
+) -> Dict[str, Any]:
+    """
+    Search documents in Paperless-ngx.
+    
+    Args:
+        query: Search query string
+        page: Page number (default: 1)
+        page_size: Number of results per page (default: 25)
+    
+    Returns:
+        Search results from Paperless
+    """
+    try:
+        # Get user preferences
+        user_prefs = user_preferences.get_by_user_id(db, current_user.id)
+        
+        if not user_prefs or not user_prefs.paperless_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Paperless integration is not enabled"
+            )
+        
+        # Check if credentials exist
+        has_auth = (user_prefs.paperless_api_token_encrypted or 
+                   (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+        if not user_prefs.paperless_url or not has_auth:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Paperless configuration is incomplete"
+            )
+        
+        # Create paperless service using consistent auth method
+        paperless_service = create_paperless_service(user_prefs.paperless_url, current_user.id)
+        
+        # Simple search without user filtering for fallback during uploads
+        logger.info(f"Searching Paperless documents with query: {query}")
+        
+        params = {
+            "query": query,
+            "page": page,
+            "page_size": min(page_size, 100)
+        }
+        
+        # Make direct request to Paperless search API
+        async with paperless_service._make_request(
+            "GET", "/api/documents/", params=params
+        ) as response:
+            logger.info(f"Paperless search response status: {response.status}")
+            
+            if response.status == 401:
+                logger.error("Paperless authentication failed during search")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Paperless authentication failed"
+                )
+            elif response.status != 200:
+                error_text = await response.text()
+                logger.error(f"Paperless search failed with status {response.status}: {error_text}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Paperless search failed: {error_text}"
+                )
+            
+            results = await response.json()
+            logger.info(f"Paperless search returned {len(results.get('results', []))} results")
+            return results.get("results", [])
+        
+    except PaperlessAuthenticationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Paperless authentication failed. Please check your credentials."
+        )
+        
+    except PaperlessConnectionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to connect to Paperless server. Please check your configuration."
+        )
+    
+    except HTTPException:
+        raise
+    
+    except Exception as e:
+        logger.error(f"Error searching Paperless documents: {str(e)}", extra={
+            "user_id": current_user.id,
+            "query": query,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while searching documents: {str(e)}"
         )

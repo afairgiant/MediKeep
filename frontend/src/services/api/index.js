@@ -612,7 +612,7 @@ class ApiService {
 
       // Check if task was successful
       const isSuccess = taskResult?.status === 'SUCCESS' && 
-                       (taskResult?.result?.document_id || taskResult?.document_id);
+                       (taskResult?.id || taskResult?.related_document || taskResult?.result?.document_id || taskResult?.document_id);
       
       // Check if task failed due to duplicate
       const isDuplicate = taskResult?.error_type === 'duplicate' || 
@@ -647,10 +647,65 @@ class ApiService {
         }
       };
       
-      // Extract document ID if successful
-      const documentId = isSuccess ? 
-                        (taskResult?.result?.document_id || taskResult?.document_id) : 
-                        null;
+      // Extract and validate document ID if successful
+      let documentId = null;
+      if (isSuccess) {
+        // Check multiple possible locations for document ID
+        const rawDocumentId = taskResult?.id || 
+                             taskResult?.related_document || 
+                             taskResult?.result?.document_id || 
+                             taskResult?.document_id;
+        
+        // Validate document ID - reject invalid values like "unknown"
+        if (rawDocumentId && 
+            String(rawDocumentId).toLowerCase() !== 'unknown' && 
+            String(rawDocumentId).toLowerCase() !== 'none' && 
+            String(rawDocumentId).toLowerCase() !== 'null' && 
+            String(rawDocumentId) !== '' &&
+            !isNaN(rawDocumentId) && 
+            parseInt(rawDocumentId) > 0) {
+          documentId = rawDocumentId;
+        } else {
+          // Invalid document ID - trigger fallback search
+          logger.warn('api_upload_invalid_document_id', 'Task returned invalid document ID, attempting fallback search', {
+            rawDocumentId,
+            fileName: file.name,
+            taskUuid,
+            component: 'ApiService',
+          });
+          
+          try {
+            // Import and call fallback search
+            const { searchDocumentByFilenameAndTime } = await import('./paperlessApi');
+            const fallbackDocumentId = await searchDocumentByFilenameAndTime(file.name);
+            
+            if (fallbackDocumentId) {
+              documentId = fallbackDocumentId;
+              logger.info('api_upload_fallback_success', 'Fallback search found document ID', {
+                fileName: file.name,
+                fallbackDocumentId,
+                originalTaskResult: rawDocumentId,
+                component: 'ApiService',
+              });
+            } else {
+              logger.error('api_upload_fallback_failed', 'Fallback search could not find document', {
+                fileName: file.name,
+                originalTaskResult: rawDocumentId,
+                component: 'ApiService',
+              });
+              // Keep documentId as null to indicate failure
+            }
+          } catch (fallbackError) {
+            logger.error('api_upload_fallback_error', 'Error during fallback search', {
+              fileName: file.name,
+              originalTaskResult: rawDocumentId,
+              error: fallbackError.message,
+              component: 'ApiService',
+            });
+            // Keep documentId as null to indicate failure
+          }
+        }
+      }
 
       logger.debug('api_upload_task_processed', 'Task result processed', {
         isSuccess,
