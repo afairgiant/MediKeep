@@ -26,7 +26,11 @@ from app.services.paperless_service import (
     create_paperless_service_with_username_password,
 )
 # New simplified architecture
-from app.services.paperless_client import create_paperless_client, PaperlessClientError
+from app.services.paperless_client import (
+    create_paperless_client, 
+    PaperlessClientError, 
+    PaperlessConnectionError as NewPaperlessConnectionError
+)
 
 logger = get_logger(__name__, "app")
 
@@ -493,11 +497,13 @@ class GenericEntityFileService:
                             f"Document {file_record.paperless_document_id} is marked as missing. "
                             f"Skipping Paperless deletion since document is not accessible."
                         )
-                        # Document is missing from Paperless, just remove database record
+                        # Document is missing from Paperless, we'll just remove the database record below
                     else:
                         # Document exists in Paperless, try to delete it
+                        logger.info(f"Attempting to delete document {file_record.paperless_document_id} from Paperless (sync_status: {file_record.sync_status})")
                         paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
                         if not paperless_deleted:
+                            logger.error(f"Paperless deletion failed for document {file_record.paperless_document_id}")
                             raise HTTPException(
                                 status_code=500,
                                 detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
@@ -1096,39 +1102,39 @@ class GenericEntityFileService:
             return False
 
         try:
-            logger.debug(f"Deleting document {file_record.paperless_document_id} for user {current_user_id}")
+            logger.info(f"Starting deletion process for document {file_record.paperless_document_id} for user {current_user_id}")
             
             # Create paperless client using new simplified architecture
+            logger.debug("Creating paperless client...")
             async with await self._create_paperless_client(user_prefs, current_user_id) as paperless_client:
-                logger.debug("Paperless client created, starting deletion")
+                logger.info("Paperless client created successfully, attempting deletion")
 
-                # Delete from paperless
-                logger.debug(f"Calling delete_document for {file_record.paperless_document_id}")
-                await paperless_client.delete_document(
+                # Delete from paperless - the new client handles errors internally
+                logger.info(f"Calling paperless_client.delete_document for document {file_record.paperless_document_id}")
+                success = await paperless_client.delete_document(
                     file_record.paperless_document_id
                 )
-                logger.debug("Delete call completed, verifying deletion")
-
-                # Verify deletion by checking if document still exists
-                doc_info = await paperless_client.get_document_info(
-                    file_record.paperless_document_id
-                )
-                still_exists = doc_info is not None
-                logger.debug(f"Document still exists: {still_exists}")
-
-                if still_exists:
-                    logger.error(
-                        f"Document {file_record.paperless_document_id} still exists after deletion attempt"
+                
+                logger.info(f"Paperless client delete_document returned: {success}")
+                
+                if success:
+                    logger.info(
+                        f"File successfully deleted from paperless: document_id={file_record.paperless_document_id}"
                     )
+                    return True
+                else:
+                    logger.error(f"Paperless client reported deletion failed for document {file_record.paperless_document_id}")
                     return False
 
-            logger.info(
-                f"File successfully deleted from paperless and verified: document_id={file_record.paperless_document_id}"
-            )
-            return True
-
+        except (PaperlessClientError, NewPaperlessConnectionError) as e:
+            logger.error(f"Paperless client error during deletion: {type(e).__name__}: {str(e)}")
+            import traceback
+            logger.error(f"Exception traceback: {traceback.format_exc()}")
+            return False
         except Exception as e:
-            logger.error(f"Failed to delete file from paperless: {str(e)}")
+            logger.error(f"Unexpected error during paperless deletion: {type(e).__name__}: {str(e)}")
+            import traceback
+            logger.error(f"Exception traceback: {traceback.format_exc()}")
             return False
 
     async def _get_paperless_download_info(

@@ -55,8 +55,9 @@ class PaperlessAuth:
         return headers
     
     def get_auth(self) -> Optional[aiohttp.BasicAuth]:
-        """Get basic auth object if using username/password."""
-        if self.username and self.password:
+        """Get basic auth object if using username/password (only if no token available)."""
+        # Only use basic auth if we don't have a token (token takes priority)
+        if not self.token and self.username and self.password:
             return aiohttp.BasicAuth(self.username, self.password)
         return None
     
