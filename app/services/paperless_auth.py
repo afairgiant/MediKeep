@@ -6,6 +6,7 @@ without the complexity of multiple inheritance patterns.
 """
 
 from typing import Optional, Tuple
+from urllib.parse import urlparse
 import aiohttp
 from app.core.logging_config import get_logger
 
@@ -90,13 +91,29 @@ class PaperlessAuth:
                     elif response.status == 403:
                         return False, "Access forbidden - check permissions"
                     else:
-                        return False, f"Connection failed with status {response.status}"
+                        # Use structured logging without exposing sensitive details
+                        logger.warning("Paperless connection failed", extra={
+                            "status_code": response.status,
+                            "auth_type": self.get_auth_type(),
+                            "url_host": urlparse(self.url).hostname
+                        })
+                        return False, "Unable to connect to document service. Please verify your settings."
                         
         except aiohttp.ClientError as e:
-            return False, f"Connection error: {str(e)}"
+            # Use structured logging without exposing sensitive connection details
+            logger.error("Paperless connection error", extra={
+                "error_type": type(e).__name__,
+                "auth_type": self.get_auth_type(),
+                "url_host": urlparse(self.url).hostname
+            })
+            return False, "Unable to connect to document service. Please check your configuration."
         except Exception as e:
-            logger.error(f"Unexpected error testing paperless connection: {e}")
-            return False, f"Unexpected error: {str(e)}"
+            # Use structured logging for unexpected errors
+            logger.error("Unexpected error during paperless connection test", extra={
+                "error_type": type(e).__name__,
+                "auth_type": self.get_auth_type()
+            })
+            return False, "An error occurred while connecting to the document service."
 
 
 def create_paperless_auth(url: str, encrypted_token: str = None, 
@@ -129,7 +146,8 @@ def create_paperless_auth(url: str, encrypted_token: str = None,
             token = credential_encryption.decrypt_token(encrypted_token)
             logger.debug("Token decryption successful")
         except Exception as e:
-            logger.warning(f"Token decryption failed: {e}")
+            # Don't log exception details that might reveal crypto info
+            logger.warning("Token decryption failed", exc_info=False)
     
     if encrypted_username and encrypted_password:
         try:
@@ -137,7 +155,8 @@ def create_paperless_auth(url: str, encrypted_token: str = None,
             password = credential_encryption.decrypt_token(encrypted_password)
             logger.debug("Username/password decryption successful")
         except Exception as e:
-            logger.warning(f"Username/password decryption failed: {e}")
+            # Don't log exception details that might reveal crypto info
+            logger.warning("Username/password decryption failed", exc_info=False)
     
     # Create auth handler
     try:
