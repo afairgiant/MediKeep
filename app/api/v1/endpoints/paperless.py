@@ -870,20 +870,19 @@ async def get_paperless_task_status(
                 detail="Paperless configuration is incomplete - missing URL or authentication credentials"
             )
         
-        # FOUND THE BUG! Upload uses create_paperless_service_with_username_password
-        # but task status was using create_paperless_service (which tries token first)
-        # Let's use the EXACT same method as upload to ensure consistency
-        logger.debug("Using same auth method as upload (username/password)")
+        # Use the smart factory that supports both token and username/password auth
+        logger.debug("Using smart auth factory (supports both token and username/password)")
         
         # Import the same method used by upload
         from app.services.paperless_service import create_paperless_service_with_username_password
         
-        # Create paperless service using SAME method as upload
-        async with create_paperless_service_with_username_password(
+        # Create paperless service using SAME method as upload - supports both token and username/password
+        async with create_paperless_service(
             user_prefs.paperless_url,
-            user_prefs.paperless_username_encrypted,
-            user_prefs.paperless_password_encrypted,
-            current_user.id
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=current_user.id
         ) as paperless_service:
             
             # Now using same auth method as upload - should work!
