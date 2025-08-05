@@ -612,7 +612,7 @@ class ApiService {
 
       // Check if task was successful
       const isSuccess = taskResult?.status === 'SUCCESS' && 
-                       (taskResult?.result?.document_id || taskResult?.document_id);
+                       (taskResult?.id || taskResult?.related_document || taskResult?.result?.document_id || taskResult?.document_id);
       
       // Check if task failed due to duplicate
       const isDuplicate = taskResult?.error_type === 'duplicate' || 
@@ -647,10 +647,65 @@ class ApiService {
         }
       };
       
-      // Extract document ID if successful
-      const documentId = isSuccess ? 
-                        (taskResult?.result?.document_id || taskResult?.document_id) : 
-                        null;
+      // Extract and validate document ID if successful
+      let documentId = null;
+      if (isSuccess) {
+        // Check multiple possible locations for document ID
+        const rawDocumentId = taskResult?.id || 
+                             taskResult?.related_document || 
+                             taskResult?.result?.document_id || 
+                             taskResult?.document_id;
+        
+        // Validate document ID - reject invalid values like "unknown"
+        if (rawDocumentId && 
+            String(rawDocumentId).toLowerCase() !== 'unknown' && 
+            String(rawDocumentId).toLowerCase() !== 'none' && 
+            String(rawDocumentId).toLowerCase() !== 'null' && 
+            String(rawDocumentId) !== '' &&
+            !isNaN(rawDocumentId) && 
+            parseInt(rawDocumentId) > 0) {
+          documentId = rawDocumentId;
+        } else {
+          // Invalid document ID - trigger fallback search
+          logger.warn('api_upload_invalid_document_id', 'Task returned invalid document ID, attempting fallback search', {
+            rawDocumentId,
+            fileName: file.name,
+            taskUuid,
+            component: 'ApiService',
+          });
+          
+          try {
+            // Import and call fallback search
+            const { searchDocumentByFilenameAndTime } = await import('./paperlessApi');
+            const fallbackDocumentId = await searchDocumentByFilenameAndTime(file.name);
+            
+            if (fallbackDocumentId) {
+              documentId = fallbackDocumentId;
+              logger.info('api_upload_fallback_success', 'Fallback search found document ID', {
+                fileName: file.name,
+                fallbackDocumentId,
+                originalTaskResult: rawDocumentId,
+                component: 'ApiService',
+              });
+            } else {
+              logger.error('api_upload_fallback_failed', 'Fallback search could not find document', {
+                fileName: file.name,
+                originalTaskResult: rawDocumentId,
+                component: 'ApiService',
+              });
+              // Keep documentId as null to indicate failure
+            }
+          } catch (fallbackError) {
+            logger.error('api_upload_fallback_error', 'Error during fallback search', {
+              fileName: file.name,
+              originalTaskResult: rawDocumentId,
+              error: fallbackError.message,
+              component: 'ApiService',
+            });
+            // Keep documentId as null to indicate failure
+          }
+        }
+      }
 
       logger.debug('api_upload_task_processed', 'Task result processed', {
         isSuccess,
@@ -936,30 +991,82 @@ class ApiService {
   }
 
   // Check Paperless document sync status
-  checkPaperlessSyncStatus(signal) {
+  async checkPaperlessSyncStatus(signal) {
+    // Create a timeout signal to prevent hanging requests
+    let timeoutId;
+    const timeoutSignal = new AbortController();
+    
     try {
       logger.debug('api_paperless_sync_check', 'Checking Paperless sync status', {
         component: 'ApiService',
       });
 
-      return this.post('/entity-files/sync/paperless', {}, { 
-        signal,
+      if (!signal) {
+        // Set 30-second timeout for sync check requests
+        timeoutId = setTimeout(() => {
+          timeoutSignal.abort();
+        }, 30000);
+      }
+
+      const finalSignal = signal || timeoutSignal.signal;
+
+      const result = await this.post('/entity-files/sync/paperless', {}, { 
+        signal: finalSignal,
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
         }
       });
+
+      // Clear timeout if request completed successfully
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      logger.info('api_paperless_sync_check_success', 'Paperless sync status check completed', {
+        filesChecked: Object.keys(result || {}).length,
+        component: 'ApiService',
+      });
+
+      return result;
     } catch (error) {
+      // Clear timeout if request failed
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Enhanced error logging for better debugging
       logger.error(
         'api_paperless_sync_check_error',
         'Failed to check Paperless sync status',
         {
           error: error.message,
+          errorStack: error.stack,
+          errorResponse: error.response,
+          isAbortError: error.name === 'AbortError',
           component: 'ApiService',
         }
       );
-      throw error;
+
+      // Provide more specific error messages for common issues
+      let enhancedError = error;
+      if (error.name === 'AbortError') {
+        enhancedError = new Error('Sync check timed out. Please check your Paperless connection and try again.');
+      } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        enhancedError = new Error('Authentication failed. Please check your Paperless credentials in Settings.');
+      } else if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
+        enhancedError = new Error('Access denied. Please verify your Paperless permissions.');
+      } else if (error.message?.includes('404')) {
+        enhancedError = new Error('Paperless API endpoint not found. Please check your Paperless URL configuration.');
+      } else if (error.message?.includes('500')) {
+        enhancedError = new Error('Paperless server error. Please check your Paperless instance status.');
+      } else if (error.message?.includes('ECONNREFUSED') || error.message?.includes('Network')) {
+        enhancedError = new Error('Cannot connect to Paperless. Please check your Paperless URL and network connection.');
+      }
+
+      enhancedError.originalError = error;
+      throw enhancedError;
     }
   }
 
