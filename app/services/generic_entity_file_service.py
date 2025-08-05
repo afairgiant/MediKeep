@@ -173,14 +173,14 @@ class GenericEntityFileService:
                         detail="Paperless integration is not enabled. Please enable it in settings before uploading to Paperless.",
                     )
 
-                if (
-                    not user_prefs.paperless_url
-                    or not user_prefs.paperless_username_encrypted
-                    or not user_prefs.paperless_password_encrypted
-                ):
+                # Check if we have either token OR username/password credentials
+                has_token = bool(user_prefs.paperless_api_token_encrypted)
+                has_credentials = bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted)
+                
+                if not user_prefs.paperless_url or (not has_token and not has_credentials):
                     raise HTTPException(
                         status_code=400,
-                        detail="Paperless configuration is incomplete. Please configure URL and credentials in settings.",
+                        detail="Paperless configuration is incomplete. Please configure URL and authentication credentials (token or username/password) in settings.",
                     )
 
             # Read file content once for both backends
@@ -875,11 +875,11 @@ class GenericEntityFileService:
                 detail="Paperless integration is not enabled for this user",
             )
 
-        if (
-            not user_prefs.paperless_url
-            or not user_prefs.paperless_username_encrypted
-            or not user_prefs.paperless_password_encrypted
-        ):
+        # Check if we have either token OR username/password credentials
+        has_token = bool(user_prefs.paperless_api_token_encrypted)
+        has_credentials = bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted)
+        
+        if not user_prefs.paperless_url or (not has_token and not has_credentials):
             raise HTTPException(
                 status_code=400, detail="Paperless configuration is incomplete"
             )

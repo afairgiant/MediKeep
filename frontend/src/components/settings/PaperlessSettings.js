@@ -24,20 +24,22 @@ const PaperlessSettings = ({
   
   // Track previous URL and token to detect actual changes
   const prevUrlRef = useRef();
-  const prevApiTokenRef = useRef();
+  const prevHasTokenRef = useRef();
 
   // Initialize connection status for saved settings
   useEffect(() => {
     const currentUrl = preferences?.paperless_url;
     
-    const currentApiToken = preferences?.paperless_api_token;
+    // Check for token existence using the backend's has_token field or form token
+    const currentHasToken = preferences?.paperless_has_token || 
+                           (preferences?.paperless_api_token && preferences.paperless_api_token.trim() !== '');
     
-    // Check if URL or API token actually changed (not just component re-render)
+    // Check if URL or token existence actually changed (not just component re-render)
     const urlChanged = prevUrlRef.current !== undefined && prevUrlRef.current !== currentUrl;
-    const apiTokenChanged = prevApiTokenRef.current !== undefined && prevApiTokenRef.current !== currentApiToken;
+    const tokenChanged = prevHasTokenRef.current !== undefined && prevHasTokenRef.current !== currentHasToken;
     
-    if (urlChanged || apiTokenChanged) {
-      // URL or API token changed - reset connection status
+    if (urlChanged || tokenChanged) {
+      // URL or token availability changed - reset connection status
       setConnectionStatus('disconnected');
       setServerInfo(null);
       
@@ -45,7 +47,7 @@ const PaperlessSettings = ({
         component: 'PaperlessSettings',
         oldUrl: prevUrlRef.current,
         newUrl: currentUrl,
-        tokenChanged: apiTokenChanged
+        tokenChanged: tokenChanged
       });
     } else if (currentUrl && connectionStatus === 'disconnected' && prevUrlRef.current === undefined) {
       // First load with saved URL - assume it was previously working
@@ -63,14 +65,14 @@ const PaperlessSettings = ({
     
     // Update refs for next comparison
     prevUrlRef.current = currentUrl;
-    prevApiTokenRef.current = currentApiToken;
+    prevHasTokenRef.current = currentHasToken;
     
     // Only set to disconnected if we truly have no URL
     if (!currentUrl) {
       setConnectionStatus('disconnected');
       setServerInfo(null);
     }
-  }, [preferences?.paperless_url, preferences?.paperless_api_token, connectionStatus]);
+  }, [preferences?.paperless_url, preferences?.paperless_api_token, preferences?.paperless_has_token, connectionStatus]);
 
   /**
    * Handle connection test
