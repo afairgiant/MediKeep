@@ -908,29 +908,31 @@ async def get_paperless_task_status(
                                 })
                                 
                                 # Extract document ID from the task result
-                                # Paperless returns document ID in 'id' field for the created document
+                                # Paperless returns document ID in 'related_document' field, NOT 'id' (which is task ID)
                                 logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - Full task result: {task}")
                                 logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('id'): {task.get('id')}")
                                 logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('related_document'): {task.get('related_document')}")
                                 logger.error(f"🔍 DOCUMENT ID EXTRACTION DEBUG - task.get('result'): {task.get('result')}")
                                 
-                                document_id = task.get('id')
-                                extraction_method = "task.id"
+                                # FIXED: Try related_document FIRST (this is the actual document ID)
+                                document_id = task.get('related_document')
+                                extraction_method = "task.related_document"
                                 
                                 # Fallback to other possible locations if not found
                                 if not document_id:
-                                    document_id = task.get('related_document')
-                                    extraction_method = "task.related_document"
+                                    if isinstance(task.get('result'), dict):
+                                        document_id = task.get('result', {}).get('document_id')
+                                        extraction_method = "task.result.document_id"
+                                    elif isinstance(task.get('result'), str):
+                                        # Try to extract from result string like "Success. New document id 2744 created"
+                                        match = re.search(r'document id (\d+)', task.get('result', ''))
+                                        if match:
+                                            document_id = match.group(1)
+                                            extraction_method = "regex_from_result_string"
+                                    # Only use task.id as LAST resort since it's the task ID, not document ID
                                     if not document_id:
-                                        if isinstance(task.get('result'), dict):
-                                            document_id = task.get('result', {}).get('document_id')
-                                            extraction_method = "task.result.document_id"
-                                        elif isinstance(task.get('result'), str):
-                                            # Try to extract from result string like "Success. New document id 2744 created"
-                                            match = re.search(r'document id (\d+)', task.get('result', ''))
-                                            if match:
-                                                document_id = match.group(1)
-                                                extraction_method = "regex_from_result_string"
+                                        document_id = task.get('id')
+                                        extraction_method = "task.id (fallback - may be incorrect)"
                                 
                                 logger.error(f"🔍 EXTRACTED DOCUMENT ID: {document_id} (type: {type(document_id)}) via {extraction_method}", extra={
                                     "user_id": current_user.id,
