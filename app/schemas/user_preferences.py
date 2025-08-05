@@ -10,6 +10,7 @@ class UserPreferencesBase(BaseModel):
     unit_system: str
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None
+    paperless_api_token: Optional[str] = None
     paperless_username: Optional[str] = None
     paperless_password: Optional[str] = None
     default_storage_backend: Optional[str] = "local"
@@ -211,8 +212,9 @@ class PaperlessConnectionData(BaseModel):
     """Schema for paperless connection data with validation."""
     
     paperless_url: str
-    paperless_username: str
-    paperless_password: str
+    paperless_api_token: Optional[str] = None
+    paperless_username: Optional[str] = None
+    paperless_password: Optional[str] = None
     
     @validator('paperless_url')
     def validate_url(cls, v):
@@ -260,20 +262,51 @@ class PaperlessConnectionData(BaseModel):
         
         return v.rstrip('/')
     
+    @validator('paperless_api_token')
+    def validate_api_token(cls, v):
+        """Validate API token format if provided."""
+        if v is not None and v.strip():
+            if len(v.strip()) < 10:
+                raise ValueError('API token appears to be too short')
+            return v.strip()
+        return v
+    
     @validator('paperless_username')
-    def validate_username(cls, v):
-        """Validate username format."""
+    def validate_username(cls, v, values):
+        """Validate username format when provided."""
+        # If token is provided, username is optional
+        if values.get('paperless_api_token'):
+            return v.strip() if v else v
+        
+        # If no token, username is required
         if not v or len(v.strip()) == 0:
-            raise ValueError('Username is required')
+            raise ValueError('Username is required when no API token is provided')
         if len(v) < 2:
             raise ValueError('Username too short')
         return v.strip()
     
     @validator('paperless_password')
-    def validate_password(cls, v):
-        """Validate password format."""
+    def validate_password(cls, v, values):
+        """Validate password format when provided."""
+        # If token is provided, password is optional
+        if values.get('paperless_api_token'):
+            return v
+        
+        # If no token, password is required
         if not v or len(v.strip()) == 0:
-            raise ValueError('Password is required')
+            raise ValueError('Password is required when no API token is provided')
         if len(v) < 3:
             raise ValueError('Password too short')
+        return v
+    
+    @validator('paperless_password', always=True)
+    def validate_auth_method(cls, v, values):
+        """Ensure at least one authentication method is provided."""
+        token = values.get('paperless_api_token')
+        username = values.get('paperless_username')
+        
+        # If no token and no username/password combination
+        if not token and (not username or not v):
+            raise ValueError('Either API token or username/password combination is required')
+        
         return v

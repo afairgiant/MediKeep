@@ -9,16 +9,26 @@ import { apiService } from './index';
 /**
  * Test connection to paperless-ngx instance
  * @param {string} paperlessUrl - Paperless-ngx instance URL
- * @param {string} username - Username for authentication
- * @param {string} password - Password for authentication
+ * @param {string} username - Username for authentication (optional if apiToken provided)
+ * @param {string} password - Password for authentication (optional if apiToken provided)
+ * @param {string} apiToken - API token for authentication (optional)
  * @returns {Promise} Connection test results
  */
-export const testPaperlessConnection = async (paperlessUrl, username, password) => {
-  return apiService.post('/paperless/test-connection', {
-    paperless_url: paperlessUrl,
-    paperless_username: username,
-    paperless_password: password
-  });
+export const testPaperlessConnection = async (paperlessUrl, username, password, apiToken) => {
+  const payload = {
+    paperless_url: paperlessUrl
+  };
+
+  // Add API token if provided (prioritized over username/password)
+  if (apiToken) {
+    payload.paperless_api_token = apiToken;
+  } else {
+    // Only add username/password if no API token is provided
+    payload.paperless_username = username;
+    payload.paperless_password = password;
+  }
+
+  return apiService.post('/paperless/test-connection', payload);
 };
 
 /**
@@ -26,8 +36,9 @@ export const testPaperlessConnection = async (paperlessUrl, username, password) 
  * @param {Object} settings - Paperless settings to update
  * @param {boolean} settings.paperless_enabled - Enable/disable paperless integration
  * @param {string} settings.paperless_url - Paperless-ngx instance URL
- * @param {string} settings.paperless_username - Username for authentication
- * @param {string} settings.paperless_password - Password for authentication
+ * @param {string} settings.paperless_api_token - API token for authentication (optional)
+ * @param {string} settings.paperless_username - Username for authentication (optional if token provided)
+ * @param {string} settings.paperless_password - Password for authentication (optional if token provided)
  * @param {string} settings.default_storage_backend - Default storage backend ('local' or 'paperless')
  * @param {boolean} settings.paperless_auto_sync - Enable automatic sync
  * @param {boolean} settings.paperless_sync_tags - Enable tag synchronization

@@ -195,8 +195,61 @@ const DocumentManager = ({
     if (isManualSync) setSyncLoading(true);
     
     try {
+      logger.info('document_manager_sync_check_start', 'Starting Paperless sync status check', {
+        entityType,
+        entityId,
+        isManualSync,
+        component: 'DocumentManager',
+      });
+
       const status = await apiService.checkPaperlessSyncStatus();
       setSyncStatus(status);
+      
+      // Count missing files and errors for logging and user notification
+      const missingCount = Object.values(status).filter(exists => exists === false).length;
+      const errorCount = Object.values(status).filter(exists => exists === null).length;
+      const totalChecked = Object.keys(status).length;
+      
+      logger.info('document_manager_sync_check_completed', 'Paperless sync status check completed', {
+        entityType,
+        entityId,
+        isManualSync,
+        totalFilesChecked: totalChecked,
+        missingFilesFound: missingCount,
+        component: 'DocumentManager',
+      });
+
+      // Show notification for manual sync with results
+      if (isManualSync) {
+        const { notifications } = await import('@mantine/notifications');
+        const { IconCheck, IconAlertTriangle } = await import('@tabler/icons-react');
+        
+        if (missingCount > 0 || errorCount > 0) {
+          const message = [];
+          if (missingCount > 0) {
+            message.push(`${missingCount} missing document(s)`);
+          }
+          if (errorCount > 0) {
+            message.push(`${errorCount} document(s) with sync errors`);
+          }
+          
+          notifications.show({
+            title: 'Sync Check Complete',
+            message: `Found ${message.join(' and ')} out of ${totalChecked} checked. Check the file list for details.`,
+            color: 'yellow',
+            icon: <IconAlertTriangle size={16} />,
+            autoClose: 8000,
+          });
+        } else {
+          notifications.show({
+            title: 'Sync Check Complete',
+            message: `All ${totalChecked} Paperless documents are synced and available.`,
+            color: 'green',
+            icon: <IconCheck size={16} />,
+            autoClose: 5000,
+          });
+        }
+      }
       
       // Refresh file list to get updated sync status from database
       await loadFiles();
@@ -205,10 +258,24 @@ const DocumentManager = ({
         message: 'Failed to check Paperless sync status',
         entityType,
         entityId,
+        isManualSync,
         error: err.message,
         component: 'DocumentManager',
       });
-      // Don't show error to user for sync checks - it's optional
+      
+      // Show error notification for manual sync
+      if (isManualSync) {
+        const { notifications } = await import('@mantine/notifications');
+        const { IconX } = await import('@tabler/icons-react');
+        
+        notifications.show({
+          title: 'Sync Check Failed',
+          message: `Failed to check Paperless sync status: ${err.message}. Please check your Paperless connection.`,
+          color: 'red',
+          icon: <IconX size={16} />,
+          autoClose: 8000,
+        });
+      }
     } finally {
       if (isManualSync) setSyncLoading(false);
     }

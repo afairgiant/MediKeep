@@ -936,30 +936,82 @@ class ApiService {
   }
 
   // Check Paperless document sync status
-  checkPaperlessSyncStatus(signal) {
+  async checkPaperlessSyncStatus(signal) {
+    // Create a timeout signal to prevent hanging requests
+    let timeoutId;
+    const timeoutSignal = new AbortController();
+    
     try {
       logger.debug('api_paperless_sync_check', 'Checking Paperless sync status', {
         component: 'ApiService',
       });
 
-      return this.post('/entity-files/sync/paperless', {}, { 
-        signal,
+      if (!signal) {
+        // Set 30-second timeout for sync check requests
+        timeoutId = setTimeout(() => {
+          timeoutSignal.abort();
+        }, 30000);
+      }
+
+      const finalSignal = signal || timeoutSignal.signal;
+
+      const result = await this.post('/entity-files/sync/paperless', {}, { 
+        signal: finalSignal,
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
         }
       });
+
+      // Clear timeout if request completed successfully
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      logger.info('api_paperless_sync_check_success', 'Paperless sync status check completed', {
+        filesChecked: Object.keys(result || {}).length,
+        component: 'ApiService',
+      });
+
+      return result;
     } catch (error) {
+      // Clear timeout if request failed
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Enhanced error logging for better debugging
       logger.error(
         'api_paperless_sync_check_error',
         'Failed to check Paperless sync status',
         {
           error: error.message,
+          errorStack: error.stack,
+          errorResponse: error.response,
+          isAbortError: error.name === 'AbortError',
           component: 'ApiService',
         }
       );
-      throw error;
+
+      // Provide more specific error messages for common issues
+      let enhancedError = error;
+      if (error.name === 'AbortError') {
+        enhancedError = new Error('Sync check timed out. Please check your Paperless connection and try again.');
+      } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        enhancedError = new Error('Authentication failed. Please check your Paperless credentials in Settings.');
+      } else if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
+        enhancedError = new Error('Access denied. Please verify your Paperless permissions.');
+      } else if (error.message?.includes('404')) {
+        enhancedError = new Error('Paperless API endpoint not found. Please check your Paperless URL configuration.');
+      } else if (error.message?.includes('500')) {
+        enhancedError = new Error('Paperless server error. Please check your Paperless instance status.');
+      } else if (error.message?.includes('ECONNREFUSED') || error.message?.includes('Network')) {
+        enhancedError = new Error('Cannot connect to Paperless. Please check your Paperless URL and network connection.');
+      }
+
+      enhancedError.originalError = error;
+      throw enhancedError;
     }
   }
 

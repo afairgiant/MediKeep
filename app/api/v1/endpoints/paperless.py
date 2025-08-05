@@ -17,13 +17,30 @@ from app.core.database import get_db
 from app.api.deps import get_current_user
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
-from app.services.paperless_service import create_paperless_service_with_username_password, PaperlessConnectionError, PaperlessAuthenticationError, PaperlessUploadError, PaperlessError
+from app.services.paperless_service import (
+    create_paperless_service,
+    create_paperless_service_with_username_password, 
+    create_paperless_service_with_token,
+    PaperlessConnectionError, 
+    PaperlessAuthenticationError, 
+    PaperlessUploadError, 
+    PaperlessError
+)
 from app.crud.user_preferences import user_preferences
 from app.services.credential_encryption import credential_encryption, SecurityError
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+
+def get_preferred_auth_method(user_prefs) -> str:
+    """Determine the preferred authentication method based on available credentials."""
+    if user_prefs.paperless_api_token_encrypted:
+        return "token"
+    elif user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted:
+        return "basic_auth"
+    return "none"
 
 
 def _update_entity_file_from_task_result(db: Session, task_uuid: str, task_result: dict) -> None:
@@ -165,47 +182,87 @@ async def test_paperless_connection(
             "endpoint": "test_paperless_connection"
         })
         
-        # Check if we need to use saved credentials
-        use_saved_credentials = (not connection_data.paperless_username or 
+        # Determine authentication method and credentials
+        use_saved_credentials = (not connection_data.paperless_api_token and 
+                               not connection_data.paperless_username and 
                                not connection_data.paperless_password)
+        
+        encrypted_token = None
+        encrypted_username = None
+        encrypted_password = None
         
         if use_saved_credentials:
             logger.info("Using saved credentials for connection test")
             # Get user preferences with saved credentials
             user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
             
-            if not user_prefs or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+            if not user_prefs:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No saved credentials found. Please enter username and password."
+                    detail="No saved credentials found. Please provide authentication details."
                 )
             
-            # Use saved encrypted credentials
+            # Check what saved credentials are available
+            has_token = bool(user_prefs.paperless_api_token_encrypted)
+            has_basic = bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted)
+            
+            if not has_token and not has_basic:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No saved authentication credentials found. Please provide token or username/password."
+                )
+            
+            # Use saved encrypted credentials (smart factory will prioritize token)
+            encrypted_token = user_prefs.paperless_api_token_encrypted
             encrypted_username = user_prefs.paperless_username_encrypted
             encrypted_password = user_prefs.paperless_password_encrypted
-            logger.info("Using saved encrypted credentials for test")
+            logger.info(f"Using saved credentials: token={'yes' if has_token else 'no'}, basic={'yes' if has_basic else 'no'}")
         else:
             # Use provided credentials, encrypt them
-            logger.info("Encrypting provided credentials...")
-            encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
-            encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
-            logger.info("Credentials encrypted successfully")
+            logger.error(f"🔍 API DEBUG - Using provided credentials for test")
+            logger.error(f"🔍 API DEBUG - Raw token from request: '{connection_data.paperless_api_token}'")
+            logger.error(f"🔍 API DEBUG - Raw token length: {len(connection_data.paperless_api_token) if connection_data.paperless_api_token else 0}")
+            logger.error(f"🔍 API DEBUG - Raw token type: {type(connection_data.paperless_api_token)}")
+            if connection_data.paperless_api_token:
+                encrypted_token = credential_encryption.encrypt_token(connection_data.paperless_api_token)
+                logger.error(f"🔍 API DEBUG - Token encrypted successfully, length: {len(encrypted_token) if encrypted_token else 0}")
+                logger.info("Token provided and encrypted")
+            
+            if connection_data.paperless_username and connection_data.paperless_password:
+                encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
+                encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
+                logger.info("Username/password provided and encrypted")
         
-        # Create paperless service for testing
-        logger.info("Creating paperless service...")
-        async with create_paperless_service_with_username_password(
+        # Create paperless service for testing using smart factory
+        logger.error(f"🔍 API DEBUG - Creating paperless service with smart factory...")
+        logger.error(f"🔍 API DEBUG - URL: {connection_data.paperless_url}")
+        logger.error(f"🔍 API DEBUG - Has encrypted_token: {bool(encrypted_token)}")
+        logger.error(f"🔍 API DEBUG - Has encrypted_username: {bool(encrypted_username)}")
+        logger.error(f"🔍 API DEBUG - Has encrypted_password: {bool(encrypted_password)}")
+        logger.error(f"🔍 API DEBUG - User ID: {current_user.id}")
+        
+        async with create_paperless_service(
             connection_data.paperless_url,
-            encrypted_username,
-            encrypted_password,
-            current_user.id
+            encrypted_token=encrypted_token,
+            encrypted_username=encrypted_username,
+            encrypted_password=encrypted_password,
+            user_id=current_user.id
         ) as paperless_service:
             logger.info("Paperless service created successfully")
             
             # Test the connection
+            logger.error(f"🔍 API DEBUG - About to call test_connection()")
             result = await paperless_service.test_connection()
+            logger.error(f"🔍 API DEBUG - test_connection() completed with result: {result}")
+            
+            # Add authentication method to result
+            result["auth_method"] = paperless_service.get_auth_type()
+            result["used_saved_credentials"] = use_saved_credentials
+            logger.error(f"🔍 API DEBUG - Final result with auth method: {result}")
             
             logger.info(f"Paperless connection test successful for user {current_user.id}", extra={
                 "user_id": current_user.id,
+                "auth_method": result["auth_method"],
                 "server_version": result.get("server_version"),
                 "api_version": result.get("api_version"),
                 "used_saved_credentials": use_saved_credentials
@@ -266,6 +323,14 @@ async def test_paperless_connection(
         )
         
     except Exception as e:
+        # Log the exception with more detail for debugging
+        logger.error(f"Unexpected error in paperless connection test", extra={
+            "user_id": current_user.id,
+            "paperless_url": connection_data.paperless_url,
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "stack_trace": traceback.format_exc()
+        })
         raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             public_message="An internal error occurred during connection test",
@@ -368,7 +433,9 @@ async def get_paperless_settings(
             return {
                 "paperless_enabled": False,
                 "paperless_url": "",
+                "paperless_has_token": False,
                 "paperless_has_credentials": False,
+                "paperless_auth_method": "none",
                 "default_storage_backend": "local",
                 "paperless_auto_sync": False,
                 "paperless_sync_tags": True
@@ -378,7 +445,9 @@ async def get_paperless_settings(
         return {
             "paperless_enabled": user_prefs.paperless_enabled or False,
             "paperless_url": user_prefs.paperless_url or "",
+            "paperless_has_token": bool(user_prefs.paperless_api_token_encrypted),
             "paperless_has_credentials": bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted),
+            "paperless_auth_method": get_preferred_auth_method(user_prefs),
             "default_storage_backend": user_prefs.default_storage_backend or "local",
             "paperless_auto_sync": user_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": user_prefs.paperless_sync_tags or True
@@ -436,6 +505,12 @@ async def update_paperless_settings(
         if "paperless_url" in settings:
             update_data["paperless_url"] = settings["paperless_url"]
             
+        if "paperless_api_token" in settings and settings["paperless_api_token"]:
+            # Encrypt the API token before storing
+            update_data["paperless_api_token_encrypted"] = credential_encryption.encrypt_token(
+                settings["paperless_api_token"]
+            )
+            
         if "paperless_username" in settings and settings["paperless_username"]:
             # Encrypt the username before storing
             update_data["paperless_username_encrypted"] = credential_encryption.encrypt_token(
@@ -469,7 +544,9 @@ async def update_paperless_settings(
         return {
             "paperless_enabled": updated_prefs.paperless_enabled or False,
             "paperless_url": updated_prefs.paperless_url or "",
+            "paperless_has_token": bool(updated_prefs.paperless_api_token_encrypted),
             "paperless_has_credentials": bool(updated_prefs.paperless_username_encrypted and updated_prefs.paperless_password_encrypted),
+            "paperless_auth_method": get_preferred_auth_method(updated_prefs),
             "default_storage_backend": updated_prefs.default_storage_backend or "local",
             "paperless_auto_sync": updated_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": updated_prefs.paperless_sync_tags or True,
@@ -549,8 +626,10 @@ async def check_paperless_health(
                 }
             }
         
-        # Check if credentials exist
-        if not user_prefs.paperless_url or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+        # Check if credentials exist (either token or username/password)
+        has_auth = (user_prefs.paperless_api_token_encrypted or 
+                   (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+        if not user_prefs.paperless_url or not has_auth:
             return {
                 "status": "unconfigured",
                 "message": "Paperless configuration incomplete",
@@ -565,11 +644,12 @@ async def check_paperless_health(
             "paperless_url": user_prefs.paperless_url
         })
         
-        async with create_paperless_service_with_username_password(
+        async with create_paperless_service(
             user_prefs.paperless_url,
-            user_prefs.paperless_username_encrypted,
-            user_prefs.paperless_password_encrypted,
-            current_user.id
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=current_user.id
         ) as paperless_service:
             result = await paperless_service.test_connection()
             
@@ -772,13 +852,24 @@ async def get_paperless_task_status(
                 detail="Paperless integration is not enabled"
             )
         
-        if not user_prefs.paperless_url or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+        # Check if credentials exist (either token or username/password)
+        has_auth = (user_prefs.paperless_api_token_encrypted or 
+                   (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+        if not user_prefs.paperless_url or not has_auth:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Paperless configuration is incomplete"
+                detail="Paperless configuration is incomplete - missing URL or authentication credentials"
             )
         
-        # Create paperless service to check task status
+        # FOUND THE BUG! Upload uses create_paperless_service_with_username_password
+        # but task status was using create_paperless_service (which tries token first)
+        # Let's use the EXACT same method as upload to ensure consistency
+        logger.error(f"🔍 TASK STATUS DEBUG - Using EXACT same auth method as upload (username/password)")
+        
+        # Import the same method used by upload
+        from app.services.paperless_service import create_paperless_service_with_username_password
+        
+        # Create paperless service using SAME method as upload
         async with create_paperless_service_with_username_password(
             user_prefs.paperless_url,
             user_prefs.paperless_username_encrypted,
@@ -786,16 +877,17 @@ async def get_paperless_task_status(
             current_user.id
         ) as paperless_service:
             
-            # Just check the current task status without waiting
-            # Use the internal method that polls Paperless directly
+            # Now using same auth method as upload - should work!
             try:
-                import aiohttp
+                logger.info(f"Checking task {task_uuid} status for user {current_user.id} using same auth as upload")
                 
-                # Get a single task status from Paperless API
-                url = f"{paperless_service.base_url}/api/tasks/?task_id={task_uuid}"
-                async with paperless_service.session.get(url) as response:
+                # Use the proper _make_request method 
+                async with paperless_service._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                    logger.info(f"Task status response: HTTP {response.status}")
+                    
                     if response.status == 200:
                         tasks = await response.json()
+                        
                         # Handle both list format and paginated format
                         if isinstance(tasks, list):
                             task_list = tasks
@@ -926,7 +1018,15 @@ async def get_paperless_task_status(
                                 status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Task {task_uuid} not found"
                             )
+                    elif response.status == 403:
+                        logger.warning(f"Permission denied checking task {task_uuid} - auth may have failed")
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Permission denied accessing task status"
+                        )
                     else:
+                        response_text = await response.text()
+                        logger.warning(f"Task status check failed: HTTP {response.status} - {response_text[:100]}")
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Failed to check task status: HTTP {response.status}"

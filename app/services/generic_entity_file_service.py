@@ -619,12 +619,14 @@ class GenericEntityFileService:
                         detail="Paperless integration is not enabled"
                     )
                 
-                # Create paperless service and download content
-                paperless_service = create_paperless_service_with_username_password(
+                # Create paperless service using consistent auth method
+                from app.services.paperless_service import create_paperless_service
+                paperless_service = create_paperless_service(
                     user_prefs.paperless_url,
-                    user_prefs.paperless_username_encrypted,
-                    user_prefs.paperless_password_encrypted,
-                    user.id,
+                    encrypted_token=user_prefs.paperless_api_token_encrypted,
+                    encrypted_username=user_prefs.paperless_username_encrypted,
+                    encrypted_password=user_prefs.paperless_password_encrypted,
+                    user_id=user.id,
                 )
                 
                 async with paperless_service:
@@ -1149,6 +1151,89 @@ class GenericEntityFileService:
                 detail=f"Failed to download file from paperless: {str(e)}",
             )
 
+    async def _handle_orphaned_paperless_records(
+        self, db: Session, current_user_id: int
+    ) -> None:
+        """
+        Handle orphaned Paperless records - files marked as paperless storage
+        but with no document ID (indicating failed/incomplete uploads).
+        
+        These records need special handling because they can't be checked against 
+        Paperless since they don't have a valid document ID to query.
+        
+        Args:
+            db: Database session
+            current_user_id: User ID to check orphaned records for
+        """
+        try:
+            from app.models.models import LabResult, Procedure
+            from sqlalchemy import or_
+            
+            logger.info(f"🔍 ORPHAN CHECK - Checking orphaned paperless records for user {current_user_id}")
+            
+            # Find all paperless files WITHOUT document IDs (orphaned records)
+            orphaned_files = []
+            
+            # Lab result orphaned files (need to join through Patient)
+            from app.models.models import Patient
+            lab_orphans = (
+                db.query(EntityFile)
+                .join(LabResult, 
+                      (EntityFile.entity_type == "lab-result") & 
+                      (EntityFile.entity_id == LabResult.id))
+                .join(Patient, LabResult.patient_id == Patient.id)
+                .filter(
+                    Patient.user_id == current_user_id,
+                    EntityFile.storage_backend == "paperless",
+                    EntityFile.paperless_document_id.is_(None),  # NO document ID
+                )
+                .all()
+            )
+            orphaned_files.extend(lab_orphans)
+            
+            # Procedure orphaned files (need to join through Patient)
+            procedure_orphans = (
+                db.query(EntityFile)
+                .join(Procedure,
+                      (EntityFile.entity_type == "procedure") &
+                      (EntityFile.entity_id == Procedure.id))
+                .join(Patient, Procedure.patient_id == Patient.id)
+                .filter(
+                    Patient.user_id == current_user_id,
+                    EntityFile.storage_backend == "paperless",
+                    EntityFile.paperless_document_id.is_(None),  # NO document ID
+                )
+                .all()
+            )
+            orphaned_files.extend(procedure_orphans)
+            
+            if orphaned_files:
+                logger.warning(f"🔍 ORPHAN CHECK - Found {len(orphaned_files)} orphaned paperless records for user {current_user_id}")
+                
+                for file_record in orphaned_files:
+                    old_status = file_record.sync_status
+                    
+                    # Mark as 'missing' since these files aren't accessible in Paperless
+                    file_record.sync_status = "missing"
+                    file_record.last_sync_at = get_utc_now()
+                    
+                    logger.warning(
+                        f"ORPHANED RECORD: {file_record.file_name} "
+                        f"(id: {file_record.id}, entity_type: {file_record.entity_type}, "
+                        f"status: {old_status} -> missing) - NO DOCUMENT ID, upload likely failed"
+                    )
+                
+                # Commit the changes
+                db.commit()
+                logger.info(f"🔍 ORPHAN CHECK - Updated {len(orphaned_files)} orphaned records to 'missing' status")
+            else:
+                logger.info(f"🔍 ORPHAN CHECK - No orphaned paperless records found for user {current_user_id}")
+                
+        except Exception as e:
+            logger.error(f"Error handling orphaned paperless records for user {current_user_id}: {str(e)}")
+            db.rollback()
+            # Don't raise - this shouldn't stop the main sync check
+
     async def check_paperless_sync_status(
         self, db: Session, current_user_id: int
     ) -> Dict[int, bool]:
@@ -1164,17 +1249,70 @@ class GenericEntityFileService:
         Returns:
             Dictionary mapping file_id to existence status (True = exists, False = missing)
         """
+        logger.error(f"🔍 SYNC SERVICE - check_paperless_sync_status called for user {current_user_id}")
+        
+        # First, check for orphaned records (no document ID)
+        await self._handle_orphaned_paperless_records(db, current_user_id)
+        
         try:
-            # Get all paperless files for the user
-            paperless_files = (
+            # Get all paperless files for the user by joining with entity tables
+            from app.models.models import LabResult, Procedure
+            from sqlalchemy import or_
+            
+            # First, let's see what entity types actually exist for paperless files
+            all_paperless_files = (
                 db.query(EntityFile)
                 .filter(
                     EntityFile.storage_backend == "paperless",
                     EntityFile.paperless_document_id.isnot(None),
-                    # Filter by user would require joining with entities, for now check all
                 )
                 .all()
             )
+            
+            logger.info(f"🔍 DEBUG - Total paperless files in system: {len(all_paperless_files)}")
+            for f in all_paperless_files:
+                logger.info(f"🔍 DEBUG - File {f.id}: entity_type='{f.entity_type}', entity_id={f.entity_id}, document_id={f.paperless_document_id}")
+            
+            # Build a union query to find paperless files across all entity types for this user
+            paperless_files = []
+            
+            # Query lab result files (need to join through Patient to get user_id)
+            logger.info(f"🔍 DEBUG - Querying lab result files for user {current_user_id}")
+            from app.models.models import Patient
+            lab_files = (
+                db.query(EntityFile)
+                .join(LabResult, 
+                      (EntityFile.entity_type == "lab-result") & 
+                      (EntityFile.entity_id == LabResult.id))
+                .join(Patient, LabResult.patient_id == Patient.id)
+                .filter(
+                    Patient.user_id == current_user_id,
+                    EntityFile.storage_backend == "paperless",
+                )
+                .all()
+            )
+            logger.info(f"🔍 DEBUG - Found {len(lab_files)} lab result files")
+            paperless_files.extend(lab_files)
+            
+            # Query procedure files (need to join through Patient to get user_id)
+            logger.info(f"🔍 DEBUG - Querying procedure files for user {current_user_id}")
+            procedure_files = (
+                db.query(EntityFile)
+                .join(Procedure,
+                      (EntityFile.entity_type == "procedure") &
+                      (EntityFile.entity_id == Procedure.id))
+                .join(Patient, Procedure.patient_id == Patient.id)
+                .filter(
+                    Patient.user_id == current_user_id,
+                    EntityFile.storage_backend == "paperless",
+                )
+                .all()
+            )
+            logger.info(f"🔍 DEBUG - Found {len(procedure_files)} procedure files")
+            paperless_files.extend(procedure_files)
+            
+            logger.info(f"Found {len(paperless_files)} paperless files for user {current_user_id}: "
+                       f"{len(lab_files)} lab results, {len(procedure_files)} procedures")
 
             if not paperless_files:
                 logger.info(f"No Paperless files found for sync check (user: {current_user_id})")
@@ -1191,16 +1329,26 @@ class GenericEntityFileService:
                 logger.warning(f"Cannot check paperless sync: user preferences not found or disabled (user: {current_user_id})")
                 return {}
 
-            if not all([user_prefs.paperless_url, user_prefs.paperless_username_encrypted, user_prefs.paperless_password_encrypted]):
+            # Check if credentials exist (either token or username/password)
+            has_auth = (user_prefs.paperless_api_token_encrypted or 
+                       (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+            if not user_prefs.paperless_url or not has_auth:
                 logger.warning(f"Cannot check paperless sync: incomplete paperless configuration (user: {current_user_id})")
                 return {}
 
-            # Create paperless service
-            paperless_service = create_paperless_service_with_username_password(
+            # Create paperless service using SAME auth method as upload for consistency
+            # This ensures sync check uses the exact same authentication as file uploads,
+            # preventing false missing document detection due to auth differences
+            from app.services.paperless_service import create_paperless_service
+            
+            logger.info(f"Creating paperless service for sync check using consistent auth method for user {current_user_id}")
+            
+            paperless_service = create_paperless_service(
                 user_prefs.paperless_url,
-                user_prefs.paperless_username_encrypted,
-                user_prefs.paperless_password_encrypted,
-                current_user_id,
+                encrypted_token=user_prefs.paperless_api_token_encrypted,
+                encrypted_username=user_prefs.paperless_username_encrypted,
+                encrypted_password=user_prefs.paperless_password_encrypted,
+                user_id=current_user_id,
             )
 
             sync_status = {}
@@ -1209,6 +1357,10 @@ class GenericEntityFileService:
             processing_count = 0
             
             logger.info(f"Starting sync check for {len(paperless_files)} Paperless documents (user: {current_user_id})")
+            logger.info(f"Sync check using auth method: {paperless_service.get_auth_type()}")
+            
+            # First pass: resolve any task UUIDs to document IDs if possible
+            await self._resolve_task_uuids_to_document_ids(db, paperless_service, paperless_files)
             
             # Check each document
             async with paperless_service:
@@ -1216,11 +1368,39 @@ class GenericEntityFileService:
                     try:
                         document_id = file_record.paperless_document_id
                         
+                        # Skip files that don't have a valid document ID
+                        if not document_id:
+                            # If orphan detection already marked this as missing, don't change it
+                            if file_record.sync_status == "missing":
+                                logger.info(f"🔍 SYNC CHECK - File {file_record.file_name} (id: {file_record.id}) already marked as missing (orphaned record)")
+                                sync_status[file_record.id] = False  # Mark as missing in sync status
+                                missing_count += 1
+                            else:
+                                # Mark as processing if not already marked as missing
+                                logger.info(f"🔍 SYNC CHECK - Skipping file {file_record.file_name} (id: {file_record.id}) - no document ID yet (likely still processing)")
+                                if file_record.sync_status != "processing":
+                                    file_record.sync_status = "processing"
+                                    file_record.last_sync_at = get_utc_now()
+                                    processing_count += 1
+                                sync_status[file_record.id] = True  # Don't mark as missing if still processing
+                            continue
+                        
+                        # Skip task UUIDs - they should be resolved to document IDs first
+                        if len(str(document_id)) == 36 and '-' in str(document_id):
+                            logger.info(f"🔍 SYNC CHECK - Skipping file {file_record.file_name} (id: {file_record.id}) - has task UUID {document_id}, should be resolved to document ID first")
+                            if file_record.sync_status != "processing":
+                                file_record.sync_status = "processing"
+                                file_record.last_sync_at = get_utc_now()
+                                processing_count += 1
+                            sync_status[file_record.id] = True  # Don't mark as missing if still processing
+                            continue
+                        
                         # Log what we're checking
-                        logger.debug(f"Checking document {document_id} for file {file_record.file_name} (id: {file_record.id})")
+                        logger.info(f"🔍 SYNC CHECK - Checking document {document_id} for file {file_record.file_name} (id: {file_record.id})")
                         
                         # Check if document exists in Paperless
                         exists = await paperless_service.check_document_exists(document_id)
+                        logger.info(f"🔍 SYNC CHECK - Document {document_id} exists: {exists}")
                         sync_status[file_record.id] = exists
                         
                         # Update sync status in database based on result
@@ -1252,14 +1432,36 @@ class GenericEntityFileService:
                                 if old_status == "processing":
                                     processing_count += 1
                         
-                    except Exception as e:
+                    except PaperlessAuthenticationError as auth_error:
+                        # Authentication errors should stop the entire sync check
+                        logger.error(f"Authentication error during sync check: {str(auth_error)}")
+                        raise auth_error
+                        
+                    except PaperlessError as paperless_error:
+                        # Handle specific paperless errors (e.g., connection issues)
                         error_count += 1
                         old_status = file_record.sync_status
                         
-                        logger.error(f"Error checking document {file_record.paperless_document_id} "
+                        logger.warning(f"Paperless error checking document {file_record.paperless_document_id} "
+                                     f"for file {file_record.file_name}: {str(paperless_error)}")
+                        
+                        # For connection/network errors, don't mark as missing - mark as error
+                        sync_status[file_record.id] = None  # Indicates error, not missing
+                        file_record.sync_status = "error"
+                        file_record.last_sync_at = get_utc_now()
+                        
+                        logger.warning(f"Document marked as ERROR: {file_record.file_name} "
+                                     f"(id: {file_record.id}, {old_status} -> error)")
+                        
+                    except Exception as e:
+                        # Unexpected errors
+                        error_count += 1
+                        old_status = file_record.sync_status
+                        
+                        logger.error(f"Unexpected error checking document {file_record.paperless_document_id} "
                                    f"for file {file_record.file_name}: {str(e)}")
                         
-                        sync_status[file_record.id] = False
+                        sync_status[file_record.id] = None  # Indicates error, not missing
                         file_record.sync_status = "error"
                         file_record.last_sync_at = get_utc_now()
                         
@@ -1286,6 +1488,11 @@ class GenericEntityFileService:
             if missing_count > 0:
                 missing_files = [f for f in paperless_files if sync_status.get(f.id) is False]
                 logger.warning(f"Missing documents detected: {[f.file_name for f in missing_files]}")
+            
+            # Log error files for debugging
+            if error_count > 0:
+                error_files = [f for f in paperless_files if sync_status.get(f.id) is None]
+                logger.warning(f"Documents with errors during sync check: {[f.file_name for f in error_files]}")
 
             return sync_status
 
@@ -1293,6 +1500,112 @@ class GenericEntityFileService:
             logger.error(f"Error checking paperless sync status: {str(e)}")
             # Return empty dict to indicate complete failure
             return {}
+
+    async def _resolve_task_uuids_to_document_ids(self, db: Session, paperless_service, paperless_files: List) -> None:
+        """
+        Helper method to resolve task UUIDs to document IDs for files that have completed processing.
+        
+        Args:
+            db: Database session
+            paperless_service: Paperless service instance
+            paperless_files: List of EntityFile records with paperless storage
+        """
+        try:
+            import re
+            
+            # Find files that have task UUIDs instead of document IDs
+            files_with_tasks = [
+                f for f in paperless_files 
+                if f.paperless_document_id and len(str(f.paperless_document_id)) == 36 and '-' in str(f.paperless_document_id)
+            ]
+            
+            if not files_with_tasks:
+                logger.info("No task UUIDs found to resolve during sync check")
+                return
+                
+            logger.info(f"Found {len(files_with_tasks)} files with task UUIDs to resolve during sync check")
+            
+            for file_record in files_with_tasks:
+                try:
+                    task_uuid = file_record.paperless_document_id
+                    logger.info(f"Attempting to resolve task UUID {task_uuid} for file {file_record.file_name}")
+                    
+                    # Check task status to get document ID
+                    async with paperless_service._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            
+                            # Handle both single task and list responses
+                            if isinstance(data, list):
+                                if not data:
+                                    logger.info(f"Task {task_uuid} not found in API response")
+                                    continue
+                                task_data = data[0]
+                            elif isinstance(data, dict):
+                                # If results key exists, it's paginated
+                                if "results" in data and data["results"]:
+                                    task_data = data["results"][0]
+                                else:
+                                    task_data = data
+                            else:
+                                logger.warning(f"Unexpected task response format: {type(data)}")
+                                continue
+                            
+                            status = task_data.get("status", "").lower()
+                            
+                            if status == "success":
+                                # Extract document ID from result
+                                result = task_data.get("result", {})
+                                document_id = None
+                                
+                                if isinstance(result, dict):
+                                    document_id = result.get("document_id") or result.get("id")
+                                elif isinstance(result, str):
+                                    # Parse document ID from string like "Success. New document id 2677 created"
+                                    match = re.search(r'document id (\d+)', result)
+                                    if match:
+                                        document_id = match.group(1)
+                                    else:
+                                        document_id = result
+                                else:
+                                    document_id = result
+                                    
+                                if document_id:
+                                    # Update the file record with the actual document ID
+                                    old_id = file_record.paperless_document_id
+                                    file_record.paperless_document_id = str(document_id)
+                                    file_record.paperless_task_uuid = None  # Clear task UUID
+                                    file_record.sync_status = "synced"
+                                    file_record.last_sync_at = get_utc_now()
+                                    
+                                    logger.info(f"Resolved task UUID {old_id} to document ID {document_id} for file {file_record.file_name}")
+                                else:
+                                    logger.warning(f"Task {task_uuid} completed successfully but no document ID found for file {file_record.file_name}")
+                                    
+                            elif status == "failure":
+                                # Task failed - mark as failed
+                                error_info = task_data.get("result", "Unknown error")
+                                file_record.sync_status = "failed"
+                                file_record.last_sync_at = get_utc_now()
+                                logger.warning(f"Task {task_uuid} failed for file {file_record.file_name}: {error_info}")
+                                
+                            # If task is still pending/processing, leave as-is
+                                
+                except Exception as task_error:
+                    logger.error(f"Error resolving task UUID {file_record.paperless_document_id} for file {file_record.file_name}: {str(task_error)}")
+                    continue
+                    
+            # Commit any document ID updates
+            try:
+                db.commit()
+                logger.info("Committed task UUID to document ID resolutions")
+            except Exception as commit_error:
+                logger.error(f"Failed to commit task UUID resolutions: {str(commit_error)}")
+                db.rollback()
+                
+        except Exception as e:
+            logger.error(f"Error in _resolve_task_uuids_to_document_ids: {str(e)}")
+            # Don't re-raise - this is a best-effort operation
 
     async def update_processing_files(
         self, db: Session, current_user_id: int
