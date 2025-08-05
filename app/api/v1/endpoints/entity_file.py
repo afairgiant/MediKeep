@@ -668,6 +668,7 @@ async def check_paperless_sync_status(
     Returns:
         Dictionary mapping file_id to existence status (True = exists, False = missing)
     """
+    logger.error(f"🔍 SYNC ENDPOINT - Starting paperless sync check for user {current_user_id}")
     try:
         sync_status = await file_service.check_paperless_sync_status(db, current_user_id)
         

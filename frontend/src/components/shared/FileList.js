@@ -274,7 +274,7 @@ const FileList = ({
           processedFiles.map((file) => {
             const { icon: FileIcon, color } = getFileIcon(file.file_name, file.file_type);
             const isMarkedForDeletion = filesToDelete.includes(file.id);
-            // Check if file is missing based on database sync_status or real-time syncStatus
+            // Check if file is missing (deleted from Paperless OR no document ID)
             const isMissing = file.storage_backend === 'paperless' && 
                              (file.sync_status === 'missing' || syncStatus[file.id] === false);
             
