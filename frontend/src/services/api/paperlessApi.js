@@ -157,8 +157,10 @@ export const exportPaperlessData = async () => {
  * @param {number} intervalMs - Polling interval in milliseconds (default: 1000)
  * @returns {Promise} Task status and result
  */
-export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, intervalMs = 1000) => {
+export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, intervalMs = 1000, onBackgroundTransition = null) => {
   console.log(`🔍 Starting task polling for ${taskUuid} with ${maxAttempts} max attempts`);
+  
+  const FOREGROUND_ATTEMPTS = 30; // 30 seconds of foreground polling
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -172,10 +174,27 @@ export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, interv
         return response;
       }
       
+      // After 30 seconds (30 attempts), transition to background processing
+      if (attempt === FOREGROUND_ATTEMPTS - 1 && onBackgroundTransition) {
+        console.log(`🔄 Transitioning to background processing after ${FOREGROUND_ATTEMPTS} attempts`);
+        
+        // Notify caller that we're going to background
+        onBackgroundTransition(taskUuid);
+        
+        // Return a special "processing" status to indicate background mode
+        return {
+          status: 'PROCESSING_BACKGROUND',
+          task_uuid: taskUuid,
+          message: 'Task is taking longer than expected, continuing in background'
+        };
+      }
+      
       // Wait before next attempt if task is still pending/running
       if (attempt < maxAttempts - 1) {
-        console.log(`⏱️ Waiting ${intervalMs}ms before next attempt...`);
-        await new Promise(resolve => setTimeout(resolve, intervalMs));
+        // Use longer intervals after transitioning to background (if we somehow get here)
+        const currentInterval = attempt >= FOREGROUND_ATTEMPTS ? 10000 : intervalMs;
+        console.log(`⏱️ Waiting ${currentInterval}ms before next attempt...`);
+        await new Promise(resolve => setTimeout(resolve, currentInterval));
       }
     } catch (error) {
       console.log(`❌ Attempt ${attempt + 1}/${maxAttempts} failed:`, error.message);
@@ -188,6 +207,97 @@ export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, interv
   }
   
   throw new Error('Task polling timeout - task may still be processing');
+};
+
+/**
+ * Poll a background task and update the entity file when complete
+ * @param {string} taskUuid - The task UUID to poll
+ * @param {string} entityType - Type of entity (e.g., 'visit')  
+ * @param {number} entityId - ID of the entity
+ * @param {string} fileName - Name of the file
+ * @returns {Promise} Resolution result
+ */
+export const resolveBackgroundTask = async (taskUuid, entityType, entityId, fileName) => {
+  console.log(`🔄 Starting background task resolution for ${taskUuid}`);
+  
+  const MAX_BACKGROUND_ATTEMPTS = 60; // 10 minutes with 10-second intervals
+  const BACKGROUND_INTERVAL = 10000; // 10 seconds
+  
+  for (let attempt = 0; attempt < MAX_BACKGROUND_ATTEMPTS; attempt++) {
+    try {
+      const response = await apiService.get(`/paperless/tasks/${taskUuid}/status`);
+      
+      console.log(`🔄 Background attempt ${attempt + 1}/${MAX_BACKGROUND_ATTEMPTS}: Task status = ${response.status}`);
+      
+      // Check if task is completed (SUCCESS or FAILURE)
+      if (response.status === 'SUCCESS' || response.status === 'FAILURE') {
+        console.log(`✅ Background task completed after ${attempt + 1} attempts with status: ${response.status}`);
+        
+        // Update the entity file with the final result
+        try {
+          await apiService.post('/paperless/entity-files/update-background-task', {
+            entity_type: entityType,
+            entity_id: entityId,
+            file_name: fileName,
+            task_uuid: taskUuid,
+            task_result: response,
+            sync_status: response.status === 'SUCCESS' ? 'synced' : 'failed'
+          });
+          
+          // Show success notification
+          import('@mantine/notifications').then(({ notifications }) => {
+            notifications.show({
+              title: response.status === 'SUCCESS' ? 'Upload Complete' : 'Upload Failed',
+              message: response.status === 'SUCCESS' 
+                ? `${fileName} has been successfully processed by Paperless` 
+                : `${fileName} failed to process in Paperless`,
+              color: response.status === 'SUCCESS' ? 'green' : 'red',
+              autoClose: 8000,
+              withCloseButton: true,
+            });
+          }).catch(console.warn);
+          
+        } catch (updateError) {
+          console.error('❌ Failed to update entity file after background resolution:', updateError);
+        }
+        
+        return response;
+      }
+      
+      // Wait before next attempt if task is still pending/running
+      if (attempt < MAX_BACKGROUND_ATTEMPTS - 1) {
+        console.log(`⏱️ Background waiting ${BACKGROUND_INTERVAL}ms before next attempt...`);
+        await new Promise(resolve => setTimeout(resolve, BACKGROUND_INTERVAL));
+      }
+    } catch (error) {
+      console.log(`❌ Background attempt ${attempt + 1}/${MAX_BACKGROUND_ATTEMPTS} failed:`, error.message);
+      
+      // If we can't get task status, continue polling unless it's the last attempt
+      if (attempt === MAX_BACKGROUND_ATTEMPTS - 1) {
+        console.error('❌ Background task resolution failed after all attempts');
+        
+        // Mark as failed
+        try {
+          await apiService.post('/paperless/entity-files/update-background-task', {
+            entity_type: entityType,
+            entity_id: entityId,
+            file_name: fileName,
+            task_uuid: taskUuid,
+            task_result: { status: 'FAILURE', error: error.message },
+            sync_status: 'failed'
+          });
+        } catch (updateError) {
+          console.error('❌ Failed to mark task as failed:', updateError);
+        }
+        
+        throw new Error(`Background task resolution failed: ${error.message}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, BACKGROUND_INTERVAL));
+    }
+  }
+  
+  console.error('❌ Background task resolution timed out');
+  throw new Error('Background task resolution timeout');
 };
 
 /**

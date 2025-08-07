@@ -595,8 +595,30 @@ class ApiService {
       // Import the pollPaperlessTaskStatus function
       const { pollPaperlessTaskStatus } = await import('./paperlessApi');
       
-      // Poll task status with extended timeout for document processing
-      const taskResult = await pollPaperlessTaskStatus(taskUuid, 60, 1000);
+      // Handle background transition notification
+      const handleBackgroundTransition = (taskUuid) => {
+        // Import notifications dynamically to avoid dependency issues
+        import('@mantine/notifications').then(({ notifications }) => {
+          notifications.show({
+            title: 'Upload Processing',
+            message: 'Paperless consumption is taking longer than expected, will continue to upload in background. Check your Paperless instance for when it is done.',
+            color: 'blue',
+            autoClose: 10000,
+            withCloseButton: true,
+          });
+        }).catch(console.warn);
+        
+        logger.info('api_upload_background_transition', 'Upload transitioned to background processing', {
+          entityType,
+          entityId,
+          fileName: file.name,
+          taskUuid,
+          component: 'ApiService',
+        });
+      };
+      
+      // Poll task status with background transition support
+      const taskResult = await pollPaperlessTaskStatus(taskUuid, 300, 1000, handleBackgroundTransition);
 
       logger.info('api_upload_task_complete', 'Paperless task monitoring completed', {
         entityType,
@@ -616,6 +638,57 @@ class ApiService {
         taskResultHasResult: !!taskResult?.result,
         component: 'ApiService',
       });
+
+      // Handle background processing status
+      if (taskResult?.status === 'PROCESSING_BACKGROUND') {
+        logger.info('api_upload_background_processing', 'Task moved to background processing', {
+          entityType,
+          entityId,
+          fileName: file.name,
+          taskUuid: taskResult.task_uuid,
+          component: 'ApiService',
+        });
+
+        // Store task UUID in the entity file for background tracking
+        await this.post('/paperless/entity-files/set-background-task', {
+          entity_type: entityType,
+          entity_id: entityId,
+          file_name: file.name,
+          task_uuid: taskResult.task_uuid,
+          sync_status: 'processing'
+        });
+
+        // Start background resolution immediately (don't await - let it run in background)
+        const { resolveBackgroundTask } = await import('./paperlessApi');
+        resolveBackgroundTask(taskResult.task_uuid, entityType, entityId, file.name).catch(error => {
+          logger.error('api_upload_background_resolution_error', 'Background task resolution failed', {
+            entityType,
+            entityId,
+            fileName: file.name,
+            taskUuid: taskResult.task_uuid,
+            error: error.message,
+            component: 'ApiService',
+          });
+        });
+
+        if (onProgress) {
+          onProgress({ 
+            status: 'processing', 
+            message: 'Document processing in background, you will be notified when complete',
+            isBackground: true
+          });
+        }
+
+        return {
+          ...uploadResult,
+          taskMonitored: true,
+          taskResult,
+          success: false, // Not complete yet
+          isBackgroundProcessing: true,
+          taskUuid: taskResult.task_uuid,
+          message: taskResult.message
+        };
+      }
 
       // Check if task was successful
       const isSuccess = taskResult?.status === 'SUCCESS' && 
