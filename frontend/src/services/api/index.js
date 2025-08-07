@@ -311,9 +311,16 @@ class ApiService {
     return this.get(`/${apiPath}/${entityId}`, { signal });
   }
 
-  createEntity(entityType, entityData, signal) {
+  createEntity(entityType, entityData, signal, patientId = null) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
-    return this.post(`/${apiPath}/`, entityData, { signal });
+    let url = `/${apiPath}/`;
+    
+    // Add patient_id query parameter if provided
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    
+    return this.post(url, entityData, { signal });
   }
 
   updateEntity(entityType, entityId, entityData, signal, patientId = null) {
@@ -1584,27 +1591,34 @@ class ApiService {
   }
 
   createEmergencyContact(emergencyContactData, signal) {
+    // Extract patient_id to pass as query parameter for multi-patient support
+    const { patient_id, ...bodyData } = emergencyContactData;
     return this.createEntity(
       ENTITY_TYPES.EMERGENCY_CONTACT,
-      emergencyContactData,
-      signal
+      bodyData,
+      signal,
+      patient_id
     );
   }
 
   updateEmergencyContact(emergencyContactId, emergencyContactData, signal) {
+    // Extract patient_id to pass as query parameter for multi-patient support
+    const { patient_id, ...bodyData } = emergencyContactData;
     return this.updateEntity(
       ENTITY_TYPES.EMERGENCY_CONTACT,
       emergencyContactId,
-      emergencyContactData,
-      signal
+      bodyData,
+      signal,
+      patient_id
     );
   }
 
-  deleteEmergencyContact(emergencyContactId, signal) {
+  deleteEmergencyContact(emergencyContactId, signal, patientId = null) {
     return this.deleteEntity(
       ENTITY_TYPES.EMERGENCY_CONTACT,
       emergencyContactId,
-      signal
+      signal,
+      patientId
     );
   }
 

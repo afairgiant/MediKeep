@@ -66,7 +66,7 @@ const EmergencyContacts = () => {
       create: (data, signal) => apiService.createEmergencyContact(data, signal),
       update: (id, data, signal) =>
         apiService.updateEmergencyContact(id, data, signal),
-      delete: (id, signal) => apiService.deleteEmergencyContact(id, signal),
+      delete: (id, signal, patientId) => apiService.deleteEmergencyContact(id, signal, patientId),
     },
     requiresPatient: true,
   });

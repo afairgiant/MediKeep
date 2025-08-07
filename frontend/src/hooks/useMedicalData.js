@@ -182,7 +182,13 @@ export const useMedicalData = config => {
       }
 
       const result = await execute(
-        async signal => await apiMethodsConfig.delete(id, signal),
+        async signal => {
+          // For multi-patient support, pass the current patient ID if available
+          if (entityName === 'emergency_contact' && currentPatientRef.current?.id) {
+            return await apiMethodsConfig.delete(id, signal, currentPatientRef.current.id);
+          }
+          return await apiMethodsConfig.delete(id, signal);
+        },
         { errorMessage: `Failed to delete ${entityName}` }
       );
 
