@@ -310,7 +310,9 @@ const Visits = () => {
   };
 
   const handleEditVisit = visit => {
+    resetSubmission(); // Reset submission state
     setEditingVisit(visit);
+    setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
       reason: visit.reason || '',
       date: visit.date ? visit.date.split('T')[0] : '',
