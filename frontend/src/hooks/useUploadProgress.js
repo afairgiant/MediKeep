@@ -268,6 +268,12 @@ export const useUploadProgress = () => {
     // Show notifications after state update to avoid render phase issues
     setTimeout(() => {
       const currentState = uploadStateRef.current;
+      
+      // Check if currentState is null (component may have unmounted)
+      if (!currentState || !currentState.files) {
+        return;
+      }
+      
       const completedFiles = currentState.files.filter(f => f.status === 'completed').length;
       const failedFiles = currentState.files.filter(f => f.status === 'failed').length;
       const totalFiles = currentState.files.length;

@@ -132,13 +132,14 @@ class PaperlessServiceBase(ABC):
             await self.session.close()
             self.session = None
 
-    def _make_request(self, method: str, endpoint: str, **kwargs):
+    def _make_request(self, method: str, endpoint: str, custom_timeout: Optional[int] = None, **kwargs):
         """
         Create HTTP request context manager with validation.
 
         Args:
             method: HTTP method
             endpoint: API endpoint
+            custom_timeout: Optional custom timeout in seconds for this specific request
             **kwargs: Additional request parameters
 
         Returns:
@@ -158,6 +159,13 @@ class PaperlessServiceBase(ABC):
         headers = kwargs.get("headers", {})
         headers["X-Request-ID"] = request_id
         kwargs["headers"] = headers
+
+        # Apply custom timeout if provided
+        if custom_timeout is not None:
+            kwargs["timeout"] = aiohttp.ClientTimeout(
+                total=custom_timeout,
+                connect=settings.PAPERLESS_CONNECT_TIMEOUT
+            )
 
         return self._request_context_manager(
             method, full_url, request_id, endpoint, **kwargs
@@ -516,10 +524,13 @@ class PaperlessServiceToken(PaperlessServiceBase):
             if document_type:
                 form_data.add_field("document_type", document_type)
 
-            # Make upload request
+            # Make upload request with extended timeout
             logger.info(f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)")
+            logger.info(f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s to prevent timeout during processing")
             async with self._make_request(
-                "POST", "/api/documents/post_document/", data=form_data
+                "POST", "/api/documents/post_document/", 
+                custom_timeout=settings.PAPERLESS_UPLOAD_TIMEOUT,
+                data=form_data
             ) as response:
 
                 logger.info(f"Paperless upload response: HTTP {response.status}")
@@ -1256,10 +1267,13 @@ class PaperlessService(PaperlessServiceBase):
             if document_type:
                 form_data.add_field("document_type", document_type)
 
-            # Make upload request
+            # Make upload request with extended timeout
             logger.info(f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)")
+            logger.info(f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s to prevent timeout during processing")
             async with self._make_request(
-                "POST", "/api/documents/post_document/", data=form_data
+                "POST", "/api/documents/post_document/", 
+                custom_timeout=settings.PAPERLESS_UPLOAD_TIMEOUT,
+                data=form_data
             ) as response:
 
                 logger.info(f"Paperless upload response: HTTP {response.status}")

@@ -747,6 +747,12 @@ const useDocumentManagerCore = ({
       );
 
       // Handle different upload outcomes
+      console.log('DocumentManagerCore completion check:', {
+        taskMonitored: uploadResult.taskMonitored,
+        selectedStorageBackend,
+        fileName: file.name
+      });
+      
       if (uploadResult.taskMonitored && selectedStorageBackend === 'paperless') {
         // Import duplicate handling utilities
         const { handlePaperlessTaskCompletion } = await import('../../utils/errorMessageUtils');

@@ -52,6 +52,7 @@ const RenderModeContent = memo(({
   onAddPendingFile,
   onRemovePendingFile,
   onPendingFileDescriptionChange,
+  handleImmediateUpload, // For immediate uploads
 }) => {
   // Performance optimization: Early return for loading state
   if (loading && files.length === 0) {
@@ -231,7 +232,19 @@ const RenderModeContent = memo(({
         <FileUploadZone
           onUpload={uploadedFiles => {
             uploadedFiles.forEach(({ file, description }) => {
-              onAddPendingFile(file, description);
+              // Use different approaches based on mode
+              if (mode === 'create') {
+                // Creation mode: use pending files (no entity ID yet)
+                console.log('RenderModeContent: adding to pending files for creation mode:', file.name);
+                onAddPendingFile(file, description);
+              } else if (handleImmediateUpload) {
+                // Edit/view mode: use immediate upload (entity ID exists)
+                console.log('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
+                handleImmediateUpload(file, description || '');
+              } else {
+                console.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
+                onAddPendingFile(file, description);
+              }
             });
           }}
           acceptedTypes={config.acceptedTypes}
@@ -239,6 +252,7 @@ const RenderModeContent = memo(({
           maxFiles={config.maxFiles}
           selectedStorageBackend={selectedStorageBackend}
           paperlessSettings={paperlessSettings}
+          mode={mode}
         />
 
         {pendingFilesList}
@@ -254,7 +268,19 @@ const RenderModeContent = memo(({
         <FileUploadZone
           onUpload={uploadedFiles => {
             uploadedFiles.forEach(({ file, description }) => {
-              onAddPendingFile(file, description);
+              // Use different approaches based on mode
+              if (mode === 'create') {
+                // Creation mode: use pending files (no entity ID yet)
+                console.log('RenderModeContent: adding to pending files for creation mode:', file.name);
+                onAddPendingFile(file, description);
+              } else if (handleImmediateUpload) {
+                // Edit/view mode: use immediate upload (entity ID exists)
+                console.log('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
+                handleImmediateUpload(file, description || '');
+              } else {
+                console.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
+                onAddPendingFile(file, description);
+              }
             });
           }}
           acceptedTypes={config.acceptedTypes}
