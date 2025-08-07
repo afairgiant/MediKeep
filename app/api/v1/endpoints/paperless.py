@@ -12,6 +12,7 @@ import traceback
 from typing import Dict, Any
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -1353,3 +1354,217 @@ async def test_paperless_connection_v2(
             "url": connection_data.paperless_url
         })
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Connection test failed")
+
+
+class BackgroundTaskRequest(BaseModel):
+    """Request model for setting background task"""
+    entity_type: str = Field(..., description="Type of entity (e.g., 'visit', 'medication')")
+    entity_id: int = Field(..., description="ID of the entity")
+    file_name: str = Field(..., description="Name of the uploaded file")
+    task_uuid: str = Field(..., description="Paperless task UUID")
+    sync_status: str = Field(default="processing", description="Sync status to set")
+
+
+@router.post("/entity-files/set-background-task")
+async def set_background_task(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    request_data: BackgroundTaskRequest
+) -> Dict[str, Any]:
+    """
+    Set an entity file to background processing status with task UUID.
+    
+    This endpoint is called when an upload takes longer than expected
+    and needs to be tracked in the background.
+    """
+    try:
+        logger.info(f"Setting background task for {request_data.entity_type} {request_data.entity_id}", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status
+        })
+
+        # Find the entity file record
+        from app.models.models import EntityFile
+        
+        # Look for the most recent entity file for this entity and filename
+        entity_file_record = db.query(EntityFile).filter(
+            EntityFile.entity_type == request_data.entity_type,
+            EntityFile.entity_id == request_data.entity_id,
+            EntityFile.file_name == request_data.file_name
+        ).order_by(EntityFile.created_at.desc()).first()
+
+        if not entity_file_record:
+            logger.error(f"Entity file not found for background task", extra={
+                "user_id": current_user.id,
+                "entity_type": request_data.entity_type,
+                "entity_id": request_data.entity_id,
+                "file_name": request_data.file_name
+            })
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Entity file not found"
+            )
+
+        # Update the record with background task information
+        entity_file_record.paperless_task_uuid = request_data.task_uuid
+        entity_file_record.sync_status = request_data.sync_status
+        
+        # Commit the changes
+        db.commit()
+        db.refresh(entity_file_record)
+        
+        updated_file = entity_file_record
+        
+        logger.info(f"Successfully set background task for entity file {updated_file.id}", extra={
+            "user_id": current_user.id,
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status
+        })
+
+        return {
+            "success": True,
+            "message": "Background task set successfully",
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to set background task", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "error": str(e)
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to set background task"
+        )
+
+
+class BackgroundTaskUpdateRequest(BaseModel):
+    """Request model for updating background task result"""
+    entity_type: str = Field(..., description="Type of entity")
+    entity_id: int = Field(..., description="ID of the entity")
+    file_name: str = Field(..., description="Name of the uploaded file")
+    task_uuid: str = Field(..., description="Paperless task UUID")
+    task_result: Dict[str, Any] = Field(..., description="Final task result from Paperless")
+    sync_status: str = Field(..., description="Final sync status ('synced' or 'failed')")
+
+
+@router.post("/entity-files/update-background-task")
+async def update_background_task(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    request_data: BackgroundTaskUpdateRequest
+) -> Dict[str, Any]:
+    """
+    Update an entity file with the final result of background task processing.
+    
+    This endpoint is called when a background task completes to update
+    the entity file with the document ID and final sync status.
+    """
+    try:
+        logger.info(f"Updating background task result for {request_data.entity_type} {request_data.entity_id}", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "task_uuid": request_data.task_uuid,
+            "task_status": request_data.task_result.get('status'),
+            "sync_status": request_data.sync_status
+        })
+
+        # Find the entity file record
+        from app.models.models import EntityFile
+        
+        # Look for the entity file with this task UUID
+        entity_file_record = db.query(EntityFile).filter(
+            EntityFile.entity_type == request_data.entity_type,
+            EntityFile.entity_id == request_data.entity_id,
+            EntityFile.file_name == request_data.file_name,
+            EntityFile.paperless_task_uuid == request_data.task_uuid
+        ).first()
+
+        if not entity_file_record:
+            logger.error(f"Entity file not found for background task update", extra={
+                "user_id": current_user.id,
+                "entity_type": request_data.entity_type,
+                "entity_id": request_data.entity_id,
+                "file_name": request_data.file_name,
+                "task_uuid": request_data.task_uuid
+            })
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Entity file not found"
+            )
+
+        # Extract document ID if task was successful
+        document_id = None
+        if request_data.sync_status == 'synced' and request_data.task_result.get('status') == 'SUCCESS':
+            task_result = request_data.task_result
+            # Use the same extraction logic as the main task processing
+            document_id = (task_result.get('related_document') or 
+                          task_result.get('id') or 
+                          (task_result.get('result', {}).get('document_id') if isinstance(task_result.get('result'), dict) else None))
+
+        # Update the record with final result
+        entity_file_record.sync_status = request_data.sync_status
+        if document_id:
+            entity_file_record.paperless_document_id = str(document_id)
+        
+        # Clear the task UUID since the task is now complete (success or failure)
+        entity_file_record.paperless_task_uuid = None
+        
+        # Update last sync timestamp
+        from datetime import datetime
+        entity_file_record.last_sync_at = datetime.utcnow()
+        
+        # Commit the changes
+        db.commit()
+        db.refresh(entity_file_record)
+        
+        updated_file = entity_file_record
+        
+        logger.info(f"Successfully updated background task for entity file {updated_file.id}", extra={
+            "user_id": current_user.id,
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status,
+            "document_id": document_id
+        })
+
+        return {
+            "success": True,
+            "message": "Background task updated successfully",
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status,
+            "document_id": document_id
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update background task", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "task_uuid": request_data.task_uuid,
+            "error": str(e)
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update background task"
+        )

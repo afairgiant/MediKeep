@@ -1374,8 +1374,45 @@ class GenericEntityFileService:
             logger.debug(f"Found {len(procedure_files)} procedure files")
             paperless_files.extend(procedure_files)
             
+            # Query insurance files (need to join through Patient to get user_id)
+            logger.debug(f"Querying insurance files for user {current_user_id}")
+            from app.models.models import Insurance
+            insurance_files = (
+                db.query(EntityFile)
+                .join(Insurance,
+                      (EntityFile.entity_type == "insurance") &
+                      (EntityFile.entity_id == Insurance.id))
+                .join(Patient, Insurance.patient_id == Patient.id)
+                .filter(
+                    Patient.user_id == current_user_id,
+                    EntityFile.storage_backend == "paperless",
+                )
+                .all()
+            )
+            logger.debug(f"Found {len(insurance_files)} insurance files")
+            paperless_files.extend(insurance_files)
+            
+            # Query visit files (need to join through Patient to get user_id)
+            logger.debug(f"Querying visit files for user {current_user_id}")
+            from app.models.models import Encounter
+            visit_files = (
+                db.query(EntityFile)
+                .join(Encounter,
+                      (EntityFile.entity_type == "visit") &
+                      (EntityFile.entity_id == Encounter.id))
+                .join(Patient, Encounter.patient_id == Patient.id)
+                .filter(
+                    Patient.user_id == current_user_id,
+                    EntityFile.storage_backend == "paperless",
+                )
+                .all()
+            )
+            logger.debug(f"Found {len(visit_files)} visit files")
+            paperless_files.extend(visit_files)
+            
             logger.info(f"Found {len(paperless_files)} paperless files for user {current_user_id}: "
-                       f"{len(lab_files)} lab results, {len(procedure_files)} procedures")
+                       f"{len(lab_files)} lab results, {len(procedure_files)} procedures, "
+                       f"{len(insurance_files)} insurance, {len(visit_files)} visits")
 
             if not paperless_files:
                 logger.info(f"No Paperless files found for sync check (user: {current_user_id})")
@@ -1476,9 +1513,10 @@ class GenericEntityFileService:
                                 sync_status[file_record.id] = True  # Don't mark as missing if still processing
                                 continue
                         
-                        # Skip task UUIDs - they should be resolved to document IDs first
-                        if len(str(document_id)) == 36 and '-' in str(document_id):
-                            logger.info(f"🔍 SYNC CHECK - Skipping file {file_record.file_name} (id: {file_record.id}) - has task UUID {document_id}, should be resolved to document ID first")
+                        # Only skip if we have an active task UUID (indicating still processing)
+                        # Don't skip based on document ID format alone - document IDs can be UUIDs too
+                        if file_record.paperless_task_uuid:
+                            logger.info(f"🔍 SYNC CHECK - Skipping file {file_record.file_name} (id: {file_record.id}) - has active task UUID {file_record.paperless_task_uuid}, still processing")
                             if file_record.sync_status != "processing":
                                 file_record.sync_status = "processing"
                                 file_record.last_sync_at = get_utc_now()
@@ -1501,13 +1539,19 @@ class GenericEntityFileService:
                         
                         sync_status[file_record.id] = exists
                         
+                        # Debug: Log what we're about to do
+                        logger.info(f"🔍 SYNC CHECK DEBUG - About to update status for document {document_id}: exists={exists}, current_status={file_record.sync_status}")
+                        
                         # Update sync status in database based on result
                         if not exists:
                             old_status = file_record.sync_status
+                            logger.info(f"🔍 SYNC CHECK DEBUG - Before update: file_record.sync_status = {file_record.sync_status}")
+                            
                             file_record.sync_status = "missing"
                             file_record.last_sync_at = get_utc_now()
                             missing_count += 1
                             
+                            logger.info(f"🔍 SYNC CHECK DEBUG - After update: file_record.sync_status = {file_record.sync_status}")
                             logger.info(f"Document marked as MISSING: {file_record.file_name} "
                                       f"(id: {file_record.id}, document_id: {document_id}, "
                                       f"old_status: {old_status} -> missing)")
@@ -1556,8 +1600,11 @@ class GenericEntityFileService:
                         error_count += 1
                         old_status = file_record.sync_status
                         
-                        logger.error(f"Unexpected error checking document {file_record.paperless_document_id} "
+                        logger.error(f"🚨 SYNC CHECK EXCEPTION - Unexpected error checking document {file_record.paperless_document_id} "
                                    f"for file {file_record.file_name}: {str(e)}")
+                        logger.error(f"🚨 SYNC CHECK EXCEPTION - Exception type: {type(e)}")
+                        import traceback
+                        logger.error(f"🚨 SYNC CHECK EXCEPTION - Traceback: {traceback.format_exc()}")
                         
                         sync_status[file_record.id] = None  # Indicates error, not missing
                         file_record.sync_status = "error"
@@ -1568,10 +1615,13 @@ class GenericEntityFileService:
 
             # Commit all database updates
             try:
+                logger.info(f"🔍 SYNC CHECK DEBUG - About to commit database changes. Missing count: {missing_count}")
                 db.commit()
-                logger.info(f"Sync check completed successfully - committed database changes")
+                logger.info(f"🔍 SYNC CHECK - Successfully committed database changes. Missing count: {missing_count}")
             except Exception as commit_error:
-                logger.error(f"Failed to commit sync status updates: {str(commit_error)}")
+                logger.error(f"🚨 SYNC CHECK COMMIT ERROR - Failed to commit sync status updates: {str(commit_error)}")
+                import traceback
+                logger.error(f"🚨 SYNC CHECK COMMIT ERROR - Traceback: {traceback.format_exc()}")
                 db.rollback()
                 # Return empty dict to indicate failure
                 return {}
@@ -1611,10 +1661,10 @@ class GenericEntityFileService:
         try:
             import re
             
-            # Find files that have task UUIDs instead of document IDs
+            # Find files that have active task UUIDs (in the paperless_task_uuid field)
             files_with_tasks = [
                 f for f in paperless_files 
-                if f.paperless_document_id and len(str(f.paperless_document_id)) == 36 and '-' in str(f.paperless_document_id)
+                if f.paperless_task_uuid
             ]
             
             if not files_with_tasks:
@@ -1625,7 +1675,7 @@ class GenericEntityFileService:
             
             for file_record in files_with_tasks:
                 try:
-                    task_uuid = file_record.paperless_document_id
+                    task_uuid = file_record.paperless_task_uuid
                     logger.info(f"Attempting to resolve task UUID {task_uuid} for file {file_record.file_name}")
                     
                     # Check task status to get document ID

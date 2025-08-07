@@ -271,7 +271,7 @@ const Procedures = () => {
       procedure_setting: procedure.procedure_setting || '',
       procedure_complications: procedure.procedure_complications || '',
       procedure_duration: procedure.procedure_duration || '',
-      practitioner_id: procedure.practitioner_id || '',
+      practitioner_id: procedure.practitioner_id ? String(procedure.practitioner_id) : '',
       anesthesia_type: procedure.anesthesia_type || '',
       anesthesia_notes: procedure.anesthesia_notes || '',
     });

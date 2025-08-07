@@ -765,9 +765,13 @@ const useDocumentManagerCore = ({
         );
 
         if (showProgressModal) {
-          if (result.success) {
+          if (result.success === true) {
             updateFileProgress(fileId, 100, 'completed');
             completeUpload(true, result.message);
+          } else if (result.success === null && result.isBackgroundProcessing) {
+            // Background processing - show as processing/uploading with appropriate message
+            updateFileProgress(fileId, 75, 'uploading', result.message);
+            completeUpload(true, result.message); // Consider this successful since it's processing in background
           } else if (result.isDuplicate) {
             updateFileProgress(fileId, 0, 'failed', result.message);
             completeUpload(false, result.message);
@@ -789,8 +793,8 @@ const useDocumentManagerCore = ({
           component: 'DocumentManagerCore',
         });
 
-        // If it's a duplicate, don't set error (it's expected behavior)
-        if (!result.success && !result.isDuplicate) {
+        // If it's a duplicate or background processing, don't set error (these are expected behaviors)
+        if (result.success === false && !result.isDuplicate && !result.isBackgroundProcessing) {
           setError(result.message);
           if (onError) {
             onError(result.message);

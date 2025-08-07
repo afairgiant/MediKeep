@@ -8,6 +8,9 @@ from ..models.enums import get_all_condition_statuses, get_all_severity_levels
 
 
 class ConditionBase(BaseModel):
+    condition_name: Optional[str] = Field(
+        None, max_length=500, description="Name of the condition"
+    )
     diagnosis: str = Field(
         ..., min_length=2, max_length=500, description="Medical diagnosis"
     )
@@ -82,6 +85,7 @@ class ConditionCreate(ConditionBase):
 
 
 class ConditionUpdate(BaseModel):
+    condition_name: Optional[str] = Field(None, max_length=500)
     diagnosis: Optional[str] = Field(None, min_length=2, max_length=500)
     notes: Optional[str] = Field(None, max_length=1000)
     onset_date: Optional[date] = None

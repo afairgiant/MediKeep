@@ -144,7 +144,6 @@ const AllergyCard = ({
         onEdit={() => onEdit(allergy)}
         onDelete={() => onDelete(allergy.id)}
         onError={handleError}
-        entityType="allergy"
       >
         {customContent}
       </BaseMedicalCard>

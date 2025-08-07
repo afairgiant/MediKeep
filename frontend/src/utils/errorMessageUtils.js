@@ -430,6 +430,21 @@ export const getPaperlessTaskErrorMessage = (taskResult, fileName) => {
  * @returns {Object} Result object with success status and message
  */
 export const handlePaperlessTaskCompletion = (taskResult, fileName, options = {}) => {
+  // Handle background processing status
+  if (taskResult?.status === 'PROCESSING_BACKGROUND') {
+    const message = `"${fileName}" is being processed in the background. You will be notified when complete.`;
+    
+    // Don't show duplicate notifications - the API service already handles this
+    // Just return success=null to indicate "processing" state
+    return {
+      success: null, // null indicates "in progress/processing" - not success or failure
+      message,
+      documentId: null,
+      isDuplicate: false,
+      isBackgroundProcessing: true
+    };
+  }
+  
   if (isPaperlessTaskSuccessful(taskResult)) {
     const documentId = extractDocumentIdFromTaskResult(taskResult);
     const message = `"${fileName}" uploaded to Paperless successfully!`;
