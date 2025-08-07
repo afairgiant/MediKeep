@@ -34,6 +34,31 @@ file_service = GenericEntityFileService()
 logger = get_logger(__name__, "app")
 
 
+def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
+    """
+    Fix filename extension based on actual file content from Paperless.
+    
+    Paperless-NGX often converts images to PDFs during processing,
+    but the original filename is preserved, causing extension/content mismatches.
+    
+    Args:
+        filename: Original filename
+        content: Actual file content bytes
+        
+    Returns:
+        Corrected filename with proper extension
+    """
+    # Check if content is actually a PDF (Paperless converts images to PDF)
+    if content.startswith(b'%PDF-'):
+        base_name = os.path.splitext(filename)[0]
+        corrected_filename = f"{base_name}.pdf"
+        logger.debug(f"Paperless file conversion detected: {filename} -> {corrected_filename}")
+        return corrected_filename
+    
+    # Return original filename if no conversion detected
+    return filename
+
+
 @router.get("/{entity_type}/{entity_id}/files", response_model=List[EntityFileResponse])
 def get_entity_files(
     *,
@@ -358,13 +383,42 @@ async def download_file(
 
         # Handle different return types (local path vs paperless content)
         if isinstance(file_info, bytes):
-            # Paperless file - return as StreamingResponse
+            # Paperless file - fix filename if content was converted
+            logger.info(f"DEBUG: Processing Paperless download - original filename: {filename}, content size: {len(file_info)}")
+            corrected_filename = fix_filename_for_paperless_content(filename, file_info)
+            logger.info(f"DEBUG: Filename after correction: {corrected_filename}")
+            
+            # Paperless file - return as StreamingResponse with proper binary handling
             from fastapi.responses import Response
+            import mimetypes
+
+            # Ensure proper content type - use corrected filename for guessing
+            if not content_type or content_type == 'application/octet-stream':
+                # Try to guess content type from corrected filename
+                guessed_type, _ = mimetypes.guess_type(corrected_filename)
+                if guessed_type:
+                    content_type = guessed_type
+                    logger.info(f"DEBUG: Guessed content type from corrected filename: {content_type}")
+
+            # Override content type for PDF files to ensure proper handling
+            if corrected_filename.endswith('.pdf'):
+                content_type = 'application/pdf'
+                logger.info(f"DEBUG: Forced content type to application/pdf for PDF file")
+
+            # Set proper headers for binary content
+            headers = {
+                "Content-Disposition": f"attachment; filename={corrected_filename}",
+                "Content-Length": str(len(file_info)),
+                "Cache-Control": "no-cache",
+            }
+            
+            logger.info(f"DEBUG: Response headers: {headers}")
+            logger.info(f"DEBUG: Response content-type: {content_type}")
 
             return Response(
                 content=file_info,
-                media_type=content_type,
-                headers={"Content-Disposition": f"attachment; filename={filename}"},
+                media_type=content_type or 'application/octet-stream',
+                headers=headers,
             )
         else:
             # Local file - return as FileResponse
@@ -428,19 +482,40 @@ async def view_file(
 
         # Handle different return types (local path vs paperless content)
         if isinstance(file_info, bytes):
-            # Paperless file - return as StreamingResponse
+            # Paperless file - fix filename if content was converted
+            logger.info(f"DEBUG: Processing Paperless download - original filename: {filename}, content size: {len(file_info)}")
+            corrected_filename = fix_filename_for_paperless_content(filename, file_info)
+            logger.info(f"DEBUG: Filename after correction: {corrected_filename}")
+            
+            # Paperless file - return as StreamingResponse with proper binary handling
             from fastapi.responses import Response
+            import mimetypes
 
-            # Set secure headers for inline file viewing
+            # Ensure proper content type - use corrected filename for guessing
+            if not content_type or content_type == 'application/octet-stream':
+                # Try to guess content type from corrected filename
+                guessed_type, _ = mimetypes.guess_type(corrected_filename)
+                if guessed_type:
+                    content_type = guessed_type
+                    logger.info(f"DEBUG: Guessed content type from corrected filename: {content_type}")
+
+            # Override content type for PDF files to ensure proper handling
+            if corrected_filename.endswith('.pdf'):
+                content_type = 'application/pdf'
+                logger.info(f"DEBUG: Forced content type to application/pdf for PDF file")
+
+            # Set secure headers for inline file viewing with proper binary handling
             headers = {
-                "Content-Disposition": f"inline; filename={filename}",
+                "Content-Disposition": f"inline; filename={corrected_filename}",
+                "Content-Length": str(len(file_info)),
                 "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
                 "X-Frame-Options": "SAMEORIGIN",     # Prevent embedding in frames from other domains
+                "Cache-Control": "no-cache",
             }
             
             return Response(
                 content=file_info,
-                media_type=content_type,
+                media_type=content_type or 'application/octet-stream',
                 headers=headers,
             )
         else:
