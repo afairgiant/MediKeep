@@ -67,6 +67,7 @@ class PaperlessClient:
                 ttl_dns_cache=300
             )
             
+            # Use default timeout for regular operations
             self._session = aiohttp.ClientSession(
                 headers=headers,
                 auth=auth,
@@ -121,9 +122,12 @@ class PaperlessClient:
             
             logger.debug(f"Uploading document: {filename}")
             
-            # Upload document
+            # Upload document with extended timeout
+            from app.core.config import settings
             url = f"{self.auth.url}/api/documents/post_document/"
-            async with self._session.post(url, data=form_data) as response:
+            upload_timeout = aiohttp.ClientTimeout(total=settings.PAPERLESS_UPLOAD_TIMEOUT)
+            logger.info(f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s for large file upload")
+            async with self._session.post(url, data=form_data, timeout=upload_timeout) as response:
                 
                 if response.status not in [200, 201]:
                     error_text = await response.text()

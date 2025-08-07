@@ -44,6 +44,7 @@ import FileUploadZone from './FileUploadZone';
 import FileList from './FileList';
 import FileCountBadge from './FileCountBadge';
 import StorageBackendSelector from './StorageBackendSelector';
+import useDocumentManagerCore from './DocumentManagerCore';
 
 const DocumentManager = ({
   entityType,
@@ -102,6 +103,24 @@ const DocumentManager = ({
   // Paperless settings state
   const [paperlessSettings, setPaperlessSettings] = useState(null);
   const [selectedStorageBackend, setSelectedStorageBackend] = useState('local');
+
+  // Use DocumentManagerCore for actual upload functionality
+  const documentManager = useDocumentManagerCore({
+    entityType,
+    entityId,
+    showProgressModal: true, // Show progress modal for immediate uploads
+    onError,
+    onUploadComplete: (success, uploadedCount, failedCount) => {
+      console.log('Upload completed:', { success, uploadedCount, failedCount });
+      if (success) {
+        // Refresh files list after successful upload
+        loadFiles();
+      }
+    }
+  });
+  
+  console.log('DocumentManager - documentManager object:', documentManager);
+  console.log('DocumentManager - handleImmediateUpload available:', !!documentManager.handleImmediateUpload);
   
   // Use refs to access current state in stable callback  
   const pendingFilesRef = useRef(pendingFiles);
@@ -1079,8 +1098,15 @@ const DocumentManager = ({
           {/* Add New Files */}
           <FileUploadZone
             onUpload={uploadedFiles => {
+              console.log('FileUploadZone onUpload called with:', uploadedFiles);
+              // Immediately upload each file using DocumentManagerCore
               uploadedFiles.forEach(({ file, description }) => {
-                handleAddPendingFile(file, description);
+                console.log('Starting immediate upload for:', file.name);
+                if (documentManager.handleImmediateUpload) {
+                  documentManager.handleImmediateUpload(file, description || '');
+                } else {
+                  console.error('handleImmediateUpload not available on documentManager');
+                }
               });
             }}
             acceptedTypes={config.acceptedTypes}
@@ -1276,14 +1302,20 @@ const DocumentManager = ({
 
           <FileUploadZone
             onUpload={uploadedFiles => {
+              console.log('FileUploadZone onUpload called with:', uploadedFiles);
+              // Immediately upload each file using DocumentManagerCore
               uploadedFiles.forEach(({ file, description }) => {
-                handleAddPendingFile(file, description);
+                console.log('Starting immediate upload for:', file.name);
+                if (documentManager.handleImmediateUpload) {
+                  documentManager.handleImmediateUpload(file, description || '');
+                } else {
+                  console.error('handleImmediateUpload not available on documentManager');
+                }
               });
             }}
             acceptedTypes={config.acceptedTypes}
             maxSize={config.maxSize}
             maxFiles={config.maxFiles}
-            autoUpload={true} // Auto-upload in create mode for better UX
             selectedStorageBackend={selectedStorageBackend}
             paperlessSettings={paperlessSettings}
           />

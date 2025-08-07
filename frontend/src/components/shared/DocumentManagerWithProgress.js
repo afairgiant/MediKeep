@@ -147,6 +147,7 @@ const DocumentManagerWithProgress = React.memo(({
                 onAddPendingFile={coreHandlers.handleAddPendingFile}
                 onRemovePendingFile={coreHandlers.handleRemovePendingFile}
                 onPendingFileDescriptionChange={coreHandlers.handlePendingFileDescriptionChange}
+                handleImmediateUpload={coreHandlers.handleImmediateUpload}
               />
             </DocumentManagerErrorBoundary>
 

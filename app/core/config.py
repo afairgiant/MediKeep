@@ -90,6 +90,18 @@ class Settings:  # App Info
     PAPERLESS_CONNECT_TIMEOUT: int = int(
         os.getenv("PAPERLESS_CONNECT_TIMEOUT", "10")
     )  # seconds
+    # Extended timeout for upload operations specifically to handle large files
+    PAPERLESS_UPLOAD_TIMEOUT: int = int(
+        os.getenv("PAPERLESS_UPLOAD_TIMEOUT", "300")
+    )  # 5 minutes for uploads
+    # Timeout for monitoring processing status - how long to wait without status updates
+    PAPERLESS_PROCESSING_TIMEOUT: int = int(
+        os.getenv("PAPERLESS_PROCESSING_TIMEOUT", "1800")
+    )  # 30 minutes max processing time
+    # How often to check processing status
+    PAPERLESS_STATUS_CHECK_INTERVAL: int = int(
+        os.getenv("PAPERLESS_STATUS_CHECK_INTERVAL", "10")
+    )  # Check every 10 seconds
     PAPERLESS_MAX_UPLOAD_SIZE: int = int(
         os.getenv("PAPERLESS_MAX_UPLOAD_SIZE", str(50 * 1024 * 1024))
     )  # 50MB
