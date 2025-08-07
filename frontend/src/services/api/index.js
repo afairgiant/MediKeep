@@ -971,10 +971,34 @@ class ApiService {
         component: 'ApiService',
       });
 
-      const blob = await this.get(`/entity-files/files/${fileId}/download`, {
-        responseType: 'blob',
+      // Use direct fetch to get full response with headers
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${this.baseURL}/entity-files/files/${fileId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         signal,
       });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+      }
+
+      // Extract filename from Content-Disposition header
+      const contentDisposition = response.headers.get('content-disposition');
+      let correctedFileName = fileName || `file_${fileId}`;
+      
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          correctedFileName = fileNameMatch[1].replace(/['"]/g, '');
+          console.log(`Using server-provided filename: ${correctedFileName} (original: ${fileName})`);
+        }
+      }
+
+      const blob = await response.blob();
 
       // Handle blob download in browser
       if (blob instanceof Blob) {
@@ -982,7 +1006,7 @@ class ApiService {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = fileName || `file_${fileId}`;
+        a.download = correctedFileName;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
