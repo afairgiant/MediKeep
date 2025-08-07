@@ -1523,6 +1523,9 @@ async def update_background_task(
         if document_id:
             entity_file_record.paperless_document_id = str(document_id)
         
+        # Clear the task UUID since the task is now complete (success or failure)
+        entity_file_record.paperless_task_uuid = None
+        
         # Update last sync timestamp
         from datetime import datetime
         entity_file_record.last_sync_at = datetime.utcnow()
