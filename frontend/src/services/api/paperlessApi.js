@@ -157,21 +157,28 @@ export const exportPaperlessData = async () => {
  * @param {number} intervalMs - Polling interval in milliseconds (default: 1000)
  * @returns {Promise} Task status and result
  */
-export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 30, intervalMs = 1000) => {
+export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, intervalMs = 1000) => {
+  console.log(`🔍 Starting task polling for ${taskUuid} with ${maxAttempts} max attempts`);
+  
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const response = await apiService.get(`/paperless/tasks/${taskUuid}/status`);
       
+      console.log(`🔍 Attempt ${attempt + 1}/${maxAttempts}: Task status = ${response.status}`, response);
+      
       // Check if task is completed (SUCCESS or FAILURE)
       if (response.status === 'SUCCESS' || response.status === 'FAILURE') {
+        console.log(`✅ Task completed after ${attempt + 1} attempts with status: ${response.status}`);
         return response;
       }
       
       // Wait before next attempt if task is still pending/running
       if (attempt < maxAttempts - 1) {
+        console.log(`⏱️ Waiting ${intervalMs}ms before next attempt...`);
         await new Promise(resolve => setTimeout(resolve, intervalMs));
       }
     } catch (error) {
+      console.log(`❌ Attempt ${attempt + 1}/${maxAttempts} failed:`, error.message);
       // If we can't get task status, continue polling unless it's the last attempt
       if (attempt === maxAttempts - 1) {
         throw new Error(`Task status polling failed: ${error.message}`);

@@ -595,8 +595,8 @@ class ApiService {
       // Import the pollPaperlessTaskStatus function
       const { pollPaperlessTaskStatus } = await import('./paperlessApi');
       
-      // Poll task status
-      const taskResult = await pollPaperlessTaskStatus(taskUuid, 30, 1000);
+      // Poll task status with extended timeout for document processing
+      const taskResult = await pollPaperlessTaskStatus(taskUuid, 60, 1000);
 
       logger.info('api_upload_task_complete', 'Paperless task monitoring completed', {
         entityType,
