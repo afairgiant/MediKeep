@@ -58,6 +58,7 @@ import ModelManagement from './pages/admin/ModelManagement';
 import ModelView from './pages/admin/ModelView';
 import ModelEdit from './pages/admin/ModelEdit';
 import ModelCreate from './pages/admin/ModelCreate';
+import AdminUserCreate from './pages/admin/AdminUserCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -405,6 +406,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <DataModels />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/create-user"
+                          element={
+                            <AdminRoute>
+                              <AdminUserCreate />
                             </AdminRoute>
                           }
                         />

@@ -695,10 +695,10 @@ const QuickActionsCard = () => (
         color="blue"
       />
       <ActionButton
-        href="/admin/models/user"
+        href="/admin/create-user"
         icon={IconUserCog}
-        title="Manage Users"
-        desc="User account management"
+        title="Create New User"
+        desc="Create user account with patient profile"
         color="green"
       />
       <ActionButton
