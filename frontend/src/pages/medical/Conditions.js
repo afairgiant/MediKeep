@@ -278,11 +278,11 @@ const Conditions = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading conditions...</Text>
+            <Text>Loading conditions...</Text>
           </Stack>
         </Center>
       </Container>
@@ -290,14 +290,10 @@ const Conditions = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Medical Conditions" icon="🏥" />
+    <Container size="xl" py="md">
+      <PageHeader title="Medical Conditions" icon="🩺" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -468,8 +464,8 @@ const Conditions = () => {
           onMedicationClick={handleMedicationClick}
           onPractitionerClick={handlePractitionerClick}
         />
-      </Container>
-    </motion.div>
+      </Stack>
+    </Container>
   );
 };
 

@@ -6,6 +6,8 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .login-form {
@@ -13,15 +15,17 @@
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
+  width: 340px;
+  max-width: 90%;
+  margin: 0 auto;
 }
 
 .login-form h1 {
   text-align: center;
   margin-bottom: 0.5rem;
   color: #333;
-  font-size: 2rem;
+  font-size: 1.6rem;
+  line-height: 1.3;
 }
 
 .login-form h2 {
@@ -288,8 +292,45 @@ button[type="submit"]:disabled {
   content: '✓';
 }
 
-/* Responsive Modal */
+/* Responsive Styles */
 @media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+  
+  .login-form {
+    padding: 1.5rem;
+    width: 320px;
+    max-width: 90%;
+    margin: 0 auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .login-form h1 {
+    font-size: 1.4rem;
+    line-height: 1.2;
+  }
+  
+  .login-form h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group input {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+  
+  button[type="submit"],
+  .create-user-btn {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+  
   .modal-content {
     margin: 1rem;
     max-width: calc(100vw - 2rem);
@@ -304,5 +345,75 @@ button[type="submit"]:disabled {
   
   .form-actions {
     flex-direction: column;
+  }
+}
+
+/* Small screens (phones in portrait) */
+@media (max-width: 480px) {
+  .login-form {
+    width: 300px;
+    max-width: 90%;
+    padding: 1.25rem;
+  }
+  
+  .login-form h1 {
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+  
+  .login-form h2 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .login-form {
+    width: 280px;
+    max-width: 90%;
+    padding: 1rem;
+  }
+  
+  .login-form h1 {
+    font-size: 1.2rem;
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
+  }
+  
+  .form-group input {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  button[type="submit"],
+  .create-user-btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Tablets in portrait mode */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .login-form {
+    width: 340px;
+    max-width: 90%;
+  }
+}
+
+/* Small laptops and regular screens */
+@media (min-width: 1025px) and (max-width: 1366px) {
+  .login-form {
+    width: 340px;
+    max-width: 90%;
+  }
+}
+
+/* Larger screens */
+@media (min-width: 1367px) {
+  .login-form {
+    width: 360px;
+    max-width: 90%;
   }
 }

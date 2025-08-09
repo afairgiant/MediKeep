@@ -23,10 +23,10 @@ import {
 } from '@tabler/icons-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import OldPageHeader from '../layout/PageHeader';
+import LayoutPageHeader from '../layout/PageHeader';
 
 const PageHeader = ({
-  useMantine = true,
+  useMantine = false,
   title,
   icon,
   showBackButton = true,
@@ -139,7 +139,7 @@ const PageHeader = ({
   // Easy toggle - if something breaks, just set useMantine=false
   if (!useMantine) {
     return (
-      <OldPageHeader
+      <LayoutPageHeader
         title={title}
         icon={icon}
         showBackButton={showBackButton}
@@ -306,39 +306,48 @@ const PageHeader = ({
                     </Group>
                   )}
 
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={() => navigate('/settings')}
-                    title="Settings"
-                    size="lg"
-                  >
-                    <IconSettings size="1.1rem" />
-                  </ActionIcon>
-
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={toggleTheme}
-                    title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    size="lg"
-                  >
-                    {theme === 'dark' ? (
-                      <IconSun size="1.1rem" />
-                    ) : (
-                      <IconMoon size="1.1rem" />
-                    )}
-                  </ActionIcon>
-
-                  <Button
-                    variant="subtle"
-                    color="red"
-                    size="sm"
-                    leftSection={<IconLogout size="1rem" />}
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </Button>
+                  {/* Account Actions Dropdown */}
+                  <Menu position="bottom-end" offset={5}>
+                    <Menu.Target>
+                      <Button
+                        variant="subtle"
+                        color="blue"
+                        rightSection={<IconChevronDown size={14} />}
+                        size="sm"
+                      >
+                        Account
+                      </Button>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Label>User Actions</Menu.Label>
+                      <Menu.Item
+                        leftSection={<IconSettings size="1rem" />}
+                        onClick={() => navigate('/settings')}
+                      >
+                        Settings
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={
+                          theme === 'dark' ? (
+                            <IconSun size="1rem" />
+                          ) : (
+                            <IconMoon size="1rem" />
+                          )
+                        }
+                        onClick={toggleTheme}
+                      >
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
+                        leftSection={<IconLogout size="1rem" />}
+                        onClick={handleLogout}
+                        color="red"
+                      >
+                        Logout
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
                 </Group>
               )}
             </Group>

@@ -18,6 +18,13 @@
 /* Import Print Styles */
 @import './styles/print.css';
 
+/* Global overflow fix for mobile */
+html {
+  overflow-x: hidden;
+  /* Allow dropdowns to show outside viewport */
+  overflow-y: visible;
+}
+
 body {
   margin: 0;
   font-family: var(
@@ -38,9 +45,87 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-secondary, #ffffff);
   color: var(--color-text-primary, #000000);
+  overflow-x: hidden;
+  overflow-y: visible; /* Allow vertical overflow for dropdowns */
+  width: 100%;
+  max-width: 100vw;
+  position: relative; /* Establish positioning context */
+}
+
+/* Root div container fixes */
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Mobile responsive fixes for Mantine components */
+@media (max-width: 768px) {
+  /* Container fixes */
+  [data-mantine-component="Container"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Grid and layout fixes */
+  [data-mantine-component="Grid"],
+  [data-mantine-component="SimpleGrid"] {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  [data-mantine-component="Grid.Col"],
+  .mantine-Grid-col {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Card fixes */
+  [data-mantine-component="Card"] {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Flex fixes */
+  [data-mantine-component="Flex"] {
+    overflow-x: hidden !important;
+  }
+
+  /* Stack fixes */
+  [data-mantine-component="Stack"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-mantine-component="Container"] {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  [data-mantine-component="Grid.Col"],
+  .mantine-Grid-col {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+  }
+}
+
+@media (max-width: 320px) {
+  [data-mantine-component="Container"] {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
 }
