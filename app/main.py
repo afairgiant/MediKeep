@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 
 from app.api.v1.api import api_router
 from app.core.config import settings
@@ -40,6 +41,55 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# Global exception handler for validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Global handler for Pydantic validation errors (422) with detailed feedback.
+    """
+    user_ip = request.client.host if request.client else "unknown"
+    
+    # Log the validation error details
+    logger.warning(
+        f"Validation error on {request.method} {request.url.path}",
+        extra={
+            "category": "app",
+            "event": "validation_error",
+            "ip": user_ip,
+            "validation_errors": exc.errors(),
+            "url_path": str(request.url.path),
+            "method": request.method,
+        }
+    )
+    
+    # Create more user-friendly error messages
+    detailed_errors = []
+    for error in exc.errors():
+        field = error.get('loc')[-1] if error.get('loc') else 'unknown'
+        msg = error.get('msg', 'Invalid value')
+        
+        # Make common validation errors more user-friendly
+        if 'ensure this value is greater than' in msg:
+            detailed_errors.append(f"{field}: Value must be greater than the minimum allowed")
+        elif 'ensure this value is less than' in msg:
+            detailed_errors.append(f"{field}: Value exceeds the maximum allowed")
+        elif 'field required' in msg:
+            detailed_errors.append(f"{field}: This field is required")
+        elif 'string too short' in msg:
+            detailed_errors.append(f"{field}: Value is too short")
+        elif 'string too long' in msg:
+            detailed_errors.append(f"{field}: Value is too long")
+        else:
+            detailed_errors.append(f"{field}: {msg}")
+    
+    error_detail = {
+        "message": "Validation failed",
+        "errors": detailed_errors,
+        "type": "validation_error"
+    }
+    
+    raise HTTPException(status_code=422, detail=error_detail)
 
 # Include API routers
 app.include_router(api_router, prefix="/api/v1")

@@ -5,7 +5,8 @@ V1 Patient Management API Endpoints - Netflix-style patient switching and manage
 from typing import Any, List, Optional
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, Field
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, Field, validator, root_validator
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -17,6 +18,40 @@ from app.models.models import User
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
+
+
+# Helper function for handling validation errors - will be used in endpoints
+def get_validation_error_response(request: Request, exc: RequestValidationError):
+    """
+    Generate a user-friendly response for Pydantic validation errors (422).
+    """
+    user_ip = request.client.host if request.client else "unknown"
+    
+    # Log the validation error details
+    logger.warning(
+        f"Validation error on {request.method} {request.url.path}",
+        extra={
+            "category": "app",
+            "event": "validation_error",
+            "ip": user_ip,
+            "validation_errors": exc.errors(),
+        }
+    )
+    
+    # Create more user-friendly error messages
+    detailed_errors = []
+    for error in exc.errors():
+        field = error.get('loc')[-1] if error.get('loc') else 'unknown'
+        msg = error.get('msg', 'Invalid value')
+        detailed_errors.append(f"{field}: {msg}")
+    
+    error_detail = {
+        "message": "Validation failed",
+        "errors": detailed_errors,
+        "type": "validation_error"
+    }
+    
+    return error_detail
 
 
 class PatientCreateRequest(BaseModel):
@@ -40,10 +75,64 @@ class PatientUpdateRequest(BaseModel):
     birth_date: Optional[date] = Field(None, description="Birth date")
     gender: Optional[str] = Field(None, max_length=20)
     blood_type: Optional[str] = Field(None, max_length=5)
-    height: Optional[float] = Field(None, gt=0, description="Height in inches")
-    weight: Optional[float] = Field(None, gt=0, description="Weight in pounds")
+    height: Optional[float] = Field(None, gt=0, le=108, description="Height in inches (1-9 feet)")
+    weight: Optional[float] = Field(None, gt=0, le=992, description="Weight in pounds (1-992 lbs)")
     address: Optional[str] = Field(None, max_length=500)
-    physician_id: Optional[int] = Field(None, description="Primary care physician ID")
+    physician_id: Optional[int] = Field(None, gt=0, description="Primary care physician ID")
+
+    @root_validator(pre=True)
+    def convert_empty_strings_to_none(cls, values):
+        """Convert empty strings to None for optional fields to prevent validation errors"""
+        if isinstance(values, dict):
+            for field in [
+                "first_name", "last_name", "birth_date", "gender", 
+                "blood_type", "height", "weight", "address", "physician_id"
+            ]:
+                if field in values and values[field] == "":
+                    values[field] = None
+        return values
+
+    @validator("birth_date")
+    def validate_birth_date(cls, v):
+        """Validate birth date is reasonable"""
+        if v is not None:
+            today = date.today()
+            if v > today:
+                raise ValueError("Birth date cannot be in the future")
+            if today.year - v.year > 150:
+                raise ValueError("Birth date cannot be more than 150 years ago")
+        return v
+
+    @validator("address")
+    def validate_address(cls, v):
+        """Validate address minimum length if provided"""
+        if v is not None and v.strip() and len(v.strip()) < 5:
+            raise ValueError("Address must be at least 5 characters long")
+        return v.strip() if v else v
+
+    @validator("blood_type")
+    def validate_blood_type(cls, v):
+        """Validate blood type format"""
+        if v is not None and v.strip():
+            valid_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+            blood_type_upper = v.upper().strip()
+            if blood_type_upper not in valid_types:
+                raise ValueError(f"Blood type must be one of: {', '.join(valid_types)}")
+            return blood_type_upper
+        return v
+
+    @validator("gender")
+    def validate_gender(cls, v):
+        """Validate gender"""
+        if v is not None and v.strip():
+            allowed = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
+            gender_upper = v.upper()
+            if gender_upper not in allowed:
+                raise ValueError(f"Gender must be one of: {', '.join(allowed)}")
+            # Normalize common values
+            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
+            return gender_map.get(gender_upper, gender_upper)
+        return v
 
 
 class PatientResponse(BaseModel):
@@ -231,14 +320,48 @@ def update_patient(
     Update a patient record.
     
     User must have edit permission for this patient.
+    
+    Common validation errors (422):
+    - Height must be between 1-108 inches (1-9 feet)
+    - Weight must be between 1-992 pounds
+    - Birth date cannot be in the future or >150 years ago
+    - Address must be at least 5 characters if provided
+    - Blood type must be valid (A+, A-, B+, B-, AB+, AB-, O+, O-)
+    - Gender must be valid (M, F, MALE, FEMALE, OTHER, U, UNKNOWN)
     """
     user_ip = request.client.host if request.client else "unknown"
+    
+    # Log the incoming request data for debugging 422 errors
+    logger.debug(
+        f"Patient update request for patient {patient_id}",
+        extra={
+            "category": "app",
+            "event": "patient_update_request",
+            "user_id": current_user.id,
+            "patient_id": patient_id,
+            "request_data": patient_in.dict(),
+            "ip": user_ip,
+        }
+    )
     
     try:
         service = PatientManagementService(db)
         
         # Filter out None values
         patient_data = {k: v for k, v in patient_in.dict().items() if v is not None}
+        
+        # Additional logging for troubleshooting
+        if patient_data:
+            logger.debug(
+                f"Filtered patient data for update: {patient_data}",
+                extra={
+                    "category": "app",
+                    "event": "patient_update_data_filtered",
+                    "user_id": current_user.id,
+                    "patient_id": patient_id,
+                    "filtered_data": patient_data,
+                }
+            )
         
         patient = service.update_patient(current_user, patient_id, patient_data)
         
@@ -264,6 +387,7 @@ def update_patient(
                 "user_id": current_user.id,
                 "patient_id": patient_id,
                 "error": str(e),
+                "error_type": type(e).__name__,
                 "ip": user_ip,
             }
         )
