@@ -553,11 +553,11 @@ const Visits = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading visits...</Text>
+            <Text>Loading visits...</Text>
           </Stack>
         </Center>
       </Container>
@@ -567,14 +567,11 @@ const Visits = () => {
   const filteredVisits = dataManagement.data;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Medical Visits" icon="🏥" />
+    <>
+    <Container size="xl" py="md">
+      <PageHeader title="Medical Visits" icon="📅" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -637,11 +634,6 @@ const Visits = () => {
         />
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
           {filteredVisits.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -667,12 +659,6 @@ const Visits = () => {
               <AnimatePresence>
                 {filteredVisits.map((visit, index) => (
                   <Grid.Col key={visit.id} span={{ base: 12, md: 6, lg: 4 }}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
                       <VisitCard
                         visit={visit}
                         onEdit={handleEditVisit}
@@ -684,7 +670,6 @@ const Visits = () => {
                         fileCountLoading={fileCountsLoading[visit.id] || false}
                         navigate={navigate}
                       />
-                    </motion.div>
                   </Grid.Col>
                 ))}
               </AnimatePresence>
@@ -725,7 +710,7 @@ const Visits = () => {
               />
             </Paper>
           )}
-        </motion.div>
+      </Stack>
       </Container>
 
       <VisitFormWrapper
@@ -770,7 +755,7 @@ const Visits = () => {
           }
         }}
       />
-    </motion.div>
+    </>
   );
 };
 

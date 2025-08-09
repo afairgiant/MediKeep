@@ -27,6 +27,7 @@ const ENTITY_TO_ROUTE_MAP = {
   [ENTITY_TYPES.PHARMACY]: '/pharmacies',
   [ENTITY_TYPES.EMERGENCY_CONTACT]: '/emergency-contacts',
   [ENTITY_TYPES.PATIENT]: '/patients',
+  [ENTITY_TYPES.FAMILY_MEMBER]: '/family-history',
 };
 
 /**

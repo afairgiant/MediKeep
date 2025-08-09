@@ -1,0 +1,139 @@
+/* Navigation Wrapper Styles */
+@import '../../styles/themes/variables.css';
+
+.navigation-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Mobile Navigation Toggle Button */
+.mobile-nav-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 997;
+  background: linear-gradient(135deg, var(--color-background, #fff), var(--color-background-secondary, #f8f9fa));
+  border: 2px solid var(--color-primary, #667eea);
+  border-radius: 12px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-nav-toggle:hover {
+  background: linear-gradient(135deg, var(--color-primary-light, #e8eaf6), var(--color-background, #fff));
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.mobile-nav-toggle.active {
+  background: linear-gradient(135deg, var(--color-primary, #667eea), var(--color-primary-dark, #5a6fd8));
+  border-color: var(--color-primary-dark, #5a6fd8);
+  transform: rotate(180deg);
+}
+
+/* Hamburger Lines */
+.hamburger-line {
+  width: 24px;
+  height: 3px;
+  background: var(--color-primary, #667eea);
+  border-radius: 3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.mobile-nav-toggle.active .hamburger-line {
+  background: white;
+}
+
+.mobile-nav-toggle.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-nav-toggle.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.mobile-nav-toggle.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Hide toggle on non-mobile viewports */
+@media (min-width: 768px) {
+  .mobile-nav-toggle {
+    display: none;
+  }
+}
+
+/* Accessibility */
+.mobile-nav-toggle:focus {
+  outline: 2px solid var(--color-primary, #667eea);
+  outline-offset: 2px;
+}
+
+.mobile-nav-toggle:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .mobile-nav-toggle {
+  background: var(--dark-background, #1a1a1a);
+  border-color: var(--dark-border, #333);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .mobile-nav-toggle:hover {
+  background: var(--dark-background-hover, #333);
+}
+
+[data-theme="dark"] .hamburger-line {
+  background: var(--dark-text-primary, #e0e0e0);
+}
+
+[data-theme="dark"] .mobile-nav-toggle.active {
+  background: linear-gradient(135deg, var(--color-primary, #667eea), var(--color-primary-dark, #5a6fd8));
+  border-color: var(--color-primary-dark, #5a6fd8);
+  transform: rotate(180deg);
+}
+
+/* Loading state */
+.navigation-wrapper.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error state */
+.navigation-wrapper.error {
+  border: 2px solid var(--color-error, #dc3545);
+  border-radius: 6px;
+  padding: 1rem;
+  background: var(--color-error-light, #f8d7da);
+}
+
+/* Animation classes */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -674,7 +674,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <>
+    <Container size="xl" py="md">
       <PageHeader
         title="Medical Records App"
         icon="🏥"
@@ -682,7 +683,7 @@ const Dashboard = () => {
         showBackButton={false}
       />
 
-      <Container size="xl" py="xl">
+      <Stack gap="lg">
         {/* Welcome Section */}
         {showWelcomeBox && (
           <Paper
@@ -744,10 +745,15 @@ const Dashboard = () => {
             justify="space-between"
             align="flex-start"
             gap="md"
-            direction={{ base: 'column', sm: 'row' }}
+            direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
           >
             {/* Patient Selector */}
-            <Box style={{ flex: '1', maxWidth: '500px', width: '100%' }}>
+            <Box style={{ 
+              flex: '1', 
+              maxWidth: '500px', 
+              width: '100%',
+              minWidth: '300px' // Ensure minimum visibility
+            }}>
               <PatientSelector
                 onPatientChange={handlePatientChange}
                 currentPatientId={currentActivePatient?.id || user?.id}
@@ -762,6 +768,7 @@ const Dashboard = () => {
                 flexShrink: 0,
                 width: '100%',
                 maxWidth: '300px',
+                minWidth: '250px', // Ensure minimum search bar width
               }}
             >
               <GlobalSearch
@@ -902,8 +909,9 @@ const Dashboard = () => {
             <StatCard key={index} stat={stat} />
           ))}
         </SimpleGrid>
+      </Stack>
       </Container>
-    </div>
+    </>
   );
 };
 

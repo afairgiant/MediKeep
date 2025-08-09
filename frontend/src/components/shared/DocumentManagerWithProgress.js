@@ -18,6 +18,141 @@ import RenderModeContent from './RenderModeContent';
 import DocumentManagerErrorBoundary from './DocumentManagerErrorBoundary';
 import logger from '../../services/logger';
 
+// Separate component to properly handle React Hooks
+const DocumentManagerContent = ({
+  entityType,
+  entityId,
+  mode,
+  onFileCountChange,
+  onError,
+  onUploadComplete,
+  showProgressModal,
+  progressProps,
+  config,
+  showUploadModal,
+  setShowUploadModal,
+  fileUpload,
+  setFileUpload,
+  handleFileUploadSubmit,
+  updateHandlersRef,
+  className
+}) => {
+  // Get handlers from DocumentManagerCore hook
+  const coreHandlers = useDocumentManagerCore({
+    entityType,
+    entityId,
+    mode,
+    onFileCountChange,
+    onError,
+    onUploadComplete,
+    showProgressModal,
+    ...progressProps
+  });
+
+  // Store handlers in ref for stable access
+  updateHandlersRef(coreHandlers);
+
+  return (
+    <Stack gap="md" className={className}>
+      {/* Error Display */}
+      {coreHandlers.error && (
+        <Alert
+          variant="light"
+          color="red"
+          title="File Operation Error"
+          icon={<IconAlertTriangle size={16} />}
+          withCloseButton
+          onClose={() => coreHandlers.setError('')}
+        >
+          {coreHandlers.error}
+        </Alert>
+      )}
+
+      {/* Main Content */}
+      <DocumentManagerErrorBoundary
+        componentName="DocumentManager Content"
+        onError={onError}
+      >
+        <RenderModeContent
+          mode={mode}
+          loading={coreHandlers.loading}
+          files={coreHandlers.files}
+          paperlessLoading={coreHandlers.paperlessLoading}
+          selectedStorageBackend={coreHandlers.selectedStorageBackend}
+          onStorageBackendChange={coreHandlers.setSelectedStorageBackend}
+          paperlessSettings={coreHandlers.paperlessSettings}
+          syncStatus={coreHandlers.syncStatus}
+          syncLoading={coreHandlers.syncLoading}
+          pendingFiles={coreHandlers.pendingFiles}
+          filesToDelete={coreHandlers.filesToDelete}
+          config={config}
+          onUploadModalOpen={() => setShowUploadModal(true)}
+          onCheckSyncStatus={coreHandlers.handleCheckSyncStatus}
+          onDownloadFile={coreHandlers.handleDownloadFile}
+          onViewFile={coreHandlers.handleViewFile}
+          onImmediateDelete={coreHandlers.handleImmediateDelete}
+          onMarkFileForDeletion={coreHandlers.handleMarkFileForDeletion}
+          onUnmarkFileForDeletion={coreHandlers.handleUnmarkFileForDeletion}
+          onAddPendingFile={coreHandlers.handleAddPendingFile}
+          onRemovePendingFile={coreHandlers.handleRemovePendingFile}
+          onPendingFileDescriptionChange={coreHandlers.handlePendingFileDescriptionChange}
+          handleImmediateUpload={coreHandlers.handleImmediateUpload}
+        />
+      </DocumentManagerErrorBoundary>
+
+      {/* Upload Modal for View Mode */}
+      <Modal
+        opened={showUploadModal}
+        onClose={() => {
+          setShowUploadModal(false);
+          setFileUpload({ file: null, description: '' });
+        }}
+        title="Upload File"
+        centered
+      >
+        <form onSubmit={handleFileUploadSubmit}>
+          <Stack gap="md">
+            <FileInput
+              placeholder="Select a file to upload"
+              value={fileUpload.file}
+              onChange={file => setFileUpload(prev => ({ ...prev, file }))}
+              accept={config.acceptedTypes?.join(',')}
+              leftSection={<IconUpload size={16} />}
+            />
+            <TextInput
+              placeholder="File description (optional)"
+              value={fileUpload.description}
+              onChange={e =>
+                setFileUpload(prev => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+            />
+            <Group justify="flex-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setFileUpload({ file: null, description: '' });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!fileUpload.file || coreHandlers.loading}
+                leftSection={<IconUpload size={16} />}
+              >
+                Upload
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
+    </Stack>
+  );
+};
 
 const DocumentManagerWithProgress = React.memo(({
   entityType,
@@ -88,121 +223,25 @@ const DocumentManagerWithProgress = React.memo(({
       onUploadComplete={onUploadComplete}
     >
       {(progressProps) => {
-        // Get handlers from DocumentManagerCore hook
-        const coreHandlers = useDocumentManagerCore({
-          entityType,
-          entityId,
-          mode,
-          onFileCountChange,
-          onError,
-          onUploadComplete,
-          showProgressModal,
-          ...progressProps
-        });
-
-        // Store handlers in ref for stable access
-        updateHandlersRef(coreHandlers);
-
-        return (
-          <Stack gap="md" className={className}>
-            {/* Error Display */}
-            {coreHandlers.error && (
-              <Alert
-                variant="light"
-                color="red"
-                title="File Operation Error"
-                icon={<IconAlertTriangle size={16} />}
-                withCloseButton
-                onClose={() => coreHandlers.setError('')}
-              >
-                {coreHandlers.error}
-              </Alert>
-            )}
-
-            {/* Main Content */}
-            <DocumentManagerErrorBoundary
-              componentName="DocumentManager Content"
-              onError={onError}
-            >
-              <RenderModeContent
-                mode={mode}
-                loading={coreHandlers.loading}
-                files={coreHandlers.files}
-                paperlessLoading={coreHandlers.paperlessLoading}
-                selectedStorageBackend={coreHandlers.selectedStorageBackend}
-                onStorageBackendChange={coreHandlers.setSelectedStorageBackend}
-                paperlessSettings={coreHandlers.paperlessSettings}
-                syncStatus={coreHandlers.syncStatus}
-                syncLoading={coreHandlers.syncLoading}
-                pendingFiles={coreHandlers.pendingFiles}
-                filesToDelete={coreHandlers.filesToDelete}
-                config={config}
-                onUploadModalOpen={() => setShowUploadModal(true)}
-                onCheckSyncStatus={coreHandlers.handleCheckSyncStatus}
-                onDownloadFile={coreHandlers.handleDownloadFile}
-                onViewFile={coreHandlers.handleViewFile}
-                onImmediateDelete={coreHandlers.handleImmediateDelete}
-                onMarkFileForDeletion={coreHandlers.handleMarkFileForDeletion}
-                onUnmarkFileForDeletion={coreHandlers.handleUnmarkFileForDeletion}
-                onAddPendingFile={coreHandlers.handleAddPendingFile}
-                onRemovePendingFile={coreHandlers.handleRemovePendingFile}
-                onPendingFileDescriptionChange={coreHandlers.handlePendingFileDescriptionChange}
-                handleImmediateUpload={coreHandlers.handleImmediateUpload}
-              />
-            </DocumentManagerErrorBoundary>
-
-                {/* Upload Modal for View Mode */}
-                <Modal
-                  opened={showUploadModal}
-                  onClose={() => {
-                    setShowUploadModal(false);
-                    setFileUpload({ file: null, description: '' });
-                  }}
-                  title="Upload File"
-                  centered
-                >
-                  <form onSubmit={handleFileUploadSubmit}>
-                    <Stack gap="md">
-                      <FileInput
-                        placeholder="Select a file to upload"
-                        value={fileUpload.file}
-                        onChange={file => setFileUpload(prev => ({ ...prev, file }))}
-                        accept={config.acceptedTypes?.join(',')}
-                        leftSection={<IconUpload size={16} />}
-                      />
-                      <TextInput
-                        placeholder="File description (optional)"
-                        value={fileUpload.description}
-                        onChange={e =>
-                          setFileUpload(prev => ({
-                            ...prev,
-                            description: e.target.value,
-                          }))
-                        }
-                      />
-                      <Group justify="flex-end">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setShowUploadModal(false);
-                            setFileUpload({ file: null, description: '' });
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={!fileUpload.file || coreHandlers.loading}
-                          leftSection={<IconUpload size={16} />}
-                        >
-                          Upload
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </form>
-                </Modal>
-              </Stack>
-            );
+        // Get handlers from DocumentManagerCore hook - moved outside callback
+        return <DocumentManagerContent 
+          entityType={entityType}
+          entityId={entityId}
+          mode={mode}
+          onFileCountChange={onFileCountChange}
+          onError={onError}
+          onUploadComplete={onUploadComplete}
+          showProgressModal={showProgressModal}
+          progressProps={progressProps}
+          config={config}
+          showUploadModal={showUploadModal}
+          setShowUploadModal={setShowUploadModal}
+          fileUpload={fileUpload}
+          setFileUpload={setFileUpload}
+          handleFileUploadSubmit={handleFileUploadSubmit}
+          updateHandlersRef={updateHandlersRef}
+          className={className}
+        />;
         }}
       </ProgressTracking>
   );

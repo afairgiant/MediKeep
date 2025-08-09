@@ -27,6 +27,26 @@ export function createSafeThrottle(func, delay, options = {}) {
   let lastArgs = null;
   let isDestroyed = false;
 
+  // Helper function to safely execute the original function (moved outside for access in flush)
+  const safeExecute = () => {
+    if (isDestroyed) return;
+    
+    try {
+      lastCallTime = Date.now();
+      return func.apply(this, lastArgs);
+    } catch (error) {
+      if (onError) {
+        try {
+          onError(error, debugName, lastArgs);
+        } catch (handlerError) {
+          console.error(`Error in throttle error handler for ${debugName}:`, handlerError);
+        }
+      } else {
+        console.error(`Error in throttled function ${debugName}:`, error);
+      }
+    }
+  };
+
   const throttledFunction = function(...args) {
     // Prevent execution if throttle has been destroyed
     if (isDestroyed) {
@@ -40,26 +60,6 @@ export function createSafeThrottle(func, delay, options = {}) {
     const timeSinceLastCall = currentTime - lastCallTime;
     
     lastArgs = args;
-
-    // Helper function to safely execute the original function
-    const safeExecute = () => {
-      if (isDestroyed) return;
-      
-      try {
-        lastCallTime = Date.now();
-        return func.apply(this, lastArgs);
-      } catch (error) {
-        if (onError) {
-          try {
-            onError(error, debugName, lastArgs);
-          } catch (handlerError) {
-            console.error(`Error in throttle error handler for ${debugName}:`, handlerError);
-          }
-        } else {
-          console.error(`Error in throttled function ${debugName}:`, error);
-        }
-      }
-    };
 
     // If enough time has passed, execute immediately (leading edge)
     if (leading && timeSinceLastCall >= delay) {

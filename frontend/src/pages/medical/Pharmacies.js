@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
@@ -220,14 +219,11 @@ const Pharmacies = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <>
+    <Container size="xl" py="md">
       <PageHeader title="Pharmacies" icon="💊" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -284,11 +280,6 @@ const Pharmacies = () => {
         />
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
           {filteredPharmacies.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -311,15 +302,8 @@ const Pharmacies = () => {
             </Paper>
           ) : (
             <Grid>
-              <AnimatePresence>
                 {filteredPharmacies.map((pharmacy, index) => (
                   <Grid.Col key={pharmacy.id} span={{ base: 12, md: 6, lg: 4 }}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
                       <PharmacyCard
                         pharmacy={pharmacy}
                         onEdit={handleEditPharmacy}
@@ -328,13 +312,11 @@ const Pharmacies = () => {
                         navigate={navigate}
                         onError={setError}
                       />
-                    </motion.div>
                   </Grid.Col>
                 ))}
-              </AnimatePresence>
             </Grid>
           )}
-        </motion.div>
+      </Stack>
       </Container>
 
       <PharmacyFormWrapper
@@ -354,7 +336,7 @@ const Pharmacies = () => {
         onEdit={handleEditPharmacy}
         navigate={navigate}
       />
-    </motion.div>
+    </>
   );
 };
 
