@@ -1,0 +1,1 @@
+# Custom enum package for APIException compatibility

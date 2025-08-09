@@ -4,54 +4,31 @@ V1 Patient Management API Endpoints - Netflix-style patient switching and manage
 
 from typing import Any, List, Optional
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, validator, root_validator
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.logging_config import get_logger
+from app.core.error_handling import (
+    NotFoundException,
+    ForbiddenException,
+    BusinessLogicException,
+    handle_database_errors,
+    DatabaseException
+)
 from app.services.patient_management import PatientManagementService
 from app.services.patient_access import PatientAccessService
-from app.schemas.patient import Patient, PatientCreate, PatientUpdate
-from app.models.models import User
+from app.schemas.patient import PatientCreate, PatientUpdate
+from app.models.models import User, Patient
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
 
 
-# Helper function for handling validation errors - will be used in endpoints
-def get_validation_error_response(request: Request, exc: RequestValidationError):
-    """
-    Generate a user-friendly response for Pydantic validation errors (422).
-    """
-    user_ip = request.client.host if request.client else "unknown"
-    
-    # Log the validation error details
-    logger.warning(
-        f"Validation error on {request.method} {request.url.path}",
-        extra={
-            "category": "app",
-            "event": "validation_error",
-            "ip": user_ip,
-            "validation_errors": exc.errors(),
-        }
-    )
-    
-    # Create more user-friendly error messages
-    detailed_errors = []
-    for error in exc.errors():
-        field = error.get('loc')[-1] if error.get('loc') else 'unknown'
-        msg = error.get('msg', 'Invalid value')
-        detailed_errors.append(f"{field}: {msg}")
-    
-    error_detail = {
-        "message": "Validation failed",
-        "errors": detailed_errors,
-        "type": "validation_error"
-    }
-    
-    return error_detail
+# Note: Validation error handling is now managed globally in app/main.py
+# The global handler provides consistent error responses across all endpoints
 
 
 class PatientCreateRequest(BaseModel):
@@ -200,8 +177,18 @@ def create_patient(
     """
     user_ip = request.client.host if request.client else "unknown"
     
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
+        
+        # Check for self-record duplication
+        if patient_in.is_self_record:
+            existing_self = service.get_self_record(current_user)
+            if existing_self:
+                raise BusinessLogicException(
+                    message="You already have a self-record. Only one self-record per user is allowed.",
+                    request=request
+                )
+        
         patient = service.create_patient(
             user=current_user,
             patient_data=patient_in.dict(),
@@ -221,24 +208,12 @@ def create_patient(
         )
         
         return PatientResponse.model_validate(patient)
-        
-    except Exception as e:
-        logger.error(
-            f"Failed to create patient for user {current_user.id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_creation_failed",
-                "user_id": current_user.id,
-                "error": str(e),
-                "ip": user_ip,
-            }
-        )
-        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/", response_model=PatientListResponse)
 def get_accessible_patients(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
     permission: str = Query("view", description="Required permission level"),
@@ -248,7 +223,7 @@ def get_accessible_patients(
     
     Returns both owned patients and patients shared with the user.
     """
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
         access_service = PatientAccessService(db)
         
@@ -272,15 +247,12 @@ def get_accessible_patients(
             owned_count=owned_count,
             shared_count=shared_count
         )
-        
-    except Exception as e:
-        logger.error(f"Failed to get accessible patients for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve patients")
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)
 def get_patient(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int,
     current_user: User = Depends(deps.get_current_user),
@@ -290,21 +262,18 @@ def get_patient(
     
     User must have access to this patient.
     """
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patient = service.get_patient(current_user, patient_id)
         
+        if not patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {patient_id} not found",
+                request=request
+            )
+        
         return PatientResponse.model_validate(patient)
-        
-    except Exception as e:
-        logger.error(f"Failed to get patient {patient_id} for user {current_user.id}: {str(e)}")
-        
-        if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
-        elif "permission" in str(e).lower():
-            raise HTTPException(status_code=403, detail=str(e))
-        else:
-            raise HTTPException(status_code=500, detail="Failed to retrieve patient")
 
 
 @router.put("/{patient_id}", response_model=PatientResponse)
@@ -344,8 +313,26 @@ def update_patient(
         }
     )
     
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
+        
+        # Check if patient exists first
+        existing_patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not existing_patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {patient_id} not found",
+                request=request
+            )
+        
+        # Check permissions
+        from app.services.patient_access import PatientAccessService
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, existing_patient, 'edit'):
+            raise ForbiddenException(
+                message="You don't have permission to edit this patient",
+                request=request
+            )
         
         # Filter out None values
         patient_data = {k: v for k, v in patient_in.dict().items() if v is not None}
@@ -377,27 +364,6 @@ def update_patient(
         )
         
         return PatientResponse.model_validate(patient)
-        
-    except Exception as e:
-        logger.error(
-            f"Failed to update patient {patient_id} for user {current_user.id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_update_failed",
-                "user_id": current_user.id,
-                "patient_id": patient_id,
-                "error": str(e),
-                "error_type": type(e).__name__,
-                "ip": user_ip,
-            }
-        )
-        
-        if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
-        elif "permission" in str(e).lower():
-            raise HTTPException(status_code=403, detail=str(e))
-        else:
-            raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/{patient_id}")
@@ -416,8 +382,25 @@ def delete_patient(
     """
     user_ip = request.client.host if request.client else "unknown"
     
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
+        
+        # Check if patient exists
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {patient_id} not found",
+                request=request
+            )
+        
+        # Check ownership
+        if patient.owner_user_id != current_user.id:
+            raise ForbiddenException(
+                message="Only the patient owner can delete this record",
+                request=request
+            )
+        
         success = service.delete_patient(current_user, patient_id)
         
         if success:
@@ -434,52 +417,33 @@ def delete_patient(
             
             return {"message": "Patient record and all associated medical records deleted successfully"}
         else:
-            raise HTTPException(status_code=500, detail="Failed to delete patient")
-            
-    except Exception as e:
-        logger.error(
-            f"Failed to delete patient {patient_id} for user {current_user.id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_deletion_failed",
-                "user_id": current_user.id,
-                "patient_id": patient_id,
-                "error": str(e),
-                "ip": user_ip,
-            }
-        )
-        
-        if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
-        elif "permission" in str(e).lower():
-            raise HTTPException(status_code=403, detail=str(e))
-        else:
-            raise HTTPException(status_code=500, detail="Failed to delete patient")
+            raise DatabaseException(
+                message="Failed to delete patient record",
+                request=request
+            )
 
 
 @router.get("/owned/list", response_model=List[PatientResponse])
 def get_owned_patients(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get all patients owned by the current user.
     """
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patients = service.get_owned_patients(current_user)
         
         return [PatientResponse.model_validate(p) for p in patients]
-        
-    except Exception as e:
-        logger.error(f"Failed to get owned patients for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve owned patients")
 
 
 @router.get("/self-record", response_model=Optional[PatientResponse])
 def get_self_record(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:
@@ -488,7 +452,7 @@ def get_self_record(
     
     Returns null if the user doesn't have a self-record.
     """
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patient = service.get_self_record(current_user)
         
@@ -496,10 +460,6 @@ def get_self_record(
             return PatientResponse.model_validate(patient)
         else:
             return None
-            
-    except Exception as e:
-        logger.error(f"Failed to get self-record for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve self-record")
 
 
 @router.post("/switch", response_model=PatientResponse)
@@ -517,8 +477,18 @@ def switch_active_patient(
     """
     user_ip = request.client.host if request.client else "unknown"
     
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
+        
+        # Check if target patient exists and user has access
+        target_patient = db.query(Patient).filter(Patient.id == switch_request.patient_id).first()
+        if not target_patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {switch_request.patient_id} not found",
+                request=request
+            )
+        
         patient = service.switch_active_patient(current_user, switch_request.patient_id)
         
         logger.info(
@@ -533,31 +503,12 @@ def switch_active_patient(
         )
         
         return PatientResponse.model_validate(patient)
-        
-    except Exception as e:
-        logger.error(
-            f"Failed to switch patient for user {current_user.id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_switch_failed",
-                "user_id": current_user.id,
-                "patient_id": switch_request.patient_id,
-                "error": str(e),
-                "ip": user_ip,
-            }
-        )
-        
-        if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
-        elif "permission" in str(e).lower():
-            raise HTTPException(status_code=403, detail=str(e))
-        else:
-            raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/active/current", response_model=Optional[PatientResponse])
 def get_active_patient(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:
@@ -566,7 +517,7 @@ def get_active_patient(
     
     Returns null if no active patient is set or if the active patient is no longer accessible.
     """
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patient = service.get_active_patient(current_user)
         
@@ -574,15 +525,12 @@ def get_active_patient(
             return PatientResponse.model_validate(patient)
         else:
             return None
-            
-    except Exception as e:
-        logger.error(f"Failed to get active patient for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve active patient")
 
 
 @router.get("/stats")
 def get_patient_statistics(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
 ):
@@ -591,7 +539,7 @@ def get_patient_statistics(
     
     Returns counts and metadata about accessible patients.
     """
-    try:
+    with handle_database_errors(request=request):
         service = PatientManagementService(db)
         stats = service.get_patient_statistics(current_user)
         
@@ -602,7 +550,3 @@ def get_patient_statistics(
             'active_patient_id': stats['active_patient_id'],
             'sharing_stats': stats['sharing_stats']
         }
-        
-    except Exception as e:
-        logger.error(f"Failed to get patient statistics for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve patient statistics")
