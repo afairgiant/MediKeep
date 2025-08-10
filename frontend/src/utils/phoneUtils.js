@@ -143,11 +143,32 @@ export const isValidPhoneNumber = phoneNumber => {
 /**
  * Format phone number as user types (for input fields)
  * Provides real-time formatting as the user enters the number
+ * Now preserves user input formatting characters for better UX
  *
  * @param {string} value - Current input value
  * @returns {string} - Formatted value for display in input
  */
 export const formatPhoneInput = value => {
+  // If user is actively typing formatting characters, preserve them temporarily
+  // This allows users to type "(555) 123-4567" as shown in placeholder
+  if (value.includes('(') || value.includes(')') || value.includes('-') || value.includes(' ')) {
+    const digits = cleanPhoneNumber(value);
+    
+    // Only format if we have enough digits, otherwise preserve user input
+    if (digits.length >= 10) {
+      // Apply standard formatting
+      if (digits.length === 10) {
+        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      } else if (digits.length === 11 && digits.startsWith('1')) {
+        return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+      }
+    }
+    
+    // If not enough digits yet, let user continue typing with their formatting
+    return value;
+  }
+
+  // For pure digit input, apply automatic formatting
   const digits = cleanPhoneNumber(value);
 
   // For very short numbers, just return digits

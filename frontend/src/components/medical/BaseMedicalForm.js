@@ -153,7 +153,8 @@ const BaseMedicalForm = ({
           <TextInput
             {...baseProps}
             onChange={handleTextInputChange(name)}
-            type={type === 'email' ? 'email' : type === 'tel' ? 'tel' : type === 'url' ? 'url' : 'text'}
+            type={type === 'email' ? 'email' : type === 'tel' ? 'text' : type === 'url' ? 'url' : 'text'}
+            inputMode={type === 'tel' ? 'tel' : undefined}
           />
         );
 

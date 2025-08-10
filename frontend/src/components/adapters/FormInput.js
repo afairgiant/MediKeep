@@ -32,7 +32,8 @@ export const FormInput = ({
     <TextInput
       label={label}
       name={name}
-      type={typeMap[type] || 'text'}
+      type={type === 'tel' ? 'text' : (typeMap[type] || 'text')}
+      inputMode={type === 'tel' ? 'tel' : undefined}
       value={value}
       onChange={onChange}
       onBlur={onBlur}
