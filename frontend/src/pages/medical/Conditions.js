@@ -118,11 +118,12 @@ const Conditions = () => {
 
   const handleAddCondition = () => {
     setEditingCondition(null);
+    // Apply default status early to avoid validation conflicts
     setFormData({
       condition_name: '',
       diagnosis: '',
       notes: '',
-      status: 'active',
+      status: 'active', // Default status applied early
       severity: '',
       medication_id: '',
       practitioner_id: '',
@@ -200,11 +201,12 @@ const Conditions = () => {
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
+    // Apply default status early if condition doesn't have one
     setFormData({
       condition_name: condition.condition_name || '',
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
-      status: condition.status || 'active',
+      status: condition.status || 'active', // Default status applied early for consistency
       severity: condition.severity || '',
       medication_id: condition.medication_id ? condition.medication_id.toString() : '',
       practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',

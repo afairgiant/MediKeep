@@ -2,6 +2,7 @@
  * Error handling utilities for consistent error message processing
  */
 
+import { formatDateForDisplay } from './dateUtils';
 /**
  * Map of common validation error types to user-friendly messages
  */
@@ -31,11 +32,17 @@ const ERROR_TYPE_MESSAGES = {
 const ERROR_PATTERN_MESSAGES = [
   {
     pattern: /ensure this value is not greater than (\d{4}-\d{2}-\d{2})/,
-    getMessage: (match) => `Date cannot be after ${match[1]}`
+    getMessage: (match) => {
+      const formattedDate = formatDateForDisplay(match[1]);
+      return `Date cannot be after ${formattedDate}`;
+    }
   },
   {
     pattern: /ensure this value is not less than (\d{4}-\d{2}-\d{2})/,
-    getMessage: (match) => `Date cannot be before ${match[1]}`
+    getMessage: (match) => {
+      const formattedDate = formatDateForDisplay(match[1]);
+      return `Date cannot be before ${formattedDate}`;
+    }
   },
   {
     pattern: /ensure this value is greater than or equal to (\d+)/,

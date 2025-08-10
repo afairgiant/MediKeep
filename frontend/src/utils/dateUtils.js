@@ -64,8 +64,8 @@ export const formatDateForAPI = (dateValue) => {
  */
 export const getTodayEndOfDay = () => {
   const today = new Date();
-  today.setHours(23, 59, 59, 999);
-  return today;
+  // Create new Date object to avoid mutation
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
 };
 
 /**
@@ -90,10 +90,11 @@ export const isDateInFuture = (dateValue) => {
   const date = parseDateInput(dateValue);
   if (!date) return false;
   
+  // Create new Date object to avoid mutation
   const today = new Date();
-  today.setHours(23, 59, 59, 999); // End of today
+  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
   
-  return date > today;
+  return date > endOfToday;
 };
 
 /**
