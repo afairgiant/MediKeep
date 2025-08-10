@@ -36,6 +36,12 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { 
+  formatDateForAPI, 
+  getTodayString, 
+  isDateInFuture, 
+  isEndDateBeforeStartDate 
+} from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -236,21 +242,52 @@ const Conditions = () => {
       return;
     }
 
+
+    // Validate dates
+    const todayString = getTodayString();
+    
+    if (isDateInFuture(formData.onset_date)) {
+      setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
+    }
+    
+    if (isDateInFuture(formData.end_date)) {
+      setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
+    }
+    
+    if (isEndDateBeforeStartDate(formData.onset_date, formData.end_date)) {
+      setError('End date cannot be before onset date');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.status) {
+      setError('Status is required. Please select a status.');
+      return;
+    }
+    
+    if (!formData.diagnosis) {
+      setError('Diagnosis is required.');
+      return;
+    }
+
     const conditionData = {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: formData.status,
+      status: formData.status || 'active', // Ensure status has a default
       severity: formData.severity || null,
       medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
-      onset_date: formData.onset_date || null, // Use snake_case to match API
-      end_date: formData.end_date || null, // Use snake_case to match API
+      onset_date: formatDateForAPI(formData.onset_date),
+      end_date: formatDateForAPI(formData.end_date),
       patient_id: currentPatient.id,
     };
+
 
     let success;
     if (editingCondition) {

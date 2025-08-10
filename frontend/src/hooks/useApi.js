@@ -30,8 +30,26 @@ export const useApi = () => {
     } catch (err) {
       // Don't show errors if request was cancelled
       if (err.name !== 'AbortError' && !controller.signal.aborted) {
-        const errorMessage =
-          options.errorMessage || err.message || 'An error occurred';
+        // Extract detailed error message if available
+        let errorMessage = options.errorMessage || err.message || 'An error occurred';
+        
+        // If the error contains validation details, extract them
+        if (err.message && err.message.includes('Validation Error:')) {
+          errorMessage = err.message; // Use the detailed validation error
+        } else if (err.response?.data?.detail) {
+          // Handle structured error responses
+          if (Array.isArray(err.response.data.detail)) {
+            const details = err.response.data.detail
+              .map(e => `${e.loc?.join('.') || 'field'}: ${e.msg}`)
+              .join('; ');
+            errorMessage = `Validation failed: ${details}`;
+          } else {
+            errorMessage = err.response.data.detail;
+          }
+        } else if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+        
         setError(errorMessage);
         // API error logged by apiService automatically
       }

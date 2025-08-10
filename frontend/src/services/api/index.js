@@ -1,5 +1,6 @@
 import logger from '../logger';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
+import { extractErrorMessage } from '../../utils/errorUtils';
 
 // Map entity types to their API endpoint paths
 const ENTITY_TO_API_PATH = {
@@ -82,17 +83,14 @@ class ApiService {
 
       try {
         fullErrorData = JSON.parse(errorData);
-        errorMessage =
-          fullErrorData.detail || fullErrorData.message || errorData; // For 422 errors, log the full validation details
+        
+        // Log validation errors for debugging
         if (response.status === 422) {
           console.error('Validation Error Details:', fullErrorData);
-          if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
-            const validationErrors = fullErrorData.detail
-              .map(err => `${err.loc?.join('.')} - ${err.msg}`)
-              .join('; ');
-            errorMessage = `Validation Error: ${validationErrors}`;
-          }
         }
+        
+        // Use the error utility to extract a user-friendly message
+        errorMessage = extractErrorMessage(fullErrorData, response.status);
       } catch {
         errorMessage =
           errorData ||
