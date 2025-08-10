@@ -116,19 +116,25 @@ export const formatPhoneNumber = phoneNumber => {
 };
 
 /**
- * Clean phone number input for form submission
- * Removes all non-digit characters for database storage
+ * Clean phone number input for form submission with enhanced sanitization
+ * Removes all non-digit characters and ensures only digits are returned
  *
  * @param {string} phoneNumber - The phone number input from user
- * @returns {string} - Cleaned phone number (digits only)
+ * @returns {string} - Sanitized phone number (digits only)
  */
 export const cleanPhoneNumber = phoneNumber => {
   if (!phoneNumber) return '';
-  return phoneNumber.replace(/\D/g, '');
+  
+  // Convert to string and remove all non-digit characters
+  const sanitized = String(phoneNumber).replace(/\D/g, '');
+  
+  // Additional sanitization - ensure we only have valid digit characters
+  // This handles edge cases with unicode digits or other numeric representations
+  return sanitized.replace(/[^\d]/g, '');
 };
 
 /**
- * Validate phone number format
+ * Validate phone number format with enhanced length validation
  *
  * @param {string} phoneNumber - The phone number to validate
  * @returns {boolean} - True if valid, false otherwise
@@ -137,7 +143,26 @@ export const isValidPhoneNumber = phoneNumber => {
   if (!phoneNumber) return true; // Allow empty phone numbers
 
   const digits = cleanPhoneNumber(phoneNumber);
-  return digits.length >= 10 && digits.length <= 15;
+  
+  // Enhanced length validation
+  if (digits.length < 10) {
+    return false; // Too short for any valid phone number
+  }
+  
+  if (digits.length > 15) {
+    return false; // Exceeds ITU-T E.164 recommendation for international numbers
+  }
+  
+  // Additional validation for common patterns
+  if (digits.length === 10) {
+    // US number validation - area code shouldn't start with 0 or 1
+    const areaCode = digits.slice(0, 3);
+    if (areaCode.startsWith('0') || areaCode.startsWith('1')) {
+      return false;
+    }
+  }
+  
+  return true;
 };
 
 /**

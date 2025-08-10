@@ -118,11 +118,12 @@ const Conditions = () => {
 
   const handleAddCondition = () => {
     setEditingCondition(null);
+    // Apply default status early to avoid validation conflicts
     setFormData({
       condition_name: '',
       diagnosis: '',
       notes: '',
-      status: 'active',
+      status: 'active', // Default status applied early
       severity: '',
       medication_id: '',
       practitioner_id: '',
@@ -200,11 +201,12 @@ const Conditions = () => {
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
+    // Apply default status early if condition doesn't have one
     setFormData({
       condition_name: condition.condition_name || '',
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
-      status: condition.status || 'active',
+      status: condition.status || 'active', // Default status applied early for consistency
       severity: condition.severity || '',
       medication_id: condition.medication_id ? condition.medication_id.toString() : '',
       practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',
@@ -262,21 +264,19 @@ const Conditions = () => {
     }
 
     // Validate required fields
-    if (!formData.status) {
-      setError('Status is required. Please select a status.');
-      return;
-    }
-    
     if (!formData.diagnosis) {
       setError('Diagnosis is required.');
       return;
     }
 
+    // Status should always have a default by now, but ensure it does
+    const validatedStatus = formData.status || 'active';
+
     const conditionData = {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: formData.status || 'active', // Ensure status has a default
+      status: validatedStatus, // Use validated status to avoid conflicts
       severity: formData.severity || null,
       medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
