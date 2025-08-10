@@ -29,6 +29,13 @@ export const NAVIGATION_SECTIONS = {
         id: 'patient-info',
         alwaysVisible: true,
       },
+      {
+        name: 'Emergency Contacts',
+        path: buildEntityUrl(ENTITY_TYPES.EMERGENCY_CONTACT),
+        icon: '🚨',
+        id: 'emergency-contacts',
+        alwaysVisible: true,
+      },
     ],
   },
   medicalRecords: {
