@@ -88,11 +88,12 @@ def read_emergency_contacts(
 @router.get("/{emergency_contact_id}", response_model=EmergencyContactWithRelations)
 def read_emergency_contact(
     emergency_contact_id: int,
+    request: Request,
     db: Session = Depends(deps.get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Get emergency contact by ID with related information - only allows access to user's own contacts."""
-    with handle_database_errors():
+    with handle_database_errors(request=request):
         # Use direct query with joinedload for relations
         from sqlalchemy.orm import joinedload
 

@@ -300,7 +300,7 @@ def update_patient(
     """
     user_ip = request.client.host if request.client else "unknown"
     
-    # Log the incoming request data for debugging 422 errors
+    # Log the incoming request without sensitive data
     logger.debug(
         f"Patient update request for patient {patient_id}",
         extra={
@@ -308,7 +308,7 @@ def update_patient(
             "event": "patient_update_request",
             "user_id": current_user.id,
             "patient_id": patient_id,
-            "request_data": patient_in.dict(),
+            "fields_provided": list(patient_in.dict(exclude_unset=True).keys()),
             "ip": user_ip,
         }
     )
@@ -337,16 +337,16 @@ def update_patient(
         # Filter out None values
         patient_data = {k: v for k, v in patient_in.dict().items() if v is not None}
         
-        # Additional logging for troubleshooting
+        # Log fields being updated without sensitive values
         if patient_data:
             logger.debug(
-                f"Filtered patient data for update: {patient_data}",
+                f"Updating patient {patient_id} fields",
                 extra={
                     "category": "app",
                     "event": "patient_update_data_filtered",
                     "user_id": current_user.id,
                     "patient_id": patient_id,
-                    "filtered_data": patient_data,
+                    "fields_updated": list(patient_data.keys()),
                 }
             )
         
