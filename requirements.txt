@@ -6,6 +6,7 @@ aiosqlite==0.21.0
 alembic==1.11.1
 annotated-types==0.7.0
 anyio==4.9.0
+apiexception==0.1.16
 attrs==25.3.0
 bcrypt==4.0.1
 certifi==2025.4.26
