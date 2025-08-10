@@ -14,6 +14,7 @@ import { IconX } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
+import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 const ConditionFormWrapper = ({
   isOpen,
   onClose,
@@ -35,9 +36,7 @@ const ConditionFormWrapper = ({
   } = useFormHandlers(onInputChange);
   
   // Get today's date for date picker constraints
-  const today = new Date();
-  // Set to end of day to ensure today is selectable
-  today.setHours(23, 59, 59, 999);
+  const today = getTodayEndOfDay();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -151,16 +150,7 @@ const ConditionFormWrapper = ({
             <DateInput
               label="Onset Date"
               name="onset_date"
-              value={formData.onset_date ? (() => {
-                // Parse date string to avoid timezone issues
-                if (typeof formData.onset_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.onset_date.trim())) {
-                  const [year, month, day] = formData.onset_date.trim().split('-').map(Number);
-                  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                    return new Date(year, month - 1, day); // month is 0-indexed
-                  }
-                }
-                return new Date(formData.onset_date);
-              })() : null}
+              value={parseDateInput(formData.onset_date)}
               onChange={handleDateChange('onset_date')}
               placeholder="Select onset date"
               clearable
@@ -171,30 +161,12 @@ const ConditionFormWrapper = ({
             <DateInput
               label="End Date"
               name="end_date"
-              value={formData.end_date ? (() => {
-                // Parse date string to avoid timezone issues
-                if (typeof formData.end_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.end_date.trim())) {
-                  const [year, month, day] = formData.end_date.trim().split('-').map(Number);
-                  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                    return new Date(year, month - 1, day); // month is 0-indexed
-                  }
-                }
-                return new Date(formData.end_date);
-              })() : null}
+              value={parseDateInput(formData.end_date)}
               onChange={handleDateChange('end_date')}
               placeholder="Select end date"
               clearable
               firstDayOfWeek={0}
-              minDate={formData.onset_date ? (() => {
-                // End date can't be before onset date
-                if (typeof formData.onset_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.onset_date.trim())) {
-                  const [year, month, day] = formData.onset_date.trim().split('-').map(Number);
-                  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                    return new Date(year, month - 1, day);
-                  }
-                }
-                return new Date(formData.onset_date);
-              })() : undefined}
+              minDate={parseDateInput(formData.onset_date) || undefined}
               maxDate={today}
             />
           </Group>

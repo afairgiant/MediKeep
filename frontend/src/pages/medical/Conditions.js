@@ -36,6 +36,12 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { 
+  formatDateForAPI, 
+  getTodayString, 
+  isDateInFuture, 
+  isEndDateBeforeStartDate 
+} from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -237,54 +243,23 @@ const Conditions = () => {
     }
 
 
-    // Validate dates are not in the future
-    const today = new Date();
-    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    // Validate dates
+    const todayString = getTodayString();
     
-    if (formData.onset_date) {
-      // Compare as strings to avoid timezone issues
-      if (formData.onset_date > todayString) {
-        setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
-        return;
-      }
+    if (isDateInFuture(formData.onset_date)) {
+      setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
     }
     
-    if (formData.end_date) {
-      // Compare as strings to avoid timezone issues
-      if (formData.end_date > todayString) {
-        setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
-        return;
-      }
+    if (isDateInFuture(formData.end_date)) {
+      setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
     }
     
-    // Validate end date is not before onset date
-    if (formData.onset_date && formData.end_date) {
-      const onsetDate = new Date(formData.onset_date);
-      const endDate = new Date(formData.end_date);
-      if (endDate < onsetDate) {
-        setError('End date cannot be before onset date');
-        return;
-      }
+    if (isEndDateBeforeStartDate(formData.onset_date, formData.end_date)) {
+      setError('End date cannot be before onset date');
+      return;
     }
-
-    // Ensure dates are properly formatted as YYYY-MM-DD strings
-    const formatDateForAPI = (dateValue) => {
-      if (!dateValue) return null;
-      
-      // If it's already a YYYY-MM-DD string, return as is
-      if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
-        return dateValue;
-      }
-      
-      // If it's a date object or date string, convert to YYYY-MM-DD
-      const date = new Date(dateValue);
-      if (isNaN(date.getTime())) return null;
-      
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
 
     // Validate required fields
     if (!formData.status) {
