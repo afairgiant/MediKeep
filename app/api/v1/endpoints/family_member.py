@@ -1,9 +1,13 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.core.error_handling import (
+    BusinessLogicException,
+    handle_database_errors
+)
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -96,7 +100,7 @@ def read_family_member(
         record_id=family_member_id,
         relations=["family_conditions"],
     )
-    handle_not_found(family_member_obj, "Family Member")
+    handle_not_found(family_member_obj, "Family Member", request)
     verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
     return family_member_obj
 
@@ -112,21 +116,22 @@ def update_family_member(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Update a family member - supports patient switching."""
-    # Verify family member exists and belongs to the accessible patient
-    family_member_obj = family_member.get(db, id=family_member_id)
-    handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
-    
-    return handle_update_with_logging(
-        db=db,
-        crud_obj=family_member,
-        entity_id=family_member_id,
-        obj_in=family_member_in,
-        entity_type=EntityType.FAMILY_MEMBER,
-        user_id=current_user_id,
-        entity_name="Family Member",
-        request=request,
-    )
+    with handle_database_errors(request=request):
+        # Verify family member exists and belongs to the accessible patient
+        family_member_obj = family_member.get(db, id=family_member_id)
+        handle_not_found(family_member_obj, "Family Member", request)
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        
+        return handle_update_with_logging(
+            db=db,
+            crud_obj=family_member,
+            entity_id=family_member_id,
+            obj_in=family_member_in,
+            entity_type=EntityType.FAMILY_MEMBER,
+            user_id=current_user_id,
+            entity_name="Family Member",
+            request=request,
+        )
 
 
 @router.delete("/{family_member_id}")
@@ -139,34 +144,37 @@ def delete_family_member(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Delete a family member - supports patient switching."""
-    # Verify family member exists and belongs to the accessible patient
-    family_member_obj = family_member.get(db, id=family_member_id)
-    handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
-    
-    return handle_delete_with_logging(
-        db=db,
-        crud_obj=family_member,
-        entity_id=family_member_id,
-        entity_type=EntityType.FAMILY_MEMBER,
-        user_id=current_user_id,
-        entity_name="Family Member",
-        request=request,
-    )
+    with handle_database_errors(request=request):
+        # Verify family member exists and belongs to the accessible patient
+        family_member_obj = family_member.get(db, id=family_member_id)
+        handle_not_found(family_member_obj, "Family Member", request)
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        
+        return handle_delete_with_logging(
+            db=db,
+            crud_obj=family_member,
+            entity_id=family_member_id,
+            entity_type=EntityType.FAMILY_MEMBER,
+            user_id=current_user_id,
+            entity_name="Family Member",
+            request=request,
+        )
 
 
 @router.get("/search/", response_model=List[FamilyMemberResponse])
 def search_family_members(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     name: str = Query(..., min_length=2),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Search family members by name - supports patient switching."""
-    family_members = family_member.search_by_name(
-        db, patient_id=target_patient_id, name_term=name
-    )
-    return family_members
+    with handle_database_errors(request=request):
+        family_members = family_member.search_by_name(
+            db, patient_id=target_patient_id, name_term=name
+        )
+        return family_members
 
 
 # Family Condition Endpoints
@@ -174,19 +182,21 @@ def search_family_members(
 @router.get("/{family_member_id}/conditions", response_model=List[FamilyConditionResponse])
 def get_family_member_conditions(
     *,
+    request: Request,
     family_member_id: int,
     db: Session = Depends(deps.get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Get all conditions for a specific family member - supports patient switching."""
-    # Verify family member exists and belongs to the accessible patient
-    family_member_obj = family_member.get(db, id=family_member_id)
-    handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
-    
-    # Get conditions
-    conditions = family_condition.get_by_family_member(db, family_member_id=family_member_id)
-    return conditions
+    with handle_database_errors(request=request):
+        # Verify family member exists and belongs to the accessible patient
+        family_member_obj = family_member.get(db, id=family_member_id)
+        handle_not_found(family_member_obj, "Family Member", request)
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        
+        # Get conditions
+        conditions = family_condition.get_by_family_member(db, family_member_id=family_member_id)
+        return conditions
 
 
 @router.post("/{family_member_id}/conditions", response_model=FamilyConditionResponse)
@@ -200,23 +210,24 @@ def create_family_condition(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Create a new condition for a family member - supports patient switching."""
-    # Verify family member exists and belongs to the accessible patient
-    family_member_obj = family_member.get(db, id=family_member_id)
-    handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
-    
-    # Set family_member_id
-    condition_in.family_member_id = family_member_id
-    
-    return handle_create_with_logging(
-        db=db,
-        crud_obj=family_condition,
-        obj_in=condition_in,
-        entity_type=EntityType.FAMILY_CONDITION,
-        user_id=current_user_id,
-        entity_name="Family Condition",
-        request=request,
-    )
+    with handle_database_errors(request=request):
+        # Verify family member exists and belongs to the accessible patient
+        family_member_obj = family_member.get(db, id=family_member_id)
+        handle_not_found(family_member_obj, "Family Member", request)
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        
+        # Set family_member_id
+        condition_in.family_member_id = family_member_id
+        
+        return handle_create_with_logging(
+            db=db,
+            crud_obj=family_condition,
+            obj_in=condition_in,
+            entity_type=EntityType.FAMILY_CONDITION,
+            user_id=current_user_id,
+            entity_name="Family Condition",
+            request=request,
+        )
 
 
 @router.put("/{family_member_id}/conditions/{condition_id}", response_model=FamilyConditionResponse)
@@ -231,32 +242,33 @@ def update_family_condition(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Update a family member condition - supports patient switching."""
-    # Verify family member exists and belongs to the accessible patient
-    family_member_obj = family_member.get(db, id=family_member_id)
-    handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
-    
-    # Get the condition
-    condition_obj = family_condition.get(db, id=condition_id)
-    handle_not_found(condition_obj, "Family Condition")
-    
-    # Verify the condition belongs to the specified family member
-    if condition_obj.family_member_id != family_member_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Condition does not belong to the specified family member"
+    with handle_database_errors(request=request):
+        # Verify family member exists and belongs to the accessible patient
+        family_member_obj = family_member.get(db, id=family_member_id)
+        handle_not_found(family_member_obj, "Family Member", request)
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        
+        # Get the condition
+        condition_obj = family_condition.get(db, id=condition_id)
+        handle_not_found(condition_obj, "Family Condition", request)
+        
+        # Verify the condition belongs to the specified family member
+        if condition_obj.family_member_id != family_member_id:
+            raise BusinessLogicException(
+                message="Condition does not belong to the specified family member",
+                request=request
+            )
+        
+        return handle_update_with_logging(
+            db=db,
+            crud_obj=family_condition,
+            entity_id=condition_id,
+            obj_in=condition_in,
+            entity_type=EntityType.FAMILY_CONDITION,
+            user_id=current_user_id,
+            entity_name="Family Condition",
+            request=request,
         )
-    
-    return handle_update_with_logging(
-        db=db,
-        crud_obj=family_condition,
-        entity_id=condition_id,
-        obj_in=condition_in,
-        entity_type=EntityType.FAMILY_CONDITION,
-        user_id=current_user_id,
-        entity_name="Family Condition",
-        request=request,
-    )
 
 
 @router.delete("/{family_member_id}/conditions/{condition_id}")
@@ -270,28 +282,29 @@ def delete_family_condition(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Delete a family member condition - supports patient switching."""
-    # Verify family member exists and belongs to the accessible patient
-    family_member_obj = family_member.get(db, id=family_member_id)
-    handle_not_found(family_member_obj, "Family Member")
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
-    
-    # Get the condition
-    condition_obj = family_condition.get(db, id=condition_id)
-    handle_not_found(condition_obj, "Family Condition")
-    
-    # Verify the condition belongs to the specified family member
-    if condition_obj.family_member_id != family_member_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Condition does not belong to the specified family member"
+    with handle_database_errors(request=request):
+        # Verify family member exists and belongs to the accessible patient
+        family_member_obj = family_member.get(db, id=family_member_id)
+        handle_not_found(family_member_obj, "Family Member", request)
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        
+        # Get the condition
+        condition_obj = family_condition.get(db, id=condition_id)
+        handle_not_found(condition_obj, "Family Condition", request)
+        
+        # Verify the condition belongs to the specified family member
+        if condition_obj.family_member_id != family_member_id:
+            raise BusinessLogicException(
+                message="Condition does not belong to the specified family member",
+                request=request
+            )
+        
+        return handle_delete_with_logging(
+            db=db,
+            crud_obj=family_condition,
+            entity_id=condition_id,
+            entity_type=EntityType.FAMILY_CONDITION,
+            user_id=current_user_id,
+            entity_name="Family Condition",
+            request=request,
         )
-    
-    return handle_delete_with_logging(
-        db=db,
-        crud_obj=family_condition,
-        entity_id=condition_id,
-        entity_type=EntityType.FAMILY_CONDITION,
-        user_id=current_user_id,
-        entity_name="Family Condition",
-        request=request,
-    )

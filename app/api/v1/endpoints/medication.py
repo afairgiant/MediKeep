@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -10,6 +10,12 @@ from app.api.v1.endpoints.utils import (
     handle_not_found,
     handle_update_with_logging,
     verify_patient_ownership,
+)
+from app.core.error_handling import (
+    NotFoundException,
+    ForbiddenException,
+    BusinessLogicException,
+    handle_database_errors
 )
 from app.crud.medication import medication
 from app.models.activity_log import EntityType
@@ -55,6 +61,7 @@ def create_medication(
 @router.get("/", response_model=List[MedicationResponseWithNested])
 def read_medications(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
@@ -63,39 +70,42 @@ def read_medications(
 ) -> Any:
     """Retrieve medications for the current user or specified patient (Phase 1 support)."""
     
-    medications = medication.get_by_patient(
-        db=db,
-        patient_id=target_patient_id,
-        skip=skip,
-        limit=limit,
-        load_relations=["practitioner", "pharmacy", "condition"],
-    )
+    with handle_database_errors(request=request):
+        medications = medication.get_by_patient(
+            db=db,
+            patient_id=target_patient_id,
+            skip=skip,
+            limit=limit,
+            load_relations=["practitioner", "pharmacy", "condition"],
+        )
 
-    # Apply name filter if provided
-    if name:
-        medications = [
-            med
-            for med in medications
-            if name.lower() in getattr(med, "medication_name", "").lower()
-        ]
+        # Apply name filter if provided
+        if name:
+            medications = [
+                med
+                for med in medications
+                if name.lower() in getattr(med, "medication_name", "").lower()
+            ]
 
-    return medications
+        return medications
 
 
 @router.get("/{medication_id}", response_model=MedicationResponseWithNested)
 def read_medication(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     medication_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Get medication by ID - only allows access to user's own medications."""
-    medication_obj = medication.get_with_relations(
-        db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
-    )
-    handle_not_found(medication_obj, "Medication")
-    verify_patient_ownership(medication_obj, current_user_patient_id, "medication")
-    return medication_obj
+    with handle_database_errors(request=request):
+        medication_obj = medication.get_with_relations(
+            db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
+        )
+        handle_not_found(medication_obj, "Medication", request)
+        verify_patient_ownership(medication_obj, current_user_patient_id, "medication")
+        return medication_obj
 
 
 @router.put("/{medication_id}", response_model=MedicationResponseWithNested)
@@ -148,6 +158,7 @@ def delete_medication(
 @router.get("/patient/{patient_id}", response_model=List[MedicationResponseWithNested])
 def read_patient_medications(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
@@ -155,14 +166,15 @@ def read_patient_medications(
     active_only: bool = Query(False),
 ) -> Any:
     """Get all medications for a specific patient."""
-    if active_only:
-        medications = medication.get_active_by_patient(db=db, patient_id=patient_id)
-    else:
-        medications = medication.get_by_patient(
-            db=db,
-            patient_id=patient_id,
-            skip=skip,
-            limit=limit,
-            load_relations=["practitioner", "pharmacy", "condition"],
-        )
-    return medications
+    with handle_database_errors(request=request):
+        if active_only:
+            medications = medication.get_active_by_patient(db=db, patient_id=patient_id)
+        else:
+            medications = medication.get_by_patient(
+                db=db,
+                patient_id=patient_id,
+                skip=skip,
+                limit=limit,
+                load_relations=["practitioner", "pharmacy", "condition"],
+            )
+        return medications
