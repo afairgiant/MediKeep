@@ -264,19 +264,21 @@ const Conditions = () => {
     }
 
     // Validate required fields
+    if (!formData.status) {
+      setError('Status is required. Please select a status.');
+      return;
+    }
+    
     if (!formData.diagnosis) {
       setError('Diagnosis is required.');
       return;
     }
 
-    // Status should always have a default by now, but ensure it does
-    const validatedStatus = formData.status || 'active';
-
     const conditionData = {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: validatedStatus, // Use validated status to avoid conflicts
+      status: formData.status || 'active', // Ensure status has a default
       severity: formData.severity || null,
       medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,

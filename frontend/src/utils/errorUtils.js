@@ -3,7 +3,6 @@
  */
 
 import { formatDateForDisplay } from './dateUtils';
-
 /**
  * Map of common validation error types to user-friendly messages
  */
