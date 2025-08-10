@@ -43,9 +43,10 @@ class PatientManagementService:
         
         # Validate required fields
         required_fields = ['first_name', 'last_name', 'birth_date']
-        for field in required_fields:
-            if field not in patient_data or not patient_data[field]:
-                raise ValueError(f"Missing required field: {field}")
+        missing_fields = [field for field in required_fields 
+                         if field not in patient_data or not patient_data[field]]
+        if missing_fields:
+            raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
         
         # Validate birth_date
         if isinstance(patient_data['birth_date'], str):
@@ -89,8 +90,15 @@ class PatientManagementService:
             
         except IntegrityError as e:
             self.db.rollback()
-            logger.error(f"Database integrity error: {e}")
-            raise ValueError("Failed to create patient due to database constraint")
+            error_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
+            logger.error(f"Database integrity error: {error_msg}")
+            
+            if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
+                raise ValueError("A patient with this information already exists")
+            elif "foreign key" in error_msg.lower():
+                raise ValueError("Invalid physician ID specified")
+            else:
+                raise ValueError("Failed to create patient due to database constraint")
     
     def get_patient(self, user: User, patient_id: int) -> Patient:
         """
@@ -172,8 +180,18 @@ class PatientManagementService:
             
         except IntegrityError as e:
             self.db.rollback()
-            logger.error(f"Database integrity error: {e}")
-            raise ValueError("Failed to update patient due to database constraint")
+            error_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
+            logger.error(f"Database integrity error updating patient: {error_msg}")
+            
+            if "foreign key" in error_msg.lower():
+                if "physician" in error_msg.lower():
+                    raise ValueError("The specified physician does not exist")
+                else:
+                    raise ValueError("Invalid reference in patient update")
+            elif "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
+                raise ValueError("This update would create a duplicate patient record")
+            else:
+                raise ValueError("Failed to update patient due to database constraint")
     
     def delete_patient(self, user: User, patient_id: int) -> bool:
         """
@@ -252,11 +270,16 @@ class PatientManagementService:
             
         except IntegrityError as e:
             self.db.rollback()
-            logger.error(f"Database integrity error during patient deletion: {e}")
-            raise ValueError(f"Failed to delete patient due to database constraint: {str(e)}")
+            error_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
+            logger.error(f"Database integrity error during patient deletion: {error_msg}")
+            
+            if "foreign key" in error_msg.lower():
+                raise ValueError("Cannot delete patient: there are still medical records associated with this patient")
+            else:
+                raise ValueError(f"Failed to delete patient due to database constraint")
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Unexpected error during patient deletion: {e}")
+            logger.error(f"Unexpected error during patient deletion: {str(e)}")
             raise ValueError(f"Failed to delete patient: {str(e)}")
         finally:
             # Re-enable activity tracking

@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Optional, Type
 import traceback
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Request, status, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DatabaseError
 
@@ -10,6 +10,11 @@ from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.datetime_utils import get_timezone_info
 from app.core.logging_config import get_logger
+from app.core.error_handling import (
+    NotFoundException,
+    handle_database_errors,
+    DatabaseException
+)
 
 logger = get_logger(__name__, "app")
 
@@ -22,19 +27,24 @@ def timezone_info():
     return get_timezone_info()
 
 
-def handle_not_found(obj: Any, entity_name: str) -> None:
+def handle_not_found(obj: Any, entity_name: str, request: Optional[Request] = None) -> None:
     """
     Standard 404 error handler for entities.
 
     Args:
         obj: The database object (None if not found)
         entity_name: Name of the entity type (e.g., "Medication", "Condition")
+        request: Request object for error context
 
     Raises:
-        HTTPException: 404 error if object is None
+        NotFoundException: 404 error if object is None
     """
     if not obj:
-        raise HTTPException(status_code=404, detail=f"{entity_name} not found")
+        raise NotFoundException(
+            resource=entity_name,
+            message=f"{entity_name} not found",
+            request=request
+        )
 
 
 def create_success_response(entity_name: str) -> dict[str, str]:
@@ -152,7 +162,7 @@ def handle_create_with_logging(
     """
     user_ip = request.client.host if request and request.client else "unknown"
 
-    try:
+    with handle_database_errors(request=request):
         entity_obj = crud_obj.create(db=db, obj_in=obj_in)
         entity_id = getattr(entity_obj, "id", None)
         patient_id = getattr(entity_obj, "patient_id", None)
@@ -178,21 +188,6 @@ def handle_create_with_logging(
         )
 
         return entity_obj
-
-    except Exception as e:
-        # Log failed creation
-        patient_id_input = getattr(obj_in, "patient_id", None)
-        handle_entity_operation_logging(
-            operation="created",
-            entity_name=entity_name,
-            entity_id=None,
-            patient_id=patient_id_input,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=False,
-            error=str(e),
-        )
-        raise
 
 
 def handle_update_with_logging(
@@ -226,13 +221,13 @@ def handle_update_with_logging(
     """
     user_ip = request.client.host if request and request.client else "unknown"
 
-    # Get existing entity
-    entity_obj = crud_obj.get(db=db, id=entity_id)
-    handle_not_found(entity_obj, entity_name)
+    with handle_database_errors(request=request):
+        # Get existing entity
+        entity_obj = crud_obj.get(db=db, id=entity_id)
+        handle_not_found(entity_obj, entity_name, request)
 
-    patient_id = getattr(entity_obj, "patient_id", None)
-
-    try:
+        patient_id = getattr(entity_obj, "patient_id", None)
+        
         updated_entity = crud_obj.update(db=db, db_obj=entity_obj, obj_in=obj_in)
 
         # Log successful update
@@ -256,20 +251,6 @@ def handle_update_with_logging(
         )
 
         return updated_entity
-
-    except Exception as e:
-        # Log failed update
-        handle_entity_operation_logging(
-            operation="updated",
-            entity_name=entity_name,
-            entity_id=entity_id,
-            patient_id=patient_id,
-            user_id=user_id,
-            user_ip=user_ip,
-            success=False,
-            error=str(e),
-        )
-        raise
 
 
 def handle_delete_with_logging(
@@ -365,24 +346,19 @@ def ensure_directory_with_permissions(directory: Path, directory_name: str = "di
         error_msg = (
             f"Permission denied creating {directory_name} directory: {directory}. "
             "This may be a Docker bind mount permission issue. "
-            "Please ensure the container has write permissions to the directory. "
-            "Solutions: "
-            "1. Use Docker volumes instead of bind mounts, "
-            "2. Fix host directory permissions: 'sudo chown -R 1000:1000 /host/path', "
-            "3. Add user mapping to docker run: '--user $(id -u):$(id -g)'. "
-            f"Error: {str(e)}"
+            "Please ensure the container has write permissions to the directory."
         )
-        logger.error(error_msg)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=error_msg,
+        logger.error(f"Permission error: {str(e)}")
+        raise DatabaseException(
+            message=error_msg,
+            request=None,
         )
     except OSError as e:
-        error_msg = f"Failed to create {directory_name} directory {directory}: {str(e)}"
-        logger.error(error_msg)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=error_msg,
+        error_msg = f"Failed to create {directory_name} directory"
+        logger.error(f"OS error creating directory: {str(e)}")
+        raise DatabaseException(
+            message=error_msg,
+            request=None,
         )
 
 

@@ -1,9 +1,12 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.core.error_handling import (
+    handle_database_errors
+)
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -47,6 +50,7 @@ def create_treatment(
 @router.get("/", response_model=List[TreatmentResponse])
 def read_treatments(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
@@ -56,47 +60,50 @@ def read_treatments(
 ) -> Any:
     """Retrieve treatments for the current user or accessible patient."""
     
-    # Filter treatments by the target patient_id
-    if status:
-        treatments = treatment.get_by_status(
-            db,
-            status=status,
-            patient_id=target_patient_id,
-        )
-    elif condition_id:
-        treatments = treatment.get_by_condition(
-            db,
-            condition_id=condition_id,
-            patient_id=target_patient_id,
-            skip=skip,
-            limit=limit,
-        )
-    else:
-        treatments = treatment.get_by_patient(
-            db,
-            patient_id=target_patient_id,
-            skip=skip,
-            limit=limit,
-        )
-    return treatments
+    with handle_database_errors(request=request):
+        # Filter treatments by the target patient_id
+        if status:
+            treatments = treatment.get_by_status(
+                db,
+                status=status,
+                patient_id=target_patient_id,
+            )
+        elif condition_id:
+            treatments = treatment.get_by_condition(
+                db,
+                condition_id=condition_id,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+            )
+        else:
+            treatments = treatment.get_by_patient(
+                db,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+            )
+        return treatments
 
 
 @router.get("/{treatment_id}", response_model=TreatmentWithRelations)
 def read_treatment(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     treatment_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Get treatment by ID with related information - only allows access to user's own treatments."""
-    treatment_obj = treatment.get_with_relations(
-        db=db,
-        record_id=treatment_id,
-        relations=["patient", "practitioner", "condition"],
-    )
-    handle_not_found(treatment_obj, "Treatment")
-    verify_patient_ownership(treatment_obj, current_user_patient_id, "treatment")
-    return treatment_obj
+    with handle_database_errors(request=request):
+        treatment_obj = treatment.get_with_relations(
+            db=db,
+            record_id=treatment_id,
+            relations=["patient", "practitioner", "condition"],
+        )
+        handle_not_found(treatment_obj, "Treatment", request)
+        verify_patient_ownership(treatment_obj, current_user_patient_id, "treatment")
+        return treatment_obj
 
 
 @router.put("/{treatment_id}", response_model=TreatmentResponse)
@@ -144,24 +151,28 @@ def delete_treatment(
 @router.get("/patient/{patient_id}/active", response_model=List[TreatmentResponse])
 def get_active_treatments(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
 ) -> Any:
     """Get all active treatments for a patient."""
-    treatments = treatment.get_active_treatments(db, patient_id=patient_id)
-    return treatments
+    with handle_database_errors(request=request):
+        treatments = treatment.get_active_treatments(db, patient_id=patient_id)
+        return treatments
 
 
 @router.get("/ongoing", response_model=List[TreatmentResponse])
 def get_ongoing_treatments(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: Optional[int] = Query(None),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get treatments that are currently ongoing."""
-    treatments = treatment.get_ongoing(db, patient_id=patient_id)
-    return treatments
+    with handle_database_errors(request=request):
+        treatments = treatment.get_ongoing(db, patient_id=patient_id)
+        return treatments
 
 
 @router.get(
@@ -169,13 +180,15 @@ def get_ongoing_treatments(
 )
 def get_patient_treatments(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
 ) -> Any:
     """Get all treatments for a specific patient."""
-    treatments = treatment.get_by_patient(
-        db, patient_id=patient_id, skip=skip, limit=limit
-    )
-    return treatments
+    with handle_database_errors(request=request):
+        treatments = treatment.get_by_patient(
+            db, patient_id=patient_id, skip=skip, limit=limit
+        )
+        return treatments

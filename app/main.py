@@ -11,6 +11,7 @@ from app.core.spa_routing import setup_spa_routing
 from app.core.startup import startup_event
 from app.core.static_files import setup_static_files
 from app.core.uvicorn_logging import configure_uvicorn_logging
+from app.core.error_handling import setup_error_handling
 
 # Initialize logging configuration
 logging_config = LoggingConfig()
@@ -40,6 +41,9 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# Setup comprehensive error handling system
+setup_error_handling(app)
 
 # Include API routers
 app.include_router(api_router, prefix="/api/v1")

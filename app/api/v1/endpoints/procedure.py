@@ -1,10 +1,19 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.core.error_handling import (
+    handle_database_errors
+)
+from app.api.v1.endpoints.utils import (
+    handle_create_with_logging,
+    handle_delete_with_logging,
+    handle_not_found,
+    handle_update_with_logging,
+    verify_patient_ownership,
+)
 from app.crud.procedure import procedure
 from app.models.activity_log import EntityType
 from app.schemas.procedure import (
@@ -20,6 +29,7 @@ router = APIRouter()
 @router.post("/", response_model=ProcedureResponse)
 def create_procedure(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     procedure_in: ProcedureCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -27,21 +37,20 @@ def create_procedure(
     """
     Create new procedure.
     """
-    procedure_obj = procedure.create(db=db, obj_in=procedure_in)
-
-    # Log the creation activity using centralized logging
-    log_create(
+    return handle_create_with_logging(
         db=db,
+        crud_obj=procedure,
+        obj_in=procedure_in,
         entity_type=EntityType.PROCEDURE,
-        entity_obj=procedure_obj,
         user_id=current_user_id,
+        entity_name="Procedure",
+        request=request,
     )
-
-    return procedure_obj
 
 
 @router.get("/", response_model=List[ProcedureResponse])
 def read_procedures(
+    request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
@@ -54,28 +63,30 @@ def read_procedures(
     """
     
     # Filter procedures by the target patient_id
-    if status:
-        procedures = procedure.get_by_status(
-            db, status=status, patient_id=target_patient_id
-        )
-    elif practitioner_id:
-        procedures = procedure.get_by_practitioner(
-            db,
-            practitioner_id=practitioner_id,
-            patient_id=target_patient_id,
-            skip=skip,
-            limit=limit,
-        )
-    else:
-        procedures = procedure.get_by_patient(
-            db, patient_id=target_patient_id, skip=skip, limit=limit
-        )
-    return procedures
+    with handle_database_errors(request=request):
+        if status:
+            procedures = procedure.get_by_status(
+                db, status=status, patient_id=target_patient_id
+            )
+        elif practitioner_id:
+            procedures = procedure.get_by_practitioner(
+                db,
+                practitioner_id=practitioner_id,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+            )
+        else:
+            procedures = procedure.get_by_patient(
+                db, patient_id=target_patient_id, skip=skip, limit=limit
+            )
+        return procedures
 
 
 @router.get("/{procedure_id}", response_model=ProcedureWithRelations)
 def read_procedure(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     procedure_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
@@ -83,23 +94,19 @@ def read_procedure(
     """
     Get procedure by ID with related information - only allows access to user's own procedures.
     """
-    procedure_obj = procedure.get_with_relations(
-        db=db, record_id=procedure_id, relations=["patient", "practitioner", "condition"]
-    )
-    if not procedure_obj:
-        raise HTTPException(status_code=404, detail="Procedure not found")
-
-    # Security check: ensure the procedure belongs to the current user
-    deps.verify_patient_record_access(
-        getattr(procedure_obj, "patient_id"), current_user_patient_id, "procedure"
-    )
-
-    return procedure_obj
+    with handle_database_errors(request=request):
+        procedure_obj = procedure.get_with_relations(
+            db=db, record_id=procedure_id, relations=["patient", "practitioner", "condition"]
+        )
+        handle_not_found(procedure_obj, "Procedure", request)
+        verify_patient_ownership(procedure_obj, current_user_patient_id, "procedure")
+        return procedure_obj
 
 
 @router.put("/{procedure_id}", response_model=ProcedureResponse)
 def update_procedure(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     procedure_id: int,
     procedure_in: ProcedureUpdate,
@@ -108,26 +115,22 @@ def update_procedure(
     """
     Update a procedure.
     """
-    procedure_obj = procedure.get(db=db, id=procedure_id)
-    if not procedure_obj:
-        raise HTTPException(status_code=404, detail="Procedure not found")
-
-    procedure_obj = procedure.update(db=db, db_obj=procedure_obj, obj_in=procedure_in)
-
-    # Log the update activity using centralized logging
-    log_update(
+    return handle_update_with_logging(
         db=db,
+        crud_obj=procedure,
+        entity_id=procedure_id,
+        obj_in=procedure_in,
         entity_type=EntityType.PROCEDURE,
-        entity_obj=procedure_obj,
         user_id=current_user_id,
+        entity_name="Procedure",
+        request=request,
     )
-
-    return procedure_obj
 
 
 @router.delete("/{procedure_id}")
 def delete_procedure(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     procedure_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -135,25 +138,21 @@ def delete_procedure(
     """
     Delete a procedure.
     """
-    procedure_obj = procedure.get(db=db, id=procedure_id)
-    if not procedure_obj:
-        raise HTTPException(status_code=404, detail="Procedure not found")
-
-    # Log the deletion activity BEFORE deleting using centralized logging
-    log_delete(
+    return handle_delete_with_logging(
         db=db,
+        crud_obj=procedure,
+        entity_id=procedure_id,
         entity_type=EntityType.PROCEDURE,
-        entity_obj=procedure_obj,
         user_id=current_user_id,
+        entity_name="Procedure",
+        request=request,
     )
-
-    procedure.delete(db=db, id=procedure_id)
-    return {"message": "Procedure deleted successfully"}
 
 
 @router.get("/scheduled", response_model=List[ProcedureResponse])
 def get_scheduled_procedures(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: Optional[int] = Query(None),
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -161,13 +160,15 @@ def get_scheduled_procedures(
     """
     Get all scheduled procedures, optionally filtered by patient.
     """
-    procedures = procedure.get_scheduled(db, patient_id=patient_id)
-    return procedures
+    with handle_database_errors(request=request):
+        procedures = procedure.get_scheduled(db, patient_id=patient_id)
+        return procedures
 
 
 @router.get("/patient/{patient_id}/recent", response_model=List[ProcedureResponse])
 def get_recent_procedures(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=90, ge=1, le=365),
@@ -175,8 +176,9 @@ def get_recent_procedures(
     """
     Get recent procedures for a patient within specified days.
     """
-    procedures = procedure.get_recent(db, patient_id=patient_id, days=days)
-    return procedures
+    with handle_database_errors(request=request):
+        procedures = procedure.get_recent(db, patient_id=patient_id, days=days)
+        return procedures
 
 
 @router.get(
@@ -184,6 +186,7 @@ def get_recent_procedures(
 )
 def get_patient_procedures(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
@@ -192,7 +195,8 @@ def get_patient_procedures(
     """
     Get all procedures for a specific patient.
     """
-    procedures = procedure.get_by_patient(
-        db, patient_id=patient_id, skip=skip, limit=limit
-    )
-    return procedures
+    with handle_database_errors(request=request):
+        procedures = procedure.get_by_patient(
+            db, patient_id=patient_id, skip=skip, limit=limit
+        )
+        return procedures
