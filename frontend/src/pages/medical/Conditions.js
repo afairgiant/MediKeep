@@ -236,21 +236,83 @@ const Conditions = () => {
       return;
     }
 
+
+    // Validate dates are not in the future
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    if (formData.onset_date) {
+      // Compare as strings to avoid timezone issues
+      if (formData.onset_date > todayString) {
+        setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+        return;
+      }
+    }
+    
+    if (formData.end_date) {
+      // Compare as strings to avoid timezone issues
+      if (formData.end_date > todayString) {
+        setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+        return;
+      }
+    }
+    
+    // Validate end date is not before onset date
+    if (formData.onset_date && formData.end_date) {
+      const onsetDate = new Date(formData.onset_date);
+      const endDate = new Date(formData.end_date);
+      if (endDate < onsetDate) {
+        setError('End date cannot be before onset date');
+        return;
+      }
+    }
+
+    // Ensure dates are properly formatted as YYYY-MM-DD strings
+    const formatDateForAPI = (dateValue) => {
+      if (!dateValue) return null;
+      
+      // If it's already a YYYY-MM-DD string, return as is
+      if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+        return dateValue;
+      }
+      
+      // If it's a date object or date string, convert to YYYY-MM-DD
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return null;
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    // Validate required fields
+    if (!formData.status) {
+      setError('Status is required. Please select a status.');
+      return;
+    }
+    
+    if (!formData.diagnosis) {
+      setError('Diagnosis is required.');
+      return;
+    }
+
     const conditionData = {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: formData.status,
+      status: formData.status || 'active', // Ensure status has a default
       severity: formData.severity || null,
       medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
-      onset_date: formData.onset_date || null, // Use snake_case to match API
-      end_date: formData.end_date || null, // Use snake_case to match API
+      onset_date: formatDateForAPI(formData.onset_date),
+      end_date: formatDateForAPI(formData.end_date),
       patient_id: currentPatient.id,
     };
+
 
     let success;
     if (editingCondition) {

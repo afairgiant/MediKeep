@@ -13,6 +13,7 @@ import { DateInput } from '@mantine/dates';
 import { IconX } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
+import { useFormHandlers } from '../../../hooks/useFormHandlers';
 const ConditionFormWrapper = ({
   isOpen,
   onClose,
@@ -26,6 +27,17 @@ const ConditionFormWrapper = ({
   isLoading,
   statusMessage,
 }) => {
+  // Use the standardized form handlers hook
+  const { 
+    handleTextInputChange,
+    handleSelectChange,
+    handleDateChange,
+  } = useFormHandlers(onInputChange);
+  
+  // Get today's date for date picker constraints
+  const today = new Date();
+  // Set to end of day to ensure today is selectable
+  today.setHours(23, 59, 59, 999);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -61,7 +73,7 @@ const ConditionFormWrapper = ({
             label="Condition Name (Optional)"
             name="condition_name"
             value={formData.condition_name || ''}
-            onChange={(e) => onInputChange(e)}
+            onChange={handleTextInputChange('condition_name')}
             placeholder="Enter condition name"
             description="Optional alternative name for the condition"
           />
@@ -70,7 +82,7 @@ const ConditionFormWrapper = ({
             label="Diagnosis"
             name="diagnosis"
             value={formData.diagnosis || ''}
-            onChange={(e) => onInputChange(e)}
+            onChange={handleTextInputChange('diagnosis')}
             required
             placeholder="Enter diagnosis"
           />
@@ -79,7 +91,7 @@ const ConditionFormWrapper = ({
             label="Severity"
             name="severity"
             value={formData.severity || ''}
-            onChange={(value) => handleInputChange('severity', value)}
+            onChange={handleSelectChange('severity')}
             data={[
               { value: 'mild', label: 'Mild' },
               { value: 'moderate', label: 'Moderate' },
@@ -94,7 +106,7 @@ const ConditionFormWrapper = ({
             label="Status"
             name="status"
             value={formData.status || ''}
-            onChange={(value) => handleInputChange('status', value)}
+            onChange={handleSelectChange('status')}
             data={[
               { value: 'active', label: 'Active' },
               { value: 'inactive', label: 'Inactive' },
@@ -108,7 +120,7 @@ const ConditionFormWrapper = ({
             label="Related Medication (Optional)"
             name="medication_id"
             value={formData.medication_id || ''}
-            onChange={(value) => handleInputChange('medication_id', value)}
+            onChange={handleSelectChange('medication_id')}
             data={medications.map(med => ({
               value: med.id.toString(),
               label: med.medication_name || med.name || `Medication #${med.id}`
@@ -123,7 +135,7 @@ const ConditionFormWrapper = ({
             label="Practitioner (Optional)"
             name="practitioner_id"
             value={formData.practitioner_id || ''}
-            onChange={(value) => handleInputChange('practitioner_id', value)}
+            onChange={handleSelectChange('practitioner_id')}
             data={practitioners.map(prac => ({
               value: prac.id.toString(),
               label: prac.name || `Dr. ${prac.first_name || ''} ${prac.last_name || ''}`.trim() || `Practitioner #${prac.id}`
@@ -139,17 +151,51 @@ const ConditionFormWrapper = ({
             <DateInput
               label="Onset Date"
               name="onset_date"
-              value={formData.onset_date ? new Date(formData.onset_date) : null}
-              onChange={(value) => handleInputChange('onset_date', value?.toISOString().split('T')[0] || '')}
+              value={formData.onset_date ? (() => {
+                // Parse date string to avoid timezone issues
+                if (typeof formData.onset_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.onset_date.trim())) {
+                  const [year, month, day] = formData.onset_date.trim().split('-').map(Number);
+                  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                    return new Date(year, month - 1, day); // month is 0-indexed
+                  }
+                }
+                return new Date(formData.onset_date);
+              })() : null}
+              onChange={handleDateChange('onset_date')}
               placeholder="Select onset date"
+              clearable
+              firstDayOfWeek={0}
+              maxDate={today}
             />
 
             <DateInput
               label="End Date"
               name="end_date"
-              value={formData.end_date ? new Date(formData.end_date) : null}
-              onChange={(value) => handleInputChange('end_date', value?.toISOString().split('T')[0] || '')}
+              value={formData.end_date ? (() => {
+                // Parse date string to avoid timezone issues
+                if (typeof formData.end_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.end_date.trim())) {
+                  const [year, month, day] = formData.end_date.trim().split('-').map(Number);
+                  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                    return new Date(year, month - 1, day); // month is 0-indexed
+                  }
+                }
+                return new Date(formData.end_date);
+              })() : null}
+              onChange={handleDateChange('end_date')}
               placeholder="Select end date"
+              clearable
+              firstDayOfWeek={0}
+              minDate={formData.onset_date ? (() => {
+                // End date can't be before onset date
+                if (typeof formData.onset_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData.onset_date.trim())) {
+                  const [year, month, day] = formData.onset_date.trim().split('-').map(Number);
+                  if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                    return new Date(year, month - 1, day);
+                  }
+                }
+                return new Date(formData.onset_date);
+              })() : undefined}
+              maxDate={today}
             />
           </Group>
 
@@ -159,7 +205,7 @@ const ConditionFormWrapper = ({
               label="ICD-10 Code"
               name="icd10_code"
               value={formData.icd10_code || ''}
-              onChange={(e) => onInputChange(e)}
+              onChange={handleTextInputChange('icd10_code')}
               placeholder="Enter ICD-10 code"
             />
 
@@ -167,7 +213,7 @@ const ConditionFormWrapper = ({
               label="SNOMED Code"
               name="snomed_code"
               value={formData.snomed_code || ''}
-              onChange={(e) => onInputChange(e)}
+              onChange={handleTextInputChange('snomed_code')}
               placeholder="Enter SNOMED code"
             />
           </Group>
@@ -176,7 +222,7 @@ const ConditionFormWrapper = ({
             label="Code Description"
             name="code_description"
             value={formData.code_description || ''}
-            onChange={(e) => onInputChange(e)}
+            onChange={handleTextInputChange('code_description')}
             placeholder="Enter code description"
           />
 
@@ -184,7 +230,7 @@ const ConditionFormWrapper = ({
             label="Clinical Notes"
             name="notes"
             value={formData.notes || ''}
-            onChange={(e) => onInputChange(e)}
+            onChange={handleTextInputChange('notes')}
             placeholder="Enter clinical notes"
             rows={3}
           />

@@ -82,16 +82,69 @@ class ApiService {
 
       try {
         fullErrorData = JSON.parse(errorData);
-        errorMessage =
-          fullErrorData.detail || fullErrorData.message || errorData; // For 422 errors, log the full validation details
+        
+        // Handle 422 validation errors with our enhanced error structure
         if (response.status === 422) {
           console.error('Validation Error Details:', fullErrorData);
+          
+          // Check for FastAPI's default validation error format (detail array)
           if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
             const validationErrors = fullErrorData.detail
-              .map(err => `${err.loc?.join('.')} - ${err.msg}`)
+              .map(err => {
+                // Extract field name from location array
+                const field = err.loc?.[err.loc.length - 1] || 'unknown field';
+                // Make the field name more user-friendly
+                const friendlyField = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                
+                // Provide user-friendly messages for common validation errors
+                let friendlyMessage = err.msg;
+                if (err.msg.includes('ensure this value is not greater than')) {
+                  // Extract the date from the error message if present
+                  const match = err.msg.match(/(\d{4}-\d{2}-\d{2})/);
+                  if (match) {
+                    friendlyMessage = `Date cannot be after ${match[1]}`;
+                  } else {
+                    friendlyMessage = 'Date cannot be in the future';
+                  }
+                } else if (err.msg.includes('ensure this value is greater than')) {
+                  friendlyMessage = 'Value must be greater than the minimum allowed';
+                } else if (err.msg.includes('field required')) {
+                  friendlyMessage = 'This field is required';
+                } else if (err.msg.includes('string too short')) {
+                  friendlyMessage = 'Value is too short';
+                } else if (err.msg.includes('string too long')) {
+                  friendlyMessage = 'Value is too long';
+                } else if (err.type === 'value_error.missing') {
+                  friendlyMessage = 'This field is required';
+                } else if (err.type === 'type_error.none.not_allowed') {
+                  friendlyMessage = 'This field cannot be empty';
+                }
+                
+                return `${friendlyField}: ${friendlyMessage}`;
+              })
               .join('; ');
-            errorMessage = `Validation Error: ${validationErrors}`;
+            errorMessage = validationErrors;
+          } 
+          // Check for our custom validation error format (validation_errors array)
+          else if (fullErrorData.validation_errors && Array.isArray(fullErrorData.validation_errors)) {
+            errorMessage = fullErrorData.validation_errors.join('; ');
           }
+          // Use description if available
+          else if (fullErrorData.description) {
+            errorMessage = fullErrorData.description;
+            
+            // If there are validation_errors in the response, append them
+            if (fullErrorData.data?.validation_errors) {
+              errorMessage += ': ' + fullErrorData.data.validation_errors.join('; ');
+            }
+          }
+          // Fallback to message
+          else {
+            errorMessage = fullErrorData.message || 'Validation failed';
+          }
+        } else {
+          // For non-validation errors, use message or detail
+          errorMessage = fullErrorData.message || fullErrorData.detail || errorData;
         }
       } catch {
         errorMessage =
