@@ -27,6 +27,13 @@ current_ip_address_var: contextvars.ContextVar[Optional[str]] = contextvars.Cont
 current_user_agent_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
     "current_user_agent", default=None
 )
+activity_tracking_disabled_var: contextvars.ContextVar[bool] = contextvars.ContextVar(
+    "activity_tracking_disabled", default=False
+)
+# Track if we're currently logging an activity to prevent recursive logging
+activity_logging_in_progress_var: contextvars.ContextVar[bool] = contextvars.ContextVar(
+    "activity_logging_in_progress", default=False
+)
 
 # Logger for activity tracking
 activity_logger = get_logger(__name__, "app")
@@ -307,6 +314,28 @@ class ActivityTracker:
             # Skip logging for ActivityLog itself to prevent infinite recursion
             if isinstance(instance, ActivityLog):
                 return
+            
+            # Skip logging if activity tracking is disabled
+            if activity_tracking_disabled_var.get():
+                return
+                
+            # Skip logging if we're already in the process of logging an activity
+            if activity_logging_in_progress_var.get():
+                activity_logger.debug("Skipping activity logging - already in progress")
+                return
+
+            # Debug logging to track duplicate activity creation
+            entity_type = self._get_entity_type(instance)
+            entity_id = getattr(instance, 'id', None)
+            activity_logger.debug(
+                f"Creating activity log: {action} {entity_type} {entity_id}",
+                extra={
+                    "category": "activity_tracking_debug",
+                    "action": action,
+                    "entity_type": entity_type,
+                    "entity_id": entity_id,
+                }
+            )
 
             # Get context information
             user_id = current_user_id_var.get()
@@ -319,6 +348,7 @@ class ActivityTracker:
             entity_id = getattr(instance, 'id', None)
             description = self._get_entity_description(instance, action)
             metadata = self._create_activity_metadata(instance, action)
+            
             
             # Create the activity log using the model's factory method
             activity = ActivityLog.create_activity(
@@ -333,12 +363,19 @@ class ActivityTracker:
                 user_agent=user_agent,
             )
             
-            # Get a new session to save the activity log
-            # This prevents issues with the current transaction
-            from app.core.database import SessionLocal
-            with SessionLocal() as db:
-                db.add(activity)
-                db.commit()
+            # Set the flag to prevent recursive activity logging
+            activity_logging_in_progress_var.set(True)
+            
+            try:
+                # Get a new session to save the activity log
+                # This prevents issues with the current transaction
+                from app.core.database import SessionLocal
+                with SessionLocal() as db:
+                    db.add(activity)
+                    db.commit()
+            finally:
+                # Always clear the flag
+                activity_logging_in_progress_var.set(False)
                 
             # Log to application logger as well
             priority = ActivityPriority.get_priority_for_action(action, entity_type)
@@ -370,6 +407,9 @@ class ActivityTracker:
 
 # Global activity tracker instance
 activity_tracker = ActivityTracker()
+
+# Track if activity tracking has been initialized
+_activity_tracking_initialized = False
 
 
 def set_current_user_context(
@@ -429,7 +469,14 @@ def initialize_activity_tracking() -> None:
     
     This should be called during application startup.
     """
+    global _activity_tracking_initialized
+    
+    if _activity_tracking_initialized:
+        activity_logger.warning("Activity tracking already initialized, skipping duplicate initialization")
+        return
+        
     activity_tracker.register_all_models()
+    _activity_tracking_initialized = True
     activity_logger.info("Activity tracking initialized for all models")
 
 

@@ -4,10 +4,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Button,
-  Modal,
   Paper,
   Group,
   Text,
@@ -37,14 +36,18 @@ import {
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import VitalsForm from '../../components/medical/VitalsForm';
 import VitalsList from '../../components/medical/VitalsList';
 
-import { vitalsService } from '../../services/medical/vitalsService';
-import { useCurrentPatient } from '../../hooks/useGlobalData';
+// Modular components
+import VitalViewModal from '../../components/medical/vital/VitalViewModal';
+import VitalFormWrapper from '../../components/medical/vital/VitalFormWrapper';
+
+import { apiService } from '../../services/api';
+import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Quick stats card configurations with Mantine icons
 const STATS_CONFIGS = {
@@ -110,15 +113,23 @@ const STATS_CONFIGS = {
 };
 
 const Vitals = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   // Page configuration
   const pageConfig = getMedicalPageConfig('vitals');
 
   // State management
   const [showForm, setShowForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [editingVitals, setEditingVitals] = useState(null);
+  const [viewingVital, setViewingVital] = useState(null);
   const [stats, setStats] = useState(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [statsError, setStatsError] = useState(null);
+
+  // Global data
+  const { practitioners } = usePractitioners();
 
   // Medical data management with filtering and sorting
   const {
@@ -135,13 +146,13 @@ const Vitals = () => {
   } = useMedicalData({
     entityName: 'vitals',
     apiMethodsConfig: {
-      getAll: signal => vitalsService.getVitals({}, signal),
+      getAll: signal => apiService.getEntities('vitals', signal),
       getByPatient: (patientId, signal) =>
-        vitalsService.getPatientVitals(patientId, {}, signal),
-      create: (data, signal) => vitalsService.createVitals(data, signal),
+        apiService.getPatientEntities('vitals', patientId, signal),
+      create: (data, signal) => apiService.createEntity('vitals', data, signal),
       update: (id, data, signal) =>
-        vitalsService.updateVitals(id, data, signal),
-      delete: (id, signal) => vitalsService.deleteVitals(id, signal),
+        apiService.updateEntity('vitals', id, data, signal),
+      delete: (id, signal) => apiService.deleteEntity('vitals', id, signal),
     },
     requiresPatient: true,
   });
@@ -169,9 +180,7 @@ const Vitals = () => {
       setIsLoadingStats(true);
       setStatsError(null);
 
-      const statsResponse = await vitalsService.getPatientVitalsStats(
-        currentPatient.id
-      );
+      const statsResponse = await apiService.get(`/vitals/stats?patient_id=${currentPatient.id}`);
       const statsData = statsResponse?.data || statsResponse;
       setStats(statsData);
     } catch (error) {
@@ -189,6 +198,20 @@ const Vitals = () => {
       loadStats();
     }
   }, [loadStats, currentPatient?.id, vitalsData?.length]);
+
+  // Handle URL parameters for direct linking to specific vitals
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewId = searchParams.get('view');
+
+    if (viewId && filteredVitals && filteredVitals.length > 0 && !vitalsLoading) {
+      const vital = filteredVitals.find(v => String(v.id) === String(viewId));
+      if (vital && !showViewModal) {
+        setViewingVital(vital);
+        setShowViewModal(true);
+      }
+    }
+  }, [location.search, filteredVitals, vitalsLoading, showViewModal]);
 
   // Generate filter options from vitalsData
   const statusOptions = useMemo(() => {
@@ -213,10 +236,36 @@ const Vitals = () => {
     setShowForm(true);
   }, []);
 
+  const handleViewVital = useCallback(vital => {
+    setViewingVital(vital);
+    setShowViewModal(true);
+    // Update URL with vital ID for sharing/bookmarking
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('view', vital.id);
+    navigate(`${location.pathname}?${searchParams.toString()}`, {
+      replace: true,
+    });
+  }, [location.search, navigate]);
+
+  const handleCloseViewModal = useCallback(() => {
+    setShowViewModal(false);
+    setViewingVital(null);
+    // Remove view parameter from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('view');
+    const newSearch = searchParams.toString();
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace: true,
+    });
+  }, [navigate, location.pathname]);
+
   const handleEdit = useCallback(vitals => {
     setEditingVitals(vitals);
     setShowForm(true);
-  }, []);
+    if (showViewModal) {
+      setShowViewModal(false);
+    }
+  }, [showViewModal]);
 
   const handleFormSave = useCallback(
     async formData => {
@@ -345,14 +394,10 @@ const Vitals = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Vital Signs" icon="🩺" />
+    <Container size="xl" py="md">
+      <PageHeader title="Vital Signs" icon="❤️" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {vitalsError && (
           <Alert
             variant="light"
@@ -380,6 +425,7 @@ const Vitals = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddNew}
             size="md"
@@ -403,7 +449,7 @@ const Vitals = () => {
                 </Text>
               </Box>
               <Button
-                variant="light"
+                variant="filled"
                 leftSection={<IconRefresh size={16} />}
                 onClick={loadStats}
                 loading={isLoadingStats}
@@ -431,7 +477,7 @@ const Vitals = () => {
               >
                 <Group justify="space-between" align="center">
                   <Text size="sm">{statsError}</Text>
-                  <Button variant="light" size="xs" onClick={loadStats}>
+                  <Button variant="filled" size="xs" onClick={loadStats}>
                     Try Again
                   </Button>
                 </Group>
@@ -487,27 +533,20 @@ const Vitals = () => {
           />
         )}
 
-        {/* Form Modal */}
-        <Modal
-          opened={showForm}
+        <VitalFormWrapper
+          isOpen={showForm}
           onClose={handleFormCancel}
           title={editingVitals ? 'Edit Vital Signs' : 'Add New Vital Signs'}
-          size="lg"
-          centered
-        >
-          <VitalsForm
-            vitals={editingVitals}
-            patientId={currentPatient?.id}
-            practitionerId={null}
-            onSave={handleFormSave}
-            onCancel={handleFormCancel}
-            isEdit={!!editingVitals}
-            createItem={createItem}
-            updateItem={updateItem}
-            error={vitalsError}
-            clearError={clearError}
-          />
-        </Modal>
+          editingVital={editingVitals}
+          patientId={currentPatient?.id}
+          practitionerId={null}
+          onSave={handleFormSave}
+          error={vitalsError}
+          clearError={clearError}
+          isLoading={false}
+          createItem={createItem}
+          updateItem={updateItem}
+        />
 
         {/* Content */}
         <motion.div
@@ -519,14 +558,24 @@ const Vitals = () => {
             patientId={currentPatient?.id}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onView={handleViewVital}
             vitalsData={filteredVitals}
             loading={vitalsLoading}
             error={vitalsError}
             showActions={true}
           />
         </motion.div>
-      </Container>
-    </motion.div>
+
+        <VitalViewModal
+          isOpen={showViewModal}
+          onClose={handleCloseViewModal}
+          vital={viewingVital}
+          onEdit={handleEdit}
+          practitioners={practitioners}
+          navigate={navigate}
+        />
+      </Stack>
+    </Container>
   );
 };
 

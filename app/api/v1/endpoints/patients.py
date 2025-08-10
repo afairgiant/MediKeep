@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -10,14 +10,15 @@ from app.api import deps
 from app.core.logging_config import get_logger
 from app.crud.patient import patient
 from app.models.activity_log import ActivityLog
+from app.models.models import Patient as PatientModel
+from app.models.models import User
 from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 
 router = APIRouter()
 
-# Initialize loggers
+# Initialize logger
 logger = get_logger(__name__, "app")
-medical_logger = get_logger(__name__, "medical")
 
 
 class UserRecentActivity(BaseModel):
@@ -199,9 +200,16 @@ def update_my_patient_record(
     patient_id = getattr(existing_patient, "id", None)
 
     try:
+        # Log the incoming data for debugging
+        logger.info(f"Attempting to update patient {patient_id} for user {user_id} with data: {patient_in.dict()}")
+        
         updated_patient = patient.update_for_user(
             db, user_id=user_id, patient_data=patient_in
         )
+
+        if not updated_patient:
+            logger.error(f"Update returned None for patient {patient_id}, user {user_id}")
+            raise HTTPException(status_code=500, detail="Failed to update patient record")
 
         # Log successful patient record update
         logger.info(
@@ -212,6 +220,7 @@ def update_my_patient_record(
                 "user_id": user_id,
                 "patient_id": patient_id,
                 "ip": user_ip,
+                "updated_data": updated_patient.id,  # Just log the ID to confirm it exists
             },
         )
 
@@ -463,6 +472,7 @@ def get_my_recent_activity(
     - procedures
     - treatments
     - encounters
+    - insurance
 
     Each activity includes a brief description and timestamp.
     """
@@ -510,12 +520,15 @@ def get_my_recent_activity(
 @router.get("/me/dashboard-stats", response_model=PatientDashboardStats)
 async def get_my_dashboard_stats(
     db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    patient_id: Optional[int] = Query(
+        None, description="Patient ID for Phase 1 patient switching"
+    ),
 ) -> Any:
     """
-    Get dashboard statistics for the current patient.
+    Get dashboard statistics for the specified patient.
 
-    Returns counts of all medical records for the authenticated user:
+    Returns counts of all medical records for the patient:
     - Total records count
     - Active medications count
     - Lab results count
@@ -526,14 +539,52 @@ async def get_my_dashboard_stats(
     - Immunizations count
     - Encounters count
     - Vitals count
+
+    Supports Phase 1 patient switching with patient_id parameter.
     """
     try:
         # Import ExportService here to avoid circular imports
         from app.services.export_service import ExportService
 
+        # Get the target patient ID
+        if patient_id:
+            # Phase 1: Use provided patient_id with access control
+            from app.services.patient_access import PatientAccessService
+
+            access_service = PatientAccessService(db)
+
+            # Get the patient record
+            patient_record = (
+                db.query(PatientModel).filter(PatientModel.id == patient_id).first()
+            )
+            if not patient_record:
+                raise HTTPException(status_code=404, detail="Patient not found")
+
+            # Check if user has access to this patient
+            if not access_service.can_access_patient(
+                current_user, patient_record, "view"
+            ):
+                raise HTTPException(status_code=403, detail="Access denied to patient")
+
+            target_patient_id = patient_id
+        else:
+            # Legacy: Get user's patient record ID
+            user_patient = (
+                db.query(PatientModel)
+                .filter(PatientModel.owner_user_id == current_user.id)
+                .first()
+            )
+            if not user_patient:
+                raise HTTPException(
+                    status_code=404, detail="No patient record found for user"
+                )
+            target_patient_id = user_patient.id
+
         # Initialize export service and get summary
         export_service = ExportService(db)
-        summary = await export_service.get_export_summary(current_user_id)
+        summary = await export_service.get_export_summary_by_patient_id(
+            target_patient_id
+        )
 
         counts = summary.get("counts", {})
 
@@ -560,7 +611,7 @@ async def get_my_dashboard_stats(
 
     except Exception as e:
         logger.error(
-            f"Error fetching dashboard stats for user {current_user_id}: {str(e)}"
+            f"Error fetching dashboard stats for user {current_user.id}: {str(e)}"
         )
         raise HTTPException(
             status_code=500, detail="Error fetching dashboard statistics"
@@ -570,6 +621,7 @@ async def get_my_dashboard_stats(
 @router.get("/recent-activity/", response_model=List[UserRecentActivity])
 def get_user_recent_activity(
     limit: int = Query(default=10, le=50),
+    patient_id: int = Query(None, description="Filter by specific patient ID"),
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -586,6 +638,7 @@ def get_user_recent_activity(
     - Procedures
     - Treatments
     - Visits/Encounters
+    - Insurance
     - Patient Info updates
     - Doctor/Practitioner interactions
 
@@ -593,10 +646,34 @@ def get_user_recent_activity(
     Includes both user actions and medical activities that affect the patient.
     """
     try:
-        # Get the user's patient record
-        patient_record = patient.get_by_user_id(db, user_id=current_user_id)
-        if not patient_record:
-            return []
+        # Get the target patient record
+        if patient_id:
+            # Validate patient access using patient_access service
+            from app.crud.user import user as user_crud
+            from app.services.patient_access import PatientAccessService
+
+            # Get user and patient objects
+            user_obj = user_crud.get(db, id=current_user_id)
+            if not user_obj:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            access_service = PatientAccessService(db)
+
+            # Get the specific patient record
+            patient_record = patient.get(db, id=patient_id)
+            if not patient_record:
+                raise HTTPException(status_code=404, detail="Patient record not found")
+
+            # Validate that the user has access to this patient
+            if not access_service.can_access_patient(user_obj, patient_record):
+                raise HTTPException(
+                    status_code=403, detail="Access denied to this patient record"
+                )
+        else:
+            # Default to user's own patient record
+            patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+            if not patient_record:
+                return []
 
         # Define medical entity types we want to include (all medical pages + doctors)
         medical_entity_types = [
@@ -614,19 +691,28 @@ def get_user_recent_activity(
             "practitioner",  # Doctors/practitioners page
             "pharmacy",  # Pharmacies page
             "lab_result_file",  # Lab result file uploads
-        ]  # Query activity logs for this patient's medical activities
-        # Include activities by the user AND activities that affect this patient
+            "insurance",  # Insurance page
+        ]
+
+        # Define universal entity types that should be shown regardless of patient
+        universal_entity_types = ["practitioner", "pharmacy"]
+
+        # Query activity logs for this patient's medical activities
+        # Include activities that relate to this specific patient
+        # Also include universal activities (practitioners, pharmacies) for all patients
+
+        # Build the main filter condition
+        main_filter = (ActivityLog.patient_id == patient_record.id) | (
+            ActivityLog.entity_type.in_(universal_entity_types)
+        )
+
+        # For requests without specific patient_id, also include activities by this user
+        if not patient_id:
+            main_filter = main_filter | (ActivityLog.user_id == current_user_id)
+
         activity_logs = (
             db.query(ActivityLog)
-            .filter(
-                ActivityLog.entity_type.in_(medical_entity_types),
-                # Show activities by this user OR activities that relate to this patient
-                # This captures both user actions and doctor actions affecting the patient
-                (ActivityLog.user_id == current_user_id)
-                | (ActivityLog.description.like(f"%patient {patient_record.id}%"))
-                | (ActivityLog.description.like(f"%{patient_record.first_name}%"))
-                | (ActivityLog.description.like(f"%{patient_record.last_name}%")),
-            )
+            .filter(ActivityLog.entity_type.in_(medical_entity_types), main_filter)
             .order_by(desc(ActivityLog.timestamp))
             .limit(limit)
             .all()

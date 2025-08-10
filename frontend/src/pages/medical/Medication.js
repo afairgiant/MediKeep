@@ -1,5 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Button,
+  Group,
+  Stack,
+  Text,
+  Grid,
+  Container,
+  Alert,
+  Loader,
+  Center,
+  Paper,
+  Title,
+} from '@mantine/core';
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconPlus,
+} from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -9,32 +28,15 @@ import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineMedicalForm from '../../components/medical/MantineMedicalForm';
-import StatusBadge from '../../components/medical/StatusBadge';
-import {
-  Badge,
-  Card,
-  Group,
-  Stack,
-  Text,
-  Grid,
-  Container,
-  Alert,
-  Loader,
-  Center,
-  Divider,
-  Modal,
-  Title,
-} from '@mantine/core';
+import { MedicationCard, MedicationViewModal, MedicationFormWrapper } from '../../components/medical/medications';
 
 const Medication = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Get practitioners and pharmacies data
   const { practitioners: practitionersObject, pharmacies: pharmaciesObject } =
@@ -90,8 +92,8 @@ const Medication = () => {
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
 
-  // Form and UI state
-  const [showModal, setShowModal] = useState(false);
+  // Form state
+  const [showAddForm, setShowAddForm] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingMedication, setViewingMedication] = useState(null);
   const [editingMedication, setEditingMedication] = useState(null);
@@ -108,8 +110,26 @@ const Medication = () => {
     pharmacy_id: null,
   });
 
-  const handleAddMedication = () => {
-    setEditingMedication(null);
+  const handleInputChange = e => {
+    const { name, value } = e.target;
+    let processedValue = value;
+
+    // Handle ID fields - convert empty string to null, otherwise keep as string for Mantine
+    if (name === 'practitioner_id' || name === 'pharmacy_id') {
+      if (value === '') {
+        processedValue = null;
+      } else {
+        processedValue = value; // Keep as string for Mantine compatibility
+      }
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: processedValue,
+    }));
+  };
+
+  const resetForm = () => {
     setFormData({
       medication_name: '',
       dosage: '',
@@ -122,12 +142,17 @@ const Medication = () => {
       practitioner_id: null,
       pharmacy_id: null,
     });
-    setShowModal(true);
+    setEditingMedication(null);
+    setShowAddForm(false);
+  };
+
+  const handleAddMedication = () => {
+    resetForm();
+    setShowAddForm(true);
   };
 
   const handleEditMedication = medication => {
-    setEditingMedication(medication);
-    const formDataToSet = {
+    setFormData({
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
       frequency: medication.frequency || '',
@@ -138,10 +163,9 @@ const Medication = () => {
       status: medication.status || 'active',
       practitioner_id: medication.practitioner_id ? String(medication.practitioner_id) : null,
       pharmacy_id: medication.pharmacy_id ? String(medication.pharmacy_id) : null,
-    };
-    
-    setFormData(formDataToSet);
-    setShowModal(true);
+    });
+    setEditingMedication(medication);
+    setShowAddForm(true);
   };
 
   const handleViewMedication = medication => {
@@ -229,7 +253,7 @@ const Medication = () => {
       }
 
       if (success) {
-        setShowModal(false);
+        resetForm();
         await refreshData();
       }
     } catch (error) {
@@ -237,38 +261,17 @@ const Medication = () => {
     }
   };
 
-  const handleInputChange = e => {
-    const { name, value } = e.target;
-    let processedValue = value;
-
-    // Handle ID fields - convert empty string to null, otherwise keep as string for Mantine
-    if (name === 'practitioner_id' || name === 'pharmacy_id') {
-      if (value === '') {
-        processedValue = null;
-      } else {
-        processedValue = value; // Keep as string for Mantine compatibility
-      }
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: processedValue,
-    }));
-  };
 
   // Get processed data from data management
-  const filteredMedications = dataManagement.data;
+  const processedMedications = dataManagement.data;
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
+      <Container size="xl" py="md">
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
             <Text>Loading medications...</Text>
-            <Text size="sm" c="dimmed">
-              If this takes too long, please refresh the page
-            </Text>
           </Stack>
         </Center>
       </Container>
@@ -276,41 +279,54 @@ const Medication = () => {
   }
 
   return (
-    <>
-      <Container size="xl" py="md">
-        <PageHeader title="Medications" icon="💊" />
+    <Container size="xl" py="md">
+      <PageHeader title="Medications" icon="💊" />
 
-        <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title="Error"
-              withCloseButton
-              onClose={clearError}
-            >
-              {error}
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="light" color="green" title="Success">
-              {successMessage}
-            </Alert>
-          )}
+      <Stack gap="lg">
+        {error && (
+          <Alert
+            variant="light"
+            color="red"
+            title="Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={clearError}
+            mb="md"
+          >
+            {error}
+          </Alert>
+        )}
 
-          <Group justify="space-between" align="center">
-            <Button variant="filled" onClick={handleAddMedication}>
-              + Add New Medication
-            </Button>
+        {successMessage && (
+          <Alert
+            variant="light"
+            color="green"
+            title="Success"
+            icon={<IconCheck size={16} />}
+            mb="md"
+          >
+            {successMessage}
+          </Alert>
+        )}
 
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
+        <Group justify="space-between" mb="lg">
+          <Button
+            variant="filled"
+            leftSection={<IconPlus size={16} />}
+            onClick={handleAddMedication}
+            size="md"
+          >
+            Add New Medication
+          </Button>
 
-          {/* Mantine Filter Controls */}
+          <ViewToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            showPrint={true}
+          />
+        </Group>
+
+        {/* Mantine Filter Controls */}
           <MantineFilters
             filters={dataManagement.filters}
             updateFilter={dataManagement.updateFilter}
@@ -328,166 +344,76 @@ const Medication = () => {
             config={config.filterControls}
           />
 
-          {filteredMedications.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">💊</Text>
-                <Text size="xl" fw={600}>
-                  No Medications Found
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Start by adding your first medication.'}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddMedication}>
-                    Add Your First Medication
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+        {/* Form Modal */}
+        <MedicationFormWrapper
+          isOpen={showAddForm}
+          onClose={() => setShowAddForm(false)}
+          title={editingMedication ? 'Edit Medication' : 'Add New Medication'}
+          formData={formData}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          practitioners={practitioners}
+          pharmacies={pharmacies}
+          editingMedication={editingMedication}
+        />
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          {processedMedications.length === 0 ? (
+            <Paper shadow="sm" p="xl" radius="md">
+              <Center py="xl">
+                <Stack align="center" gap="md">
+                  <IconAlertTriangle
+                    size={64}
+                    stroke={1}
+                    color="var(--mantine-color-gray-5)"
+                  />
+                  <Stack align="center" gap="xs">
+                    <Title order={3}>No medications found</Title>
+                    <Text c="dimmed" ta="center">
+                      {dataManagement.hasActiveFilters
+                        ? 'Try adjusting your search or filter criteria.'
+                        : 'Click "Add New Medication" to get started.'}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Center>
+            </Paper>
           ) : viewMode === 'cards' ? (
             <Grid>
-              {filteredMedications.map(medication => (
-                <Grid.Col key={medication.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <Card
-                    withBorder
-                    shadow="sm"
-                    radius="md"
-                    h="100%"
-                    style={{ display: 'flex', flexDirection: 'column' }}
+              <AnimatePresence>
+                {processedMedications.map((medication, index) => (
+                  <Grid.Col
+                    key={medication.id}
+                    span={{ base: 12, md: 6, lg: 4 }}
                   >
-                    <Stack gap="sm" style={{ flex: 1 }}>
-                      <Group justify="space-between" align="flex-start">
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Text fw={600} size="lg">
-                            {medication.medication_name}
-                          </Text>
-                          {medication.dosage && (
-                            <Badge variant="light" color="blue" size="md">
-                              {medication.dosage}
-                            </Badge>
-                          )}
-                        </Stack>
-                        <StatusBadge status={medication.status} />
-                      </Group>
-
-                      <Stack gap="xs">
-                        {medication.frequency && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Frequency:
-                            </Text>
-                            <Text size="sm">{medication.frequency}</Text>
-                          </Group>
-                        )}
-                        {medication.route && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Route:
-                            </Text>
-                            <Badge variant="light" color="cyan" size="sm">
-                              {medication.route}
-                            </Badge>
-                          </Group>
-                        )}
-                        <Group align="flex-start">
-                          <Text size="sm" fw={500} c="dimmed" w={120}>
-                            Purpose:
-                          </Text>
-                          <Text size="sm" style={{ flex: 1 }}>
-                            {getMedicationPurpose(medication)}
-                          </Text>
-                        </Group>
-                        {medication.practitioner && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Prescriber:
-                            </Text>
-                            <Text 
-                              size="sm" 
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
-                              onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
-                              title="View practitioner details"
-                            >
-                              {medication.practitioner.name}
-                            </Text>
-                          </Group>
-                        )}
-                        {medication.pharmacy && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Pharmacy:
-                            </Text>
-                            <Text 
-                              size="sm" 
-                              style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
-                              onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
-                              title="View pharmacy details"
-                            >
-                              {medication.pharmacy.name}
-                            </Text>
-                          </Group>
-                        )}
-                        {medication.effective_period_start && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              Start Date:
-                            </Text>
-                            <Text size="sm">
-                              {formatDate(medication.effective_period_start)}
-                            </Text>
-                          </Group>
-                        )}
-                        {medication.effective_period_end && (
-                          <Group>
-                            <Text size="sm" fw={500} c="dimmed" w={120}>
-                              End Date:
-                            </Text>
-                            <Text size="sm">
-                              {formatDate(medication.effective_period_end)}
-                            </Text>
-                          </Group>
-                        )}
-                      </Stack>
-                    </Stack>
-
-                    {/* Buttons always at bottom */}
-                    <Stack gap={0} mt="auto">
-                      <Divider />
-                      <Group justify="flex-end" gap="xs" pt="sm">
-                        <Button
-                          variant="light"
-                          size="xs"
-                          onClick={() => handleViewMedication(medication)}
-                        >
-                          View
-                        </Button>
-                        <Button
-                          variant="light"
-                          size="xs"
-                          onClick={() => handleEditMedication(medication)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="light"
-                          color="red"
-                          size="xs"
-                          onClick={() => handleDeleteMedication(medication.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-              ))}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <MedicationCard
+                        medication={medication}
+                        onView={handleViewMedication}
+                        onEdit={handleEditMedication}
+                        onDelete={handleDeleteMedication}
+                        navigate={navigate}
+                        onError={setError}
+                      />
+                    </motion.div>
+                  </Grid.Col>
+                ))}
+              </AnimatePresence>
             </Grid>
           ) : (
-            <MedicalTable
-              data={filteredMedications}
+            <Paper shadow="sm" radius="md" withBorder>
+              <MedicalTable
+                data={processedMedications}
               columns={[
                 { header: 'Medication Name', accessor: 'medication_name' },
                 { header: 'Dosage', accessor: 'dosage' },
@@ -507,231 +433,21 @@ const Medication = () => {
               onDelete={handleDeleteMedication}
               formatters={formatters}
             />
+            </Paper>
           )}
-        </Stack>
-      </Container>
+        </motion.div>
 
-      <MantineMedicalForm
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={editingMedication ? 'Edit Medication' : 'Add New Medication'}
-        formData={formData}
-        onInputChange={handleInputChange}
-        onSubmit={handleSubmit}
-        practitioners={practitioners}
-        pharmacies={pharmacies}
-        editingMedication={editingMedication}
-      />
-
-      {/* Medication View Modal */}
-      <Modal
-        opened={showViewModal}
-        onClose={handleCloseViewModal}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              Medication Details
-            </Text>
-            {viewingMedication && (
-              <StatusBadge status={viewingMedication.status} />
-            )}
-          </Group>
-        }
-        size="lg"
-        centered
-      >
-        {viewingMedication && (
-          <Stack gap="md">
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Title order={3}>{viewingMedication.medication_name}</Title>
-                    {viewingMedication.dosage && (
-                      <Badge variant="light" color="blue" size="lg">
-                        {viewingMedication.dosage}
-                      </Badge>
-                    )}
-                  </Stack>
-                </Group>
-
-                <Stack gap="xs">
-                  <Text fw={500} c="dimmed" size="sm">
-                    Purpose
-                  </Text>
-                  <Text>
-                    {getMedicationPurpose(viewingMedication)}
-                  </Text>
-                </Stack>
-              </Stack>
-            </Card>
-
-            <Grid>
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      DOSAGE & FREQUENCY
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Dosage:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingMedication.dosage ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingMedication.dosage || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Frequency:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={viewingMedication.frequency ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingMedication.frequency || 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Route:
-                      </Text>
-                      {viewingMedication.route ? (
-                        <Badge variant="light" color="cyan" size="sm">
-                          {viewingMedication.route}
-                        </Badge>
-                      ) : (
-                        <Text size="sm" c="dimmed">
-                          Not specified
-                        </Text>
-                      )}
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={6}>
-                <Card withBorder p="md" h="100%">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      PRESCRIBER & PHARMACY
-                    </Text>
-                    <Divider />
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Prescriber:
-                      </Text>
-                      {viewingMedication.practitioner ? (
-                        <Text
-                          size="sm"
-                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
-                          onClick={() => navigateToEntity('practitioner', viewingMedication.practitioner.id, navigate)}
-                          title="View practitioner details"
-                        >
-                          {viewingMedication.practitioner.name}
-                        </Text>
-                      ) : (
-                        <Text size="sm" c="dimmed">
-                          Not specified
-                        </Text>
-                      )}
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Pharmacy:
-                      </Text>
-                      {viewingMedication.pharmacy ? (
-                        <Text
-                          size="sm"
-                          style={{ cursor: 'pointer', color: '#1c7ed6', textDecoration: 'underline' }}
-                          onClick={() => navigateToEntity('pharmacy', viewingMedication.pharmacy.id, navigate)}
-                          title="View pharmacy details"
-                        >
-                          {viewingMedication.pharmacy.name}
-                        </Text>
-                      ) : (
-                        <Text size="sm" c="dimmed">
-                          Not specified
-                        </Text>
-                      )}
-                    </Group>
-                  </Stack>
-                </Card>
-              </Grid.Col>
-            </Grid>
-
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  EFFECTIVE PERIOD
-                </Text>
-                <Divider />
-                <Grid>
-                  <Grid.Col span={6}>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Start Date:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          viewingMedication.effective_period_start
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {viewingMedication.effective_period_start
-                          ? formatDate(viewingMedication.effective_period_start)
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Grid.Col>
-                  <Grid.Col span={6}>
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        End Date:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          viewingMedication.effective_period_end
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {viewingMedication.effective_period_end
-                          ? formatDate(viewingMedication.effective_period_end)
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Grid.Col>
-                </Grid>
-              </Stack>
-            </Card>
-
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                variant="light"
-                onClick={() => {
-                  handleCloseViewModal();
-                  handleEditMedication(viewingMedication);
-                }}
-              >
-                Edit Medication
-              </Button>
-              <Button variant="filled" onClick={handleCloseViewModal}>
-                Close
-              </Button>
-            </Group>
-          </Stack>
-        )}
-      </Modal>
-    </>
+        {/* Medication View Modal */}
+        <MedicationViewModal
+          isOpen={showViewModal}
+          onClose={handleCloseViewModal}
+          medication={viewingMedication}
+          onEdit={handleEditMedication}
+          navigate={navigate}
+          onError={setError}
+        />
+      </Stack>
+    </Container>
   );
 };
 

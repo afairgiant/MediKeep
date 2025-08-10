@@ -51,6 +51,11 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import {
+  formatMeasurement,
+  convertForDisplay,
+} from '../../utils/unitConversion';
 import {
   formatDate as formatDateHelper,
   formatDateTime,
@@ -60,6 +65,7 @@ const VitalsList = ({
   patientId,
   onEdit,
   onDelete,
+  onView,
   onRefresh,
   vitalsData,
   loading,
@@ -67,6 +73,7 @@ const VitalsList = ({
   showActions = true,
   limit = 10,
 }) => {
+  const { unitSystem } = useUserPreferences();
   // Use passed data if available, otherwise load internally
   const [internalVitals, setInternalVitals] = useState([]);
   const [internalLoading, setInternalLoading] = useState(true);
@@ -150,8 +157,14 @@ const VitalsList = ({
   };
 
   const handleViewDetails = vital => {
-    setSelectedVital(vital);
-    setShowDetailsModal(true);
+    if (onView) {
+      // Use external view handler if provided
+      onView(vital);
+    } else {
+      // Fall back to internal modal
+      setSelectedVital(vital);
+      setShowDetailsModal(true);
+    }
   };
 
   const formatDate = dateString => {
@@ -490,7 +503,7 @@ const VitalsList = ({
         <Group justify="space-between" align="center">
           <Text size="sm">{currentError}</Text>
           <Button
-            variant="light"
+            variant="filled"
             size="xs"
             leftSection={<IconRefresh size={14} />}
             onClick={loadVitals}
@@ -561,7 +574,11 @@ const VitalsList = ({
       <Table.Td>
         {vital.temperature ? (
           <Text size="sm" fw={500}>
-            {vital.temperature}°F
+            {formatMeasurement(
+              convertForDisplay(vital.temperature, 'temperature', unitSystem),
+              'temperature',
+              unitSystem
+            )}
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
@@ -572,7 +589,11 @@ const VitalsList = ({
       <Table.Td>
         {vital.weight ? (
           <Text size="sm" fw={500}>
-            {vital.weight} lbs
+            {formatMeasurement(
+              convertForDisplay(vital.weight, 'weight', unitSystem),
+              'weight',
+              unitSystem
+            )}
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
@@ -606,7 +627,7 @@ const VitalsList = ({
         <Table.Td>
           <Group gap="xs">
             <ActionIcon
-              variant="light"
+              variant="filled"
               color="green"
               size="sm"
               onClick={e => {
@@ -618,7 +639,7 @@ const VitalsList = ({
               <IconEye size={14} />
             </ActionIcon>
             <ActionIcon
-              variant="light"
+              variant="filled"
               color="blue"
               size="sm"
               onClick={e => {
@@ -630,7 +651,7 @@ const VitalsList = ({
               <IconEdit size={14} />
             </ActionIcon>
             <ActionIcon
-              variant="light"
+              variant="filled"
               color="red"
               size="sm"
               onClick={e => {
@@ -719,7 +740,7 @@ const VitalsList = ({
 
         {vitals.length >= limit && (
           <Center>
-            <Button variant="light" onClick={loadVitals}>
+            <Button variant="filled" onClick={loadVitals}>
               Load More
             </Button>
           </Center>

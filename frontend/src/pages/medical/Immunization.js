@@ -17,8 +17,8 @@ import {
   Divider,
   Modal,
   SimpleGrid,
+  Button,
 } from '@mantine/core';
-import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
@@ -32,11 +32,18 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineImmunizationForm from '../../components/medical/MantineImmunizationForm';
+
+// Modular components
+import {
+  ImmunizationCard,
+  ImmunizationViewModal,
+  ImmunizationFormWrapper,
+} from '../../components/medical/immunizations';
 
 const Immunization = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
@@ -236,53 +243,17 @@ const Immunization = () => {
     }
   }, [location.search, processedImmunizations, loading, showViewModal]);
 
-  // Helper function to get immunization icon based on vaccine name
-  const getImmunizationIcon = vaccineName => {
-    const vaccineLower = vaccineName.toLowerCase();
-    if (vaccineLower.includes('covid') || vaccineLower.includes('corona'))
-      return IconShieldCheck;
-    if (vaccineLower.includes('flu') || vaccineLower.includes('influenza'))
-      return IconVaccine;
-    if (vaccineLower.includes('tetanus') || vaccineLower.includes('diphtheria'))
-      return IconShieldCheck;
-    if (
-      vaccineLower.includes('measles') ||
-      vaccineLower.includes('mumps') ||
-      vaccineLower.includes('rubella')
-    )
-      return IconVaccine;
-    if (vaccineLower.includes('hepatitis')) return IconVaccine;
-    if (
-      vaccineLower.includes('pneumonia') ||
-      vaccineLower.includes('pneumococcal')
-    )
-      return IconVaccine;
-    return IconVaccine; // Default immunization icon
-  };
-
-  // Helper function to get dose color
-  const getDoseColor = doseNumber => {
-    switch (doseNumber) {
-      case 1:
-        return 'blue';
-      case 2:
-        return 'green';
-      case 3:
-        return 'orange';
-      case 4:
-        return 'red';
-      default:
-        return 'gray';
-    }
-  };
+  // Get practitioners data
+  const { practitioners: practitionersObject } = usePatientWithStaticData();
+  const practitioners = practitionersObject?.practitioners || [];
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading immunizations...</Text>
+            <Text>Loading immunizations...</Text>
           </Stack>
         </Center>
       </Container>
@@ -290,14 +261,10 @@ const Immunization = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <Container size="xl" py="md">
       <PageHeader title="Immunizations" icon="💉" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -326,6 +293,7 @@ const Immunization = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddImmunization}
             size="md"
@@ -357,7 +325,7 @@ const Immunization = () => {
         />
 
         {/* Form Modal */}
-        <MantineImmunizationForm
+        <ImmunizationFormWrapper
           isOpen={showAddForm}
           onClose={resetForm}
           title={
@@ -367,219 +335,20 @@ const Immunization = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingImmunization={editingImmunization}
+          practitioners={practitioners}
         />
 
         {/* View Details Modal */}
-        <Modal
-          opened={showViewModal}
+        <ImmunizationViewModal
+          isOpen={showViewModal}
           onClose={handleCloseViewModal}
-          title={
-            <Group>
-              <Text size="lg" fw={600}>
-                Immunization Details
-              </Text>
-              {viewingImmunization && viewingImmunization.dose_number && (
-                <Badge
-                  color={getDoseColor(viewingImmunization.dose_number)}
-                  variant="filled"
-                  size="lg"
-                >
-                  Dose {viewingImmunization.dose_number}
-                </Badge>
-              )}
-            </Group>
-          }
-          size="lg"
-          centered
-        >
-          {viewingImmunization && (
-            <Stack gap="md">
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Group justify="space-between" align="flex-start">
-                    <Stack gap="xs" style={{ flex: 1 }}>
-                      <Title order={3}>
-                        {viewingImmunization.vaccine_name}
-                      </Title>
-                      <Group gap="xs">
-                        {viewingImmunization.manufacturer && (
-                          <Badge variant="light" color="blue" size="lg">
-                            {viewingImmunization.manufacturer}
-                          </Badge>
-                        )}
-                        {viewingImmunization.site && (
-                          <Badge variant="light" color="teal" size="lg">
-                            {viewingImmunization.site
-                              .replace(/_/g, ' ')
-                              .replace(/\b\w/g, l => l.toUpperCase())}
-                          </Badge>
-                        )}
-                      </Group>
-                    </Stack>
-                  </Group>
-                </Stack>
-              </Card>
-
-              <Grid>
-                <Grid.Col span={6}>
-                  <Card withBorder p="md" h="100%">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        ADMINISTRATION
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Date:
-                        </Text>
-                        <Text size="sm" fw={600}>
-                          {formatDate(viewingImmunization.date_administered)}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Route:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingImmunization.route ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingImmunization.route || 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Site:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingImmunization.site ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingImmunization.site
-                            ? viewingImmunization.site
-                                .replace(/_/g, ' ')
-                                .replace(/\b\w/g, l => l.toUpperCase())
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-
-                <Grid.Col span={6}>
-                  <Card withBorder p="md" h="100%">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        VACCINE DETAILS
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Dose:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingImmunization.dose_number
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingImmunization.dose_number
-                            ? `Dose ${viewingImmunization.dose_number}`
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Lot:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingImmunization.lot_number
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingImmunization.lot_number || 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Expires:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingImmunization.expiration_date
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingImmunization.expiration_date
-                            ? formatDate(viewingImmunization.expiration_date)
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-
-                <Grid.Col span={12}>
-                  <Card withBorder p="md">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        PRACTITIONER
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          ID:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingImmunization.practitioner_id
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingImmunization.practitioner_id ||
-                            'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-
-                <Grid.Col span={12}>
-                  <Card withBorder p="md">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        NOTES
-                      </Text>
-                      <Divider />
-                      <Text
-                        style={{ whiteSpace: 'pre-wrap' }}
-                        c={viewingImmunization.notes ? 'inherit' : 'dimmed'}
-                      >
-                        {viewingImmunization.notes || 'No notes available'}
-                      </Text>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-              </Grid>
-            </Stack>
-          )}
-        </Modal>
+          immunization={viewingImmunization}
+          onEdit={handleEditImmunization}
+          practitioners={practitioners}
+          navigate={navigate}
+        />
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
           {processedImmunizations.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -603,179 +372,21 @@ const Immunization = () => {
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>
-                {processedImmunizations.map((immunization, index) => {
-                  const ImmunizationIcon = getImmunizationIcon(
-                    immunization.vaccine_name
-                  );
-
-                  return (
-                    <Grid.Col
-                      key={immunization.id}
-                      span={{ base: 12, md: 6, lg: 4 }}
-                    >
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                      >
-                        <Card
-                          withBorder
-                          shadow="sm"
-                          radius="md"
-                          h="100%"
-                          style={{ display: 'flex', flexDirection: 'column' }}
-                        >
-                          <Stack gap="sm" style={{ flex: 1 }}>
-                            <Group justify="space-between" align="flex-start">
-                              <Group gap="xs">
-                                <ImmunizationIcon
-                                  size={20}
-                                  color="var(--mantine-color-blue-6)"
-                                />
-                                <Text fw={600} size="lg">
-                                  {immunization.vaccine_name}
-                                </Text>
-                              </Group>
-                              {immunization.dose_number && (
-                                <Badge
-                                  color={getDoseColor(immunization.dose_number)}
-                                  variant="filled"
-                                >
-                                  Dose {immunization.dose_number}
-                                </Badge>
-                              )}
-                            </Group>
-
-                            <Stack gap="xs">
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Date Administered:
-                                </Text>
-                                <Text size="sm" fw={500}>
-                                  {formatDate(immunization.date_administered)}
-                                </Text>
-                              </Group>
-
-                              {immunization.manufacturer && (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Manufacturer:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {immunization.manufacturer}
-                                  </Text>
-                                </Group>
-                              )}
-
-                              {immunization.site && (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Site:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {immunization.site
-                                      .replace(/_/g, ' ')
-                                      .replace(/\b\w/g, l => l.toUpperCase())}
-                                  </Text>
-                                </Group>
-                              )}
-
-                              {immunization.route && (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Route:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {immunization.route}
-                                  </Text>
-                                </Group>
-                              )}
-
-                              {immunization.lot_number && (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Lot Number:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {immunization.lot_number}
-                                  </Text>
-                                </Group>
-                              )}
-
-                              {immunization.expiration_date && (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Expiration Date:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {formatDate(immunization.expiration_date)}
-                                  </Text>
-                                </Group>
-                              )}
-
-                              {immunization.practitioner_id && (
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Practitioner ID:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {immunization.practitioner_id}
-                                  </Text>
-                                </Group>
-                              )}
-                              {immunization.notes && (
-                                <Group align="flex-start">
-                                  <Text size="sm" fw={500} c="dimmed" w={120}>
-                                    Notes:
-                                  </Text>
-                                  <Text size="sm" style={{ flex: 1 }}>
-                                    {immunization.notes}
-                                  </Text>
-                                </Group>
-                              )}
-                            </Stack>
-                          </Stack>
-
-                          {/* Buttons always at bottom */}
-                          <Stack gap={0} mt="auto">
-                            <Divider />
-                            <Group justify="flex-end" gap="xs" pt="sm">
-                              <Button
-                                variant="light"
-                                size="xs"
-                                onClick={() =>
-                                  handleViewImmunization(immunization)
-                                }
-                              >
-                                View
-                              </Button>
-                              <Button
-                                variant="light"
-                                size="xs"
-                                onClick={() =>
-                                  handleEditImmunization(immunization)
-                                }
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="light"
-                                color="red"
-                                size="xs"
-                                onClick={() =>
-                                  handleDeleteImmunization(immunization.id)
-                                }
-                              >
-                                Delete
-                              </Button>
-                            </Group>
-                          </Stack>
-                        </Card>
-                      </motion.div>
-                    </Grid.Col>
-                  );
-                })}
+                {processedImmunizations.map((immunization, index) => (
+                  <Grid.Col
+                    key={immunization.id}
+                    span={{ base: 12, md: 6, lg: 4 }}
+                  >
+                      <ImmunizationCard
+                        immunization={immunization}
+                        onView={handleViewImmunization}
+                        onEdit={handleEditImmunization}
+                        onDelete={handleDeleteImmunization}
+                        practitioners={practitioners}
+                        navigate={navigate}
+                      />
+                  </Grid.Col>
+                ))}
               </AnimatePresence>
             </Grid>
           ) : (
@@ -820,9 +431,8 @@ const Immunization = () => {
               />
             </Paper>
           )}
-        </motion.div>
-      </Container>
-    </motion.div>
+        </Stack>
+    </Container>
   );
 };
 

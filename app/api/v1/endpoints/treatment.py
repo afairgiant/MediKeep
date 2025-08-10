@@ -50,31 +50,31 @@ def read_treatments(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
     condition_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve treatments for the current user with optional filtering and related data."""
-    # Filter treatments by the user's patient_id (ignore any provided patient_id for security)
+    """Retrieve treatments for the current user or accessible patient."""
+    
+    # Filter treatments by the target patient_id
     if status:
         treatments = treatment.get_by_status(
             db,
             status=status,
-            patient_id=current_user_patient_id,
+            patient_id=target_patient_id,
         )
     elif condition_id:
         treatments = treatment.get_by_condition(
             db,
             condition_id=condition_id,
-            patient_id=current_user_patient_id,
+            patient_id=target_patient_id,
             skip=skip,
             limit=limit,
         )
     else:
         treatments = treatment.get_by_patient(
             db,
-            patient_id=current_user_patient_id,
+            patient_id=target_patient_id,
             skip=skip,
             limit=limit,
         )

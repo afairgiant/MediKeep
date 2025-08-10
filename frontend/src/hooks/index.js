@@ -21,3 +21,10 @@ export { useTimezone } from './useTimezone';
 export { default as useFiltering } from './useFiltering';
 export { default as useSorting } from './useSorting';
 export { default as useDataManagement } from './useDataManagement';
+
+// Activity tracking hooks
+export { 
+  useActivityTracker, 
+  useApiActivityTracker, 
+  useNavigationActivityTracker 
+} from './useActivityTracker';

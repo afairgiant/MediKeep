@@ -1,6 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Grid, Text, Group, ActionIcon, Badge } from '@mantine/core';
+import {
+  Card,
+  Grid,
+  Text,
+  Group,
+  ActionIcon,
+  Badge,
+  Paper,
+  useMantineColorScheme,
+} from '@mantine/core';
 import {
   IconDatabase,
   IconUsers,
@@ -22,6 +31,7 @@ import './DataModels.css';
 
 const DataModels = () => {
   const navigate = useNavigate();
+  const { colorScheme } = useMantineColorScheme();
 
   const models = [
     {
@@ -136,9 +146,38 @@ const DataModels = () => {
       color: 'dark',
       category: 'Medical Records',
     },
+    {
+      name: 'patient_share',
+      display: 'Patient Shares',
+      icon: IconUsers,
+      description: 'Patient data sharing relationships between users',
+      color: 'blue',
+      category: 'Sharing & Access',
+    },
+    {
+      name: 'invitation',
+      display: 'Invitations',
+      icon: IconUsers,
+      description: 'System invitations for sharing and collaboration',
+      color: 'green',
+      category: 'Sharing & Access',
+    },
+    {
+      name: 'family_history_share',
+      display: 'Family History Shares',
+      icon: IconUsers,
+      description: 'Family medical history sharing relationships',
+      color: 'purple',
+      category: 'Sharing & Access',
+    },
   ];
 
-  const categories = ['System', 'Core Medical', 'Medical Records'];
+  const categories = [
+    'System',
+    'Core Medical',
+    'Medical Records',
+    'Sharing & Access',
+  ];
 
   const handleModelClick = modelName => {
     navigate(`/admin/models/${modelName}`);
@@ -202,7 +241,14 @@ const DataModels = () => {
   return (
     <AdminLayout>
       <div className="data-models-page">
-        <div className="page-header">
+        <div
+          className="page-header"
+          style={{
+            backgroundColor: colorScheme === 'dark' ? '#1a1b1e' : 'white',
+            borderColor: colorScheme === 'dark' ? '#373A40' : '#dee2e6',
+            border: '1px solid',
+          }}
+        >
           <Group justify="space-between" align="flex-start" mb="xl">
             <div>
               <Text size="xl" fw={700} mb="xs">

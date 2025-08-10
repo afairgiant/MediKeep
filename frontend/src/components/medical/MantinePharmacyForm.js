@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Text } from '@mantine/core';
 
 import BaseMedicalForm from './BaseMedicalForm';
 import { pharmacyFormFields } from '../../utils/medicalFormFields';
+import { formatPhoneInput, isValidPhoneNumber } from '../../utils/phoneUtils';
 
 const MantinePharmacyForm = ({
   isOpen,
@@ -38,40 +39,52 @@ const MantinePharmacyForm = ({
     onInputChange(syntheticEvent);
   };
 
-  // Custom handler for phone formatting
-  const handlePhoneChange = (event) => {
-    let value = event.target.value;
-
-    // Remove all non-digits
-    const cleaned = value.replace(/\D/g, '');
-
-    // Format as (XXX) XXX-XXXX
-    let formatted = cleaned;
-    if (cleaned.length >= 6) {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-    } else if (cleaned.length >= 3) {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    } else if (cleaned.length > 0) {
-      formatted = cleaned;
+  // Field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState({});
+  
+  // Clear field errors when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setFieldErrors({});
     }
+  }, [isOpen]);
 
-    const syntheticEvent = {
-      target: {
-        name: 'phone_number',
-        value: formatted,
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Override form data handling for custom formatted fields
+  // Enhanced input change handler with phone formatting and validation
   const handleInputChange = (event) => {
-    const { name } = event.target;
+    const { name, value } = event.target;
+    
+    // Clear any existing error for this field
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: null
+      }));
+    }
     
     if (name === 'store_number') {
       handleStoreNumberChange(event);
     } else if (name === 'phone_number') {
-      handlePhoneChange(event);
+      // Validate phone number if not empty
+      if (value.trim() !== '' && !isValidPhoneNumber(value)) {
+        setFieldErrors(prev => ({
+          ...prev,
+          [name]: 'Please enter a valid phone number (10-15 digits)'
+        }));
+      }
+      
+      // Format phone number as user types
+      const formattedValue = formatPhoneInput(value);
+      
+      // Create a new event with formatted value
+      const formattedEvent = {
+        ...event,
+        target: {
+          ...event.target,
+          value: formattedValue
+        }
+      };
+      
+      onInputChange(formattedEvent);
     } else {
       onInputChange(event);
     }
@@ -125,7 +138,7 @@ const MantinePharmacyForm = ({
       editingItem={editingPharmacy}
       fields={pharmacyFormFields}
       modalSize="lg"
-
+      fieldErrors={fieldErrors}
     >
       {customContent}
     </BaseMedicalForm>

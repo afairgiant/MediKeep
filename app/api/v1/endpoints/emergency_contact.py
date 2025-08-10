@@ -24,12 +24,12 @@ def create_emergency_contact(
     db: Session = Depends(deps.get_db),
     emergency_contact_in: EmergencyContactCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Create new emergency contact."""
     # Use the specialized method that handles patient_id properly
     emergency_contact_obj = emergency_contact.create_for_patient(
-        db=db, patient_id=current_user_patient_id, obj_in=emergency_contact_in
+        db=db, patient_id=target_patient_id, obj_in=emergency_contact_in
     )
 
     # Log the creation activity using centralized logging
@@ -48,17 +48,15 @@ def read_emergency_contacts(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
     is_active: Optional[bool] = Query(None),
     is_primary: Optional[bool] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve emergency contacts for the current user with optional filtering."""
-    # Filter emergency contacts by the user's patient_id (ignore any provided patient_id for security)
+    """Retrieve emergency contacts for the current user or accessible patient."""
 
     # Start with base query
     query = db.query(EmergencyContact).filter(
-        EmergencyContact.patient_id == current_user_patient_id
+        EmergencyContact.patient_id == target_patient_id
     )
 
     # Apply optional filters
@@ -81,7 +79,7 @@ def read_emergency_contacts(
 def read_emergency_contact(
     emergency_contact_id: int,
     db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Get emergency contact by ID with related information - only allows access to user's own contacts."""
     # Use direct query with joinedload for relations
@@ -99,7 +97,7 @@ def read_emergency_contact(
 
     # Security check: ensure the contact belongs to the current user
     deps.verify_patient_record_access(
-        getattr(contact_obj, "patient_id"), current_user_patient_id, "emergency contact"
+        getattr(contact_obj, "patient_id"), target_patient_id, "emergency contact"
     )
     return contact_obj
 
@@ -111,7 +109,7 @@ def update_emergency_contact(
     emergency_contact_id: int,
     emergency_contact_in: EmergencyContactUpdate,
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Update an emergency contact."""
     emergency_contact_obj = emergency_contact.get(db=db, id=emergency_contact_id)
@@ -121,7 +119,7 @@ def update_emergency_contact(
     # Security check: ensure the contact belongs to the current user
     deps.verify_patient_record_access(
         getattr(emergency_contact_obj, "patient_id"),
-        current_user_patient_id,
+        target_patient_id,
         "emergency contact",
     )
 
@@ -146,7 +144,7 @@ def delete_emergency_contact(
     db: Session = Depends(deps.get_db),
     emergency_contact_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Delete an emergency contact."""
     emergency_contact_obj = emergency_contact.get(db=db, id=emergency_contact_id)
@@ -156,7 +154,7 @@ def delete_emergency_contact(
     # Security check: ensure the contact belongs to the current user
     deps.verify_patient_record_access(
         getattr(emergency_contact_obj, "patient_id"),
-        current_user_patient_id,
+        target_patient_id,
         "emergency contact",
     )
 

@@ -1,15 +1,20 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     Date,
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
+    UniqueConstraint,
+    column,
+    func,
 )
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
@@ -21,6 +26,8 @@ from .enums import (
     ConditionType,
     EncounterPriority,
     FamilyRelationship,
+    InsuranceStatus,
+    InsuranceType,
     LabResultStatus,
     MedicationStatus,
     ProcedureStatus,
@@ -31,6 +38,8 @@ from .enums import (
     get_all_condition_types,
     get_all_encounter_priorities,
     get_all_family_relationships,
+    get_all_insurance_statuses,
+    get_all_insurance_types,
     get_all_lab_result_statuses,
     get_all_medication_statuses,
     get_all_procedure_statuses,
@@ -64,13 +73,56 @@ class User(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
-    patient = orm_relationship("Patient", back_populates="user", uselist=False)
+    # V1: Current patient context - which patient they're managing
+    active_patient_id = Column(Integer, ForeignKey("patients.id"), nullable=True)
+
+    # Original relationship (specify foreign key to avoid ambiguity)
+    patient = orm_relationship(
+        "Patient", foreign_keys="Patient.user_id", back_populates="user", uselist=False
+    )
+
+    # V1: New relationships
+    owned_patients = orm_relationship(
+        "Patient", foreign_keys="Patient.owner_user_id", overlaps="owner"
+    )
+    current_patient_context = orm_relationship(
+        "Patient", foreign_keys=[active_patient_id]
+    )
+
+    # V1: Patient sharing relationships
+    shared_patients_by_me = orm_relationship(
+        "PatientShare",
+        foreign_keys="PatientShare.shared_by_user_id",
+        overlaps="shared_by",
+    )
+    shared_patients_with_me = orm_relationship(
+        "PatientShare",
+        foreign_keys="PatientShare.shared_with_user_id",
+        overlaps="shared_with",
+    )
 
 
 class Patient(Base):
     __tablename__ = "patients"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # V1: Individual ownership
+    owner_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    is_self_record = Column(Boolean, default=False, nullable=False)
+
+    # V2+: Family context (nullable for V1)
+    family_id = Column(Integer, nullable=True)  # Will add FK constraint in V2
+    relationship_to_family = Column(
+        String, nullable=True
+    )  # self, spouse, child, parent
+
+    # V3+: Advanced permissions (nullable for V1/V2)
+    privacy_level = Column(String, default="owner", nullable=False)
+
+    # V4+: External linking (nullable for V1/V2/V3)
+    external_account_id = Column(Integer, nullable=True)  # Will add FK constraint in V4
+    is_externally_accessible = Column(Boolean, default=False, nullable=False)
 
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -81,13 +133,22 @@ class Patient(Base):
     )  # Primary care physician
 
     blood_type = Column(String, nullable=True)  # e.g., 'A+', 'O-', etc.
-    height = Column(Integer, nullable=True)  # in inches
-    weight = Column(Integer, nullable=True)  # in lbs
+    height = Column(Float, nullable=True)  # in inches
+    weight = Column(Float, nullable=True)  # in lbs
     gender = Column(String, nullable=True)
     address = Column(String, nullable=True)
 
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
-    user = orm_relationship("User", back_populates="patient")
+    owner = orm_relationship(
+        "User", foreign_keys=[owner_user_id], overlaps="owned_patients"
+    )
+    user = orm_relationship("User", foreign_keys=[user_id], back_populates="patient")
     practitioner = orm_relationship("Practitioner", back_populates="patients")
     medications = orm_relationship(
         "Medication", back_populates="patient", cascade="all, delete-orphan"
@@ -121,6 +182,17 @@ class Patient(Base):
     )
     family_members = orm_relationship(
         "FamilyMember", back_populates="patient", cascade="all, delete-orphan"
+    )
+    insurances = orm_relationship(
+        "Insurance", back_populates="patient", cascade="all, delete-orphan"
+    )
+
+    # V1: Patient sharing relationships
+    shares = orm_relationship(
+        "PatientShare",
+        foreign_keys="PatientShare.patient_id",
+        cascade="all, delete-orphan",
+        overlaps="patient",
     )
 
 
@@ -308,6 +380,61 @@ class LabResultFile(Base):
     lab_result = orm_relationship("LabResult", back_populates="files")
 
 
+class EntityFile(Base):
+    """
+    Generic file management for all entity types.
+    Supports lab-results, insurance, visits, procedures, and future entity types.
+    """
+
+    __tablename__ = "entity_files"
+
+    id = Column(Integer, primary_key=True)
+    entity_type = Column(
+        String(50), nullable=False
+    )  # 'lab-result', 'insurance', 'visit', 'procedure'
+    entity_id = Column(Integer, nullable=False)  # Foreign key to the entity
+    file_name = Column(String(255), nullable=False)  # Original filename
+    file_path = Column(String(500), nullable=False)  # Path to file on server
+    file_type = Column(String(100), nullable=False)  # MIME type or extension
+    file_size = Column(Integer, nullable=True)  # Size in bytes
+    description = Column(Text, nullable=True)  # Optional description
+    category = Column(
+        String(100), nullable=True
+    )  # File category (result, report, card, etc.)
+    uploaded_at = Column(DateTime, nullable=False)  # Upload timestamp
+
+    # Storage backend tracking
+    storage_backend = Column(
+        String(20), default="local", nullable=False
+    )  # 'local' or 'paperless'
+    paperless_document_id = Column(
+        String(255), nullable=True
+    )  # ID in paperless-ngx system
+    paperless_task_uuid = Column(
+        String(255), nullable=True
+    )  # UUID of the task in paperless-ngx system
+    sync_status = Column(
+        String(20), default="synced", nullable=False
+    )  # 'synced', 'pending', 'processing', 'failed', 'missing'
+    last_sync_at = Column(DateTime, nullable=True)  # Last successful sync timestamp
+
+    created_at = Column(DateTime, nullable=False, default=get_utc_now)
+    updated_at = Column(
+        DateTime, nullable=False, default=get_utc_now, onupdate=get_utc_now
+    )
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_entity_type_id", "entity_type", "entity_id"),
+        Index("idx_category", "category"),
+        Index("idx_uploaded_at", "uploaded_at"),
+        Index("idx_created_at", "created_at"),
+        Index("idx_storage_backend", "storage_backend"),
+        Index("idx_paperless_document_id", "paperless_document_id"),
+        Index("idx_sync_status", "sync_status"),
+    )
+
+
 class LabResultCondition(Base):
     """
     Junction table for many-to-many relationship between lab results and conditions.
@@ -371,6 +498,7 @@ class Condition(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
 
     # Condition details
     condition_name = Column(String, nullable=True)  # Name of the condition
@@ -401,6 +529,7 @@ class Condition(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="conditions")
     practitioner = orm_relationship("Practitioner", back_populates="conditions")
+    medication = orm_relationship("Medication", foreign_keys=[medication_id])
     treatments = orm_relationship("Treatment", back_populates="condition")
     # encounters relationship removed - use queries instead due to potential high volume
     procedures = orm_relationship("Procedure", back_populates="condition")
@@ -748,6 +877,11 @@ class FamilyMember(Base):
     family_conditions = orm_relationship(
         "FamilyCondition", back_populates="family_member", cascade="all, delete-orphan"
     )
+    shares = orm_relationship(
+        "FamilyHistoryShare",
+        back_populates="family_member",
+        cascade="all, delete-orphan",
+    )
 
 
 class FamilyCondition(Base):
@@ -779,3 +913,240 @@ class FamilyCondition(Base):
 
     # Relationships
     family_member = orm_relationship("FamilyMember", back_populates="family_conditions")
+
+
+class PatientShare(Base):
+    """_summary_
+
+    Args:
+        Base (_type_): _description_
+    """
+
+    __tablename__ = "patient_shares"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    shared_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    shared_with_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Permission control
+    permission_level = Column(String, nullable=False)  # view, edit, full
+    custom_permissions = Column(JSON, nullable=True)
+
+    # Status and lifecycle
+    is_active = Column(Boolean, default=True, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    patient = orm_relationship("Patient", foreign_keys=[patient_id], overlaps="shares")
+    shared_by = orm_relationship(
+        "User", foreign_keys=[shared_by_user_id], overlaps="shared_patients_by_me"
+    )
+    shared_with = orm_relationship(
+        "User", foreign_keys=[shared_with_user_id], overlaps="shared_patients_with_me"
+    )
+
+    # Constraints
+    __table_args__ = (
+        UniqueConstraint(
+            "patient_id", "shared_with_user_id", name="unique_patient_share"
+        ),
+    )
+
+
+class Invitation(Base):
+    """Reusable invitation system for various sharing/collaboration features"""
+
+    __tablename__ = "invitations"
+
+    id = Column(Integer, primary_key=True)
+
+    # Who's sending and receiving
+    sent_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    sent_to_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # What type of invitation
+    invitation_type = Column(
+        String, nullable=False
+    )  # 'family_history_share', 'patient_share', 'family_join', etc.
+
+    # Status tracking
+    status = Column(
+        String, default="pending", nullable=False
+    )  # pending, accepted, rejected, expired, cancelled
+
+    # Invitation details
+    title = Column(String, nullable=False)  # "Family History Share Request"
+    message = Column(Text, nullable=True)  # Custom message from sender
+
+    # Context data (JSON for flexibility)
+    context_data = Column(JSON, nullable=False)  # Stores type-specific data
+
+    # Expiration
+    expires_at = Column(DateTime, nullable=True)
+
+    # Response tracking
+    responded_at = Column(DateTime, nullable=True)
+    response_note = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    sent_by = orm_relationship("User", foreign_keys=[sent_by_user_id])
+    sent_to = orm_relationship("User", foreign_keys=[sent_to_user_id])
+
+    # No unique constraints - let application logic handle business rules
+    # Each invitation has a unique ID which is sufficient for database integrity
+
+
+class FamilyHistoryShare(Base):
+    """Share family history records independently from personal medical data"""
+
+    __tablename__ = "family_history_shares"
+
+    id = Column(Integer, primary_key=True)
+
+    # Link to the invitation that created this share
+    invitation_id = Column(Integer, ForeignKey("invitations.id"), nullable=False)
+
+    # What's being shared - specific family member's history record
+    family_member_id = Column(Integer, ForeignKey("family_members.id"), nullable=False)
+
+    # Who's sharing and receiving
+    shared_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    shared_with_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Simple permissions
+    permission_level = Column(
+        String, default="view", nullable=False
+    )  # view only for Phase 1.5
+    is_active = Column(Boolean, default=True, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+
+    # Optional sharing note
+    sharing_note = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    invitation = orm_relationship("Invitation")
+    family_member = orm_relationship("FamilyMember", back_populates="shares")
+    shared_by = orm_relationship("User", foreign_keys=[shared_by_user_id])
+    shared_with = orm_relationship("User", foreign_keys=[shared_with_user_id])
+
+    # Constraints - allow multiple shares but only one active share per family member/user pair
+    __table_args__ = (
+        # Partial unique constraint: only one active share per (family_member_id, shared_with_user_id)
+        # Multiple inactive shares are allowed to maintain history
+        Index(
+            "unique_active_family_history_share_partial",
+            "family_member_id",
+            "shared_with_user_id",
+            unique=True,
+            postgresql_where=(column("is_active") == True),
+        ),
+    )
+
+
+class UserPreferences(Base):
+    __tablename__ = "user_preferences"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+
+    # Unit system preference: 'imperial' or 'metric'
+    unit_system = Column(String, default="imperial", nullable=False)
+
+    # Paperless-ngx integration fields
+    paperless_enabled = Column(Boolean, default=False, nullable=False)
+    paperless_url = Column(String(500), nullable=True)
+    paperless_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
+    paperless_username_encrypted = Column(Text, nullable=True)  # Encrypted username
+    paperless_password_encrypted = Column(Text, nullable=True)  # Encrypted password
+    default_storage_backend = Column(
+        String(20), default="local", nullable=False
+    )  # 'local' or 'paperless'
+    paperless_auto_sync = Column(Boolean, default=False, nullable=False)
+    paperless_sync_tags = Column(Boolean, default=True, nullable=False)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Relationships
+    user = orm_relationship("User", backref="preferences")
+
+
+class Insurance(Base):
+    """
+    Represents insurance information for a patient.
+    Supports multiple insurance types: medical, dental, vision, prescription.
+    """
+
+    __tablename__ = "insurances"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+
+    # Insurance type and basic info
+    insurance_type = Column(
+        String, nullable=False
+    )  # Use InsuranceType enum: medical, dental, vision, prescription
+    company_name = Column(String, nullable=False)
+    employer_group = Column(
+        String, nullable=True
+    )  # Company or organization providing the insurance
+    member_name = Column(String, nullable=False)
+    member_id = Column(String, nullable=False)
+    group_number = Column(String, nullable=True)
+    plan_name = Column(String, nullable=True)
+
+    # Policy holder information (may differ from member)
+    policy_holder_name = Column(String, nullable=True)
+    relationship_to_holder = Column(
+        String, nullable=True
+    )  # self, spouse, child, dependent
+
+    # Coverage period
+    effective_date = Column(Date, nullable=False)
+    expiration_date = Column(Date, nullable=True)
+
+    # Status management
+    status = Column(
+        String, nullable=False, default="active"
+    )  # Use InsuranceStatus enum: active, inactive, expired, pending
+    is_primary = Column(
+        Boolean, default=False, nullable=False
+    )  # For medical insurance hierarchy
+
+    # Type-specific data stored as JSON for flexibility
+    coverage_details = Column(
+        JSON, nullable=True
+    )  # Copays, deductibles, percentages, BIN/PCN, etc.
+    contact_info = Column(JSON, nullable=True)  # Phone numbers, addresses, websites
+
+    # General notes
+    notes = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="insurances")

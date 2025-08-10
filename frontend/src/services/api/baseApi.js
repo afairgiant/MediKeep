@@ -2,7 +2,7 @@
 import logger from '../logger';
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
-    ? process.env.REACT_APP_API_URL || '' // Use relative URLs in production
+    ? process.env.REACT_APP_API_URL || '/api/v1' // Use relative URLs in production
     : 'http://localhost:8000/api/v1';
 
 class BaseApiService {
@@ -231,7 +231,9 @@ class BaseApiService {
     if (!response.ok) {
       // Handle auth errors first
       if (this.handleAuthError(response)) {
-        return; // Will redirect to login
+        // If handleAuthError returns true, it means we're redirecting to login
+        // We should throw an error so the calling code knows the request failed
+        throw new Error('Authentication failed - redirecting to login');
       }
 
       // For 401 errors on admin endpoints with valid tokens, retry once
@@ -278,22 +280,34 @@ class BaseApiService {
   }
 
   // Enhanced GET method with queuing
-  async get(endpoint, errorMessage) {
+  async get(endpoint, options = {}) {
+    const { params, signal, ...rest } = options;
+    const errorMessage = rest.errorMessage || 'Request failed';
+    
+    // Build URL with query parameters BEFORE queuing
+    let url = `${this.baseURL}${this.basePath}${endpoint}`;
+    
+    if (params && Object.keys(params).length > 0) {
+      const searchParams = new URLSearchParams(params);
+      url += `?${searchParams.toString()}`;
+    }
+    
     return this.queueRequest(async () => {
       const timestamp = new Date().toISOString();
+      
       logger.debug('api_request', {
         message: 'GET request queued',
         timestamp,
         endpoint: `${this.basePath}${endpoint}`,
-        method: 'GET'
+        method: 'GET',
+        params: params || null,
+        finalUrl: url
       });
 
-      const response = await fetch(
-        `${this.baseURL}${this.basePath}${endpoint}`,
-        {
-          headers: this.getAuthHeaders(),
-        }
-      );
+      const response = await fetch(url, {
+        headers: this.getAuthHeaders(),
+        signal,
+      });
 
       logger.debug('api_response', {
         message: 'GET response received',
@@ -344,6 +358,21 @@ class BaseApiService {
         {
           method: 'DELETE',
           headers: this.getAuthHeaders(),
+        }
+      );
+      return this.handleResponse(response, errorMessage);
+    });
+  }
+
+  // Enhanced DELETE method with body support and queuing
+  async deleteWithBody(endpoint, data, errorMessage) {
+    return this.queueRequest(async () => {
+      const response = await fetch(
+        `${this.baseURL}${this.basePath}${endpoint}`,
+        {
+          method: 'DELETE',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(data),
         }
       );
       return this.handleResponse(response, errorMessage);

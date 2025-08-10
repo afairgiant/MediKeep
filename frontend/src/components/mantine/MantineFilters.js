@@ -11,6 +11,7 @@ import {
   Flex,
   Collapse,
   ActionIcon,
+  useMantineColorScheme,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -58,6 +59,7 @@ const MantineFilters = ({
     showSearch = true,
   } = config;
 
+  const { colorScheme } = useMantineColorScheme();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Count collapsible filters (excluding always-visible search)
@@ -147,9 +149,18 @@ const MantineFilters = ({
 
         {/* Collapsible Filter Controls */}
         <Collapse in={isExpanded}>
-          <Card withBorder p="sm" bg="gray.0" style={{ borderStyle: 'dashed' }}>
+          <Card
+            withBorder
+            p="sm"
+            bg={colorScheme === 'dark' ? 'dark.7' : 'gray.0'}
+            style={{ borderStyle: 'dashed' }}
+          >
             <Stack gap="md">
-              <Text size="sm" fw={500} c="dimmed">
+              <Text
+                size="sm"
+                fw={500}
+                c={colorScheme === 'dark' ? 'gray.3' : 'dimmed'}
+              >
                 Advanced Filters
               </Text>
 

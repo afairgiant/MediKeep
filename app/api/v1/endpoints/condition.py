@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.models.models import User
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -55,19 +56,19 @@ def read_conditions(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve conditions for the current user with optional filtering."""
-    # Filter conditions by the user's patient_id (ignore any provided patient_id for security)
+    """Retrieve conditions for the current user or specified patient (Phase 1 support)."""
+    
+    # Filter conditions by the verified accessible patient_id
     if status:
         conditions = condition.get_by_status(
-            db, status=status, patient_id=current_user_patient_id
+            db, status=status, patient_id=target_patient_id
         )
     else:
         conditions = condition.get_by_patient(
-            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db, patient_id=target_patient_id, skip=skip, limit=limit
         )
     return conditions
 
@@ -89,6 +90,210 @@ def get_conditions_for_dropdown(
 
     return conditions
 
+
+# Simple condition medications endpoint
+@router.get("/condition-medications/{condition_id}")
+def get_condition_medications(
+    condition_id: int, 
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Simple endpoint to get medications for a condition."""
+    try:
+        # Verify condition exists and belongs to the current user
+        db_condition = condition.get(db, id=condition_id)
+        if not db_condition:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Condition with ID {condition_id} not found"
+            )
+        
+        # Verify condition belongs to current user
+        if db_condition.patient_id != current_user_patient_id:
+            raise HTTPException(
+                status_code=404,
+                detail="Condition not found"
+            )
+            
+        relationships = condition_medication.get_by_condition(db, condition_id=condition_id)
+        return [{
+            "id": rel.id, 
+            "medication_id": rel.medication_id, 
+            "condition_id": rel.condition_id,
+            "relevance_note": rel.relevance_note,
+            "created_at": rel.created_at,
+            "updated_at": rel.updated_at
+        } for rel in relationships]
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        # Log the error and return a generic error message
+        from app.core.logging_config import get_logger
+        logger = get_logger(__name__, "app")
+        logger.error(f"Error getting condition medications: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while retrieving condition medications"
+        )
+
+
+@router.post("/{condition_id}/medications", response_model=ConditionMedicationResponse)
+def create_condition_medication(
+    *,
+    condition_id: int,
+    medication_in: ConditionMedicationCreate,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """Create a new condition medication relationship."""
+    try:
+        # Verify condition exists and belongs to the current user
+        db_condition = condition.get(db, id=condition_id)
+        if not db_condition:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Condition with ID {condition_id} not found"
+            )
+        
+        # Verify condition belongs to current user
+        if db_condition.patient_id != current_user_patient_id:
+            raise HTTPException(
+                status_code=404,
+                detail="Condition not found"
+            )
+        
+        # Verify medication exists and belongs to the same patient
+        db_medication = medication_crud.get(db, id=medication_in.medication_id)
+        if not db_medication:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Medication with ID {medication_in.medication_id} not found"
+            )
+        
+        # Ensure medication belongs to the same patient as the condition
+        if db_medication.patient_id != current_user_patient_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot link medication that doesn't belong to the same patient"
+            )
+        
+        # Check if relationship already exists
+        existing = condition_medication.get_by_condition_and_medication(
+            db, condition_id=condition_id, medication_id=medication_in.medication_id
+        )
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail="Relationship between this condition and medication already exists"
+            )
+        
+        # Set condition_id and create relationship
+        medication_in.condition_id = condition_id
+        
+        # Create the relationship
+        relationship = condition_medication.create(db, obj_in=medication_in)
+        return relationship
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        # Log the error and return a generic error message
+        from app.core.logging_config import get_logger
+        logger = get_logger(__name__, "app")
+        logger.error(f"Error creating condition medication relationship: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while creating the condition medication relationship"
+        )
+
+
+@router.put("/{condition_id}/medications/{relationship_id}", response_model=ConditionMedicationResponse)
+def update_condition_medication(
+    *,
+    condition_id: int,
+    relationship_id: int,
+    medication_in: ConditionMedicationUpdate,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Update a condition medication relationship."""
+    # Verify condition exists and user has access to it
+    db_condition = condition.get(db, id=condition_id)
+    handle_not_found(db_condition, "Condition")
+    
+    # Verify access using multi-patient system
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+    
+    patient_record = db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+    if not patient_record:
+        handle_not_found(None, "Patient")
+        
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, "edit"):
+        handle_not_found(None, "Condition")
+    
+    # Get the relationship
+    relationship = condition_medication.get(db, id=relationship_id)
+    handle_not_found(relationship, "Condition medication relationship")
+    
+    # Verify the relationship belongs to the specified condition
+    if relationship.condition_id != condition_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Relationship does not belong to the specified condition"
+        )
+    
+    # Update the relationship
+    updated_relationship = condition_medication.update(db, db_obj=relationship, obj_in=medication_in)
+    return updated_relationship
+
+
+@router.delete("/{condition_id}/medications/{relationship_id}")
+def delete_condition_medication(
+    *,
+    condition_id: int,
+    relationship_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Delete a condition medication relationship."""
+    # Verify condition exists and user has access to it
+    db_condition = condition.get(db, id=condition_id)
+    handle_not_found(db_condition, "Condition")
+    
+    # Verify access using multi-patient system
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+    
+    patient_record = db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+    if not patient_record:
+        handle_not_found(None, "Patient")
+        
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, "edit"):
+        handle_not_found(None, "Condition")
+    
+    # Get the relationship
+    relationship = condition_medication.get(db, id=relationship_id)
+    handle_not_found(relationship, "Condition medication relationship")
+    
+    # Verify the relationship belongs to the specified condition
+    if relationship.condition_id != condition_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Relationship does not belong to the specified condition"
+        )
+    
+    # Delete the relationship
+    condition_medication.delete(db, id=relationship_id)
+    return {"message": "Condition medication relationship deleted successfully"}
+
+
+# Generic condition routes (must come after specific medication routes)
 
 @router.get("/{condition_id}", response_model=ConditionWithRelations)
 def read_condition(
@@ -179,151 +384,6 @@ def get_patient_conditions(
     return conditions
 
 
-# Condition-Medication Relationship Endpoints
-
-@router.get("/{condition_id}/medications", response_model=List[ConditionMedicationWithDetails])
-def get_condition_medications(
-    *,
-    condition_id: int,
-    db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
-) -> Any:
-    """Get all medication relationships for a specific condition."""
-    # Verify condition exists and belongs to the current user
-    db_condition = condition.get(db, id=condition_id)
-    handle_not_found(db_condition, "Condition")
-    verify_patient_ownership(db_condition, current_user_patient_id, "condition")
-    
-    # Get medication relationships
-    relationships = condition_medication.get_by_condition(db, condition_id=condition_id)
-    
-    # Enhance with medication details
-    enhanced_relationships = []
-    for rel in relationships:
-        medication_obj = medication_crud.get(db, id=rel.medication_id)
-        enhanced_relationships.append({
-            "id": rel.id,
-            "condition_id": rel.condition_id,
-            "medication_id": rel.medication_id,
-            "relevance_note": rel.relevance_note,
-            "created_at": rel.created_at,
-            "updated_at": rel.updated_at,
-            "medication": {
-                "id": medication_obj.id,
-                "medication_name": medication_obj.medication_name,
-                "dosage": medication_obj.dosage,
-                "frequency": medication_obj.frequency,
-                "status": medication_obj.status,
-            } if medication_obj else None
-        })
-    
-    return enhanced_relationships
-
-
-@router.post("/{condition_id}/medications", response_model=ConditionMedicationResponse)
-def create_condition_medication(
-    *,
-    condition_id: int,
-    medication_in: ConditionMedicationCreate,
-    db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
-) -> Any:
-    """Create a new condition medication relationship."""
-    # Verify condition exists and belongs to the current user
-    db_condition = condition.get(db, id=condition_id)
-    handle_not_found(db_condition, "Condition")
-    verify_patient_ownership(db_condition, current_user_patient_id, "condition")
-    
-    # Verify medication exists and belongs to the same patient
-    db_medication = medication_crud.get(db, id=medication_in.medication_id)
-    handle_not_found(db_medication, "Medication")
-    
-    # Ensure medication belongs to the same patient as the condition
-    if db_medication.patient_id != current_user_patient_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot link medication that doesn't belong to the same patient"
-        )
-    
-    # Check if relationship already exists
-    existing = condition_medication.get_by_condition_and_medication(
-        db, condition_id=condition_id, medication_id=medication_in.medication_id
-    )
-    if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="Relationship between this condition and medication already exists"
-        )
-    
-    # Set condition_id and create relationship
-    medication_in.condition_id = condition_id
-    
-    # Create the relationship
-    relationship = condition_medication.create(db, obj_in=medication_in)
-    return relationship
-
-
-@router.put("/{condition_id}/medications/{relationship_id}", response_model=ConditionMedicationResponse)
-def update_condition_medication(
-    *,
-    condition_id: int,
-    relationship_id: int,
-    medication_in: ConditionMedicationUpdate,
-    db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
-) -> Any:
-    """Update a condition medication relationship."""
-    # Verify condition exists and belongs to the current user
-    db_condition = condition.get(db, id=condition_id)
-    handle_not_found(db_condition, "Condition")
-    verify_patient_ownership(db_condition, current_user_patient_id, "condition")
-    
-    # Get the relationship
-    relationship = condition_medication.get(db, id=relationship_id)
-    handle_not_found(relationship, "Condition medication relationship")
-    
-    # Verify the relationship belongs to the specified condition
-    if relationship.condition_id != condition_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Relationship does not belong to the specified condition"
-        )
-    
-    # Update the relationship
-    updated_relationship = condition_medication.update(db, db_obj=relationship, obj_in=medication_in)
-    return updated_relationship
-
-
-@router.delete("/{condition_id}/medications/{relationship_id}")
-def delete_condition_medication(
-    *,
-    condition_id: int,
-    relationship_id: int,
-    db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
-) -> Any:
-    """Delete a condition medication relationship."""
-    # Verify condition exists and belongs to the current user
-    db_condition = condition.get(db, id=condition_id)
-    handle_not_found(db_condition, "Condition")
-    verify_patient_ownership(db_condition, current_user_patient_id, "condition")
-    
-    # Get the relationship
-    relationship = condition_medication.get(db, id=relationship_id)
-    handle_not_found(relationship, "Condition medication relationship")
-    
-    # Verify the relationship belongs to the specified condition
-    if relationship.condition_id != condition_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Relationship does not belong to the specified condition"
-        )
-    
-    # Delete the relationship
-    condition_medication.delete(db, id=relationship_id)
-    return {"message": "Condition medication relationship deleted successfully"}
-
-
 # Medication-focused endpoints (for showing conditions on medication view)
 
 @router.get("/medication/{medication_id}/conditions", response_model=List[ConditionMedicationWithDetails])
@@ -331,19 +391,24 @@ def get_medication_conditions(
     *,
     medication_id: int,
     db: Session = Depends(deps.get_db),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all condition relationships for a specific medication."""
-    # Verify medication exists and belongs to the current user
+    # Verify medication exists and user has access to it
     db_medication = medication_crud.get(db, id=medication_id)
     handle_not_found(db_medication, "Medication")
     
-    # Ensure medication belongs to the current user
-    if db_medication.patient_id != current_user_patient_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Cannot access medication that doesn't belong to you"
-        )
+    # Verify access using multi-patient system
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+    
+    patient_record = db.query(Patient).filter(Patient.id == db_medication.patient_id).first()
+    if not patient_record:
+        handle_not_found(None, "Patient")
+        
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, "view"):
+        handle_not_found(None, "Medication")
     
     # Get condition relationships
     relationships = condition_medication.get_by_medication(db, medication_id=medication_id)
@@ -353,7 +418,7 @@ def get_medication_conditions(
     for rel in relationships:
         condition_obj = condition.get(db, id=rel.condition_id)
         # Verify the condition belongs to the same patient as the medication
-        if condition_obj and condition_obj.patient_id != current_user_patient_id:
+        if condition_obj and condition_obj.patient_id != db_medication.patient_id:
             condition_obj = None  # Don't include conditions from other patients
             
         enhanced_relationships.append({

@@ -33,7 +33,7 @@ export const useApi = () => {
         const errorMessage =
           options.errorMessage || err.message || 'An error occurred';
         setError(errorMessage);
-        console.error('API Error:', err);
+        // API error logged by apiService automatically
       }
       return null;
     } finally {

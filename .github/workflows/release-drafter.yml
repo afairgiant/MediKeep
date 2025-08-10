@@ -3,13 +3,24 @@ name: Release Drafter
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main
   pull_request:
     types: [closed]
+  # Allow manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Required for creating releases
+  pull-requests: read
 
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
+    # Run on main branch pushes, merged PRs to main, or manual triggers
+    if: |
+      github.ref == 'refs/heads/main' || 
+      (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main') ||
+      github.event_name == 'workflow_dispatch'
     steps:
       - uses: release-drafter/release-drafter@v6
         with:

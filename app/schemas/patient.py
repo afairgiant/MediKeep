@@ -22,8 +22,12 @@ class PatientBase(BaseModel):
     gender: Optional[str] = None
     address: Optional[str] = None
     blood_type: Optional[str] = None
-    height: Optional[int] = None  # in inches
-    weight: Optional[int] = None  # in pounds
+    height: Optional[float] = (
+        None  # in inches (allows decimals for metric conversion precision)
+    )
+    weight: Optional[float] = (
+        None  # in pounds (allows decimals for metric conversion precision)
+    )
     physician_id: Optional[int] = None
 
     @root_validator(pre=True)
@@ -146,13 +150,13 @@ class PatientBase(BaseModel):
         Raises:
             ValueError: If address is too long
         """
-        if v is not None:
+        if v is not None and v.strip():
             if len(v.strip()) < 5:
                 raise ValueError("Address must be at least 5 characters long")
             if len(v) > 200:
                 raise ValueError("Address must be less than 200 characters")
             return v.strip()
-        return v
+        return None
 
     @validator("blood_type")
     def validate_blood_type(cls, v):
@@ -168,7 +172,7 @@ class PatientBase(BaseModel):
         Raises:
             ValueError: If blood type is not in valid format
         """
-        if v is not None:
+        if v is not None and v.strip():
             # Common blood types
             valid_blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
             blood_type_upper = v.upper().strip()
@@ -179,12 +183,12 @@ class PatientBase(BaseModel):
                 )
 
             return blood_type_upper
-        return v
+        return None
 
     @validator("height")
     def validate_height(cls, v):
         """
-        Validate height in inches.
+        Validate height in inches (stored as imperial, converted from user's preferred units).
 
         Args:
             v: The height value to validate
@@ -196,14 +200,14 @@ class PatientBase(BaseModel):
             ValueError: If height is not reasonable
         """
         if v is not None:
-            if v < 12 or v > 120:  # 1 foot to 10 feet
-                raise ValueError("Height must be between 12 and 120 inches")
+            if v < 12.0 or v > 108.0:  # 1 foot to 9 feet, consistent with frontend
+                raise ValueError("Height must be between 12 and 108 inches")
         return v
 
     @validator("weight")
     def validate_weight(cls, v):
         """
-        Validate weight in pounds.
+        Validate weight in pounds (stored as imperial, converted from user's preferred units).
 
         Args:
             v: The weight value to validate
@@ -215,8 +219,8 @@ class PatientBase(BaseModel):
             ValueError: If weight is not reasonable
         """
         if v is not None:
-            if v < 1 or v > 1000:  # 1 to 1000 pounds
-                raise ValueError("Weight must be between 1 and 1000 pounds")
+            if v < 1.0 or v > 992.0:  # Consistent with frontend validation ranges
+                raise ValueError("Weight must be between 1 and 992 pounds")
         return v
 
     @validator("physician_id")
@@ -283,8 +287,8 @@ class PatientUpdate(BaseModel):
     gender: Optional[str] = None
     address: Optional[str] = None
     blood_type: Optional[str] = None
-    height: Optional[int] = None
-    weight: Optional[int] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
     physician_id: Optional[int] = None
 
     @root_validator(pre=True)
@@ -357,18 +361,18 @@ class PatientUpdate(BaseModel):
     @validator("address")
     def validate_address(cls, v):
         """Validate address if provided."""
-        if v is not None:
+        if v is not None and v.strip():
             if len(v.strip()) < 5:
                 raise ValueError("Address must be at least 5 characters long")
             if len(v) > 200:
                 raise ValueError("Address must be less than 200 characters")
             return v.strip()
-        return v
+        return None
 
     @validator("blood_type")
     def validate_blood_type(cls, v):
         """Validate blood type if provided."""
-        if v is not None:
+        if v is not None and v.strip():
             valid_blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
             blood_type_upper = v.upper().strip()
 
@@ -378,22 +382,22 @@ class PatientUpdate(BaseModel):
                 )
 
             return blood_type_upper
-        return v
+        return None
 
     @validator("height")
     def validate_height(cls, v):
-        """Validate height if provided."""
+        """Validate height if provided (stored as inches, converted from user's preferred units)."""
         if v is not None:
-            if v < 12 or v > 120:  # 1 foot to 10 feet
-                raise ValueError("Height must be between 12 and 120 inches")
+            if v < 12.0 or v > 108.0:  # 1 foot to 9 feet, consistent with frontend
+                raise ValueError("Height must be between 12 and 108 inches")
         return v
 
     @validator("weight")
     def validate_weight(cls, v):
-        """Validate weight if provided."""
+        """Validate weight if provided (stored as pounds, converted from user's preferred units)."""
         if v is not None:
-            if v < 1 or v > 1000:  # 1 to 1000 pounds
-                raise ValueError("Weight must be between 1 and 1000 pounds")
+            if v < 1.0 or v > 992.0:  # Consistent with frontend validation ranges
+                raise ValueError("Weight must be between 1 and 992 pounds")
         return v
 
     @validator("physician_id")
@@ -425,6 +429,48 @@ class Patient(PatientBase):
     """
 
     id: int
+
+    @root_validator(pre=True)
+    def convert_empty_strings_to_none_for_response(cls, values):
+        """Convert empty strings to None for response validation"""
+        if isinstance(values, dict):
+            for field in [
+                "gender",
+                "address",
+                "blood_type",
+                "height",
+                "weight",
+                "physician_id",
+            ]:
+                if field in values and values[field] == "":
+                    values[field] = None
+        return values
+
+    @validator("gender")
+    def validate_gender_response(cls, v):
+        """Validate gender for response, allowing None for empty values"""
+        if v is not None and v != "":
+            allowed_genders = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
+            if v.upper() not in allowed_genders:
+                # For response validation, return None instead of raising error
+                return None
+            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
+            return gender_map.get(v.upper(), v.upper())
+        return None
+
+    @validator("address")
+    def validate_address_response(cls, v):
+        """Validate address for response, consistent with other validation methods"""
+        if v is not None and v.strip():
+            # Use same validation logic as other classes for consistency
+            if len(v.strip()) < 5:
+                # For response, silently return None for invalid data rather than failing
+                return None
+            if len(v) > 200:
+                # Truncate if too long rather than failing in response validation
+                return v.strip()[:200]
+            return v.strip()
+        return None
 
     class Config:
         """

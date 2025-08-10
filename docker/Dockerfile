@@ -40,13 +40,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    LOG_ROTATION_METHOD=logrotate
 
 # Install system dependencies in a single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     bash \
     postgresql-client \
+    gosu \
+    logrotate \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -70,6 +73,10 @@ COPY run.py .
 
 # Copy Alembic migrations and configuration
 COPY alembic/ ./alembic/
+
+# Copy and setup logrotate configuration
+COPY config/logrotate.conf /etc/logrotate.d/medical-records
+RUN chmod 644 /etc/logrotate.d/medical-records
 
 # Copy built React app from frontend stage
 COPY --from=frontend-build /frontend/build ./static
@@ -98,8 +105,8 @@ RUN mkdir -p logs uploads/labwork backups certs /usr/local/bin && \
     ln -sf /app/app/scripts/restore /usr/local/bin/restore && \
     chown -R appuser:appuser /app
 
-# Switch to non-root user
-USER appuser
+# Note: We start as root and switch to appuser in entrypoint.sh to allow PUID/PGID configuration
+# USER appuser
 
 # Expose port
 EXPOSE 8000

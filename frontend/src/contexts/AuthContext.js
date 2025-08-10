@@ -6,6 +6,8 @@ import {
   isFirstLogin,
 } from '../utils/profileUtils';
 import logger from '../services/logger';
+import { getActivityConfig } from '../config/activityConfig';
+import secureActivityLogger from '../utils/secureActivityLogger';
 
 // Auth State Management
 const initialState = {
@@ -240,21 +242,77 @@ export function AuthProvider({ children }) {
     }
   }, [state.tokenExpiry, state.isAuthenticated]);
 
-  // Activity tracking for auto-logout
+  // Enhanced activity tracking for auto-logout with proper error handling
   useEffect(() => {
     if (!state.isAuthenticated) return;
 
-    const activityTimeout = 30 * 60 * 1000; // 30 minutes
+    const config = getActivityConfig();
+    let activityTimer = null;
+
     const checkActivity = () => {
-      if (Date.now() - state.lastActivity > activityTimeout) {
-        toast.info('Session expired due to inactivity');
+      try {
+        const timeSinceLastActivity = Date.now() - state.lastActivity;
+        
+        if (timeSinceLastActivity > config.SESSION_TIMEOUT) {
+          secureActivityLogger.logSessionEvent({
+            action: 'session_expired',
+            reason: 'inactivity',
+            timeSinceLastActivity,
+            sessionTimeout: config.SESSION_TIMEOUT
+          });
+          
+          toast.info('Session expired due to inactivity');
+          clearAuthData();
+          dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'AuthContext',
+          action: 'checkActivity'
+        });
+        
+        // On error, err on the side of caution and logout
+        logger.error('Session check failed, logging out for security', {
+          error: error.message,
+          category: 'auth_context_error'
+        });
         clearAuthData();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
     };
 
-    const activityTimer = setInterval(checkActivity, 60000); // Check every minute
-    return () => clearInterval(activityTimer);
+    // Set up the activity check timer
+    try {
+      activityTimer = setInterval(checkActivity, config.SESSION_CHECK_INTERVAL);
+      
+      secureActivityLogger.logSessionEvent({
+        action: 'session_monitoring_started',
+        sessionTimeout: config.SESSION_TIMEOUT,
+        checkInterval: config.SESSION_CHECK_INTERVAL
+      });
+    } catch (error) {
+      secureActivityLogger.logActivityError(error, {
+        component: 'AuthContext',
+        action: 'setup_activity_timer'
+      });
+    }
+
+    // Cleanup function
+    return () => {
+      try {
+        if (activityTimer) {
+          clearInterval(activityTimer);
+          secureActivityLogger.logSessionEvent({
+            action: 'session_monitoring_stopped'
+          });
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'AuthContext',
+          action: 'cleanup_activity_timer'
+        });
+      }
+    };
   }, [state.lastActivity, state.isAuthenticated]);
 
   // Helper functions
@@ -262,6 +320,19 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('tokenExpiry');
+    
+    // Clear any cached app data to ensure fresh data on next login
+    // This is additional insurance for cache clearing
+    const cacheKeys = Object.keys(localStorage).filter(key => 
+      key.startsWith('appData_') || 
+      key.startsWith('patient_') || 
+      key.startsWith('cache_')
+    );
+    
+    cacheKeys.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
     // Note: We don't clear first login status as it should persist across sessions
   };
 
@@ -301,6 +372,26 @@ export function AuthProvider({ children }) {
 
       if (result.success) {
         const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+        // Clear any existing cache data before login
+        // This ensures fresh data is loaded for the new user session
+        logger.info('Clearing cache before login', {
+          category: 'auth_cache_clear',
+          username: result.user.username,
+          userId: result.user.id,
+          timestamp: new Date().toISOString()
+        });
+
+        // Clear any existing cached data from localStorage
+        const cacheKeys = Object.keys(localStorage).filter(key => 
+          key.startsWith('appData_') || 
+          key.startsWith('patient_') || 
+          key.startsWith('cache_')
+        );
+        
+        cacheKeys.forEach(key => {
+          localStorage.removeItem(key);
+        });
 
         // Store in localStorage
         updateStoredToken(result.token, tokenExpiry);
@@ -367,7 +458,28 @@ export function AuthProvider({ children }) {
   };
 
   const updateActivity = () => {
-    dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
+    try {
+      dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
+      
+      // Log activity update in development mode only
+      if (process.env.NODE_ENV === 'development') {
+        secureActivityLogger.logActivityDetected({
+          component: 'AuthContext',
+          action: 'activity_updated'
+        });
+      }
+    } catch (error) {
+      secureActivityLogger.logActivityError(error, {
+        component: 'AuthContext',
+        action: 'updateActivity'
+      });
+      
+      // Don't throw the error to prevent breaking the app
+      logger.error('Failed to update activity', {
+        error: error.message,
+        category: 'auth_context_error'
+      });
+    }
   };
 
   const clearError = () => {

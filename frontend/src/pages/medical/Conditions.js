@@ -17,8 +17,8 @@ import {
   Box,
   Divider,
   Modal,
+  Button,
 } from '@mantine/core';
-import { Button } from '../../components/ui';
 import {
   IconAlertTriangle,
   IconCheck,
@@ -40,17 +40,23 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineConditionForm from '../../components/medical/MantineConditionForm';
-import MedicationRelationships from '../../components/medical/MedicationRelationships';
+
+// Modular components
+import {
+  ConditionCard,
+  ConditionViewModal,
+  ConditionFormWrapper,
+} from '../../components/medical/conditions';
 
 const Conditions = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   
-  // Get patient medications for linking
+  // Load medications and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);
-  const [conditionMedications, setConditionMedications] = useState({});
+  const [practitioners, setPractitioners] = useState([]);
+  
 
   // Standardized data management
   const {
@@ -90,10 +96,13 @@ const Conditions = () => {
   const [viewingCondition, setViewingCondition] = useState(null);
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
+    condition_name: '',
     diagnosis: '',
     notes: '',
     status: 'active',
     severity: '',
+    medication_id: '',
+    practitioner_id: '',
     icd10_code: '',
     snomed_code: '',
     code_description: '',
@@ -104,10 +113,13 @@ const Conditions = () => {
   const handleAddCondition = () => {
     setEditingCondition(null);
     setFormData({
+      condition_name: '',
       diagnosis: '',
       notes: '',
       status: 'active',
       severity: '',
+      medication_id: '',
+      practitioner_id: '',
       icd10_code: '',
       snomed_code: '',
       code_description: '',
@@ -140,9 +152,10 @@ const Conditions = () => {
     });
   };
 
-  // Load medications for linking
+  // Load medications and practitioners for linking dropdowns
   useEffect(() => {
     if (currentPatient?.id) {
+      // Load medications
       apiService.getPatientMedications(currentPatient.id)
         .then(response => {
           setMedications(response || []);
@@ -151,24 +164,18 @@ const Conditions = () => {
           console.error('Failed to fetch medications:', error);
           setMedications([]);
         });
+      
+      // Load practitioners
+      apiService.getPractitioners()
+        .then(response => {
+          setPractitioners(response || []);
+        })
+        .catch(error => {
+          console.error('Failed to fetch practitioners:', error);
+          setPractitioners([]);
+        });
     }
   }, [currentPatient?.id]);
-
-  // Helper function to fetch condition medications
-  const fetchConditionMedications = async (conditionId) => {
-    try {
-      const relationships = await apiService.getConditionMedications(conditionId);
-      setConditionMedications(prev => ({
-        ...prev,
-        [conditionId]: relationships || []
-      }));
-      return relationships || [];
-    } catch (error) {
-      console.error('Failed to fetch condition medications:', error);
-      return [];
-    }
-  };
-
 
   // Handle URL parameters for direct linking to specific conditions
   useEffect(() => {
@@ -188,10 +195,13 @@ const Conditions = () => {
   const handleEditCondition = condition => {
     setEditingCondition(condition);
     setFormData({
+      condition_name: condition.condition_name || '',
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
       status: condition.status || 'active',
       severity: condition.severity || '',
+      medication_id: condition.medication_id ? condition.medication_id.toString() : '',
+      practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',
       icd10_code: condition.icd10_code || '',
       snomed_code: condition.snomed_code || '',
       code_description: condition.code_description || '',
@@ -210,6 +220,14 @@ const Conditions = () => {
     }
   };
 
+  const handleMedicationClick = (medicationId) => {
+    navigate(`/medications?view=${medicationId}`);
+  };
+
+  const handlePractitionerClick = (practitionerId) => {
+    navigate(`/practitioners?view=${practitionerId}`);
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
 
@@ -219,10 +237,13 @@ const Conditions = () => {
     }
 
     const conditionData = {
+      condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
       status: formData.status,
       severity: formData.severity || null,
+      medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
+      practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
@@ -254,107 +275,14 @@ const Conditions = () => {
 
   const filteredConditions = dataManagement.data;
 
-  // Helper function to calculate condition duration
-  const getConditionDuration = (onsetDate, endDate, status) => {
-    if (!onsetDate) return null;
-
-    const onset = new Date(onsetDate);
-    const endPoint = endDate ? new Date(endDate) : new Date();
-    const diffTime = Math.abs(endPoint - onset);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    let duration;
-    if (diffDays < 30) {
-      duration = `${diffDays} day${diffDays === 1 ? '' : 's'}`;
-    } else if (diffDays < 365) {
-      const months = Math.floor(diffDays / 30);
-      duration = `${months} month${months === 1 ? '' : 's'}`;
-    } else {
-      const years = Math.floor(diffDays / 365);
-      duration = `${years} year${years === 1 ? '' : 's'}`;
-    }
-
-    // Add appropriate suffix based on condition status
-    if (endDate || status === 'resolved' || status === 'inactive') {
-      return `${duration} (ended)`;
-    } else {
-      return `${duration} (ongoing)`;
-    }
-  };
-
-  // Helper function to get condition icon based on diagnosis
-  const getConditionIcon = diagnosis => {
-    const diagnosisLower = diagnosis.toLowerCase();
-    if (diagnosisLower.includes('diabetes')) return IconDroplet;
-    if (
-      diagnosisLower.includes('hypertension') ||
-      diagnosisLower.includes('blood pressure')
-    )
-      return IconHeart;
-    if (
-      diagnosisLower.includes('asthma') ||
-      diagnosisLower.includes('respiratory')
-    )
-      return IconLungs;
-    if (
-      diagnosisLower.includes('arthritis') ||
-      diagnosisLower.includes('joint')
-    )
-      return IconBone;
-    if (diagnosisLower.includes('heart') || diagnosisLower.includes('cardiac'))
-      return IconHeart;
-    if (diagnosisLower.includes('cancer') || diagnosisLower.includes('tumor'))
-      return IconAward;
-    if (
-      diagnosisLower.includes('migraine') ||
-      diagnosisLower.includes('headache')
-    )
-      return IconBrain;
-    if (
-      diagnosisLower.includes('allergy') ||
-      diagnosisLower.includes('allergic')
-    )
-      return IconAlertTriangle;
-    return IconShieldCheck; // Default medical icon
-  };
-
-  const getSeverityColor = severity => {
-    switch (severity) {
-      case 'critical':
-        return 'red';
-      case 'severe':
-        return 'orange';
-      case 'moderate':
-        return 'yellow';
-      case 'mild':
-        return 'blue';
-      default:
-        return 'gray';
-    }
-  };
-
-  const getStatusColor = status => {
-    switch (status) {
-      case 'active':
-        return 'green';
-      case 'inactive':
-        return 'gray';
-      case 'resolved':
-        return 'blue';
-      case 'chronic':
-        return 'orange';
-      default:
-        return 'gray';
-    }
-  };
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading conditions...</Text>
+            <Text>Loading conditions...</Text>
           </Stack>
         </Center>
       </Container>
@@ -362,14 +290,10 @@ const Conditions = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Medical Conditions" icon="🏥" />
+    <Container size="xl" py="md">
+      <PageHeader title="Medical Conditions" icon="🩺" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -398,6 +322,7 @@ const Conditions = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddCondition}
             size="md"
@@ -431,7 +356,7 @@ const Conditions = () => {
         />
 
         {/* Form Modal */}
-        <MantineConditionForm
+        <ConditionFormWrapper
           isOpen={showModal}
           onClose={() => setShowModal(false)}
           title={editingCondition ? 'Edit Condition' : 'Add New Condition'}
@@ -440,8 +365,7 @@ const Conditions = () => {
           onSubmit={handleSubmit}
           editingCondition={editingCondition}
           medications={medications}
-          conditionMedications={conditionMedications}
-          fetchConditionMedications={fetchConditionMedications}
+          practitioners={practitioners}
           navigate={navigate}
         />
 
@@ -474,186 +398,27 @@ const Conditions = () => {
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>
-                {filteredConditions.map((condition, index) => {
-                  const ConditionIcon = getConditionIcon(condition.diagnosis);
-
-                  return (
-                    <Grid.Col
-                      key={condition.id}
-                      span={{ base: 12, md: 6, lg: 4 }}
+                {filteredConditions.map((condition, index) => (
+                  <Grid.Col
+                    key={condition.id}
+                    span={{ base: 12, md: 6, lg: 4 }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                      >
-                        <Card shadow="sm" padding="lg" radius="md" withBorder>
-                          <Card.Section withBorder inheritPadding py="xs">
-                            <Group justify="space-between">
-                              <Group gap="xs">
-                                <ConditionIcon
-                                  size={20}
-                                  color="var(--mantine-color-blue-6)"
-                                />
-                                <Text fw={600} size="lg">
-                                  {condition.diagnosis}
-                                </Text>
-                              </Group>
-                              <Badge
-                                color={getStatusColor(condition.status)}
-                                variant="light"
-                              >
-                                {condition.status}
-                              </Badge>
-                            </Group>
-                          </Card.Section>
-
-                          <Stack gap="md" mt="md">
-                            {/* Display onset date if available */}
-                            {condition.onset_date && (
-                              <>
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Onset Date:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {formatDate(condition.onset_date)}
-                                  </Text>
-                                </Group>
-                                <Group justify="space-between">
-                                  <Text size="sm" c="dimmed">
-                                    Duration:
-                                  </Text>
-                                  <Text size="sm" fw={500}>
-                                    {getConditionDuration(condition.onset_date, condition.end_date, condition.status)}
-                                  </Text>
-                                </Group>
-                              </>
-                            )}
-
-                            {/* Display end date if available */}
-                            {condition.end_date && (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  End Date:
-                                </Text>
-                                <Text size="sm" fw={500}>
-                                  {formatDate(condition.end_date)}
-                                </Text>
-                              </Group>
-                            )}
-
-                            {/* Display severity if available */}
-                            {condition.severity && (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Severity:
-                                </Text>
-                                <Badge
-                                  color={getSeverityColor(condition.severity)}
-                                  variant="filled"
-                                >
-                                  {condition.severity}
-                                </Badge>
-                              </Group>
-                            )}
-
-                            {/* Display medical codes if available */}
-                            {(condition.icd10_code ||
-                              condition.snomed_code) && (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Medical Codes:
-                                </Text>
-                                <Text size="sm" fw={500}>
-                                  {condition.icd10_code &&
-                                    `ICD-10: ${condition.icd10_code}`}
-                                  {condition.icd10_code &&
-                                    condition.snomed_code &&
-                                    ' | '}
-                                  {condition.snomed_code &&
-                                    `SNOMED: ${condition.snomed_code}`}
-                                </Text>
-                              </Group>
-                            )}
-
-                            {condition.code_description && (
-                              <Group justify="space-between">
-                                <Text size="sm" c="dimmed">
-                                  Code Description:
-                                </Text>
-                                <Text size="sm" fw={500}>
-                                  {condition.code_description}
-                                </Text>
-                              </Group>
-                            )}
-
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                Status:
-                              </Text>
-                              <Badge
-                                color={getStatusColor(condition.status)}
-                                variant="light"
-                              >
-                                {condition.status}
-                              </Badge>
-                            </Group>
-                          </Stack>
-
-                          {condition.notes && (
-                            <Box
-                              mt="md"
-                              pt="md"
-                              style={{
-                                borderTop:
-                                  '1px solid var(--mantine-color-gray-3)',
-                              }}
-                            >
-                              <Text size="sm" c="dimmed" mb="xs">
-                                📝 Clinical Notes
-                              </Text>
-                              <Text size="sm" c="gray.7">
-                                {condition.notes}
-                              </Text>
-                            </Box>
-                          )}
-
-                          <Stack gap={0} mt="auto">
-                            <Divider />
-                            <Group justify="flex-end" gap="xs" pt="sm">
-                              <Button
-                                variant="light"
-                                size="xs"
-                                onClick={() => handleViewCondition(condition)}
-                              >
-                                View
-                              </Button>
-                              <Button
-                                variant="light"
-                                size="xs"
-                                onClick={() => handleEditCondition(condition)}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="light"
-                                color="red"
-                                size="xs"
-                                onClick={() =>
-                                  handleDeleteCondition(condition.id)
-                                }
-                              >
-                                Delete
-                              </Button>
-                            </Group>
-                          </Stack>
-                        </Card>
-                      </motion.div>
-                    </Grid.Col>
-                  );
-                })}
+                      <ConditionCard
+                        condition={condition}
+                        onView={handleViewCondition}
+                        onEdit={handleEditCondition}
+                        onDelete={handleDeleteCondition}
+                        navigate={navigate}
+                      />
+                    </motion.div>
+                  </Grid.Col>
+                ))}
               </AnimatePresence>
             </Grid>
           ) : (
@@ -689,241 +454,18 @@ const Conditions = () => {
         </motion.div>
 
         {/* Condition View Modal */}
-        <Modal
-          opened={showViewModal}
+        <ConditionViewModal
+          isOpen={showViewModal}
           onClose={handleCloseViewModal}
-          title={
-            <Group>
-              <Text size="lg" fw={600}>
-                Condition Details
-              </Text>
-              {viewingCondition && (
-                <Badge
-                  color={getStatusColor(viewingCondition.status)}
-                  variant="light"
-                >
-                  {viewingCondition.status}
-                </Badge>
-              )}
-            </Group>
-          }
-          size="lg"
-          centered
-        >
-          {viewingCondition && (
-            <Stack gap="md">
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Group justify="space-between" align="flex-start">
-                    <Stack gap="xs" style={{ flex: 1 }}>
-                      <Title order={3}>{viewingCondition.diagnosis}</Title>
-                      {viewingCondition.severity && (
-                        <Badge
-                          color={getSeverityColor(viewingCondition.severity)}
-                          variant="filled"
-                        >
-                          {viewingCondition.severity}
-                        </Badge>
-                      )}
-                    </Stack>
-                  </Group>
-                </Stack>
-              </Card>
-
-              <Grid>
-                <Grid.Col span={6}>
-                  <Card withBorder p="md" h="100%">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        DIAGNOSIS INFORMATION
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Diagnosis:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingCondition.diagnosis ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingCondition.diagnosis || 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Severity:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingCondition.severity ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingCondition.severity || 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Status:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingCondition.status ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingCondition.status || 'Not specified'}
-                        </Text>
-                      </Group>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-
-                <Grid.Col span={6}>
-                  <Card withBorder p="md" h="100%">
-                    <Stack gap="sm">
-                      <Text fw={600} size="sm" c="dimmed">
-                        TIMELINE
-                      </Text>
-                      <Divider />
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Onset Date:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingCondition.onset_date ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingCondition.onset_date
-                            ? formatDate(viewingCondition.onset_date)
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          End Date:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={viewingCondition.end_date ? 'inherit' : 'dimmed'}
-                        >
-                          {viewingCondition.end_date
-                            ? formatDate(viewingCondition.end_date)
-                            : 'Not specified'}
-                        </Text>
-                      </Group>
-                      {viewingCondition.onset_date && (
-                        <Group>
-                          <Text size="sm" fw={500} w={80}>
-                            Duration:
-                          </Text>
-                          <Text size="sm" c="inherit">
-                            {getConditionDuration(viewingCondition.onset_date, viewingCondition.end_date, viewingCondition.status)}
-                          </Text>
-                        </Group>
-                      )}
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-              </Grid>
-
-              {(viewingCondition.icd10_code ||
-                viewingCondition.snomed_code ||
-                viewingCondition.code_description) && (
-                <Card withBorder p="md">
-                  <Stack gap="sm">
-                    <Text fw={600} size="sm" c="dimmed">
-                      MEDICAL CODES
-                    </Text>
-                    <Divider />
-                    <Grid>
-                      {viewingCondition.icd10_code && (
-                        <Grid.Col span={6}>
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              ICD-10:
-                            </Text>
-                            <Text size="sm">{viewingCondition.icd10_code}</Text>
-                          </Group>
-                        </Grid.Col>
-                      )}
-                      {viewingCondition.snomed_code && (
-                        <Grid.Col span={6}>
-                          <Group>
-                            <Text size="sm" fw={500} w={80}>
-                              SNOMED:
-                            </Text>
-                            <Text size="sm">
-                              {viewingCondition.snomed_code}
-                            </Text>
-                          </Group>
-                        </Grid.Col>
-                      )}
-                    </Grid>
-                    {viewingCondition.code_description && (
-                      <Group>
-                        <Text size="sm" fw={500} w={80}>
-                          Description:
-                        </Text>
-                        <Text
-                          size="sm"
-                          c={
-                            viewingCondition.code_description
-                              ? 'inherit'
-                              : 'dimmed'
-                          }
-                        >
-                          {viewingCondition.code_description || 'Not specified'}
-                        </Text>
-                      </Group>
-                    )}
-                  </Stack>
-                </Card>
-              )}
-
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    CLINICAL NOTES
-                  </Text>
-                  <Divider />
-                  <Text
-                    size="sm"
-                    c={viewingCondition.notes ? 'inherit' : 'dimmed'}
-                  >
-                    {viewingCondition.notes || 'No notes available'}
-                  </Text>
-                </Stack>
-              </Card>
-
-              {/* Related Medications Section */}
-              <Stack gap="lg">
-                <Title order={3}>Related Medications</Title>
-                <MedicationRelationships 
-                  conditionId={viewingCondition.id}
-                  conditionMedications={conditionMedications}
-                  medications={medications}
-                  fetchConditionMedications={fetchConditionMedications}
-                  navigate={navigate}
-                  isViewMode={true}
-                />
-              </Stack>
-
-              <Group justify="flex-end" mt="md">
-                <Button
-                  variant="light"
-                  onClick={() => {
-                    handleCloseViewModal();
-                    handleEditCondition(viewingCondition);
-                  }}
-                >
-                  Edit Condition
-                </Button>
-                <Button variant="filled" onClick={handleCloseViewModal}>
-                  Close
-                </Button>
-              </Group>
-            </Stack>
-          )}
-        </Modal>
-      </Container>
-    </motion.div>
+          condition={viewingCondition}
+          onEdit={handleEditCondition}
+          medications={medications}
+          practitioners={practitioners}
+          onMedicationClick={handleMedicationClick}
+          onPractitionerClick={handlePractitionerClick}
+        />
+      </Stack>
+    </Container>
   );
 };
 

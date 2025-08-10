@@ -21,6 +21,7 @@ Security Note:
 """
 
 import argparse
+import getpass
 import os
 import sys
 from pathlib import Path
@@ -123,7 +124,7 @@ def create_emergency_admin(
         print("")
         print("🔐 Login Credentials:")
         print(f"   • Username: {username}")
-        print(f"   • Password: {password}")
+        print("   • Password: [Hidden for security]")
         print("")
         print("⚠️  IMPORTANT SECURITY NOTICE:")
         print("   1. Log in immediately and change this password")
@@ -168,8 +169,7 @@ def main():
 
     parser.add_argument(
         "--password",
-        default="admin123",
-        help="Password for the emergency admin user (default: admin123)",
+        help="Password for the emergency admin user (will prompt if not provided)",
     )
 
     parser.add_argument(
@@ -179,6 +179,23 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Get password securely if not provided
+    if not args.password:
+        print(f"Creating emergency admin user '{args.username}'")
+        print("Please enter a secure password for this admin account:")
+        password = getpass.getpass("Password: ")
+        password_confirm = getpass.getpass("Confirm password: ")
+        
+        if password != password_confirm:
+            print("❌ Passwords do not match. Operation cancelled.")
+            return
+        
+        if len(password) < 8:
+            print("❌ Password must be at least 8 characters long. Operation cancelled.")
+            return
+    else:
+        password = args.password
 
     # Confirm action with user
     if not args.force:
@@ -191,7 +208,7 @@ def main():
             return
 
     success = create_emergency_admin(
-        username=args.username, password=args.password, force=args.force
+        username=args.username, password=password, force=args.force
     )
 
     if success:

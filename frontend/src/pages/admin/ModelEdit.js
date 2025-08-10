@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { AdminResetPasswordModal } from '../../components/auth';
 import { Loading } from '../../components';
+import { Button } from '../../components/ui';
 import './ModelEdit.css';
 
 const ModelEdit = () => {
@@ -109,8 +110,13 @@ const ModelEdit = () => {
     let hasErrors = false;
 
     metadata.fields.forEach(field => {
-      if (!field.primary_key) {
-        // Don't validate primary keys
+      // Don't validate primary keys or password fields since they're excluded from updates
+      if (
+        !field.primary_key &&
+        field.name !== 'password_hash' &&
+        field.name !== 'password' &&
+        !field.name.includes('password')
+      ) {
         const fieldErrors = validateField(field, formData[field.name]);
         if (fieldErrors.length > 0) {
           errors[field.name] = fieldErrors;
@@ -145,7 +151,72 @@ const ModelEdit = () => {
         }
       });
 
+      // Safety checks for user model updates
+      if (modelName === 'user') {
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentUsername = currentUser.username;
+        
+        // Check for username changes
+        if (updateData.username && record.username !== updateData.username) {
+          // If admin is changing their own username, show warning
+          if (record.username === currentUsername) {
+            const confirmChange = window.confirm(
+              `⚠️ WARNING: You are about to change your own username from "${record.username}" to "${updateData.username}".\n\n` +
+              `This will log you out immediately and you'll need to log back in with the new username.\n\n` +
+              `Are you sure you want to continue?`
+            );
+            
+            if (!confirmChange) {
+              setSaving(false);
+              return;
+            }
+          }
+        }
+        
+        // Check for role changes that could lock out admin access
+        if (updateData.role && record.role !== updateData.role) {
+          const currentUserRole = (currentUser.role || '').toLowerCase();
+          const recordRole = (record.role || '').toLowerCase();
+          const newRole = (updateData.role || '').toLowerCase();
+          
+          // If changing admin to non-admin, warn about potential lockout
+          if (['admin', 'administrator'].includes(recordRole) && !['admin', 'administrator'].includes(newRole)) {
+            const confirmRoleChange = window.confirm(
+              `⚠️ WARNING: You are about to remove admin privileges from this user.\n\n` +
+              `If this is the last admin user in the system, you may lose admin access.\n\n` +
+              `Are you sure you want to continue?`
+            );
+            
+            if (!confirmRoleChange) {
+              setSaving(false);
+              return;
+            }
+          }
+        }
+      }
+
       await adminApiService.updateModelRecord(modelName, recordId, updateData);
+      
+      // If user changed their own username, they need to log out
+      if (modelName === 'user' && updateData.username && record.username !== updateData.username) {
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentUsername = currentUser.username;
+        
+        if (record.username === currentUsername) {
+          alert(
+            `✅ Username updated successfully!\n\n` +
+            `You have been logged out because your username changed.\n` +
+            `Please log back in with your new username: "${updateData.username}"`
+          );
+          
+          // Clear authentication and redirect to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return;
+        }
+      }
+      
       navigate(`/admin/models/${modelName}/${recordId}`);
     } catch (err) {
       console.error('Error saving record:', err);
@@ -203,18 +274,16 @@ const ModelEdit = () => {
               Password hash (read-only for security)
             </small>
             {modelName === 'user' && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-small"
+              <Button
+                variant="secondary"
+                size="small"
                 onClick={() => handleChangePassword(recordId)}
                 style={{
                   marginLeft: '1rem',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
                 }}
               >
                 🔑 Reset Password
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -334,9 +403,9 @@ const ModelEdit = () => {
         <div className="model-edit-error">
           <h2>Error</h2>
           <p>{error}</p>
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button variant="secondary" onClick={handleCancel}>
             ← Back
-          </button>
+          </Button>
         </div>
       </AdminLayout>
     );
@@ -352,20 +421,21 @@ const ModelEdit = () => {
           </div>
 
           <div className="edit-actions">
-            <button
+            <Button
+              variant="secondary"
               onClick={handleCancel}
-              className="btn btn-secondary"
               disabled={saving}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              className="btn btn-primary"
               disabled={saving}
+              loading={saving}
             >
-              {saving ? '💾 Saving...' : '💾 Save Changes'}
-            </button>
+              💾 Save Changes
+            </Button>
           </div>
         </div>
 

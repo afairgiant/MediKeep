@@ -46,6 +46,8 @@ services:
       TZ: ${TZ:-America/New_York}
       # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS
       ENABLE_SSL: ${ENABLE_SSL:-false}
+      #PUID: ${PUID} # Enable if using bind mounts
+      #PGID: ${PGID} # Enable if using bind mounts
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs

@@ -1,0 +1,295 @@
+/* Mobile Navigation Styles */
+@import '../../styles/themes/variables.css';
+
+/* Backdrop */
+.mobile-nav-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Navigation Panel */
+.mobile-navigation {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 300px;
+  height: 100vh;
+  background: var(--color-background, #fff);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobile-navigation.open {
+  right: 0;
+}
+
+/* Header */
+.mobile-nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1rem;
+  border-bottom: 2px solid var(--color-border, #e9ecef);
+  background: linear-gradient(135deg, var(--color-primary-light, #e8eaf6), var(--color-background-secondary, #f8f9fa));
+  flex-shrink: 0;
+}
+
+.mobile-nav-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary, #667eea);
+  letter-spacing: -0.5px;
+}
+
+.mobile-nav-close {
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-close:hover {
+  background: var(--color-error-light, #fee);
+  color: var(--color-error, #dc3545);
+  transform: rotate(90deg);
+}
+
+/* Content */
+.mobile-nav-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sections */
+.mobile-nav-section {
+  padding: 0.5rem 0;
+}
+
+.mobile-nav-section + .mobile-nav-section {
+  border-top: 1px solid var(--color-border-light, #f0f0f0);
+}
+
+.mobile-nav-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-primary, #667eea);
+  padding: 0.625rem 1rem 0.375rem;
+  margin: 0;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+/* Navigation List */
+.mobile-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-nav-item {
+  margin: 0;
+}
+
+/* Navigation Links */
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  margin: 0 0.5rem;
+  border-radius: 8px;
+  width: calc(100% - 1rem);
+  background: none;
+  border: none;
+  color: var(--color-text-primary, #333);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+}
+
+.mobile-nav-link:hover {
+  background-color: var(--color-background-hover, #f5f5f5);
+  transform: translateX(4px);
+}
+
+.mobile-nav-link.active {
+  background: linear-gradient(90deg, var(--color-primary-light, #e8eaf6), transparent);
+  color: var(--color-primary, #667eea);
+  font-weight: 600;
+  border-left: 3px solid var(--color-primary, #667eea);
+  padding-left: calc(1rem - 3px);
+}
+
+.mobile-nav-link .nav-icon {
+  font-size: 1.2rem;
+  width: 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.mobile-nav-link .nav-text {
+  flex: 1;
+}
+
+/* Back Button */
+.mobile-back-section {
+  border-bottom: 2px solid var(--color-border, #e9ecef);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.nav-back-link {
+  color: var(--color-primary, #667eea);
+  font-weight: 500;
+}
+
+.nav-back-link:hover {
+  background-color: var(--color-primary-light, #e8eaf6);
+}
+
+/* Footer */
+.mobile-nav-footer {
+  border-top: 1px solid var(--color-border, #e9ecef);
+  padding: 1rem;
+  background: var(--color-background-secondary, #f8f9fa);
+  flex-shrink: 0;
+}
+
+/* Action Buttons */
+.mobile-nav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.mobile-nav-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-background, #fff);
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: 6px;
+  color: var(--color-text-primary, #333);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-action-btn:hover {
+  background-color: var(--color-background-hover, #f5f5f5);
+  border-color: var(--color-border-dark, #dee2e6);
+}
+
+.theme-toggle-wrapper {
+  justify-content: space-between;
+}
+
+.logout-action {
+  color: var(--color-error, #dc3545);
+  border-color: var(--color-error-light, #f8d7da);
+}
+
+.logout-action:hover {
+  background-color: var(--color-error-light, #f8d7da);
+  border-color: var(--color-error, #dc3545);
+}
+
+/* User Info */
+.mobile-nav-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-background, #fff);
+  border-radius: 6px;
+}
+
+.mobile-nav-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary, #667eea);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.mobile-nav-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.mobile-nav-user-name {
+  font-weight: 500;
+  color: var(--color-text-primary, #333);
+  font-size: 0.95rem;
+}
+
+.mobile-nav-user-role {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #666);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Accessibility */
+.mobile-navigation[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .mobile-navigation {
+  background: var(--dark-background, #1a1a1a);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .mobile-nav-header {
+  background: var(--dark-background-secondary, #2a2a2a);
+  border-bottom-color: var(--dark-border, #333);
+}
+
+[data-theme="dark"] .mobile-nav-footer {
+  background: var(--dark-background-secondary, #2a2a2a);
+  border-top-color: var(--dark-border, #333);
+}

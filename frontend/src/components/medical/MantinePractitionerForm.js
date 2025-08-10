@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, Anchor } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import { practitionerFormFields } from '../../utils/medicalFormFields';
+import { formatPhoneInput, isValidPhoneNumber } from '../../utils/phoneUtils';
 
 const MantinePractitionerForm = ({
   isOpen,
@@ -72,42 +73,57 @@ const MantinePractitionerForm = ({
     }
   };
 
-  // Handle phone input with formatting
-  const handlePhoneChange = event => {
-    let value = event.target.value;
-
-    // Remove all non-digits
-    const cleaned = value.replace(/\D/g, '');
-
-    // Format as (XXX) XXX-XXXX
-    let formatted = cleaned;
-    if (cleaned.length >= 6) {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-    } else if (cleaned.length >= 3) {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    } else if (cleaned.length > 0) {
-      formatted = cleaned;
+  // Field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState({});
+  
+  // Clear field errors when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setFieldErrors({});
     }
+  }, [isOpen]);
 
-    const syntheticEvent = {
-      target: {
-        name: 'phone_number',
-        value: formatted,
-      },
-    };
-    onInputChange(syntheticEvent);
-  };
-
-  // Override form data handling for custom formatted fields
-  const handleInputChange = (event) => {
-    const { name } = event.target;
+  // Enhanced input change handler with phone formatting and validation
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
     
-    if (name === 'phone_number') {
-      handlePhoneChange(event);
-    } else {
-      onInputChange(event);
+    // Clear any existing error for this field
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: null
+      }));
     }
+    
+    // Handle phone number formatting and validation
+    if (name === 'phone_number') {
+      // Validate phone number if not empty
+      if (value.trim() !== '' && !isValidPhoneNumber(value)) {
+        setFieldErrors(prev => ({
+          ...prev,
+          [name]: 'Please enter a valid phone number (10-15 digits)'
+        }));
+      }
+      
+      // Format phone number as user types
+      const formattedValue = formatPhoneInput(value);
+      
+      // Create a new event with formatted value
+      const formattedEvent = {
+        ...e,
+        target: {
+          ...e.target,
+          value: formattedValue
+        }
+      };
+      
+      onInputChange(formattedEvent);
+      return;
+    }
+    
+    onInputChange(e);
   };
+
 
 
   const websiteError =
@@ -137,7 +153,7 @@ const MantinePractitionerForm = ({
             }
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: '12px', color: '#228be6' }}
+            style={{ fontSize: '12px', color: 'var(--mantine-color-blue-6)' }}
           >
             Visit Website ↗
           </Anchor>
@@ -159,10 +175,10 @@ const MantinePractitionerForm = ({
       formData={formData}
       onInputChange={handleInputChange}
       onSubmit={handleSubmit}
-
       editingItem={editingPractitioner}
       fields={practitionerFormFields}
       dynamicOptions={dynamicOptions}
+      fieldErrors={fieldErrors}
     >
       {customContent}
     </BaseMedicalForm>

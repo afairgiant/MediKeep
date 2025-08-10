@@ -31,8 +31,8 @@
 /* Back Button */
 .back-button {
   background: none;
-  border: 2px solid #007bff;
-  color: #007bff;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
   padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
@@ -46,8 +46,8 @@
 }
 
 .back-button:hover {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
   transform: translateY(-1px);
 }
 
@@ -384,13 +384,13 @@
 .item-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   margin: 0;
   flex: 1;
 }
 
 .item-subtitle {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin: 5px 0 0 0;
 }
@@ -421,13 +421,13 @@
 
 .detail-item .label {
   font-weight: 500;
-  color: #495057;
+  color: var(--color-text-secondary);
   min-width: 100px;
   flex-shrink: 0;
 }
 
 .detail-item .value {
-  color: #333;
+  color: var(--color-text-primary);
   text-align: right;
   word-break: break-word;
 }
@@ -463,40 +463,40 @@
 }
 
 .edit-button {
-  border-color: #007bff;
-  color: #007bff;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .edit-button:hover {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
 }
 
 .delete-button {
-  border-color: #dc3545;
-  color: #dc3545;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .delete-button:hover {
-  background-color: #dc3545;
-  color: white;
+  background-color: var(--color-danger);
+  color: var(--color-text-light);
 }
 
 .view-button {
-  border-color: #28a745;
-  color: #28a745;
+  border-color: var(--color-success);
+  color: var(--color-success);
 }
 
 .view-button:hover {
-  background-color: #28a745;
-  color: white;
+  background-color: var(--color-success);
+  color: var(--color-text-light);
 }
 
 /* Empty State */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #6c757d;
+  color: var(--color-text-muted);
 }
 
 .empty-icon {
@@ -507,7 +507,7 @@
 
 .empty-state h3 {
   margin: 0 0 10px 0;
-  color: #495057;
+  color: var(--color-text-secondary);
   font-size: 1.5rem;
 }
 
@@ -546,11 +546,11 @@
 
 /* Messages */
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
   padding: 12px 16px;
   border-radius: 6px;
-  border: 1px solid #f5c6cb;
+  border: 1px solid var(--color-danger);
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -558,11 +558,11 @@
 }
 
 .success-message {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
   padding: 12px 16px;
   border-radius: 6px;
-  border: 1px solid #c3e6cb;
+  border: 1px solid var(--color-success);
   margin-bottom: 20px;
   display: flex;
   align-items: center;

@@ -1,16 +1,8 @@
 import React from 'react';
 import { Card as MantineCard } from '@mantine/core';
-import OldCard, { CardHeader, CardTitle, CardContent } from '../ui/Card';
+import { CardHeader, CardTitle, CardContent } from '../ui/Card';
 
-export const Card = ({ useMantine = true, children, className, ...props }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldCard className={className} {...props}>
-        {children}
-      </OldCard>
-    );
-  }
+export const Card = ({ children, className, ...props }) => {
 
   return (
     <MantineCard

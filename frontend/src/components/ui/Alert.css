@@ -52,7 +52,7 @@
 }
 
 .alert-close:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--color-bg-overlay);
 }
 
 .alert-close-icon {
@@ -62,85 +62,61 @@
 
 /* Success variant */
 .alert-success {
-  background-color: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #166534;
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success-dark);
 }
 
 .alert-success .alert-icon {
-  color: #16a34a;
+  color: var(--color-success);
 }
 
 .alert-success .alert-close:hover {
-  background-color: rgba(22, 163, 74, 0.1);
+  background-color: var(--color-bg-overlay);
 }
 
 /* Error variant */
 .alert-error {
-  background-color: #fef2f2;
-  border-color: #fecaca;
-  color: #991b1b;
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger-dark);
 }
 
 .alert-error .alert-icon {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .alert-error .alert-close:hover {
-  background-color: rgba(220, 38, 38, 0.1);
+  background-color: var(--color-bg-overlay);
 }
 
 /* Warning variant */
 .alert-warning {
-  background-color: #fffbeb;
-  border-color: #fed7aa;
-  color: #92400e;
+  background-color: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-warning-dark);
 }
 
 .alert-warning .alert-icon {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .alert-warning .alert-close:hover {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: var(--color-bg-overlay);
 }
 
 /* Info variant */
 .alert-info {
-  background-color: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1e40af;
+  background-color: var(--color-info-light);
+  border-color: var(--color-info);
+  color: var(--color-info-dark);
 }
 
 .alert-info .alert-icon {
-  color: #3b82f6;
+  color: var(--color-info);
 }
 
 .alert-info .alert-close:hover {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--color-bg-overlay);
 }
 
-/* Dark theme support */
-[data-theme='dark'] .alert-success {
-  background-color: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.3);
-  color: #86efac;
-}
-
-[data-theme='dark'] .alert-error {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-}
-
-[data-theme='dark'] .alert-warning {
-  background-color: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: #fcd34d;
-}
-
-[data-theme='dark'] .alert-info {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
-  color: #93c5fd;
-}

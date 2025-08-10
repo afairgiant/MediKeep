@@ -34,30 +34,30 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--color-border-medium);
   border-radius: 3px;
-  background-color: white;
+  background-color: var(--color-bg-primary);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .checkbox-input:checked + .checkbox-label .checkbox-custom {
-  background-color: #2563eb;
-  border-color: #2563eb;
-  color: white;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-light);
 }
 
 .checkbox-input:focus + .checkbox-label .checkbox-custom {
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: var(--form-input-focus-shadow);
 }
 
 .checkbox-input:hover + .checkbox-label .checkbox-custom {
-  border-color: #9ca3af;
+  border-color: var(--color-border-dark);
 }
 
 .checkbox-input:checked:hover + .checkbox-label .checkbox-custom {
-  background-color: #1d4ed8;
-  border-color: #1d4ed8;
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
 .checkbox-icon {
@@ -67,7 +67,7 @@
 }
 
 .checkbox-text {
-  color: #374151;
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -76,38 +76,11 @@
 }
 
 .checkbox-wrapper.disabled .checkbox-text {
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 
 .checkbox-wrapper.disabled .checkbox-custom {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-light);
 }
 
-/* Dark theme support */
-[data-theme='dark'] .checkbox-custom {
-  background-color: #374151;
-  border-color: #4b5563;
-}
-
-[data-theme='dark'] .checkbox-input:checked + .checkbox-label .checkbox-custom {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
-}
-
-[data-theme='dark'] .checkbox-input:hover + .checkbox-label .checkbox-custom {
-  border-color: #6b7280;
-}
-
-[data-theme='dark'] .checkbox-text {
-  color: #f9fafb;
-}
-
-[data-theme='dark'] .checkbox-wrapper.disabled .checkbox-text {
-  color: #6b7280;
-}
-
-[data-theme='dark'] .checkbox-wrapper.disabled .checkbox-custom {
-  background-color: #1f2937;
-  border-color: #374151;
-}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
+import { useBackupNotifications } from '../../hooks/useBackupNotifications';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
 import { formatDateTime } from '../../utils/helpers';
@@ -13,6 +14,10 @@ const BackupManagement = () => {
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [showAdvancedMenu, setShowAdvancedMenu] = useState(false);
+
+  // Enhanced notification system
+  const { showSuccess, showError, showLoading, hideLoading, showWarning } = useBackupNotifications();
 
   // Backup Management with auto-refresh
   const {
@@ -20,9 +25,7 @@ const BackupManagement = () => {
     loading,
     error,
     refreshData,
-    successMessage,
-    setSuccessMessage,
-    executeAction,
+    executeAction: rawExecuteAction,
   } = useAdminData({
     entityName: 'Backup Management',
     apiMethodsConfig: {
@@ -52,23 +55,52 @@ const BackupManagement = () => {
     },
   });
 
+  // Wrap executeAction to suppress default success messages
+  const executeAction = async (actionName, actionData = null) => {
+    try {
+      return await rawExecuteAction(actionName, actionData);
+    } catch (error) {
+      // Let our enhanced notification system handle the error
+      throw error;
+    }
+  };
+
   const backups = backupData?.backups || [];
 
   const handleCreateBackup = async type => {
     setCreating(prev => ({ ...prev, [type]: true }));
 
+    // Determine action name for notifications
+    const actionName = type === 'database' ? 'createDatabaseBackup' 
+                    : type === 'files' ? 'createFilesBackup' 
+                    : 'createFullBackup';
+
+    // Show loading notification for longer operations
+    const loadingId = showLoading(actionName);
+
     try {
       const description = `Manual ${type} backup created on ${formatDateTime(new Date().toISOString())}`;
 
+      let result;
       if (type === 'database') {
-        await executeAction('createDatabaseBackup', description);
+        result = await executeAction('createDatabaseBackup', description);
       } else if (type === 'files') {
-        await executeAction('createFilesBackup', description);
+        result = await executeAction('createFilesBackup', description);
       } else if (type === 'full') {
-        await executeAction('createFullBackup', description);
+        result = await executeAction('createFullBackup', description);
       }
 
-      await refreshData();
+      // Hide loading notification and show success
+      hideLoading(loadingId);
+      if (result) {
+        showSuccess(actionName, result);
+        await refreshData();
+      }
+    } catch (error) {
+      // Hide loading notification and show error
+      hideLoading(loadingId);
+      showError(actionName, error);
+      console.error(`${actionName} failed:`, error);
     } finally {
       setCreating(prev => ({ ...prev, [type]: false }));
     }
@@ -81,28 +113,38 @@ const BackupManagement = () => {
     // Validate file type
     const filename = file.name.toLowerCase();
     if (!filename.endsWith('.sql') && !filename.endsWith('.zip')) {
-      setSuccessMessage('Please select a .sql or .zip backup file');
+      showWarning('Invalid File Type', 'Please select a .sql or .zip backup file.');
       return;
     }
 
     setUploading(true);
+    const loadingId = showLoading('uploadBackup');
+
     try {
       const result = await executeAction('uploadBackup', file);
+      
+      hideLoading(loadingId);
       if (result) {
-        setSuccessMessage(
-          `Backup uploaded successfully! Type: ${result.backup_type}, Size: ${formatFileSize(result.backup_size)}`
-        );
+        showSuccess('uploadBackup', result);
         await refreshData();
         event.target.value = '';
       }
+    } catch (error) {
+      hideLoading(loadingId);
+      showError('uploadBackup', error);
+      console.error('Upload backup failed:', error);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDownloadBackup = async (backupId, filename) => {
+    const loadingId = showLoading('downloadBackup');
+    
     try {
       const blob = await executeAction('downloadBackup', backupId);
+      
+      hideLoading(loadingId);
       if (blob) {
         // Create download link
         const url = window.URL.createObjectURL(blob);
@@ -113,16 +155,31 @@ const BackupManagement = () => {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        
+        showSuccess('downloadBackup');
       }
     } catch (error) {
+      hideLoading(loadingId);
+      showError('downloadBackup', error);
       console.error('Download failed:', error);
     }
   };
 
   const handleVerifyBackup = async backupId => {
-    const result = await executeAction('verifyBackup', backupId);
-    if (result) {
-      await refreshData();
+    const loadingId = showLoading('verifyBackup');
+    
+    try {
+      const result = await executeAction('verifyBackup', backupId);
+      
+      hideLoading(loadingId);
+      if (result) {
+        showSuccess('verifyBackup', result);
+        await refreshData();
+      }
+    } catch (error) {
+      hideLoading(loadingId);
+      showError('verifyBackup', error);
+      console.error('Verify backup failed:', error);
     }
   };
 
@@ -132,31 +189,69 @@ const BackupManagement = () => {
     );
 
     if (confirmDelete) {
-      await executeAction('deleteBackup', backupId);
-      await refreshData();
+      const loadingId = showLoading('deleteBackup');
+      
+      try {
+        const result = await executeAction('deleteBackup', backupId);
+        
+        hideLoading(loadingId);
+        if (result) {
+          showSuccess('deleteBackup', result);
+          await refreshData();
+        }
+      } catch (error) {
+        hideLoading(loadingId);
+        showError('deleteBackup', error);
+        console.error('Delete backup failed:', error);
+      }
     }
   };
 
   const handleCleanupBackups = async () => {
-    const result = await executeAction('cleanupBackups');
-    if (result) {
-      const trackedDeleted = result.deleted_count || 0;
-      const orphanedDeleted = result.orphaned_deleted || 0;
-      const totalDeleted =
-        result.total_deleted || trackedDeleted + orphanedDeleted;
-      setSuccessMessage(`Cleanup completed: ${totalDeleted} files removed`);
-      await refreshData();
+    const loadingId = showLoading('cleanupBackups');
+    
+    try {
+      const result = await executeAction('cleanupBackups');
+      
+      hideLoading(loadingId);
+      if (result) {
+        showSuccess('cleanupBackups', result);
+        await refreshData();
+      }
+    } catch (error) {
+      hideLoading(loadingId);
+      showError('cleanupBackups', error);
+      console.error('Cleanup backups failed:', error);
     }
   };
 
   const handleCompleteCleanup = async () => {
-    const result = await executeAction('cleanupAllOldData');
-    if (result) {
-      const totalFiles = result.total_files_cleaned || 0;
-      setSuccessMessage(
-        `Complete cleanup finished: ${totalFiles} files removed`
-      );
-      await refreshData();
+    const confirmCleanup = window.confirm(
+      `⚠️ WARNING: Complete Cleanup will permanently remove:\n\n` +
+      `• Old backup files\n` +
+      `• Orphaned files\n` +
+      `• Trash files\n\n` +
+      `This action cannot be undone. Are you sure you want to proceed?`
+    );
+
+    if (!confirmCleanup) {
+      return;
+    }
+
+    const loadingId = showLoading('cleanupAllOldData');
+    
+    try {
+      const result = await executeAction('cleanupAllOldData');
+      
+      hideLoading(loadingId);
+      if (result) {
+        showSuccess('cleanupAllOldData', result);
+        await refreshData();
+      }
+    } catch (error) {
+      hideLoading(loadingId);
+      showError('cleanupAllOldData', error);
+      console.error('Complete cleanup failed:', error);
     }
   };
 
@@ -168,6 +263,8 @@ const BackupManagement = () => {
     if (!confirmRestore) return;
 
     setRestoring(prev => ({ ...prev, [backupId]: true }));
+    const loadingId = showLoading('restoreBackup');
+    
     try {
       // Get confirmation token first
       const tokenResponse =
@@ -178,13 +275,14 @@ const BackupManagement = () => {
         confirmationToken: tokenResponse.confirmation_token,
       });
 
+      hideLoading(loadingId);
       if (result) {
-        setSuccessMessage(
-          `Restore completed successfully! Safety backup created with ID: ${result.safety_backup_id}`
-        );
+        showSuccess('restoreBackup', result);
         await refreshData();
       }
     } catch (error) {
+      hideLoading(loadingId);
+      showError('restoreBackup', error);
       console.error('Restore failed:', error);
     } finally {
       setRestoring(prev => ({ ...prev, [backupId]: false }));
@@ -220,39 +318,16 @@ const BackupManagement = () => {
           </div>
         </AdminCard>
 
-        {/* Success/Error Messages */}
-        {(successMessage || error) && (
-          <AdminCard className={`message-card ${error ? 'error' : 'success'}`}>
-            {error || successMessage}
-          </AdminCard>
-        )}
+        {/* Note: Notifications are now handled by Mantine notification system */}
 
-        {/* Backup Actions */}
+        {/* Main Backup Actions */}
         <AdminCard title="⚡ Backup Operations" className="backup-actions-card">
-          <div className="backup-actions-grid">
-            <BackupActionCard
-              title="Database Backup"
-              description="Create a backup of the database"
-              buttonText="Create Database Backup"
-              buttonClass="database"
-              loading={creating.database}
-              onClick={() => handleCreateBackup('database')}
-            />
-
-            <BackupActionCard
-              title="Files Backup"
-              description="Create a backup of uploaded files"
-              buttonText="Create Files Backup"
-              buttonClass="files"
-              loading={creating.files}
-              onClick={() => handleCreateBackup('files')}
-            />
-
+          <div className="main-backup-actions">
             <BackupActionCard
               title="Full System Backup"
-              description="Create a complete backup (database + files)"
+              description="Create a complete backup (database + files) - Recommended"
               buttonText="Create Full Backup"
-              buttonClass="full"
+              buttonClass="full compact-btn"
               loading={creating.full}
               onClick={() => handleCreateBackup('full')}
             />
@@ -265,23 +340,61 @@ const BackupManagement = () => {
               onUpload={handleUploadBackup}
             />
 
-            <BackupActionCard
-              title="Cleanup Old Backups"
-              description="Remove old backups based on retention policy"
-              buttonText="Cleanup Old Backups"
-              buttonClass="cleanup"
-              loading={loading}
-              onClick={handleCleanupBackups}
-            />
-
-            <BackupActionCard
-              title="Complete Cleanup"
-              description="Remove old backups, orphaned files, and trash files"
-              buttonText="Complete Cleanup"
-              buttonClass="cleanup-all"
-              loading={loading}
-              onClick={handleCompleteCleanup}
-            />
+            <div className="advanced-actions-menu">
+              <h3>Advanced Options</h3>
+              <div className="menu-trigger">
+                <button 
+                  className="dots-menu-btn" 
+                  onClick={() => setShowAdvancedMenu(!showAdvancedMenu)}
+                  aria-expanded={showAdvancedMenu}
+                  aria-haspopup="menu"
+                  aria-label="Advanced backup options menu"
+                >
+                  <span>⋮</span> More Options
+                </button>
+                {showAdvancedMenu && (
+                  <div className="dropdown-menu" role="menu">
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCreateBackup('database'); setShowAdvancedMenu(false); }}
+                      disabled={creating.database}
+                      aria-disabled={creating.database}
+                    >
+                      {creating.database ? 'Creating...' : 'Database Only Backup'}
+                    </button>
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCreateBackup('files'); setShowAdvancedMenu(false); }}
+                      disabled={creating.files}
+                      aria-disabled={creating.files}
+                    >
+                      {creating.files ? 'Creating...' : 'Files Only Backup'}
+                    </button>
+                    <hr className="dropdown-divider" />
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCleanupBackups(); setShowAdvancedMenu(false); }}
+                      disabled={loading}
+                      aria-disabled={loading}
+                    >
+                      {loading ? 'Cleaning...' : 'Cleanup Old Backups'}
+                    </button>
+                    <button 
+                      className="dropdown-item"
+                      role="menuitem"
+                      onClick={() => { handleCompleteCleanup(); setShowAdvancedMenu(false); }}
+                      disabled={loading}
+                      aria-disabled={loading}
+                    >
+                      {loading ? 'Cleaning...' : 'Complete Cleanup'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </AdminCard>
 

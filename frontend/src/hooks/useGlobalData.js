@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAppData } from '../contexts/AppDataContext';
+import logger from '../services/logger';
 
 /**
  * Hook for accessing current patient data with automatic caching
@@ -58,7 +59,10 @@ export function usePractitioners(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          console.error('Error in initial practitioners fetch:', error);
+          logger.debug('practitioners_initial_fetch_error', 'Error in initial practitioners fetch', {
+            error: error.message,
+            component: 'useGlobalData'
+          });
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
@@ -98,7 +102,10 @@ export function usePharmacies(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          console.error('Error in initial pharmacy fetch:', error);
+          logger.debug('pharmacies_initial_fetch_error', 'Error in initial pharmacy fetch', {
+            error: error.message,
+            component: 'useGlobalData'
+          });
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
@@ -174,6 +181,53 @@ export function usePatientWithStaticData(autoFetch = true) {
 }
 
 /**
+ * Hook for accessing patient list with automatic caching
+ * @param {boolean} autoFetch - Whether to automatically fetch data on mount
+ * @returns {object} Patient list data, loading state, error, and refresh function
+ */
+export function usePatientList(autoFetch = true) {
+  const {
+    patientList,
+    patientListLoading,
+    patientListError,
+    fetchPatientList,
+  } = useAppData();
+
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
+
+  // Auto-fetch patient list data on mount if enabled
+  useEffect(() => {
+    if (autoFetch && !initialFetchDone) {
+      fetchPatientList()
+        .then(() => {
+          setInitialFetchDone(true);
+        })
+        .catch(error => {
+          logger.debug('patient_list_initial_fetch_error', 'Error in initial patient list fetch', {
+            error: error.message,
+            component: 'useGlobalData'
+          });
+          setInitialFetchDone(true); // Still mark as done to prevent infinite retries
+        });
+    }
+  }, [autoFetch, fetchPatientList, initialFetchDone]);
+
+  // Refresh function that forces a new fetch
+  const refreshPatientList = useCallback(() => {
+    return fetchPatientList(true);
+  }, [fetchPatientList]);
+
+  return {
+    // Ensure patientList is always an array to prevent map errors
+    patientList: Array.isArray(patientList) ? patientList : [],
+    loading: patientListLoading,
+    error: patientListError,
+    refresh: refreshPatientList,
+    hasData: Array.isArray(patientList) && patientList.length > 0,
+  };
+}
+
+/**
  * Hook for cache management utilities
  * @returns {object} Cache management functions
  */
@@ -185,6 +239,8 @@ export function useCacheManager() {
     fetchPharmacies,
     fetchPractitioners,
     fetchCurrentPatient,
+    fetchPatientList,
+    setCurrentPatient,
   } = useAppData();
 
   const invalidateAll = useCallback(() => {
@@ -203,6 +259,10 @@ export function useCacheManager() {
     return invalidateCache('pharmacies');
   }, [invalidateCache]);
 
+  const invalidatePatientList = useCallback(() => {
+    return invalidateCache('patientList');
+  }, [invalidateCache]);
+
   const refreshPharmacies = useCallback(() => {
     return fetchPharmacies(true);
   }, [fetchPharmacies]);
@@ -215,14 +275,21 @@ export function useCacheManager() {
     return fetchCurrentPatient(true);
   }, [fetchCurrentPatient]);
 
+  const refreshPatientList = useCallback(() => {
+    return fetchPatientList(true);
+  }, [fetchPatientList]);
+
   return {
     invalidateAll,
     invalidatePatient,
     invalidatePractitioners,
     invalidatePharmacies,
+    invalidatePatientList,
     refreshPharmacies,
     refreshPractitioners,
     refreshPatient,
+    refreshPatientList,
+    setCurrentPatient,
     updateCacheExpiry,
     isCacheValid,
   };

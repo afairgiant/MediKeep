@@ -5,6 +5,8 @@
 import { authService } from './auth/simpleAuthService';
 import { toast } from 'react-toastify';
 import logger from './logger';
+import { createRaceSafeWrapper } from '../utils/throttleUtils';
+import secureActivityLogger from '../utils/secureActivityLogger';
 
 class APIClient {
   constructor() {
@@ -17,9 +19,44 @@ class APIClient {
     this.requestInterceptors = [];
     this.responseInterceptors = [];
 
+    // Activity tracking with race condition protection
+    this.activityTracker = null;
+    this.safeActivityTracker = null;
+
     // Add default auth interceptor
     this.addRequestInterceptor(this.authInterceptor.bind(this));
     this.addResponseInterceptor(this.errorInterceptor.bind(this));
+  }
+
+  // Set activity tracker for API calls with race condition protection
+  setActivityTracker(activityTracker) {
+    try {
+      // Clean up previous tracker
+      if (this.safeActivityTracker && this.safeActivityTracker.cleanup) {
+        this.safeActivityTracker.cleanup();
+      }
+      
+      this.activityTracker = activityTracker;
+      
+      // Create race-safe wrapper if tracker is provided
+      if (activityTracker) {
+        this.safeActivityTracker = createRaceSafeWrapper(
+          activityTracker,
+          'api-activity-tracker'
+        );
+      } else {
+        this.safeActivityTracker = null;
+      }
+    } catch (error) {
+      secureActivityLogger.logActivityError(error, {
+        component: 'APIClient',
+        action: 'setActivityTracker'
+      });
+      
+      // Fallback to unsafe tracker to maintain functionality
+      this.activityTracker = activityTracker;
+      this.safeActivityTracker = null;
+    }
   }
 
   // Add request interceptor
@@ -81,9 +118,9 @@ class APIClient {
 
   // Main request method
   async request(config) {
+    // Apply request interceptors (declare outside try block for error logging)
+    let processedConfig = { ...config };
     try {
-      // Apply request interceptors
-      let processedConfig = { ...config };
       for (const interceptor of this.requestInterceptors) {
         processedConfig = await interceptor(processedConfig);
       } // Prepare URL
@@ -150,6 +187,54 @@ class APIClient {
         }
 
         throw error;
+      }
+
+      // Track API activity for successful requests with race condition protection
+      if (this.safeActivityTracker) {
+        try {
+          // Use race-safe wrapper
+          this.safeActivityTracker({
+            method: processedConfig.method || 'GET',
+            status: response.status,
+            // Don't log URL to prevent potential sensitive data leakage
+          });
+        } catch (error) {
+          secureActivityLogger.logActivityError(error, {
+            component: 'APIClient',
+            action: 'trackActivity',
+            method: processedConfig.method || 'GET',
+            status: response.status
+          });
+          
+          // Fallback to direct tracker if race-safe wrapper fails
+          if (this.activityTracker) {
+            try {
+              this.activityTracker({
+                method: processedConfig.method || 'GET',
+                status: response.status,
+              });
+            } catch (fallbackError) {
+              // Log but don't throw - activity tracking failure shouldn't break API calls
+              secureActivityLogger.logActivityError(fallbackError, {
+                component: 'APIClient',
+                action: 'trackActivity_fallback'
+              });
+            }
+          }
+        }
+      } else if (this.activityTracker) {
+        // Fallback to direct tracker if race-safe wrapper not available
+        try {
+          this.activityTracker({
+            method: processedConfig.method || 'GET',
+            status: response.status,
+          });
+        } catch (error) {
+          secureActivityLogger.logActivityError(error, {
+            component: 'APIClient',
+            action: 'trackActivity_direct'
+          });
+        }
       }
 
       return {

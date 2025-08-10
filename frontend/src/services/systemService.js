@@ -31,21 +31,11 @@ export const getVersionInfo = async () => {
       }
     }
 
-    // Fallback if endpoint fails
-    return {
-      app_name: 'Medical Records Management System',
-      version: '0.11.0', // Fallback version
-
-      timestamp: new Date().toISOString(),
-    };
+    // If endpoint fails, throw error to properly handle it
+    throw new Error('Version endpoint returned invalid data');
   } catch (error) {
-    // Return fallback instead of throwing
-    return {
-      app_name: 'Medical Records Management System',
-      version: '0.11.0', // Fallback version
-
-      timestamp: new Date().toISOString(),
-    };
+    // Propagate the error instead of returning fallback
+    throw error;
   }
 };
 

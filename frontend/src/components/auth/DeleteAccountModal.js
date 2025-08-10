@@ -115,7 +115,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
                 </List.Item>
               </List>
 
-              <Paper p="md" withBorder bg="red.0">
+              <Paper p="md" withBorder bg="red.1">
                 <Text size="sm">
                   <Text component="span" fw={700}>
                     Once deleted, this data cannot be recovered.
@@ -152,7 +152,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
                 all associated data, please type the following text exactly:
               </Text>
 
-              <Paper p="sm" bg="gray.1">
+              <Paper p="sm" bg="gray.2">
                 <Code color="red" fw={700}>
                   {requiredConfirmationText}
                 </Code>

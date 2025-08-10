@@ -25,6 +25,7 @@ import {
   Tooltip,
   HoverCard,
   Select,
+  useMantineColorScheme,
 } from '@mantine/core';
 import {
   IconStethoscope,
@@ -48,12 +49,16 @@ import {
   IconX,
   IconPhoneCall,
   IconUsers,
+  IconShield,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
+import { PatientSelector } from '../components/medical';
+import { GlobalSearch } from '../components/common';
+import { InvitationNotifications } from '../components/dashboard';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
-import { useCurrentPatient } from '../hooks/useGlobalData';
+import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
 import { formatDateTime } from '../utils/helpers';
 import {
   getActivityNavigationUrl,
@@ -67,6 +72,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { colorScheme } = useMantineColorScheme();
   const {
     user: authUser,
     shouldShowProfilePrompts,
@@ -75,13 +81,22 @@ const Dashboard = () => {
 
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
+  const {
+    invalidatePatient,
+    refreshPatient,
+    invalidateAll,
+    setCurrentPatient,
+  } = useCacheManager();
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [currentActivePatient, setCurrentActivePatient] = useState(null);
+  const [patientSelectorLoading, setPatientSelectorLoading] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [lastActivityUpdate, setLastActivityUpdate] = useState(null);
   const [showWelcomeBox, setShowWelcomeBox] = useState(() => {
     // Check if user has dismissed the welcome box for this user
     const dismissed = localStorage.getItem(
@@ -90,14 +105,51 @@ const Dashboard = () => {
     return dismissed !== 'true';
   });
 
-  // Combine loading states
-  const loading = patientLoading || activityLoading || statsLoading;
+  // Combine loading states - only show full loading screen during initial load
+  const loading =
+    (patientLoading || activityLoading || statsLoading) && !initialLoadComplete;
 
   useEffect(() => {
-    fetchRecentActivity();
-    fetchDashboardStats();
-    checkAdminStatus();
+    const loadInitialData = async () => {
+      await Promise.all([
+        fetchRecentActivity(),
+        fetchDashboardStats(),
+        checkAdminStatus(),
+      ]);
+      setInitialLoadComplete(true);
+    };
+    loadInitialData();
   }, []);
+
+  // Initialize currentActivePatient when user loads
+  useEffect(() => {
+    if (user && !currentActivePatient) {
+      setCurrentActivePatient(user);
+    }
+  }, [user, currentActivePatient]);
+
+  // Refresh dashboard stats when active patient changes
+  useEffect(() => {
+    if (currentActivePatient?.id && initialLoadComplete) {
+      fetchDashboardStats();
+    }
+  }, [currentActivePatient?.id, initialLoadComplete]);
+
+  // Refresh recent activity when active patient changes
+  useEffect(() => {
+    if (currentActivePatient?.id && initialLoadComplete) {
+      fetchRecentActivity();
+    }
+  }, [currentActivePatient?.id, initialLoadComplete]);
+
+  // Auto-refresh recent activity every 30 seconds to catch new updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchRecentActivity();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [currentActivePatient, user]);
 
   useEffect(() => {
     if (authUser && user) {
@@ -110,7 +162,7 @@ const Dashboard = () => {
     }
   }, [authUser, user]);
 
-  const checkAdminStatus = () => {
+  const checkAdminStatus = async () => {
     try {
       const token = localStorage.getItem('token');
       if (token) {
@@ -132,26 +184,60 @@ const Dashboard = () => {
     }
   };
 
-  const fetchRecentActivity = async () => {
+  const handlePatientChange = async newPatient => {
+    // Prevent infinite loops by checking if patient actually changed
+    if (currentActivePatient?.id === newPatient?.id) {
+      return;
+    }
+
+    frontendLogger.logInfo('Patient switched from dashboard', {
+      component: 'Dashboard',
+      newPatientId: newPatient?.id,
+      patientName: newPatient
+        ? `${newPatient.first_name} ${newPatient.last_name}`
+        : null,
+    });
+
+    // Show loading state for patient selector during switch
+    setPatientSelectorLoading(true);
+
+    // Update local state
+    setCurrentActivePatient(newPatient);
+
+    // Invalidate all caches to force refresh of all medical data for new patient
+    invalidateAll();
+    refreshPatient();
+
+    // Dashboard data will be refreshed automatically by useEffect when currentActivePatient changes
+
+    // Hide loading state
+    setPatientSelectorLoading(false);
+  };
+
+  const fetchRecentActivity = async (patientId = null) => {
     try {
       setActivityLoading(true);
-      const activity = await apiService.getRecentActivity();
+      const targetPatientId = patientId || currentActivePatient?.id || user?.id;
+      const activity = await apiService.getRecentActivity(targetPatientId);
       
       // Filter out erroneous "deleted" patient information activities
       // This is a temporary fix for a backend issue where patient updates are logged as deletions
       const filteredActivity = activity.filter(item => {
-        const isPatientModel = item.model_name?.toLowerCase().includes('patient');
+        const isPatientModel = item.model_name
+          ?.toLowerCase()
+          .includes('patient');
         const isDeletedAction = item.action?.toLowerCase() === 'deleted';
-        
+
         // Exclude deleted patient information activities (backend logging error)
         if (isPatientModel && isDeletedAction) {
           return false;
         }
-        
+
         return true;
       });
-      
+
       setRecentActivity(filteredActivity);
+      setLastActivityUpdate(new Date());
     } catch (error) {
       frontendLogger.logError('Error fetching activity', {
         error: error.message,
@@ -165,12 +251,14 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setStatsLoading(true);
-      const stats = await apiService.getDashboardStats();
+      const patientId = currentActivePatient?.id;
+      const stats = await apiService.getDashboardStats(patientId);
       setDashboardStats(stats);
     } catch (error) {
       frontendLogger.logError('Error fetching dashboard stats', {
         error: error.message,
         component: 'Dashboard',
+        patientId: currentActivePatient?.id,
       });
       // Set fallback stats on error
       setDashboardStats({
@@ -297,6 +385,12 @@ const Dashboard = () => {
   // Additional resources
   const additionalModules = [
     {
+      title: 'Insurance',
+      icon: IconShield,
+      color: 'violet',
+      link: '/insurance',
+    },
+    {
       title: 'Emergency Contacts',
       icon: IconPhoneCall,
       color: 'red',
@@ -348,13 +442,27 @@ const Dashboard = () => {
   const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
+    const handleClick = (e) => {
+      console.log('ModuleCard clicked:', module.link);
+      try {
+        navigate(module.link);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        frontendLogger.logError('Navigation error from ModuleCard', {
+          error: error.message,
+          component: 'Dashboard',
+          link: module.link,
+        });
+      }
+    };
+
     return (
       <Card
         shadow="sm"
         padding="lg"
         radius="md"
         withBorder
-        onClick={() => navigate(module.link)}
+        onClick={handleClick}
         style={{
           cursor: 'pointer',
           transition: 'all 0.2s ease',
@@ -418,21 +526,25 @@ const Dashboard = () => {
           style={{
             cursor: isClickable ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
-            backgroundColor: isClickable
-              ? 'transparent'
-              : 'var(--mantine-color-gray-0)',
           }}
-          styles={{
-            root: isClickable
-              ? {
-                  '&:hover': {
-                    backgroundColor: 'var(--mantine-color-gray-1)',
-                    transform: 'translateX(4px)',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  },
-                }
-              : {},
-          }}
+          styles={(theme) => ({
+            root: {
+              backgroundColor: colorScheme === 'dark' 
+                ? theme.colors.dark[7] 
+                : theme.white,
+              ...(isClickable
+                ? {
+                    '&:hover': {
+                      backgroundColor: colorScheme === 'dark' 
+                        ? theme.colors.dark[6] 
+                        : theme.colors.gray[1],
+                      transform: 'translateX(4px)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    },
+                  }
+                : {}),
+            },
+          })}
           onClick={handleClick}
         >
           <Group align="flex-start" gap="sm" wrap="nowrap">
@@ -470,7 +582,7 @@ const Dashboard = () => {
                 {isClickable && (
                   <IconChevronRight
                     size={12}
-                    color="var(--mantine-color-dimmed)"
+                    style={{ color: 'var(--mantine-color-dimmed)' }}
                   />
                 )}
               </Group>
@@ -496,9 +608,17 @@ const Dashboard = () => {
 
   const RecentActivityList = () => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Title order={3} size="h4" mb="md">
-        Recent Activity
-      </Title>
+      <Group justify="space-between" mb="md">
+        <Title order={3} size="h4">
+          Recent Activity
+        </Title>
+      </Group>
+
+      {lastActivityUpdate && (
+        <Text size="xs" c="dimmed" mb="sm">
+          Last updated: {lastActivityUpdate.toLocaleTimeString()}
+        </Text>
+      )}
 
       {recentActivity.length > 0 ? (
         <Stack gap="xs">
@@ -511,7 +631,14 @@ const Dashboard = () => {
           ))}
         </Stack>
       ) : (
-        <Paper p="md" radius="md" bg="gray.1">
+        <Paper p="md" radius="md" 
+          styles={(theme) => ({
+            root: {
+              backgroundColor: colorScheme === 'dark' 
+                ? theme.colors.dark[6] 
+                : theme.colors.gray[1],
+            },
+          })}>
           <Stack align="center" gap="xs">
             <ThemeIcon color="gray" variant="light" size="lg">
               <IconAlertCircle size={20} />
@@ -547,7 +674,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <>
+    <Container size="xl" py="md">
       <PageHeader
         title="Medical Records App"
         icon="🏥"
@@ -555,7 +683,7 @@ const Dashboard = () => {
         showBackButton={false}
       />
 
-      <Container size="xl" py="xl">
+      <Stack gap="lg">
         {/* Welcome Section */}
         {showWelcomeBox && (
           <Paper
@@ -602,26 +730,55 @@ const Dashboard = () => {
                   Manage your health information securely
                 </Text>
               </div>
-              {user && (
+              {authUser && (
                 <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
-                  Hello, {user.first_name} {user.last_name}!
+                  Hello, {authUser.fullName || authUser.full_name || authUser.username}!
                 </Badge>
               )}
             </Group>
           </Paper>
         )}
 
-        {/* Search Bar */}
-        <Flex justify="flex-end" mb="xl">
-          <TextInput
-            placeholder="search"
-            leftSection={<IconSearch size={16} />}
-            value={searchQuery}
-            onChange={event => setSearchQuery(event.currentTarget.value)}
-            w={300}
-            radius="md"
-          />
-        </Flex>
+        {/* Patient Selector and Search Bar - Responsive Layout */}
+        <Stack gap="md" mb="xl">
+          <Flex
+            justify="space-between"
+            align="flex-start"
+            gap="md"
+            direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
+          >
+            {/* Patient Selector */}
+            <Box style={{ 
+              flex: '1', 
+              maxWidth: '500px', 
+              width: '100%',
+              minWidth: '300px' // Ensure minimum visibility
+            }}>
+              <PatientSelector
+                onPatientChange={handlePatientChange}
+                currentPatientId={currentActivePatient?.id || user?.id}
+                loading={patientSelectorLoading}
+                compact={true}
+              />
+            </Box>
+
+            {/* Search Bar */}
+            <Box
+              style={{
+                flexShrink: 0,
+                width: '100%',
+                maxWidth: '300px',
+                minWidth: '250px', // Ensure minimum search bar width
+              }}
+            >
+              <GlobalSearch
+                patientId={currentActivePatient?.id}
+                placeholder="Search medical records..."
+                width="100%"
+              />
+            </Box>
+          </Flex>
+        </Stack>
 
         {/* Main Content Grid */}
         <Grid mb="xl">
@@ -695,18 +852,32 @@ const Dashboard = () => {
                         key={index}
                         p="sm"
                         radius="md"
-                        onClick={() => navigate(module.link)}
+                        onClick={(e) => {
+                          console.log('Additional resource clicked:', module.link);
+                          try {
+                            navigate(module.link);
+                          } catch (error) {
+                            console.error('Navigation error:', error);
+                            frontendLogger.logError('Navigation error from additional resource', {
+                              error: error.message,
+                              component: 'Dashboard',
+                              link: module.link,
+                            });
+                          }
+                        }}
                         style={{ cursor: 'pointer' }}
                         withBorder
-                        styles={{
+                        styles={(theme) => ({
                           root: {
                             '&:hover': {
-                              backgroundColor: 'var(--mantine-color-gray-1)',
+                              backgroundColor: colorScheme === 'dark' 
+                                ? theme.colors.dark[6] 
+                                : theme.colors.gray[1],
                               transform: 'translateX(4px)',
                               transition: 'all 0.2s ease',
                             },
                           },
-                        }}
+                        })}
                       >
                         <Group gap="sm">
                           <ThemeIcon
@@ -726,6 +897,8 @@ const Dashboard = () => {
                   })}
                 </Stack>
               </Card>
+              {/* Invitation Notifications */}
+              <InvitationNotifications />
             </Stack>
           </Grid.Col>
         </Grid>
@@ -736,9 +909,9 @@ const Dashboard = () => {
             <StatCard key={index} stat={stat} />
           ))}
         </SimpleGrid>
+      </Stack>
       </Container>
-
-    </div>
+    </>
   );
 };
 

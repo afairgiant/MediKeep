@@ -2,6 +2,16 @@
  * Standardized configuration templates for medical pages filtering and sorting
  */
 
+import logger from '../services/logger';
+
+// Constants for search functionality
+// Maximum length for search terms to prevent performance issues with large text inputs.
+// 100 characters is sufficient for most medical search queries while avoiding:
+// - Excessive memory usage during string operations
+// - Poor UI performance with very long search strings
+// - Potential DoS attacks through extremely large input
+const SEARCH_TERM_MAX_LENGTH = 100;
+
 export const medicalPageConfigs = {
   conditions: {
     filtering: {
@@ -14,18 +24,18 @@ export const medicalPageConfigs = {
         { value: 'chronic', label: 'Chronic' },
         { value: 'inactive', label: 'Inactive' },
       ],
-      dateField: 'onsetDate',
+      dateField: 'onset_date',
     },
     sorting: {
-      defaultSortBy: 'onsetDate',
+      defaultSortBy: 'onset_date',
       defaultSortOrder: 'desc',
       sortOptions: [
-        { value: 'onsetDate', label: 'Onset Date' },
+        { value: 'onset_date', label: 'Onset Date' },
         { value: 'diagnosis', label: 'Diagnosis' },
         { value: 'status', label: 'Status' },
       ],
       sortTypes: {
-        onsetDate: 'date',
+        onset_date: 'date',
         diagnosis: 'string',
         status: 'status',
       },
@@ -34,6 +44,138 @@ export const medicalPageConfigs = {
       searchPlaceholder: 'Search conditions, notes...',
       title: 'Filter & Sort Conditions',
       showDateRange: true,
+    },
+  },
+
+  insurances: {
+    filtering: {
+      searchFields: ['company_name', 'member_name', 'plan_name', 'notes'],
+      statusField: 'status',
+      statusOptions: [
+        { value: 'all', label: 'All Statuses' },
+        { value: 'active', label: 'Active' },
+        { value: 'inactive', label: 'Inactive' },
+        { value: 'expired', label: 'Expired' },
+        { value: 'pending', label: 'Pending' },
+      ],
+      categoryField: 'insurance_type',
+      categoryLabel: 'Insurance Type',
+      categoryOptions: [
+        { value: 'all', label: 'All Types' },
+        { value: 'medical', label: 'Medical' },
+        { value: 'dental', label: 'Dental' },
+        { value: 'vision', label: 'Vision' },
+        { value: 'prescription', label: 'Prescription' },
+      ],
+      dateField: 'effective_date',
+      dateRangeOptions: [
+        { value: 'all', label: 'All Time' },
+        { value: 'this_year', label: 'This Year' },
+        { value: 'last_year', label: 'Last Year' },
+        { value: 'previous_years', label: 'All Previous Years' },
+        { value: 'current', label: 'Currently Active' },
+        { value: 'expired', label: 'Expired Insurance' },
+      ],
+      customFilters: {
+        dateRange: (item, dateRange) => {
+          if (dateRange === 'all') return true;
+
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const effectiveDate = item.effective_date ? new Date(item.effective_date) : null;
+          const expirationDate = item.expiration_date ? new Date(item.expiration_date) : null;
+
+          switch (dateRange) {
+            case 'this_year':
+              // Show if insurance is active during this year
+              // Either started this year, or started earlier but still active (no end date or ends this year or later)
+              if (!effectiveDate) return false;
+              const effectiveEndDateThisYear = expirationDate || now;
+              return (
+                effectiveDate.getFullYear() <= currentYear &&
+                effectiveEndDateThisYear.getFullYear() >= currentYear
+              );
+
+            case 'last_year':
+              // Show if insurance was active during last year
+              if (!effectiveDate) return false;
+              const lastYear = currentYear - 1;
+              const effectiveEndDateLastYear = expirationDate || now;
+              return (
+                effectiveDate.getFullYear() <= lastYear &&
+                effectiveEndDateLastYear.getFullYear() >= lastYear
+              );
+
+            case 'previous_years':
+              // Show insurance that was only active in years before current year
+              if (!effectiveDate) return false;
+              const effectiveEndDatePrevious = expirationDate || now;
+              return effectiveEndDatePrevious.getFullYear() < currentYear;
+
+            case 'current':
+              // Currently active insurance
+              const effectiveEndDate = expirationDate || now;
+              return (
+                (!effectiveDate || effectiveDate <= now) &&
+                effectiveEndDate >= now
+              );
+
+            case 'expired':
+              // Expired insurance
+              return expirationDate && expirationDate < now;
+
+            default:
+              return true;
+          }
+        },
+      },
+    },
+    sorting: {
+      defaultSortBy: 'priority',
+      defaultSortOrder: 'desc',
+      sortOptions: [
+        { value: 'priority', label: 'Priority (Primary First)' },
+        { value: 'insurance_type', label: 'Insurance Type' },
+        { value: 'company_name', label: 'Company Name' },
+        { value: 'effective_date', label: 'Effective Date' },
+        { value: 'expiration_date', label: 'Expiration Date' },
+        { value: 'status', label: 'Status' },
+      ],
+      sortTypes: {
+        insurance_type: 'string',
+        company_name: 'string',
+        effective_date: 'date',
+        expiration_date: 'date',
+        status: 'status',
+      },
+      customSortFunctions: {
+        priority: (a, b) => {
+          // Primary insurance first (only for medical insurance)
+          if (a.insurance_type === 'medical' && a.is_primary && !(b.insurance_type === 'medical' && b.is_primary)) return -1;
+          if (b.insurance_type === 'medical' && b.is_primary && !(a.insurance_type === 'medical' && a.is_primary)) return 1;
+          
+          // Then active insurance
+          if (a.status === 'active' && b.status !== 'active') return -1;
+          if (b.status === 'active' && a.status !== 'active') return 1;
+          
+          // Then by insurance type
+          if (a.status === b.status) {
+            return a.insurance_type.localeCompare(b.insurance_type);
+          }
+          
+          // Finally by status priority: active > pending > expired > inactive
+          const statusOrder = ['active', 'pending', 'expired', 'inactive'];
+          const aIndex = statusOrder.indexOf(a.status) !== -1 ? statusOrder.indexOf(a.status) : 999;
+          const bIndex = statusOrder.indexOf(b.status) !== -1 ? statusOrder.indexOf(b.status) : 999;
+          return aIndex - bIndex;
+        },
+      },
+    },
+    filterControls: {
+      searchPlaceholder: 'Search insurance companies, member names...',
+      title: 'Filter & Sort Insurance',
+      showDateRange: true,
+      showCategory: true,
     },
   },
 
@@ -69,7 +211,7 @@ export const medicalPageConfigs = {
         { value: 'effective_period_start', label: 'Start Date' },
       ],
       customSortFunctions: {
-        active: (a, b, sortOrder) => {
+        active: (a, b) => {
           const aIsActive = a.status === 'active';
           const bIsActive = b.status === 'active';
           if (aIsActive && !bIsActive) return -1;
@@ -139,7 +281,7 @@ export const medicalPageConfigs = {
       startDateField: 'start_date',
       endDateField: 'end_date',
       customFilters: {
-        dateRange: (item, dateRange, additionalData) => {
+        dateRange: (item, dateRange) => {
           if (dateRange === 'all') return true;
 
           const now = new Date();
@@ -960,7 +1102,7 @@ export const medicalPageConfigs = {
         is_active: 'boolean',
       },
       customSortFunctions: {
-        priority: (a, b, sortOrder) => {
+        priority: (a, b) => {
           // Primary contacts first
           if (a.is_primary && !b.is_primary) return -1;
           if (!a.is_primary && b.is_primary) return 1;
@@ -986,6 +1128,80 @@ export const medicalPageConfigs = {
   family_members: {
     filtering: {
       searchFields: ['name', 'relationship', 'notes'],
+      customSearchFunction: (item, searchTerm) => {
+        // Validate and sanitize search term
+        if (!searchTerm || typeof searchTerm !== 'string') {
+          return true; // Show all items if search term is invalid
+        }
+        
+        let sanitizedTerm = searchTerm.trim().toLowerCase();
+        if (sanitizedTerm.length === 0) {
+          return true; // Show all items if search term is empty after trimming
+        }
+        
+        // Additional validation: prevent extremely long search terms that could cause performance issues
+        if (sanitizedTerm.length > SEARCH_TERM_MAX_LENGTH) {
+          logger.warn(`Search term too long, truncating to ${SEARCH_TERM_MAX_LENGTH} characters`, {
+            component: 'medicalPageConfigs',
+            originalLength: sanitizedTerm.length,
+            truncatedLength: SEARCH_TERM_MAX_LENGTH
+          });
+          sanitizedTerm = sanitizedTerm.substring(0, SEARCH_TERM_MAX_LENGTH);
+        }
+        
+        // Search in basic family member fields
+        const basicFields = ['name', 'relationship', 'notes'];
+        const matchesBasic = basicFields.some(field => {
+          const value = item[field];
+          if (!value) return false;
+          try {
+            return value.toString().toLowerCase().includes(sanitizedTerm);
+          } catch (error) {
+            logger.warn(`Error processing search field "${field}"`, {
+              component: 'medicalPageConfigs',
+              field,
+              value,
+              valueType: typeof value,
+              error: error.message,
+              searchTerm: sanitizedTerm
+            });
+            return false;
+          }
+        });
+        
+        if (matchesBasic) return true;
+        
+        // Search in family conditions
+        if (item.family_conditions && Array.isArray(item.family_conditions)) {
+          const conditionFields = ['condition_name', 'notes', 'condition_type', 'severity', 'status'];
+          const matchesCondition = item.family_conditions.some(condition => {
+            if (!condition || typeof condition !== 'object') return false;
+            
+            return conditionFields.some(field => {
+              const value = condition[field];
+              if (!value) return false;
+              try {
+                return value.toString().toLowerCase().includes(sanitizedTerm);
+              } catch (error) {
+                logger.warn(`Error processing condition search field "${field}"`, {
+                  component: 'medicalPageConfigs',
+                  field,
+                  value,
+                  valueType: typeof value,
+                  error: error.message,
+                  searchTerm: sanitizedTerm,
+                  conditionId: condition?.id
+                });
+                return false;
+              }
+            });
+          });
+          
+          if (matchesCondition) return true;
+        }
+        
+        return false;
+      },
       categoryField: 'relationship',
       categoryLabel: 'Relationship',
       categoryOptions: [
@@ -1031,7 +1247,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search family members...',
+      searchPlaceholder: 'Search family members, conditions, notes...',
       title: 'Filter & Sort Family Members',
       showCategory: true,
       showStatus: true,
@@ -1076,7 +1292,7 @@ export const medicalPageConfigs = {
           label: 'Severity',
           sortable: true,
           width: '100px',
-          render: (value, row) => {
+          render: (value) => {
             if (!value) return '-';
             const colors = {
               mild: 'green',

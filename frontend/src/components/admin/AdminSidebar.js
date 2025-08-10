@@ -120,14 +120,6 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
             <span className="nav-text">Backup Management</span>
           </Link>
           <Link
-            to="/admin/bulk-operations"
-            className={`nav-item ${currentPath.includes('/admin/bulk-operations') ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin/bulk-operations')}
-          >
-            <span className="nav-icon">⚡</span>
-            <span className="nav-text">Bulk Operations</span>
-          </Link>
-          <Link
             to="/admin/system-health"
             className={`nav-item ${currentPath.includes('/admin/system-health') ? 'active' : ''}`}
             onClick={() => handleLinkClick('/admin/system-health')}

@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -15,7 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.11.0"
+    VERSION: str = "0.22.0"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
@@ -68,19 +69,63 @@ class Settings:  # App Info
         os.getenv("BACKUP_RETENTION_DAYS", "7")
     )  # Keep it simple initially
 
+    # Enhanced Backup Retention Settings
+    BACKUP_MIN_COUNT: int = int(
+        os.getenv("BACKUP_MIN_COUNT", "5")
+    )  # Always keep at least 5 backups
+    BACKUP_MAX_COUNT: int = int(
+        os.getenv("BACKUP_MAX_COUNT", "50")
+    )  # Warning threshold for too many backups
+
     # Trash directory settings
     TRASH_DIR: Path = Path(os.getenv("TRASH_DIR", "./uploads/trash"))
     TRASH_RETENTION_DAYS: int = int(
         os.getenv("TRASH_RETENTION_DAYS", "30")
     )  # Keep deleted files for 30 days
 
+    # Paperless-ngx Integration Configuration
+    PAPERLESS_REQUEST_TIMEOUT: int = int(
+        os.getenv("PAPERLESS_REQUEST_TIMEOUT", "30")
+    )  # seconds
+    PAPERLESS_CONNECT_TIMEOUT: int = int(
+        os.getenv("PAPERLESS_CONNECT_TIMEOUT", "10")
+    )  # seconds
+    # Extended timeout for upload operations specifically to handle large files
+    PAPERLESS_UPLOAD_TIMEOUT: int = int(
+        os.getenv("PAPERLESS_UPLOAD_TIMEOUT", "300")
+    )  # 5 minutes for uploads
+    # Timeout for monitoring processing status - how long to wait without status updates
+    PAPERLESS_PROCESSING_TIMEOUT: int = int(
+        os.getenv("PAPERLESS_PROCESSING_TIMEOUT", "1800")
+    )  # 30 minutes max processing time
+    # How often to check processing status
+    PAPERLESS_STATUS_CHECK_INTERVAL: int = int(
+        os.getenv("PAPERLESS_STATUS_CHECK_INTERVAL", "10")
+    )  # Check every 10 seconds
+    PAPERLESS_MAX_UPLOAD_SIZE: int = int(
+        os.getenv("PAPERLESS_MAX_UPLOAD_SIZE", str(50 * 1024 * 1024))
+    )  # 50MB
+    PAPERLESS_RETRY_ATTEMPTS: int = int(os.getenv("PAPERLESS_RETRY_ATTEMPTS", "3"))
+    PAPERLESS_SALT: str = os.getenv("PAPERLESS_SALT", "paperless_integration_salt_v1")
+
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
-    ENABLE_DEBUG_LOGS: bool = (
-        os.getenv("DEBUG", "False").lower() == "true"
-    )  # Database Sequence Monitoring (configurable for different environments)
+    ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
+
+    # Log Rotation Configuration
+    LOG_ROTATION_METHOD: str = os.getenv(
+        "LOG_ROTATION_METHOD", "auto"
+    )  # auto|python|logrotate
+    LOG_ROTATION_SIZE: str = os.getenv("LOG_ROTATION_SIZE", "5M")
+    LOG_ROTATION_TIME: str = os.getenv(
+        "LOG_ROTATION_TIME", "daily"
+    )  # daily|weekly|monthly
+    LOG_ROTATION_BACKUP_COUNT: int = int(os.getenv("LOG_ROTATION_BACKUP_COUNT", "30"))
+    LOG_COMPRESSION: bool = os.getenv("LOG_COMPRESSION", "True").lower() == "true"
+
+    # Database Sequence Monitoring (configurable for different environments)
     ENABLE_SEQUENCE_MONITORING: bool = (
         os.getenv("ENABLE_SEQUENCE_MONITORING", "True").lower() == "true"
     )
@@ -93,14 +138,42 @@ class Settings:  # App Info
     )
 
     def __init__(self):
-        # Ensure upload directory exists
-        if not self.UPLOAD_DIR.exists():
-            self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        # Ensure upload directory exists with proper error handling
+        self._ensure_directory_exists(self.UPLOAD_DIR, "upload")
 
-        # Ensure backup directory exists
-        if not self.BACKUP_DIR.exists():
-            self.BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        # Ensure backup directory exists with proper error handling
+        self._ensure_directory_exists(self.BACKUP_DIR, "backup")
+
+    def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
+        """Ensure directory exists with proper permission error handling for Docker bind mounts."""
+        if not directory.exists():
+            try:
+                directory.mkdir(parents=True, exist_ok=True)
+                logging.info(f"Created {directory_type} directory: {directory}")
+            except PermissionError as e:
+                error_msg = (
+                    f"Permission denied creating {directory_type} directory: {directory}. "
+                    "This is likely a Docker bind mount permission issue. "
+                    "Please ensure the container has write permissions to the host directory. "
+                    "For bind mounts, you may need to: "
+                    "1. Set proper ownership: 'sudo chown -R 1000:1000 /host/path' "
+                    "2. Or use Docker volumes instead of bind mounts. "
+                    f"Error: {str(e)}"
+                )
+                logging.error(error_msg)
+                # Don't raise here to allow the app to start, but log the issue
+                # The actual endpoints will handle the error when they try to create files
+            except OSError as e:
+                error_msg = (
+                    f"Failed to create {directory_type} directory {directory}: {str(e)}"
+                )
+                logging.error(error_msg)
+                # Don't raise here to allow the app to start
 
 
 # Create global settings instance
-settings = Settings()
+try:
+    settings = Settings()
+except Exception as e:
+    logging.error(f"Failed to initialize settings: {str(e)}")
+    raise

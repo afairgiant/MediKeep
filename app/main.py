@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.core.logging_config import LoggingConfig, get_logger
 from app.core.logging_middleware import RequestLoggingMiddleware
 from app.core.middleware import TrailingSlashMiddleware
+from app.core.activity_middleware import ActivityTrackingMiddleware
 from app.core.spa_routing import setup_spa_routing
 from app.core.startup import startup_event
 from app.core.static_files import setup_static_files
@@ -29,6 +30,7 @@ app = FastAPI(
 
 # Add middleware stack
 app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(TrailingSlashMiddleware)
 app.add_middleware(
     CORSMiddleware,

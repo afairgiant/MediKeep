@@ -5,7 +5,9 @@
   "dependencies": {
     "@mantine/core": "^8.1.2",
     "@mantine/dates": "^8.1.2",
+    "@mantine/dropzone": "^8.1.2",
     "@mantine/hooks": "^8.1.2",
+    "@mantine/notifications": "^8.1.2",
     "@tabler/icons-react": "^3.34.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

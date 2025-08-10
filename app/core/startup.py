@@ -9,6 +9,8 @@ from app.core.database import (
 )
 from app.core.datetime_utils import set_application_startup_time
 from app.core.logging_config import get_logger
+from app.core.activity_tracker import initialize_activity_tracking
+from app.core.data_migrations import run_startup_data_migrations
 
 logger = get_logger(__name__, "app")
 
@@ -91,4 +93,13 @@ async def startup_event():
     # Create default user if not exists
     create_default_user()
     await check_sequences_on_startup()
+    
+    # Run data migrations (after users/database setup is complete)
+    run_startup_data_migrations()
+    
+    # Initialize activity tracking
+    # NOTE: Automatic activity tracking disabled to prevent double logging
+    # Manual activity logging is used instead via app.api.activity_logging
+    logger.info("Activity tracking initialization skipped (using manual logging)")
+    
     logger.info("Application startup completed")

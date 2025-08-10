@@ -17,6 +17,7 @@ import {
   Divider,
   Anchor,
   Modal,
+  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -30,7 +31,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
-import { Button } from '../../components/ui';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
@@ -66,7 +66,7 @@ const EmergencyContacts = () => {
       create: (data, signal) => apiService.createEmergencyContact(data, signal),
       update: (id, data, signal) =>
         apiService.updateEmergencyContact(id, data, signal),
-      delete: (id, signal) => apiService.deleteEmergencyContact(id, signal),
+      delete: (id, signal, patientId) => apiService.deleteEmergencyContact(id, signal, patientId),
     },
     requiresPatient: true,
   });
@@ -246,11 +246,11 @@ const EmergencyContacts = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading emergency contacts...</Text>
+            <Text>Loading emergency contacts...</Text>
           </Stack>
         </Center>
       </Container>
@@ -258,14 +258,11 @@ const EmergencyContacts = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Emergency Contacts" icon="🚨" />
+    <>
+      <Container size="xl" py="md">
+      <PageHeader title="Emergency Contacts" icon="📞" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -294,6 +291,7 @@ const EmergencyContacts = () => {
 
         <Group justify="space-between" mb="lg">
           <Button
+            variant="filled"
             leftSection={<IconPlus size={16} />}
             onClick={handleAddContact}
             size="md"
@@ -325,11 +323,6 @@ const EmergencyContacts = () => {
         />
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
           {filteredContacts.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -355,12 +348,6 @@ const EmergencyContacts = () => {
               <AnimatePresence>
                 {filteredContacts.map((contact, index) => (
                   <Grid.Col key={contact.id} span={{ base: 12, md: 6, lg: 4 }}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
                       <Card
                         shadow="sm"
                         padding="lg"
@@ -489,7 +476,7 @@ const EmergencyContacts = () => {
                             <Text size="sm" c="dimmed" mb="xs">
                               📝 Notes
                             </Text>
-                            <Text size="sm" c="gray.7">
+                            <Text size="sm">
                               {contact.notes}
                             </Text>
                           </Box>
@@ -499,21 +486,21 @@ const EmergencyContacts = () => {
                           <Divider />
                           <Group justify="flex-end" gap="xs" pt="sm">
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleViewContact(contact)}
                             >
                               View
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               size="xs"
                               onClick={() => handleEditContact(contact)}
                             >
                               Edit
                             </Button>
                             <Button
-                              variant="light"
+                              variant="filled"
                               color="red"
                               size="xs"
                               onClick={() => handleDeleteContact(contact.id)}
@@ -523,7 +510,6 @@ const EmergencyContacts = () => {
                           </Group>
                         </Stack>
                       </Card>
-                    </motion.div>
                   </Grid.Col>
                 ))}
               </AnimatePresence>
@@ -600,7 +586,7 @@ const EmergencyContacts = () => {
               />
             </Paper>
           )}
-        </motion.div>
+      </Stack>
       </Container>
 
       <MantineEmergencyContactForm
@@ -761,7 +747,7 @@ const EmergencyContacts = () => {
                 📝 Notes
               </Title>
               {viewingContact.notes ? (
-                <Text size="md" c="gray.7">
+                <Text size="md">
                   {viewingContact.notes}
                 </Text>
               ) : (
@@ -773,10 +759,12 @@ const EmergencyContacts = () => {
 
             {/* Action Buttons */}
             <Group justify="flex-end" gap="md">
-              <Button variant="light" onClick={handleCloseViewModal}>
+              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
                 Close
               </Button>
               <Button
+                variant="filled"
+                size="xs"
                 onClick={() => {
                   handleCloseViewModal();
                   handleEditContact(viewingContact);
@@ -788,7 +776,7 @@ const EmergencyContacts = () => {
           </Stack>
         )}
       </Modal>
-    </motion.div>
+    </>
   );
 };
 

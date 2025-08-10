@@ -8,6 +8,9 @@ from ..models.enums import get_all_condition_statuses, get_all_severity_levels
 
 
 class ConditionBase(BaseModel):
+    condition_name: Optional[str] = Field(
+        None, max_length=500, description="Name of the condition"
+    )
     diagnosis: str = Field(
         ..., min_length=2, max_length=500, description="Medical diagnosis"
     )
@@ -34,6 +37,9 @@ class ConditionBase(BaseModel):
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the practitioner"
+    )
+    medication_id: Optional[int] = Field(
+        None, gt=0, description="ID of related medication"
     )
 
     @validator("status")
@@ -79,6 +85,7 @@ class ConditionCreate(ConditionBase):
 
 
 class ConditionUpdate(BaseModel):
+    condition_name: Optional[str] = Field(None, max_length=500)
     diagnosis: Optional[str] = Field(None, min_length=2, max_length=500)
     notes: Optional[str] = Field(None, max_length=1000)
     onset_date: Optional[date] = None
@@ -89,6 +96,7 @@ class ConditionUpdate(BaseModel):
     snomed_code: Optional[str] = Field(None, max_length=20)
     code_description: Optional[str] = Field(None, max_length=500)
     practitioner_id: Optional[int] = Field(None, gt=0)
+    medication_id: Optional[int] = Field(None, gt=0)
 
     @validator("status")
     def validate_status(cls, v):
@@ -144,6 +152,61 @@ class ConditionWithRelations(ConditionResponse):
 
     class Config:
         from_attributes = True
+        
+    @field_validator('patient', mode='before')
+    @classmethod
+    def validate_patient(cls, v):
+        """Convert SQLAlchemy Patient object to dict"""
+        if v is None:
+            return None
+        if hasattr(v, '__dict__'):
+            # Convert SQLAlchemy object to dict
+            return {
+                'id': getattr(v, 'id', None),
+                'first_name': getattr(v, 'first_name', None),
+                'last_name': getattr(v, 'last_name', None),
+                'birth_date': getattr(v, 'birth_date', None),
+                'user_id': getattr(v, 'user_id', None),
+            }
+        return v
+    
+    @field_validator('practitioner', mode='before')
+    @classmethod
+    def validate_practitioner(cls, v):
+        """Convert SQLAlchemy Practitioner object to dict"""
+        if v is None:
+            return None
+        if hasattr(v, '__dict__'):
+            # Convert SQLAlchemy object to dict
+            return {
+                'id': getattr(v, 'id', None),
+                'name': getattr(v, 'name', None),
+                'specialty': getattr(v, 'specialty', None),
+                'phone_number': getattr(v, 'phone_number', None),
+            }
+        return v
+    
+    @field_validator('treatments', mode='before')
+    @classmethod
+    def validate_treatments(cls, v):
+        """Convert SQLAlchemy Treatment objects to list of dicts"""
+        if v is None:
+            return []
+        if isinstance(v, list):
+            treatments = []
+            for treatment in v:
+                if hasattr(treatment, '__dict__'):
+                    treatments.append({
+                        'id': getattr(treatment, 'id', None),
+                        'treatment_name': getattr(treatment, 'treatment_name', None),
+                        'status': getattr(treatment, 'status', None),
+                        'start_date': getattr(treatment, 'start_date', None),
+                        'end_date': getattr(treatment, 'end_date', None),
+                    })
+                else:
+                    treatments.append(treatment)
+            return treatments
+        return v
 
 
 class ConditionSummary(BaseModel):
@@ -194,9 +257,20 @@ class ConditionMedicationBase(BaseModel):
         return v.strip() if v else None
 
 
-class ConditionMedicationCreate(ConditionMedicationBase):
+class ConditionMedicationCreate(BaseModel):
     """Schema for creating a condition medication relationship"""
-    pass
+    
+    medication_id: int
+    relevance_note: Optional[str] = None
+    condition_id: Optional[int] = None  # Will be set from URL path parameter
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
 
 
 class ConditionMedicationUpdate(BaseModel):

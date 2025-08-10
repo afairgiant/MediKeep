@@ -1,9 +1,7 @@
 import React from 'react';
 import { Select as MantineSelect } from '@mantine/core';
-import OldSelect from '../ui/Select';
 
 export const Select = ({
-  useMantine = true,
   value,
   onChange,
   options = [],
@@ -12,20 +10,6 @@ export const Select = ({
   disabled = false,
   ...props
 }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldSelect
-        value={value}
-        onChange={onChange}
-        options={options}
-        placeholder={placeholder}
-        className={className}
-        disabled={disabled}
-        {...props}
-      />
-    );
-  }
 
   // Handle the onChange - old component passes value directly, Mantine passes value
   const handleChange = selectedValue => {

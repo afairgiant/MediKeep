@@ -94,91 +94,91 @@ export const EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS = [
 export const STATUS_STYLES = {
   // Active states - Green
   active: {
-    color: '#2d5a2d',
-    backgroundColor: '#e8f5e8',
-    borderColor: '#c3e6c3',
+    color: 'var(--mantine-color-green-8)',
+    backgroundColor: 'var(--mantine-color-green-1)',
+    borderColor: 'var(--mantine-color-green-3)',
     icon: '🟢',
   },
   
   // Inactive/Stopped states - Gray
   inactive: {
-    color: '#6c757d',
-    backgroundColor: '#f8f9fa',
-    borderColor: '#dee2e6',
+    color: 'var(--mantine-color-gray-6)',
+    backgroundColor: 'var(--mantine-color-gray-1)',
+    borderColor: 'var(--mantine-color-gray-3)',
     icon: '⚫',
   },
   
   // Completed/Resolved states - Blue
   completed: {
-    color: '#0d47a1',
-    backgroundColor: '#e3f2fd',
-    borderColor: '#90caf9',
+    color: 'var(--mantine-color-blue-8)',
+    backgroundColor: 'var(--mantine-color-blue-1)',
+    borderColor: 'var(--mantine-color-blue-3)',
     icon: '✅',
   },
   resolved: {
-    color: '#0d47a1',
-    backgroundColor: '#e3f2fd',
-    borderColor: '#90caf9',
+    color: 'var(--mantine-color-blue-8)',
+    backgroundColor: 'var(--mantine-color-blue-1)',
+    borderColor: 'var(--mantine-color-blue-3)',
     icon: '✅',
   },
   
   // Cancelled states - Red
   cancelled: {
-    color: '#721c24',
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    color: 'var(--mantine-color-red-8)',
+    backgroundColor: 'var(--mantine-color-red-1)',
+    borderColor: 'var(--mantine-color-red-3)',
     icon: '❌',
   },
   
   // On Hold/Paused states - Orange
   on_hold: {
-    color: '#856404',
-    backgroundColor: '#fff3cd',
-    borderColor: '#ffeaa7',
+    color: 'var(--mantine-color-yellow-8)',
+    backgroundColor: 'var(--mantine-color-yellow-1)',
+    borderColor: 'var(--mantine-color-yellow-3)',
     icon: '⏸️',
   },
   
   // In Progress states - Blue
   in_progress: {
-    color: '#0c5460',
-    backgroundColor: '#d1ecf1',
-    borderColor: '#bee5eb',
+    color: 'var(--mantine-color-cyan-8)',
+    backgroundColor: 'var(--mantine-color-cyan-1)',
+    borderColor: 'var(--mantine-color-cyan-3)',
     icon: '🔄',
   },
   
   // Chronic states - Purple
   chronic: {
-    color: '#495057',
-    backgroundColor: '#e9ecef',
-    borderColor: '#ced4da',
+    color: 'var(--mantine-color-gray-7)',
+    backgroundColor: 'var(--mantine-color-gray-1)',
+    borderColor: 'var(--mantine-color-gray-4)',
     icon: '🔵',
   },
   
   // Special condition states
   recurrence: {
-    color: '#721c24',
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    color: 'var(--mantine-color-red-8)',
+    backgroundColor: 'var(--mantine-color-red-1)',
+    borderColor: 'var(--mantine-color-red-3)',
     icon: '🔄',
   },
   relapse: {
-    color: '#721c24',
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    color: 'var(--mantine-color-red-8)',
+    backgroundColor: 'var(--mantine-color-red-1)',
+    borderColor: 'var(--mantine-color-red-3)',
     icon: '⚠️',
   },
   
   // Lab/Procedure specific
   ordered: {
-    color: '#6c757d',
-    backgroundColor: '#f8f9fa',
-    borderColor: '#dee2e6',
+    color: 'var(--mantine-color-gray-6)',
+    backgroundColor: 'var(--mantine-color-gray-1)',
+    borderColor: 'var(--mantine-color-gray-3)',
     icon: '📋',
   },
   scheduled: {
-    color: '#0c5460',
-    backgroundColor: '#d1ecf1',
-    borderColor: '#bee5eb',
+    color: 'var(--mantine-color-cyan-8)',
+    backgroundColor: 'var(--mantine-color-cyan-1)',
+    borderColor: 'var(--mantine-color-cyan-3)',
     icon: '📅',
   },
 };
@@ -186,27 +186,27 @@ export const STATUS_STYLES = {
 // Severity Badge Colors
 export const SEVERITY_STYLES = {
   mild: {
-    color: '#2d5a2d',
-    backgroundColor: '#e8f5e8',
-    borderColor: '#c3e6c3',
+    color: 'var(--mantine-color-green-8)',
+    backgroundColor: 'var(--mantine-color-green-1)',
+    borderColor: 'var(--mantine-color-green-3)',
     icon: '🟢',
   },
   moderate: {
-    color: '#856404',
-    backgroundColor: '#fff3cd',
-    borderColor: '#ffeaa7',
+    color: 'var(--mantine-color-yellow-8)',
+    backgroundColor: 'var(--mantine-color-yellow-1)',
+    borderColor: 'var(--mantine-color-yellow-3)',
     icon: '🟡',
   },
   severe: {
-    color: '#721c24',
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    color: 'var(--mantine-color-orange-8)',
+    backgroundColor: 'var(--mantine-color-orange-1)',
+    borderColor: 'var(--mantine-color-orange-3)',
     icon: '🟠',
   },
   critical: {
-    color: '#721c24',
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    color: 'var(--mantine-color-red-8)',
+    backgroundColor: 'var(--mantine-color-red-1)',
+    borderColor: 'var(--mantine-color-red-3)',
     icon: '🔴',
   },
 };

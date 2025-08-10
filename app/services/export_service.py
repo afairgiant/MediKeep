@@ -782,8 +782,16 @@ class ExportService:
         ]
 
     async def get_export_summary(self, user_id: int) -> Dict[str, Any]:
-        """Get summary of available data for export."""
+        """Get summary of available data for export (legacy method using user_id)."""
         patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
+        if not patient:
+            raise ValueError("Patient record not found")
+
+        return await self.get_export_summary_by_patient_id(patient.id)
+
+    async def get_export_summary_by_patient_id(self, patient_id: int) -> Dict[str, Any]:
+        """Get summary of available data for export by patient ID (Phase 1 compatible)."""
+        patient = self.db.query(Patient).filter(Patient.id == patient_id).first()
         if not patient:
             raise ValueError("Patient record not found")
 

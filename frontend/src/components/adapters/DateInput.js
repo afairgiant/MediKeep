@@ -1,9 +1,7 @@
 import React from 'react';
 import { DateInput as MantineDateInput } from '@mantine/dates';
-import OldDateInput from '../ui/DateInput';
 
 export const DateInput = ({
-  useMantine = true,
   label,
   name,
   value,
@@ -17,19 +15,6 @@ export const DateInput = ({
   helpText,
   ...props
 }) => {
-  // Easy toggle - if something breaks, just set useMantine=false
-  if (!useMantine) {
-    return (
-      <OldDateInput
-        value={value}
-        onChange={val => onChange({ target: { name, value: val } })}
-        placeholder={placeholder}
-        className={className}
-        disabled={disabled}
-        {...props}
-      />
-    );
-  }
 
   // Handle the change event to match form expectations
   const handleChange = date => {

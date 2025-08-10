@@ -49,19 +49,19 @@ def read_immunizations(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    patient_id: Optional[int] = Query(None),
     vaccine_name: Optional[str] = Query(None),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
-    """Retrieve immunizations for the current user with optional filtering."""
-    # Filter immunizations by the user's patient_id (ignore any provided patient_id for security)
+    """Retrieve immunizations for the current user or accessible patient."""
+    
+    # Filter immunizations by the target patient_id
     if vaccine_name:
         immunizations = immunization.get_by_vaccine(
-            db, vaccine_name=vaccine_name, patient_id=current_user_patient_id
+            db, vaccine_name=vaccine_name, patient_id=target_patient_id
         )
     else:
         immunizations = immunization.get_by_patient(
-            db, patient_id=current_user_patient_id, skip=skip, limit=limit
+            db, patient_id=target_patient_id, skip=skip, limit=limit
         )
     return immunizations
 
