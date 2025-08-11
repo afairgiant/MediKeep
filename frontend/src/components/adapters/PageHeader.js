@@ -67,16 +67,9 @@ const PageHeader = ({
   // Navigation items organized by category
   const navigationSections = [
     {
-      title: 'Core',
-      items: [
-        { name: 'Dashboard', path: '/dashboard', icon: '🏥' },
-        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
-        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
-      ],
-    },
-    {
       title: 'Medical Records',
       items: [
+        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
         { name: 'Allergies', path: '/allergies', icon: '⚠️' },
         { name: 'Conditions', path: '/conditions', icon: '🏥' },
         { name: 'Lab Results', path: '/lab-results', icon: '🧪' },
@@ -97,6 +90,7 @@ const PageHeader = ({
     {
       title: 'Other',
       items: [
+        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
         { name: 'Insurance', path: '/insurance', icon: '💳' },
         { name: 'Pharmacies', path: '/pharmacies', icon: '🏪' },
         { name: 'Practitioners', path: '/practitioners', icon: '👨‍⚕️' },
