@@ -417,3 +417,14 @@ button[type="submit"]:disabled {
     max-width: 90%;
   }
 }
+
+/* Registration Disabled Message */
+.registration-disabled-message {
+  text-align: center;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #666;
+  font-size: 14px;
+  margin-top: 10px;
+}

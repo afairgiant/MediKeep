@@ -346,6 +346,39 @@ class SimpleAuthService {
 
     return headers;
   }
+
+  // Check if user registration is enabled
+  async checkRegistrationEnabled() {
+    try {
+      const response = await this.makeRequest('/auth/registration-status', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        logger.error('Failed to check registration status', {
+          status: response.status,
+          category: 'auth_registration_check'
+        });
+        // Default to enabled if check fails
+        return { registration_enabled: true };
+      }
+
+      const data = await response.json();
+      logger.info('Registration status checked', {
+        enabled: data.registration_enabled,
+        category: 'auth_registration_check'
+      });
+      return data;
+    } catch (error) {
+      logger.error('Error checking registration status', {
+        error: error.message,
+        category: 'auth_registration_check'
+      });
+      // Default to enabled if check fails to avoid blocking users
+      return { registration_enabled: true };
+    }
+  }
 }
 
 // Export singleton instance

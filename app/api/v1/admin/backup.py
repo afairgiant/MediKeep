@@ -42,6 +42,7 @@ class RetentionSettingsResponse(BaseModel):
     trash_retention_days: int
     backup_min_count: int
     backup_max_count: int
+    allow_user_registration: bool
 
 
 class RetentionSettingsUpdate(BaseModel):
@@ -49,6 +50,7 @@ class RetentionSettingsUpdate(BaseModel):
     trash_retention_days: Optional[int] = None
     backup_min_count: Optional[int] = None
     backup_max_count: Optional[int] = None
+    allow_user_registration: Optional[bool] = None
 
 
 @router.post("/create-database", response_model=BackupResponse)
@@ -383,12 +385,13 @@ async def cleanup_all_old_data(
 async def get_retention_settings(
     current_user: User = Depends(get_current_admin_user),
 ) -> RetentionSettingsResponse:
-    """Get current retention settings for backups and trash."""
+    """Get current admin settings including retention and user management."""
     return RetentionSettingsResponse(
         backup_retention_days=settings.BACKUP_RETENTION_DAYS,
         trash_retention_days=settings.TRASH_RETENTION_DAYS,
         backup_min_count=settings.BACKUP_MIN_COUNT,
         backup_max_count=settings.BACKUP_MAX_COUNT,
+        allow_user_registration=settings.ALLOW_USER_REGISTRATION,
     )
 
 
@@ -397,7 +400,7 @@ async def update_retention_settings(
     settings_update: RetentionSettingsUpdate,
     current_user: User = Depends(get_current_admin_user),
 ):
-    """Update retention settings for backups and trash."""
+    """Update admin settings including retention and user management."""
     try:
         updated_settings = {}
 
@@ -459,27 +462,35 @@ async def update_retention_settings(
             settings.BACKUP_MAX_COUNT = settings_update.backup_max_count
             updated_settings["backup_max_count"] = settings_update.backup_max_count
 
+        if settings_update.allow_user_registration is not None:
+            settings.ALLOW_USER_REGISTRATION = settings_update.allow_user_registration
+            updated_settings["allow_user_registration"] = settings_update.allow_user_registration
+            logger.info(
+                f"User registration {'enabled' if settings_update.allow_user_registration else 'disabled'} by admin {current_user.username}"
+            )
+
         logger.info(
-            f"Admin {current_user.username} updated retention settings: {updated_settings}"
+            f"Admin {current_user.username} updated settings: {updated_settings}"
         )
 
         return {
-            "message": "Retention settings updated successfully",
+            "message": "Settings updated successfully",
             "updated_settings": updated_settings,
             "current_settings": {
                 "backup_retention_days": settings.BACKUP_RETENTION_DAYS,
                 "trash_retention_days": settings.TRASH_RETENTION_DAYS,
                 "backup_min_count": settings.BACKUP_MIN_COUNT,
                 "backup_max_count": settings.BACKUP_MAX_COUNT,
+                "allow_user_registration": settings.ALLOW_USER_REGISTRATION,
             },
         }
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to update retention settings: {str(e)}")
+        logger.error(f"Failed to update settings: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to update retention settings: {str(e)}"
+            status_code=500, detail=f"Failed to update settings: {str(e)}"
         )
 
 

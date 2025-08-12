@@ -10,6 +10,7 @@ const AdminSettings = () => {
     trash_retention_days: 30,
     backup_min_count: 5,
     backup_max_count: 50,
+    allow_user_registration: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,6 +61,7 @@ const AdminSettings = () => {
         trash_retention_days: settings.trash_retention_days,
         backup_min_count: settings.backup_min_count,
         backup_max_count: settings.backup_max_count,
+        allow_user_registration: settings.allow_user_registration,
       };
 
       const response =
@@ -263,22 +265,40 @@ const AdminSettings = () => {
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="settings-section-actions">
-              <button
-                onClick={handleReset}
-                className="settings-btn secondary"
-                disabled={saving}
-              >
-                Reset
-              </button>
-              <button
-                onClick={handleSave}
-                className="settings-btn primary"
-                disabled={saving}
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
+          {/* User Management Settings */}
+          <div className="settings-section-card">
+            <div className="settings-section-header">
+              <h2>User Management</h2>
+              <p>Control user registration and access settings</p>
+            </div>
+            
+            <div className="settings-section-content">
+              <div className="setting-item">
+                <div className="setting-info">
+                  <div className="setting-title">Allow New User Registration</div>
+                  <div className="setting-description">
+                    Enable or disable the ability for new users to create accounts from the login page
+                  </div>
+                </div>
+                <div className="setting-control">
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={settings.allow_user_registration}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        allow_user_registration: e.target.checked
+                      }))}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <span className="toggle-label">
+                    {settings.allow_user_registration ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -297,6 +317,24 @@ const AdminSettings = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Global Save Actions - Apply to all settings */}
+        <div className="settings-global-actions">
+          <button
+            onClick={handleReset}
+            className="settings-btn secondary"
+            disabled={saving}
+          >
+            Reset All
+          </button>
+          <button
+            onClick={handleSave}
+            className="settings-btn primary"
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save All Changes'}
+          </button>
         </div>
       </div>
     </AdminLayout>
