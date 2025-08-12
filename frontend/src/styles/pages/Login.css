@@ -418,6 +418,64 @@ button[type="submit"]:disabled {
   }
 }
 
+/* SSO Section */
+.sso-section {
+  margin: 1.5rem 0;
+}
+
+.divider {
+  text-align: center;
+  margin: 1.5rem 0 1rem 0;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e1e5e9;
+}
+
+.divider span {
+  background: white;
+  color: #666;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  position: relative;
+}
+
+.sso-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #fff;
+  color: #333;
+  border: 2px solid #e1e5e9;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.sso-btn:hover:not(:disabled) {
+  border-color: #667eea;
+  background: #f8f9ff;
+  transform: translateY(-1px);
+}
+
+.sso-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Registration Disabled Message */
 .registration-disabled-message {
   text-align: center;
