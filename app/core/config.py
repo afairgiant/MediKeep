@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from pathlib import Path
@@ -88,6 +89,19 @@ class Settings:  # App Info
         os.getenv("ALLOW_USER_REGISTRATION", "True").lower() == "true"
     )  # Default: enabled to avoid lockout scenarios
 
+    # SSO Configuration (Simple and Right-Sized)
+    SSO_ENABLED: bool = os.getenv("SSO_ENABLED", "False").lower() == "true"
+    SSO_PROVIDER_TYPE: str = os.getenv("SSO_PROVIDER_TYPE", "oidc")
+    SSO_CLIENT_ID: str = os.getenv("SSO_CLIENT_ID", "")
+    SSO_CLIENT_SECRET: str = os.getenv("SSO_CLIENT_SECRET", "")
+    SSO_ISSUER_URL: str = os.getenv("SSO_ISSUER_URL", "")
+    SSO_REDIRECT_URI: str = os.getenv("SSO_REDIRECT_URI", "")
+    SSO_ALLOWED_DOMAINS: list = json.loads(os.getenv("SSO_ALLOWED_DOMAINS", "[]"))
+    
+    # Basic rate limiting (simple approach)
+    SSO_RATE_LIMIT_ATTEMPTS: int = int(os.getenv("SSO_RATE_LIMIT_ATTEMPTS", "10"))
+    SSO_RATE_LIMIT_WINDOW_MINUTES: int = int(os.getenv("SSO_RATE_LIMIT_WINDOW_MINUTES", "10"))
+
     # Paperless-ngx Integration Configuration
     PAPERLESS_REQUEST_TIMEOUT: int = int(
         os.getenv("PAPERLESS_REQUEST_TIMEOUT", "30")
@@ -148,6 +162,40 @@ class Settings:  # App Info
 
         # Ensure backup directory exists with proper error handling
         self._ensure_directory_exists(self.BACKUP_DIR, "backup")
+
+    @property
+    def sso_configured(self) -> bool:
+        """Check if SSO is properly configured"""
+        if not self.SSO_ENABLED:
+            return False
+        
+        basic_config = bool(self.SSO_CLIENT_ID and self.SSO_CLIENT_SECRET and self.SSO_REDIRECT_URI)
+        
+        # OIDC providers need issuer URL
+        if self.SSO_PROVIDER_TYPE in ["oidc", "authentik", "authelia", "keycloak"]:
+            return basic_config and bool(self.SSO_ISSUER_URL)
+        
+        return basic_config
+
+    def validate_sso_config(self):
+        """Simple validation with clear error messages"""
+        if not self.SSO_ENABLED:
+            return
+        
+        if self.SSO_PROVIDER_TYPE not in ['google', 'github', 'oidc', 'authentik', 'authelia', 'keycloak']:
+            raise ValueError(f"Unsupported SSO provider: {self.SSO_PROVIDER_TYPE}")
+        
+        if not self.SSO_CLIENT_ID:
+            raise ValueError("SSO_CLIENT_ID is required when SSO is enabled")
+        
+        if not self.SSO_CLIENT_SECRET:
+            raise ValueError("SSO_CLIENT_SECRET is required when SSO is enabled")
+        
+        if not self.SSO_REDIRECT_URI:
+            raise ValueError("SSO_REDIRECT_URI is required when SSO is enabled")
+        
+        if self.SSO_PROVIDER_TYPE in ["oidc", "authentik", "authelia", "keycloak"] and not self.SSO_ISSUER_URL:
+            raise ValueError("SSO_ISSUER_URL is required for OIDC providers")
 
     def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
         """Ensure directory exists with proper permission error handling for Docker bind mounts."""

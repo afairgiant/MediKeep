@@ -67,7 +67,17 @@ class User(Base):
     full_name = Column(String, nullable=False)  # Role-based access control
     role = Column(
         String, nullable=False
-    )  # e.g., 'admin', 'user', 'guest'    # Timestamps
+    )  # e.g., 'admin', 'user', 'guest'    
+    
+    # SSO fields
+    auth_method = Column(String(20), nullable=False, default='local')  # 'local', 'sso', 'hybrid'
+    external_id = Column(String(255), nullable=True, unique=True)  # SSO provider user ID
+    sso_provider = Column(String(50), nullable=True)  # 'google', 'github', 'oidc', etc.
+    sso_metadata = Column(JSON, nullable=True)  # Additional SSO data
+    last_sso_login = Column(DateTime, nullable=True)  # Last SSO login timestamp
+    account_linked_at = Column(DateTime, nullable=True)  # When account was linked to SSO
+    
+    # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
