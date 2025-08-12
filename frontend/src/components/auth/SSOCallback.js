@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/auth/simpleAuthService';
+import SSOConflictModal from './SSOConflictModal';
 import logger from '../../services/logger';
 
 const SSOCallback = () => {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(true);
+  const [conflictData, setConflictData] = useState(null);
+  const [showConflictModal, setShowConflictModal] = useState(false);
+  const [resolvingConflict, setResolvingConflict] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -74,6 +78,20 @@ const SSOCallback = () => {
         return;
       }
 
+      // Check if there's an account conflict
+      if (result.conflict) {
+        logger.info('SSO account conflict detected', {
+          existingUser: result.existing_user_info?.email,
+          ssoUser: result.sso_user_info?.email,
+          category: 'sso_callback_component'
+        });
+        
+        setConflictData(result);
+        setShowConflictModal(true);
+        setProcessing(false);
+        return;
+      }
+
       logger.info('SSO authentication completed successfully', {
         isNewUser: result.isNewUser,
         username: result.user?.username,
@@ -117,6 +135,65 @@ const SSOCallback = () => {
       });
       setError('An unexpected error occurred during authentication');
       setProcessing(false);
+    }
+  };
+
+  const handleConflictResolution = async ({ action, preference, tempToken }) => {
+    setResolvingConflict(true);
+    
+    try {
+      logger.info('Resolving SSO account conflict', {
+        action,
+        preference,
+        category: 'sso_callback_component'
+      });
+
+      const result = await authService.resolveSSOConflict(tempToken, action, preference);
+      
+      if (result.success) {
+        logger.info('SSO conflict resolved successfully', {
+          action,
+          username: result.user?.username,
+          category: 'sso_callback_component'
+        });
+
+        // Update auth context with resolved login
+        if (login) {
+          login(result.user, result.token);
+        }
+
+        // Hide the modal and redirect
+        setShowConflictModal(false);
+        
+        // Determine where to redirect
+        let redirectPath = '/dashboard';
+        
+        if (result.isNewUser) {
+          redirectPath = '/patients/me?edit=true';
+        } else {
+          const returnUrl = sessionStorage.getItem('sso_return_url');
+          if (returnUrl) {
+            redirectPath = returnUrl;
+            sessionStorage.removeItem('sso_return_url');
+          }
+        }
+
+        navigate(redirectPath, { replace: true });
+        
+      } else {
+        setError(result.error || 'Failed to resolve account conflict');
+        setShowConflictModal(false);
+      }
+      
+    } catch (error) {
+      logger.error('Error resolving SSO conflict', {
+        error: error.message,
+        category: 'sso_callback_component'
+      });
+      setError('An error occurred while resolving the account conflict');
+      setShowConflictModal(false);
+    } finally {
+      setResolvingConflict(false);
     }
   };
 
@@ -220,7 +297,16 @@ const SSOCallback = () => {
     );
   }
 
-  return null;
+  return (
+    <>
+      <SSOConflictModal
+        conflictData={conflictData}
+        isOpen={showConflictModal}
+        onResolve={handleConflictResolution}
+        isLoading={resolvingConflict}
+      />
+    </>
+  );
 };
 
 export default SSOCallback;

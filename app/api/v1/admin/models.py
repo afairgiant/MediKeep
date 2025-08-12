@@ -257,6 +257,7 @@ FIELD_DISPLAY_CONFIG = {
             "sso_metadata",
             "last_sso_login",
             "account_linked_at",
+            "sso_linking_preference",
             "active_patient_id",
             "created_at",
             "updated_at",
@@ -796,6 +797,8 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
             choices = ["M", "F", "OTHER", "U"]
         elif column.name == "role":
             choices = ["patient", "admin", "staff"]
+        elif column.name == "sso_linking_preference":
+            choices = ["auto_link", "create_separate", "always_ask"]
 
         fields.append(
             ModelField(

@@ -76,6 +76,7 @@ class User(Base):
     sso_metadata = Column(JSON, nullable=True)  # Additional SSO data
     last_sso_login = Column(DateTime, nullable=True)  # Last SSO login timestamp
     account_linked_at = Column(DateTime, nullable=True)  # When account was linked to SSO
+    sso_linking_preference = Column(String(20), nullable=True)  # 'auto_link', 'create_separate', 'always_ask'
     
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)

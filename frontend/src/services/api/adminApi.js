@@ -59,6 +59,19 @@ class AdminApiService extends BaseApiService {
     return response.json();
   }
 
+  async getSSOConfig() {
+    // Note: This endpoint is not under /admin, so we use the direct path
+    const response = await fetch('/api/v1/auth/sso/config', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
+
   // Model management endpoints
   async getAvailableModels() {
     return this.get('/models/');

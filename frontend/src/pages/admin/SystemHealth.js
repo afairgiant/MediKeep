@@ -79,14 +79,29 @@ const SystemHealth = () => {
     },
   });
 
+  // SSO Configuration
+  const {
+    data: ssoConfig,
+    loading: ssoLoading,
+    error: ssoError,
+    refreshData: refreshSSO,
+  } = useAdminData({
+    entityName: 'SSO Configuration',
+    apiMethodsConfig: {
+      load: () => adminApiService.getSSOConfig(),
+    },
+  });
+
+
   const loading =
     healthLoading ||
     metricsLoading ||
     statsLoading ||
     storageLoading ||
-    logLoading;
+    logLoading ||
+    ssoLoading;
   const hasError =
-    healthError || metricsError || statsError || storageError || logError;
+    healthError || metricsError || statsError || storageError || logError || ssoError;
 
   const handleRefreshAll = async () => {
     setLastRefresh(new Date());
@@ -96,6 +111,7 @@ const SystemHealth = () => {
       refreshStats(true),
       refreshStorage(true),
       refreshLogs(true),
+      refreshSSO(true),
     ]);
   };
 
@@ -371,6 +387,65 @@ const SystemHealth = () => {
                 systemMetrics?.services?.admin_interface?.status
               )}
             />
+          </div>
+        </AdminCard>
+
+        {/* SSO Configuration */}
+        <AdminCard
+          title="Single Sign-On (SSO)"
+          icon="🔐"
+          status={ssoConfig?.enabled ? 'healthy' : 'info'}
+          loading={ssoLoading}
+          error={ssoError}
+        >
+          <div className="health-items">
+            <HealthItem
+              label="SSO Status"
+              value={ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+              status={ssoConfig?.enabled ? 'healthy' : 'info'}
+            />
+            {ssoConfig?.enabled && (
+              <>
+                <HealthItem
+                  label="Provider Type"
+                  value={ssoConfig.provider_type?.toUpperCase() || 'Unknown'}
+                  status="info"
+                />
+                {ssoConfig.provider_type === 'google' && (
+                  <HealthItem
+                    label="Provider"
+                    value="Google OAuth 2.0"
+                    status="healthy"
+                  />
+                )}
+                {ssoConfig.provider_type === 'github' && (
+                  <HealthItem
+                    label="Provider"
+                    value="GitHub OAuth"
+                    status="healthy"
+                  />
+                )}
+                {ssoConfig.provider_type === 'oidc' && (
+                  <HealthItem
+                    label="Provider"
+                    value="OpenID Connect"
+                    status="healthy"
+                  />
+                )}
+                <HealthItem
+                  label="Registration via SSO"
+                  value={ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
+                  status={ssoConfig.registration_enabled ? 'healthy' : 'warning'}
+                />
+              </>
+            )}
+            {!ssoConfig?.enabled && (
+              <HealthItem
+                label="Info"
+                value="Users can only log in with username/password"
+                status="info"
+              />
+            )}
           </div>
         </AdminCard>
 

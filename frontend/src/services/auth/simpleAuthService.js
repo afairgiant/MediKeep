@@ -500,6 +500,24 @@ class SimpleAuthService {
       }
 
       const data = await response.json();
+      
+      // Check if this is a conflict response
+      if (data.conflict) {
+        logger.info('SSO conflict detected', {
+          hasExistingUser: !!data.existing_user_info,
+          hasSSOUser: !!data.sso_user_info,
+          category: 'sso_callback'
+        });
+        
+        return {
+          success: true,
+          conflict: true,
+          existing_user_info: data.existing_user_info,
+          sso_user_info: data.sso_user_info,
+          temp_token: data.temp_token
+        };
+      }
+      
       logger.info('SSO authentication successful', {
         isNewUser: data.is_new_user,
         authMethod: data.user?.auth_method,
@@ -570,6 +588,70 @@ class SimpleAuthService {
         category: 'sso_test'
       });
       return { success: false, message: error.message };
+    }
+  }
+
+  // Resolve SSO account conflict
+  async resolveSSOConflict(tempToken, action, preference) {
+    try {
+      logger.info('Resolving SSO account conflict', {
+        action,
+        preference,
+        category: 'sso_conflict'
+      });
+
+      const response = await this.makeRequest('/auth/sso/resolve-conflict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          temp_token: tempToken,
+          action: action,
+          preference: preference
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        logger.error('SSO conflict resolution failed', {
+          status: response.status,
+          error: errorData,
+          category: 'sso_conflict'
+        });
+        
+        return { 
+          success: false, 
+          error: errorData.detail?.message || errorData.detail || 'Failed to resolve account conflict' 
+        };
+      }
+
+      const data = await response.json();
+      
+      logger.info('SSO conflict resolved successfully', {
+        hasToken: !!data.access_token,
+        hasUser: !!data.user,
+        category: 'sso_conflict'
+      });
+
+      // Prepare the result in the expected format
+      return {
+        success: true,
+        user: {
+          ...data.user,
+          // Ensure isAdmin property is set based on role
+          isAdmin: ['admin', 'administrator'].includes(data.user.role?.toLowerCase())
+        },
+        token: data.access_token,
+        isNewUser: data.is_new_user
+      };
+
+    } catch (error) {
+      logger.error('SSO conflict resolution error', {
+        error: error.message,
+        category: 'sso_conflict'
+      });
+      return { success: false, error: error.message };
     }
   }
 }

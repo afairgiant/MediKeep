@@ -55,6 +55,11 @@ async def sso_callback(
         # Complete SSO authentication
         result = await sso_service.complete_authentication(code, state, db)
         
+        # Check if this is a conflict response
+        if result.get("conflict"):
+            # Return conflict data directly for frontend to handle
+            return result
+        
         # Create JWT token for the user (matching regular auth format)
         access_token = create_access_token(
             data={
@@ -103,6 +108,58 @@ async def sso_callback(
         raise HTTPException(
             status_code=500,
             detail="SSO authentication failed"
+        )
+
+@router.post("/resolve-conflict")
+async def resolve_account_conflict(
+    temp_token: str,
+    action: str,  # "link" or "create_separate"
+    preference: str,  # "auto_link", "create_separate", "always_ask"
+    db: Session = Depends(deps.get_db)
+):
+    """Resolve SSO account conflict based on user's choice"""
+    try:
+        result = sso_service.resolve_account_conflict(temp_token, action, preference, db)
+        
+        # Create JWT token for the user
+        access_token = create_access_token(
+            data={
+                "sub": result["user"].username,
+                "role": (
+                    result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
+                ),
+                "user_id": result["user"].id,
+            }
+        )
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": result["user"].id,
+                "username": result["user"].username,
+                "email": result["user"].email,
+                "full_name": result["user"].full_name,
+                "role": result["user"].role,
+                "auth_method": result["user"].auth_method,
+            },
+            "is_new_user": result["is_new_user"]
+        }
+        
+    except SSOAuthenticationError as e:
+        logger.error(f"SSO conflict resolution failed: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": str(e),
+                "error_code": "CONFLICT_RESOLUTION_FAILED"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in SSO conflict resolution: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="SSO conflict resolution failed"
         )
 
 @router.post("/test-connection")

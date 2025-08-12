@@ -79,14 +79,21 @@ class SSOService:
                 # Find or create user
                 result = self._find_or_create_user(user_info, db)
                 
-                logger.info(
-                    f"SSO authentication successful for {user_info.email}",
-                    extra={
-                        "category": "sso", 
-                        "event": "auth_success",
-                        "is_new_user": result["is_new_user"]
-                    }
-                )
+                # Log success (handle both regular and conflict responses)
+                if result.get("conflict"):
+                    logger.info(
+                        f"SSO authentication detected conflict for {user_info.email}",
+                        extra={"category": "sso", "event": "auth_conflict"}
+                    )
+                else:
+                    logger.info(
+                        f"SSO authentication successful for {user_info.email}",
+                        extra={
+                            "category": "sso", 
+                            "event": "auth_success",
+                            "is_new_user": result["is_new_user"]
+                        }
+                    )
                 
                 return result
                 
@@ -119,29 +126,84 @@ class SSOService:
         allowed_domains = [d.lower() for d in settings.SSO_ALLOWED_DOMAINS]
         return domain in allowed_domains
     
+    def _validate_sso_linking(self, existing_user, sso_user_info) -> bool:
+        """Detect corrupted SSO linking data"""
+        
+        # Check for partial corruption - has external_id but missing sso_provider
+        if existing_user.external_id and not existing_user.sso_provider:
+            logger.warning(
+                f"Corrupted SSO data for user {existing_user.id}: has external_id but no sso_provider",
+                extra={"category": "sso_corruption", "user_id": existing_user.id, "corruption_type": "missing_provider"}
+            )
+            return False
+        
+        # Check for provider mismatch
+        if existing_user.sso_provider and existing_user.sso_provider != settings.SSO_PROVIDER_TYPE:
+            logger.warning(
+                f"Provider mismatch for user {existing_user.id}: expected {settings.SSO_PROVIDER_TYPE}, got {existing_user.sso_provider}",
+                extra={"category": "sso_corruption", "user_id": existing_user.id, "corruption_type": "provider_mismatch"}
+            )
+            return False
+        
+        # Check for auth_method inconsistency
+        has_sso_data = bool(existing_user.external_id and existing_user.sso_provider)
+        is_hybrid_or_sso = existing_user.auth_method in ['hybrid', 'sso']
+        
+        if has_sso_data and not is_hybrid_or_sso:
+            logger.warning(
+                f"Auth method inconsistency for user {existing_user.id}: has SSO data but auth_method is {existing_user.auth_method}",
+                extra={"category": "sso_corruption", "user_id": existing_user.id, "corruption_type": "auth_method_mismatch"}
+            )
+            return False
+        
+        return True
+    
+    def _reset_corrupted_sso_data(self, existing_user, db: Session):
+        """Reset corrupted SSO data to clean state"""
+        logger.info(
+            f"Resetting corrupted SSO data for user {existing_user.id}",
+            extra={"category": "sso_recovery", "user_id": existing_user.id}
+        )
+        
+        existing_user.external_id = None
+        existing_user.sso_provider = None
+        existing_user.sso_metadata = None
+        existing_user.last_sso_login = None
+        existing_user.account_linked_at = None
+        existing_user.auth_method = 'local'  # Reset to local auth only
+        db.commit()
+
     def _find_or_create_user(self, user_info, db: Session) -> Dict:
-        """Find existing user or create new one (respects registration control)"""
+        """Find existing user or create new one with corruption detection and clean preferences logic"""
         # Check for existing user by email
         existing_user = user_crud.get_by_email(db, email=user_info.email)
         
         if existing_user:
-            # Update SSO info for existing user
-            existing_user.external_id = user_info.sub
-            existing_user.sso_provider = settings.SSO_PROVIDER_TYPE
-            existing_user.last_sso_login = datetime.utcnow()
+            # STEP 1: Check for SSO data corruption
+            if not self._validate_sso_linking(existing_user, user_info):
+                # Reset corrupted data and proceed as unlinked account
+                self._reset_corrupted_sso_data(existing_user, db)
+                # Continue to preference logic below
             
-            # Link account if it was previously local-only
-            if existing_user.auth_method == 'local':
-                existing_user.auth_method = 'hybrid'
-                existing_user.account_linked_at = datetime.utcnow()
+            # STEP 2: Check if account is already cleanly linked
+            elif existing_user.external_id and existing_user.sso_provider:
+                # Already linked - proceed with login regardless of preference
+                logger.info(
+                    f"SSO login for already linked account: {user_info.email}",
+                    extra={"category": "sso", "event": "linked_account_login"}
+                )
+                return self._link_existing_user(existing_user, user_info, db)
             
-            db.commit()
+            # STEP 3: Account not linked - check user preference
+            preference = existing_user.sso_linking_preference or 'always_ask'
             
-            return {
-                "user": existing_user,
-                "is_new_user": False,
-                "auth_method": "sso"
-            }
+            if preference == 'auto_link':
+                return self._link_existing_user(existing_user, user_info, db)
+            elif preference == 'create_separate':
+                # User preference is to always create separate accounts
+                return self._create_new_separate_user(user_info, db)
+            else:  # always_ask or any other value
+                return self._return_account_conflict(existing_user, user_info)
         else:
             # Check if registration is allowed (integration with existing system)
             if not settings.ALLOW_USER_REGISTRATION:
@@ -179,6 +241,142 @@ class SSOService:
                 "auth_method": "sso"
             }
     
+    def _create_new_separate_user(self, user_info, db: Session) -> Dict:
+        """Create a new separate user account even when email matches existing user"""
+        # Create new user from SSO (allowing duplicate email)
+        new_user = user_crud.create_from_sso(
+            db,
+            email=user_info.email,
+            username=f"{user_info.email.split('@')[0]}_{user_info.sub.replace('-', '')[:8]}",  # Make username unique
+            full_name=user_info.name or "",
+            external_id=user_info.sub,
+            sso_provider=settings.SSO_PROVIDER_TYPE,
+        )
+        
+        logger.info(
+            f"New separate SSO user created: {user_info.email} (username: {new_user.username})",
+            extra={"category": "sso", "event": "separate_user_created", "user_id": new_user.id}
+        )
+        
+        return {
+            "user": new_user,
+            "is_new_user": True,
+            "auth_method": "sso"
+        }
+
+    def _link_existing_user(self, existing_user, user_info, db: Session) -> Dict:
+        """Link SSO to existing user account"""
+        # Update SSO info for existing user
+        existing_user.external_id = user_info.sub
+        existing_user.sso_provider = settings.SSO_PROVIDER_TYPE
+        existing_user.last_sso_login = datetime.utcnow()
+        
+        # Link account if it was previously local-only
+        if existing_user.auth_method == 'local':
+            existing_user.auth_method = 'hybrid'
+            existing_user.account_linked_at = datetime.utcnow()
+        
+        db.commit()
+        
+        return {
+            "user": existing_user,
+            "is_new_user": False,
+            "auth_method": "sso"
+        }
+    
+    def _return_account_conflict(self, existing_user, user_info) -> Dict:
+        """Return account conflict data for frontend to handle"""
+        # Create a temporary token for the conflict resolution process
+        temp_token = secrets.token_urlsafe(32)
+        
+        # Store conflict data temporarily (in production, use Redis)
+        conflict_key = f"sso_conflict_{temp_token}"
+        _state_storage[conflict_key] = {
+            "created_at": datetime.utcnow(),
+            "existing_user_id": existing_user.id,
+            "sso_user_info": user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
+            "expires_at": datetime.utcnow() + timedelta(minutes=10)
+        }
+        
+        return {
+            "conflict": True,
+            "existing_user_info": {
+                "email": existing_user.email,
+                "username": existing_user.username,
+                "full_name": existing_user.full_name,
+                "created_at": existing_user.created_at.isoformat() if existing_user.created_at else None,
+                "auth_method": existing_user.auth_method
+            },
+            "sso_user_info": {
+                "email": user_info.email,
+                "name": user_info.name or "",
+                "provider": settings.SSO_PROVIDER_TYPE
+            },
+            "temp_token": temp_token
+        }
+    
+    def resolve_account_conflict(self, temp_token: str, action: str, preference: str, db: Session) -> Dict:
+        """Resolve account conflict based on user's choice"""
+        # Retrieve conflict data
+        conflict_key = f"sso_conflict_{temp_token}"
+        if conflict_key not in _state_storage:
+            raise SSOAuthenticationError("Invalid or expired conflict resolution token")
+        
+        conflict_data = _state_storage[conflict_key]
+        
+        # Check if token is expired
+        if datetime.utcnow() > conflict_data["expires_at"]:
+            del _state_storage[conflict_key]
+            raise SSOAuthenticationError("Conflict resolution token expired")
+        
+        # Get existing user
+        existing_user = user_crud.get(db, id=conflict_data["existing_user_id"])
+        if not existing_user:
+            raise SSOAuthenticationError("Existing user not found")
+        
+        # Save user's preference for future logins
+        existing_user.sso_linking_preference = preference
+        db.commit()
+        
+        # Execute user's choice
+        if action == "link":
+            # Link accounts
+            sso_info = conflict_data["sso_user_info"]
+            # Reconstruct user_info object for linking
+            class UserInfo:
+                def __init__(self, data):
+                    self.sub = data.get("sub")
+                    self.email = data.get("email")
+                    self.name = data.get("name")
+            
+            user_info = UserInfo(sso_info)
+            result = self._link_existing_user(existing_user, user_info, db)
+            
+            # Clean up temporary data
+            del _state_storage[conflict_key]
+            return result
+            
+        elif action == "create_separate":
+            # Create new separate user account
+            sso_info = conflict_data["sso_user_info"]
+            
+            # Reconstruct user_info object for the helper method
+            class UserInfo:
+                def __init__(self, data):
+                    self.sub = data.get("sub")
+                    self.email = data.get("email")
+                    self.name = data.get("name")
+            
+            user_info = UserInfo(sso_info)
+            result = self._create_new_separate_user(user_info, db)
+            
+            # Clean up temporary data
+            del _state_storage[conflict_key]
+            return result
+        
+        else:
+            raise SSOAuthenticationError("Invalid action. Must be 'link' or 'create_separate'")
+
     def test_connection(self) -> Dict[str, bool]:
         """Test SSO provider connection (for admin dashboard)"""
         try:

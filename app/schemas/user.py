@@ -237,6 +237,7 @@ class User(UserBase):
     sso_metadata: Optional[dict] = None
     last_sso_login: Optional[datetime] = None
     account_linked_at: Optional[datetime] = None
+    sso_linking_preference: Optional[str] = None
 
     class Config:
         """
