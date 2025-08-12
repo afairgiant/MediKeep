@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Medical Records application supports optional Single Sign-On (SSO) authentication via Docker environment variables. SSO is **disabled by default** and requires explicit configuration.
+The Personal Medical Records application supports optional Single Sign-On (SSO) authentication via Docker environment variables for **personal/family use only**. SSO is **disabled by default** and requires explicit configuration.
+
+**⚠️ IMPORTANT: This application is NOT HIPAA-compliant and should never be used for professional medical practices or healthcare organizations.**
 
 ## Default Behavior (No SSO)
 
@@ -74,14 +76,14 @@ SSO_CLIENT_SECRET=your-github-client-secret
 SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback
 ```
 
-### Custom OIDC (Keycloak, Authentik, etc.)
+### Custom OIDC (For Home Labs with Keycloak, Authentik, etc.)
 ```bash
 SSO_ENABLED=true
 SSO_PROVIDER_TYPE=oidc
 SSO_CLIENT_ID=medical-records-client
 SSO_CLIENT_SECRET=your-oidc-secret
 SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback
-SSO_ISSUER_URL=https://your-oidc-provider.com/realms/main
+SSO_ISSUER_URL=https://homelab.local/auth/realms/family
 ```
 
 ## Environment Variables Reference
