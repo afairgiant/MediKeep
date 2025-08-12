@@ -23,6 +23,8 @@ const Login = () => {
   });
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [createUserError, setCreateUserError] = useState('');
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
+  const [registrationMessage, setRegistrationMessage] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,6 +37,16 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
+
+  // Check registration status on mount
+  useEffect(() => {
+    const checkRegistration = async () => {
+      const status = await authService.checkRegistrationEnabled();
+      setRegistrationEnabled(status.registration_enabled);
+      setRegistrationMessage(status.message || '');
+    };
+    checkRegistration();
+  }, []);
 
   const handleChange = e => {
     clearError(); // Clear any existing errors
@@ -259,14 +271,20 @@ const Login = () => {
         </form>
 
         <div className="login-actions">
-          <button
-            type="button"
-            className="create-user-btn"
-            onClick={openCreateUserModal}
-            disabled={isLoading}
-          >
-            Create New User Account
-          </button>
+          {registrationEnabled ? (
+            <button
+              type="button"
+              className="create-user-btn"
+              onClick={openCreateUserModal}
+              disabled={isLoading}
+            >
+              Create New User Account
+            </button>
+          ) : (
+            <div className="registration-disabled-message">
+              {registrationMessage || 'New user registration is currently disabled.'}
+            </div>
+          )}
         </div>
       </div>
 

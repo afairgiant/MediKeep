@@ -83,6 +83,11 @@ class Settings:  # App Info
         os.getenv("TRASH_RETENTION_DAYS", "30")
     )  # Keep deleted files for 30 days
 
+    # User Registration Control
+    ALLOW_USER_REGISTRATION: bool = (
+        os.getenv("ALLOW_USER_REGISTRATION", "True").lower() == "true"
+    )  # Default: enabled to avoid lockout scenarios
+
     # Paperless-ngx Integration Configuration
     PAPERLESS_REQUEST_TIMEOUT: int = int(
         os.getenv("PAPERLESS_REQUEST_TIMEOUT", "30")

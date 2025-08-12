@@ -27,6 +27,16 @@ logger = get_logger(__name__, "app")
 security_logger = get_logger(__name__, "security")
 
 
+@router.get("/registration-status")
+def get_registration_status():
+    """Check if new user registration is enabled."""
+    return {
+        "registration_enabled": settings.ALLOW_USER_REGISTRATION,
+        "message": "Registration is currently disabled. Please contact an administrator." 
+                   if not settings.ALLOW_USER_REGISTRATION else None
+    }
+
+
 @router.post("/register", response_model=User)
 def register(
     *,
@@ -41,6 +51,22 @@ def register(
     The password will be automatically hashed for security.
     A basic patient record is automatically created for the user.
     """
+    # Check if registration is enabled
+    if not settings.ALLOW_USER_REGISTRATION:
+        logger.warning(
+            f"Registration attempt blocked - registration disabled. Username: {user_in.username}",
+            extra={
+                "category": "security",
+                "event": "registration_blocked",
+                "username": user_in.username,
+                "ip": request.client.host if request.client else "unknown",
+            },
+        )
+        raise UnauthorizedException(
+            message="New user registration is currently disabled. Please contact an administrator.",
+            request=request
+        )
+    
     user_ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
