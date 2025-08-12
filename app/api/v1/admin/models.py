@@ -73,7 +73,7 @@ router = APIRouter()
 
 # Centralized field mapping configuration to eliminate DRY violations
 DATETIME_FIELD_MAP = {
-    "user": ["created_at", "updated_at", "last_login"],
+    "user": ["created_at", "updated_at", "last_login", "last_sso_login", "account_linked_at"],
     "patient": ["created_at", "updated_at"],
     "practitioner": ["created_at", "updated_at"],
     "pharmacy": ["created_at", "updated_at"],
@@ -240,6 +240,8 @@ FIELD_DISPLAY_CONFIG = {
             "email",
             "full_name",
             "role",
+            "auth_method",
+            "sso_provider",
             "active_patient_id",
             "created_at",
         ],
@@ -249,6 +251,12 @@ FIELD_DISPLAY_CONFIG = {
             "email",
             "full_name",
             "role",
+            "auth_method",
+            "external_id",
+            "sso_provider",
+            "sso_metadata",
+            "last_sso_login",
+            "account_linked_at",
             "active_patient_id",
             "created_at",
             "updated_at",

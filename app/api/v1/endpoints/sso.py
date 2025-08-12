@@ -55,9 +55,15 @@ async def sso_callback(
         # Complete SSO authentication
         result = await sso_service.complete_authentication(code, state, db)
         
-        # Create JWT token for the user
+        # Create JWT token for the user (matching regular auth format)
         access_token = create_access_token(
-            subject=str(result["user"].id)
+            data={
+                "sub": result["user"].username,
+                "role": (
+                    result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
+                ),
+                "user_id": result["user"].id,
+            }
         )
         
         return {

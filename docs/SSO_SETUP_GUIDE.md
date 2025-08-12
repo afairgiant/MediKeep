@@ -165,8 +165,8 @@ SSO_ISSUER_URL=https://your-tenant.auth0.com/
 ## User Account Behavior
 
 ### New Users
-- If `ALLOW_USER_REGISTRATION=true`: New SSO users get accounts automatically
-- If `ALLOW_USER_REGISTRATION=false`: SSO login blocked for new users
+- If **Admin Settings → Allow User Registration = ON**: New SSO users get accounts automatically  
+- If **Admin Settings → Allow User Registration = OFF**: SSO login blocked for new users
 
 ### Existing Users  
 - Users with matching email addresses can link their SSO account

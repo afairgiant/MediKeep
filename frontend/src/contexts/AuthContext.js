@@ -362,66 +362,98 @@ export function AuthProvider({ children }) {
     return updatedUser;
   };
 
-  // Auth Actions
-  const login = async credentials => {
+  // Auth Actions - handles both username/password credentials and SSO user/token
+  const login = async (credentialsOrUser, tokenFromSSO = null) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      const result = await authService.login(credentials);
-
-      if (result.success) {
-        const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-        // Clear any existing cache data before login
-        // This ensures fresh data is loaded for the new user session
-        logger.info('Clearing cache before login', {
-          category: 'auth_cache_clear',
-          username: result.user.username,
-          userId: result.user.id,
+      // Check if this is SSO login (user object + token) or regular login (credentials)
+      const isSSO = tokenFromSSO !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
+      
+      let user, token;
+      
+      if (isSSO) {
+        // SSO login - we already have user and token
+        user = {
+          ...credentialsOrUser,
+          // Ensure isAdmin property is set based on role
+          isAdmin: ['admin', 'administrator'].includes(credentialsOrUser.role?.toLowerCase())
+        };
+        token = tokenFromSSO;
+        
+        logger.info('Processing SSO login', {
+          category: 'auth_sso_login',
+          username: user.username,
+          userId: user.id,
+          role: user.role,
+          isAdmin: user.isAdmin,
           timestamp: new Date().toISOString()
         });
-
-        // Clear any existing cached data from localStorage
-        const cacheKeys = Object.keys(localStorage).filter(key => 
-          key.startsWith('appData_') || 
-          key.startsWith('patient_') || 
-          key.startsWith('cache_')
-        );
-        
-        cacheKeys.forEach(key => {
-          localStorage.removeItem(key);
-        });
-
-        // Store in localStorage
-        updateStoredToken(result.token, tokenExpiry);
-        updateStoredUser(result.user);
-
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: {
-            user: result.user,
-            token: result.token,
-            tokenExpiry,
-          },
-        });
-
-        toast.success('Login successful!');
-
-        // Check if profile completion modal should be shown
-        // This will be handled by the component consuming the auth context
-
-        return {
-          success: true,
-          isFirstLogin: isFirstLogin(result.user.username),
-        };
       } else {
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_FAILURE,
-          payload: result.error || 'Login failed',
+        // Regular username/password login
+        const result = await authService.login(credentialsOrUser);
+
+        if (!result.success) {
+          dispatch({
+            type: AUTH_ACTIONS.LOGIN_FAILURE,
+            payload: result.error || 'Login failed',
+          });
+          return { success: false, error: result.error };
+        }
+        
+        user = result.user;
+        token = result.token;
+        
+        logger.info('Processing regular login', {
+          category: 'auth_regular_login',
+          username: user.username,
+          userId: user.id,
+          timestamp: new Date().toISOString()
         });
-        return { success: false, error: result.error };
       }
+
+      const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+      // Clear any existing cache data before login
+      // This ensures fresh data is loaded for the new user session
+      logger.info('Clearing cache before login', {
+        category: 'auth_cache_clear',
+        username: user.username,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
+
+      // Clear any existing cached data from localStorage
+      const cacheKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('appData_') || 
+        key.startsWith('patient_') || 
+        key.startsWith('cache_')
+      );
+      
+      cacheKeys.forEach(key => {
+        localStorage.removeItem(key);
+      });
+
+      // Store in localStorage
+      updateStoredToken(token, tokenExpiry);
+      updateStoredUser(user);
+
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: {
+          user,
+          token,
+          tokenExpiry,
+        },
+      });
+
+      toast.success('Login successful!');
+
+      return {
+        success: true,
+        isFirstLogin: isFirstLogin(user.username),
+      };
     } catch (error) {
       const errorMessage = error.message || 'Login failed';
       dispatch({

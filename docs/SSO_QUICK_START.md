@@ -23,6 +23,12 @@ SSO_PROVIDER_TYPE=google
 SSO_CLIENT_ID=your-google-client-id-here
 SSO_CLIENT_SECRET=your-google-client-secret-here
 SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
+# DO NOT set SSO_ISSUER_URL for Google - it's built-in!
+```
+
+**Note:** For Docker users, use port 8005 in the redirect URI:
+```bash
+SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback
 ```
 
 ### Step 3: Restart & Test
@@ -93,15 +99,22 @@ And add the same URL to your Google/GitHub app settings.
 
 ## Advanced Options
 
-### Restrict to Company Domains
+### Restrict to Family Domains (Optional)
 ```bash
-SSO_ALLOWED_DOMAINS=["yourcompany.com", "contractor.net"]
+# Allow any Google account (most common)
+SSO_ALLOWED_DOMAINS=[]
+
+# OR restrict to specific domains  
+SSO_ALLOWED_DOMAINS=["gmail.com", "smithfamily.org"]
 ```
 
 ### Disable New User Creation
-```bash
-ALLOW_USER_REGISTRATION=false
-```
+This is controlled in the **Admin Settings** page, not environment variables:
+
+1. Login as admin
+2. Go to **Admin Settings** → **User Management** 
+3. Toggle **"Allow New User Registration"** to **OFF**
+
 This will block new SSO users but allow existing users to link accounts.
 
 ---

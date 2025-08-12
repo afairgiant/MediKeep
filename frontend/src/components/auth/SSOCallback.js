@@ -80,7 +80,7 @@ const SSOCallback = () => {
         category: 'sso_callback_component'
       });
 
-      // Update auth context
+      // Update auth context with SSO login (user, token)
       if (login) {
         login(result.user, result.token);
       }
