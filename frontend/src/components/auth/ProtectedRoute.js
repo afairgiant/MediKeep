@@ -22,17 +22,11 @@ function ProtectedRoute({
 
   // Determine redirect reason and target
   const getRedirectInfo = () => {
-    if (isLoading) return null;
+    if (isLoading) {
+      return null;
+    }
     
     if (!isAuthenticated) {
-      console.log('🛡️ PROTECTED_ROUTE: User not authenticated, redirecting to login', {
-        isAuthenticated,
-        isLoading,
-        hasUser: !!user,
-        currentPath: location.pathname,
-        redirectTo,
-        timestamp: new Date().toISOString()
-      });
       return { to: redirectTo, reason: 'unauthenticated' };
     }
     

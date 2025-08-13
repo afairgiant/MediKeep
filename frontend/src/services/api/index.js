@@ -33,10 +33,10 @@ class ApiService {
     this.fallbackURL = '/api/v1';
   }
 
-  getAuthHeaders() {
+  async getAuthHeaders() {
     // Migrate legacy data first
-    legacyMigration.migrateFromLocalStorage();
-    const token = secureStorage.getItem('token');
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
     const headers = { 'Content-Type': 'application/json' };
 
     if (token) {
@@ -139,8 +139,8 @@ class ApiService {
 
     // Get token but don't fail if it doesn't exist - let backend handle authentication
     // Migrate legacy data first
-    legacyMigration.migrateFromLocalStorage();
-    const token = secureStorage.getItem('token');
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
     const config = {
       method,
       signal,
@@ -856,8 +856,8 @@ class ApiService {
 
       // Get authentication token
       // Migrate legacy data first
-      legacyMigration.migrateFromLocalStorage();
-      const token = secureStorage.getItem('token');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication required to view files');
       }
@@ -978,8 +978,8 @@ class ApiService {
 
       // Use direct fetch to get full response with headers
       // Migrate legacy data first
-      legacyMigration.migrateFromLocalStorage();
-      const token = secureStorage.getItem('token');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       const response = await fetch(`${this.baseURL}/entity-files/files/${fileId}/download`, {
         method: 'GET',
         headers: {

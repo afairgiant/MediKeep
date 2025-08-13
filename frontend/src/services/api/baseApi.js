@@ -18,10 +18,10 @@ class BaseApiService {
   }
 
   // Helper method to get auth headers with validation
-  getAuthHeaders() {
+  async getAuthHeaders() {
     // Migrate legacy data first
-    legacyMigration.migrateFromLocalStorage();
-    const token = secureStorage.getItem('token');
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
 
     // Validate token before using it
     if (token) {
@@ -308,7 +308,7 @@ class BaseApiService {
       });
 
       const response = await fetch(url, {
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         signal,
       });
 
@@ -330,7 +330,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'POST',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -345,7 +345,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'PUT',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -360,7 +360,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'DELETE',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
         }
       );
       return this.handleResponse(response, errorMessage);
@@ -374,7 +374,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'DELETE',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );

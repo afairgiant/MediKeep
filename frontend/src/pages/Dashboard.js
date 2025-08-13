@@ -166,8 +166,8 @@ const Dashboard = () => {
     try {
       // Use secure storage system instead of direct localStorage
       const { secureStorage, legacyMigration } = await import('../utils/secureStorage');
-      legacyMigration.migrateFromLocalStorage();
-      const token = secureStorage.getItem('token');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       
       console.log('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
         hasToken: !!token,

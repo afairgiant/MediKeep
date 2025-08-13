@@ -192,7 +192,7 @@ class AdminApiService extends BaseApiService {
     const response = await fetch(
       `${this.baseURL}${this.basePath}/backups/${backupId}/download`,
       {
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       }
     );
     if (!response.ok) {

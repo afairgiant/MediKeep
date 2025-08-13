@@ -83,16 +83,16 @@ class SimpleAuthService {
   }
 
   // Get stored token
-  getToken() {
+  async getToken() {
     // Migrate legacy data first
-    legacyMigration.migrateFromLocalStorage();
-    return secureStorage.getItem(this.tokenKey);
+    await legacyMigration.migrateFromLocalStorage();
+    return await secureStorage.getItem(this.tokenKey);
   }
 
   // Set token
-  setToken(token) {
+  async setToken(token) {
     if (token) {
-      secureStorage.setItem(this.tokenKey, token);
+      await secureStorage.setItem(this.tokenKey, token);
     } else {
       secureStorage.removeItem(this.tokenKey);
     }
@@ -123,8 +123,8 @@ class SimpleAuthService {
   }
 
   // Check if token is valid (not expired)
-  isTokenValid(token = null) {
-    const targetToken = token || this.getToken();
+  async isTokenValid(token = null) {
+    const targetToken = token || await this.getToken();
     if (!targetToken) return false;
 
     const payload = this.parseJWT(targetToken);
@@ -299,8 +299,8 @@ class SimpleAuthService {
   // Get current user (from localStorage since /users/me has issues)
   async getCurrentUser() {
     try {
-      const storedUser = secureStorage.getItem(this.userKey);
-      if (storedUser && this.isTokenValid()) {
+      const storedUser = await secureStorage.getItem(this.userKey);
+      if (storedUser && await this.isTokenValid()) {
         return JSON.parse(storedUser);
       }
       return null;
@@ -362,18 +362,7 @@ class SimpleAuthService {
   }
 
   // Clear all auth data from both secure storage and legacy localStorage
-  clearTokens() {
-    console.log('🗑️ AUTHSERVICE_CLEAR: Clearing tokens from all storage locations', {
-      beforeClear: {
-        secureToken: !!secureStorage.getItem(this.tokenKey),
-        secureUser: !!secureStorage.getItem(this.userKey),
-        legacyToken: !!localStorage.getItem(this.tokenKey),
-        legacyUser: !!localStorage.getItem(this.userKey),
-        legacyTokenExpiry: !!localStorage.getItem('tokenExpiry')
-      },
-      timestamp: new Date().toISOString()
-    });
-    
+  async clearTokens() {
     // Clear from secure storage (new system)
     secureStorage.removeItem(this.tokenKey);
     secureStorage.removeItem(this.userKey);
@@ -384,25 +373,14 @@ class SimpleAuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     localStorage.removeItem('tokenExpiry');
-    
-    console.log('🗑️ AUTHSERVICE_CLEAR: All tokens cleared', {
-      afterClear: {
-        secureToken: !!secureStorage.getItem(this.tokenKey),
-        secureUser: !!secureStorage.getItem(this.userKey),
-        legacyToken: !!localStorage.getItem(this.tokenKey),
-        legacyUser: !!localStorage.getItem(this.userKey),
-        legacyTokenExpiry: !!localStorage.getItem('tokenExpiry')
-      },
-      timestamp: new Date().toISOString()
-    });
   }
 
   // Get auth headers for API requests
-  getAuthHeaders() {
-    const token = this.getToken();
+  async getAuthHeaders() {
+    const token = await this.getToken();
     const headers = { 'Content-Type': 'application/json' };
 
-    if (token && this.isTokenValid(token)) {
+    if (token && await this.isTokenValid(token)) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
@@ -628,7 +606,7 @@ class SimpleAuthService {
 
       const response = await this.makeRequest('/auth/sso/test-connection', {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       });
 
       if (!response.ok) {

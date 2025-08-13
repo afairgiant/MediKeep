@@ -22,13 +22,13 @@ const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
 
 class TokenManager {
-  static getToken() {
-    return secureStorage.getItem(TOKEN_KEY);
+  static async getToken() {
+    return await secureStorage.getItem(TOKEN_KEY);
   }
 
-  static setToken(token) {
+  static async setToken(token) {
     if (token) {
-      secureStorage.setItem(TOKEN_KEY, token);
+      await secureStorage.setItem(TOKEN_KEY, token);
     } else {
       secureStorage.removeItem(TOKEN_KEY);
     }
@@ -104,9 +104,9 @@ export function AuthProvider({ children }) {
       setError(null);
 
       // Migrate legacy localStorage data if present
-      legacyMigration.migrateFromLocalStorage();
+      await legacyMigration.migrateFromLocalStorage();
 
-      const storedToken = TokenManager.getToken();
+      const storedToken = await TokenManager.getToken();
 
       if (!storedToken || !TokenManager.isTokenValid(storedToken)) {
         // No valid token, clear everything
@@ -147,7 +147,7 @@ export function AuthProvider({ children }) {
       logger.error('Error initializing auth', {
         category: 'auth_init_error',
         error: error.message,
-        has_stored_token: !!TokenManager.getToken()
+        has_stored_token: !!localStorage.getItem('medapp_token') || !!localStorage.getItem('token')
       });
       TokenManager.removeToken();
       setError('Authentication initialization failed');
@@ -215,9 +215,14 @@ export function AuthProvider({ children }) {
     navigate('/login');
   }, [navigate]);
 
-  // Check if user is authenticated
+  // Check if user is authenticated (synchronous - based on current state)
   const isAuthenticated = useCallback(() => {
-    const currentToken = token || TokenManager.getToken();
+    return !!(token && user);
+  }, [token, user]);
+
+  // Internal async authentication check
+  const checkAuthentication = useCallback(async () => {
+    const currentToken = token || await TokenManager.getToken();
     return currentToken && TokenManager.isTokenValid(currentToken);
   }, [token]);
 
@@ -227,8 +232,8 @@ export function AuthProvider({ children }) {
   }, [user]);
 
   // Get auth headers for API requests
-  const getAuthHeaders = useCallback(() => {
-    const currentToken = token || TokenManager.getToken();
+  const getAuthHeaders = useCallback(async () => {
+    const currentToken = token || await TokenManager.getToken();
 
     if (currentToken && TokenManager.isTokenValid(currentToken)) {
       return {

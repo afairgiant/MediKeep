@@ -133,53 +133,23 @@ export function AuthProvider({ children }) {
   // Initialize auth state on app load
   useEffect(() => {
     const initializeAuth = async () => {
-      console.log('🔄 AUTH_INIT: Starting auth initialization', {
-        currentAuthState: state.isAuthenticated,
-        hasCurrentToken: !!state.token,
-        timestamp: new Date().toISOString()
-      });
-      
       try {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
 
         // Migrate legacy localStorage data if present
-        legacyMigration.migrateFromLocalStorage();
+        await legacyMigration.migrateFromLocalStorage();
         
-        const storedToken = secureStorage.getItem('token');
-        const storedUser = secureStorage.getItem('user');
-        const storedExpiry = secureStorage.getItem('tokenExpiry');
-        
-        console.log('🔄 AUTH_INIT: Checking stored auth data', {
-          hasStoredToken: !!storedToken,
-          hasStoredUser: !!storedUser,
-          hasStoredExpiry: !!storedExpiry,
-          storedTokenPreview: storedToken ? `${storedToken.substring(0, 20)}...` : null,
-          storedUserPreview: storedUser ? JSON.parse(storedUser).username : null,
-          allMedappKeys: Object.keys(localStorage).filter(key => key.startsWith('medapp_')),
-          allTokenKeys: Object.keys(localStorage).filter(key => key.includes('token')),
-          timestamp: new Date().toISOString()
-        });
+        const storedToken = await secureStorage.getItem('token');
+        const storedUser = await secureStorage.getItem('user');
+        const storedExpiry = await secureStorage.getItem('tokenExpiry');
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
-          
-          console.log('🔄 AUTH_INIT: Found stored auth data, checking expiry', {
-            tokenExpiry: new Date(tokenExpiry).toISOString(),
-            currentTime: new Date().toISOString(),
-            isExpired: isTokenExpired(tokenExpiry),
-            timeUntilExpiry: tokenExpiry - Date.now(),
-            timestamp: new Date().toISOString()
-          });
 
           if (!isTokenExpired(tokenExpiry)) {
-            console.log('🔄 AUTH_INIT: Token not expired, attempting to restore session');
             // Token is still valid, verify with server
             try {
               const user = await authService.getCurrentUser();
-              console.log('🔄 AUTH_INIT: Server validated token, restoring session', {
-                username: user?.username,
-                userId: user?.id
-              });
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
                 payload: {
@@ -189,7 +159,6 @@ export function AuthProvider({ children }) {
                 },
               });
             } catch (error) {
-              console.log('🔄 AUTH_INIT: Server rejected token, clearing storage', error.message);
               // Token invalid on server, clear local storage
               clearAuthData();
               dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -197,11 +166,8 @@ export function AuthProvider({ children }) {
           } else {
             // Token expired, try to refresh
             try {
-              console.log('🔄 AUTH_INIT: Token expired, checking for refresh capability');
-              
               // Check if refreshToken method exists
               if (typeof authService.refreshToken !== 'function') {
-                console.log('🔄 AUTH_INIT: No refresh method available, clearing auth data');
                 clearAuthData();
                 dispatch({ type: AUTH_ACTIONS.LOGOUT });
                 return;
@@ -246,15 +212,7 @@ export function AuthProvider({ children }) {
   }, []);
   // Auto-refresh token before expiry
   useEffect(() => {
-    console.log('🔄 TOKEN_REFRESH_EFFECT: Auto-refresh effect triggered', {
-      isAuthenticated: state.isAuthenticated,
-      hasTokenExpiry: !!state.tokenExpiry,
-      tokenExpiry: state.tokenExpiry,
-      timestamp: new Date().toISOString()
-    });
-    
     if (!state.isAuthenticated || !state.tokenExpiry) {
-      console.log('🔄 TOKEN_REFRESH_EFFECT: Skipping refresh - not authenticated or no expiry');
       return;
     }
 
@@ -264,11 +222,8 @@ export function AuthProvider({ children }) {
     if (timeUntilRefresh > 0) {
       const refreshTimer = setTimeout(async () => {
         try {
-          console.log('🔄 TOKEN_REFRESH_EFFECT: Attempting token refresh');
-          
           // Check if refreshToken method exists
           if (typeof authService.refreshToken !== 'function') {
-            console.log('🔄 TOKEN_REFRESH_EFFECT: No refresh method available, logging out');
             clearAuthData();
             dispatch({ type: AUTH_ACTIONS.LOGOUT });
             return;
@@ -383,38 +338,11 @@ export function AuthProvider({ children }) {
 
   // Helper functions
   const clearAuthData = () => {
-    console.log('🗑️ CLEAR_AUTH_DATA: Starting to clear auth data', {
-      beforeClear: {
-        hasToken: !!secureStorage.getItem('token'),
-        hasUser: !!secureStorage.getItem('user'),
-        hasExpiry: !!secureStorage.getItem('tokenExpiry')
-      },
-      timestamp: new Date().toISOString()
-    });
-    
     secureStorage.removeItem('token');
     secureStorage.removeItem('user');
     secureStorage.removeItem('tokenExpiry');
     
-    console.log('🗑️ CLEAR_AUTH_DATA: Auth data cleared', {
-      afterClear: {
-        hasToken: !!secureStorage.getItem('token'),
-        hasUser: !!secureStorage.getItem('user'),
-        hasExpiry: !!secureStorage.getItem('tokenExpiry')
-      },
-      legacyStorage: {
-        hasLegacyToken: !!localStorage.getItem('token'),
-        hasLegacyUser: !!localStorage.getItem('user'),
-        hasLegacyExpiry: !!localStorage.getItem('tokenExpiry')
-      },
-      allStorageKeys: Object.keys(localStorage).filter(key => 
-        key.includes('token') || key.includes('user') || key.includes('medapp')
-      ),
-      timestamp: new Date().toISOString()
-    });
-    
     // Clear any cached app data to ensure fresh data on next login
-    // This is additional insurance for cache clearing
     const cacheKeys = Object.keys(localStorage).filter(key => 
       key.startsWith('appData_') || 
       key.startsWith('patient_') || 
@@ -562,22 +490,12 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    console.log('🚪 LOGOUT: Starting logout process', {
-      isAuthenticated: state.isAuthenticated,
-      hasToken: !!state.token,
-      hasUser: !!state.user,
-      timestamp: new Date().toISOString()
-    });
-    
     try {
       // Call backend logout if token exists
       if (state.token) {
-        console.log('🚪 LOGOUT: Calling backend logout API');
         await authService.logout();
-        console.log('🚪 LOGOUT: Backend logout completed');
       }
     } catch (error) {
-      console.log('🚪 LOGOUT: Backend logout failed', error.message);
       logger.error('auth_context_logout_error', {
         message: 'Logout API call failed',
         error: error.message,
@@ -589,24 +507,11 @@ export function AuthProvider({ children }) {
         timestamp: new Date().toISOString()
       });
     } finally {
-      console.log('🚪 LOGOUT: Clearing auth data and dispatching logout action');
-      
       // Clear auth data first
       clearAuthData();
       
       // Dispatch logout action to update state
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
-      
-      // Add a small delay to ensure state updates are processed
-      // This prevents race conditions with the auth initialization effect
-      setTimeout(() => {
-        console.log('🚪 LOGOUT: Final auth state verification', {
-          hasStoredToken: !!secureStorage.getItem('token'),
-          hasStoredUser: !!secureStorage.getItem('user'),
-          hasStoredExpiry: !!secureStorage.getItem('tokenExpiry'),
-          timestamp: new Date().toISOString()
-        });
-      }, 100);
       
       toast.info('Logged out successfully');
     }

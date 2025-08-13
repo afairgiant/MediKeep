@@ -25,8 +25,8 @@ const AdminLayout = ({ children }) => {
       setError(null);
 
       // Migrate legacy data first
-      legacyMigration.migrateFromLocalStorage();
-      const token = secureStorage.getItem('token');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       if (!token) {
         navigate('/login');
         return;
