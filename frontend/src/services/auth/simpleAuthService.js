@@ -5,6 +5,7 @@
 
 import logger from '../logger';
 import { isAdminRole } from '../../utils/authUtils';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
 class SimpleAuthService {
   constructor() {
@@ -83,15 +84,17 @@ class SimpleAuthService {
 
   // Get stored token
   getToken() {
-    return localStorage.getItem(this.tokenKey);
+    // Migrate legacy data first
+    legacyMigration.migrateFromLocalStorage();
+    return secureStorage.getItem(this.tokenKey);
   }
 
   // Set token
   setToken(token) {
     if (token) {
-      localStorage.setItem(this.tokenKey, token);
+      secureStorage.setItem(this.tokenKey, token);
     } else {
-      localStorage.removeItem(this.tokenKey);
+      secureStorage.removeItem(this.tokenKey);
     }
   }
 
@@ -204,7 +207,7 @@ class SimpleAuthService {
       };
 
       // Store user
-      localStorage.setItem(this.userKey, JSON.stringify(user));
+      secureStorage.setJSON(this.userKey, user);
 
       return {
         success: true,
@@ -296,7 +299,7 @@ class SimpleAuthService {
   // Get current user (from localStorage since /users/me has issues)
   async getCurrentUser() {
     try {
-      const storedUser = localStorage.getItem(this.userKey);
+      const storedUser = secureStorage.getItem(this.userKey);
       if (storedUser && this.isTokenValid()) {
         return JSON.parse(storedUser);
       }
@@ -332,8 +335,8 @@ class SimpleAuthService {
 
   // Clear all auth data
   clearTokens() {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
+    secureStorage.removeItem(this.tokenKey);
+    secureStorage.removeItem(this.userKey);
   }
 
   // Get auth headers for API requests
@@ -528,7 +531,7 @@ class SimpleAuthService {
       // Store token and user (same as regular login)
       if (data.access_token) {
         this.setToken(data.access_token);
-        localStorage.setItem(this.userKey, JSON.stringify({
+        secureStorage.setJSON(this.userKey, {
           id: data.user.id,
           username: data.user.username,
           email: data.user.email,
@@ -536,7 +539,7 @@ class SimpleAuthService {
           role: data.user.role,
           authMethod: data.user.auth_method,
           isAdmin: data.user.role === 'admin',
-        }));
+        });
       }
 
       return {

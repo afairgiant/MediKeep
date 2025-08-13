@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import logger from '../services/logger';
 import { isAdminRole } from '../utils/authUtils';
+import { secureStorage, legacyMigration } from '../utils/secureStorage';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -22,20 +23,20 @@ const USER_KEY = 'user';
 
 class TokenManager {
   static getToken() {
-    return localStorage.getItem(TOKEN_KEY);
+    return secureStorage.getItem(TOKEN_KEY);
   }
 
   static setToken(token) {
     if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
+      secureStorage.setItem(TOKEN_KEY, token);
     } else {
-      localStorage.removeItem(TOKEN_KEY);
+      secureStorage.removeItem(TOKEN_KEY);
     }
   }
 
   static removeToken() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    secureStorage.removeItem(TOKEN_KEY);
+    secureStorage.removeItem(USER_KEY);
   }
 
   static isTokenValid(token) {
@@ -102,6 +103,9 @@ export function AuthProvider({ children }) {
       setLoading(true);
       setError(null);
 
+      // Migrate legacy localStorage data if present
+      legacyMigration.migrateFromLocalStorage();
+
       const storedToken = TokenManager.getToken();
 
       if (!storedToken || !TokenManager.isTokenValid(storedToken)) {
@@ -127,7 +131,7 @@ export function AuthProvider({ children }) {
         setUser(userData);
 
         // Store user data
-        localStorage.setItem(USER_KEY, JSON.stringify(userData));
+        secureStorage.setJSON(USER_KEY, userData);
 
         // Check if token is expiring soon
         if (TokenManager.isTokenExpiringSoon(storedToken)) {

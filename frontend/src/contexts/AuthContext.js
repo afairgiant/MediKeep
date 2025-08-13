@@ -9,6 +9,7 @@ import logger from '../services/logger';
 import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
 import { isAdminRole } from '../utils/authUtils';
+import { secureStorage, legacyMigration } from '../utils/secureStorage';
 
 // Auth State Management
 const initialState = {
@@ -135,9 +136,12 @@ export function AuthProvider({ children }) {
       try {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
 
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        const storedExpiry = localStorage.getItem('tokenExpiry');
+        // Migrate legacy localStorage data if present
+        legacyMigration.migrateFromLocalStorage();
+        
+        const storedToken = secureStorage.getItem('token');
+        const storedUser = secureStorage.getItem('user');
+        const storedExpiry = secureStorage.getItem('tokenExpiry');
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
@@ -188,9 +192,9 @@ export function AuthProvider({ children }) {
           message: 'Auth initialization failed',
           error: error.message,
           stack: error.stack,
-          hasStoredToken: !!localStorage.getItem('token'),
-          hasStoredUser: !!localStorage.getItem('user'),
-          hasStoredExpiry: !!localStorage.getItem('tokenExpiry'),
+          hasStoredToken: !!secureStorage.getItem('token'),
+          hasStoredUser: !!secureStorage.getItem('user'),
+          hasStoredExpiry: !!secureStorage.getItem('tokenExpiry'),
           timestamp: new Date().toISOString()
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -318,9 +322,9 @@ export function AuthProvider({ children }) {
 
   // Helper functions
   const clearAuthData = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('tokenExpiry');
+    secureStorage.removeItem('token');
+    secureStorage.removeItem('user');
+    secureStorage.removeItem('tokenExpiry');
     
     // Clear any cached app data to ensure fresh data on next login
     // This is additional insurance for cache clearing
@@ -331,19 +335,21 @@ export function AuthProvider({ children }) {
     );
     
     cacheKeys.forEach(key => {
+      // Legacy cleanup - remove from both storages
       localStorage.removeItem(key);
+      secureStorage.removeItem(key);
     });
     
     // Note: We don't clear first login status as it should persist across sessions
   };
 
   const updateStoredToken = (token, tokenExpiry) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('tokenExpiry', tokenExpiry.toString());
+    secureStorage.setItem('token', token);
+    secureStorage.setItem('tokenExpiry', tokenExpiry.toString());
   };
 
   const updateStoredUser = user => {
-    localStorage.setItem('user', JSON.stringify(user));
+    secureStorage.setJSON('user', user);
   };
 
   // Update user data in context and storage
@@ -433,7 +439,9 @@ export function AuthProvider({ children }) {
       );
       
       cacheKeys.forEach(key => {
+        // Legacy cleanup - remove from both storages
         localStorage.removeItem(key);
+        secureStorage.removeItem(key);
       });
 
       // Store in localStorage
