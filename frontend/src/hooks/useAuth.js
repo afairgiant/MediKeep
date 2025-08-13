@@ -137,7 +137,7 @@ export function AuthProvider({ children }) {
             token_expiry: payload.exp,
             current_time: Math.floor(Date.now() / 1000)
           });
-          // TODO: Implement token refresh here
+          // Token refresh not implemented - user will need to log in again when token expires
         }
       }
     } catch (error) {

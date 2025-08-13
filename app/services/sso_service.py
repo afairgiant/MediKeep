@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 logger = get_logger(__name__, "sso")
 
-# Simple in-memory state storage (replace with Redis in production)
+# In-memory state storage for temporary SSO tokens
 _state_storage = {}
 
 class SSOService:
@@ -289,7 +289,7 @@ class SSOService:
         # Create a temporary token for the conflict resolution process
         temp_token = secrets.token_urlsafe(32)
         
-        # Store conflict data temporarily (in production, use Redis)
+        # Store conflict data temporarily
         conflict_key = f"sso_conflict_{temp_token}"
         _state_storage[conflict_key] = {
             "created_at": datetime.utcnow(),
@@ -320,7 +320,7 @@ class SSOService:
         # Create a temporary token for the manual linking process
         temp_token = secrets.token_urlsafe(32)
         
-        # Store GitHub user info temporarily (in production, use Redis)
+        # Store GitHub user info temporarily
         github_key = f"github_manual_link_{temp_token}"
         _state_storage[github_key] = {
             "created_at": datetime.utcnow(),

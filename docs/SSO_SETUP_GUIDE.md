@@ -8,7 +8,7 @@ The SSO system allows users to log in using external identity providers instead 
 
 - **Google OAuth2** - Personal and Google Workspace accounts
 - **GitHub OAuth2** - GitHub accounts
-- **Generic OIDC** - Enterprise providers (Auth0, Okta, etc.)
+- **Generic OIDC** - OIDC providers (Auth0, Okta, etc.)
 - **Keycloak** - Open source identity management
 - **Authentik** - Modern identity provider
 - **Authelia** - Authentication and authorization server
@@ -291,14 +291,6 @@ To allow multiple email domains:
 ```bash
 SSO_ALLOWED_DOMAINS=["company.com", "contractor.org", "partner.net"]
 ```
-
-### Load Balancer Setup
-
-If using a load balancer, ensure:
-
-1. Sticky sessions OR shared session storage
-2. All instances have same SSO configuration
-3. Health checks don't interfere with SSO endpoints
 
 ## Support
 
