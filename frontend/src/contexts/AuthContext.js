@@ -8,6 +8,7 @@ import {
 import logger from '../services/logger';
 import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
+import { isAdminRole } from '../utils/authUtils';
 
 // Auth State Management
 const initialState = {
@@ -378,7 +379,7 @@ export function AuthProvider({ children }) {
         user = {
           ...credentialsOrUser,
           // Ensure isAdmin property is set based on role
-          isAdmin: ['admin', 'administrator'].includes(credentialsOrUser.role?.toLowerCase())
+          isAdmin: isAdminRole(credentialsOrUser.role)
         };
         token = tokenFromSSO;
         

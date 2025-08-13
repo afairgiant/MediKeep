@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logger from '../services/logger';
+import { isAdminRole } from '../utils/authUtils';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -119,9 +120,7 @@ export function AuthProvider({ children }) {
           username: payload.sub,
           role: payload.role || 'user',
           fullName: payload.full_name || payload.sub,
-          isAdmin: ['admin', 'administrator'].includes(
-            (payload.role || '').toLowerCase()
-          ),
+          isAdmin: isAdminRole(payload.role),
         };
 
         setToken(storedToken);

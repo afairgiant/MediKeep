@@ -4,6 +4,7 @@
  */
 
 import logger from '../logger';
+import { isAdminRole } from '../../utils/authUtils';
 
 class SimpleAuthService {
   constructor() {
@@ -640,7 +641,7 @@ class SimpleAuthService {
         user: {
           ...data.user,
           // Ensure isAdmin property is set based on role
-          isAdmin: ['admin', 'administrator'].includes(data.user.role?.toLowerCase())
+          isAdmin: isAdminRole(data.user.role)
         },
         token: data.access_token,
         isNewUser: data.is_new_user
