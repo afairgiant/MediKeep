@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/auth/simpleAuthService';
 import SSOConflictModal from './SSOConflictModal';
+import GitHubLinkModal from './GitHubLinkModal';
 import logger from '../../services/logger';
 
 const SSOCallback = () => {
@@ -12,6 +13,8 @@ const SSOCallback = () => {
   const [conflictData, setConflictData] = useState(null);
   const [showConflictModal, setShowConflictModal] = useState(false);
   const [resolvingConflict, setResolvingConflict] = useState(false);
+  const [githubLinkData, setGithubLinkData] = useState(null);
+  const [showGithubLinkModal, setShowGithubLinkModal] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -88,6 +91,20 @@ const SSOCallback = () => {
         
         setConflictData(result);
         setShowConflictModal(true);
+        setProcessing(false);
+        return;
+      }
+
+      // Check if there's a GitHub manual linking requirement
+      if (result.github_manual_link) {
+        logger.info('GitHub manual linking required', {
+          githubUsername: result.github_user_info?.github_username,
+          githubId: result.github_user_info?.github_id,
+          category: 'sso_callback_component'
+        });
+        
+        setGithubLinkData(result);
+        setShowGithubLinkModal(true);
         setProcessing(false);
         return;
       }
@@ -197,6 +214,50 @@ const SSOCallback = () => {
     }
   };
 
+  const handleGithubLinkComplete = (result) => {
+    logger.info('GitHub manual linking completed successfully', {
+      username: result.user?.username,
+      category: 'sso_callback_component'
+    });
+
+    // Update auth context with linked login
+    if (login) {
+      login(result.user, result.access_token);
+    }
+
+    // Hide the modal and redirect
+    setShowGithubLinkModal(false);
+    
+    // Determine where to redirect
+    let redirectPath = '/dashboard';
+    
+    if (result.is_new_user) {
+      redirectPath = '/patients/me?edit=true';
+    } else {
+      const returnUrl = sessionStorage.getItem('sso_return_url');
+      if (returnUrl) {
+        redirectPath = returnUrl;
+        sessionStorage.removeItem('sso_return_url');
+      }
+    }
+
+    navigate(redirectPath, { replace: true });
+  };
+
+  const handleGithubLinkError = (error) => {
+    logger.error('GitHub manual linking failed', {
+      error: error.message,
+      category: 'sso_callback_component'
+    });
+    setError(error.message || 'Failed to link GitHub account');
+    setShowGithubLinkModal(false);
+  };
+
+  const handleGithubLinkClose = () => {
+    setShowGithubLinkModal(false);
+    setError('GitHub linking cancelled');
+  };
+
   if (processing) {
     return (
       <div style={{ 
@@ -304,6 +365,15 @@ const SSOCallback = () => {
         isOpen={showConflictModal}
         onResolve={handleConflictResolution}
         isLoading={resolvingConflict}
+      />
+      
+      <GitHubLinkModal
+        isOpen={showGithubLinkModal}
+        onClose={handleGithubLinkClose}
+        githubUserInfo={githubLinkData?.github_user_info}
+        tempToken={githubLinkData?.temp_token}
+        onLinkComplete={handleGithubLinkComplete}
+        onError={handleGithubLinkError}
       />
     </>
   );

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.api import deps
 from app.services.sso_service import SSOService
 from app.auth.sso.exceptions import *
@@ -10,6 +11,16 @@ from app.core.logging_config import get_logger
 logger = get_logger(__name__, "sso")
 router = APIRouter(prefix="/auth/sso", tags=["sso"])
 sso_service = SSOService()
+
+class SSOConflictRequest(BaseModel):
+    temp_token: str
+    action: str  # "link" or "create_separate"
+    preference: str  # "auto_link", "create_separate", "always_ask"
+
+class GitHubLinkRequest(BaseModel):
+    temp_token: str
+    username: str
+    password: str
 
 @router.get("/config")
 async def get_sso_config():
@@ -58,6 +69,11 @@ async def sso_callback(
         # Check if this is a conflict response
         if result.get("conflict"):
             # Return conflict data directly for frontend to handle
+            return result
+        
+        # Check if this is a GitHub manual linking response
+        if result.get("github_manual_link"):
+            # Return GitHub manual linking data for frontend to handle
             return result
         
         # Create JWT token for the user (matching regular auth format)
@@ -112,14 +128,12 @@ async def sso_callback(
 
 @router.post("/resolve-conflict")
 async def resolve_account_conflict(
-    temp_token: str,
-    action: str,  # "link" or "create_separate"
-    preference: str,  # "auto_link", "create_separate", "always_ask"
+    request: SSOConflictRequest,
     db: Session = Depends(deps.get_db)
 ):
     """Resolve SSO account conflict based on user's choice"""
     try:
-        result = sso_service.resolve_account_conflict(temp_token, action, preference, db)
+        result = sso_service.resolve_account_conflict(request.temp_token, request.action, request.preference, db)
         
         # Create JWT token for the user
         access_token = create_access_token(
@@ -160,6 +174,56 @@ async def resolve_account_conflict(
         raise HTTPException(
             status_code=500,
             detail="SSO conflict resolution failed"
+        )
+
+@router.post("/resolve-github-link")
+async def resolve_github_manual_link(
+    request: GitHubLinkRequest,
+    db: Session = Depends(deps.get_db)
+):
+    """Resolve GitHub manual linking by verifying user credentials"""
+    try:
+        result = sso_service.resolve_github_manual_link(request.temp_token, request.username, request.password, db)
+        
+        # Create JWT token for the user
+        access_token = create_access_token(
+            data={
+                "sub": result["user"].username,
+                "role": (
+                    result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
+                ),
+                "user_id": result["user"].id,
+            }
+        )
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": result["user"].id,
+                "username": result["user"].username,
+                "email": result["user"].email,
+                "full_name": result["user"].full_name,
+                "role": result["user"].role,
+                "auth_method": result["user"].auth_method,
+            },
+            "is_new_user": result["is_new_user"]
+        }
+        
+    except SSOAuthenticationError as e:
+        logger.error(f"GitHub manual linking failed: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": str(e),
+                "error_code": "GITHUB_LINK_FAILED"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in GitHub manual linking: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="GitHub manual linking failed"
         )
 
 @router.post("/test-connection")

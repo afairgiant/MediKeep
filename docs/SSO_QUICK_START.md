@@ -26,9 +26,9 @@ SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 # DO NOT set SSO_ISSUER_URL for Google - it's built-in!
 ```
 
-**Note:** For Docker users, use port 8005 in the redirect URI:
+**For Docker users:** Use the same port as your `docker-compose.yml` configuration:
 ```bash
-SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback
+SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback  # if using port 8005
 ```
 
 ### Step 3: Restart & Test
@@ -64,6 +64,8 @@ SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 ### Step 3: Restart & Test
 Same as Google - restart and test!
 
+**GitHub Note:** If users have private email settings in GitHub, they'll see a manual linking modal to connect with existing accounts using their local credentials.
+
 ---
 
 ## What You DON'T Need to Configure
@@ -77,9 +79,10 @@ Same as Google - restart and test!
 ## What Happens Next
 
 ✅ **New Users**: Automatically get accounts (if registration enabled)  
-✅ **Existing Users**: SSO links to existing account by email  
+✅ **Existing Users (email matches)**: Shows linking modal with choice to link or create separate account  
+✅ **GitHub Users (private email)**: Shows manual linking modal to connect with existing account  
 ✅ **Security**: CSRF protection, secure token handling  
-✅ **Flexibility**: Users can still use local passwords  
+✅ **Flexibility**: Users can still use local passwords after linking  
 
 ## Production Setup
 

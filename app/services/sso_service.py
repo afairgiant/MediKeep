@@ -54,57 +54,49 @@ class SSOService:
             raise SSOAuthenticationError(f"Failed to start SSO authentication: {str(e)}")
     
     async def complete_authentication(self, code: str, state: str, db: Session) -> Dict:
-        """Complete SSO authentication with simple retry"""
+        """Complete SSO authentication - no retry for OAuth codes (they're single-use)"""
         # Validate state
         self._validate_state(state)
         
-        # Simple retry logic (3 attempts)
-        last_error = None
-        for attempt in range(3):
-            try:
-                provider = create_sso_provider()
-                
-                # Exchange code for token
-                token_data = await provider.exchange_code_for_token(code)
-                
-                # Get user information
-                user_info = await provider.get_user_info(token_data["access_token"])
-                
-                # Validate email domain if configured
-                if not self._validate_email_domain(user_info.email):
-                    raise SSOAuthenticationError(
-                        f"Email domain not allowed: {user_info.email.split('@')[1]}"
-                    )
-                
-                # Find or create user
-                result = self._find_or_create_user(user_info, db)
-                
-                # Log success (handle both regular and conflict responses)
-                if result.get("conflict"):
-                    logger.info(
-                        f"SSO authentication detected conflict for {user_info.email}",
-                        extra={"category": "sso", "event": "auth_conflict"}
-                    )
-                else:
-                    logger.info(
-                        f"SSO authentication successful for {user_info.email}",
-                        extra={
-                            "category": "sso", 
-                            "event": "auth_success",
-                            "is_new_user": result["is_new_user"]
-                        }
-                    )
-                
-                return result
-                
-            except Exception as e:
-                last_error = e
-                if attempt < 2:  # Don't sleep on last attempt
-                    await asyncio.sleep(1)  # Simple 1 second delay
-                continue
-        
-        logger.error(f"SSO authentication failed after 3 attempts: {str(last_error)}")
-        raise SSOAuthenticationError(f"Authentication failed: {str(last_error)}")
+        try:
+            provider = create_sso_provider()
+            
+            # Exchange code for token (OAuth codes are single-use, no retry!)
+            token_data = await provider.exchange_code_for_token(code)
+            
+            # Get user information
+            user_info = await provider.get_user_info(token_data["access_token"])
+            
+            # Validate email domain if configured
+            if not self._validate_email_domain(user_info.email):
+                raise SSOAuthenticationError(
+                    f"Email domain not allowed: {user_info.email.split('@')[1]}"
+                )
+            
+            # Find or create user
+            result = self._find_or_create_user(user_info, db)
+            
+            # Log success (handle both regular and conflict responses)
+            if result.get("conflict"):
+                logger.info(
+                    f"SSO authentication detected conflict for {user_info.email}",
+                    extra={"category": "sso", "event": "auth_conflict"}
+                )
+            else:
+                logger.info(
+                    f"SSO authentication successful for {user_info.email}",
+                    extra={
+                        "category": "sso", 
+                        "event": "auth_success",
+                        "is_new_user": result["is_new_user"]
+                    }
+                )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"SSO authentication failed: {str(e)}")
+            raise SSOAuthenticationError(f"Authentication failed: {str(e)}")
     
     def _validate_state(self, state: str):
         """Validate CSRF state token"""
@@ -175,6 +167,14 @@ class SSOService:
 
     def _find_or_create_user(self, user_info, db: Session) -> Dict:
         """Find existing user or create new one with corruption detection and clean preferences logic"""
+        # Special handling for GitHub users without accessible email
+        is_github_no_email = (settings.SSO_PROVIDER_TYPE == "github" and 
+                              not user_info.email)
+        
+        if is_github_no_email:
+            # For GitHub users without accessible email, show manual linking modal
+            return self._return_github_manual_linking(user_info)
+        
         # Check for existing user by email
         existing_user = user_crud.get_by_email(db, email=user_info.email)
         
@@ -294,7 +294,7 @@ class SSOService:
         _state_storage[conflict_key] = {
             "created_at": datetime.utcnow(),
             "existing_user_id": existing_user.id,
-            "sso_user_info": user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
+            "sso_user_info": user_info.dict() if hasattr(user_info, 'dict') else user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
             "expires_at": datetime.utcnow() + timedelta(minutes=10)
         }
         
@@ -309,6 +309,30 @@ class SSOService:
             },
             "sso_user_info": {
                 "email": user_info.email,
+                "name": user_info.name or "",
+                "provider": settings.SSO_PROVIDER_TYPE
+            },
+            "temp_token": temp_token
+        }
+    
+    def _return_github_manual_linking(self, user_info) -> Dict:
+        """Return GitHub manual linking data for users without accessible email"""
+        # Create a temporary token for the manual linking process
+        temp_token = secrets.token_urlsafe(32)
+        
+        # Store GitHub user info temporarily (in production, use Redis)
+        github_key = f"github_manual_link_{temp_token}"
+        _state_storage[github_key] = {
+            "created_at": datetime.utcnow(),
+            "sso_user_info": user_info.dict() if hasattr(user_info, 'dict') else user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
+            "expires_at": datetime.utcnow() + timedelta(minutes=10)
+        }
+        
+        return {
+            "github_manual_link": True,
+            "github_user_info": {
+                "github_id": user_info.sub,
+                "github_username": user_info.username or "GitHub User",
                 "name": user_info.name or "",
                 "provider": settings.SSO_PROVIDER_TYPE
             },
@@ -376,6 +400,54 @@ class SSOService:
         
         else:
             raise SSOAuthenticationError("Invalid action. Must be 'link' or 'create_separate'")
+    
+    def resolve_github_manual_link(self, temp_token: str, username: str, password: str, db: Session) -> Dict:
+        """Resolve GitHub manual linking by verifying user credentials"""
+        from app.core.security import verify_password
+        
+        # Retrieve GitHub linking data
+        github_key = f"github_manual_link_{temp_token}"
+        if github_key not in _state_storage:
+            raise SSOAuthenticationError("Invalid or expired GitHub linking token")
+        
+        github_data = _state_storage[github_key]
+        
+        # Check if token is expired
+        if datetime.utcnow() > github_data["expires_at"]:
+            del _state_storage[github_key]
+            raise SSOAuthenticationError("GitHub linking token expired")
+        
+        # Find user by username
+        existing_user = user_crud.get_by_username(db, username=username)
+        if not existing_user:
+            raise SSOAuthenticationError("Invalid username or password")
+        
+        # Verify password
+        if not verify_password(password, existing_user.password):
+            raise SSOAuthenticationError("Invalid username or password")
+        
+        # Link the GitHub account to the existing user
+        sso_info = github_data["sso_user_info"]
+        
+        # Reconstruct user_info object for linking
+        class UserInfo:
+            def __init__(self, data):
+                self.sub = data.get("sub")
+                self.email = data.get("email")
+                self.name = data.get("name")
+        
+        user_info = UserInfo(sso_info)
+        result = self._link_existing_user(existing_user, user_info, db)
+        
+        # Clean up temporary data
+        del _state_storage[github_key]
+        
+        logger.info(
+            f"GitHub account manually linked to user {existing_user.username}",
+            extra={"category": "sso", "event": "github_manual_link", "user_id": existing_user.id}
+        )
+        
+        return result
 
     def test_connection(self) -> Dict[str, bool]:
         """Test SSO provider connection (for admin dashboard)"""

@@ -7,7 +7,7 @@ This guide explains how to configure SSO authentication for the Medical Records 
 The SSO system allows users to log in using external identity providers instead of creating local accounts. It supports:
 
 - **Google OAuth2** - Personal and Google Workspace accounts
-- **GitHub OAuth2** - GitHub accounts  
+- **GitHub OAuth2** - GitHub accounts
 - **Generic OIDC** - Enterprise providers (Auth0, Okta, etc.)
 - **Keycloak** - Open source identity management
 - **Authentik** - Modern identity provider
@@ -29,11 +29,12 @@ The SSO system allows users to log in using external identity providers instead 
 The app has **built-in endpoints** for Google and GitHub - you only need to provide your client credentials!
 
 **For Google/GitHub (Easiest Setup):**
+
 ```bash
 # Enable SSO
 SSO_ENABLED=true
 
-# Provider type 
+# Provider type
 SSO_PROVIDER_TYPE=google  # or "github"
 
 # Your OAuth credentials (get these from provider)
@@ -45,6 +46,7 @@ SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 ```
 
 **For Custom OIDC Providers:**
+
 ```bash
 # Enable SSO
 SSO_ENABLED=true
@@ -77,6 +79,7 @@ SSO_ALLOWED_DOMAINS=["example.com", "company.org"]
 7. Copy the Client ID and Client Secret
 
 **Environment Variables:**
+
 ```bash
 SSO_ENABLED=true
 SSO_PROVIDER_TYPE=google
@@ -97,6 +100,7 @@ SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 5. Copy the Client ID and generate a Client Secret
 
 **Environment Variables:**
+
 ```bash
 SSO_ENABLED=true
 SSO_PROVIDER_TYPE=github
@@ -105,17 +109,25 @@ SSO_CLIENT_SECRET=your-github-client-secret
 SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 ```
 
+**GitHub-Specific Notes:**
+
+- **Private Emails**: If users have private email settings, they'll see a manual linking modal to connect with existing accounts
+- **Public Emails**: Users with public emails work like Google SSO with automatic email matching
+- **No Domain Restrictions**: GitHub doesn't enforce email domain restrictions like workplace providers
+
 ### Generic OIDC Setup (Keycloak, Auth0, Okta, etc.)
 
 This requires your OIDC provider's configuration details.
 
 **For Keycloak:**
+
 1. Create a new client in your Keycloak realm
 2. Set Client ID and generate secret
 3. Set redirect URI to `http://localhost:8000/auth/sso/callback`
 4. Note your Keycloak server URL and realm
 
 **Environment Variables:**
+
 ```bash
 SSO_ENABLED=true
 SSO_PROVIDER_TYPE=keycloak  # or "oidc"
@@ -126,6 +138,7 @@ SSO_ISSUER_URL=https://keycloak.company.com/realms/your-realm
 ```
 
 **For Auth0:**
+
 ```bash
 SSO_ENABLED=true
 SSO_PROVIDER_TYPE=oidc
@@ -137,19 +150,20 @@ SSO_ISSUER_URL=https://your-tenant.auth0.com/
 
 ## Variable Reference
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `SSO_ENABLED` | ✅ All | Enable/disable SSO | `true` |
-| `SSO_PROVIDER_TYPE` | ✅ All | Provider type | `google`, `github`, `oidc`, `keycloak`, `authentik`, `authelia` |
-| `SSO_CLIENT_ID` | ✅ All | OAuth client ID from provider | `123456789-abc.apps.googleusercontent.com` |
-| `SSO_CLIENT_SECRET` | ✅ All | OAuth client secret from provider | `GOCSPX-xxxxxxxxxxxxx` |
-| `SSO_REDIRECT_URI` | ✅ All | Where provider redirects after login | `http://localhost:8000/auth/sso/callback` |
-| `SSO_ISSUER_URL` | ✅ OIDC only | OIDC provider's issuer URL | `https://keycloak.com/realms/main` |
-| `SSO_ALLOWED_DOMAINS` | Optional | Restrict to email domains (JSON array) | `["company.com"]` |
+| Variable              | Required     | Description                            | Example                                                         |
+| --------------------- | ------------ | -------------------------------------- | --------------------------------------------------------------- |
+| `SSO_ENABLED`         | ✅ All       | Enable/disable SSO                     | `true`                                                          |
+| `SSO_PROVIDER_TYPE`   | ✅ All       | Provider type                          | `google`, `github`, `oidc`, `keycloak`, `authentik`, `authelia` |
+| `SSO_CLIENT_ID`       | ✅ All       | OAuth client ID from provider          | `123456789-abc.apps.googleusercontent.com`                      |
+| `SSO_CLIENT_SECRET`   | ✅ All       | OAuth client secret from provider      | `GOCSPX-xxxxxxxxxxxxx`                                          |
+| `SSO_REDIRECT_URI`    | ✅ All       | Where provider redirects after login   | `http://localhost:8000/auth/sso/callback`                       |
+| `SSO_ISSUER_URL`      | ✅ OIDC only | OIDC provider's issuer URL             | `https://keycloak.com/realms/main`                              |
+| `SSO_ALLOWED_DOMAINS` | Optional     | Restrict to email domains (JSON array) | `["company.com"]`                                               |
 
 **Built-in for Google/GitHub:**
+
 - ✅ Authorization URLs (you don't set these)
-- ✅ Token URLs (you don't set these)  
+- ✅ Token URLs (you don't set these)
 - ✅ API endpoints (you don't set these)
 - ✅ Required scopes (automatically configured)
 
@@ -165,19 +179,45 @@ SSO_ISSUER_URL=https://your-tenant.auth0.com/
 ## User Account Behavior
 
 ### New Users
-- If **Admin Settings → Allow User Registration = ON**: New SSO users get accounts automatically  
+
+- If **Admin Settings → Allow User Registration = ON**: New SSO users get accounts automatically
 - If **Admin Settings → Allow User Registration = OFF**: SSO login blocked for new users
 
-### Existing Users  
+### Existing Users
+
 - Users with matching email addresses can link their SSO account
 - Local password still works after linking SSO
 - Users can use either login method
 
 ### Account Linking
+
+**Automatic Linking (when email matches):**
+
 When an existing user (with email john@company.com) logs in via SSO:
+
 1. System finds existing account by email
-2. Links SSO provider to that account  
-3. User can now login with either local password OR SSO
+2. Shows account linking modal with options:
+   - **Link accounts** (recommended) - Links SSO to existing account
+   - **Create separate account** - Creates new account with SSO
+   - **Always ask** / **Auto-link** / **Never link** - Sets preference for future
+3. Once linked, user can login with either local password OR SSO
+
+**Manual Linking (GitHub with private email):**
+
+When GitHub users have private email settings:
+
+1. System cannot automatically match by email
+2. Shows GitHub manual linking modal
+3. User enters existing account credentials to link
+4. GitHub account gets permanently linked to local account
+
+**User Preferences:**
+
+Users can set linking preferences to avoid repeated prompts:
+
+- **Auto-link**: Always link to existing accounts automatically
+- **Create separate**: Always create new separate accounts
+- **Always ask**: Show choice modal each time (default)
 
 ## Security Features
 
@@ -189,12 +229,15 @@ When an existing user (with email john@company.com) logs in via SSO:
 ## Production Deployment
 
 ### HTTPS Required
+
 Most providers require HTTPS in production. Update your redirect URI:
+
 ```bash
 SSO_REDIRECT_URI=https://yourdomain.com/auth/sso/callback
 ```
 
 ### Environment Security
+
 - Never commit secrets to version control
 - Use environment variable management (Docker secrets, etc.)
 - Rotate client secrets regularly
@@ -204,14 +247,17 @@ SSO_REDIRECT_URI=https://yourdomain.com/auth/sso/callback
 ### Common Issues
 
 1. **"Invalid redirect URI"**
+
    - Check redirect URI matches exactly in provider settings
    - Ensure no trailing slashes or typos
 
 2. **"SSO button not showing"**
+
    - Verify `SSO_ENABLED=true`
    - Check frontend can reach `/auth/sso/config` endpoint
 
 3. **"Connection test failed"**
+
    - Verify client ID and secret are correct
    - For OIDC, check issuer URL is accessible
    - Check network connectivity
@@ -221,7 +267,9 @@ SSO_REDIRECT_URI=https://yourdomain.com/auth/sso/callback
    - Or pre-create accounts for SSO users
 
 ### Debug Mode
+
 Enable detailed logging by setting:
+
 ```bash
 LOG_LEVEL=DEBUG
 ```
@@ -229,19 +277,25 @@ LOG_LEVEL=DEBUG
 ## Advanced Configuration
 
 ### Custom Scopes
+
 The system requests these scopes by default:
+
 - Google: `openid email profile`
 - GitHub: `user:email`
 - OIDC: `openid email profile`
 
 ### Multiple Domains
+
 To allow multiple email domains:
+
 ```bash
 SSO_ALLOWED_DOMAINS=["company.com", "contractor.org", "partner.net"]
 ```
 
 ### Load Balancer Setup
+
 If using a load balancer, ensure:
+
 1. Sticky sessions OR shared session storage
 2. All instances have same SSO configuration
 3. Health checks don't interfere with SSO endpoints
@@ -249,6 +303,7 @@ If using a load balancer, ensure:
 ## Support
 
 For issues:
+
 1. Check application logs
 2. Use "Test SSO Connection" in admin panel
 3. Verify provider configuration

@@ -47,13 +47,13 @@ services:
       # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS
       ENABLE_SSL: ${ENABLE_SSL:-false}
       # SSO Configuration (Optional) - SSO is disabled by default
-      #SSO_ENABLED: ${SSO_ENABLED:-false}
-      #SSO_PROVIDER_TYPE: ${SSO_PROVIDER_TYPE:-oidc}
-      #SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
-      #SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-}
-      #SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
-      #SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
-      #SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
+      SSO_ENABLED: ${SSO_ENABLED:-false}
+      SSO_PROVIDER_TYPE: ${SSO_PROVIDER_TYPE:-oidc}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-}
+      SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
+      SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
+      SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
 
       #PUID: ${PUID} # Enable if using bind mounts
       #PGID: ${PGID} # Enable if using bind mounts

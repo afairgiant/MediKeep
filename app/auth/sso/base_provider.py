@@ -6,7 +6,8 @@ import httpx
 class SSOUserInfo(BaseModel):
     """Standardized user info from SSO providers"""
     sub: str  # Subject ID
-    email: str
+    email: Optional[str] = None  # Optional for providers like GitHub without public email
+    username: Optional[str] = None  # Provider username (e.g., GitHub login)
     name: Optional[str] = None
 
 class SSOProvider(ABC):
