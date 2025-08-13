@@ -164,13 +164,31 @@ const Dashboard = () => {
 
   const checkAdminStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // Use secure storage system instead of direct localStorage
+      const { secureStorage, legacyMigration } = await import('../utils/secureStorage');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
+      
+      console.log('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
+        hasToken: !!token,
+        tokenPreview: token ? token.substring(0, 20) + '...' : null,
+        timestamp: new Date().toISOString()
+      });
+      
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const userRole = payload.role || '';
         const adminCheck =
           userRole.toLowerCase() === 'admin' ||
           userRole.toLowerCase() === 'administrator';
+        
+        console.log('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
+          role: userRole,
+          isAdmin: adminCheck,
+          fullPayload: payload,
+          timestamp: new Date().toISOString()
+        });
+        
         setIsAdmin(adminCheck);
       } else {
         setIsAdmin(false);

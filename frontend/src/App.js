@@ -34,6 +34,7 @@ import ProtectedRoute, {
 
 // Pages
 import Login from './pages/auth/Login';
+import SSOCallback from './components/auth/SSOCallback';
 import Dashboard from './pages/Dashboard';
 import ExportPage from './pages/ExportPage';
 import PatientInfo from './pages/medical/Patient-Info';
@@ -345,6 +346,14 @@ function App() {
                           element={
                             <PublicRoute>
                               <Login />
+                            </PublicRoute>
+                          }
+                        />
+                        <Route
+                          path="/auth/sso/callback"
+                          element={
+                            <PublicRoute>
+                              <SSOCallback />
                             </PublicRoute>
                           }
                         />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminApiService } from '../../services/api/adminApi';
+import { authService } from '../../services/auth/simpleAuthService';
 import AdminLayout from '../../components/admin/AdminLayout';
 import frontendLogger from '../../services/frontendLogger';
 import './AdminSettings.css';
@@ -15,10 +16,14 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [ssoConfig, setSSOConfig] = useState({ enabled: false });
+  const [ssoTestLoading, setSSOTestLoading] = useState(false);
+  const [ssoTestResult, setSSOTestResult] = useState(null);
 
   // Load settings on component mount
   useEffect(() => {
     loadSettings();
+    loadSSOConfig();
   }, []);
 
   const loadSettings = async () => {
@@ -95,8 +100,39 @@ const AdminSettings = () => {
     }
   };
 
+  const loadSSOConfig = async () => {
+    try {
+      const config = await authService.getSSOConfig();
+      setSSOConfig(config);
+    } catch (error) {
+      frontendLogger.logError('Error loading SSO config', {
+        error: error.message,
+        component: 'AdminSettings',
+      });
+    }
+  };
+
+  const testSSOConnection = async () => {
+    try {
+      setSSOTestLoading(true);
+      setSSOTestResult(null);
+      
+      const result = await authService.testSSOConnection();
+      setSSOTestResult(result);
+    } catch (error) {
+      setSSOTestResult({
+        success: false,
+        message: error.message || 'Connection test failed'
+      });
+    } finally {
+      setSSOTestLoading(false);
+    }
+  };
+
   const handleReset = () => {
     loadSettings(); // Reload from server
+    loadSSOConfig();
+    setSSOTestResult(null);
     setMessage({ type: '', text: '' });
   };
 
@@ -299,6 +335,101 @@ const AdminSettings = () => {
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* SSO Settings */}
+          <div className="settings-section-card">
+            <div className="settings-section-header">
+              <h2>Single Sign-On (SSO)</h2>
+              <p>Configure SSO authentication settings</p>
+            </div>
+            
+            <div className="settings-section-content">
+              <div className="setting-item">
+                <div className="setting-info">
+                  <div className="setting-title">SSO Status</div>
+                  <div className="setting-description">
+                    Current SSO configuration status
+                  </div>
+                </div>
+                <div className="setting-control">
+                  <div className={`status-indicator ${ssoConfig.enabled ? 'enabled' : 'disabled'}`}>
+                    {ssoConfig.enabled ? 'Enabled' : 'Disabled'}
+                  </div>
+                  {ssoConfig.enabled && ssoConfig.provider_type && (
+                    <div className="sso-provider-info">
+                      Provider: {ssoConfig.provider_type.charAt(0).toUpperCase() + ssoConfig.provider_type.slice(1)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {ssoConfig.enabled && (
+                <>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <div className="setting-title">SSO Registration</div>
+                      <div className="setting-description">
+                        Whether new users can be created via SSO
+                      </div>
+                    </div>
+                    <div className="setting-control">
+                      <div className={`status-indicator ${ssoConfig.registration_enabled ? 'enabled' : 'disabled'}`}>
+                        {ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <div className="setting-title">Test Connection</div>
+                      <div className="setting-description">
+                        Test the SSO provider connection and configuration
+                      </div>
+                    </div>
+                    <div className="setting-control">
+                      <button
+                        onClick={testSSOConnection}
+                        disabled={ssoTestLoading}
+                        className="settings-btn secondary"
+                      >
+                        {ssoTestLoading ? 'Testing...' : 'Test SSO Connection'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {ssoTestResult && (
+                    <div className="setting-item">
+                      <div className="setting-info">
+                        <div className="setting-title">Test Result</div>
+                      </div>
+                      <div className="setting-control">
+                        <div className={`sso-test-result ${ssoTestResult.success ? 'success' : 'error'}`}>
+                          {ssoTestResult.success ? '✓ ' : '✗ '}
+                          {ssoTestResult.message}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {!ssoConfig.enabled && (
+                <div className="sso-disabled-info">
+                  <p>
+                    SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:
+                  </p>
+                  <ul>
+                    <li><code>SSO_ENABLED=true</code></li>
+                    <li><code>SSO_PROVIDER_TYPE</code> (google, github, or oidc)</li>
+                    <li><code>SSO_CLIENT_ID</code></li>
+                    <li><code>SSO_CLIENT_SECRET</code></li>
+                    <li><code>SSO_ISSUER_URL</code> (for OIDC provider)</li>
+                    <li><code>SSO_REDIRECT_URI</code></li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

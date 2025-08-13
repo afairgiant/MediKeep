@@ -70,7 +70,12 @@ const BaseMedicalCard = ({
           {/* Header */}
           <Group justify="space-between" align="flex-start">
             <Stack gap="xs" style={{ flex: 1 }}>
-              <Text fw={600} size="lg">{title}</Text>
+              {/* Handle title as either string or complex element */}
+              {typeof title === 'string' ? (
+                <Text fw={600} size="lg">{title}</Text>
+              ) : (
+                <div>{title}</div>
+              )}
               {subtitle && <Text size="sm" c="dimmed">{subtitle}</Text>}
               <Group gap="xs">
                 {badges.map((badge, index) => (
@@ -90,7 +95,8 @@ const BaseMedicalCard = ({
                 )}
               </Group>
             </Stack>
-            <StatusBadge status={status} />
+            {/* Only show status badge if it's not already included in the title */}
+            {typeof title === 'string' && <StatusBadge status={status} />}
           </Group>
 
           {/* Dynamic Fields */}

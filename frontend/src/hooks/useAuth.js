@@ -11,6 +11,8 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logger from '../services/logger';
+import { isAdminRole } from '../utils/authUtils';
+import { secureStorage, legacyMigration } from '../utils/secureStorage';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -20,21 +22,21 @@ const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
 
 class TokenManager {
-  static getToken() {
-    return localStorage.getItem(TOKEN_KEY);
+  static async getToken() {
+    return await secureStorage.getItem(TOKEN_KEY);
   }
 
-  static setToken(token) {
+  static async setToken(token) {
     if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
+      await secureStorage.setItem(TOKEN_KEY, token);
     } else {
-      localStorage.removeItem(TOKEN_KEY);
+      secureStorage.removeItem(TOKEN_KEY);
     }
   }
 
   static removeToken() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    secureStorage.removeItem(TOKEN_KEY);
+    secureStorage.removeItem(USER_KEY);
   }
 
   static isTokenValid(token) {
@@ -101,7 +103,10 @@ export function AuthProvider({ children }) {
       setLoading(true);
       setError(null);
 
-      const storedToken = TokenManager.getToken();
+      // Migrate legacy localStorage data if present
+      await legacyMigration.migrateFromLocalStorage();
+
+      const storedToken = await TokenManager.getToken();
 
       if (!storedToken || !TokenManager.isTokenValid(storedToken)) {
         // No valid token, clear everything
@@ -119,16 +124,14 @@ export function AuthProvider({ children }) {
           username: payload.sub,
           role: payload.role || 'user',
           fullName: payload.full_name || payload.sub,
-          isAdmin: ['admin', 'administrator'].includes(
-            (payload.role || '').toLowerCase()
-          ),
+          isAdmin: isAdminRole(payload.role),
         };
 
         setToken(storedToken);
         setUser(userData);
 
         // Store user data
-        localStorage.setItem(USER_KEY, JSON.stringify(userData));
+        secureStorage.setJSON(USER_KEY, userData);
 
         // Check if token is expiring soon
         if (TokenManager.isTokenExpiringSoon(storedToken)) {
@@ -137,14 +140,14 @@ export function AuthProvider({ children }) {
             token_expiry: payload.exp,
             current_time: Math.floor(Date.now() / 1000)
           });
-          // TODO: Implement token refresh here
+          // Token refresh not implemented - user will need to log in again when token expires
         }
       }
     } catch (error) {
       logger.error('Error initializing auth', {
         category: 'auth_init_error',
         error: error.message,
-        has_stored_token: !!TokenManager.getToken()
+        has_stored_token: !!localStorage.getItem('medapp_token') || !!localStorage.getItem('token')
       });
       TokenManager.removeToken();
       setError('Authentication initialization failed');
@@ -212,9 +215,14 @@ export function AuthProvider({ children }) {
     navigate('/login');
   }, [navigate]);
 
-  // Check if user is authenticated
+  // Check if user is authenticated (synchronous - based on current state)
   const isAuthenticated = useCallback(() => {
-    const currentToken = token || TokenManager.getToken();
+    return !!(token && user);
+  }, [token, user]);
+
+  // Internal async authentication check
+  const checkAuthentication = useCallback(async () => {
+    const currentToken = token || await TokenManager.getToken();
     return currentToken && TokenManager.isTokenValid(currentToken);
   }, [token]);
 
@@ -224,8 +232,8 @@ export function AuthProvider({ children }) {
   }, [user]);
 
   // Get auth headers for API requests
-  const getAuthHeaders = useCallback(() => {
-    const currentToken = token || TokenManager.getToken();
+  const getAuthHeaders = useCallback(async () => {
+    const currentToken = token || await TokenManager.getToken();
 
     if (currentToken && TokenManager.isTokenValid(currentToken)) {
       return {

@@ -43,25 +43,19 @@ const PageHeader = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [navOpened, setNavOpened] = useState(false);
 
   // Check if user is admin
   const isAdmin = () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role || '';
-        return (
-          userRole.toLowerCase() === 'admin' ||
-          userRole.toLowerCase() === 'administrator'
-        );
-      }
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-    }
-    return false;
+    console.log('🔑 ADAPTER_ADMIN_CHECK: Checking admin status in PageHeader adapter', {
+      user,
+      userIsAdmin: user?.isAdmin,
+      userRole: user?.role,
+      result: user?.isAdmin || false,
+      timestamp: new Date().toISOString()
+    });
+    return user?.isAdmin || false;
   };
 
   // Navigation items organized by category
@@ -158,15 +152,19 @@ const PageHeader = ({
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    // Clear welcome box dismissal so it reappears on next login
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('welcomeBox_dismissed_')) {
-        localStorage.removeItem(key);
-      }
-    });
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    console.log('🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process');
+    try {
+      console.log('🚪 PAGEHEADER_LOGOUT: Calling AuthContext logout function');
+      // Use AuthContext logout for proper state management
+      await logout();
+      console.log('🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully');
+      // Navigation will be handled by AuthContext/ProtectedRoute
+    } catch (error) {
+      console.log('🚪 PAGEHEADER_LOGOUT: Logout failed with error', error.message);
+      // Fallback navigation if logout fails
+      window.location.href = '/login';
+    }
   };
 
   const isDashboard = variant === 'dashboard';

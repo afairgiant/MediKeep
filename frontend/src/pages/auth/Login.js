@@ -25,6 +25,8 @@ const Login = () => {
   const [createUserError, setCreateUserError] = useState('');
   const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [registrationMessage, setRegistrationMessage] = useState('');
+  const [ssoConfig, setSSOConfig] = useState({ enabled: false });
+  const [ssoLoading, setSSOLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,14 +40,21 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
-  // Check registration status on mount
+  // Check registration status and SSO config on mount
   useEffect(() => {
     const checkRegistration = async () => {
       const status = await authService.checkRegistrationEnabled();
       setRegistrationEnabled(status.registration_enabled);
       setRegistrationMessage(status.message || '');
     };
+    
+    const checkSSO = async () => {
+      const config = await authService.getSSOConfig();
+      setSSOConfig(config);
+    };
+    
     checkRegistration();
+    checkSSO();
   }, []);
 
   const handleChange = e => {
@@ -230,6 +239,27 @@ const Login = () => {
       lastName: '',
     });
   };
+
+  const handleSSOLogin = async () => {
+    setSSOLoading(true);
+    try {
+      // Store current location for redirect after SSO
+      const returnUrl = location.state?.from?.pathname || '/dashboard';
+      sessionStorage.setItem('sso_return_url', returnUrl);
+      
+      const result = await authService.initiateSSOLogin(returnUrl);
+      // Redirect to SSO provider
+      window.location.href = result.auth_url;
+    } catch (error) {
+      frontendLogger.logError('SSO login initiation failed', {
+        error: error.message,
+        component: 'Login',
+      });
+      toast.error(error.message || 'Failed to start SSO login');
+    } finally {
+      setSSOLoading(false);
+    }
+  };
   return (
     <div className="login-container">
       <div className="login-form">
@@ -269,6 +299,23 @@ const Login = () => {
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        {/* SSO Login Option */}
+        {ssoConfig.enabled && (
+          <div className="sso-section">
+            <div className="divider">
+              <span>or</span>
+            </div>
+            <button
+              type="button"
+              className="sso-btn"
+              onClick={handleSSOLogin}
+              disabled={isLoading || ssoLoading}
+            >
+              {ssoLoading ? 'Redirecting...' : `Continue with ${ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO'}`}
+            </button>
+          </div>
+        )}
 
         <div className="login-actions">
           {registrationEnabled ? (
