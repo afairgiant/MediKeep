@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import { adminApiService } from '../../services/api/adminApi';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
@@ -13,6 +15,7 @@ const AdminLayout = ({ children }) => {
   const [adminVerified, setAdminVerified] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
 
   const checkAdminAccess = useCallback(async () => {
@@ -21,7 +24,9 @@ const AdminLayout = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
+      // Migrate legacy data first
+      legacyMigration.migrateFromLocalStorage();
+      const token = secureStorage.getItem('token');
       if (!token) {
         navigate('/login');
         return;
@@ -32,7 +37,7 @@ const AdminLayout = ({ children }) => {
       const currentTime = Date.now() / 1000;
 
       if (payload.exp < currentTime) {
-        localStorage.removeItem('token');
+        secureStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -79,9 +84,15 @@ const AdminLayout = ({ children }) => {
     }
   }, [checkAdminAccess, user, adminVerified]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // Use AuthContext logout to properly clear state and redirect
+      await logout();
+      // Navigation will be handled by AuthContext/ProtectedRoute
+    } catch (error) {
+      // Fallback navigation if logout fails
+      navigate('/login');
+    }
   };
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

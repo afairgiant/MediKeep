@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { useViewport } from '../../hooks/useViewport';
 import MobileNavigation from './MobileNavigation';
 import TabletNavigation from './TabletNavigation';
@@ -23,17 +24,23 @@ const NavigationWrapper = ({
   const { viewport, isMobile, isTablet } = useViewport();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   
-  // Handle logout
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem('token');
-    // Clear any user-specific localStorage items
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('welcomeBox_dismissed_') || key.startsWith('user_')) {
-        localStorage.removeItem(key);
-      }
+  // Handle logout - use the proper auth system
+  const { logout } = useAuth();
+  const handleLogout = useCallback(async () => {
+    console.log('🚪 NAVIGATION_LOGOUT: NavigationWrapper logout clicked', {
+      timestamp: new Date().toISOString()
     });
-    window.location.href = '/login';
-  }, []);
+    try {
+      await logout();
+      console.log('🚪 NAVIGATION_LOGOUT: AuthContext logout completed, redirecting...', {
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('🚪 NAVIGATION_LOGOUT: Error during logout:', error);
+      // Fallback: direct redirect if auth logout fails
+      window.location.href = '/login';
+    }
+  }, [logout]);
   
   // Handle back navigation
   const handleBackClick = useCallback(() => {

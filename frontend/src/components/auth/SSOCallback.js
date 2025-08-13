@@ -23,6 +23,7 @@ const SSOCallback = () => {
   }, []);
 
   const handleSSOCallback = async () => {
+    // Extract OAuth parameters from URL (OAuth provider redirects here)
     const code = searchParams.get('code');
     const state = searchParams.get('state');
     const error = searchParams.get('error');
@@ -60,8 +61,11 @@ const SSOCallback = () => {
     }
 
     try {
-      // Complete SSO authentication
+      // Complete SSO authentication (code/state sent securely in POST body)
       const result = await authService.completeSSOAuth(code, state);
+      
+      // Clear URL parameters to reduce exposure in browser history
+      window.history.replaceState({}, document.title, window.location.pathname);
       
       if (!result.success) {
         logger.error('SSO authentication failed', {

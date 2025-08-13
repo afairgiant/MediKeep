@@ -316,6 +316,14 @@ class SimpleAuthService {
     }
   }
 
+  // Refresh token (not implemented for this simple auth system)
+  async refreshToken() {
+    logger.warn('Token refresh not implemented for simple auth system', {
+      category: 'auth_refresh_token'
+    });
+    return { success: false, error: 'Token refresh not supported' };
+  }
+
   // Logout user
   async logout() {
     try {
@@ -323,6 +331,26 @@ class SimpleAuthService {
         hadToken: !!this.getToken(),
         category: 'auth_logout'
       });
+      
+      // Call backend logout endpoint to invalidate token
+      const token = this.getToken();
+      if (token) {
+        try {
+          await this.makeRequest('/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (error) {
+          logger.warn('Backend logout failed, continuing with client logout', {
+            error: error.message,
+            category: 'auth_logout'
+          });
+        }
+      }
+      
       this.clearTokens();
     } catch (error) {
       logger.error('Error during logout process', {
@@ -333,10 +361,40 @@ class SimpleAuthService {
     }
   }
 
-  // Clear all auth data
+  // Clear all auth data from both secure storage and legacy localStorage
   clearTokens() {
+    console.log('🗑️ AUTHSERVICE_CLEAR: Clearing tokens from all storage locations', {
+      beforeClear: {
+        secureToken: !!secureStorage.getItem(this.tokenKey),
+        secureUser: !!secureStorage.getItem(this.userKey),
+        legacyToken: !!localStorage.getItem(this.tokenKey),
+        legacyUser: !!localStorage.getItem(this.userKey),
+        legacyTokenExpiry: !!localStorage.getItem('tokenExpiry')
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+    // Clear from secure storage (new system)
     secureStorage.removeItem(this.tokenKey);
     secureStorage.removeItem(this.userKey);
+    secureStorage.removeItem('tokenExpiry');
+    
+    // CRITICAL: Also clear from legacy localStorage (old system)
+    // This is essential because auth initialization checks both locations
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem('tokenExpiry');
+    
+    console.log('🗑️ AUTHSERVICE_CLEAR: All tokens cleared', {
+      afterClear: {
+        secureToken: !!secureStorage.getItem(this.tokenKey),
+        secureUser: !!secureStorage.getItem(this.userKey),
+        legacyToken: !!localStorage.getItem(this.tokenKey),
+        legacyUser: !!localStorage.getItem(this.userKey),
+        legacyTokenExpiry: !!localStorage.getItem('tokenExpiry')
+      },
+      timestamp: new Date().toISOString()
+    });
   }
 
   // Get auth headers for API requests
@@ -478,13 +536,14 @@ class SimpleAuthService {
         category: 'sso_callback'
       });
 
-      const params = new URLSearchParams();
-      params.append('code', code);
-      params.append('state', state);
-
-      const response = await this.makeRequest(`/auth/sso/callback?${params.toString()}`, {
+      // Send OAuth code and state in POST body for security (not URL)
+      const response = await this.makeRequest('/auth/sso/callback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code,
+          state: state
+        })
       });
 
       if (!response.ok) {

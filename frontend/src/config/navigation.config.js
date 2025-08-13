@@ -227,11 +227,27 @@ export const VIEWPORT_CONFIGS = {
 
 // Helper function to get navigation sections based on viewport and user role
 export const getNavigationSections = (viewport, isAdmin = false) => {
+  console.log('🧭 NAV_CONFIG: Getting navigation sections', {
+    viewport,
+    isAdmin,
+    timestamp: new Date().toISOString()
+  });
+  
   const sections = { ...NAVIGATION_SECTIONS };
 
   // Add admin section if user is admin
   if (isAdmin) {
     sections.admin = ADMIN_SECTION;
+    console.log('🧭 NAV_CONFIG: Admin section added', {
+      adminSection: ADMIN_SECTION,
+      totalSections: Object.keys(sections).length,
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    console.log('🧭 NAV_CONFIG: Admin section NOT added (user not admin)', {
+      isAdmin,
+      timestamp: new Date().toISOString()
+    });
   }
 
   // Apply viewport-specific modifications

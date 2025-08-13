@@ -1,13 +1,13 @@
 /**
- * Secure storage utility with XSS protection measures
- * Uses sessionStorage instead of localStorage for reduced exposure window
+ * Secure storage utility
+ * Uses localStorage for persistence but with security measures
  */
 
 const STORAGE_PREFIX = 'medapp_';
 
 class SecureStorage {
   /**
-   * Store data in sessionStorage with prefix
+   * Store data in localStorage with prefix
    * @param {string} key 
    * @param {any} value 
    */
@@ -15,21 +15,21 @@ class SecureStorage {
     try {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
       const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
-      sessionStorage.setItem(prefixedKey, serializedValue);
+      localStorage.setItem(prefixedKey, serializedValue);
     } catch (error) {
       console.error('SecureStorage: Failed to store item', { key, error });
     }
   }
 
   /**
-   * Retrieve data from sessionStorage
+   * Retrieve data from localStorage
    * @param {string} key 
    * @returns {string|null}
    */
   getItem(key) {
     try {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
-      return sessionStorage.getItem(prefixedKey);
+      return localStorage.getItem(prefixedKey);
     } catch (error) {
       console.error('SecureStorage: Failed to retrieve item', { key, error });
       return null;
@@ -37,26 +37,26 @@ class SecureStorage {
   }
 
   /**
-   * Remove data from sessionStorage
+   * Remove data from localStorage
    * @param {string} key 
    */
   removeItem(key) {
     try {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
-      sessionStorage.removeItem(prefixedKey);
+      localStorage.removeItem(prefixedKey);
     } catch (error) {
       console.error('SecureStorage: Failed to remove item', { key, error });
     }
   }
 
   /**
-   * Clear all application data from sessionStorage
+   * Clear all application data from localStorage
    */
   clear() {
     try {
-      Object.keys(sessionStorage).forEach(key => {
+      Object.keys(localStorage).forEach(key => {
         if (key.startsWith(STORAGE_PREFIX)) {
-          sessionStorage.removeItem(key);
+          localStorage.removeItem(key);
         }
       });
     } catch (error) {

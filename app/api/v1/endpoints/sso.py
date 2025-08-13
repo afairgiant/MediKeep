@@ -17,6 +17,10 @@ class SSOConflictRequest(BaseModel):
     action: str  # "link" or "create_separate"
     preference: str  # "auto_link", "create_separate", "always_ask"
 
+class SSOCallbackRequest(BaseModel):
+    code: str  # Authorization code from SSO provider
+    state: str  # State parameter for CSRF protection
+
 class GitHubLinkRequest(BaseModel):
     temp_token: str
     username: str
@@ -57,18 +61,18 @@ async def initiate_sso_login(
 
 @router.post("/callback")
 async def sso_callback(
-    code: str = Query(..., description="Authorization code from SSO provider"),
-    state: str = Query(..., description="State parameter for CSRF protection"),
+    request: SSOCallbackRequest,
     db: Session = Depends(deps.get_db)
 ):
     """Handle SSO callback and complete authentication
     
-    Security Note: OAuth authorization codes are single-use and time-limited,
-    but should not be logged in web server access logs.
+    Security Note: OAuth authorization codes are sent in POST body from frontend
+    to prevent exposure in backend URL parameters, browser history, and server logs.
+    The OAuth provider still redirects to the frontend GET route as per OAuth spec.
     """
     try:
         # Complete SSO authentication
-        result = await sso_service.complete_authentication(code, state, db)
+        result = await sso_service.complete_authentication(request.code, request.state, db)
         
         # Check if this is a conflict response
         if result.get("conflict"):
