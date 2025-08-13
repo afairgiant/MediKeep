@@ -236,7 +236,6 @@ def login(
         raise UnauthorizedException(
             message="Incorrect username or password",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Validate required fields

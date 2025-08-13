@@ -14,10 +14,9 @@ class ExceptionStatus(str, Enum):
     """
     Enumeration for exception status types used in error responses.
     """
-    SUCCESS = "success"
-    WARNING = "warning" 
-    FAIL = "fail"
-    ERROR = "error"
+    SUCCESS = "SUCCESS"
+    WARNING = "WARNING" 
+    FAIL = "FAIL"
 
 
 class BaseExceptionCode(str, Enum):

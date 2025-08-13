@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { NavigationWrapper } from '../navigation';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import './PageHeader.css';
 
 /**
@@ -27,22 +28,49 @@ const PageHeader = ({
   const { isMobile } = useViewport();
   
   // Check if user is admin
-  const isAdmin = () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role || '';
-        return (
-          userRole.toLowerCase() === 'admin' ||
-          userRole.toLowerCase() === 'administrator'
-        );
+  const [adminStatus, setAdminStatus] = useState(false);
+  
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        // Migrate legacy data first
+        await legacyMigration.migrateFromLocalStorage();
+        const token = await secureStorage.getItem('token');
+        console.log('🔑 ADMIN_CHECK: Checking admin status', {
+          hasToken: !!token,
+          tokenPreview: token ? token.substring(0, 20) + '...' : null,
+          timestamp: new Date().toISOString()
+        });
+        
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const userRole = payload.role || '';
+          const isAdminResult = (
+            userRole.toLowerCase() === 'admin' ||
+            userRole.toLowerCase() === 'administrator'
+          );
+          
+          console.log('🔑 ADMIN_CHECK: Token payload analysis', {
+            role: userRole,
+            isAdmin: isAdminResult,
+            fullPayload: payload,
+            timestamp: new Date().toISOString()
+          });
+          
+          setAdminStatus(isAdminResult);
+        } else {
+          setAdminStatus(false);
+        }
+      } catch (error) {
+        console.error('🔑 ADMIN_CHECK: Error checking admin status:', error);
+        setAdminStatus(false);
       }
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-    }
-    return false;
-  };
+    };
+    
+    checkAdminStatus();
+  }, []);
+  
+  const isAdmin = () => adminStatus;
   
   const handleBackClick = () => {
     if (onBackClick) {

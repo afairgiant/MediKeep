@@ -54,7 +54,8 @@ class MedicalRecordsAPIException(APIException):
                  message: str = None,
                  description: str = None,
                  request: Optional[Request] = None,
-                 context: Optional[Dict[str, Any]] = None):
+                 context: Optional[Dict[str, Any]] = None,
+                 headers: Optional[Dict[str, str]] = None):
         """
         Initialize with enhanced logging and context.
         
@@ -66,8 +67,12 @@ class MedicalRecordsAPIException(APIException):
             description: Detailed error description
             request: FastAPI request object for logging context
             context: Additional context data for logging
+            headers: Optional HTTP headers to include in the response
         """
         super().__init__(error_code, http_status_code, status, message, description)
+        
+        # Store headers for FastAPI to use
+        self.headers = headers
         
         # Enhanced logging with medical records context
         self._log_enhanced_exception(request, context)
@@ -181,7 +186,7 @@ class DatabaseException(MedicalRecordsAPIException):
         super().__init__(
             error_code=ExceptionCode.DATABASE_ERROR,
             http_status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-            status=ExceptionStatus.ERROR,
+            status=ExceptionStatus.FAIL,
             message=message or "Database operation failed",
             description=description or "An error occurred while accessing the database",
             **kwargs
@@ -208,7 +213,7 @@ class ServiceUnavailableException(MedicalRecordsAPIException):
         super().__init__(
             error_code=ExceptionCode.SERVICE_UNAVAILABLE,
             http_status_code=HTTP_503_SERVICE_UNAVAILABLE,
-            status=ExceptionStatus.ERROR,
+            status=ExceptionStatus.FAIL,
             message=message or "Service temporarily unavailable",
             description=description or "The service is temporarily unavailable, please try again later",
             **kwargs
@@ -380,7 +385,7 @@ def create_fallback_exception_handler():
         internal_error = MedicalRecordsAPIException(
             error_code=ExceptionCode.INTERNAL_SERVER_ERROR,
             http_status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-            status=ExceptionStatus.ERROR,
+            status=ExceptionStatus.FAIL,
             message="An unexpected error occurred",
             description="The server encountered an unexpected error. Please try again later.",
             request=request,
@@ -461,7 +466,7 @@ def setup_error_handling(app: FastAPI):
         api_exception = MedicalRecordsAPIException(
             error_code=error_code,
             http_status_code=exc.status_code,
-            status=ExceptionStatus.FAIL if exc.status_code < 500 else ExceptionStatus.ERROR,
+            status=ExceptionStatus.FAIL,
             message=exc.detail if isinstance(exc.detail, str) else "HTTP Error",
             description=f"HTTP {exc.status_code} error occurred",
             request=request

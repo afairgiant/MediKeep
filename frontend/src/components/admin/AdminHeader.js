@@ -5,41 +5,20 @@ import './AdminHeader.css';
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
   const { theme, toggleTheme } = useTheme();
 
-  console.log('🎯 AdminHeader render:', {
-    timestamp: new Date().toISOString(),
-    user: user?.username,
-    hasOnLogout: typeof onLogout === 'function',
-    hasOnToggleSidebar: typeof onToggleSidebar === 'function',
-    currentTheme: theme,
-  });
 
   const handleLogout = () => {
-    console.log('🚪 AdminHeader logout button clicked:', {
-      timestamp: new Date().toISOString(),
-      user: user?.username,
-    });
     if (onLogout) {
       onLogout();
-    } else {
-      console.error('❌ onLogout function not provided to AdminHeader');
     }
   };
 
   const handleToggleSidebar = () => {
-    console.log('📱 AdminHeader sidebar toggle clicked');
     if (onToggleSidebar) {
       onToggleSidebar();
-    } else {
-      console.error('❌ onToggleSidebar function not provided to AdminHeader');
     }
   };
 
   const handleThemeToggle = () => {
-    console.log('🌓 AdminHeader theme toggle clicked:', {
-      timestamp: new Date().toISOString(),
-      currentTheme: theme,
-      newTheme: theme === 'light' ? 'dark' : 'light',
-    });
     toggleTheme();
   };
   return (

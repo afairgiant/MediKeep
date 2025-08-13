@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
+from datetime import datetime
 
 
 class UserBase(BaseModel):
@@ -220,11 +221,23 @@ class User(UserBase):
             "username": "john_doe",
             "email": "john@example.com",
             "full_name": "John Doe",
-            "role": "user"
+            "role": "user",
+            "auth_method": "local",
+            "sso_provider": null,
+            "external_id": null
         }
     """
 
     id: int
+    
+    # SSO fields
+    auth_method: Optional[str] = None
+    external_id: Optional[str] = None
+    sso_provider: Optional[str] = None
+    sso_metadata: Optional[dict] = None
+    last_sso_login: Optional[datetime] = None
+    account_linked_at: Optional[datetime] = None
+    sso_linking_preference: Optional[str] = None
 
     class Config:
         """

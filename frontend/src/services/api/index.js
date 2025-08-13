@@ -1,6 +1,7 @@
 import logger from '../logger';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
 import { extractErrorMessage } from '../../utils/errorUtils';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
 // Map entity types to their API endpoint paths
 const ENTITY_TO_API_PATH = {
@@ -32,8 +33,10 @@ class ApiService {
     this.fallbackURL = '/api/v1';
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
+  async getAuthHeaders() {
+    // Migrate legacy data first
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
     const headers = { 'Content-Type': 'application/json' };
 
     if (token) {
@@ -62,14 +65,14 @@ class ApiService {
         const currentTime = Date.now() / 1000;
         if (payload.exp < currentTime) {
           logger.warn('Token expired, removing from storage');
-          localStorage.removeItem('token');
+          secureStorage.removeItem('token');
           return headers;
         }
 
         headers['Authorization'] = `Bearer ${token}`;
       } catch (e) {
         logger.error('Invalid token format', { error: e.message });
-        localStorage.removeItem('token');
+        secureStorage.removeItem('token');
       }
     }
 
@@ -135,7 +138,9 @@ class ApiService {
     }
 
     // Get token but don't fail if it doesn't exist - let backend handle authentication
-    const token = localStorage.getItem('token');
+    // Migrate legacy data first
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
     const config = {
       method,
       signal,
@@ -850,7 +855,9 @@ class ApiService {
       });
 
       // Get authentication token
-      const token = localStorage.getItem('token');
+      // Migrate legacy data first
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication required to view files');
       }
@@ -970,7 +977,9 @@ class ApiService {
       });
 
       // Use direct fetch to get full response with headers
-      const token = localStorage.getItem('token');
+      // Migrate legacy data first
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       const response = await fetch(`${this.baseURL}/entity-files/files/${fileId}/download`, {
         method: 'GET',
         headers: {

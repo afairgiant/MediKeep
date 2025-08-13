@@ -76,10 +76,10 @@ const StatusBadge = ({
       {...props}
     >
       {showIcon && statusConfig.icon && (
-        <Group gap={4} wrap="nowrap">
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <span>{statusConfig.icon}</span>
           <span>{statusConfig.label}</span>
-        </Group>
+        </span>
       )}
       {!showIcon && statusConfig.label}
     </Badge>

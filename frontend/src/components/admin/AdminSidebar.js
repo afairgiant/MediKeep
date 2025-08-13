@@ -5,13 +5,6 @@ import './AdminSidebar.css';
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
   const [isMobile, setIsMobile] = useState(false);
   
-  console.log('🗂️ AdminSidebar render:', {
-    timestamp: new Date().toISOString(),
-    isOpen,
-    currentPath,
-    hasOnToggle: typeof onToggle === 'function',
-    isMobile,
-  });
 
   // Check if we're on mobile
   useEffect(() => {
@@ -26,20 +19,12 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
   }, []);
 
   const handleToggle = () => {
-    console.log('🗂️ AdminSidebar toggle clicked');
     if (onToggle) {
       onToggle();
-    } else {
-      console.error('❌ onToggle function not provided to AdminSidebar');
     }
   };
 
   const handleLinkClick = path => {
-    console.log('🔗 AdminSidebar link clicked:', {
-      timestamp: new Date().toISOString(),
-      path,
-      currentPath,
-    });
     // Close sidebar on mobile when a link is clicked
     if (isMobile && isOpen && onToggle) {
       onToggle();

@@ -8,6 +8,8 @@ import {
 import logger from '../services/logger';
 import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
+import { isAdminRole } from '../utils/authUtils';
+import { secureStorage, legacyMigration } from '../utils/secureStorage';
 
 // Auth State Management
 const initialState = {
@@ -134,9 +136,12 @@ export function AuthProvider({ children }) {
       try {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
 
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        const storedExpiry = localStorage.getItem('tokenExpiry');
+        // Migrate legacy localStorage data if present
+        await legacyMigration.migrateFromLocalStorage();
+        
+        const storedToken = await secureStorage.getItem('token');
+        const storedUser = await secureStorage.getItem('user');
+        const storedExpiry = await secureStorage.getItem('tokenExpiry');
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
@@ -161,6 +166,13 @@ export function AuthProvider({ children }) {
           } else {
             // Token expired, try to refresh
             try {
+              // Check if refreshToken method exists
+              if (typeof authService.refreshToken !== 'function') {
+                clearAuthData();
+                dispatch({ type: AUTH_ACTIONS.LOGOUT });
+                return;
+              }
+              
               const refreshResult = await authService.refreshToken();
               if (refreshResult.success) {
                 dispatch({
@@ -187,9 +199,9 @@ export function AuthProvider({ children }) {
           message: 'Auth initialization failed',
           error: error.message,
           stack: error.stack,
-          hasStoredToken: !!localStorage.getItem('token'),
-          hasStoredUser: !!localStorage.getItem('user'),
-          hasStoredExpiry: !!localStorage.getItem('tokenExpiry'),
+          hasStoredToken: !!secureStorage.getItem('token'),
+          hasStoredUser: !!secureStorage.getItem('user'),
+          hasStoredExpiry: !!secureStorage.getItem('tokenExpiry'),
           timestamp: new Date().toISOString()
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -200,7 +212,9 @@ export function AuthProvider({ children }) {
   }, []);
   // Auto-refresh token before expiry
   useEffect(() => {
-    if (!state.isAuthenticated || !state.tokenExpiry) return;
+    if (!state.isAuthenticated || !state.tokenExpiry) {
+      return;
+    }
 
     const refreshBuffer = 5 * 60 * 1000; // 5 minutes before expiry
     const timeUntilRefresh = state.tokenExpiry - Date.now() - refreshBuffer;
@@ -208,6 +222,13 @@ export function AuthProvider({ children }) {
     if (timeUntilRefresh > 0) {
       const refreshTimer = setTimeout(async () => {
         try {
+          // Check if refreshToken method exists
+          if (typeof authService.refreshToken !== 'function') {
+            clearAuthData();
+            dispatch({ type: AUTH_ACTIONS.LOGOUT });
+            return;
+          }
+          
           const refreshResult = await authService.refreshToken();
           if (refreshResult.success) {
             dispatch({
@@ -317,12 +338,11 @@ export function AuthProvider({ children }) {
 
   // Helper functions
   const clearAuthData = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('tokenExpiry');
+    secureStorage.removeItem('token');
+    secureStorage.removeItem('user');
+    secureStorage.removeItem('tokenExpiry');
     
     // Clear any cached app data to ensure fresh data on next login
-    // This is additional insurance for cache clearing
     const cacheKeys = Object.keys(localStorage).filter(key => 
       key.startsWith('appData_') || 
       key.startsWith('patient_') || 
@@ -330,19 +350,21 @@ export function AuthProvider({ children }) {
     );
     
     cacheKeys.forEach(key => {
+      // Legacy cleanup - remove from both storages
       localStorage.removeItem(key);
+      secureStorage.removeItem(key);
     });
     
     // Note: We don't clear first login status as it should persist across sessions
   };
 
   const updateStoredToken = (token, tokenExpiry) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('tokenExpiry', tokenExpiry.toString());
+    secureStorage.setItem('token', token);
+    secureStorage.setItem('tokenExpiry', tokenExpiry.toString());
   };
 
   const updateStoredUser = user => {
-    localStorage.setItem('user', JSON.stringify(user));
+    secureStorage.setJSON('user', user);
   };
 
   // Update user data in context and storage
@@ -362,66 +384,100 @@ export function AuthProvider({ children }) {
     return updatedUser;
   };
 
-  // Auth Actions
-  const login = async credentials => {
+  // Auth Actions - handles both username/password credentials and SSO user/token
+  const login = async (credentialsOrUser, tokenFromSSO = null) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      const result = await authService.login(credentials);
-
-      if (result.success) {
-        const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-        // Clear any existing cache data before login
-        // This ensures fresh data is loaded for the new user session
-        logger.info('Clearing cache before login', {
-          category: 'auth_cache_clear',
-          username: result.user.username,
-          userId: result.user.id,
+      // Check if this is SSO login (user object + token) or regular login (credentials)
+      const isSSO = tokenFromSSO !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
+      
+      let user, token;
+      
+      if (isSSO) {
+        // SSO login - we already have user and token
+        user = {
+          ...credentialsOrUser,
+          // Ensure isAdmin property is set based on role
+          isAdmin: isAdminRole(credentialsOrUser.role)
+        };
+        token = tokenFromSSO;
+        
+        logger.info('Processing SSO login', {
+          category: 'auth_sso_login',
+          username: user.username,
+          userId: user.id,
+          role: user.role,
+          isAdmin: user.isAdmin,
           timestamp: new Date().toISOString()
         });
-
-        // Clear any existing cached data from localStorage
-        const cacheKeys = Object.keys(localStorage).filter(key => 
-          key.startsWith('appData_') || 
-          key.startsWith('patient_') || 
-          key.startsWith('cache_')
-        );
-        
-        cacheKeys.forEach(key => {
-          localStorage.removeItem(key);
-        });
-
-        // Store in localStorage
-        updateStoredToken(result.token, tokenExpiry);
-        updateStoredUser(result.user);
-
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: {
-            user: result.user,
-            token: result.token,
-            tokenExpiry,
-          },
-        });
-
-        toast.success('Login successful!');
-
-        // Check if profile completion modal should be shown
-        // This will be handled by the component consuming the auth context
-
-        return {
-          success: true,
-          isFirstLogin: isFirstLogin(result.user.username),
-        };
       } else {
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_FAILURE,
-          payload: result.error || 'Login failed',
+        // Regular username/password login
+        const result = await authService.login(credentialsOrUser);
+
+        if (!result.success) {
+          dispatch({
+            type: AUTH_ACTIONS.LOGIN_FAILURE,
+            payload: result.error || 'Login failed',
+          });
+          return { success: false, error: result.error };
+        }
+        
+        user = result.user;
+        token = result.token;
+        
+        logger.info('Processing regular login', {
+          category: 'auth_regular_login',
+          username: user.username,
+          userId: user.id,
+          timestamp: new Date().toISOString()
         });
-        return { success: false, error: result.error };
       }
+
+      const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+      // Clear any existing cache data before login
+      // This ensures fresh data is loaded for the new user session
+      logger.info('Clearing cache before login', {
+        category: 'auth_cache_clear',
+        username: user.username,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
+
+      // Clear any existing cached data from localStorage
+      const cacheKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('appData_') || 
+        key.startsWith('patient_') || 
+        key.startsWith('cache_')
+      );
+      
+      cacheKeys.forEach(key => {
+        // Legacy cleanup - remove from both storages
+        localStorage.removeItem(key);
+        secureStorage.removeItem(key);
+      });
+
+      // Store in localStorage
+      updateStoredToken(token, tokenExpiry);
+      updateStoredUser(user);
+
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: {
+          user,
+          token,
+          tokenExpiry,
+        },
+      });
+
+      toast.success('Login successful!');
+
+      return {
+        success: true,
+        isFirstLogin: isFirstLogin(user.username),
+      };
     } catch (error) {
       const errorMessage = error.message || 'Login failed';
       dispatch({
@@ -451,8 +507,12 @@ export function AuthProvider({ children }) {
         timestamp: new Date().toISOString()
       });
     } finally {
+      // Clear auth data first
       clearAuthData();
+      
+      // Dispatch logout action to update state
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      
       toast.info('Logged out successfully');
     }
   };

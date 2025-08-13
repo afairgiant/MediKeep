@@ -22,7 +22,9 @@ function ProtectedRoute({
 
   // Determine redirect reason and target
   const getRedirectInfo = () => {
-    if (isLoading) return null;
+    if (isLoading) {
+      return null;
+    }
     
     if (!isAuthenticated) {
       return { to: redirectTo, reason: 'unauthenticated' };

@@ -6,13 +6,12 @@ export const useApi = () => {
   const abortControllerRef = useRef(null);
 
   const execute = useCallback(async (apiCall, options = {}) => {
-    // Cancel any existing requests
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // Create new abort controller
+    // Create new abort controller for this request
     const controller = new AbortController();
+    
+    // Store reference but don't cancel existing requests immediately
+    // This prevents race conditions between multiple hooks
+    const previousController = abortControllerRef.current;
     abortControllerRef.current = controller;
 
     try {
@@ -26,36 +25,46 @@ export const useApi = () => {
         return null;
       }
 
+      // Only cancel previous request if this one succeeded
+      // This prevents successful requests from being cancelled by new ones
+      if (previousController && !previousController.signal.aborted) {
+        previousController.abort();
+      }
+
       return result;
     } catch (err) {
-      // Don't show errors if request was cancelled
+      // Don't show errors if request was cancelled or if it's an AbortError
       if (err.name !== 'AbortError' && !controller.signal.aborted) {
-        // Extract detailed error message if available
-        let errorMessage = options.errorMessage || err.message || 'An error occurred';
-        
-        // If the error contains validation details, extract them
-        if (err.message && err.message.includes('Validation Error:')) {
-          errorMessage = err.message; // Use the detailed validation error
-        } else if (err.response?.data?.detail) {
-          // Handle structured error responses
-          if (Array.isArray(err.response.data.detail)) {
-            const details = err.response.data.detail
-              .map(e => `${e.loc?.join('.') || 'field'}: ${e.msg}`)
-              .join('; ');
-            errorMessage = `Validation failed: ${details}`;
-          } else {
-            errorMessage = err.response.data.detail;
+        // Only show error if this is the most recent request
+        if (abortControllerRef.current === controller) {
+          // Extract detailed error message if available
+          let errorMessage = options.errorMessage || err.message || 'An error occurred';
+          
+          // If the error contains validation details, extract them
+          if (err.message && err.message.includes('Validation Error:')) {
+            errorMessage = err.message; // Use the detailed validation error
+          } else if (err.response?.data?.detail) {
+            // Handle structured error responses
+            if (Array.isArray(err.response.data.detail)) {
+              const details = err.response.data.detail
+                .map(e => `${e.loc?.join('.') || 'field'}: ${e.msg}`)
+                .join('; ');
+              errorMessage = `Validation failed: ${details}`;
+            } else {
+              errorMessage = err.response.data.detail;
+            }
+          } else if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
           }
-        } else if (err.response?.data?.message) {
-          errorMessage = err.response.data.message;
+          
+          setError(errorMessage);
         }
-        
-        setError(errorMessage);
         // API error logged by apiService automatically
       }
       return null;
     } finally {
-      if (!controller.signal.aborted) {
+      // Only set loading to false if this is still the current request
+      if (abortControllerRef.current === controller && !controller.signal.aborted) {
         setLoading(false);
       }
     }
