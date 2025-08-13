@@ -50,7 +50,7 @@ async def initiate_sso_login(
         return result
     except SSOConfigurationError as e:
         logger.warning(f"SSO configuration error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="SSO configuration error")
     except Exception as e:
         logger.error(f"Failed to initiate SSO: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to start SSO authentication")
@@ -61,7 +61,11 @@ async def sso_callback(
     state: str = Query(..., description="State parameter for CSRF protection"),
     db: Session = Depends(deps.get_db)
 ):
-    """Handle SSO callback and complete authentication"""
+    """Handle SSO callback and complete authentication
+    
+    Security Note: OAuth authorization codes are single-use and time-limited,
+    but should not be logged in web server access logs.
+    """
     try:
         # Complete SSO authentication
         result = await sso_service.complete_authentication(code, state, db)
@@ -106,7 +110,7 @@ async def sso_callback(
         raise HTTPException(
             status_code=403,
             detail={
-                "message": str(e),
+                "message": "Registration is currently disabled",
                 "error_code": "REGISTRATION_DISABLED"
             }
         )
@@ -165,7 +169,7 @@ async def resolve_account_conflict(
         raise HTTPException(
             status_code=400,
             detail={
-                "message": str(e),
+                "message": "Account conflict resolution failed",
                 "error_code": "CONFLICT_RESOLUTION_FAILED"
             }
         )
@@ -215,7 +219,7 @@ async def resolve_github_manual_link(
         raise HTTPException(
             status_code=400,
             detail={
-                "message": str(e),
+                "message": "GitHub account linking failed",
                 "error_code": "GITHUB_LINK_FAILED"
             }
         )
@@ -237,4 +241,4 @@ async def test_sso_connection():
             return {"success": False, "message": result["message"]}
     except Exception as e:
         logger.error(f"SSO connection test failed: {str(e)}")
-        return {"success": False, "message": f"Connection test failed: {str(e)}"}
+        return {"success": False, "message": "Connection test failed"}

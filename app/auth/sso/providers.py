@@ -108,10 +108,10 @@ class GitHubProvider(SSOProvider):
         
         logger = logging.getLogger(__name__)
         
-        # Debug log the parameters we're sending
-        logger.info(f"GitHub token exchange - redirect_uri: {self.redirect_uri}")
-        logger.info(f"GitHub token exchange - client_id: {self.client_id}")
-        logger.info(f"GitHub token exchange - code: {code[:10]}...")
+        # Debug log parameters (only in debug mode with redacted sensitive info)
+        logger.debug(f"GitHub token exchange - redirect_uri: {self.redirect_uri}")
+        logger.debug(f"GitHub token exchange - client_id: {self.client_id[:8]}***")
+        logger.debug(f"GitHub token exchange - code: {code[:6]}***")
         
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.post(
@@ -149,7 +149,7 @@ class GitHubProvider(SSOProvider):
                 # Check for error in form-encoded response
                 if "error" in parsed:
                     error_desc = parsed.get("error_description", [None])[0] or parsed.get("error", [None])[0]
-                    logger.error(f"GitHub OAuth error (form-encoded): {text}")
+                    logger.error(f"GitHub OAuth error (form-encoded): {error_desc}")
                     raise ValueError(f"GitHub OAuth error: {error_desc}")
                 
                 # Now check status after parsing
@@ -158,8 +158,8 @@ class GitHubProvider(SSOProvider):
                 # Extract access token
                 access_token = parsed.get("access_token", [None])[0]
                 if not access_token:
-                    logger.error(f"No access token in GitHub response: {text}")
-                    raise ValueError(f"No access token in GitHub response: {text}")
+                    logger.error("No access token in GitHub OAuth response")
+                    raise ValueError("No access token in GitHub OAuth response")
                 
                 return {
                     "access_token": access_token,

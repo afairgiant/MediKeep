@@ -51,7 +51,7 @@ class SSOService:
             }
         except Exception as e:
             logger.error(f"Failed to generate SSO auth URL: {str(e)}")
-            raise SSOAuthenticationError(f"Failed to start SSO authentication: {str(e)}")
+            raise SSOAuthenticationError("Failed to start SSO authentication")
     
     async def complete_authentication(self, code: str, state: str, db: Session) -> Dict:
         """Complete SSO authentication - no retry for OAuth codes (they're single-use)"""
@@ -96,7 +96,7 @@ class SSOService:
             
         except Exception as e:
             logger.error(f"SSO authentication failed: {str(e)}")
-            raise SSOAuthenticationError(f"Authentication failed: {str(e)}")
+            raise SSOAuthenticationError("Authentication failed")
     
     def _validate_state(self, state: str):
         """Validate CSRF state token"""
@@ -458,4 +458,4 @@ class SSOService:
             auth_url = provider.get_auth_url(test_state)
             return {"success": True, "message": "SSO provider configuration is valid"}
         except Exception as e:
-            return {"success": False, "message": f"SSO test failed: {str(e)}"}
+            return {"success": False, "message": "SSO test failed"}
