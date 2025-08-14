@@ -203,7 +203,7 @@ class SimpleAuthService {
         username: payload.sub,
         role: payload.role || 'user',
         fullName: payload.full_name || payload.sub,
-        isAdmin: payload.role === 'admin',
+        isAdmin: isAdminRole(payload.role),
       };
 
       // Store user
@@ -567,16 +567,26 @@ class SimpleAuthService {
 
       // Store token and user (same as regular login)
       if (data.access_token) {
-        this.setToken(data.access_token);
-        secureStorage.setJSON(this.userKey, {
+        // Create enriched user object with isAdmin property
+        const enrichedUser = {
           id: data.user.id,
           username: data.user.username,
           email: data.user.email,
           fullName: data.user.full_name,
           role: data.user.role,
           authMethod: data.user.auth_method,
-          isAdmin: data.user.role === 'admin',
-        });
+          isAdmin: isAdminRole(data.user.role),
+        };
+        
+        this.setToken(data.access_token);
+        secureStorage.setJSON(this.userKey, enrichedUser);
+        
+        return {
+          success: true,
+          user: enrichedUser,  // Return enriched user with isAdmin property
+          token: data.access_token,
+          isNewUser: data.is_new_user,
+        };
       }
 
       return {

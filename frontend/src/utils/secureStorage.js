@@ -5,11 +5,14 @@
 
 const STORAGE_PREFIX = 'medapp_';
 const SENSITIVE_KEYS = ['token', 'user', 'tokenExpiry']; // Keys that require encryption
+const ENCRYPTION_INIT_RETRY_DELAY = 100; // ms to wait before retrying encryption init
+const ENCRYPTED_DATA_MARKER = '__encrypted__';
 
 class SecureStorage {
   constructor() {
     this.encryptionKey = null;
     this.isInitialized = false;
+    this.sessionKeyId = 'medapp_secure_session_key';
     this.initializeEncryption();
   }
 
@@ -24,19 +27,29 @@ class SecureStorage {
         return;
       }
 
-      // Try to reuse existing session key or generate new one
-      if (window._secureStorageKey) {
-        this.encryptionKey = window._secureStorageKey;
+      // Try to reuse existing session key from sessionStorage or generate new one
+      const storedKeyData = sessionStorage.getItem(this.sessionKeyId);
+      
+      if (storedKeyData) {
+        try {
+          // Import the stored key
+          const keyData = JSON.parse(storedKeyData);
+          const keyBuffer = Uint8Array.from(atob(keyData.key), c => c.charCodeAt(0));
+          
+          this.encryptionKey = await window.crypto.subtle.importKey(
+            'raw',
+            keyBuffer,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+          );
+        } catch (importError) {
+          // If import fails, generate new key
+          await this.generateNewKey();
+        }
       } else {
-        // Generate session-persistent AES-GCM key
-        this.encryptionKey = await window.crypto.subtle.generateKey(
-          { name: 'AES-GCM', length: 256 },
-          false, // not extractable - key stays in memory only
-          ['encrypt', 'decrypt']
-        );
-        
-        // Store in window for session persistence (cleared on page reload)
-        window._secureStorageKey = this.encryptionKey;
+        // Generate new session key
+        await this.generateNewKey();
       }
       
       this.isInitialized = true;
@@ -44,6 +57,40 @@ class SecureStorage {
       console.error('SecureStorage: Failed to initialize encryption, using fallback', error);
       this.encryptionKey = null;
       this.isInitialized = true;
+    }
+  }
+
+  /**
+   * Generate and store a new encryption key
+   */
+  async generateNewKey() {
+    try {
+      // Generate session-persistent AES-GCM key
+      this.encryptionKey = await window.crypto.subtle.generateKey(
+        { name: 'AES-GCM', length: 256 },
+        true, // extractable so we can export to sessionStorage
+        ['encrypt', 'decrypt']
+      );
+      
+      // Export and store key in sessionStorage for session persistence
+      const exportedKey = await window.crypto.subtle.exportKey('raw', this.encryptionKey);
+      const keyData = {
+        key: btoa(String.fromCharCode(...new Uint8Array(exportedKey))),
+        created: Date.now()
+      };
+      sessionStorage.setItem(this.sessionKeyId, JSON.stringify(keyData));
+      
+      // Re-import as non-extractable for security
+      this.encryptionKey = await window.crypto.subtle.importKey(
+        'raw',
+        exportedKey,
+        { name: 'AES-GCM', length: 256 },
+        false, // non-extractable after storage
+        ['encrypt', 'decrypt']
+      );
+    } catch (error) {
+      console.error('SecureStorage: Failed to generate new key', error);
+      this.encryptionKey = null;
     }
   }
 
@@ -145,8 +192,23 @@ class SecureStorage {
   isSensitiveKey(key) {
     return SENSITIVE_KEYS.includes(key);
   }
+
   /**
-   * Store data in localStorage with secure prefix (encryption disabled for stability)
+   * Check if stored data is encrypted
+   * @param {string} value - Stored value to check
+   * @returns {boolean}
+   */
+  isEncryptedFormat(value) {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && parsed.marker === ENCRYPTED_DATA_MARKER && parsed.data;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Store data in localStorage with encryption for sensitive keys
    * @param {string} key 
    * @param {any} value 
    */
@@ -155,15 +217,56 @@ class SecureStorage {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
       const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
       
-      // Store with prefix only (encryption disabled to prevent navigation issues)
-      localStorage.setItem(prefixedKey, serializedValue);
+      // Check if this key should be encrypted
+      if (this.isSensitiveKey(key)) {
+        // CRITICAL: Never store sensitive data unencrypted
+        // Wait for encryption to be ready with retry
+        await this.waitForInit();
+        
+        // If still no encryption after waiting, try reinitializing
+        if (!this.encryptionKey) {
+          await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
+          await this.initializeEncryption();
+          await this.waitForInit();
+        }
+        
+        // If encryption still not available, throw error for sensitive data
+        if (!this.encryptionKey) {
+          console.error('SecureStorage: Cannot store sensitive data without encryption');
+          throw new Error('Encryption not available for sensitive data');
+        }
+        
+        // Encrypt sensitive data
+        const encryptedValue = await this.encryptData(serializedValue);
+        const wrapper = JSON.stringify({
+          marker: ENCRYPTED_DATA_MARKER,
+          data: encryptedValue,
+          timestamp: Date.now()
+        });
+        localStorage.setItem(prefixedKey, wrapper);
+      } else {
+        // Store non-sensitive data as plain text for performance
+        localStorage.setItem(prefixedKey, serializedValue);
+      }
     } catch (error) {
-      // Silent fail - don't log in production
+      // For sensitive keys, never fallback to unencrypted storage
+      if (this.isSensitiveKey(key)) {
+        console.error('SecureStorage: Failed to store sensitive key securely:', key);
+        throw error;
+      }
+      // For non-sensitive keys, allow fallback
+      try {
+        const prefixedKey = `${STORAGE_PREFIX}${key}`;
+        const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
+        localStorage.setItem(prefixedKey, serializedValue);
+      } catch (fallbackError) {
+        // Silent fail for non-sensitive data
+      }
     }
   }
 
   /**
-   * Retrieve data from localStorage with secure prefix (encryption disabled for stability)
+   * Retrieve data from localStorage with decryption for sensitive keys
    * @param {string} key 
    * @returns {string|null}
    */
@@ -176,7 +279,28 @@ class SecureStorage {
         return null;
       }
       
-      // Return stored value directly (encryption disabled to prevent navigation issues)
+      // Check if this is sensitive data that should be encrypted
+      if (this.isSensitiveKey(key)) {
+        // Check if data is in encrypted format
+        if (this.isEncryptedFormat(storedValue)) {
+          try {
+            const wrapper = JSON.parse(storedValue);
+            const decryptedValue = await this.decryptData(wrapper.data);
+            return decryptedValue;
+          } catch (decryptError) {
+            console.error('SecureStorage: Failed to decrypt sensitive data for key:', key);
+            // For sensitive data, don't return unencrypted data
+            return null;
+          }
+        } else {
+          // Migration case: unencrypted sensitive data
+          console.warn('SecureStorage: Found unencrypted sensitive data for key:', key, '- will re-encrypt on next write');
+          // Return the data for this session, but it will be encrypted on next write
+          return storedValue;
+        }
+      }
+      
+      // Return non-sensitive data directly
       return storedValue;
     } catch (error) {
       return null;
@@ -220,7 +344,11 @@ class SecureStorage {
     try {
       await this.setItem(key, JSON.stringify(data));
     } catch (error) {
-      // Silent fail
+      // Propagate error for sensitive keys
+      if (this.isSensitiveKey(key)) {
+        throw error;
+      }
+      // Silent fail for non-sensitive keys
     }
   }
 
@@ -232,7 +360,15 @@ class SecureStorage {
   async getJSON(key) {
     try {
       const value = await this.getItem(key);
-      return value ? JSON.parse(value) : null;
+      if (value === null) return null;
+      
+      // Safe JSON parsing with error handling
+      try {
+        return JSON.parse(value);
+      } catch (parseError) {
+        console.error('SecureStorage: Failed to parse JSON for key:', key);
+        return null;
+      }
     } catch (error) {
       return null;
     }
@@ -271,8 +407,23 @@ export const legacyMigration = {
         await secureStorage.setItem('tokenExpiry', tokenExpiry);
         localStorage.removeItem('tokenExpiry');
       }
+      
+      // Also check for prefixed but unencrypted sensitive data and mark for re-encryption
+      const prefixedKeys = Object.keys(localStorage).filter(key => key.startsWith(STORAGE_PREFIX));
+      for (const prefixedKey of prefixedKeys) {
+        const key = prefixedKey.replace(STORAGE_PREFIX, '');
+        if (SENSITIVE_KEYS.includes(key)) {
+          const value = localStorage.getItem(prefixedKey);
+          if (value && !secureStorage.isEncryptedFormat(value)) {
+            console.log(`SecureStorage: Migrating unencrypted sensitive key: ${key}`);
+            // Re-save to trigger encryption
+            await secureStorage.setItem(key, value);
+          }
+        }
+      }
     } catch (error) {
-      // Silent fail
+      console.error('SecureStorage: Migration error:', error);
+      // Don't fail silently for migration errors
     }
   }
 };
