@@ -19,6 +19,7 @@ const AdminLayout = ({ children }) => {
 
 
   const checkAdminAccess = useCallback(async () => {
+    const ENCRYPTION_INIT_RETRY_DELAY = 100; // ms to wait for encryption initialization
 
     try {
       setLoading(true);
@@ -26,18 +27,38 @@ const AdminLayout = ({ children }) => {
 
       // Migrate legacy data first
       await legacyMigration.migrateFromLocalStorage();
-      const token = await secureStorage.getItem('token');
+      
+      // Try to get token with retry logic for decryption failures
+      let token = await secureStorage.getItem('token');
+      
+      // If token retrieval failed, wait a moment and retry once
+      // This handles cases where encryption key might not be ready yet
+      if (!token) {
+        await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
+        token = await secureStorage.getItem('token');
+      }
+      
       if (!token) {
         navigate('/login');
         return;
       }
 
-      // Decode token to check role and expiration
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Decode token to check role and expiration with error handling
+      let payload;
+      try {
+        payload = JSON.parse(atob(token.split('.')[1]));
+      } catch (decodeError) {
+        console.error('Failed to decode token:', decodeError);
+        // Token is corrupted, clear and redirect to login
+        await secureStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      
       const currentTime = Date.now() / 1000;
 
       if (payload.exp < currentTime) {
-        secureStorage.removeItem('token');
+        await secureStorage.removeItem('token');
         navigate('/login');
         return;
       }
