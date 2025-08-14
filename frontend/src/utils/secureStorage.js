@@ -5,6 +5,8 @@
 
 const STORAGE_PREFIX = 'medapp_';
 const SENSITIVE_KEYS = ['token', 'user', 'tokenExpiry']; // Keys that require encryption
+const ENCRYPTION_INIT_RETRY_DELAY = 100; // ms to wait before retrying encryption init
+const ENCRYPTED_DATA_MARKER = '__encrypted__';
 
 class SecureStorage {
   constructor() {
@@ -190,6 +192,21 @@ class SecureStorage {
   isSensitiveKey(key) {
     return SENSITIVE_KEYS.includes(key);
   }
+
+  /**
+   * Check if stored data is encrypted
+   * @param {string} value - Stored value to check
+   * @returns {boolean}
+   */
+  isEncryptedFormat(value) {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && parsed.marker === ENCRYPTED_DATA_MARKER && parsed.data;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Store data in localStorage with encryption for sensitive keys
    * @param {string} key 
@@ -202,25 +219,48 @@ class SecureStorage {
       
       // Check if this key should be encrypted
       if (this.isSensitiveKey(key)) {
+        // CRITICAL: Never store sensitive data unencrypted
+        // Wait for encryption to be ready with retry
+        await this.waitForInit();
+        
+        // If still no encryption after waiting, try reinitializing
+        if (!this.encryptionKey) {
+          await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
+          await this.initializeEncryption();
+          await this.waitForInit();
+        }
+        
+        // If encryption still not available, throw error for sensitive data
+        if (!this.encryptionKey) {
+          console.error('SecureStorage: Cannot store sensitive data without encryption');
+          throw new Error('Encryption not available for sensitive data');
+        }
+        
         // Encrypt sensitive data
         const encryptedValue = await this.encryptData(serializedValue);
-        localStorage.setItem(prefixedKey, JSON.stringify({
-          encrypted: true,
+        const wrapper = JSON.stringify({
+          marker: ENCRYPTED_DATA_MARKER,
           data: encryptedValue,
           timestamp: Date.now()
-        }));
+        });
+        localStorage.setItem(prefixedKey, wrapper);
       } else {
         // Store non-sensitive data as plain text for performance
         localStorage.setItem(prefixedKey, serializedValue);
       }
     } catch (error) {
-      // Fallback to unencrypted storage if encryption fails
+      // For sensitive keys, never fallback to unencrypted storage
+      if (this.isSensitiveKey(key)) {
+        console.error('SecureStorage: Failed to store sensitive key securely:', key);
+        throw error;
+      }
+      // For non-sensitive keys, allow fallback
       try {
         const prefixedKey = `${STORAGE_PREFIX}${key}`;
         const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
         localStorage.setItem(prefixedKey, serializedValue);
       } catch (fallbackError) {
-        // Silent fail - don't log in production
+        // Silent fail for non-sensitive data
       }
     }
   }
@@ -239,24 +279,24 @@ class SecureStorage {
         return null;
       }
       
-      // Check if this is encrypted data
+      // Check if this is sensitive data that should be encrypted
       if (this.isSensitiveKey(key)) {
-        try {
-          const wrapper = JSON.parse(storedValue);
-          if (wrapper && wrapper.encrypted && wrapper.data) {
-            // Decrypt the data
+        // Check if data is in encrypted format
+        if (this.isEncryptedFormat(storedValue)) {
+          try {
+            const wrapper = JSON.parse(storedValue);
             const decryptedValue = await this.decryptData(wrapper.data);
             return decryptedValue;
+          } catch (decryptError) {
+            console.error('SecureStorage: Failed to decrypt sensitive data for key:', key);
+            // For sensitive data, don't return unencrypted data
+            return null;
           }
-        } catch (decryptError) {
-          // If decryption fails, check if it's plain text (migration case)
-          // This handles data that was stored before encryption was enabled
-          if (!storedValue.startsWith('{') || !JSON.parse(storedValue).encrypted) {
-            return storedValue;
-          }
-          // If it's encrypted but we can't decrypt, return null
-          console.warn('SecureStorage: Failed to decrypt sensitive data for key:', key);
-          return null;
+        } else {
+          // Migration case: unencrypted sensitive data
+          console.warn('SecureStorage: Found unencrypted sensitive data for key:', key, '- will re-encrypt on next write');
+          // Return the data for this session, but it will be encrypted on next write
+          return storedValue;
         }
       }
       
@@ -304,7 +344,11 @@ class SecureStorage {
     try {
       await this.setItem(key, JSON.stringify(data));
     } catch (error) {
-      // Silent fail
+      // Propagate error for sensitive keys
+      if (this.isSensitiveKey(key)) {
+        throw error;
+      }
+      // Silent fail for non-sensitive keys
     }
   }
 
@@ -316,7 +360,15 @@ class SecureStorage {
   async getJSON(key) {
     try {
       const value = await this.getItem(key);
-      return value ? JSON.parse(value) : null;
+      if (value === null) return null;
+      
+      // Safe JSON parsing with error handling
+      try {
+        return JSON.parse(value);
+      } catch (parseError) {
+        console.error('SecureStorage: Failed to parse JSON for key:', key);
+        return null;
+      }
     } catch (error) {
       return null;
     }
@@ -356,20 +408,22 @@ export const legacyMigration = {
         localStorage.removeItem('tokenExpiry');
       }
       
-      // Also check for prefixed but unencrypted sensitive data and re-encrypt it
+      // Also check for prefixed but unencrypted sensitive data and mark for re-encryption
       const prefixedKeys = Object.keys(localStorage).filter(key => key.startsWith(STORAGE_PREFIX));
       for (const prefixedKey of prefixedKeys) {
         const key = prefixedKey.replace(STORAGE_PREFIX, '');
         if (SENSITIVE_KEYS.includes(key)) {
           const value = localStorage.getItem(prefixedKey);
-          if (value && !value.startsWith('{"encrypted":true')) {
+          if (value && !secureStorage.isEncryptedFormat(value)) {
+            console.log(`SecureStorage: Migrating unencrypted sensitive key: ${key}`);
             // Re-save to trigger encryption
             await secureStorage.setItem(key, value);
           }
         }
       }
     } catch (error) {
-      // Silent fail
+      console.error('SecureStorage: Migration error:', error);
+      // Don't fail silently for migration errors
     }
   }
 };

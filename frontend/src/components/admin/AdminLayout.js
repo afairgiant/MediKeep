@@ -19,6 +19,7 @@ const AdminLayout = ({ children }) => {
 
 
   const checkAdminAccess = useCallback(async () => {
+    const ENCRYPTION_INIT_RETRY_DELAY = 100; // ms to wait for encryption initialization
 
     try {
       setLoading(true);
@@ -33,7 +34,7 @@ const AdminLayout = ({ children }) => {
       // If token retrieval failed, wait a moment and retry once
       // This handles cases where encryption key might not be ready yet
       if (!token) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
         token = await secureStorage.getItem('token');
       }
       
@@ -42,7 +43,7 @@ const AdminLayout = ({ children }) => {
         return;
       }
 
-      // Decode token to check role and expiration
+      // Decode token to check role and expiration with error handling
       let payload;
       try {
         payload = JSON.parse(atob(token.split('.')[1]));
