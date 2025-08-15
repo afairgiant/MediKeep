@@ -23,10 +23,10 @@ import {
 } from '@tabler/icons-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import OldPageHeader from '../layout/PageHeader';
+import LayoutPageHeader from '../layout/PageHeader';
 
 const PageHeader = ({
-  useMantine = true,
+  useMantine = false,
   title,
   icon,
   showBackButton = true,
@@ -43,40 +43,27 @@ const PageHeader = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [navOpened, setNavOpened] = useState(false);
 
   // Check if user is admin
   const isAdmin = () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role || '';
-        return (
-          userRole.toLowerCase() === 'admin' ||
-          userRole.toLowerCase() === 'administrator'
-        );
-      }
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-    }
-    return false;
+    console.log('🔑 ADAPTER_ADMIN_CHECK: Checking admin status in PageHeader adapter', {
+      user,
+      userIsAdmin: user?.isAdmin,
+      userRole: user?.role,
+      result: user?.isAdmin || false,
+      timestamp: new Date().toISOString()
+    });
+    return user?.isAdmin || false;
   };
 
   // Navigation items organized by category
   const navigationSections = [
     {
-      title: 'Core',
-      items: [
-        { name: 'Dashboard', path: '/dashboard', icon: '🏥' },
-        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
-        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
-      ],
-    },
-    {
       title: 'Medical Records',
       items: [
+        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
         { name: 'Allergies', path: '/allergies', icon: '⚠️' },
         { name: 'Conditions', path: '/conditions', icon: '🏥' },
         { name: 'Lab Results', path: '/lab-results', icon: '🧪' },
@@ -97,6 +84,7 @@ const PageHeader = ({
     {
       title: 'Other',
       items: [
+        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
         { name: 'Insurance', path: '/insurance', icon: '💳' },
         { name: 'Pharmacies', path: '/pharmacies', icon: '🏪' },
         { name: 'Practitioners', path: '/practitioners', icon: '👨‍⚕️' },
@@ -139,7 +127,7 @@ const PageHeader = ({
   // Easy toggle - if something breaks, just set useMantine=false
   if (!useMantine) {
     return (
-      <OldPageHeader
+      <LayoutPageHeader
         title={title}
         icon={icon}
         showBackButton={showBackButton}
@@ -164,15 +152,19 @@ const PageHeader = ({
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    // Clear welcome box dismissal so it reappears on next login
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('welcomeBox_dismissed_')) {
-        localStorage.removeItem(key);
-      }
-    });
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    console.log('🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process');
+    try {
+      console.log('🚪 PAGEHEADER_LOGOUT: Calling AuthContext logout function');
+      // Use AuthContext logout for proper state management
+      await logout();
+      console.log('🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully');
+      // Navigation will be handled by AuthContext/ProtectedRoute
+    } catch (error) {
+      console.log('🚪 PAGEHEADER_LOGOUT: Logout failed with error', error.message);
+      // Fallback navigation if logout fails
+      window.location.href = '/login';
+    }
   };
 
   const isDashboard = variant === 'dashboard';
@@ -306,39 +298,48 @@ const PageHeader = ({
                     </Group>
                   )}
 
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={() => navigate('/settings')}
-                    title="Settings"
-                    size="lg"
-                  >
-                    <IconSettings size="1.1rem" />
-                  </ActionIcon>
-
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    onClick={toggleTheme}
-                    title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    size="lg"
-                  >
-                    {theme === 'dark' ? (
-                      <IconSun size="1.1rem" />
-                    ) : (
-                      <IconMoon size="1.1rem" />
-                    )}
-                  </ActionIcon>
-
-                  <Button
-                    variant="subtle"
-                    color="red"
-                    size="sm"
-                    leftSection={<IconLogout size="1rem" />}
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </Button>
+                  {/* Account Actions Dropdown */}
+                  <Menu position="bottom-end" offset={5}>
+                    <Menu.Target>
+                      <Button
+                        variant="subtle"
+                        color="blue"
+                        rightSection={<IconChevronDown size={14} />}
+                        size="sm"
+                      >
+                        Account
+                      </Button>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Label>User Actions</Menu.Label>
+                      <Menu.Item
+                        leftSection={<IconSettings size="1rem" />}
+                        onClick={() => navigate('/settings')}
+                      >
+                        Settings
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={
+                          theme === 'dark' ? (
+                            <IconSun size="1rem" />
+                          ) : (
+                            <IconMoon size="1rem" />
+                          )
+                        }
+                        onClick={toggleTheme}
+                      >
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
+                        leftSection={<IconLogout size="1rem" />}
+                        onClick={handleLogout}
+                        color="red"
+                      >
+                        Logout
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
                 </Group>
               )}
             </Group>

@@ -902,19 +902,22 @@ const FamilyHistory = () => {
 
   if (loading) {
     return (
-      <Center style={{ height: '200px' }}>
-        <Loader size="md" />
-      </Center>
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text>Loading family history...</Text>
+          </Stack>
+        </Center>
+      </Container>
     );
   }
 
   return (
-    <Container size="xl">
-      <PageHeader
-        title="Family History"
-        subtitle="Track medical conditions and health history of your family members"
-        icon={<IconUsers size={24} />}
-      />
+    <Container size="xl" py="md">
+      <PageHeader title="Family History" icon="👨‍👩‍👧‍👦" />
+
+      <Stack gap="lg">
 
       {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
       <ErrorAlert error={currentError} onClose={clearSharedError} />
@@ -1415,6 +1418,7 @@ const FamilyHistory = () => {
         bulkMode={true}
         onSuccess={handleBulkSharingSuccess}
       />
+      </Stack>
     </Container>
   );
 };

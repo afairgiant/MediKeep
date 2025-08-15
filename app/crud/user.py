@@ -326,6 +326,72 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         """
         return db.query(self.model).count()
 
+    def create_from_sso(
+        self, 
+        db: Session, 
+        *, 
+        email: str, 
+        username: str, 
+        full_name: str, 
+        external_id: str, 
+        sso_provider: str
+    ) -> User:
+        """
+        Create a new user from SSO authentication.
+
+        Args:
+            db: SQLAlchemy database session
+            email: User's email from SSO provider
+            username: Derived username (usually email prefix)
+            full_name: User's full name from SSO provider
+            external_id: SSO provider's user ID
+            sso_provider: SSO provider type (google, github, oidc, etc.)
+
+        Returns:
+            The newly created User object
+
+        Example:
+            new_user = user_crud.create_from_sso(
+                db,
+                email="john@example.com",
+                username="john",
+                full_name="John Doe",
+                external_id="google_123456",
+                sso_provider="google"
+            )
+        """
+        from datetime import datetime
+        
+        # Generate a random password hash for SSO users (they won't use it)
+        import secrets
+        from app.core.security import get_password_hash
+        random_password = secrets.token_urlsafe(32)
+        hashed_password = get_password_hash(random_password)
+        
+        # Create the User object for SSO user
+        db_obj = User(
+            username=username.lower(),
+            email=email,
+            password_hash=hashed_password,  # Random password - won't be used
+            full_name=full_name,
+            role="user",  # Default role for SSO users
+            auth_method="sso",  # Mark as SSO user
+            external_id=external_id,
+            sso_provider=sso_provider,
+            last_sso_login=datetime.utcnow(),
+        )
+
+        # Add to database session
+        db.add(db_obj)
+
+        # Commit the transaction
+        db.commit()
+
+        # Refresh to get any database-generated values (like ID, timestamps)
+        db.refresh(db_obj)
+
+        return db_obj
+
 
 # Create the user CRUD instance
 user = CRUDUser(User)

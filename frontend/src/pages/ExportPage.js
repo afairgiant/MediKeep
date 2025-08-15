@@ -197,17 +197,10 @@ const ExportPage = () => {
   }
 
   return (
-    <Container size="xl" py="xl">
-      {/* Header */}
-      <PageHeader
-        title="Export Medical Records"
-        icon={<IconFileExport size={24} />}
-        backButtonText="← Back to Dashboard"
-        backButtonPath="/dashboard"
-        variant="medical"
-      />
+    <Container size="xl" py="md">
+      <PageHeader title="Export Medical Records" icon="📤" />
 
-      <Stack gap="xl" mt="xl">
+      <Stack gap="lg">
         <Text size="lg" c="dimmed">
           Download your medical data in various formats for backup or sharing
           with healthcare providers

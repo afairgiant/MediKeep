@@ -36,6 +36,12 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { 
+  formatDateForAPI, 
+  getTodayString, 
+  isDateInFuture, 
+  isEndDateBeforeStartDate 
+} from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
@@ -112,11 +118,12 @@ const Conditions = () => {
 
   const handleAddCondition = () => {
     setEditingCondition(null);
+    // Apply default status early to avoid validation conflicts
     setFormData({
       condition_name: '',
       diagnosis: '',
       notes: '',
-      status: 'active',
+      status: 'active', // Default status applied early
       severity: '',
       medication_id: '',
       practitioner_id: '',
@@ -194,11 +201,12 @@ const Conditions = () => {
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
+    // Apply default status early if condition doesn't have one
     setFormData({
       condition_name: condition.condition_name || '',
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
-      status: condition.status || 'active',
+      status: condition.status || 'active', // Default status applied early for consistency
       severity: condition.severity || '',
       medication_id: condition.medication_id ? condition.medication_id.toString() : '',
       practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',
@@ -236,21 +244,52 @@ const Conditions = () => {
       return;
     }
 
+
+    // Validate dates
+    const todayString = getTodayString();
+    
+    if (isDateInFuture(formData.onset_date)) {
+      setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
+    }
+    
+    if (isDateInFuture(formData.end_date)) {
+      setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
+    }
+    
+    if (isEndDateBeforeStartDate(formData.onset_date, formData.end_date)) {
+      setError('End date cannot be before onset date');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.status) {
+      setError('Status is required. Please select a status.');
+      return;
+    }
+    
+    if (!formData.diagnosis) {
+      setError('Diagnosis is required.');
+      return;
+    }
+
     const conditionData = {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: formData.status,
+      status: formData.status || 'active', // Ensure status has a default
       severity: formData.severity || null,
       medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
-      onset_date: formData.onset_date || null, // Use snake_case to match API
-      end_date: formData.end_date || null, // Use snake_case to match API
+      onset_date: formatDateForAPI(formData.onset_date),
+      end_date: formatDateForAPI(formData.end_date),
       patient_id: currentPatient.id,
     };
+
 
     let success;
     if (editingCondition) {
@@ -278,11 +317,11 @@ const Conditions = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading conditions...</Text>
+            <Text>Loading conditions...</Text>
           </Stack>
         </Center>
       </Container>
@@ -290,14 +329,10 @@ const Conditions = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Medical Conditions" icon="🏥" />
+    <Container size="xl" py="md">
+      <PageHeader title="Medical Conditions" icon="🩺" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -468,8 +503,8 @@ const Conditions = () => {
           onMedicationClick={handleMedicationClick}
           onPractitionerClick={handlePractitionerClick}
         />
-      </Container>
-    </motion.div>
+      </Stack>
+    </Container>
   );
 };
 

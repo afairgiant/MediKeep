@@ -24,24 +24,30 @@ const PaperlessSettings = ({
   
   // Track previous URL and token to detect actual changes
   const prevUrlRef = useRef();
-  const prevTokenRef = useRef();
+  const prevHasTokenRef = useRef();
 
   // Initialize connection status for saved settings
   useEffect(() => {
     const currentUrl = preferences?.paperless_url;
     
-    // Check if URL actually changed (not just component re-render)
-    const urlChanged = prevUrlRef.current !== undefined && prevUrlRef.current !== currentUrl;
+    // Check for token existence using the backend's has_token field or form token
+    const currentHasToken = preferences?.paperless_has_token || 
+                           (preferences?.paperless_api_token && preferences.paperless_api_token.trim() !== '');
     
-    if (urlChanged) {
-      // URL changed - reset connection status
+    // Check if URL or token existence actually changed (not just component re-render)
+    const urlChanged = prevUrlRef.current !== undefined && prevUrlRef.current !== currentUrl;
+    const tokenChanged = prevHasTokenRef.current !== undefined && prevHasTokenRef.current !== currentHasToken;
+    
+    if (urlChanged || tokenChanged) {
+      // URL or token availability changed - reset connection status
       setConnectionStatus('disconnected');
       setServerInfo(null);
       
-      frontendLogger.logInfo('Paperless URL changed, resetting connection status', {
+      frontendLogger.logInfo('Paperless URL or API token changed, resetting connection status', {
         component: 'PaperlessSettings',
         oldUrl: prevUrlRef.current,
-        newUrl: currentUrl
+        newUrl: currentUrl,
+        tokenChanged: tokenChanged
       });
     } else if (currentUrl && connectionStatus === 'disconnected' && prevUrlRef.current === undefined) {
       // First load with saved URL - assume it was previously working
@@ -59,13 +65,14 @@ const PaperlessSettings = ({
     
     // Update refs for next comparison
     prevUrlRef.current = currentUrl;
+    prevHasTokenRef.current = currentHasToken;
     
     // Only set to disconnected if we truly have no URL
     if (!currentUrl) {
       setConnectionStatus('disconnected');
       setServerInfo(null);
     }
-  }, [preferences?.paperless_url, connectionStatus]);
+  }, [preferences?.paperless_url, preferences?.paperless_api_token, preferences?.paperless_has_token, connectionStatus]);
 
   /**
    * Handle connection test
@@ -83,57 +90,68 @@ const PaperlessSettings = ({
     try {
       setTestingConnection(true);
       
-      // If form credentials are empty, try to use saved credentials by getting them from the backend
+      // Gather connection test parameters
       let testUrl = preferences.paperless_url;
       let testUsername = preferences.paperless_username;
       let testPassword = preferences.paperless_password;
+      let testApiToken = preferences.paperless_api_token;
       
-      // If credentials are missing from form, we need to test with the saved configuration
-      // The backend will use the saved encrypted credentials for this user
-      if (!testUsername || !testPassword) {
-        frontendLogger.logInfo('Using saved credentials for connection test', {
+      // Determine authentication method and test accordingly
+      const hasApiToken = testApiToken && testApiToken.trim();
+      const hasCredentials = testUsername && testPassword;
+      
+      let result;
+      
+      if (hasApiToken) {
+        // Test with API token
+        frontendLogger.logInfo('Testing connection with API token', {
           component: 'PaperlessSettings',
-          hasFormUsername: !!testUsername,
-          hasFormPassword: !!testPassword
+          hasApiToken: true
         });
         
-        // Test with minimal data - backend will use saved credentials
-        const result = await testPaperlessConnection(testUrl, '', '');
+        result = await testPaperlessConnection(testUrl, '', '', testApiToken);
+      } else if (hasCredentials) {
+        // Test with username/password
+        frontendLogger.logInfo('Testing connection with username/password', {
+          component: 'PaperlessSettings',
+          hasUsername: !!testUsername,
+          hasPassword: !!testPassword
+        });
         
-        if (result.status === 'connected') {
-          setConnectionStatus('connected');
-          setServerInfo({
-            serverUrl: result.server_url,
-            note: result.note
-          });
-
-          frontendLogger.logInfo('Paperless connection test successful with saved credentials', {
-            component: 'PaperlessSettings',
-            serverUrl: result.server_url
-          });
-        } else {
-          setConnectionStatus('failed');
-          setServerInfo(null);
-        }
+        result = await testPaperlessConnection(testUrl, testUsername, testPassword);
       } else {
-        // Test with form credentials
-        const result = await testPaperlessConnection(testUrl, testUsername, testPassword);
+        // No form credentials provided - test with saved configuration
+        frontendLogger.logInfo('Using saved credentials for connection test', {
+          component: 'PaperlessSettings',
+          hasFormData: false
+        });
+        
+        result = await testPaperlessConnection(testUrl, '', '', '');
+      }
+      
+      if (result.status === 'connected') {
+        setConnectionStatus('connected');
+        setServerInfo({
+          serverUrl: result.server_url,
+          note: result.note,
+          auth_method: result.auth_method,
+          used_saved_credentials: result.used_saved_credentials
+        });
 
-        if (result.status === 'connected') {
-          setConnectionStatus('connected');
-          setServerInfo({
-            serverUrl: result.server_url,
-            note: result.note
-          });
-
-          frontendLogger.logInfo('Paperless connection test successful with form credentials', {
-            component: 'PaperlessSettings',
-            serverUrl: result.server_url
-          });
-        } else {
-          setConnectionStatus('failed');
-          setServerInfo(null);
-        }
+        frontendLogger.logInfo('Paperless connection test successful', {
+          component: 'PaperlessSettings',
+          serverUrl: result.server_url,
+          authMethod: result.auth_method,
+          usedSaved: result.used_saved_credentials
+        });
+      } else {
+        setConnectionStatus('failed');
+        setServerInfo(null);
+        
+        frontendLogger.logWarning('Paperless connection test failed', {
+          component: 'PaperlessSettings',
+          error: result.message || 'Unknown error'
+        });
       }
       
     } catch (error) {
@@ -161,8 +179,11 @@ const PaperlessSettings = ({
     
     onPreferencesUpdate(updatedPrefs);
 
-    // If URL, username, or password changes, reset connection status
-    if (updates.paperless_url !== undefined || updates.paperless_username !== undefined || updates.paperless_password !== undefined) {
+    // If URL, API token, username, or password changes, reset connection status
+    if (updates.paperless_url !== undefined || 
+        updates.paperless_api_token !== undefined || 
+        updates.paperless_username !== undefined || 
+        updates.paperless_password !== undefined) {
       setConnectionStatus('disconnected');
       setServerInfo(null);
     }

@@ -1,24 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import {
-  Paper,
-  Text,
   Stack,
   Group,
+  Text,
   Button,
+  ThemeIcon,
   FileInput,
-  TextInput,
-  Alert,
-  Progress,
-  Badge,
-  ActionIcon,
-  ThemeIcon
 } from '@mantine/core';
 import {
   IconUpload,
-  IconFile,
   IconX,
-  IconCheck,
-  IconAlertCircle,
+  IconFile,
   IconFolder,
   IconCloud
 } from '@tabler/icons-react';
@@ -32,23 +24,23 @@ const FileUploadZone = ({
   maxFiles = 5,
   multiple = true,
   disabled = false,
-  autoUpload = false, // Automatically upload files when added
   className = '',
   selectedStorageBackend = 'local',
-  paperlessSettings = null
+  paperlessSettings = null,
+  mode = 'view' // Add mode prop to adjust messaging
 }) => {
-  const [uploadQueue, setUploadQueue] = useState([]);
   const [dragActive, setDragActive] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Validate file
   const validateFile = useCallback((file) => {
     const errors = [];
-
+    
     // Check file size
     if (file.size > maxSize) {
-      errors.push(`File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`);
+      errors.push(`File size exceeds ${Math.round(maxSize / 1024 / 1024)}MB limit`);
     }
-
+    
     // Check file type
     const fileName = file.name.toLowerCase();
     const hasValidExtension = acceptedTypes.some(type => 
@@ -56,162 +48,100 @@ const FileUploadZone = ({
     );
     
     if (!hasValidExtension) {
-      errors.push(`File type not supported. Accepted types: ${acceptedTypes.join(', ')}`);
+      errors.push(`File type not supported. Accepted: ${acceptedTypes.join(', ')}`);
     }
-
+    
     return errors;
   }, [acceptedTypes, maxSize]);
 
-  // Handle file selection (both drag/drop and file input)
+  // Handle file selection (both drag/drop and file input) - ADD TO SELECTED FILES
   const handleFilesSelected = useCallback((files) => {
     if (disabled) return;
 
     const fileArray = Array.from(files);
     
     // Check max files limit
-    if (uploadQueue.length + fileArray.length > maxFiles) {
+    if (selectedFiles.length + fileArray.length > maxFiles) {
       if (onValidationError) {
-        onValidationError(`Cannot upload more than ${maxFiles} files at once`);
+        onValidationError(`Cannot select more than ${maxFiles} files at once`);
       }
       return;
     }
 
-    // Process each file
-    const newQueueItems = fileArray.map(file => {
+    // Process files and add to selected list
+    const validFiles = [];
+    const errorMessages = [];
+
+    fileArray.forEach(file => {
       const validationErrors = validateFile(file);
       
-      return {
-        id: Date.now() + Math.random(),
-        file,
-        description: '',
-        status: validationErrors.length > 0 ? 'error' : 'ready',
-        errors: validationErrors,
-        progress: 0
-      };
+      if (validationErrors.length > 0) {
+        errorMessages.push(`${file.name}: ${validationErrors.join(', ')}`);
+      } else {
+        validFiles.push({
+          id: Date.now() + Math.random(),
+          file,
+          description: '',
+          status: 'ready'
+        });
+      }
     });
 
-    // Report validation errors
-    const hasErrors = newQueueItems.some(item => item.status === 'error');
-    if (hasErrors && onValidationError) {
-      const errorMessages = newQueueItems
-        .filter(item => item.status === 'error')
-        .flatMap(item => item.errors);
+    // Show validation errors if any
+    if (errorMessages.length > 0 && onValidationError) {
       onValidationError(errorMessages.join('; '));
     }
 
-    setUploadQueue(prev => [...prev, ...newQueueItems]);
-
-    // Auto-upload if enabled and all new files are valid
-    if (autoUpload && newQueueItems.every(item => item.status === 'ready')) {
-      // Small delay to ensure state is updated
-      setTimeout(() => {
-        const filesToUpload = newQueueItems
-          .filter(item => item.status === 'ready')
-          .map(item => ({
-            file: item.file,
-            description: item.description
-          }));
-        
-        if (filesToUpload.length > 0 && onUpload) {
-          onUpload(filesToUpload);
-          // Remove auto-uploaded items from queue
-          setUploadQueue(prev => prev.filter(item => 
-            !newQueueItems.some(newItem => newItem.id === item.id)
-          ));
-        }
-      }, 100);
+    // Add valid files to selected list
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
     }
-  }, [disabled, uploadQueue.length, maxFiles, validateFile, onValidationError, autoUpload, onUpload]);
+  }, [disabled, maxFiles, validateFile, onValidationError, selectedFiles.length]);
 
-  // Remove file from queue
-  const removeFromQueue = useCallback((itemId) => {
-    setUploadQueue(prev => prev.filter(item => item.id !== itemId));
-  }, []);
-
-  // Update description for queued file
-  const updateDescription = useCallback((itemId, description) => {
-    setUploadQueue(prev => prev.map(item => 
-      item.id === itemId ? { ...item, description } : item
-    ));
-  }, []);
-
-  // Upload all valid files
-  const handleUploadAll = useCallback(() => {
-    const validItems = uploadQueue.filter(item => item.status === 'ready');
-    
-    if (validItems.length === 0) return;
-
-    // Convert to format expected by parent
-    const filesToUpload = validItems.map(item => ({
+  // Handle upload button click
+  const handleUpload = useCallback(() => {
+    const filesToUpload = selectedFiles.map(item => ({
       file: item.file,
       description: item.description
     }));
 
-    // Call parent upload handler
-    if (onUpload) {
+    if (filesToUpload.length > 0 && onUpload) {
+      console.log('Uploading files:', filesToUpload.map(f => f.file.name));
       onUpload(filesToUpload);
+      // Clear selected files after upload
+      setSelectedFiles([]);
     }
+  }, [selectedFiles, onUpload]);
 
-    // Clear the queue
-    setUploadQueue([]);
-  }, [uploadQueue, onUpload]);
-
-  // Clear all files from queue
-  const handleClearAll = useCallback(() => {
-    setUploadQueue([]);
+  // Remove file from selected list
+  const removeFile = useCallback((fileId) => {
+    setSelectedFiles(prev => prev.filter(f => f.id !== fileId));
   }, []);
 
-  // Get file icon based on type
-  const getFileIcon = (fileName) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    
-    switch (extension) {
-      case 'pdf':
-        return { icon: IconFile, color: 'red' };
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-        return { icon: IconFile, color: 'blue' };
-      case 'doc':
-      case 'docx':
-        return { icon: IconFile, color: 'blue' };
-      default:
-        return { icon: IconFile, color: 'gray' };
-    }
-  };
+  // Update file description
+  const updateDescription = useCallback((fileId, description) => {
+    setSelectedFiles(prev => prev.map(f => 
+      f.id === fileId ? { ...f, description } : f
+    ));
+  }, []);
 
-  // Format file size
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const validFilesCount = uploadQueue.filter(item => item.status === 'ready').length;
-  const hasErrors = uploadQueue.some(item => item.status === 'error');
-
-  // Get storage backend info for display
-  const getStorageBackendInfo = () => {
+  // Storage backend info
+  const getStorageInfo = () => {
     if (selectedStorageBackend === 'paperless') {
       return {
         icon: IconCloud,
-        color: 'green',
         label: 'Paperless-ngx',
-        description: 'Files will be uploaded to your paperless-ngx instance'
+        color: 'green'
       };
     }
     return {
       icon: IconFolder,
-      color: 'blue',
       label: 'Local Storage',
-      description: 'Files will be stored locally on this server'
+      color: 'blue'
     };
   };
 
-  const storageInfo = getStorageBackendInfo();
+  const storageInfo = getStorageInfo();
 
   return (
     <Stack gap="md" className={className}>
@@ -230,7 +160,7 @@ const FileUploadZone = ({
           const mimeTypes = {
             '.pdf': 'application/pdf',
             '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
+            '.jpeg': 'image/jpeg', 
             '.png': 'image/png',
             '.gif': 'image/gif',
             '.doc': 'application/msword',
@@ -241,6 +171,8 @@ const FileUploadZone = ({
           return acc;
         }, {})}
         disabled={disabled}
+        onDragEnter={() => setDragActive(true)}
+        onDragLeave={() => setDragActive(false)}
         style={{
           borderColor: dragActive ? 'var(--mantine-color-blue-6)' : undefined,
           backgroundColor: dragActive ? 'var(--mantine-color-blue-0)' : undefined,
@@ -262,173 +194,102 @@ const FileUploadZone = ({
             />
           </Dropzone.Reject>
           <Dropzone.Idle>
-            <IconUpload
+            <IconFile
               size={52}
               color="var(--mantine-color-dimmed)"
               stroke={1.5}
             />
           </Dropzone.Idle>
 
-          <div>
+          <div style={{ textAlign: 'center' }}>
             <Text size="xl" inline>
-              Drag files here or click to select files
+              Drag files here or click to select
             </Text>
             <Text size="sm" c="dimmed" inline mt={7}>
-              Attach up to {maxFiles} files, each file should not exceed {(maxSize / 1024 / 1024).toFixed(1)}MB
+              {mode === 'create' 
+                ? 'Files will be uploaded after creating the record' 
+                : 'Select files, then click Upload to start'
+              }
             </Text>
-            <Text size="sm" c="dimmed" mt={7}>
-              Supported formats: {acceptedTypes.join(', ')}
+            <Text size="xs" c="dimmed" mt="xs">
+              Accepted: {acceptedTypes.join(', ')} • Max size: {Math.round(maxSize / 1024 / 1024)}MB
             </Text>
-            
-            {/* Storage Backend Indicator */}
-            <Group gap="xs" mt="md" justify="center">
-              <Badge
-                color={storageInfo.color}
-                leftSection={<storageInfo.icon size={12} />}
-                size="sm"
-                variant="light"
-              >
-                {storageInfo.label}
-              </Badge>
+            <Group justify="center" mt="md">
+              <ThemeIcon size="sm" variant="light" color={storageInfo.color}>
+                <storageInfo.icon size={16} />
+              </ThemeIcon>
+              <Text size="sm" c="dimmed">
+                → {storageInfo.label}
+              </Text>
             </Group>
-            <Text size="xs" c="dimmed" ta="center" mt={4}>
-              {storageInfo.description}
-            </Text>
           </div>
         </Group>
       </Dropzone>
 
-      {/* Alternative file input button */}
+      {/* Alternative file input */}
       <Group justify="center">
         <FileInput
-          placeholder="Or select files"
-          multiple={multiple}
           accept={acceptedTypes.join(',')}
+          multiple={multiple}
           onChange={handleFilesSelected}
           disabled={disabled}
-          leftSection={<IconUpload size={16} />}
           style={{ display: 'none' }}
-          id="file-input-alternative"
+          id="file-input"
         />
         <Button
-          variant="outline"
+          variant="light"
           leftSection={<IconUpload size={16} />}
-          onClick={() => document.getElementById('file-input-alternative')?.click()}
+          onClick={() => document.getElementById('file-input')?.click()}
           disabled={disabled}
         >
           Choose Files
         </Button>
       </Group>
 
-      {/* Upload Queue */}
-      {uploadQueue.length > 0 && (
-        <Paper withBorder p="md">
-          <Stack gap="md">
-            <Group justify="space-between" align="center">
-              <Group gap="md">
-                <Text fw={500}>
-                  Files to Upload ({validFilesCount} valid, {uploadQueue.length - validFilesCount} with errors)
-                </Text>
-                <Badge
-                  color={storageInfo.color}
-                  leftSection={<storageInfo.icon size={10} />}
-                  size="xs"
-                  variant="light"
-                >
-                  → {storageInfo.label}
-                </Badge>
+      {/* Selected Files */}
+      {selectedFiles.length > 0 && (
+        <Stack gap="sm">
+          <Text fw={500} size="sm">
+            Selected Files ({selectedFiles.length})
+          </Text>
+          
+          {selectedFiles.map((item) => (
+            <Group key={item.id} justify="space-between" p="sm" style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: '4px' }}>
+              <Group gap="sm">
+                <IconFile size={16} />
+                <div>
+                  <Text size="sm">{item.file.name}</Text>
+                  <Text size="xs" c="dimmed">
+                    {(item.file.size / 1024).toFixed(1)} KB
+                  </Text>
+                </div>
               </Group>
-              <Group gap="xs">
-                <Button
-                  size="xs"
-                  variant="outline"
-                  onClick={handleClearAll}
-                >
-                  Clear All
-                </Button>
-                <Button
-                  size="xs"
-                  onClick={handleUploadAll}
-                  disabled={validFilesCount === 0}
-                  leftSection={<storageInfo.icon size={14} />}
-                >
-                  Upload {validFilesCount} File{validFilesCount !== 1 ? 's' : ''}
-                </Button>
-              </Group>
+              <Button
+                variant="subtle"
+                color="red"
+                size="xs"
+                onClick={() => removeFile(item.id)}
+              >
+                Remove
+              </Button>
             </Group>
-
-            <Stack gap="sm">
-              {uploadQueue.map((item) => {
-                const { icon: FileIcon, color } = getFileIcon(item.file.name);
-                
-                return (
-                  <Paper
-                    key={item.id}
-                    withBorder
-                    p="sm"
-                    bg={item.status === 'error' ? 'red.0' : 'white'}
-                    style={{
-                      borderColor: item.status === 'error' ? 'var(--mantine-color-red-3)' : undefined
-                    }}
-                  >
-                    <Group justify="space-between" align="flex-start">
-                      <Group gap="xs" style={{ flex: 1 }}>
-                        <ThemeIcon variant="light" color={color} size="sm">
-                          <FileIcon size={14} />
-                        </ThemeIcon>
-                        
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Group gap="md">
-                            <Text fw={500} size="sm">
-                              {item.file.name}
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              {formatFileSize(item.file.size)}
-                            </Text>
-                            {item.status === 'ready' && (
-                              <Badge color="green" size="xs" leftSection={<IconCheck size={10} />}>
-                                Ready
-                              </Badge>
-                            )}
-                            {item.status === 'error' && (
-                              <Badge color="red" size="xs" leftSection={<IconAlertCircle size={10} />}>
-                                Error
-                              </Badge>
-                            )}
-                          </Group>
-                          
-                          {item.status === 'error' && (
-                            <Alert color="red" size="xs" p="xs">
-                              {item.errors.join('; ')}
-                            </Alert>
-                          )}
-                          
-                          {item.status === 'ready' && (
-                            <TextInput
-                              placeholder="File description (optional)"
-                              size="xs"
-                              value={item.description}
-                              onChange={(e) => updateDescription(item.id, e.target.value)}
-                            />
-                          )}
-                        </Stack>
-                      </Group>
-                      
-                      <ActionIcon
-                        variant="light"
-                        color="red"
-                        size="sm"
-                        onClick={() => removeFromQueue(item.id)}
-                      >
-                        <IconX size={14} />
-                      </ActionIcon>
-                    </Group>
-                  </Paper>
-                );
-              })}
-            </Stack>
-          </Stack>
-        </Paper>
+          ))}
+          
+          {/* Upload Button */}
+          <Group justify="center" mt="md">
+            <Button
+              leftSection={<IconUpload size={16} />}
+              onClick={handleUpload}
+              disabled={disabled || selectedFiles.length === 0}
+              color={storageInfo.color}
+            >
+              {mode === 'create' 
+                ? `Add ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''} (Upload After Creating)`
+                : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''} to ${storageInfo.label}`
+              }
+            </Button>
+          </Group>
+        </Stack>
       )}
     </Stack>
   );

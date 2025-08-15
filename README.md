@@ -5,7 +5,7 @@ A medical records management system with React frontend and FastAPI backend.
 [![CodeQL](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql)
 [![Medical Records Docker Image CI](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml)
 
-## This is actievly being worked on!
+## This is actively being worked on!
 
 ## Screenshots
 
@@ -152,7 +152,22 @@ http://localhost:8005
 - Password: `admin123`
 
 ## Backup and Restore
-The app can be backed up using the Admin Dashboard. 
+
+The app can be backed up using the Admin Dashboard.
 Additionally, a backup/restore CLI is available.
-This can be used with cron to automate scheduled backups. 
+This can be used with cron to automate scheduled backups.
 See [Backup and Restore CLI](app/scripts/README_BACKUP_CLI.md) for more details.
+
+Backups are stored under `/app/backups`. This should be mapped to
+an external location or volume so that it can be stored safely in case a
+restore is needed.
+
+## SSO
+
+The app has SSO capabilities.
+As of right now, Google and Github are offically supported and tested.
+ODIC SSO(keycloak, authlia, etc) should be supported but I haven't tested them yet.
+
+See [SSO Quick Start](app/docs/SSO_QUICK_START.md) for google/github.
+
+See [SSO Full Guide](app/docs/SSO_SETUP_GUIDE.md) for a more detailed guide.

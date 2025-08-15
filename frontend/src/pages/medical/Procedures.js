@@ -85,16 +85,25 @@ const Procedures = () => {
   const [fileCounts, setFileCounts] = useState({});
   const [fileCountsLoading, setFileCountsLoading] = useState({});
 
+  // Track which procedures we've already loaded file counts for
+  const loadedFileCountsRef = useRef(new Set());
+
   // Load file counts for procedures
   useEffect(() => {
     const loadFileCountsForProcedures = async () => {
       if (!procedures || procedures.length === 0) return;
       
-      const countPromises = procedures.map(async (procedure) => {
-        setFileCountsLoading(prev => {
-          if (prev[procedure.id] !== undefined) return prev; // Already loading
-          return { ...prev, [procedure.id]: true };
-        });
+      // Only load file counts for procedures we haven't loaded yet
+      const proceduresToLoad = procedures.filter(procedure => 
+        !loadedFileCountsRef.current.has(procedure.id)
+      );
+      
+      if (proceduresToLoad.length === 0) return;
+      
+      const countPromises = proceduresToLoad.map(async (procedure) => {
+        // Mark as loading
+        loadedFileCountsRef.current.add(procedure.id);
+        setFileCountsLoading(prev => ({ ...prev, [procedure.id]: true }));
         
         try {
           const files = await apiService.getEntityFiles('procedure', procedure.id);
@@ -112,16 +121,26 @@ const Procedures = () => {
     };
 
     loadFileCountsForProcedures();
-  }, [procedures]); // Remove fileCounts from dependencies
+  }, [procedures]);
 
-  // Function to refresh file counts for all procedures
+  // Function to refresh file counts for specific procedures
   const refreshFileCount = useCallback(async (procedureId) => {
     try {
+      // Force reload by removing from loaded set
+      loadedFileCountsRef.current.delete(procedureId);
+      setFileCountsLoading(prev => ({ ...prev, [procedureId]: true }));
+      
       const files = await apiService.getEntityFiles('procedure', procedureId);
       const count = Array.isArray(files) ? files.length : 0;
+      
       setFileCounts(prev => ({ ...prev, [procedureId]: count }));
+      loadedFileCountsRef.current.add(procedureId);
     } catch (error) {
       console.error(`Error refreshing file count for procedure ${procedureId}:`, error);
+      setFileCounts(prev => ({ ...prev, [procedureId]: 0 }));
+      loadedFileCountsRef.current.add(procedureId);
+    } finally {
+      setFileCountsLoading(prev => ({ ...prev, [procedureId]: false }));
     }
   }, []);
 
@@ -271,7 +290,7 @@ const Procedures = () => {
       procedure_setting: procedure.procedure_setting || '',
       procedure_complications: procedure.procedure_complications || '',
       procedure_duration: procedure.procedure_duration || '',
-      practitioner_id: procedure.practitioner_id || '',
+      practitioner_id: procedure.practitioner_id ? String(procedure.practitioner_id) : '',
       anesthesia_type: procedure.anesthesia_type || '',
       anesthesia_notes: procedure.anesthesia_notes || '',
     });
@@ -299,7 +318,7 @@ const Procedures = () => {
     // deleteItem now properly updates local state to remove the deleted item
     // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Clean up local file counts for the deleted procedure
+      // Clean up local file counts and tracking for the deleted procedure
       setFileCounts(prev => {
         const updated = { ...prev };
         delete updated[procedureId];
@@ -310,6 +329,8 @@ const Procedures = () => {
         delete updated[procedureId];
         return updated;
       });
+      // Remove from loaded tracking
+      loadedFileCountsRef.current.delete(procedureId);
     }
   };
 

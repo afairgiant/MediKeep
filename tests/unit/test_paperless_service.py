@@ -10,11 +10,15 @@ from aiohttp import web
 
 from app.services.paperless_service import (
     PaperlessService,
+    PaperlessServiceToken,
+    PaperlessServiceBase,
     PaperlessError,
     PaperlessConnectionError,
     PaperlessAuthenticationError,
     PaperlessUploadError,
-    create_paperless_service
+    create_paperless_service,
+    create_paperless_service_with_token,
+    create_paperless_service_with_username_password
 )
 from app.services.credential_encryption import credential_encryption
 
@@ -26,23 +30,40 @@ class TestPaperlessService:
         """Setup test fixtures."""
         self.base_url = "https://paperless.example.com"
         self.api_token = "a1b2c3d4e5f6789012345678901234567890abcd"
+        self.username = "testuser"
+        self.password = "testpass"
         self.user_id = 123
         
-    def test_init_valid_url(self):
-        """Test service initialization with valid HTTPS URL."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+    def test_init_valid_url_basic_auth(self):
+        """Test service initialization with valid HTTPS URL using basic auth."""
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
+        assert service.base_url == self.base_url
+        assert service.username == self.username
+        assert service.password == self.password
+        assert service.user_id == self.user_id
+        assert service.get_auth_type() == "basic_auth"
+        
+    def test_init_valid_url_token_auth(self):
+        """Test service initialization with valid HTTPS URL using token auth."""
+        service = PaperlessServiceToken(self.base_url, self.api_token, self.user_id)
         assert service.base_url == self.base_url
         assert service.api_token == self.api_token
         assert service.user_id == self.user_id
+        assert service.get_auth_type() == "token"
         
-    def test_init_invalid_url(self):
-        """Test service initialization rejects HTTP URLs."""
+    def test_init_invalid_url_basic_auth(self):
+        """Test service initialization rejects HTTP URLs with basic auth."""
         with pytest.raises(PaperlessConnectionError, match="must use HTTPS"):
-            PaperlessService("http://insecure.example.com", self.api_token, self.user_id)
+            PaperlessService("http://insecure.example.com", self.username, self.password, self.user_id)
+            
+    def test_init_invalid_url_token_auth(self):
+        """Test service initialization rejects HTTP URLs with token auth."""
+        with pytest.raises(PaperlessConnectionError, match="must use HTTPS"):
+            PaperlessServiceToken("http://insecure.example.com", self.api_token, self.user_id)
     
     def test_safe_endpoint_validation(self):
         """Test endpoint validation for SSRF prevention."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Valid endpoints
         assert service._is_safe_endpoint("/api/documents/") is True
@@ -58,7 +79,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_connection_test_success(self):
         """Test successful connection test."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock successful response
         mock_response = AsyncMock()
@@ -79,7 +100,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_connection_test_auth_failure(self):
         """Test connection test with authentication failure."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock 401 response
         mock_response = AsyncMock()
@@ -94,7 +115,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_upload_document_success(self):
         """Test successful document upload."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock successful upload response
         mock_response = AsyncMock()
@@ -123,7 +144,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_upload_document_too_large(self):
         """Test upload with file too large."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Create file data larger than limit
         with patch('app.services.paperless_service.settings.PAPERLESS_MAX_UPLOAD_SIZE', 100):
@@ -137,7 +158,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_download_document_success(self):
         """Test successful document download."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock successful download response
         mock_response = AsyncMock()
@@ -156,7 +177,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_download_document_not_found(self):
         """Test download with document not found."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock 404 response
         mock_response = AsyncMock()
@@ -171,7 +192,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_delete_document_success(self):
         """Test successful document deletion."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock successful deletion response
         mock_response = AsyncMock()
@@ -188,7 +209,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_delete_document_not_found(self):
         """Test deletion with document not found (should succeed)."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock 404 response (document already deleted)
         mock_response = AsyncMock()
@@ -205,7 +226,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_search_documents_success(self):
         """Test successful document search."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock successful search response
         mock_response = AsyncMock()
@@ -236,7 +257,7 @@ class TestPaperlessService:
     @pytest.mark.asyncio
     async def test_search_documents_empty_query(self):
         """Test document search with empty query."""
-        service = PaperlessService(self.base_url, self.api_token, self.user_id)
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
         
         # Mock successful search response
         mock_response = AsyncMock()
@@ -347,6 +368,102 @@ class TestCredentialEncryption:
         # Test with a token that's too short (less than 10 characters)
         with pytest.raises(SecurityError, match="Invalid API token format"):
             credential_encryption.encrypt_token("short")
+
+
+class TestPaperlessAuthentication:
+    """Test cases for dual authentication support."""
+    
+    def setup_method(self):
+        """Setup test fixtures."""
+        self.base_url = "https://paperless.example.com"
+        self.api_token = "a1b2c3d4e5f6789012345678901234567890abcd"
+        self.username = "testuser"
+        self.password = "testpass"
+        self.user_id = 123
+        
+    def test_smart_factory_token_priority(self):
+        """Test that smart factory prioritizes token auth over basic auth."""
+        with patch('app.services.credential_encryption.credential_encryption.decrypt_token') as mock_decrypt:
+            # Mock successful decryption for both token and credentials
+            mock_decrypt.side_effect = lambda x: {
+                'encrypted_token': self.api_token,
+                'encrypted_username': self.username,
+                'encrypted_password': self.password
+            }.get(x, x)
+            
+            service = create_paperless_service(
+                paperless_url=self.base_url,
+                encrypted_token='encrypted_token',
+                encrypted_username='encrypted_username', 
+                encrypted_password='encrypted_password',
+                user_id=self.user_id
+            )
+            
+            assert isinstance(service, PaperlessServiceToken)
+            assert service.get_auth_type() == "token"
+    
+    def test_smart_factory_basic_auth_fallback(self):
+        """Test that smart factory falls back to basic auth when no token available."""
+        with patch('app.services.credential_encryption.credential_encryption.decrypt_token') as mock_decrypt:
+            # Mock successful decryption for credentials only
+            mock_decrypt.side_effect = lambda x: {
+                'encrypted_username': self.username,
+                'encrypted_password': self.password
+            }.get(x, x)
+            
+            service = create_paperless_service(
+                paperless_url=self.base_url,
+                encrypted_token=None,
+                encrypted_username='encrypted_username',
+                encrypted_password='encrypted_password',
+                user_id=self.user_id
+            )
+            
+            assert isinstance(service, PaperlessService)
+            assert service.get_auth_type() == "basic_auth"
+    
+    def test_smart_factory_no_credentials(self):
+        """Test that smart factory raises error when no valid credentials."""
+        with pytest.raises(PaperlessError, match="No valid authentication credentials"):
+            create_paperless_service(
+                paperless_url=self.base_url,
+                encrypted_token=None,
+                encrypted_username=None,
+                encrypted_password=None,
+                user_id=self.user_id
+            )
+    
+    def test_token_service_creation(self):
+        """Test creating token service directly."""
+        with patch('app.services.credential_encryption.credential_encryption.decrypt_token') as mock_decrypt:
+            mock_decrypt.return_value = self.api_token
+            
+            service = create_paperless_service_with_token(
+                paperless_url=self.base_url,
+                encrypted_token='encrypted_token',
+                user_id=self.user_id
+            )
+            
+            assert isinstance(service, PaperlessServiceToken)
+            assert service.get_auth_type() == "token"
+            assert service.api_token == self.api_token
+    
+    def test_basic_auth_service_creation(self):
+        """Test creating basic auth service directly."""
+        with patch('app.services.credential_encryption.credential_encryption.decrypt_token') as mock_decrypt:
+            mock_decrypt.side_effect = [self.username, self.password]
+            
+            service = create_paperless_service_with_username_password(
+                paperless_url=self.base_url,
+                encrypted_username='encrypted_username',
+                encrypted_password='encrypted_password',
+                user_id=self.user_id
+            )
+            
+            assert isinstance(service, PaperlessService)
+            assert service.get_auth_type() == "basic_auth"
+            assert service.username == self.username
+            assert service.password == self.password
 
 
 # Integration test fixtures (commented out - would need actual paperless instance)

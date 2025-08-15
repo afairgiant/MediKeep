@@ -237,11 +237,11 @@ const Practitioners = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading practitioners...</Text>
+            <Text>Loading practitioners...</Text>
           </Stack>
         </Center>
       </Container>
@@ -249,14 +249,11 @@ const Practitioners = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <>
+    <Container size="xl" py="md">
       <PageHeader title="Healthcare Practitioners" icon="👨‍⚕️" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -319,11 +316,6 @@ const Practitioners = () => {
         />
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
           {filteredPractitioners.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -352,12 +344,6 @@ const Practitioners = () => {
                     key={practitioner.id}
                     span={{ base: 12, md: 6, lg: 4 }}
                   >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
                       <PractitionerCard
                         practitioner={practitioner}
                         onEdit={handleEditPractitioner}
@@ -373,7 +359,6 @@ const Practitioners = () => {
                           });
                         }}
                       />
-                    </motion.div>
                   </Grid.Col>
                 ))}
               </AnimatePresence>
@@ -405,7 +390,7 @@ const Practitioners = () => {
               />
             </Paper>
           )}
-        </motion.div>
+      </Stack>
       </Container>
 
       <PractitionerFormWrapper
@@ -429,7 +414,7 @@ const Practitioners = () => {
         onEdit={handleEditPractitioner}
         navigate={navigate}
       />
-    </motion.div>
+    </>
   );
 };
 

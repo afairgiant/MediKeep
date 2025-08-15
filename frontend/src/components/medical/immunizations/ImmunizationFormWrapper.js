@@ -76,7 +76,22 @@ const ImmunizationFormWrapper = ({
             label="Date Administered"
             name="date_administered"
             value={formData.date_administered ? new Date(formData.date_administered) : null}
-            onChange={(value) => handleInputChange('date_administered', value?.toISOString().split('T')[0] || '')}
+            onChange={(value) => {
+              // Handle different value types from DateInput
+              let formattedDate = '';
+              if (value) {
+                try {
+                  // Ensure we have a Date object
+                  const dateObj = value instanceof Date ? value : new Date(value);
+                  if (!isNaN(dateObj.getTime())) {
+                    formattedDate = dateObj.toISOString().split('T')[0];
+                  }
+                } catch (error) {
+                  logger.warn('Date conversion error', { value, error: error.message });
+                }
+              }
+              handleInputChange('date_administered', formattedDate);
+            }}
             placeholder="Select administration date"
           />
 
@@ -152,7 +167,22 @@ const ImmunizationFormWrapper = ({
             label="Expiration Date"
             name="expiration_date"
             value={formData.expiration_date ? new Date(formData.expiration_date) : null}
-            onChange={(value) => handleInputChange('expiration_date', value?.toISOString().split('T')[0] || '')}
+            onChange={(value) => {
+              // Handle different value types from DateInput
+              let formattedDate = '';
+              if (value) {
+                try {
+                  // Ensure we have a Date object
+                  const dateObj = value instanceof Date ? value : new Date(value);
+                  if (!isNaN(dateObj.getTime())) {
+                    formattedDate = dateObj.toISOString().split('T')[0];
+                  }
+                } catch (error) {
+                  logger.warn('Date conversion error', { value, error: error.message });
+                }
+              }
+              handleInputChange('expiration_date', formattedDate);
+            }}
             placeholder="Select expiration date"
           />
 

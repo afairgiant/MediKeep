@@ -182,7 +182,13 @@ export const useMedicalData = config => {
       }
 
       const result = await execute(
-        async signal => await apiMethodsConfig.delete(id, signal),
+        async signal => {
+          // For multi-patient support, pass the current patient ID if available
+          if (entityName === 'emergency_contact' && currentPatientRef.current?.id) {
+            return await apiMethodsConfig.delete(id, signal, currentPatientRef.current.id);
+          }
+          return await apiMethodsConfig.delete(id, signal);
+        },
         { errorMessage: `Failed to delete ${entityName}` }
       );
 
@@ -215,21 +221,30 @@ export const useMedicalData = config => {
     };
   }, [entityName, apiMethodsConfig, requiresPatient, loadFilesCounts]);
 
-  // Initialize data - run once on mount
+  // Initialize data - run once on mount or when patient changes
   useEffect(() => {
     let isMounted = true;
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
     const initializeData = async () => {
+      // Reset initialization flag when patient changes
+      if (currentPatient?.id) {
+        isInitialized.current = false;
+      }
+      
       if (isInitialized.current || !isMounted) return;
+      
+      // Add small delay to prevent race conditions between multiple hooks
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
 
       const config = configRef.current;
 
       logger.info('medical_data_init', 'Starting data initialization', {
         entityName: config.entityName,
         requiresPatient: config.requiresPatient,
-        loadFilesCounts: config.loadFilesCounts
+        loadFilesCounts: config.loadFilesCounts,
+        patientId: currentPatient?.id
       });
       isInitialized.current = true;
 
@@ -237,11 +252,12 @@ export const useMedicalData = config => {
         // Wait for patient data to be available if required
         if (config.requiresPatient) {
           if (!currentPatient?.id) {
-            logger.warn('medical_data_warning', 'Patient data not available for initialization', {
+            logger.debug('medical_data_init', 'Waiting for patient data to become available', {
               entityName: config.entityName,
               requiresPatient: config.requiresPatient,
               patientAvailable: false
             });
+            isInitialized.current = false; // Reset so it can try again when patient loads
             return;
           }
         }

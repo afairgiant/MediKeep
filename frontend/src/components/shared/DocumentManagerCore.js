@@ -339,48 +339,63 @@ const useDocumentManagerCore = ({
   const checkSyncStatus = useCallback(async (isManualSync = false) => {
     if (isManualSync) setSyncLoading(true);
 
-    // Use current values from refs for stable dependencies
-    const currentFiles = filesRef.current || files;
-    const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
-    
-    // Check sync status for Paperless files
-    
-    // Don't proceed if no paperless files or paperless not enabled
-    if (paperlessFiles.length === 0) {
-      // No Paperless files found, skipping sync check
-      logger.debug('No Paperless files found, skipping sync check', {
-        entityType,
-        entityId,
-        isManualSync,
-        component: 'DocumentManagerCore',
-      });
-      if (isManualSync) setSyncLoading(false);
-      return;
-    }
+    try {
+      // Use current values from refs for stable dependencies
+      const currentFiles = filesRef.current || files;
+      const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
+      
+      // Check sync status for Paperless files
+      
+      // For manual sync, always try the API call even if frontend doesn't see paperless files
+      // The backend might know about files that need sync checking
+      if (paperlessFiles.length === 0 && !isManualSync) {
+        // No Paperless files found, skipping automatic sync check
+        logger.debug('No Paperless files found, skipping automatic sync check', {
+          entityType,
+          entityId,
+          isManualSync,
+          component: 'DocumentManagerCore',
+        });
+        return;
+      }
 
-    if (!paperlessSettings?.paperless_enabled) {
-      logger.warn('paperless_not_enabled_sync_skip', 'Paperless not enabled, skipping sync check', {
+      if (!paperlessSettings?.paperless_enabled) {
+        logger.warn('paperless_not_enabled_sync_skip', 'Paperless not enabled, skipping sync check', {
+          entityType,
+          entityId,
+          isManualSync,
+          paperlessFilesCount: paperlessFiles.length,
+          component: 'DocumentManagerCore',
+        });
+        
+        if (isManualSync) {
+          // Show notification for manual sync when paperless not enabled
+          const { notifications } = await import('@mantine/notifications');
+          const { IconExclamationMark } = await import('@tabler/icons-react');
+          
+          notifications.show({
+            title: 'Sync Check Failed',
+            message: 'Paperless integration is not enabled. Please enable it in Settings.',
+            color: 'orange',
+            icon: <IconExclamationMark size={16} />,
+            autoClose: 5000,
+          });
+        }
+        
+        if (isManualSync) setSyncLoading(false);
+        return;
+      }
+      
+      logger.info('sync_status_check_start', 'Starting Paperless sync status check', {
         entityType,
         entityId,
         isManualSync,
         paperlessFilesCount: paperlessFiles.length,
+        paperlessEnabled: paperlessSettings?.paperless_enabled,
+        autoSyncEnabled: paperlessSettings?.paperless_auto_sync,
         component: 'DocumentManagerCore',
       });
-      if (isManualSync) setSyncLoading(false);
-      return;
-    }
-    
-    logger.info('sync_status_check_start', 'Starting Paperless sync status check', {
-      entityType,
-      entityId,
-      isManualSync,
-      paperlessFilesCount: paperlessFiles.length,
-      paperlessEnabled: paperlessSettings?.paperless_enabled,
-      autoSyncEnabled: paperlessSettings?.paperless_auto_sync,
-      component: 'DocumentManagerCore',
-    });
 
-    try {
       // First, update any processing files to check if tasks have completed
       try {
         logger.debug('processing_files_update_start', 'Updating processing files status', {
@@ -451,6 +466,9 @@ const useDocumentManagerCore = ({
       // Reload files to refresh the UI with updated sync status
       await loadFiles();
     } catch (err) {
+      const currentFiles = filesRef.current || files;
+      const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
+      
       logger.error('document_manager_sync_check_error', {
         message: 'Failed to check Paperless sync status',
         entityType,
@@ -538,7 +556,7 @@ const useDocumentManagerCore = ({
 
     const timeoutId = setTimeout(() => {
       memoizedCheckSyncStatus();
-    }, 500); // Increased debounce to 500ms to reduce frequency
+    }, 500); // Debounce to prevent frequent sync checks
     
     return () => clearTimeout(timeoutId);
   }, [mode, memoizedCheckSyncStatus]);
@@ -729,6 +747,12 @@ const useDocumentManagerCore = ({
       );
 
       // Handle different upload outcomes
+      console.log('DocumentManagerCore completion check:', {
+        taskMonitored: uploadResult.taskMonitored,
+        selectedStorageBackend,
+        fileName: file.name
+      });
+      
       if (uploadResult.taskMonitored && selectedStorageBackend === 'paperless') {
         // Import duplicate handling utilities
         const { handlePaperlessTaskCompletion } = await import('../../utils/errorMessageUtils');
@@ -741,9 +765,13 @@ const useDocumentManagerCore = ({
         );
 
         if (showProgressModal) {
-          if (result.success) {
+          if (result.success === true) {
             updateFileProgress(fileId, 100, 'completed');
             completeUpload(true, result.message);
+          } else if (result.success === null && result.isBackgroundProcessing) {
+            // Background processing - show as processing/uploading with appropriate message
+            updateFileProgress(fileId, 75, 'uploading', result.message);
+            completeUpload(true, result.message); // Consider this successful since it's processing in background
           } else if (result.isDuplicate) {
             updateFileProgress(fileId, 0, 'failed', result.message);
             completeUpload(false, result.message);
@@ -765,8 +793,8 @@ const useDocumentManagerCore = ({
           component: 'DocumentManagerCore',
         });
 
-        // If it's a duplicate, don't set error (it's expected behavior)
-        if (!result.success && !result.isDuplicate) {
+        // If it's a duplicate or background processing, don't set error (these are expected behaviors)
+        if (result.success === false && !result.isDuplicate && !result.isBackgroundProcessing) {
           setError(result.message);
           if (onError) {
             onError(result.message);

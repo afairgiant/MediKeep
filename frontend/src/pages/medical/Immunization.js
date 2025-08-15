@@ -249,11 +249,11 @@ const Immunization = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
+      <Container size="xl" py="md">
+        <Center h={200}>
+          <Stack align="center">
             <Loader size="lg" />
-            <Text size="lg">Loading immunizations...</Text>
+            <Text>Loading immunizations...</Text>
           </Stack>
         </Center>
       </Container>
@@ -261,14 +261,10 @@ const Immunization = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <Container size="xl" py="md">
       <PageHeader title="Immunizations" icon="💉" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
@@ -353,11 +349,6 @@ const Immunization = () => {
         />
 
         {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
           {processedImmunizations.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -386,12 +377,6 @@ const Immunization = () => {
                     key={immunization.id}
                     span={{ base: 12, md: 6, lg: 4 }}
                   >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
                       <ImmunizationCard
                         immunization={immunization}
                         onView={handleViewImmunization}
@@ -400,7 +385,6 @@ const Immunization = () => {
                         practitioners={practitioners}
                         navigate={navigate}
                       />
-                    </motion.div>
                   </Grid.Col>
                 ))}
               </AnimatePresence>
@@ -447,9 +431,8 @@ const Immunization = () => {
               />
             </Paper>
           )}
-        </motion.div>
-      </Container>
-    </motion.div>
+        </Stack>
+    </Container>
   );
 };
 

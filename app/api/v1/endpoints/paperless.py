@@ -6,10 +6,13 @@ settings management, and document operations.
 """
 
 import os
+import json
+import re
 import traceback
 from typing import Dict, Any
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -17,13 +20,39 @@ from app.core.database import get_db
 from app.api.deps import get_current_user
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
-from app.services.paperless_service import create_paperless_service_with_username_password, PaperlessConnectionError, PaperlessAuthenticationError, PaperlessUploadError, PaperlessError
+from app.services.paperless_service import (
+    create_paperless_service,
+    create_paperless_service_with_username_password, 
+    create_paperless_service_with_token,
+    PaperlessConnectionError, 
+    PaperlessAuthenticationError, 
+    PaperlessUploadError, 
+    PaperlessError
+)
+# New simplified architecture
+from app.services.paperless_client import (
+    create_paperless_client,
+    PaperlessClient,
+    PaperlessClientError,
+    PaperlessConnectionError as NewPaperlessConnectionError,
+    PaperlessUploadError as NewPaperlessUploadError
+)
+from app.services.paperless_auth import create_paperless_auth
 from app.crud.user_preferences import user_preferences
 from app.services.credential_encryption import credential_encryption, SecurityError
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+
+def get_preferred_auth_method(user_prefs) -> str:
+    """Determine the preferred authentication method based on available credentials."""
+    if user_prefs.paperless_api_token_encrypted:
+        return "token"
+    elif user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted:
+        return "basic_auth"
+    return "none"
 
 
 def _update_entity_file_from_task_result(db: Session, task_uuid: str, task_result: dict) -> None:
@@ -165,47 +194,85 @@ async def test_paperless_connection(
             "endpoint": "test_paperless_connection"
         })
         
-        # Check if we need to use saved credentials
-        use_saved_credentials = (not connection_data.paperless_username or 
+        # Determine authentication method and credentials
+        use_saved_credentials = (not connection_data.paperless_api_token and 
+                               not connection_data.paperless_username and 
                                not connection_data.paperless_password)
+        
+        encrypted_token = None
+        encrypted_username = None
+        encrypted_password = None
         
         if use_saved_credentials:
             logger.info("Using saved credentials for connection test")
             # Get user preferences with saved credentials
             user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
             
-            if not user_prefs or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+            if not user_prefs:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No saved credentials found. Please enter username and password."
+                    detail="No saved credentials found. Please provide authentication details."
                 )
             
-            # Use saved encrypted credentials
+            # Check what saved credentials are available
+            has_token = bool(user_prefs.paperless_api_token_encrypted)
+            has_basic = bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted)
+            
+            if not has_token and not has_basic:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No saved authentication credentials found. Please provide token or username/password."
+                )
+            
+            # Use saved encrypted credentials (smart factory will prioritize token)
+            encrypted_token = user_prefs.paperless_api_token_encrypted
             encrypted_username = user_prefs.paperless_username_encrypted
             encrypted_password = user_prefs.paperless_password_encrypted
-            logger.info("Using saved encrypted credentials for test")
+            logger.info(f"Using saved credentials: token={'yes' if has_token else 'no'}, basic={'yes' if has_basic else 'no'}")
         else:
             # Use provided credentials, encrypt them
-            logger.info("Encrypting provided credentials...")
-            encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
-            encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
-            logger.info("Credentials encrypted successfully")
+            logger.debug("Using provided credentials for test")
+            logger.debug(f"Token provided: {bool(connection_data.paperless_api_token)}")
+            if connection_data.paperless_api_token:
+                encrypted_token = credential_encryption.encrypt_token(connection_data.paperless_api_token)
+                logger.debug("Token encrypted successfully")
+                logger.info("Token provided and encrypted")
+            
+            if connection_data.paperless_username and connection_data.paperless_password:
+                encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
+                encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
+                logger.info("Username/password provided and encrypted")
         
-        # Create paperless service for testing
-        logger.info("Creating paperless service...")
-        async with create_paperless_service_with_username_password(
+        # Create paperless service for testing using smart factory
+        logger.debug("Creating paperless service with smart factory")
+        logger.debug(f"URL: {connection_data.paperless_url}")
+        logger.debug(f"Has encrypted_token: {bool(encrypted_token)}")
+        logger.debug(f"Has encrypted_username: {bool(encrypted_username)}")
+        logger.debug(f"Has encrypted_password: {bool(encrypted_password)}")
+        logger.debug(f"User ID: {current_user.id}")
+        
+        async with create_paperless_service(
             connection_data.paperless_url,
-            encrypted_username,
-            encrypted_password,
-            current_user.id
+            encrypted_token=encrypted_token,
+            encrypted_username=encrypted_username,
+            encrypted_password=encrypted_password,
+            user_id=current_user.id
         ) as paperless_service:
             logger.info("Paperless service created successfully")
             
             # Test the connection
+            logger.debug("About to call test_connection()")
             result = await paperless_service.test_connection()
+            logger.debug(f"test_connection() completed with result: {result}")
+            
+            # Add authentication method to result
+            result["auth_method"] = paperless_service.get_auth_type()
+            result["used_saved_credentials"] = use_saved_credentials
+            logger.debug(f"Final result with auth method: {result}")
             
             logger.info(f"Paperless connection test successful for user {current_user.id}", extra={
                 "user_id": current_user.id,
+                "auth_method": result["auth_method"],
                 "server_version": result.get("server_version"),
                 "api_version": result.get("api_version"),
                 "used_saved_credentials": use_saved_credentials
@@ -266,6 +333,14 @@ async def test_paperless_connection(
         )
         
     except Exception as e:
+        # Log the exception with more detail for debugging
+        logger.error(f"Unexpected error in paperless connection test", extra={
+            "user_id": current_user.id,
+            "paperless_url": connection_data.paperless_url,
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "stack_trace": traceback.format_exc()
+        })
         raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             public_message="An internal error occurred during connection test",
@@ -368,7 +443,9 @@ async def get_paperless_settings(
             return {
                 "paperless_enabled": False,
                 "paperless_url": "",
+                "paperless_has_token": False,
                 "paperless_has_credentials": False,
+                "paperless_auth_method": "none",
                 "default_storage_backend": "local",
                 "paperless_auto_sync": False,
                 "paperless_sync_tags": True
@@ -378,7 +455,9 @@ async def get_paperless_settings(
         return {
             "paperless_enabled": user_prefs.paperless_enabled or False,
             "paperless_url": user_prefs.paperless_url or "",
+            "paperless_has_token": bool(user_prefs.paperless_api_token_encrypted),
             "paperless_has_credentials": bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted),
+            "paperless_auth_method": get_preferred_auth_method(user_prefs),
             "default_storage_backend": user_prefs.default_storage_backend or "local",
             "paperless_auto_sync": user_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": user_prefs.paperless_sync_tags or True
@@ -436,6 +515,12 @@ async def update_paperless_settings(
         if "paperless_url" in settings:
             update_data["paperless_url"] = settings["paperless_url"]
             
+        if "paperless_api_token" in settings and settings["paperless_api_token"]:
+            # Encrypt the API token before storing
+            update_data["paperless_api_token_encrypted"] = credential_encryption.encrypt_token(
+                settings["paperless_api_token"]
+            )
+            
         if "paperless_username" in settings and settings["paperless_username"]:
             # Encrypt the username before storing
             update_data["paperless_username_encrypted"] = credential_encryption.encrypt_token(
@@ -469,7 +554,9 @@ async def update_paperless_settings(
         return {
             "paperless_enabled": updated_prefs.paperless_enabled or False,
             "paperless_url": updated_prefs.paperless_url or "",
+            "paperless_has_token": bool(updated_prefs.paperless_api_token_encrypted),
             "paperless_has_credentials": bool(updated_prefs.paperless_username_encrypted and updated_prefs.paperless_password_encrypted),
+            "paperless_auth_method": get_preferred_auth_method(updated_prefs),
             "default_storage_backend": updated_prefs.default_storage_backend or "local",
             "paperless_auto_sync": updated_prefs.paperless_auto_sync or False,
             "paperless_sync_tags": updated_prefs.paperless_sync_tags or True,
@@ -549,8 +636,10 @@ async def check_paperless_health(
                 }
             }
         
-        # Check if credentials exist
-        if not user_prefs.paperless_url or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+        # Check if credentials exist (either token or username/password)
+        has_auth = (user_prefs.paperless_api_token_encrypted or 
+                   (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+        if not user_prefs.paperless_url or not has_auth:
             return {
                 "status": "unconfigured",
                 "message": "Paperless configuration incomplete",
@@ -565,11 +654,12 @@ async def check_paperless_health(
             "paperless_url": user_prefs.paperless_url
         })
         
-        async with create_paperless_service_with_username_password(
+        async with create_paperless_service(
             user_prefs.paperless_url,
-            user_prefs.paperless_username_encrypted,
-            user_prefs.paperless_password_encrypted,
-            current_user.id
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=current_user.id
         ) as paperless_service:
             result = await paperless_service.test_connection()
             
@@ -772,30 +862,41 @@ async def get_paperless_task_status(
                 detail="Paperless integration is not enabled"
             )
         
-        if not user_prefs.paperless_url or not user_prefs.paperless_username_encrypted or not user_prefs.paperless_password_encrypted:
+        # Check if credentials exist (either token or username/password)
+        has_auth = (user_prefs.paperless_api_token_encrypted or 
+                   (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+        if not user_prefs.paperless_url or not has_auth:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Paperless configuration is incomplete"
+                detail="Paperless configuration is incomplete - missing URL or authentication credentials"
             )
         
-        # Create paperless service to check task status
-        async with create_paperless_service_with_username_password(
+        # Use the smart factory that supports both token and username/password auth
+        logger.debug("Using smart auth factory (supports both token and username/password)")
+        
+        # Import the same method used by upload
+        from app.services.paperless_service import create_paperless_service_with_username_password
+        
+        # Create paperless service using SAME method as upload - supports both token and username/password
+        async with create_paperless_service(
             user_prefs.paperless_url,
-            user_prefs.paperless_username_encrypted,
-            user_prefs.paperless_password_encrypted,
-            current_user.id
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=current_user.id
         ) as paperless_service:
             
-            # Just check the current task status without waiting
-            # Use the internal method that polls Paperless directly
+            # Now using same auth method as upload - should work!
             try:
-                import aiohttp
+                logger.info(f"Checking task {task_uuid} status for user {current_user.id} using same auth as upload")
                 
-                # Get a single task status from Paperless API
-                url = f"{paperless_service.base_url}/api/tasks/?task_id={task_uuid}"
-                async with paperless_service.session.get(url) as response:
+                # Use the proper _make_request method 
+                async with paperless_service._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                    logger.info(f"Task status response: HTTP {response.status}")
+                    
                     if response.status == 200:
                         tasks = await response.json()
+                        
                         # Handle both list format and paginated format
                         if isinstance(tasks, list):
                             task_list = tasks
@@ -806,9 +907,57 @@ async def get_paperless_task_status(
                             task = task_list[0]
                             
                             if task['status'] == 'SUCCESS':
+                                # Log the raw task response from Paperless for debugging
+                                logger.error(f"🔍 RAW PAPERLESS TASK RESPONSE: {json.dumps(task, indent=2)}", extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                    "raw_paperless_response": task
+                                })
+                                
                                 # Extract document ID from the task result
-                                # This may need adjustment based on Paperless API response format
-                                document_id = task.get('result', {}).get('document_id') if isinstance(task.get('result'), dict) else None
+                                # Paperless returns document ID in 'related_document' field, NOT 'id' (which is task ID)
+                                logger.debug(f"Document ID extraction - Full task result: {task}")
+                                logger.debug(f"task.get('id'): {task.get('id')}")
+                                logger.debug(f"task.get('related_document'): {task.get('related_document')}")
+                                logger.debug(f"task.get('result'): {task.get('result')}")
+                                
+                                # FIXED: Try related_document FIRST (this is the actual document ID)
+                                document_id = task.get('related_document')
+                                extraction_method = "task.related_document"
+                                
+                                # Fallback to other possible locations if not found
+                                if not document_id:
+                                    if isinstance(task.get('result'), dict):
+                                        document_id = task.get('result', {}).get('document_id')
+                                        extraction_method = "task.result.document_id"
+                                    elif isinstance(task.get('result'), str):
+                                        # Try to extract from result string like "Success. New document id 2744 created"
+                                        match = re.search(r'document id (\d+)', task.get('result', ''))
+                                        if match:
+                                            document_id = match.group(1)
+                                            extraction_method = "regex_from_result_string"
+                                    # Only use task.id as LAST resort since it's the task ID, not document ID
+                                    if not document_id:
+                                        document_id = task.get('id')
+                                        extraction_method = "task.id (fallback - may be incorrect)"
+                                
+                                logger.error(f"🔍 EXTRACTED DOCUMENT ID: {document_id} (type: {type(document_id)}) via {extraction_method}", extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                    "extracted_document_id": document_id,
+                                    "extraction_method": extraction_method,
+                                    "full_task_result": task
+                                })
+                                
+                                # VALIDATE: Check if extracted document ID actually exists in Paperless
+                                if document_id:
+                                    try:
+                                        exists = await paperless_service.check_document_exists(document_id)
+                                        logger.error(f"🔍 VALIDATION - Document {document_id} exists in Paperless: {exists}")
+                                        if not exists:
+                                            logger.error(f"🚨 BUG DETECTED - Extracted document ID {document_id} does not exist in Paperless! Task result may be wrong.")
+                                    except Exception as e:
+                                        logger.error(f"🔍 VALIDATION - Failed to check document existence: {e}")
                                 
                                 # Update database record with successful completion
                                 _update_entity_file_from_task_result(db, task_uuid, {
@@ -820,7 +969,7 @@ async def get_paperless_task_status(
                                 result = {
                                     "status": "SUCCESS",
                                     "result": {
-                                        "document_id": document_id or "unknown"
+                                        "document_id": document_id
                                     },
                                     "task_id": task_uuid,
                                     "timestamp": datetime.utcnow().isoformat()
@@ -926,7 +1075,15 @@ async def get_paperless_task_status(
                                 status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"Task {task_uuid} not found"
                             )
+                    elif response.status == 403:
+                        logger.warning(f"Permission denied checking task {task_uuid} - auth may have failed")
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Permission denied accessing task status"
+                        )
                     else:
+                        response_text = await response.text()
+                        logger.warning(f"Task status check failed: HTTP {response.status} - {response_text[:100]}")
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Failed to check task status: HTTP {response.status}"
@@ -990,4 +1147,424 @@ async def get_paperless_task_status(
             user_id=current_user.id,
             operation="paperless_task_status_check",
             task_uuid=task_uuid
+        )
+
+
+@router.get("/documents/search")
+async def search_paperless_documents(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    query: str = "",
+    page: int = 1,
+    page_size: int = 25
+) -> Dict[str, Any]:
+    """
+    Search documents in Paperless-ngx.
+    
+    Args:
+        query: Search query string
+        page: Page number (default: 1)
+        page_size: Number of results per page (default: 25)
+    
+    Returns:
+        Search results from Paperless
+    """
+    try:
+        # Get user preferences
+        user_prefs = user_preferences.get_by_user_id(db, current_user.id)
+        
+        if not user_prefs or not user_prefs.paperless_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Paperless integration is not enabled"
+            )
+        
+        # Check if credentials exist
+        has_auth = (user_prefs.paperless_api_token_encrypted or 
+                   (user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted))
+        if not user_prefs.paperless_url or not has_auth:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Paperless configuration is incomplete"
+            )
+        
+        # Create paperless service using consistent auth method
+        paperless_service = create_paperless_service(user_prefs.paperless_url, current_user.id)
+        
+        # Simple search without user filtering for fallback during uploads
+        logger.info(f"Searching Paperless documents with query: {query}")
+        
+        params = {
+            "query": query,
+            "page": page,
+            "page_size": min(page_size, 100)
+        }
+        
+        # Make direct request to Paperless search API
+        async with paperless_service._make_request(
+            "GET", "/api/documents/", params=params
+        ) as response:
+            logger.info(f"Paperless search response status: {response.status}")
+            
+            if response.status == 401:
+                logger.error("Paperless authentication failed during search")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Paperless authentication failed"
+                )
+            elif response.status != 200:
+                error_text = await response.text()
+                logger.error(f"Paperless search failed with status {response.status}: {error_text}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Paperless search failed: {error_text}"
+                )
+            
+            results = await response.json()
+            logger.info(f"Paperless search returned {len(results.get('results', []))} results")
+            return results.get("results", [])
+        
+    except PaperlessAuthenticationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Paperless authentication failed. Please check your credentials."
+        )
+        
+    except PaperlessConnectionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to connect to Paperless server. Please check your configuration."
+        )
+    
+    except HTTPException:
+        raise
+    
+    except Exception as e:
+        logger.error(f"Error searching Paperless documents: {str(e)}", extra={
+            "user_id": current_user.id,
+            "query": query,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while searching documents: {str(e)}"
+        )
+
+
+# =============================================================================
+# NEW SIMPLIFIED ARCHITECTURE ENDPOINTS
+# =============================================================================
+
+@router.post("/test-connection-v2", response_model=Dict[str, Any])
+async def test_paperless_connection_v2(
+    connection_data: PaperlessConnectionData,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Test connection to paperless-ngx instance using new simplified architecture.
+    
+    This is the new, cleaner implementation that will replace the original
+    test-connection endpoint once fully tested.
+    """
+    try:
+        # Determine if we should use saved credentials
+        use_saved_credentials = not any([
+            connection_data.paperless_api_token,
+            connection_data.paperless_username,
+            connection_data.paperless_password
+        ])
+        
+        if use_saved_credentials:
+            # Get saved credentials from database
+            user_prefs = user_preferences.get_by_user_id(db, current_user.id)
+            if not user_prefs:
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "No saved credentials found")
+            
+            # Use saved encrypted credentials
+            encrypted_token = user_prefs.paperless_api_token_encrypted
+            encrypted_username = user_prefs.paperless_username_encrypted
+            encrypted_password = user_prefs.paperless_password_encrypted
+            
+            logger.info(f"Testing with saved credentials for user {current_user.id}")
+        else:
+            # Encrypt provided credentials
+            encrypted_token = None
+            encrypted_username = None
+            encrypted_password = None
+            
+            if connection_data.paperless_api_token:
+                encrypted_token = credential_encryption.encrypt_token(connection_data.paperless_api_token)
+            
+            if connection_data.paperless_username and connection_data.paperless_password:
+                encrypted_username = credential_encryption.encrypt_token(connection_data.paperless_username)
+                encrypted_password = credential_encryption.encrypt_token(connection_data.paperless_password)
+            
+            logger.info(f"Testing with provided credentials for user {current_user.id}")
+        
+        # Create authentication handler
+        auth = create_paperless_auth(
+            url=connection_data.paperless_url,
+            encrypted_token=encrypted_token,
+            encrypted_username=encrypted_username,
+            encrypted_password=encrypted_password,
+            user_id=current_user.id
+        )
+        
+        # Test connection
+        success, message = await auth.test_connection()
+        
+        if success:
+            result = {
+                "status": "success",
+                "message": message,
+                "auth_method": auth.get_auth_type(),
+                "used_saved_credentials": use_saved_credentials,
+                "url": connection_data.paperless_url
+            }
+            
+            logger.info(f"Connection test successful for user {current_user.id}", extra={
+                "user_id": current_user.id,
+                "auth_method": result["auth_method"],
+                "used_saved_credentials": use_saved_credentials,
+                "url": connection_data.paperless_url
+            })
+            
+            return result
+        else:
+            # Connection failed
+            logger.warning(f"Connection test failed for user {current_user.id}: {message}")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Connection failed: {message}")
+            
+    except HTTPException:
+        raise
+    except ValueError as e:
+        # Authentication setup error (no credentials provided)
+        logger.warning(f"Invalid credentials for user {current_user.id}: {e}")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
+    except SecurityError as e:
+        logger.error(f"Security error during connection test for user {current_user.id}: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Security error occurred")
+    except Exception as e:
+        logger.error(f"Unexpected error during connection test for user {current_user.id}: {e}", extra={
+            "user_id": current_user.id,
+            "error": str(e),
+            "url": connection_data.paperless_url
+        })
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Connection test failed")
+
+
+class BackgroundTaskRequest(BaseModel):
+    """Request model for setting background task"""
+    entity_type: str = Field(..., description="Type of entity (e.g., 'visit', 'medication')")
+    entity_id: int = Field(..., description="ID of the entity")
+    file_name: str = Field(..., description="Name of the uploaded file")
+    task_uuid: str = Field(..., description="Paperless task UUID")
+    sync_status: str = Field(default="processing", description="Sync status to set")
+
+
+@router.post("/entity-files/set-background-task")
+async def set_background_task(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    request_data: BackgroundTaskRequest
+) -> Dict[str, Any]:
+    """
+    Set an entity file to background processing status with task UUID.
+    
+    This endpoint is called when an upload takes longer than expected
+    and needs to be tracked in the background.
+    """
+    try:
+        logger.info(f"Setting background task for {request_data.entity_type} {request_data.entity_id}", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status
+        })
+
+        # Find the entity file record
+        from app.models.models import EntityFile
+        
+        # Look for the most recent entity file for this entity and filename
+        entity_file_record = db.query(EntityFile).filter(
+            EntityFile.entity_type == request_data.entity_type,
+            EntityFile.entity_id == request_data.entity_id,
+            EntityFile.file_name == request_data.file_name
+        ).order_by(EntityFile.created_at.desc()).first()
+
+        if not entity_file_record:
+            logger.error(f"Entity file not found for background task", extra={
+                "user_id": current_user.id,
+                "entity_type": request_data.entity_type,
+                "entity_id": request_data.entity_id,
+                "file_name": request_data.file_name
+            })
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Entity file not found"
+            )
+
+        # Update the record with background task information
+        entity_file_record.paperless_task_uuid = request_data.task_uuid
+        entity_file_record.sync_status = request_data.sync_status
+        
+        # Commit the changes
+        db.commit()
+        db.refresh(entity_file_record)
+        
+        updated_file = entity_file_record
+        
+        logger.info(f"Successfully set background task for entity file {updated_file.id}", extra={
+            "user_id": current_user.id,
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status
+        })
+
+        return {
+            "success": True,
+            "message": "Background task set successfully",
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to set background task", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "error": str(e)
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to set background task"
+        )
+
+
+class BackgroundTaskUpdateRequest(BaseModel):
+    """Request model for updating background task result"""
+    entity_type: str = Field(..., description="Type of entity")
+    entity_id: int = Field(..., description="ID of the entity")
+    file_name: str = Field(..., description="Name of the uploaded file")
+    task_uuid: str = Field(..., description="Paperless task UUID")
+    task_result: Dict[str, Any] = Field(..., description="Final task result from Paperless")
+    sync_status: str = Field(..., description="Final sync status ('synced' or 'failed')")
+
+
+@router.post("/entity-files/update-background-task")
+async def update_background_task(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    request_data: BackgroundTaskUpdateRequest
+) -> Dict[str, Any]:
+    """
+    Update an entity file with the final result of background task processing.
+    
+    This endpoint is called when a background task completes to update
+    the entity file with the document ID and final sync status.
+    """
+    try:
+        logger.info(f"Updating background task result for {request_data.entity_type} {request_data.entity_id}", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "task_uuid": request_data.task_uuid,
+            "task_status": request_data.task_result.get('status'),
+            "sync_status": request_data.sync_status
+        })
+
+        # Find the entity file record
+        from app.models.models import EntityFile
+        
+        # Look for the entity file with this task UUID
+        entity_file_record = db.query(EntityFile).filter(
+            EntityFile.entity_type == request_data.entity_type,
+            EntityFile.entity_id == request_data.entity_id,
+            EntityFile.file_name == request_data.file_name,
+            EntityFile.paperless_task_uuid == request_data.task_uuid
+        ).first()
+
+        if not entity_file_record:
+            logger.error(f"Entity file not found for background task update", extra={
+                "user_id": current_user.id,
+                "entity_type": request_data.entity_type,
+                "entity_id": request_data.entity_id,
+                "file_name": request_data.file_name,
+                "task_uuid": request_data.task_uuid
+            })
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Entity file not found"
+            )
+
+        # Extract document ID if task was successful
+        document_id = None
+        if request_data.sync_status == 'synced' and request_data.task_result.get('status') == 'SUCCESS':
+            task_result = request_data.task_result
+            # Use the same extraction logic as the main task processing
+            document_id = (task_result.get('related_document') or 
+                          task_result.get('id') or 
+                          (task_result.get('result', {}).get('document_id') if isinstance(task_result.get('result'), dict) else None))
+
+        # Update the record with final result
+        entity_file_record.sync_status = request_data.sync_status
+        if document_id:
+            entity_file_record.paperless_document_id = str(document_id)
+        
+        # Clear the task UUID since the task is now complete (success or failure)
+        entity_file_record.paperless_task_uuid = None
+        
+        # Update last sync timestamp
+        from datetime import datetime
+        entity_file_record.last_sync_at = datetime.utcnow()
+        
+        # Commit the changes
+        db.commit()
+        db.refresh(entity_file_record)
+        
+        updated_file = entity_file_record
+        
+        logger.info(f"Successfully updated background task for entity file {updated_file.id}", extra={
+            "user_id": current_user.id,
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status,
+            "document_id": document_id
+        })
+
+        return {
+            "success": True,
+            "message": "Background task updated successfully",
+            "entity_file_id": updated_file.id,
+            "task_uuid": request_data.task_uuid,
+            "sync_status": request_data.sync_status,
+            "document_id": document_id
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update background task", extra={
+            "user_id": current_user.id,
+            "entity_type": request_data.entity_type,
+            "entity_id": request_data.entity_id,
+            "file_name": request_data.file_name,
+            "task_uuid": request_data.task_uuid,
+            "error": str(e)
+        })
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update background task"
         )

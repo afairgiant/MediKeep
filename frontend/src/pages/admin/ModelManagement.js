@@ -242,7 +242,14 @@ const ModelManagement = () => {
           <div className="model-actions">
             <Button
               variant="primary"
-              onClick={() => navigate(`/admin/models/${modelName}/create`)}
+              onClick={() => {
+                // For user model, use our specialized admin user creation page
+                if (modelName === 'user') {
+                  navigate('/admin/create-user');
+                } else {
+                  navigate(`/admin/models/${modelName}/create`);
+                }
+              }}
             >
               ➕ Add New
             </Button>

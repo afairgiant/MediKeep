@@ -1,5 +1,7 @@
 import logger from '../logger';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
+import { extractErrorMessage } from '../../utils/errorUtils';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
 // Map entity types to their API endpoint paths
 const ENTITY_TO_API_PATH = {
@@ -31,8 +33,10 @@ class ApiService {
     this.fallbackURL = '/api/v1';
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
+  async getAuthHeaders() {
+    // Migrate legacy data first
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
     const headers = { 'Content-Type': 'application/json' };
 
     if (token) {
@@ -61,14 +65,14 @@ class ApiService {
         const currentTime = Date.now() / 1000;
         if (payload.exp < currentTime) {
           logger.warn('Token expired, removing from storage');
-          localStorage.removeItem('token');
+          secureStorage.removeItem('token');
           return headers;
         }
 
         headers['Authorization'] = `Bearer ${token}`;
       } catch (e) {
         logger.error('Invalid token format', { error: e.message });
-        localStorage.removeItem('token');
+        secureStorage.removeItem('token');
       }
     }
 
@@ -82,17 +86,14 @@ class ApiService {
 
       try {
         fullErrorData = JSON.parse(errorData);
-        errorMessage =
-          fullErrorData.detail || fullErrorData.message || errorData; // For 422 errors, log the full validation details
+        
+        // Log validation errors for debugging
         if (response.status === 422) {
           console.error('Validation Error Details:', fullErrorData);
-          if (fullErrorData.detail && Array.isArray(fullErrorData.detail)) {
-            const validationErrors = fullErrorData.detail
-              .map(err => `${err.loc?.join('.')} - ${err.msg}`)
-              .join('; ');
-            errorMessage = `Validation Error: ${validationErrors}`;
-          }
         }
+        
+        // Use the error utility to extract a user-friendly message
+        errorMessage = extractErrorMessage(fullErrorData, response.status);
       } catch {
         errorMessage =
           errorData ||
@@ -137,7 +138,9 @@ class ApiService {
     }
 
     // Get token but don't fail if it doesn't exist - let backend handle authentication
-    const token = localStorage.getItem('token');
+    // Migrate legacy data first
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
     const config = {
       method,
       signal,
@@ -311,9 +314,16 @@ class ApiService {
     return this.get(`/${apiPath}/${entityId}`, { signal });
   }
 
-  createEntity(entityType, entityData, signal) {
+  createEntity(entityType, entityData, signal, patientId = null) {
     const apiPath = ENTITY_TO_API_PATH[entityType] || entityType;
-    return this.post(`/${apiPath}/`, entityData, { signal });
+    let url = `/${apiPath}/`;
+    
+    // Add patient_id query parameter if provided
+    if (patientId !== null) {
+      url += `?patient_id=${patientId}`;
+    }
+    
+    return this.post(url, entityData, { signal });
   }
 
   updateEntity(entityType, entityId, entityData, signal, patientId = null) {
@@ -588,8 +598,30 @@ class ApiService {
       // Import the pollPaperlessTaskStatus function
       const { pollPaperlessTaskStatus } = await import('./paperlessApi');
       
-      // Poll task status
-      const taskResult = await pollPaperlessTaskStatus(taskUuid, 30, 1000);
+      // Handle background transition notification
+      const handleBackgroundTransition = (taskUuid) => {
+        // Import notifications dynamically to avoid dependency issues
+        import('@mantine/notifications').then(({ notifications }) => {
+          notifications.show({
+            title: 'Upload Processing',
+            message: 'Paperless consumption is taking longer than expected, will continue to upload in background. Check your Paperless instance for when it is done.',
+            color: 'blue',
+            autoClose: 10000,
+            withCloseButton: true,
+          });
+        }).catch(console.warn);
+        
+        logger.info('api_upload_background_transition', 'Upload transitioned to background processing', {
+          entityType,
+          entityId,
+          fileName: file.name,
+          taskUuid,
+          component: 'ApiService',
+        });
+      };
+      
+      // Poll task status with background transition support
+      const taskResult = await pollPaperlessTaskStatus(taskUuid, 300, 1000, handleBackgroundTransition);
 
       logger.info('api_upload_task_complete', 'Paperless task monitoring completed', {
         entityType,
@@ -610,9 +642,60 @@ class ApiService {
         component: 'ApiService',
       });
 
+      // Handle background processing status
+      if (taskResult?.status === 'PROCESSING_BACKGROUND') {
+        logger.info('api_upload_background_processing', 'Task moved to background processing', {
+          entityType,
+          entityId,
+          fileName: file.name,
+          taskUuid: taskResult.task_uuid,
+          component: 'ApiService',
+        });
+
+        // Store task UUID in the entity file for background tracking
+        await this.post('/paperless/entity-files/set-background-task', {
+          entity_type: entityType,
+          entity_id: entityId,
+          file_name: file.name,
+          task_uuid: taskResult.task_uuid,
+          sync_status: 'processing'
+        });
+
+        // Start background resolution immediately (don't await - let it run in background)
+        const { resolveBackgroundTask } = await import('./paperlessApi');
+        resolveBackgroundTask(taskResult.task_uuid, entityType, entityId, file.name).catch(error => {
+          logger.error('api_upload_background_resolution_error', 'Background task resolution failed', {
+            entityType,
+            entityId,
+            fileName: file.name,
+            taskUuid: taskResult.task_uuid,
+            error: error.message,
+            component: 'ApiService',
+          });
+        });
+
+        if (onProgress) {
+          onProgress({ 
+            status: 'processing', 
+            message: 'Document processing in background, you will be notified when complete',
+            isBackground: true
+          });
+        }
+
+        return {
+          ...uploadResult,
+          taskMonitored: true,
+          taskResult,
+          success: false, // Not complete yet
+          isBackgroundProcessing: true,
+          taskUuid: taskResult.task_uuid,
+          message: taskResult.message
+        };
+      }
+
       // Check if task was successful
       const isSuccess = taskResult?.status === 'SUCCESS' && 
-                       (taskResult?.result?.document_id || taskResult?.document_id);
+                       (taskResult?.id || taskResult?.related_document || taskResult?.result?.document_id || taskResult?.document_id);
       
       // Check if task failed due to duplicate
       const isDuplicate = taskResult?.error_type === 'duplicate' || 
@@ -647,10 +730,65 @@ class ApiService {
         }
       };
       
-      // Extract document ID if successful
-      const documentId = isSuccess ? 
-                        (taskResult?.result?.document_id || taskResult?.document_id) : 
-                        null;
+      // Extract and validate document ID if successful
+      let documentId = null;
+      if (isSuccess) {
+        // Check multiple possible locations for document ID
+        const rawDocumentId = taskResult?.id || 
+                             taskResult?.related_document || 
+                             taskResult?.result?.document_id || 
+                             taskResult?.document_id;
+        
+        // Validate document ID - reject invalid values like "unknown"
+        if (rawDocumentId && 
+            String(rawDocumentId).toLowerCase() !== 'unknown' && 
+            String(rawDocumentId).toLowerCase() !== 'none' && 
+            String(rawDocumentId).toLowerCase() !== 'null' && 
+            String(rawDocumentId) !== '' &&
+            !isNaN(rawDocumentId) && 
+            parseInt(rawDocumentId) > 0) {
+          documentId = rawDocumentId;
+        } else {
+          // Invalid document ID - trigger fallback search
+          logger.warn('api_upload_invalid_document_id', 'Task returned invalid document ID, attempting fallback search', {
+            rawDocumentId,
+            fileName: file.name,
+            taskUuid,
+            component: 'ApiService',
+          });
+          
+          try {
+            // Import and call fallback search
+            const { searchDocumentByFilenameAndTime } = await import('./paperlessApi');
+            const fallbackDocumentId = await searchDocumentByFilenameAndTime(file.name);
+            
+            if (fallbackDocumentId) {
+              documentId = fallbackDocumentId;
+              logger.info('api_upload_fallback_success', 'Fallback search found document ID', {
+                fileName: file.name,
+                fallbackDocumentId,
+                originalTaskResult: rawDocumentId,
+                component: 'ApiService',
+              });
+            } else {
+              logger.error('api_upload_fallback_failed', 'Fallback search could not find document', {
+                fileName: file.name,
+                originalTaskResult: rawDocumentId,
+                component: 'ApiService',
+              });
+              // Keep documentId as null to indicate failure
+            }
+          } catch (fallbackError) {
+            logger.error('api_upload_fallback_error', 'Error during fallback search', {
+              fileName: file.name,
+              originalTaskResult: rawDocumentId,
+              error: fallbackError.message,
+              component: 'ApiService',
+            });
+            // Keep documentId as null to indicate failure
+          }
+        }
+      }
 
       logger.debug('api_upload_task_processed', 'Task result processed', {
         isSuccess,
@@ -717,7 +855,9 @@ class ApiService {
       });
 
       // Get authentication token
-      const token = localStorage.getItem('token');
+      // Migrate legacy data first
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication required to view files');
       }
@@ -836,10 +976,36 @@ class ApiService {
         component: 'ApiService',
       });
 
-      const blob = await this.get(`/entity-files/files/${fileId}/download`, {
-        responseType: 'blob',
+      // Use direct fetch to get full response with headers
+      // Migrate legacy data first
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
+      const response = await fetch(`${this.baseURL}/entity-files/files/${fileId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         signal,
       });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+      }
+
+      // Extract filename from Content-Disposition header
+      const contentDisposition = response.headers.get('content-disposition');
+      let correctedFileName = fileName || `file_${fileId}`;
+      
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          correctedFileName = fileNameMatch[1].replace(/['"]/g, '');
+          console.log(`Using server-provided filename: ${correctedFileName} (original: ${fileName})`);
+        }
+      }
+
+      const blob = await response.blob();
 
       // Handle blob download in browser
       if (blob instanceof Blob) {
@@ -847,7 +1013,7 @@ class ApiService {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = fileName || `file_${fileId}`;
+        a.download = correctedFileName;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -936,30 +1102,82 @@ class ApiService {
   }
 
   // Check Paperless document sync status
-  checkPaperlessSyncStatus(signal) {
+  async checkPaperlessSyncStatus(signal) {
+    // Create a timeout signal to prevent hanging requests
+    let timeoutId;
+    const timeoutSignal = new AbortController();
+    
     try {
       logger.debug('api_paperless_sync_check', 'Checking Paperless sync status', {
         component: 'ApiService',
       });
 
-      return this.post('/entity-files/sync/paperless', {}, { 
-        signal,
+      if (!signal) {
+        // Set 30-second timeout for sync check requests
+        timeoutId = setTimeout(() => {
+          timeoutSignal.abort();
+        }, 30000);
+      }
+
+      const finalSignal = signal || timeoutSignal.signal;
+
+      const result = await this.post('/entity-files/sync/paperless', {}, { 
+        signal: finalSignal,
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
         }
       });
+
+      // Clear timeout if request completed successfully
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      logger.info('api_paperless_sync_check_success', 'Paperless sync status check completed', {
+        filesChecked: Object.keys(result || {}).length,
+        component: 'ApiService',
+      });
+
+      return result;
     } catch (error) {
+      // Clear timeout if request failed
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Enhanced error logging for better debugging
       logger.error(
         'api_paperless_sync_check_error',
         'Failed to check Paperless sync status',
         {
           error: error.message,
+          errorStack: error.stack,
+          errorResponse: error.response,
+          isAbortError: error.name === 'AbortError',
           component: 'ApiService',
         }
       );
-      throw error;
+
+      // Provide more specific error messages for common issues
+      let enhancedError = error;
+      if (error.name === 'AbortError') {
+        enhancedError = new Error('Sync check timed out. Please check your Paperless connection and try again.');
+      } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        enhancedError = new Error('Authentication failed. Please check your Paperless credentials in Settings.');
+      } else if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
+        enhancedError = new Error('Access denied. Please verify your Paperless permissions.');
+      } else if (error.message?.includes('404')) {
+        enhancedError = new Error('Paperless API endpoint not found. Please check your Paperless URL configuration.');
+      } else if (error.message?.includes('500')) {
+        enhancedError = new Error('Paperless server error. Please check your Paperless instance status.');
+      } else if (error.message?.includes('ECONNREFUSED') || error.message?.includes('Network')) {
+        enhancedError = new Error('Cannot connect to Paperless. Please check your Paperless URL and network connection.');
+      }
+
+      enhancedError.originalError = error;
+      throw enhancedError;
     }
   }
 
@@ -1477,27 +1695,34 @@ class ApiService {
   }
 
   createEmergencyContact(emergencyContactData, signal) {
+    // Extract patient_id to pass as query parameter for multi-patient support
+    const { patient_id, ...bodyData } = emergencyContactData;
     return this.createEntity(
       ENTITY_TYPES.EMERGENCY_CONTACT,
-      emergencyContactData,
-      signal
+      bodyData,
+      signal,
+      patient_id
     );
   }
 
   updateEmergencyContact(emergencyContactId, emergencyContactData, signal) {
+    // Extract patient_id to pass as query parameter for multi-patient support
+    const { patient_id, ...bodyData } = emergencyContactData;
     return this.updateEntity(
       ENTITY_TYPES.EMERGENCY_CONTACT,
       emergencyContactId,
-      emergencyContactData,
-      signal
+      bodyData,
+      signal,
+      patient_id
     );
   }
 
-  deleteEmergencyContact(emergencyContactId, signal) {
+  deleteEmergencyContact(emergencyContactId, signal, patientId = null) {
     return this.deleteEntity(
       ENTITY_TYPES.EMERGENCY_CONTACT,
       emergencyContactId,
-      signal
+      signal,
+      patientId
     );
   }
 

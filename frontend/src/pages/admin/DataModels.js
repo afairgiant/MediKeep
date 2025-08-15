@@ -1,6 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Grid, Text, Group, ActionIcon, Badge, Paper, useMantineColorScheme } from '@mantine/core';
+import {
+  Card,
+  Grid,
+  Text,
+  Group,
+  ActionIcon,
+  Badge,
+  Paper,
+  useMantineColorScheme,
+} from '@mantine/core';
 import {
   IconDatabase,
   IconUsers,
@@ -163,7 +172,12 @@ const DataModels = () => {
     },
   ];
 
-  const categories = ['System', 'Core Medical', 'Medical Records', 'Sharing & Access'];
+  const categories = [
+    'System',
+    'Core Medical',
+    'Medical Records',
+    'Sharing & Access',
+  ];
 
   const handleModelClick = modelName => {
     navigate(`/admin/models/${modelName}`);
@@ -227,8 +241,8 @@ const DataModels = () => {
   return (
     <AdminLayout>
       <div className="data-models-page">
-        <div 
-          className="page-header" 
+        <div
+          className="page-header"
           style={{
             backgroundColor: colorScheme === 'dark' ? '#1a1b1e' : 'white',
             borderColor: colorScheme === 'dark' ? '#373A40' : '#dee2e6',

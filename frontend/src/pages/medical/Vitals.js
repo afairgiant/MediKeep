@@ -394,14 +394,10 @@ const Vitals = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader title="Vital Signs" icon="🩺" />
+    <Container size="xl" py="md">
+      <PageHeader title="Vital Signs" icon="❤️" />
 
-      <Container size="xl" py="lg">
+      <Stack gap="lg">
         {vitalsError && (
           <Alert
             variant="light"
@@ -578,8 +574,8 @@ const Vitals = () => {
           practitioners={practitioners}
           navigate={navigate}
         />
-      </Container>
-    </motion.div>
+      </Stack>
+    </Container>
   );
 };
 

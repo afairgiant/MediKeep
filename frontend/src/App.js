@@ -34,6 +34,7 @@ import ProtectedRoute, {
 
 // Pages
 import Login from './pages/auth/Login';
+import SSOCallback from './components/auth/SSOCallback';
 import Dashboard from './pages/Dashboard';
 import ExportPage from './pages/ExportPage';
 import PatientInfo from './pages/medical/Patient-Info';
@@ -58,6 +59,7 @@ import ModelManagement from './pages/admin/ModelManagement';
 import ModelView from './pages/admin/ModelView';
 import ModelEdit from './pages/admin/ModelEdit';
 import ModelCreate from './pages/admin/ModelCreate';
+import AdminUserCreate from './pages/admin/AdminUserCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -347,6 +349,14 @@ function App() {
                             </PublicRoute>
                           }
                         />
+                        <Route
+                          path="/auth/sso/callback"
+                          element={
+                            <PublicRoute>
+                              <SSOCallback />
+                            </PublicRoute>
+                          }
+                        />
                         {/* Protected Routes */}
                         <Route
                           path="/dashboard"
@@ -405,6 +415,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <DataModels />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/create-user"
+                          element={
+                            <AdminRoute>
+                              <AdminUserCreate />
                             </AdminRoute>
                           }
                         />

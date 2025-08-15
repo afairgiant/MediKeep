@@ -13,6 +13,7 @@
 export const PAPERLESS_SETTING_KEYS = [
   'paperless_enabled',      // Boolean: Enable/disable Paperless integration
   'paperless_url',          // String: URL to Paperless-ngx instance
+  'paperless_api_token',    // String: API token for authentication (encrypted)
   'paperless_username',     // String: Username for authentication (encrypted)
   'paperless_password',     // String: Password for authentication (encrypted)
   'default_storage_backend', // String: Default storage backend for documents
@@ -27,6 +28,7 @@ export const PAPERLESS_SETTING_KEYS = [
 export const PAPERLESS_SETTING_TYPES = {
   paperless_enabled: 'boolean',
   paperless_url: 'string',
+  paperless_api_token: 'string',
   paperless_username: 'string',
   paperless_password: 'string',
   default_storage_backend: 'string',
@@ -41,6 +43,7 @@ export const PAPERLESS_SETTING_TYPES = {
 export const PAPERLESS_SETTING_DEFAULTS = {
   paperless_enabled: false,
   paperless_url: '',
+  paperless_api_token: '',
   paperless_username: '',
   paperless_password: '',
   default_storage_backend: 'local',
@@ -53,6 +56,7 @@ export const PAPERLESS_SETTING_DEFAULTS = {
  * @type {string[]}
  */
 export const PAPERLESS_SENSITIVE_SETTINGS = [
+  'paperless_api_token',
   'paperless_username',
   'paperless_password',
 ];

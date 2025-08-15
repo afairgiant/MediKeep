@@ -1,6 +1,6 @@
 from typing import Generator, Optional
 
-from fastapi import Depends, HTTPException, Query, Request, status
+from fastapi import Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.logging_config import get_logger, log_security_event
+from app.core.error_handling import UnauthorizedException, ForbiddenException, NotFoundException, MedicalRecordsAPIException
 from app.api.v1.endpoints.system import get_client_ip
 from app.core.logging_constants import sanitize_log_input
 from app.crud.user import user
@@ -51,17 +52,13 @@ def get_current_user(
         Current user object
 
     Raises:
-        HTTPException 401: If token is invalid or user not found
+        UnauthorizedException: If token is invalid or user not found
     """
     # Extract client information for security logging
     client_ip = get_client_ip(request)
     user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    # Standardized authentication error
 
     try:
         # Validate token format before attempting to decode
@@ -75,7 +72,11 @@ def get_current_user(
                 user_agent=user_agent,
                 message="Empty JWT token provided",
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
             
         # Basic JWT format validation (should have 3 parts separated by dots)
         token_parts = token_str.split('.')
@@ -88,7 +89,11 @@ def get_current_user(
                 user_agent=user_agent,
                 message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)}",
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
 
         # Decode JWT token
         payload = jwt.decode(
@@ -106,7 +111,11 @@ def get_current_user(
                 user_agent=user_agent,
                 message="JWT token missing subject claim",
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
 
         security_logger.info(
             f"🔍 AUTH: Token decoded successfully for user: {username}"
@@ -121,7 +130,11 @@ def get_current_user(
             user_agent=user_agent,
             message=f"JWT token decode failed: {str(e)}",
         )
-        raise credentials_exception
+        raise UnauthorizedException(
+            message="Token validation failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     # Get user from database (caching disabled to avoid session issues)
     try:
@@ -135,7 +148,11 @@ def get_current_user(
                 message=f"Token valid but user not found: {username}",
                 username=username,
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
 
     except Exception as e:
         log_security_event(
@@ -146,7 +163,11 @@ def get_current_user(
             message=f"Database error during user lookup for {username}: {str(e)}",
             username=username,
         )
-        raise credentials_exception
+        raise UnauthorizedException(
+            message="Token validation failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     # Log successful token validation
     user_id = getattr(db_user, "id", None)
@@ -192,16 +213,12 @@ def get_current_user_flexible_auth(
         Current user object
         
     Raises:
-        HTTPException 401: If no valid token is provided or token is invalid
+        UnauthorizedException: If no valid token is provided or token is invalid
     """
     # Extract client information for security logging
     client_ip = get_client_ip(request)
     user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    # Standardized authentication error
     
     # Try to get token from Authorization header first, then query parameter
     jwt_token = None
@@ -224,7 +241,11 @@ def get_current_user_flexible_auth(
             user_agent=user_agent,
             message="No JWT token provided in header or query parameter",
         )
-        raise credentials_exception
+        raise UnauthorizedException(
+            message="Token validation failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     
     try:
         # Validate token format before attempting to decode
@@ -238,7 +259,11 @@ def get_current_user_flexible_auth(
                 user_agent=user_agent,
                 message=f"Empty JWT token provided (auth method: {auth_method})",
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
             
         # Basic JWT format validation (should have 3 parts separated by dots)
         token_parts = token_str.split('.')
@@ -251,7 +276,11 @@ def get_current_user_flexible_auth(
                 user_agent=user_agent,
                 message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)} (auth method: {auth_method})",
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
 
         # Decode JWT token using the same validation as get_current_user
         payload = jwt.decode(
@@ -269,7 +298,11 @@ def get_current_user_flexible_auth(
                 user_agent=user_agent,
                 message=f"JWT token missing subject claim (auth method: {auth_method})",
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
             
         security_logger.info(
             f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
@@ -284,7 +317,11 @@ def get_current_user_flexible_auth(
             user_agent=user_agent,
             message=f"JWT token decode failed (auth method: {auth_method}): {str(e)}",
         )
-        raise credentials_exception
+        raise UnauthorizedException(
+            message="Token validation failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     
     # Get user from database (same logic as get_current_user)
     try:
@@ -298,7 +335,11 @@ def get_current_user_flexible_auth(
                 message=f"Token valid but user not found: {username} (auth method: {auth_method})",
                 username=username,
             )
-            raise credentials_exception
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
             
     except Exception as e:
         log_security_event(
@@ -309,7 +350,11 @@ def get_current_user_flexible_auth(
             message=f"Database error during user lookup for {username} (auth method: {auth_method}): {str(e)}",
             username=username,
         )
-        raise credentials_exception
+        raise UnauthorizedException(
+            message="Token validation failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     
     # Log successful token validation with auth method
     user_id = getattr(db_user, "id", None)
@@ -342,7 +387,11 @@ def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     # Use getattr to safely access the id value from the SQLAlchemy model
     user_id = getattr(current_user, "id", None)
     if user_id is None:
-        raise HTTPException(status_code=500, detail="User ID not found")
+        raise MedicalRecordsAPIException(
+            status_code=500,
+            message="User ID not found",
+            request=None
+        )
     return user_id
 
 
@@ -362,7 +411,11 @@ def get_current_user_id_flexible_auth(current_user: User = Depends(get_current_u
     # Use getattr to safely access the id value from the SQLAlchemy model
     user_id = getattr(current_user, "id", None)
     if user_id is None:
-        raise HTTPException(status_code=500, detail="User ID not found")
+        raise MedicalRecordsAPIException(
+            status_code=500,
+            message="User ID not found",
+            request=None
+        )
     return user_id
 
 
@@ -379,7 +432,7 @@ def get_current_admin_user(current_user: User = Depends(get_current_user)) -> Us
         Current user object if they are an admin
 
     Raises:
-        HTTPException 403: If user is not an admin
+        ForbiddenException: If user is not an admin
     """
     user_role = getattr(current_user, "role", None)
     if not user_role or user_role.lower() not in ["admin", "administrator"]:
@@ -391,8 +444,9 @@ def get_current_admin_user(current_user: User = Depends(get_current_user)) -> Us
             message=f"Non-admin user attempted admin access: {current_user.username}",
             username=current_user.username,
         )
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required"
+        raise ForbiddenException(
+            message="Admin privileges required",
+            request=None
         )
 
     log_security_event(
@@ -425,13 +479,16 @@ def get_current_user_patient_id(
         Patient ID for the current user
 
     Raises:
-        HTTPException 404: If patient record not found
+        NotFoundException: If patient record not found
     """
     from app.crud.patient import patient
 
     patient_record = patient.get_by_user_id(db, user_id=current_user_id)
     if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient record not found")
+        raise NotFoundException(
+            message="Patient record not found",
+            request=None
+        )
 
     return getattr(patient_record, "id")
 
@@ -450,10 +507,13 @@ def verify_patient_record_access(
         record_type: Type of record for error message (e.g., "medication", "allergy")
 
     Raises:
-        HTTPException 404: If record doesn't belong to current user
+        NotFoundException: If record doesn't belong to current user
     """
     if record_patient_id != current_user_patient_id:
-        raise HTTPException(status_code=404, detail=f"{record_type.title()} not found")
+        raise NotFoundException(
+            message=f"{record_type.title()} not found",
+            request=None
+        )
 
 
 def verify_patient_access(
@@ -479,8 +539,8 @@ def verify_patient_access(
         The verified patient_id
 
     Raises:
-        HTTPException 404: If patient not found
-        HTTPException 403: If access denied
+        NotFoundException: If patient not found
+        ForbiddenException: If access denied
     """
     from app.models.models import Patient
     from app.services.patient_access import PatientAccessService
@@ -488,14 +548,17 @@ def verify_patient_access(
     # Get the patient record
     patient_record = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient_record:
-        raise HTTPException(status_code=404, detail="Patient not found")
+        raise NotFoundException(
+            message="Patient not found",
+            request=None
+        )
     
     # Check access using the PatientAccessService
     access_service = PatientAccessService(db)
     if not access_service.can_access_patient(current_user, patient_record, required_permission):
-        raise HTTPException(
-            status_code=403, 
-            detail=f"Access denied to patient {patient_id}"
+        raise ForbiddenException(
+            message=f"Access denied to patient {patient_id}",
+            request=None
         )
     
     return patient_id
@@ -521,8 +584,8 @@ def get_accessible_patient_id(
         Patient ID that the user can access
         
     Raises:
-        HTTPException 404: If patient not found
-        HTTPException 403: If access denied
+        NotFoundException: If patient not found
+        ForbiddenException: If access denied
     """
     if patient_id is not None:
         # Verify user has access to this patient
@@ -531,11 +594,17 @@ def get_accessible_patient_id(
         
         patient_record = db.query(Patient).filter(Patient.id == patient_id).first()
         if not patient_record:
-            raise HTTPException(status_code=404, detail="Patient not found")
+            raise NotFoundException(
+                message="Patient not found",
+                request=None
+            )
         
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "view"):
-            raise HTTPException(status_code=403, detail="Access denied to patient")
+            raise ForbiddenException(
+                message="Access denied to patient",
+                request=None
+            )
             
         return patient_id
     else:

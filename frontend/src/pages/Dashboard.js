@@ -164,13 +164,31 @@ const Dashboard = () => {
 
   const checkAdminStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // Use secure storage system instead of direct localStorage
+      const { secureStorage, legacyMigration } = await import('../utils/secureStorage');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
+      
+      console.log('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
+        hasToken: !!token,
+        tokenPreview: token ? token.substring(0, 20) + '...' : null,
+        timestamp: new Date().toISOString()
+      });
+      
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const userRole = payload.role || '';
         const adminCheck =
           userRole.toLowerCase() === 'admin' ||
           userRole.toLowerCase() === 'administrator';
+        
+        console.log('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
+          role: userRole,
+          isAdmin: adminCheck,
+          fullPayload: payload,
+          timestamp: new Date().toISOString()
+        });
+        
         setIsAdmin(adminCheck);
       } else {
         setIsAdmin(false);
@@ -674,7 +692,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <>
+    <Container size="xl" py="md">
       <PageHeader
         title="Medical Records App"
         icon="🏥"
@@ -682,7 +701,7 @@ const Dashboard = () => {
         showBackButton={false}
       />
 
-      <Container size="xl" py="xl">
+      <Stack gap="lg">
         {/* Welcome Section */}
         {showWelcomeBox && (
           <Paper
@@ -744,10 +763,15 @@ const Dashboard = () => {
             justify="space-between"
             align="flex-start"
             gap="md"
-            direction={{ base: 'column', sm: 'row' }}
+            direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
           >
             {/* Patient Selector */}
-            <Box style={{ flex: '1', maxWidth: '500px', width: '100%' }}>
+            <Box style={{ 
+              flex: '1', 
+              maxWidth: '500px', 
+              width: '100%',
+              minWidth: '300px' // Ensure minimum visibility
+            }}>
               <PatientSelector
                 onPatientChange={handlePatientChange}
                 currentPatientId={currentActivePatient?.id || user?.id}
@@ -762,6 +786,7 @@ const Dashboard = () => {
                 flexShrink: 0,
                 width: '100%',
                 maxWidth: '300px',
+                minWidth: '250px', // Ensure minimum search bar width
               }}
             >
               <GlobalSearch
@@ -902,8 +927,9 @@ const Dashboard = () => {
             <StatCard key={index} stat={stat} />
           ))}
         </SimpleGrid>
+      </Stack>
       </Container>
-    </div>
+    </>
   );
 };
 
