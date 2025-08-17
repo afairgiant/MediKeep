@@ -143,6 +143,13 @@ export const NAVIGATION_SECTIONS = {
     priority: 5,
     items: [
       {
+        name: 'Custom Reports',
+        path: '/reports/builder',
+        icon: '📊',
+        id: 'custom-reports',
+        featured: true,
+      },
+      {
         name: 'Export Records',
         path: '/export',
         icon: '📤',

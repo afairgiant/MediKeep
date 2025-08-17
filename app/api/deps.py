@@ -64,7 +64,7 @@ def get_current_user(
         # Validate token format before attempting to decode
         token_str = credentials.credentials.strip()
         if not token_str:
-            security_logger.info("🔍 AUTH: Empty token provided")
+            security_logger.info("Empty token provided")
             log_security_event(
                 security_logger,
                 event="token_empty",
@@ -81,7 +81,7 @@ def get_current_user(
         # Basic JWT format validation (should have 3 parts separated by dots)
         token_parts = token_str.split('.')
         if len(token_parts) != 3:
-            security_logger.info(f"🔍 AUTH: Invalid token format - expected 3 parts, got {len(token_parts)}")
+            security_logger.info(f"Invalid token format - expected 3 parts, got {len(token_parts)}")
             log_security_event(
                 security_logger,
                 event="token_invalid_format",
@@ -103,7 +103,7 @@ def get_current_user(
         )
         username = payload.get("sub")
         if username is None:
-            security_logger.info("🔍 AUTH: Token missing subject claim")
+            security_logger.info("Token missing subject claim")
             log_security_event(
                 security_logger,
                 event="token_invalid_no_subject",
@@ -117,12 +117,10 @@ def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
-        security_logger.info(
-            f"🔍 AUTH: Token decoded successfully for user: {username}"
-        )
+        security_logger.info("Token decoded successfully")
 
     except JWTError as e:
-        security_logger.info(f"🔍 AUTH: Token decode failed: {str(e)}")
+        security_logger.info(f"Token decode failed: {str(e)}")
         log_security_event(
             security_logger,
             event="token_decode_failed",

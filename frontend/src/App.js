@@ -64,6 +64,7 @@ import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
+import ReportBuilder from './pages/reports/ReportBuilder';
 
 // Components
 import { ErrorBoundary } from './components';
@@ -385,6 +386,14 @@ function App() {
                         />
                         {/* Generated entity routes */}
                         {generateEntityRoutes()}
+                        <Route
+                          path="/reports/builder"
+                          element={
+                            <ProtectedRoute>
+                              <ReportBuilder />
+                            </ProtectedRoute>
+                          }
+                        />
                         <Route
                           path="/export"
                           element={
