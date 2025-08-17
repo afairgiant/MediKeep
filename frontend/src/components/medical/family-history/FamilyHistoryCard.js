@@ -123,7 +123,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleViewClick = (e) => {
-    e.stopPropagation();
+    // Handle both event object and direct calls
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       onView(member);
     } catch (error) {
@@ -132,7 +135,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleEditClick = (e) => {
-    e.stopPropagation();
+    // Handle both event object and direct calls
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       if (member.is_shared) {
         logger.warn('Attempted to edit shared family member', {
@@ -148,7 +154,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleDeleteClick = (e) => {
-    e.stopPropagation();
+    // Handle both event object and direct calls
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       if (member.is_shared) {
         logger.warn('Attempted to delete shared family member', {
@@ -164,7 +173,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleAddConditionClick = (e) => {
-    e.stopPropagation();
+    // Handle both event object and direct calls
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       if (member.is_shared) {
         return;
@@ -176,7 +188,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleEditConditionClick = (e, condition) => {
-    e.stopPropagation();
+    // Handle both event object and direct calls
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       if (member.is_shared) {
         return;
@@ -188,7 +203,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleDeleteConditionClick = (e, conditionId) => {
-    e.stopPropagation();
+    // Handle both event object and direct calls
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       if (member.is_shared) {
         return;
@@ -200,7 +218,10 @@ const FamilyHistoryCard = ({
   };
 
   const handleShareClick = (e) => {
-    e.stopPropagation();
+    // Menu.Item onClick may not always provide an event object
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     try {
       if (member.is_shared) {
         return;
