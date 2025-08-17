@@ -5,6 +5,7 @@ from app.api.v1.endpoints import (
     allergy,
     auth,
     condition,
+    custom_reports,
     emergency_contact,
     encounter,
     entity_file,
@@ -92,6 +93,9 @@ api_router.include_router(
 
 # Export endpoints
 api_router.include_router(export.router, prefix="/export", tags=["export"])
+
+# Custom reports endpoints
+api_router.include_router(custom_reports.router, prefix="/custom-reports", tags=["custom-reports"])
 
 # Utils endpoints
 api_router.include_router(utils.router)

@@ -1811,6 +1811,169 @@ class ApiService {
       { signal }
     );
   }
+
+  // ==========================================
+  // CUSTOM REPORTS METHODS
+  // ==========================================
+
+  /**
+   * Get summary of all medical data available for custom report generation.
+   * Returns counts and basic info for each category to support UI selection.
+   */
+  getCustomReportSummary(signal) {
+    try {
+      logger.debug('api_custom_report_summary', 'Fetching custom report data summary', {
+        component: 'ApiService',
+      });
+
+      return this.get('/custom-reports/data-summary', { signal });
+    } catch (error) {
+      logger.error('api_custom_report_summary_error', 'Failed to get custom report summary', {
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Generate a custom PDF report with selected records from various categories.
+   */
+  async generateCustomReport(reportRequest, signal) {
+    try {
+      logger.info('api_generate_custom_report', 'Generating custom report', {
+        selectedCategoriesCount: reportRequest.selected_records?.length || 0,
+        reportTitle: reportRequest.report_title,
+        component: 'ApiService',
+      });
+
+      // Use request method directly to handle PDF blob response
+      const response = await this.request('POST', '/custom-reports/generate', reportRequest, {
+        signal,
+        responseType: 'blob'
+      });
+
+      logger.info('api_generate_custom_report_success', 'Custom report generated successfully', {
+        hasPdfData: !!response,
+        component: 'ApiService',
+      });
+
+      return response;
+    } catch (error) {
+      logger.error('api_generate_custom_report_error', 'Failed to generate custom report', {
+        error: error.message,
+        reportTitle: reportRequest.report_title,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Save a custom report template for future use.
+   */
+  saveReportTemplate(template, signal) {
+    try {
+      logger.info('api_save_report_template', 'Saving report template', {
+        templateName: template.name,
+        selectedCategoriesCount: template.selected_records?.length || 0,
+        component: 'ApiService',
+      });
+
+      return this.post('/custom-reports/templates', template, { signal });
+    } catch (error) {
+      logger.error('api_save_report_template_error', 'Failed to save report template', {
+        templateName: template.name,
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get all saved report templates for the current user.
+   */
+  getReportTemplates(signal) {
+    try {
+      logger.debug('api_get_report_templates', 'Fetching report templates', {
+        component: 'ApiService',
+      });
+
+      return this.get('/custom-reports/templates', { signal });
+    } catch (error) {
+      logger.error('api_get_report_templates_error', 'Failed to get report templates', {
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get a specific report template by ID.
+   */
+  getReportTemplate(templateId, signal) {
+    try {
+      logger.debug('api_get_report_template', 'Fetching report template', {
+        templateId,
+        component: 'ApiService',
+      });
+
+      return this.get(`/custom-reports/templates/${templateId}`, { signal });
+    } catch (error) {
+      logger.error('api_get_report_template_error', 'Failed to get report template', {
+        templateId,
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Update an existing report template.
+   */
+  updateReportTemplate(templateId, template, signal) {
+    try {
+      logger.info('api_update_report_template', 'Updating report template', {
+        templateId,
+        templateName: template.name,
+        component: 'ApiService',
+      });
+
+      return this.put(`/custom-reports/templates/${templateId}`, template, { signal });
+    } catch (error) {
+      logger.error('api_update_report_template_error', 'Failed to update report template', {
+        templateId,
+        templateName: template.name,
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a report template.
+   */
+  deleteReportTemplate(templateId, signal) {
+    try {
+      logger.info('api_delete_report_template', 'Deleting report template', {
+        templateId,
+        component: 'ApiService',
+      });
+
+      return this.delete(`/custom-reports/templates/${templateId}`, { signal });
+    } catch (error) {
+      logger.error('api_delete_report_template_error', 'Failed to delete report template', {
+        templateId,
+        error: error.message,
+        component: 'ApiService',
+      });
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();
