@@ -24,16 +24,13 @@ export const useCustomReports = () => {
 
   // Fetch data summary for record selection
   const fetchDataSummary = useCallback(async () => {
-    console.log('CUSTOM REPORTS: Starting fetchDataSummary');
     logger.info('custom_reports_fetch_summary', 'Fetching data summary for report builder', {
       component: 'useCustomReports',
     });
 
     const result = await execute(
       async signal => {
-        console.log('CUSTOM REPORTS: About to call API');
         const response = await apiService.getCustomReportSummary(signal);
-        console.log('CUSTOM REPORTS: API response received:', response);
         logger.debug('custom_reports_summary_response', 'Data summary fetched successfully', {
           categoriesCount: Object.keys(response?.categories || {}).length,
           totalRecords: response?.total_records || 0,

@@ -53,14 +53,33 @@ class AuthService:
             user_id = getattr(new_user, "id", None)
             if user_id:
                 patient.create_for_user(db, user_id=user_id, patient_data=patient_data)
-                logger.info(f"Patient record created for user {username}")
+                logger.info(
+                    "Patient record created for new user",
+                    extra={
+                        "category": "app",
+                        "event": "patient_record_created_for_new_user",
+                        "user_id": user_id,
+                    }
+                )
             else:
                 logger.warning(
-                    f"Could not create patient record for {username} - no user ID"
+                    "Could not create patient record for new user - no user ID",
+                    extra={
+                        "category": "app", 
+                        "event": "patient_record_creation_no_user_id",
+                    }
                 )
 
         except Exception as e:
-            logger.warning(f"Failed to create patient record for {username}: {e}")
+            logger.warning(
+                "Failed to create patient record for new user",
+                extra={
+                    "category": "app",
+                    "event": "patient_record_creation_failed",
+                    "user_id": getattr(new_user, "id", None),
+                    "error": str(e),
+                }
+            )
             # Don't fail user creation if patient creation fails
 
         return new_user

@@ -57,24 +57,24 @@ class CustomReportService:
         # Cache for frequently accessed summaries (5 minutes timeout)
         self._summary_cache = {}
         self._cache_timeout = 300
-        logger.info("CACHE: CustomReportService initialized with empty cache")
+        logger.debug("CustomReportService initialized")
     
     async def get_data_summary_for_selection(self, user_id: int) -> DataSummaryResponse:
         """
         Get summarized data for all categories to support record selection.
         Implements caching for performance optimization.
         """
-        logger.info(f"DATA SUMMARY: get_data_summary_for_selection called for user {user_id}")
+        logger.debug(f"Fetching data summary for user {user_id}")
         cache_key = f"summary_{user_id}"
         now = time.time()
         
         # Check cache
         if (cache_key in self._summary_cache and 
             now - self._summary_cache[cache_key]['timestamp'] < self._cache_timeout):
-            logger.info(f"DATA SUMMARY: Returning cached summary for user {user_id}")
+            logger.debug(f"Returning cached summary for user {user_id}")
             return self._summary_cache[cache_key]['data']
         
-        logger.info(f"Generating data summary for user {user_id}")
+        logger.debug(f"Generating new data summary for user {user_id}")
         
         # Get patient ID for the user
         patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
@@ -173,13 +173,13 @@ class CustomReportService:
             # Use a generic approach that works for all models
             # Try to find the main name/title field
             title_field = self._get_title_field(item, category)
-            logger.info(f"Title field for {category}: {title_field}")
+            logger.debug(f"Found title field for {category}")
             
             date_field = self._get_date_field(item, category)
             logger.info(f"Date field for {category}: {date_field}")
             
             key_info = self._get_key_info(item, category)
-            logger.info(f"Key info for {category}: {key_info}")
+            logger.debug(f"Generated key info for {category}")
             
             return RecordSummary(
                 id=item.id,
@@ -269,14 +269,14 @@ class CustomReportService:
         for field_name in field_config.get('primary', []):
             value = getattr(item, field_name, None)
             if value and str(value).strip():
-                logger.info(f"Found primary field '{field_name}' for {category}: {value}")
+                logger.debug(f"Found primary field '{field_name}' for {category}")
                 return str(value).strip()
         
         # Try fallback fields
         for field_name in field_config.get('fallbacks', []):
             value = getattr(item, field_name, None)
             if value and str(value).strip():
-                logger.info(f"Using fallback field '{field_name}' for {category}: {value}")
+                logger.debug(f"Using fallback field '{field_name}' for {category}")
                 # Add a prefix to indicate this is a fallback field
                 field_display = field_name.replace('_', ' ').title()
                 return f"{str(value).strip()}"
@@ -286,7 +286,7 @@ class CustomReportService:
         for field in common_fields:
             value = getattr(item, field, None)
             if value and str(value).strip():
-                logger.info(f"Using common fallback field '{field}' for {category}: {value}")
+                logger.debug(f"Using common fallback field '{field}' for {category}")
                 return str(value).strip()
         
         logger.info(f"No title field found for {category}")
@@ -731,23 +731,22 @@ class CustomReportService:
             # Special handling for encounters - include practitioner and condition names
             elif category == 'encounters':
                 # Debug: Show all fields in the encounter record
-                logger.info(f"Encounter {record.id} fields: {[col.name for col in record.__table__.columns]}")
-                logger.info(f"Encounter {record.id} - practitioner_id: {getattr(record, 'practitioner_id', 'NO ATTR')}, condition_id: {getattr(record, 'condition_id', 'NO ATTR')}")
+                logger.debug(f"Processing encounter {record.id}")
                 
                 # Get practitioner name if linked
                 if hasattr(record, 'practitioner_id') and record.practitioner_id:
                     practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
                     if practitioner:
                         record_dict['practitioner_name'] = practitioner.name
-                        logger.info(f"✓ Added practitioner name: {practitioner.name}")
+                        logger.debug(f"Added practitioner information")
                     else:
-                        logger.warning(f"✗ Practitioner {record.practitioner_id} not found in database")
+                        logger.warning(f"Practitioner {record.practitioner_id} not found")
                 else:
-                    logger.info(f"- No practitioner_id on encounter {record.id}")
+                    logger.debug(f"No practitioner linked to encounter {record.id}")
                 
                 # Get condition name if linked
                 if hasattr(record, 'condition_id') and record.condition_id:
-                    logger.info(f"→ Looking up condition {record.condition_id}")
+                    logger.debug(f"Looking up condition {record.condition_id}")
                     condition = self.db.query(Condition).filter(Condition.id == record.condition_id).first()
                     if condition:
                         # Try multiple fields for condition name, as condition_name might be null
@@ -759,13 +758,13 @@ class CustomReportService:
                             f"Condition #{condition.id}"
                         )
                         record_dict['condition_name'] = condition_display
-                        logger.info(f"✓ Added condition name: {condition_display} (from field: {('condition_name' if condition.condition_name else 'fallback')})")
+                        logger.debug(f"Added condition information")
                     else:
-                        logger.warning(f"✗ Condition {record.condition_id} not found in database")
+                        logger.warning(f"Condition {record.condition_id} not found")
                 else:
-                    logger.info(f"- Encounter {record.id} has no condition_id or condition_id is None")
+                    logger.debug(f"No condition linked to encounter {record.id}")
                 
-                logger.info(f"Encounter {record.id} final record_dict: condition_name={record_dict.get('condition_name', 'NOT IN DICT')}")
+                logger.debug(f"Completed processing encounter {record.id}")
             
             # Special handling for treatments - include practitioner and condition names
             elif category == 'treatments':
@@ -831,7 +830,7 @@ class CustomReportService:
                 
                 logger.info(f"Medication {record.id} enhanced with pharmacy and practitioner info")
             
-            logger.info(f"Record {record.id} data keys: {list(record_dict.keys())}")
+            logger.debug(f"Processed record {record.id}")
             result.append(record_dict)
         
         return result

@@ -1272,8 +1272,7 @@ class CustomReportPDFGenerator:
         
         for record in sorted_records:
             # Debug logging
-            logger.info(f"PDF: Formatting encounter - keys: {list(record.keys())}")
-            logger.info(f"PDF: condition_name = {record.get('condition_name', 'NOT FOUND')}")
+            logger.debug(f"Formatting encounter record {record.get('id', 'unknown')}")
             
             # Header: Reason for visit and date (most important info)
             reason = record.get('reason', 'Visit')
