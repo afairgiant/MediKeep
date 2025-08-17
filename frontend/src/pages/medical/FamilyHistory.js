@@ -929,7 +929,7 @@ const FamilyHistory = () => {
           style={{ marginBottom: '1rem' }}
           onClose={() => setError(null)}
         >
-          {error}
+          {typeof error === 'string' ? error : error?.message || 'An error occurred'}
         </Alert>
       )}
 
