@@ -11,17 +11,10 @@ export const BREAKPOINTS = {
 
 // Navigation sections shared across all viewports
 export const NAVIGATION_SECTIONS = {
-  core: {
-    title: 'Core',
-    priority: 1,
+  medicalRecords: {
+    title: 'Medical Records',
+    priority: 2,
     items: [
-      {
-        name: 'Dashboard',
-        path: '/dashboard',
-        icon: '🏥',
-        id: 'dashboard',
-        alwaysVisible: true,
-      },
       {
         name: 'Patient Info',
         path: buildEntityUrl(ENTITY_TYPES.PATIENT, 'me'),
@@ -29,19 +22,6 @@ export const NAVIGATION_SECTIONS = {
         id: 'patient-info',
         alwaysVisible: true,
       },
-      {
-        name: 'Emergency Contacts',
-        path: buildEntityUrl(ENTITY_TYPES.EMERGENCY_CONTACT),
-        icon: '🚨',
-        id: 'emergency-contacts',
-        alwaysVisible: true,
-      },
-    ],
-  },
-  medicalRecords: {
-    title: 'Medical Records',
-    priority: 2,
-    items: [
       {
         name: 'Medications',
         path: buildEntityUrl(ENTITY_TYPES.MEDICATION),
@@ -135,6 +115,13 @@ export const NAVIGATION_SECTIONS = {
         path: buildEntityUrl(ENTITY_TYPES.INSURANCE),
         icon: '💳',
         id: 'insurance',
+      },
+      {
+        name: 'Emergency Contacts',
+        path: buildEntityUrl(ENTITY_TYPES.EMERGENCY_CONTACT),
+        icon: '🚨',
+        id: 'emergency-contacts',
+        alwaysVisible: true,
       },
     ],
   },
@@ -237,9 +224,9 @@ export const getNavigationSections = (viewport, isAdmin = false) => {
   console.log('🧭 NAV_CONFIG: Getting navigation sections', {
     viewport,
     isAdmin,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
-  
+
   const sections = { ...NAVIGATION_SECTIONS };
 
   // Add admin section if user is admin
@@ -248,12 +235,12 @@ export const getNavigationSections = (viewport, isAdmin = false) => {
     console.log('🧭 NAV_CONFIG: Admin section added', {
       adminSection: ADMIN_SECTION,
       totalSections: Object.keys(sections).length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } else {
     console.log('🧭 NAV_CONFIG: Admin section NOT added (user not admin)', {
       isAdmin,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
