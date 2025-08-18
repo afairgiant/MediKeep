@@ -537,7 +537,7 @@ export function AppDataProvider({ children }) {
         dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
       }
       
-      // Add timeout with longer delay after login to ensure auth is fully synchronized
+      // Add minimal delay to ensure auth state is propagated
       const timeoutId = setTimeout(
         () => {
           // Double-check authentication is still valid before making API calls
@@ -581,8 +581,8 @@ export function AppDataProvider({ children }) {
             });
           }
         },
-        process.env.NODE_ENV === 'production' ? 800 : 300
-      ); // Increased delay to ensure auth token is fully propagated
+        100
+      ); // Minimal delay to ensure auth state is propagated
 
       return () => clearTimeout(timeoutId);
     } else if (!isAuthenticated && !isLoading) {

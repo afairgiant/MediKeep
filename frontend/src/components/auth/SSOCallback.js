@@ -10,6 +10,7 @@ const SSOCallback = () => {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(true);
+  const [processingTime, setProcessingTime] = useState(0);
   const [conflictData, setConflictData] = useState(null);
   const [showConflictModal, setShowConflictModal] = useState(false);
   const [resolvingConflict, setResolvingConflict] = useState(false);
@@ -20,6 +21,13 @@ const SSOCallback = () => {
 
   useEffect(() => {
     handleSSOCallback();
+    
+    // Update processing time counter
+    const interval = setInterval(() => {
+      setProcessingTime(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleSSOCallback = async () => {
@@ -147,8 +155,8 @@ const SSOCallback = () => {
         category: 'sso_callback_component'
       });
 
-      // Add a small delay to ensure auth state is fully saved before navigation
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Add minimal delay to ensure auth state is propagated
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       navigate(redirectPath, { replace: true });
 
@@ -286,6 +294,16 @@ const SSOCallback = () => {
         }}></div>
         <h2>Completing sign-in...</h2>
         <p>Please wait while we authenticate your account</p>
+        {processingTime > 5 && (
+          <p style={{ color: '#666', fontSize: '0.9em', marginTop: '0.5rem' }}>
+            This is taking longer than usual. SSO provider may be slow to respond...
+          </p>
+        )}
+        {processingTime > 15 && (
+          <p style={{ color: '#d9534f', fontSize: '0.9em', marginTop: '0.5rem' }}>
+            Still waiting for SSO provider response. If this continues, please try again.
+          </p>
+        )}
         <style>
           {`
             @keyframes spin {
