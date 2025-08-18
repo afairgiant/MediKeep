@@ -39,9 +39,11 @@ class SimpleAuthService {
           category: 'auth_connection'
         });
 
-        // Create timeout promise
+        // Create timeout promise - longer for SSO operations
+        const isSSO = url.includes('/sso/');
+        const timeout = isSSO ? 30000 : 15000; // 30s for SSO, 15s for regular auth
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Request timeout')), 10000);
+          setTimeout(() => reject(new Error('Request timeout')), timeout);
         });
 
         const fetchPromise = fetch(url, options);
