@@ -16,6 +16,15 @@ const MantineFamilyMemberForm = ({
     // Add any dynamic options for family members if needed
   };
 
+  // Handle is_deceased change to clear death_year when unchecked
+  const handleInputChange = (name, value) => {
+    if (name === 'is_deceased' && value === false && formData?.death_year) {
+      // Clear death_year when is_deceased is unchecked
+      onInputChange('death_year', null);
+    }
+    onInputChange(name, value);
+  };
+
   // Filter fields based on form state - only show death_year if is_deceased is true
   const filteredFields = familyMemberFormFields.filter(field => {
     if (field.name === 'death_year') {
@@ -50,7 +59,7 @@ const MantineFamilyMemberForm = ({
       onClose={onClose}
       title={title}
       formData={formData}
-      onInputChange={onInputChange}
+      onInputChange={handleInputChange}
       onSubmit={onSubmit}
       editingItem={editingMember}
       fields={filteredFields}

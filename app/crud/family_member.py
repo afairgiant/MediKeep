@@ -14,6 +14,35 @@ class CRUDFamilyMember(CRUDBase[FamilyMember, FamilyMemberCreate, FamilyMemberUp
     Handles family members and their basic information for medical history tracking.
     """
 
+    def get_by_patient(self, db: Session, patient_id: int, **kwargs) -> List[FamilyMember]:
+        """
+        Get all family members for a patient.
+        Overrides base method to fix data inconsistencies.
+        
+        Args:
+            db: SQLAlchemy database session
+            patient_id: ID of the patient
+            **kwargs: Additional query parameters
+            
+        Returns:
+            List of family members for the patient
+        """
+        family_members = super().get_by_patient(db, patient_id, **kwargs)
+        
+        # Fix data inconsistency: if death_year is set but is_deceased is False
+        has_fixes = False
+        for member in family_members:
+            if member.death_year and not member.is_deceased:
+                member.is_deceased = True
+                db.add(member)
+                has_fixes = True
+        
+        # Commit any fixes
+        if has_fixes:
+            db.commit()
+        
+        return family_members
+
     def get_by_patient_with_conditions(
         self, db: Session, *, patient_id: int
     ) -> List[FamilyMember]:
@@ -27,13 +56,27 @@ class CRUDFamilyMember(CRUDBase[FamilyMember, FamilyMemberCreate, FamilyMemberUp
         Returns:
             List of family members with conditions eagerly loaded
         """
-        return (
+        family_members = (
             db.query(self.model)
             .options(joinedload(FamilyMember.family_conditions))
             .filter(self.model.patient_id == patient_id)
             .order_by(self.model.relationship, self.model.name)
             .all()
         )
+        
+        # Fix data inconsistency: if death_year is set but is_deceased is False
+        has_fixes = False
+        for member in family_members:
+            if member.death_year and not member.is_deceased:
+                member.is_deceased = True
+                db.add(member)
+                has_fixes = True
+        
+        # Commit any fixes
+        if has_fixes:
+            db.commit()
+        
+        return family_members
 
     def get_by_relationship(
         self, db: Session, *, patient_id: int, relationship: str
