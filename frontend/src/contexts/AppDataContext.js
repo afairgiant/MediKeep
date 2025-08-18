@@ -208,7 +208,7 @@ const AppDataContext = createContext(null);
 // App Data Provider Component
 export function AppDataProvider({ children }) {
   const [state, dispatch] = useReducer(appDataReducer, initialState);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   // Use ref to access current state without dependency loops
   const stateRef = useRef(state);
@@ -520,11 +520,12 @@ export function AppDataProvider({ children }) {
 
   // Initialize app data when user logs in
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && !isLoading) {
       logger.info('User authenticated, clearing cache and fetching fresh data', {
         category: 'app_data_init',
         userId: user.id,
         username: user.username,
+        isLoading,
         timestamp: new Date().toISOString()
       });
       
@@ -536,44 +537,66 @@ export function AppDataProvider({ children }) {
         dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
       }
       
-      // Add timeout to prevent rapid fire requests in production
+      // Add timeout with longer delay after login to ensure auth is fully synchronized
       const timeoutId = setTimeout(
         () => {
-          // Fetch fresh patient data immediately on login
-          fetchCurrentPatient(true);
+          // Double-check authentication is still valid before making API calls
+          if (isAuthenticated && user && !isLoading) {
+            logger.info('Starting data initialization after auth verification', {
+              category: 'app_data_init_start',
+              userId: user.id,
+              isAuthenticated,
+              isLoading,
+              timestamp: new Date().toISOString()
+            });
+            
+            // Fetch fresh patient data immediately on login
+            fetchCurrentPatient(true);
 
-          // Fetch fresh static lists and patient list in parallel
-          Promise.all([
-            fetchPractitioners(true), 
-            fetchPharmacies(true), 
-            fetchPatientList(true)
-          ]).catch(
-            error => {
-              logger.error('Failed to initialize application data', {
-                category: 'app_data_init_error',
-                error: error.message,
-                stack: error.stack,
-                userId: user?.id,
-                isAuthenticated,
-                timestamp: new Date().toISOString()
-              });
-            }
-          );
+            // Fetch fresh static lists and patient list in parallel
+            Promise.all([
+              fetchPractitioners(true), 
+              fetchPharmacies(true), 
+              fetchPatientList(true)
+            ]).catch(
+              error => {
+                logger.error('Failed to initialize application data', {
+                  category: 'app_data_init_error',
+                  error: error.message,
+                  stack: error.stack,
+                  userId: user?.id,
+                  isAuthenticated,
+                  isLoading,
+                  timestamp: new Date().toISOString()
+                });
+              }
+            );
+          } else {
+            logger.warn('Skipping data initialization - authentication state changed', {
+              category: 'app_data_init_skip',
+              isAuthenticated,
+              hasUser: !!user,
+              isLoading,
+              timestamp: new Date().toISOString()
+            });
+          }
         },
-        process.env.NODE_ENV === 'production' ? 100 : 0
-      ); // Small delay in production
+        process.env.NODE_ENV === 'production' ? 800 : 300
+      ); // Increased delay to ensure auth token is fully propagated
 
       return () => clearTimeout(timeoutId);
-    } else if (!isAuthenticated) {
-      // Clear all data when user logs out
+    } else if (!isAuthenticated && !isLoading) {
+      // Clear all data when user logs out (but only when auth loading is complete)
       logger.info('User logged out, clearing all cached data', {
         category: 'app_data_logout',
+        isLoading,
         timestamp: new Date().toISOString()
       });
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
     }
   }, [
     isAuthenticated,
+    isLoading, // Add isLoading to dependencies
     user?.id, // Only depend on user ID, not the full user object
     checkAppVersion,
   ]);
@@ -651,6 +674,47 @@ export function AppDataProvider({ children }) {
     });
   }, []);
 
+  // Force re-initialization of all data (useful after login)
+  const reinitializeAllData = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      logger.warn('Cannot reinitialize data - user not authenticated', {
+        category: 'app_data_reinit',
+        isAuthenticated,
+        hasUser: !!user,
+        timestamp: new Date().toISOString()
+      });
+      return;
+    }
+
+    logger.info('Force re-initializing all application data', {
+      category: 'app_data_reinit',
+      userId: user.id,
+      timestamp: new Date().toISOString()
+    });
+
+    // Clear existing data and fetch fresh
+    dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+    
+    // Wait a moment for state to clear
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Fetch all data in parallel
+    await Promise.all([
+      fetchCurrentPatient(true),
+      fetchPractitioners(true),
+      fetchPharmacies(true),
+      fetchPatientList(true)
+    ]).catch(error => {
+      logger.error('Failed to reinitialize application data', {
+        category: 'app_data_reinit_error',
+        error: error.message,
+        stack: error.stack,
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      });
+    });
+  }, [isAuthenticated, user, fetchCurrentPatient, fetchPractitioners, fetchPharmacies, fetchPatientList]);
+
   // Context value
   const contextValue = {
     // State
@@ -665,6 +729,7 @@ export function AppDataProvider({ children }) {
     setCurrentPatient,
     invalidateCache,
     updateCacheExpiry,
+    reinitializeAllData,
 
     // Helpers
     isCacheValid: (lastFetch, cacheKey) => isCacheValid(lastFetch, cacheKey),

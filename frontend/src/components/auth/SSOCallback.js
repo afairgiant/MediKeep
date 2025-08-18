@@ -147,6 +147,9 @@ const SSOCallback = () => {
         category: 'sso_callback_component'
       });
 
+      // Add a small delay to ensure auth state is fully saved before navigation
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       navigate(redirectPath, { replace: true });
 
     } catch (error) {

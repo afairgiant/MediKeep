@@ -79,6 +79,9 @@ const Login = () => {
     try {
       const result = await login(formData);
       if (result.success) {
+        // Add a small delay to ensure auth state is fully saved before navigation
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
@@ -152,6 +155,10 @@ const Login = () => {
 
         if (loginResult.success) {
           setShowCreateUser(false);
+          
+          // Add a small delay to ensure auth state is fully saved before navigation
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
           // Redirect new users to patient info page in edit mode
           navigate('/patients/me?edit=true', { replace: true });
         } else {

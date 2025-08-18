@@ -158,8 +158,20 @@ export function AuthProvider({ children }) {
                   tokenExpiry,
                 },
               });
+              
+              logger.info('Authentication restored successfully', {
+                category: 'auth_restore_success',
+                userId: user.id,
+                username: user.username,
+                timestamp: new Date().toISOString()
+              });
             } catch (error) {
               // Token invalid on server, clear local storage
+              logger.warn('Stored token invalid on server, clearing auth data', {
+                category: 'auth_restore_failure',
+                error: error.message,
+                timestamp: new Date().toISOString()
+              });
               clearAuthData();
               dispatch({ type: AUTH_ACTIONS.LOGOUT });
             }
@@ -168,6 +180,9 @@ export function AuthProvider({ children }) {
             try {
               // Check if refreshToken method exists
               if (typeof authService.refreshToken !== 'function') {
+                logger.warn('Token refresh not available, logging out', {
+                  category: 'auth_refresh_unavailable'
+                });
                 clearAuthData();
                 dispatch({ type: AUTH_ACTIONS.LOGOUT });
                 return;
@@ -182,16 +197,36 @@ export function AuthProvider({ children }) {
                     tokenExpiry: refreshResult.tokenExpiry,
                   },
                 });
+                updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
+                
+                logger.info('Token refreshed successfully during auth initialization', {
+                  category: 'auth_refresh_success',
+                  timestamp: new Date().toISOString()
+                });
               } else {
+                logger.warn('Token refresh failed during auth initialization', {
+                  category: 'auth_refresh_failure',
+                  timestamp: new Date().toISOString()
+                });
                 clearAuthData();
                 dispatch({ type: AUTH_ACTIONS.LOGOUT });
               }
             } catch (error) {
+              logger.error('Token refresh error during auth initialization', {
+                category: 'auth_refresh_error',
+                error: error.message,
+                timestamp: new Date().toISOString()
+              });
               clearAuthData();
               dispatch({ type: AUTH_ACTIONS.LOGOUT });
             }
           }
         } else {
+          // No stored auth data
+          logger.info('No stored authentication data found', {
+            category: 'auth_init_no_data',
+            timestamp: new Date().toISOString()
+          });
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } catch (error) {
@@ -205,6 +240,10 @@ export function AuthProvider({ children }) {
           timestamp: new Date().toISOString()
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      } finally {
+        // Always ensure loading is set to false when initialization completes
+        // This prevents indefinite loading states
+        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
 

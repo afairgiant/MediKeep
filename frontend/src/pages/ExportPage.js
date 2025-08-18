@@ -65,9 +65,11 @@ const ExportPage = () => {
     loadInitialData();
   }, []);
 
-  const loadInitialData = async () => {
+  const loadInitialData = async (retryCount = 0) => {
     try {
       setSummaryLoading(true);
+      setError(null); // Clear any previous errors
+      
       const [summaryData, formatsData] = await Promise.all([
         exportService.getSummary(),
         exportService.getSupportedFormats(),
@@ -76,7 +78,18 @@ const ExportPage = () => {
       setSummary(summaryData.data);
       setFormats(formatsData);
     } catch (error) {
-      setError('Failed to load export data. Please try again.');
+      // Check if this is an authentication error
+      if (error.status === 401) {
+        if (retryCount < 1) {
+          // Try once more after a short delay in case of temporary token issues
+          setTimeout(() => loadInitialData(retryCount + 1), 1000);
+          return;
+        }
+        setError('Your session has expired. Please refresh the page or log in again to access export features.');
+      } else {
+        setError(`Failed to load export data: ${error.message || 'Please try again.'}`);
+      }
+      console.error('Export data loading failed:', error);
     } finally {
       setSummaryLoading(false);
     }
@@ -216,7 +229,27 @@ const ExportPage = () => {
             onClose={clearAlerts}
             withCloseButton
           >
-            {error}
+            <Stack gap="xs">
+              <Text>{error}</Text>
+              {error.includes('session has expired') && (
+                <Group gap="xs">
+                  <Button 
+                    size="xs" 
+                    variant="light" 
+                    onClick={() => window.location.reload()}
+                  >
+                    Refresh Page
+                  </Button>
+                  <Button 
+                    size="xs" 
+                    variant="light" 
+                    onClick={() => loadInitialData()}
+                  >
+                    Retry
+                  </Button>
+                </Group>
+              )}
+            </Stack>
           </Alert>
         )}
 

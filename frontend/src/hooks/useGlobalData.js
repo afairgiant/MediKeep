@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAppData } from '../contexts/AppDataContext';
+import { useAuth } from '../contexts/AuthContext';
 import logger from '../services/logger';
 
 /**
@@ -10,17 +11,39 @@ import logger from '../services/logger';
 export function useCurrentPatient(autoFetch = true) {
   const { currentPatient, patientLoading, patientError, fetchCurrentPatient } =
     useAppData();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   // Auto-fetch patient data on mount if enabled
   useEffect(() => {
-    if (autoFetch && !initialFetchDone) {
+    if (autoFetch && !initialFetchDone && isAuthenticated && !authLoading) {
+      logger.debug('useCurrentPatient auto-fetch starting', {
+        component: 'useCurrentPatient',
+        autoFetch,
+        initialFetchDone,
+        isAuthenticated,
+        authLoading,
+        timestamp: new Date().toISOString()
+      });
+      
       fetchCurrentPatient().then(() => {
         setInitialFetchDone(true);
+      }).catch(error => {
+        logger.warn('useCurrentPatient auto-fetch failed', {
+          component: 'useCurrentPatient',
+          error: error.message,
+          isAuthenticated,
+          authLoading,
+          timestamp: new Date().toISOString()
+        });
+        setInitialFetchDone(true); // Mark as done to prevent infinite retries
       });
+    } else if (!isAuthenticated || authLoading) {
+      // Reset fetch status when auth state changes
+      setInitialFetchDone(false);
     }
-  }, [autoFetch, fetchCurrentPatient, initialFetchDone]);
+  }, [autoFetch, fetchCurrentPatient, initialFetchDone, isAuthenticated, authLoading]);
 
   // Refresh function that forces a new fetch
   const refreshPatient = useCallback(() => {
