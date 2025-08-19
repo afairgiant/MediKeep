@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from typing import Dict, Optional
 import re
 from app.auth.sso.base_provider import SSOProvider, SSOUserInfo
@@ -87,13 +87,22 @@ class GitHubProvider(SSOProvider):
                 )
                 if emails_response.status_code == 200:
                     emails = emails_response.json()
-                    # Find primary email or first verified email
+                    # Find primary email first
+                    primary_email = None
+                    verified_email = None
+                    
                     for email_obj in emails:
                         if email_obj.get("primary"):
-                            user_data["email"] = email_obj["email"]
-                            break
-                        elif email_obj.get("verified") and not user_data.get("email"):
-                            user_data["email"] = email_obj["email"]
+                            primary_email = email_obj["email"]
+                            break  # Primary found, stop searching
+                        elif email_obj.get("verified") and not verified_email:
+                            verified_email = email_obj["email"]  # Keep first verified as fallback
+                    
+                    # Use primary if found, otherwise use first verified
+                    if primary_email:
+                        user_data["email"] = primary_email
+                    elif verified_email:
+                        user_data["email"] = verified_email
             
             # If we still don't have an email, that's OK - we'll do manual linking
             return self.format_user_info(user_data)
@@ -187,6 +196,10 @@ class OIDCProvider(SSOProvider):
         self.issuer_url = issuer_url.rstrip('/')
         self.provider_type = settings.SSO_PROVIDER_TYPE.lower() if settings.SSO_PROVIDER_TYPE else "oidc"
         
+        # Parse the URL for domain checking
+        self.parsed_url = urlparse(self.issuer_url)
+        self.hostname = self.parsed_url.hostname or ""
+        
         # Initialize endpoint URLs
         self.authorization_endpoint = None
         self.token_endpoint = None
@@ -200,6 +213,17 @@ class OIDCProvider(SSOProvider):
         import httpx
         import time
         
+        # Configurable timeout for discovery (default 15 seconds, can be overridden via env)
+        import os
+        discovery_timeout = float(os.getenv("SSO_DISCOVERY_TIMEOUT", "15"))
+        
+        logger.debug("Starting OIDC endpoint discovery", extra={
+            "provider_type": self.provider_type,
+            "issuer_url": self.issuer_url,
+            "timeout_seconds": discovery_timeout,
+            "action": "endpoint_discovery"
+        })
+        
         # First, try OIDC discovery
         discovery_urls = [
             f"{self.issuer_url}/.well-known/openid-configuration",
@@ -209,8 +233,8 @@ class OIDCProvider(SSOProvider):
         
         for discovery_url in discovery_urls:
             try:
-                # Use synchronous client for initialization
-                with httpx.Client(timeout=5) as client:
+                # Use synchronous client for initialization with longer timeout
+                with httpx.Client(timeout=discovery_timeout) as client:
                     response = client.get(discovery_url)
                     if response.status_code == 200:
                         config = response.json()
@@ -235,11 +259,29 @@ class OIDCProvider(SSOProvider):
                                 "has_userinfo": bool(self.userinfo_endpoint),
                                 "action": "endpoint_discovery"
                             })
+            except httpx.TimeoutException as e:
+                logger.warning("OIDC discovery timed out", extra={
+                    "provider_type": self.provider_type,
+                    "discovery_url": discovery_url,
+                    "timeout_seconds": discovery_timeout,
+                    "error": f"Request timed out after {discovery_timeout} seconds. Consider increasing SSO_DISCOVERY_TIMEOUT if this persists.",
+                    "action": "endpoint_discovery"
+                })
+                continue
+            except httpx.NetworkError as e:
+                logger.warning("OIDC discovery network error", extra={
+                    "provider_type": self.provider_type,
+                    "discovery_url": discovery_url,
+                    "error": f"Network error: {str(e)}. Check network connectivity and firewall rules.",
+                    "action": "endpoint_discovery"
+                })
+                continue
             except Exception as e:
                 logger.warning("OIDC discovery failed", extra={
                     "provider_type": self.provider_type,
                     "discovery_url": discovery_url,
                     "error": str(e),
+                    "error_type": type(e).__name__,
                     "action": "endpoint_discovery"
                 })
                 continue
@@ -253,13 +295,23 @@ class OIDCProvider(SSOProvider):
     
     def _set_provider_defaults(self):
         """Set provider-specific default endpoints"""
-        if self.provider_type == "authentik" or '/application/o/' in self.issuer_url:
+        # Check paths for specific patterns (safe to check in path)
+        path_has_application_o = '/application/o/' in self.parsed_url.path
+        path_has_realms = '/realms/' in self.parsed_url.path
+        path_has_oauth2 = '/oauth2/' in self.parsed_url.path
+        
+        # Check hostnames safely (prevents subdomain attacks)
+        hostname_is_auth0 = self.hostname.endswith('.auth0.com') or self.hostname == 'auth0.com'
+        hostname_is_okta = self.hostname.endswith('.okta.com') or self.hostname.endswith('.oktapreview.com')
+        hostname_is_microsoft = self.hostname.endswith('.microsoftonline.com') or self.hostname == 'microsoftonline.com'
+        
+        if self.provider_type == "authentik" or path_has_application_o:
             # Authentik endpoints
             self.authorization_endpoint = f"{self.issuer_url}/authorize/"
             self.token_endpoint = f"{self.issuer_url}/token/"
             self.userinfo_endpoint = f"{self.issuer_url}/userinfo/"
         
-        elif self.provider_type == "keycloak" or '/realms/' in self.issuer_url:
+        elif self.provider_type == "keycloak" or path_has_realms:
             # Keycloak endpoints
             self.authorization_endpoint = f"{self.issuer_url}/protocol/openid-connect/auth"
             self.token_endpoint = f"{self.issuer_url}/protocol/openid-connect/token"
@@ -271,15 +323,15 @@ class OIDCProvider(SSOProvider):
             self.token_endpoint = f"{self.issuer_url}/api/oidc/token"
             self.userinfo_endpoint = f"{self.issuer_url}/api/oidc/userinfo"
         
-        elif self.provider_type == "auth0" or 'auth0.com' in self.issuer_url:
+        elif self.provider_type == "auth0" or hostname_is_auth0:
             # Auth0 endpoints
             self.authorization_endpoint = f"{self.issuer_url}/authorize"
             self.token_endpoint = f"{self.issuer_url}/oauth/token"
             self.userinfo_endpoint = f"{self.issuer_url}/userinfo"
         
-        elif self.provider_type == "okta" or 'okta.com' in self.issuer_url or 'oktapreview.com' in self.issuer_url:
+        elif self.provider_type == "okta" or hostname_is_okta:
             # Okta endpoints - check if it has /oauth2/ in the URL already
-            if '/oauth2/' in self.issuer_url:
+            if path_has_oauth2:
                 # Already includes oauth2 path
                 self.authorization_endpoint = f"{self.issuer_url}/v1/authorize"
                 self.token_endpoint = f"{self.issuer_url}/v1/token"
@@ -290,7 +342,7 @@ class OIDCProvider(SSOProvider):
                 self.token_endpoint = f"{self.issuer_url}/oauth2/default/v1/token"
                 self.userinfo_endpoint = f"{self.issuer_url}/oauth2/default/v1/userinfo"
         
-        elif self.provider_type == "azure" or 'microsoftonline.com' in self.issuer_url:
+        elif self.provider_type == "azure" or hostname_is_microsoft:
             # Azure AD / Microsoft Identity Platform
             if '/v2.0' in self.issuer_url:
                 # v2.0 endpoints
@@ -326,7 +378,8 @@ class OIDCProvider(SSOProvider):
         }
         
         # Add provider-specific parameters
-        if self.provider_type == "azure" or 'microsoftonline.com' in self.issuer_url:
+        hostname_is_microsoft = self.hostname.endswith('.microsoftonline.com') or self.hostname == 'microsoftonline.com'
+        if self.provider_type == "azure" or hostname_is_microsoft:
             params["response_mode"] = "query"
         
         return f"{self.authorization_endpoint}?{urlencode(params)}"
