@@ -92,6 +92,14 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
             <span className="nav-icon">🗄️</span>
             <span className="nav-text">Data Models</span>
           </Link>
+          <Link
+            to="/admin/models/user"
+            className={`nav-item ${currentPath.includes('/admin/models/user') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/models/user')}
+          >
+            <span className="nav-icon">👥</span>
+            <span className="nav-text">Manage Users</span>
+          </Link>
         </div>
 
         <div className="nav-section">
