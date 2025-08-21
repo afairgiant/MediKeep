@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
@@ -38,7 +39,14 @@ logger = get_logger(__name__, "app")
 
 
 def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
-    """Get entity by type and ID for authorization checks"""
+    """Get entity by type and ID for authorization checks
+    
+    Returns:
+        Entity object if found, None if not found
+        
+    Raises:
+        HTTPException: For database errors or unsupported entity types
+    """
     entity_map = {
         "lab-result": lab_result.get,
         "procedure": procedure.get,
@@ -51,11 +59,25 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
         raise HTTPException(status_code=400, detail=f"Unsupported entity type: {entity_type}")
     
     try:
-        return crud_func(db, id=entity_id)
+        entity = crud_func(db, id=entity_id)
+        if not entity:
+            logger.debug(f"Entity not found: {entity_type} with ID {entity_id}")
+            return None
+        return entity
+    except SQLAlchemyError as e:
+        # Database errors should be logged and re-raised
+        logger.error(f"Database error looking up {entity_type} {entity_id}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Database error occurred while accessing entity"
+        )
     except Exception as e:
-        # If CRUD operation fails, return None (entity doesn't exist or access denied)
-        logger.debug(f"Entity lookup failed for {entity_type} {entity_id}: {str(e)}")
-        return None
+        # Unexpected errors should be logged with full details
+        logger.error(f"Unexpected error looking up {entity_type} {entity_id}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred while accessing entity"
+        )
 
 
 def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
@@ -755,7 +777,7 @@ def get_batch_file_counts(
     *,
     db: Session = Depends(deps.get_db),
     request: FileBatchCountRequest,
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> List[FileBatchCountResponse]:
     """
     Get file counts for multiple entities in batch.
@@ -770,20 +792,79 @@ def get_batch_file_counts(
         # Verify user has access to all requested entities
         entity_type = request.entity_type.value
         authorized_entity_ids = []
+        skipped_count = 0
+        not_found_count = 0
+        
+        logger.debug(
+            f"Processing batch file count request for {len(request.entity_ids)} entities",
+            extra={
+                "user_id": current_user.id,
+                "entity_type": entity_type,
+                "requested_count": len(request.entity_ids)
+            }
+        )
         
         for entity_id in request.entity_ids:
             try:
                 parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
                 if parent_entity:
-                    verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
+                    # Verify user has access to the patient that owns this entity
+                    entity_patient_id = getattr(parent_entity, "patient_id", None)
+                    if entity_patient_id:
+                        deps.verify_patient_access(entity_patient_id, db, current_user)
+                    
                     authorized_entity_ids.append(entity_id)
-            except HTTPException:
-                # Skip entities the user doesn't have access to
+                    logger.debug(
+                        f"User {current_user.id} authorized for {entity_type} {entity_id}",
+                        extra={
+                            "user_id": current_user.id,
+                            "entity_type": entity_type,
+                            "entity_id": entity_id,
+                            "patient_id": entity_patient_id
+                        }
+                    )
+                else:
+                    not_found_count += 1
+                    logger.debug(
+                        f"Entity not found during batch count: {entity_type} {entity_id}",
+                        extra={
+                            "user_id": current_user.id,
+                            "entity_type": entity_type,
+                            "entity_id": entity_id,
+                            "reason": "not_found"
+                        }
+                    )
+            except (HTTPException, NotFoundException, MedicalRecordsAPIException) as e:
+                # Log when entities are skipped due to authorization
+                skipped_count += 1
+                logger.debug(
+                    f"User {current_user.id} not authorized for {entity_type} {entity_id}: {str(e)}",
+                    extra={
+                        "user_id": current_user.id,
+                        "entity_type": entity_type,
+                        "entity_id": entity_id,
+                        "reason": "access_denied",
+                        "error": str(e)
+                    }
+                )
                 continue
 
         # Get file counts from service for authorized entities only
         file_counts = file_service.get_files_count_batch(
             db=db, entity_type=entity_type, entity_ids=authorized_entity_ids
+        )
+        
+        # Log summary of batch processing
+        logger.info(
+            f"Batch file count completed for user {current_user.id}",
+            extra={
+                "user_id": current_user.id,
+                "entity_type": entity_type,
+                "requested_count": len(request.entity_ids),
+                "authorized_count": len(authorized_entity_ids),
+                "skipped_count": skipped_count,
+                "not_found_count": not_found_count
+            }
         )
 
         # Convert to response format
@@ -911,11 +992,14 @@ async def cleanup_entity_files_on_deletion(
     entity_id: int,
     preserve_paperless: bool = True,
     current_user_id: int = Depends(deps.get_current_user_id),
-    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Dict[str, int]:
     """
     Clean up EntityFiles when an entity is deleted.
     Preserves Paperless documents by default, deletes local files.
+    
+    IMPORTANT: This endpoint assumes authorization has already been performed
+    by the calling endpoint that is deleting the entity. No additional 
+    authorization checks are performed here.
     
     Args:
         entity_type: Type of entity being deleted
@@ -926,10 +1010,15 @@ async def cleanup_entity_files_on_deletion(
         Dictionary with cleanup statistics
     """
     try:
-        # Get the parent entity and verify ownership
-        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
-        handle_not_found(parent_entity, entity_type)
-        verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
+        logger.debug(
+            "Starting entity file cleanup",
+            extra={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "preserve_paperless": preserve_paperless,
+                "user_id": current_user_id
+            }
+        )
         
         cleanup_stats = file_service.cleanup_entity_files_on_deletion(
             db=db,
@@ -939,13 +1028,29 @@ async def cleanup_entity_files_on_deletion(
         )
         
         logger.info(
-            f"Entity file cleanup completed for {entity_type} {entity_id} by user {current_user_id}: {cleanup_stats}"
+            "Entity file cleanup completed",
+            extra={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "user_id": current_user_id,
+                "cleanup_stats": cleanup_stats,
+                "files_deleted": cleanup_stats.get("files_deleted", 0),
+                "paperless_preserved": cleanup_stats.get("paperless_preserved", 0)
+            }
         )
         
         return cleanup_stats
 
     except Exception as e:
-        logger.error(f"Failed to cleanup entity files: {str(e)}")
+        logger.error(
+            "Failed to cleanup entity files",
+            extra={
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "user_id": current_user_id,
+                "error": str(e)
+            }
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup entity files: {str(e)}",
