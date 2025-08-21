@@ -113,6 +113,11 @@ class User(Base):
         overlaps="shared_with",
     )
 
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_users_email", "email"),
+    )
+
 
 class Patient(Base):
     __tablename__ = "patients"
@@ -207,6 +212,11 @@ class Patient(Base):
         overlaps="patient",
     )
 
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_patients_owner_user_id", "owner_user_id"),
+    )
+
 
 class Practitioner(Base):
     __tablename__ = "practitioners"
@@ -272,6 +282,12 @@ class Medication(Base):
         "ConditionMedication", back_populates="medication", cascade="all, delete-orphan"
     )
 
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_medications_patient_id", "patient_id"),
+        Index("idx_medications_patient_status", "patient_id", "status"),
+    )
+
 
 class Encounter(Base):
     """
@@ -326,6 +342,11 @@ class Encounter(Base):
     practitioner = orm_relationship("Practitioner", back_populates="encounters")
     condition = orm_relationship("Condition")
 
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_encounters_patient_id", "patient_id"),
+    )
+
 
 class LabResult(Base):
     __tablename__ = "lab_results"
@@ -371,6 +392,12 @@ class LabResult(Base):
     # Many-to-Many relationship with conditions through junction table
     condition_relationships = orm_relationship(
         "LabResultCondition", back_populates="lab_result", cascade="all, delete-orphan"
+    )
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_lab_results_patient_id", "patient_id"),
+        Index("idx_lab_results_patient_date", "patient_id", "completed_date"),
     )
 
 
@@ -556,6 +583,12 @@ class Condition(Base):
         "ConditionMedication", back_populates="condition", cascade="all, delete-orphan"
     )
 
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_conditions_patient_id", "patient_id"),
+        Index("idx_conditions_patient_status", "patient_id", "status"),
+    )
+
 
 class Immunization(Base):
     __tablename__ = "immunizations"
@@ -585,6 +618,11 @@ class Immunization(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="immunizations")
     practitioner = orm_relationship("Practitioner", back_populates="immunizations")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_immunizations_patient_id", "patient_id"),
+    )
 
 
 class Procedure(Base):
@@ -637,6 +675,11 @@ class Procedure(Base):
     patient = orm_relationship("Patient", back_populates="procedures")
     practitioner = orm_relationship("Practitioner", back_populates="procedures")
     condition = orm_relationship("Condition", back_populates="procedures")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_procedures_patient_id", "patient_id"),
+    )
 
 
 class Treatment(Base):
@@ -708,6 +751,11 @@ class Allergy(Base):
     patient = orm_relationship("Patient", back_populates="allergies")
     medication = orm_relationship("Medication", back_populates="allergies")
 
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_allergies_patient_id", "patient_id"),
+    )
+
 
 class Vitals(Base):
     __tablename__ = "vitals"
@@ -749,6 +797,11 @@ class Vitals(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="vitals")
     practitioner = orm_relationship("Practitioner", back_populates="vitals")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_vitals_patient_id", "patient_id"),
+    )
 
 
 class Pharmacy(Base):
