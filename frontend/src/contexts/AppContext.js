@@ -4,6 +4,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { apiService } from '../services/api';
+import { secureStorage } from '../utils/secureStorage';
 
 // Initial state
 const initialState = {
@@ -83,7 +84,7 @@ export const AppProvider = ({ children }) => {
   // Initialize app state
   useEffect(() => {
     const initializeApp = async () => {
-      const token = localStorage.getItem('token');
+      const token = await secureStorage.getItem('token');
 
       if (!token) {
         dispatch({ type: ACTION_TYPES.SET_LOADING, payload: false });
@@ -97,7 +98,7 @@ export const AppProvider = ({ children }) => {
         dispatch({ type: ACTION_TYPES.SET_PATIENT, payload: userData });
       } catch (error) {
         // Failed to initialize app - session will be cleared
-        localStorage.removeItem('token');
+        await secureStorage.removeItem('token');
         dispatch({ type: ACTION_TYPES.SET_ERROR, payload: 'Session expired' });
       }
     };
@@ -144,8 +145,8 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ACTION_TYPES.REMOVE_NOTIFICATION, payload: id });
     },
 
-    logout: () => {
-      localStorage.removeItem('token');
+    logout: async () => {
+      await secureStorage.removeItem('token');
       dispatch({ type: ACTION_TYPES.LOGOUT });
     },
   };

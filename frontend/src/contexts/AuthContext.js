@@ -149,6 +149,14 @@ export function AuthProvider({ children }) {
           if (!isTokenExpired(tokenExpiry)) {
             // Token is still valid, verify with server
             try {
+              logger.info('Verifying stored token with server', {
+                category: 'auth_restore_attempt',
+                tokenExpiry: tokenExpiry,
+                currentTime: Date.now(),
+                hoursUntilExpiry: ((tokenExpiry - Date.now()) / (1000 * 60 * 60)).toFixed(2),
+                timestamp: new Date().toISOString()
+              });
+              
               const user = await authService.getCurrentUser();
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -170,6 +178,10 @@ export function AuthProvider({ children }) {
               logger.warn('Stored token invalid on server, clearing auth data', {
                 category: 'auth_restore_failure',
                 error: error.message,
+                errorStack: error.stack,
+                tokenExpiry: tokenExpiry,
+                currentTime: Date.now(),
+                wasExpired: tokenExpiry < Date.now(),
                 timestamp: new Date().toISOString()
               });
               clearAuthData();
@@ -432,7 +444,7 @@ export function AuthProvider({ children }) {
       // Check if this is SSO login (user object + token) or regular login (credentials)
       const isSSO = tokenFromSSO !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
       
-      let user, token;
+      let user, token, tokenExpiry;
       
       if (isSSO) {
         // SSO login - we already have user and token
@@ -443,12 +455,29 @@ export function AuthProvider({ children }) {
         };
         token = tokenFromSSO;
         
+        // Try to extract expiry from the SSO token
+        try {
+          const tokenParts = token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (payload.exp) {
+              tokenExpiry = payload.exp * 1000; // Convert from seconds to milliseconds
+            }
+          }
+        } catch (e) {
+          logger.warn('Failed to extract expiry from SSO token', {
+            category: 'auth_sso_token_parse',
+            error: e.message
+          });
+        }
+        
         logger.info('Processing SSO login', {
           category: 'auth_sso_login',
           username: user.username,
           userId: user.id,
           role: user.role,
           isAdmin: user.isAdmin,
+          tokenExpiry: tokenExpiry,
           timestamp: new Date().toISOString()
         });
       } else {
@@ -465,16 +494,26 @@ export function AuthProvider({ children }) {
         
         user = result.user;
         token = result.token;
+        tokenExpiry = result.tokenExpiry; // Get the actual token expiry from the result
         
         logger.info('Processing regular login', {
           category: 'auth_regular_login',
           username: user.username,
           userId: user.id,
+          tokenExpiry: tokenExpiry,
           timestamp: new Date().toISOString()
         });
       }
 
-      const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+      // Use the actual token expiry from the auth service (or fallback to 24 hours for SSO)
+      if (isSSO && !tokenExpiry) {
+        tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;  // 24 hours fallback for SSO
+      }
+      
+      // Fallback if tokenExpiry is still not set
+      if (!tokenExpiry) {
+        tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;  // 24 hours fallback
+      }
 
       // Clear any existing cache data before login
       // This ensures fresh data is loaded for the new user session
@@ -496,6 +535,18 @@ export function AuthProvider({ children }) {
         // Legacy cleanup - remove from both storages
         localStorage.removeItem(key);
         secureStorage.removeItem(key);
+      });
+
+      // Log token expiry details for debugging
+      const expiryDate = new Date(tokenExpiry);
+      const hoursUntilExpiry = (tokenExpiry - Date.now()) / (1000 * 60 * 60);
+      logger.info('Token expiry details before storage', {
+        category: 'auth_token_expiry',
+        tokenExpiry: tokenExpiry,
+        expiryDate: expiryDate.toISOString(),
+        hoursUntilExpiry: hoursUntilExpiry.toFixed(2),
+        currentTime: Date.now(),
+        isExpired: tokenExpiry < Date.now()
       });
 
       // Store in localStorage
