@@ -28,7 +28,19 @@ class ApiService {
     // Use environment variable for configurable API URL
     // Docker and production set REACT_APP_API_URL=/api/v1 for relative paths
     // Development uses REACT_APP_API_URL=http://localhost:8000/api/v1
-    this.baseURL = process.env.REACT_APP_API_URL || '/api/v1';
+    let baseURL = process.env.REACT_APP_API_URL || '/api/v1';
+    
+    // Auto-detect protocol mismatch and adjust for local development
+    if (typeof window !== 'undefined' && baseURL.startsWith('http://localhost')) {
+      const currentProtocol = window.location.protocol;
+      if (currentProtocol === 'https:') {
+        // Frontend is HTTPS but API URL is HTTP - switch to HTTPS
+        baseURL = baseURL.replace('http://', 'https://');
+        console.warn('Detected HTTPS frontend with HTTP API URL. Switching to HTTPS:', baseURL);
+      }
+    }
+    
+    this.baseURL = baseURL;
     // Fallback URLs for better Docker compatibility
     this.fallbackURL = '/api/v1';
   }
@@ -90,6 +102,16 @@ class ApiService {
         // Log validation errors for debugging
         if (response.status === 422) {
           console.error('Validation Error Details:', fullErrorData);
+        }
+        
+        // Log authentication errors with more detail
+        if (response.status === 401 || response.status === 403) {
+          console.error('Authentication Error:', {
+            status: response.status,
+            url: url,
+            error: fullErrorData,
+            hasToken: !!this.getAuthHeaders().then(h => h.Authorization)
+          });
         }
         
         // Use the error utility to extract a user-friendly message

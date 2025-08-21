@@ -15,7 +15,8 @@ from app.crud.user import user
 from app.models.models import User
 
 # Security scheme for JWT tokens
-security = HTTPBearer()
+# Set auto_error=False to handle missing credentials with our custom error messages
+security = HTTPBearer(auto_error=False)
 
 # Initialize security logger
 security_logger = get_logger(__name__, "security")
@@ -38,7 +39,7 @@ def get_db() -> Generator:
 def get_current_user(
     request: Request,
     db: Session = Depends(get_db),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> User:
     """
     Get current authenticated user from JWT token.
@@ -57,6 +58,22 @@ def get_current_user(
     # Extract client information for security logging
     client_ip = get_client_ip(request)
     user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
+
+    # Check if credentials were provided
+    if not credentials or not credentials.credentials:
+        security_logger.info("No authentication credentials provided")
+        log_security_event(
+            security_logger,
+            event="no_credentials",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message="No authentication credentials provided",
+        )
+        raise UnauthorizedException(
+            message="Authentication required",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
 
     # Standardized authentication error
 
