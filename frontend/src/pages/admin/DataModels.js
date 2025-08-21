@@ -25,6 +25,9 @@ import {
   IconBandage,
   IconNotes,
   IconBuilding,
+  IconPhone,
+  IconShield,
+  IconFile,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import './DataModels.css';
@@ -56,7 +59,7 @@ const DataModels = () => {
       icon: IconUsers,
       description: 'Healthcare providers and specialists',
       color: 'cyan',
-      category: 'Core Medical',
+      category: 'Healthcare Directory',
     },
     {
       name: 'pharmacy',
@@ -64,7 +67,7 @@ const DataModels = () => {
       icon: IconBuilding,
       description: 'Pharmacy locations and contact information',
       color: 'violet',
-      category: 'Core Medical',
+      category: 'Healthcare Directory',
     },
     {
       name: 'medication',
@@ -170,12 +173,56 @@ const DataModels = () => {
       color: 'purple',
       category: 'Sharing & Access',
     },
+    {
+      name: 'emergency_contact',
+      display: 'Emergency Contacts',
+      icon: IconPhone,
+      description: 'Emergency contact information for patients',
+      color: 'red',
+      category: 'Patient Support',
+    },
+    {
+      name: 'insurance',
+      display: 'Insurance',
+      icon: IconShield,
+      description: 'Patient insurance coverage information',
+      color: 'blue',
+      category: 'Patient Support',
+    },
+    {
+      name: 'family_member',
+      display: 'Family Members',
+      icon: IconUsers,
+      description: 'Family member records for medical history',
+      color: 'green',
+      category: 'Family History',
+    },
+    {
+      name: 'family_condition',
+      display: 'Family Conditions',
+      icon: IconClipboard,
+      description: 'Medical conditions of family members',
+      color: 'orange',
+      category: 'Family History',
+    },
+    {
+      name: 'entity_file',
+      display: 'Entity Files',
+      icon: IconFile,
+      description: 'File attachments for all entity types',
+      color: 'gray',
+      category: 'File Management',
+    },
   ];
 
   const categories = [
     'System',
     'Core Medical',
+    'Healthcare Directory',
     'Medical Records',
+    'Patient Support',
+    'Family History',
+    'File Management',
     'Sharing & Access',
   ];
 

@@ -234,12 +234,23 @@ const ModelManagement = () => {
     <AdminLayout>
       <div className="model-management">
         <div className="model-header">
-          <div className="model-title">
-            <h1>{metadata?.verbose_name_plural || modelName}</h1>
-            <p>{totalRecords} total records</p>
+          <div className="model-header-top">
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/admin/data-models')}
+              className="back-button"
+            >
+              ← Back to Data Models
+            </Button>
           </div>
+          
+          <div className="model-header-main">
+            <div className="model-title">
+              <h1>{metadata?.verbose_name_plural || modelName}</h1>
+              <p>{totalRecords} total records</p>
+            </div>
 
-          <div className="model-actions">
+            <div className="model-actions">
             <Button
               variant="primary"
               onClick={() => {
@@ -253,6 +264,7 @@ const ModelManagement = () => {
             >
               ➕ Add New
             </Button>
+            </div>
           </div>
         </div>
 

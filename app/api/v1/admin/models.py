@@ -21,7 +21,10 @@ from app.crud import (
     allergy,
     condition,
     encounter,
+    family_condition,
+    family_member,
     immunization,
+    insurance,
     lab_result,
     lab_result_file,
     medication,
@@ -33,14 +36,20 @@ from app.crud import (
     user,
     vitals,
 )
+from app.crud.emergency_contact import emergency_contact
 from app.crud.base import CRUDBase
 from app.models.activity_log import ActionType, ActivityLog, EntityType, get_utc_now
 from app.models.models import (
     Allergy,
     Condition,
+    EmergencyContact,
     Encounter,
+    EntityFile,
+    FamilyCondition,
     FamilyHistoryShare,
+    FamilyMember,
     Immunization,
+    Insurance,
     Invitation,
     LabResult,
     LabResultFile,
@@ -52,12 +61,19 @@ from app.models.models import (
     Procedure,
     Treatment,
     User,
+    UserPreferences,
     Vitals,
 )
+from app.models.activity_log import ActivityLog
 from app.schemas.allergy import AllergyCreate
 from app.schemas.condition import ConditionCreate
+from app.schemas.emergency_contact import EmergencyContactCreate
 from app.schemas.encounter import EncounterCreate
+from app.schemas.entity_file import EntityFileCreate
+from app.schemas.family_condition import FamilyConditionCreate
+from app.schemas.family_member import FamilyMemberCreate
 from app.schemas.immunization import ImmunizationCreate
+from app.schemas.insurance import InsuranceCreate
 from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
 from app.schemas.medication import MedicationCreate
@@ -91,6 +107,11 @@ DATETIME_FIELD_MAP = {
     "procedure": ["created_at", "updated_at"],
     "treatment": ["created_at", "updated_at"],
     "encounter": ["created_at", "updated_at"],
+    "emergency_contact": ["created_at", "updated_at"],
+    "insurance": ["created_at", "updated_at"],
+    "family_member": ["created_at", "updated_at"],
+    "family_condition": ["created_at", "updated_at"],
+    "entity_file": ["uploaded_at", "created_at", "updated_at"],
 }
 
 DATE_FIELD_MAP = {
@@ -101,6 +122,10 @@ DATE_FIELD_MAP = {
     "encounter": ["date"],
     "condition": ["onset_date", "end_date"],
     "allergy": ["onset_date"],
+    "family_member": ["birth_date"],
+    "family_condition": ["onset_date", "end_date"],
+    "insurance": ["policy_start_date", "policy_end_date"],
+    "entity_file": ["last_sync_at"],
 }
 
 # Field display configuration - controls which fields are shown and their order
@@ -160,6 +185,7 @@ FIELD_DISPLAY_CONFIG = {
             "last_name", 
             "birth_date",
             "gender",
+            "owner_user_id",
             "created_at",
         ],
         "detail_fields": [
@@ -172,6 +198,12 @@ FIELD_DISPLAY_CONFIG = {
             "height",
             "weight",
             "address",
+            "user_id",
+            "owner_user_id",
+            "is_self_record",
+            "family_id",
+            "relationship_to_family",
+            "privacy_level",
             "physician_id",
             "created_at",
             "updated_at",
@@ -579,6 +611,144 @@ FIELD_DISPLAY_CONFIG = {
         ],
         "search_fields": ["permission_level"],
     },
+    "emergency_contact": {
+        "list_fields": [
+            "id",
+            "name",
+            "relationship",
+            "phone_number",
+            "is_primary",
+            "patient_id",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "name",
+            "relationship",
+            "phone_number",
+            "secondary_phone",
+            "email",
+            "address",
+            "notes",
+            "is_primary",
+            "is_active",
+            "patient_id",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["name", "relationship", "phone_number"],
+    },
+    "insurance": {
+        "list_fields": [
+            "id",
+            "provider_name",
+            "plan_name",
+            "policy_number",
+            "insurance_type",
+            "patient_id",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "provider_name",
+            "plan_name",
+            "policy_number",
+            "group_number",
+            "insurance_type",
+            "policy_start_date",
+            "policy_end_date",
+            "copay_amount",
+            "deductible_amount",
+            "out_of_pocket_max",
+            "patient_id",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["provider_name", "plan_name", "policy_number"],
+    },
+    "family_member": {
+        "list_fields": [
+            "id",
+            "first_name",
+            "last_name",
+            "relationship",
+            "birth_date",
+            "user_id",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "first_name",
+            "last_name",
+            "relationship",
+            "birth_date",
+            "gender",
+            "blood_type",
+            "deceased",
+            "user_id",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["first_name", "last_name", "relationship"],
+    },
+    "family_condition": {
+        "list_fields": [
+            "id",
+            "condition_name",
+            "onset_date",
+            "status",
+            "family_member_id",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "condition_name",
+            "description",
+            "onset_date",
+            "end_date",
+            "status",
+            "severity",
+            "icd10_code",
+            "notes",
+            "family_member_id",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["condition_name", "icd10_code", "status"],
+    },
+    "entity_file": {
+        "list_fields": [
+            "id",
+            "file_name",
+            "entity_type",
+            "entity_id",
+            "file_type",
+            "file_size",
+            "category",
+            "storage_backend",
+            "uploaded_at",
+        ],
+        "detail_fields": [
+            "id",
+            "file_name",
+            "file_path",
+            "file_type",
+            "file_size",
+            "entity_type",
+            "entity_id",
+            "description",
+            "category",
+            "storage_backend",
+            "paperless_document_id",
+            "paperless_task_uuid",
+            "sync_status",
+            "last_sync_at",
+            "uploaded_at",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["file_name", "entity_type", "file_type", "category"],
+    },
     # Add more models as needed
 }
 
@@ -680,6 +850,31 @@ MODEL_REGISTRY = {
         "model": FamilyHistoryShare,
         "crud": family_history_share_crud,
         "create_schema": FamilyHistoryShareCreate,
+    },
+    "emergency_contact": {
+        "model": EmergencyContact,
+        "crud": emergency_contact,
+        "create_schema": EmergencyContactCreate,
+    },
+    "insurance": {
+        "model": Insurance,
+        "crud": insurance,
+        "create_schema": InsuranceCreate,
+    },
+    "family_member": {
+        "model": FamilyMember,
+        "crud": family_member,
+        "create_schema": FamilyMemberCreate,
+    },
+    "family_condition": {
+        "model": FamilyCondition,
+        "crud": family_condition,
+        "create_schema": FamilyConditionCreate,
+    },
+    "entity_file": {
+        "model": EntityFile,
+        "crud": CRUDBase[EntityFile, EntityFileCreate, dict](EntityFile),
+        "create_schema": EntityFileCreate,
     },
 }
 
