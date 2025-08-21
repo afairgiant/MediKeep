@@ -12,7 +12,10 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.v1.endpoints.utils import handle_not_found, verify_patient_ownership
+from app.core.error_handling import NotFoundException, MedicalRecordsAPIException
 from app.core.logging_config import get_logger
+from app.crud import lab_result, insurance, encounter, procedure
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
@@ -32,6 +35,27 @@ file_service = GenericEntityFileService()
 
 # Initialize logger
 logger = get_logger(__name__, "app")
+
+
+def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
+    """Get entity by type and ID for authorization checks"""
+    entity_map = {
+        "lab-result": lab_result.get,
+        "procedure": procedure.get,
+        "insurance": insurance.get,
+        "encounter": encounter.get,
+        "visit": encounter.get,  # Alternative name for encounter
+    }
+    crud_func = entity_map.get(entity_type)
+    if not crud_func:
+        raise HTTPException(status_code=400, detail=f"Unsupported entity type: {entity_type}")
+    
+    try:
+        return crud_func(db, id=entity_id)
+    except Exception as e:
+        # If CRUD operation fails, return None (entity doesn't exist or access denied)
+        logger.debug(f"Entity lookup failed for {entity_type} {entity_id}: {str(e)}")
+        return None
 
 
 def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
@@ -65,7 +89,7 @@ def get_entity_files(
     db: Session = Depends(deps.get_db),
     entity_type: str,
     entity_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> List[EntityFileResponse]:
     """
     Get all files for a specific entity.
@@ -78,14 +102,28 @@ def get_entity_files(
         List of entity files
     """
     try:
-        # TODO: Add permission check - ensure user has access to this entity
-        # This would depend on your user model and permission system
-
+        # Get the parent entity (lab-result, procedure, etc.) and verify access
+        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+        if not parent_entity:
+            # If entity doesn't exist, return empty list (matches original behavior)
+            return []
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            try:
+                # Use the multi-patient access verification system
+                deps.verify_patient_access(entity_patient_id, db, current_user)
+            except (HTTPException, NotFoundException, MedicalRecordsAPIException):
+                # Entity exists but user doesn't have access - return empty list
+                return []
+        
         return file_service.get_entity_files(db, entity_type, entity_id)
 
-    except HTTPException:
+    except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
+        logger.error(f"Unexpected error in get_entity_files: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve files: {str(e)}",
@@ -109,6 +147,7 @@ async def create_pending_file_record(
     category: Optional[str] = Form(None),
     storage_backend: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> EntityFileResponse:
     """
     Create a pending file record without actual file upload.
@@ -128,6 +167,11 @@ async def create_pending_file_record(
         Created pending file record
     """
     try:
+        # Get the parent entity (lab-result, procedure, etc.) and verify ownership
+        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+        handle_not_found(parent_entity, entity_type)
+        verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
+        
         logger.info(
             f"Creating pending file record for {entity_type} {entity_id}",
             extra={
@@ -201,6 +245,7 @@ async def update_file_upload_status(
     sync_status: str = Form("synced"),
     paperless_document_id: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> EntityFileResponse:
     """
     Update the upload status of a pending file record.
@@ -215,6 +260,15 @@ async def update_file_upload_status(
         Updated file record
     """
     try:
+        # Get file record first to check authorization
+        file_record = file_service.get_file_by_id(db, file_id)
+        handle_not_found(file_record, "File")
+        
+        # Get the parent entity and verify ownership
+        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        handle_not_found(parent_entity, file_record.entity_type)
+        verify_patient_ownership(parent_entity, current_user_patient_id, file_record.entity_type)
+        
         logger.info(
             f"Updating file {file_id} status to {sync_status}",
             extra={
@@ -282,6 +336,7 @@ async def upload_entity_file(
     category: Optional[str] = Form(None),
     storage_backend: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> EntityFileResponse:
     """
     Upload a file for any entity type.
@@ -309,8 +364,19 @@ async def upload_entity_file(
                 "current_user_id": current_user_id,
             },
         )
-        # TODO: Add permission check - ensure user has access to this entity
-        # This would depend on your user model and permission system
+        
+        # Get the parent entity (lab-result, procedure, etc.) and verify access
+        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+        if not parent_entity:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"{entity_type.title()} not found"
+            )
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
 
         # Validate file type and size
         if not file.filename:
@@ -347,9 +413,10 @@ async def upload_entity_file(
 
         return result
 
-    except HTTPException:
+    except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
+        logger.error(f"Unexpected error in upload_entity_file: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload file: {str(e)}",
@@ -361,7 +428,7 @@ async def download_file(
     *,
     db: Session = Depends(deps.get_db),
     file_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """
     Download a file by its ID from both local and paperless storage.
@@ -373,12 +440,22 @@ async def download_file(
         File response for download
     """
     try:
-        # TODO: Add permission check - ensure user has access to this file
-        # This would involve checking if the user has access to the entity that owns the file
+        # Get file record first to check authorization
+        file_record = file_service.get_file_by_id(db, file_id)
+        handle_not_found(file_record, "File")
+        
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        handle_not_found(parent_entity, file_record.entity_type)
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
 
         # Get file information
         file_info, filename, content_type = await file_service.get_file_download_info(
-            db, file_id, current_user_id
+            db, file_id, current_user.id
         )
 
         # Handle different return types (local path vs paperless content)
@@ -463,17 +540,24 @@ async def view_file(
     try:
         logger.info(f"Viewing file {file_id} for user {current_user_id}")
 
-        # Basic permission check - ensure file exists and user has access
+        # Get current user object for multi-patient access verification
+        from app.crud.user import user
+        current_user = user.get(db, id=current_user_id)
+        if not current_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Get file record first to check authorization
         file_record = file_service.get_file_by_id(db, file_id)
-        if not file_record:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="File not found"
-            )
+        handle_not_found(file_record, "File")
         
-        # TODO: Implement entity-level permission checking
-        # For now, we allow access to any authenticated user's files
-        # In the future, this should check if the user has access to the entity that owns the file
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        handle_not_found(parent_entity, file_record.entity_type)
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
         
         # Get file information
         file_info, filename, content_type = await file_service.get_file_view_info(
@@ -549,6 +633,7 @@ async def delete_file(
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> FileOperationResult:
     """
     Delete a file by its ID.
@@ -560,14 +645,18 @@ async def delete_file(
         File operation result
     """
     try:
-        # TODO: Add permission check - ensure user has access to this file
-
-        # Get file record before deletion for logging
+        # Get file record before deletion for logging and authorization
         file_record = file_service.get_file_by_id(db, file_id)
-        if not file_record:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
-            )
+        handle_not_found(file_record, "File")
+        
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        handle_not_found(parent_entity, file_record.entity_type)
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
 
         # Delete the file
         result = await file_service.delete_file(db, file_id, current_user_id)
@@ -603,6 +692,7 @@ def update_file_metadata(
     description: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> EntityFileResponse:
     """
     Update file metadata (description, category).
@@ -616,14 +706,18 @@ def update_file_metadata(
         Updated entity file details
     """
     try:
-        # TODO: Add permission check - ensure user has access to this file
-
-        # Get original file record for logging
+        # Get original file record for logging and authorization
         original_file = file_service.get_file_by_id(db, file_id)
-        if not original_file:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
-            )
+        handle_not_found(original_file, "File")
+        
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, original_file.entity_type, original_file.entity_id)
+        handle_not_found(parent_entity, original_file.entity_type)
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
 
         # Update metadata
         result = file_service.update_file_metadata(
@@ -661,7 +755,7 @@ def get_batch_file_counts(
     *,
     db: Session = Depends(deps.get_db),
     request: FileBatchCountRequest,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> List[FileBatchCountResponse]:
     """
     Get file counts for multiple entities in batch.
@@ -673,11 +767,23 @@ def get_batch_file_counts(
         List of file counts per entity
     """
     try:
-        # TODO: Add permission check - ensure user has access to these entities
+        # Verify user has access to all requested entities
+        entity_type = request.entity_type.value
+        authorized_entity_ids = []
+        
+        for entity_id in request.entity_ids:
+            try:
+                parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+                if parent_entity:
+                    verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
+                    authorized_entity_ids.append(entity_id)
+            except HTTPException:
+                # Skip entities the user doesn't have access to
+                continue
 
-        # Get file counts from service
+        # Get file counts from service for authorized entities only
         file_counts = file_service.get_files_count_batch(
-            db=db, entity_type=request.entity_type.value, entity_ids=request.entity_ids
+            db=db, entity_type=entity_type, entity_ids=authorized_entity_ids
         )
 
         # Convert to response format
@@ -700,7 +806,7 @@ def get_file_details(
     *,
     db: Session = Depends(deps.get_db),
     file_id: int,
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> EntityFileResponse:
     """
     Get details of a specific file.
@@ -712,13 +818,18 @@ def get_file_details(
         Entity file details
     """
     try:
-        # TODO: Add permission check - ensure user has access to this file
-
+        # Get file record and check authorization
         file_record = file_service.get_file_by_id(db, file_id)
-        if not file_record:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
-            )
+        handle_not_found(file_record, "File")
+        
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        handle_not_found(parent_entity, file_record.entity_type)
+        
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
 
         return EntityFileResponse.from_orm(file_record)
 
@@ -736,6 +847,7 @@ async def check_paperless_sync_status(
     *,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Dict[int, bool]:
     """
     Check sync status for all Paperless documents.
@@ -766,6 +878,7 @@ async def update_processing_files(
     *,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Dict[str, str]:
     """
     Update files with 'processing' status by checking their task completion.
@@ -798,6 +911,7 @@ async def cleanup_entity_files_on_deletion(
     entity_id: int,
     preserve_paperless: bool = True,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Dict[str, int]:
     """
     Clean up EntityFiles when an entity is deleted.
@@ -812,6 +926,11 @@ async def cleanup_entity_files_on_deletion(
         Dictionary with cleanup statistics
     """
     try:
+        # Get the parent entity and verify ownership
+        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+        handle_not_found(parent_entity, entity_type)
+        verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
+        
         cleanup_stats = file_service.cleanup_entity_files_on_deletion(
             db=db,
             entity_type=entity_type,
