@@ -455,12 +455,29 @@ export function AuthProvider({ children }) {
         };
         token = tokenFromSSO;
         
+        // Try to extract expiry from the SSO token
+        try {
+          const tokenParts = token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (payload.exp) {
+              tokenExpiry = payload.exp * 1000; // Convert from seconds to milliseconds
+            }
+          }
+        } catch (e) {
+          logger.warn('Failed to extract expiry from SSO token', {
+            category: 'auth_sso_token_parse',
+            error: e.message
+          });
+        }
+        
         logger.info('Processing SSO login', {
           category: 'auth_sso_login',
           username: user.username,
           userId: user.id,
           role: user.role,
           isAdmin: user.isAdmin,
+          tokenExpiry: tokenExpiry,
           timestamp: new Date().toISOString()
         });
       } else {

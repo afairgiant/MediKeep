@@ -106,11 +106,12 @@ class ApiService {
         
         // Log authentication errors with more detail
         if (response.status === 401 || response.status === 403) {
+          const authHeaders = await this.getAuthHeaders();
           console.error('Authentication Error:', {
             status: response.status,
             url: url,
             error: fullErrorData,
-            hasToken: !!this.getAuthHeaders().then(h => h.Authorization)
+            hasToken: !!authHeaders.Authorization
           });
         }
         
