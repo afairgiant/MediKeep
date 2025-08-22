@@ -209,7 +209,7 @@ export function AuthProvider({ children }) {
                     tokenExpiry: refreshResult.tokenExpiry,
                   },
                 });
-                updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
+                await updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
                 
                 logger.info('Token refreshed successfully during auth initialization', {
                   category: 'auth_refresh_success',
@@ -246,9 +246,9 @@ export function AuthProvider({ children }) {
           message: 'Auth initialization failed',
           error: error.message,
           stack: error.stack,
-          hasStoredToken: !!secureStorage.getItem('token'),
-          hasStoredUser: !!secureStorage.getItem('user'),
-          hasStoredExpiry: !!secureStorage.getItem('tokenExpiry'),
+          hasStoredToken: !!(await secureStorage.getItem('token')),
+          hasStoredUser: !!(await secureStorage.getItem('user')),
+          hasStoredExpiry: !!(await secureStorage.getItem('tokenExpiry')),
           timestamp: new Date().toISOString()
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -289,7 +289,7 @@ export function AuthProvider({ children }) {
                 tokenExpiry: refreshResult.tokenExpiry,
               },
             });
-            updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
+            await updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
           } else {
             clearAuthData();
             dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -409,13 +409,13 @@ export function AuthProvider({ children }) {
     // Note: We don't clear first login status as it should persist across sessions
   };
 
-  const updateStoredToken = (token, tokenExpiry) => {
-    secureStorage.setItem('token', token);
-    secureStorage.setItem('tokenExpiry', tokenExpiry.toString());
+  const updateStoredToken = async (token, tokenExpiry) => {
+    await secureStorage.setItem('token', token);
+    await secureStorage.setItem('tokenExpiry', tokenExpiry.toString());
   };
 
-  const updateStoredUser = user => {
-    secureStorage.setJSON('user', user);
+  const updateStoredUser = async user => {
+    await secureStorage.setJSON('user', user);
   };
 
   // Update user data in context and storage
@@ -431,7 +431,9 @@ export function AuthProvider({ children }) {
       },
     });
 
-    updateStoredUser(updatedUser);
+    // Note: Not awaiting here as this is called synchronously from components
+    // The storage will complete in the background
+    secureStorage.setJSON('user', updatedUser);
     return updatedUser;
   };
 
@@ -549,9 +551,9 @@ export function AuthProvider({ children }) {
         isExpired: tokenExpiry < Date.now()
       });
 
-      // Store in localStorage
-      updateStoredToken(token, tokenExpiry);
-      updateStoredUser(user);
+      // Store in localStorage - MUST await to prevent race conditions
+      await updateStoredToken(token, tokenExpiry);
+      await updateStoredUser(user);
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
