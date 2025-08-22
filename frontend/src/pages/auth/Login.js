@@ -80,7 +80,7 @@ const Login = () => {
       const result = await login(formData);
       if (result.success) {
         // Add a small delay to ensure auth state is fully saved before navigation
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
@@ -157,7 +157,7 @@ const Login = () => {
           setShowCreateUser(false);
           
           // Add a small delay to ensure auth state is fully saved before navigation
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise(resolve => setTimeout(resolve, 500));
           
           // Redirect new users to patient info page in edit mode
           navigate('/patients/me?edit=true', { replace: true });
