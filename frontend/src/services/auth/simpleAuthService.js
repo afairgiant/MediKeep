@@ -310,8 +310,8 @@ class SimpleAuthService {
       logger.error('Error retrieving current user from storage', {
         error: error.message,
         errorType: error.constructor.name,
-        hasToken: !!this.getToken(),
-        isTokenValid: this.isTokenValid(),
+        hasToken: !!(await this.getToken()),
+        isTokenValid: await this.isTokenValid(),
         category: 'auth_user_fetch_error'
       });
       return null;
@@ -330,12 +330,12 @@ class SimpleAuthService {
   async logout() {
     try {
       logger.info('Logging out user', {
-        hadToken: !!this.getToken(),
+        hadToken: !!(await this.getToken()),
         category: 'auth_logout'
       });
       
       // Call backend logout endpoint to invalidate token
-      const token = this.getToken();
+      const token = await this.getToken();
       if (token) {
         try {
           await this.makeRequest('/auth/logout', {
