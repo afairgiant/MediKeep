@@ -70,9 +70,9 @@ class APIClient {
   }
 
   // Auth interceptor - adds token to requests
-  authInterceptor(config) {
-    const token = authService.getToken();
-    if (token && authService.isTokenValid(token)) {
+  async authInterceptor(config) {
+    const token = await authService.getToken();
+    if (token && await authService.isTokenValid(token)) {
       config.headers = {
         ...config.headers,
         Authorization: `Bearer ${token}`,
