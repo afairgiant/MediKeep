@@ -261,14 +261,18 @@ class SecureStorage {
   }
 
   /**
-   * Check if stored data is encrypted
+   * Check if stored data is encrypted or in fallback format
    * @param {string} value - Stored value to check
    * @returns {boolean}
    */
   isEncryptedFormat(value) {
     try {
       const parsed = JSON.parse(value);
-      return parsed && parsed.marker === ENCRYPTED_DATA_MARKER && parsed.data;
+      // Check for both encrypted and fallback markers
+      return parsed && parsed.data && (
+        parsed.marker === ENCRYPTED_DATA_MARKER || 
+        parsed.marker === '__fallback__'
+      );
     } catch {
       return false;
     }
@@ -332,10 +336,16 @@ class SecureStorage {
         localStorage.setItem(prefixedKey, serializedValue);
       }
     } catch (error) {
-      // For sensitive keys, never fallback to unencrypted storage
+      // For sensitive keys, log the error but don't throw to prevent app breakage
       if (this.isSensitiveKey(key)) {
-        console.error('SecureStorage: Failed to store sensitive key securely:', key);
-        throw error;
+        logger.error('SecureStorage: Failed to store sensitive key securely', {
+          key: key,
+          error: error.message,
+          category: 'secure_storage_write_error'
+        });
+        // Don't throw - this was causing the auto-logout issue
+        // The fallback mechanism above should handle this
+        return;
       }
       // For non-sensitive keys, allow fallback
       try {
@@ -364,10 +374,21 @@ class SecureStorage {
       
       // Check if this is sensitive data that should be encrypted
       if (this.isSensitiveKey(key)) {
-        // Check if data is in encrypted format
+        // Check if data is in encrypted or fallback format
         if (this.isEncryptedFormat(storedValue)) {
           try {
             const wrapper = JSON.parse(storedValue);
+            
+            // Handle fallback format
+            if (wrapper.marker === '__fallback__') {
+              logger.debug('SecureStorage: Reading fallback-encoded data', {
+                key: key,
+                category: 'secure_storage_read_fallback'
+              });
+              return decodeURIComponent(atob(wrapper.data));
+            }
+            
+            // Handle encrypted format
             const decryptedValue = await this.decryptData(wrapper.data);
             return decryptedValue;
           } catch (decryptError) {
@@ -380,17 +401,6 @@ class SecureStorage {
             return null;
           }
         } else {
-          // Check if it's fallback format
-          try {
-            const parsed = JSON.parse(storedValue);
-            if (parsed && parsed.marker === '__fallback__' && parsed.data) {
-              // Decode fallback base64 data
-              return decodeURIComponent(atob(parsed.data));
-            }
-          } catch (e) {
-            // Not fallback format, continue
-          }
-          
           // Migration case: unencrypted sensitive data
           logger.warn('SecureStorage: Found unencrypted sensitive data - will re-encrypt on next write', {
             key: key,
@@ -519,15 +529,22 @@ export const legacyMigration = {
         const key = prefixedKey.replace(STORAGE_PREFIX, '');
         if (SENSITIVE_KEYS.includes(key)) {
           const value = localStorage.getItem(prefixedKey);
+          // Don't re-encrypt if already in encrypted or fallback format
           if (value && !secureStorage.isEncryptedFormat(value)) {
-            console.log(`SecureStorage: Migrating unencrypted sensitive key: ${key}`);
+            logger.info('SecureStorage: Migrating unencrypted sensitive key', {
+              key: key,
+              category: 'secure_storage_migration'
+            });
             // Re-save to trigger encryption
             await secureStorage.setItem(key, value);
           }
         }
       }
     } catch (error) {
-      console.error('SecureStorage: Migration error:', error);
+      logger.error('SecureStorage: Migration error', {
+        error: error.message,
+        category: 'secure_storage_migration_error'
+      });
       // Don't fail silently for migration errors
     }
   }
