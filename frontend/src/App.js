@@ -223,9 +223,8 @@ function ActivityTracker() {
             activeElement.tagName === 'SELECT' ||
             activeElement.tagName === 'TEXTAREA' ||
             activeElement.contentEditable === 'true' ||
-            activeElement.closest('[role="dialog"]') || // Mantine modals
-            activeElement.closest('.mantine-Modal-root') || // Mantine modals
-            activeElement.closest('.mantine-DateInput-input') // Mantine date inputs
+            // Check for modal or date input interaction with combined selector for efficiency
+            activeElement.closest('[role="dialog"], .mantine-Modal-root, .mantine-DateInput-input')
           );
           
           if (!isFormInteraction) {

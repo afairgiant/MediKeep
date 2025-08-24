@@ -287,6 +287,7 @@ export const medicationFormFields = [
     gridColumn: 6,
     searchable: true,
     clearable: true,
+    maxDropdownHeight: 200, // Fixed height to prevent viewport calculation loops
     dynamicOptions: 'practitioners',
   },
   {
@@ -298,6 +299,7 @@ export const medicationFormFields = [
     gridColumn: 6,
     searchable: true,
     clearable: true,
+    maxDropdownHeight: 200, // Fixed height to prevent viewport calculation loops
     dynamicOptions: 'pharmacies',
   },
 ];
