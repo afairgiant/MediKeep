@@ -100,6 +100,47 @@ const BaseMedicalForm = ({
     onSubmit(e);
   };
 
+  // Track window size to handle responsive changes
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth || 1024,
+    height: window.innerHeight || 768
+  });
+
+  useEffect(() => {
+    let resizeTimeout;
+    const handleResize = () => {
+      // Debounce resize events to prevent excessive updates
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth || 1024,
+          height: window.innerHeight || 768
+        });
+      }, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, []);
+
+  // Memoize dropdown height calculation based on window size
+  const getResponsiveDropdownHeight = useMemo(() => {
+    return (providedHeight) => {
+      if (providedHeight) return providedHeight;
+      
+      if (windowSize.height < 600) {
+        return 150; // Very small screens (phones in landscape)
+      } else if (windowSize.height < 800) {
+        return 200; // Small screens (tablets, small laptops) 
+      } else {
+        return 280; // Larger screens
+      }
+    };
+  }, [windowSize.height]);
+
   // Render individual form field based on configuration
   const renderField = (fieldConfig) => {
     const {
@@ -169,17 +210,8 @@ const BaseMedicalForm = ({
         );
 
       case 'select':
-        // Calculate responsive maxDropdownHeight to prevent viewport calculation loops on small screens
-        const responsiveMaxHeight = maxDropdownHeight || (() => {
-          // Use tracked window height to determine appropriate dropdown height
-          if (windowSize.height < 600) {
-            return 150; // Very small screens (phones in landscape)
-          } else if (windowSize.height < 800) {
-            return 200; // Small screens (tablets, small laptops) 
-          } else {
-            return 280; // Larger screens
-          }
-        })();
+        // Use memoized function to get responsive dropdown height
+        const responsiveMaxHeight = getResponsiveDropdownHeight(maxDropdownHeight);
         
         return (
           <Select
@@ -396,32 +428,6 @@ const BaseMedicalForm = ({
     
     return undefined;
   };
-
-  // Track window size to handle responsive changes
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth || 1024,
-    height: window.innerHeight || 768
-  });
-
-  useEffect(() => {
-    let resizeTimeout;
-    const handleResize = () => {
-      // Debounce resize events to prevent excessive updates
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        setWindowSize({
-          width: window.innerWidth || 1024,
-          height: window.innerHeight || 768
-        });
-      }, 150);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(resizeTimeout);
-    };
-  }, []);
 
   // Calculate responsive modal size to prevent issues on small screens
   const responsiveModalSize = useMemo(() => {
