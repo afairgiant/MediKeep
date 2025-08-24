@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import BaseMedicalForm from './BaseMedicalForm';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 
@@ -13,22 +13,40 @@ const MantineMedicalForm = ({
   pharmacies = [],
   editingMedication = null,
 }) => {
-  // Convert practitioners to Mantine format
-  const practitionerOptions = practitioners.map(practitioner => ({
-    value: String(practitioner.id),
-    label: `${practitioner.name} - ${practitioner.specialty}`,
-  }));
+  // Convert practitioners to Mantine format - memoized to prevent recreating on every render
+  const practitionerOptions = useMemo(() => {
+    if (!practitioners || !Array.isArray(practitioners)) return [];
+    
+    try {
+      return practitioners.map(practitioner => ({
+        value: String(practitioner.id),
+        label: `${practitioner.name} - ${practitioner.specialty}`,
+      }));
+    } catch (error) {
+      console.error('Error mapping practitioners:', error);
+      return [];
+    }
+  }, [practitioners]);
 
-  // Convert pharmacies to Mantine format
-  const pharmacyOptions = pharmacies.map(pharmacy => ({
-    value: String(pharmacy.id),
-    label: `${pharmacy.name}${pharmacy.city ? ` - ${pharmacy.city}` : ''}${pharmacy.state ? `, ${pharmacy.state}` : ''}`,
-  }));
+  // Convert pharmacies to Mantine format - memoized to prevent recreating on every render
+  const pharmacyOptions = useMemo(() => {
+    if (!pharmacies || !Array.isArray(pharmacies)) return [];
+    
+    try {
+      return pharmacies.map(pharmacy => ({
+        value: String(pharmacy.id),
+        label: `${pharmacy.name}${pharmacy.city ? ` - ${pharmacy.city}` : ''}${pharmacy.state ? `, ${pharmacy.state}` : ''}`,
+      }));
+    } catch (error) {
+      console.error('Error mapping pharmacies:', error);
+      return [];
+    }
+  }, [pharmacies]);
 
-  const dynamicOptions = {
+  const dynamicOptions = useMemo(() => ({
     practitioners: practitionerOptions,
     pharmacies: pharmacyOptions,
-  };
+  }), [practitionerOptions, pharmacyOptions]);
 
   return (
     <BaseMedicalForm
