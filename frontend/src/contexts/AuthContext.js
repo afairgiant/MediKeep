@@ -611,13 +611,23 @@ export function AuthProvider({ children }) {
 
   const updateActivity = () => {
     try {
+      // Throttle activity updates to prevent excessive re-renders during form interactions
+      const now = Date.now();
+      const timeSinceLastUpdate = now - state.lastActivity;
+      
+      // Only update if it's been at least 5 seconds since last update
+      if (timeSinceLastUpdate < 5000) {
+        return;
+      }
+      
       dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
       
       // Log activity update in development mode only
       if (process.env.NODE_ENV === 'development') {
         secureActivityLogger.logActivityDetected({
           component: 'AuthContext',
-          action: 'activity_updated'
+          action: 'activity_updated',
+          timeSinceLastUpdate
         });
       }
     } catch (error) {

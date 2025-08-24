@@ -208,20 +208,34 @@ function ActivityTracker() {
   // Create a working API activity tracker that heavily throttles updateActivity calls
   const { updateActivity } = useAuth();
   const trackApiActivity = useCallback((apiInfo = {}) => {
-    // Only call updateActivity every 60 seconds to avoid navigation interference
+    // Increase throttle to 2 minutes and add form interaction protection
     const now = Date.now();
     const lastUpdate = window._lastActivityUpdate || 0;
-    if (now - lastUpdate > 60000) { // 1 minute throttle
+    if (now - lastUpdate > 120000) { // 2 minute throttle
       window._lastActivityUpdate = now;
-      // Call updateActivity asynchronously to avoid blocking navigation
+      // Call updateActivity asynchronously to avoid blocking form interactions
       setTimeout(() => {
         try {
-          updateActivity();
+          // Don't update activity if user is actively interacting with forms
+          const activeElement = document.activeElement;
+          const isFormInteraction = activeElement && (
+            activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'SELECT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.contentEditable === 'true' ||
+            activeElement.closest('[role="dialog"]') || // Mantine modals
+            activeElement.closest('.mantine-Modal-root') || // Mantine modals
+            activeElement.closest('.mantine-DateInput-input') // Mantine date inputs
+          );
+          
+          if (!isFormInteraction) {
+            updateActivity();
+          }
         } catch (error) {
           // Activity update failed - this is expected during logout/navigation
           // No need to log as it's normal behavior
         }
-      }, 0);
+      }, 100); // Small delay to allow form interactions to complete
     }
   }, [updateActivity]);
   const getApiStats = () => ({});
