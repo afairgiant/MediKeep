@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   Modal,
   TextInput,
@@ -169,6 +169,18 @@ const BaseMedicalForm = ({
         );
 
       case 'select':
+        // Calculate responsive maxDropdownHeight to prevent viewport calculation loops on small screens
+        const responsiveMaxHeight = maxDropdownHeight || (() => {
+          // Use tracked window height to determine appropriate dropdown height
+          if (windowSize.height < 600) {
+            return 150; // Very small screens (phones in landscape)
+          } else if (windowSize.height < 800) {
+            return 200; // Small screens (tablets, small laptops) 
+          } else {
+            return 280; // Larger screens
+          }
+        })();
+        
         return (
           <Select
             {...baseProps}
@@ -176,11 +188,9 @@ const BaseMedicalForm = ({
             onChange={handleSelectChange(name)}
             searchable={searchable}
             clearable={clearable}
-            maxDropdownHeight={maxDropdownHeight}
-
+            maxDropdownHeight={responsiveMaxHeight}
             disabled={isFieldLoading}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
-
           />
         );
 
@@ -387,6 +397,45 @@ const BaseMedicalForm = ({
     return undefined;
   };
 
+  // Track window size to handle responsive changes
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth || 1024,
+    height: window.innerHeight || 768
+  });
+
+  useEffect(() => {
+    let resizeTimeout;
+    const handleResize = () => {
+      // Debounce resize events to prevent excessive updates
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth || 1024,
+          height: window.innerHeight || 768
+        });
+      }, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, []);
+
+  // Calculate responsive modal size to prevent issues on small screens
+  const responsiveModalSize = useMemo(() => {
+    if (typeof modalSize === 'string') {
+      // Override modal size on small screens to prevent overflow
+      if (windowSize.width < 768) {
+        return 'sm'; // Force smaller modal on mobile
+      } else if (windowSize.width < 1024) {
+        return modalSize === 'xl' ? 'lg' : modalSize; // Cap at 'lg' on tablets/small laptops
+      }
+    }
+    return modalSize;
+  }, [modalSize, windowSize.width]);
+
   return (
     <Modal
       opened={isOpen}
@@ -396,10 +445,13 @@ const BaseMedicalForm = ({
           {title}
         </Text>
       }
-      size={modalSize}
+      size={responsiveModalSize}
       centered
       styles={{
-        body: { padding: '1.5rem', paddingBottom: '2rem' },
+        body: { 
+          padding: windowSize.width < 768 ? '1rem' : '1.5rem', 
+          paddingBottom: windowSize.width < 768 ? '1.5rem' : '2rem' 
+        },
         header: { paddingBottom: '1rem' },
       }}
       overflow="inside"
