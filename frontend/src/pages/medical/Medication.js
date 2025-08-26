@@ -247,12 +247,13 @@ const Medication = () => {
       return;
     }
 
+    // Prepare medication data - ensure empty strings become null for optional fields
     const medicationData = {
-      medication_name: formData.medication_name?.trim() || '',
-      dosage: formData.dosage?.trim() || '',
-      frequency: formData.frequency?.trim() || '',
-      route: formData.route?.trim() || '',
-      indication: formData.indication?.trim() || '',
+      medication_name: formData.medication_name?.trim() || '',  // Required field
+      dosage: formData.dosage?.trim() || null,
+      frequency: formData.frequency?.trim() || null,
+      route: formData.route?.trim() || null,
+      indication: formData.indication?.trim() || null,
       status: formData.status || 'active',
       patient_id: currentPatient.id,
       practitioner_id: formData.practitioner_id
@@ -268,6 +269,13 @@ const Medication = () => {
     if (formData.effective_period_end) {
       medicationData.effective_period_end = formData.effective_period_end;
     }
+
+    // Log the data being sent for debugging
+    logger.debug('Submitting medication data', {
+      component: 'Medication',
+      medicationData,
+      formData
+    });
 
     try {
       let success;
