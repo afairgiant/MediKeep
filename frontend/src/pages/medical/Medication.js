@@ -239,7 +239,7 @@ const Medication = () => {
     }
   };
 
-  const handleSubmit = useCallback(async e => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
@@ -284,7 +284,7 @@ const Medication = () => {
     } catch (error) {
       console.error('Error during save operation:', error);
     }
-  }, [formData, editingMedication, currentPatient?.id, createItem, updateItem, refreshData, setError, resetForm]);
+  };
 
 
   // Get processed data from data management
