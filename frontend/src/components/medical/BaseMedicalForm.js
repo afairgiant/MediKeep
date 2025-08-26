@@ -70,32 +70,38 @@ const BaseMedicalForm = ({
   const lastRenderTime = useRef(Date.now());
   const dropdownOpenCount = useRef(0);
   
-  useEffect(() => {
-    renderCount.current++;
-    const now = Date.now();
-    const timeSinceLastRender = now - lastRenderTime.current;
-    lastRenderTime.current = now;
-    
-    logger.debug('BaseMedicalForm render', {
-      component: 'BaseMedicalForm',
-      renderCount: renderCount.current,
-      timeSinceLastRender,
-      isOpen,
-      windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight,
-      fieldsCount: fields.length,
-      formDataKeys: Object.keys(formData || {}).length
+  // Only log renders in development
+  if (process.env.NODE_ENV === 'development') {
+    useEffect(() => {
+      renderCount.current++;
+      const now = Date.now();
+      const timeSinceLastRender = now - lastRenderTime.current;
+      lastRenderTime.current = now;
+      
+      // Only log every 5th render to reduce noise
+      if (renderCount.current % 5 === 0 || timeSinceLastRender < 50) {
+        logger.debug('BaseMedicalForm render', {
+          component: 'BaseMedicalForm',
+          renderCount: renderCount.current,
+          timeSinceLastRender,
+          isOpen,
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
+          fieldsCount: fields.length,
+          formDataKeys: Object.keys(formData || {}).length
+        });
+      }
+      
+      // Warn if rendering too frequently
+      if (timeSinceLastRender < 50 && renderCount.current > 10) {
+        logger.warn('Rapid re-rendering detected in BaseMedicalForm', {
+          component: 'BaseMedicalForm',
+          renderCount: renderCount.current,
+          timeSinceLastRender
+        });
+      }
     });
-    
-    // Warn if rendering too frequently
-    if (timeSinceLastRender < 50 && renderCount.current > 10) {
-      logger.warn('Rapid re-rendering detected in BaseMedicalForm', {
-        component: 'BaseMedicalForm',
-        renderCount: renderCount.current,
-        timeSinceLastRender
-      });
-    }
-  });
+  }
   
   // Set up performance observer to detect long tasks
   useEffect(() => {
@@ -161,6 +167,7 @@ const BaseMedicalForm = ({
   };
 
   // Track window size to handle responsive changes
+  // Use a ref for the current size to avoid dependency issues
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth || 1024,
     height: window.innerHeight || 768
@@ -171,29 +178,32 @@ const BaseMedicalForm = ({
     let resizeTimeout;
     const handleResize = () => {
       resizeCallCount.current++;
-      logger.debug('Window resize event', {
-        component: 'BaseMedicalForm',
-        resizeCallCount: resizeCallCount.current,
-        currentWidth: window.innerWidth,
-        currentHeight: window.innerHeight
-      });
       
       // Debounce resize events to prevent excessive updates
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        const newSize = {
-          width: window.innerWidth || 1024,
-          height: window.innerHeight || 768
-        };
-        
-        logger.debug('Setting new window size', {
-          component: 'BaseMedicalForm',
-          oldSize: windowSize,
-          newSize
+        setWindowSize(prevSize => {
+          const newSize = {
+            width: window.innerWidth || 1024,
+            height: window.innerHeight || 768
+          };
+          
+          // Only update if size actually changed
+          if (prevSize.width === newSize.width && prevSize.height === newSize.height) {
+            return prevSize;
+          }
+          
+          if (process.env.NODE_ENV === 'development') {
+            logger.debug('Window size changed', {
+              component: 'BaseMedicalForm',
+              oldSize: prevSize,
+              newSize
+            });
+          }
+          
+          return newSize;
         });
-        
-        setWindowSize(newSize);
-      }, 150);
+      }, 250); // Increased debounce time
     };
 
     window.addEventListener('resize', handleResize);
@@ -201,7 +211,7 @@ const BaseMedicalForm = ({
       window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeout);
     };
-  }, []);
+  }, []); // Empty dependency array - no need for windowSize here
 
   // Memoize dropdown height calculation based on window size
   const getResponsiveDropdownHeight = useMemo(() => {
@@ -290,16 +300,19 @@ const BaseMedicalForm = ({
         // Use memoized function to get responsive dropdown height
         const responsiveMaxHeight = getResponsiveDropdownHeight(maxDropdownHeight);
         
-        logger.debug('Rendering Select field', {
-          component: 'BaseMedicalForm',
-          fieldName: name,
-          optionsCount: selectOptions.length,
-          responsiveMaxHeight,
-          windowHeight: windowSize.height,
-          isFieldLoading,
-          searchable,
-          clearable
-        });
+        // Only log in development and for specific fields
+        if (process.env.NODE_ENV === 'development' && (name === 'practitioner_id' || name === 'pharmacy_id')) {
+          logger.debug('Rendering Select field', {
+            component: 'BaseMedicalForm',
+            fieldName: name,
+            optionsCount: selectOptions.length,
+            responsiveMaxHeight,
+            windowHeight: windowSize.height,
+            isFieldLoading,
+            searchable,
+            clearable
+          });
+        }
         
         // Disable certain features on small screens to prevent performance issues
         const isSmallScreen = windowSize.height < 800;
@@ -314,15 +327,6 @@ const BaseMedicalForm = ({
             maxDropdownHeight={responsiveMaxHeight}
             disabled={isFieldLoading}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
-            withinPortal={true}
-            portalProps={{ 
-              target: document.body,
-              style: { zIndex: 9999 }
-            }}
-            transitionProps={{ 
-              transition: isSmallScreen ? 'fade' : 'pop',
-              duration: isSmallScreen ? 100 : 150
-            }}
             limit={isSmallScreen ? 20 : undefined}
             onDropdownOpen={() => {
               dropdownOpenCount.current++;
