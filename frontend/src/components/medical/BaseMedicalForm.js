@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import {
   Modal,
   TextInput,
@@ -17,6 +17,7 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
+import logger from '../../services/logger';
 
 /**
  * BaseMedicalForm - Reusable form component for medical data entry
@@ -64,6 +65,65 @@ const BaseMedicalForm = ({
   // Modal customization
   modalSize = "lg",
 }) => {
+  // Debug: Track render cycles
+  const renderCount = useRef(0);
+  const lastRenderTime = useRef(Date.now());
+  const dropdownOpenCount = useRef(0);
+  
+  useEffect(() => {
+    renderCount.current++;
+    const now = Date.now();
+    const timeSinceLastRender = now - lastRenderTime.current;
+    lastRenderTime.current = now;
+    
+    logger.debug('BaseMedicalForm render', {
+      component: 'BaseMedicalForm',
+      renderCount: renderCount.current,
+      timeSinceLastRender,
+      isOpen,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      fieldsCount: fields.length,
+      formDataKeys: Object.keys(formData || {}).length
+    });
+    
+    // Warn if rendering too frequently
+    if (timeSinceLastRender < 50 && renderCount.current > 10) {
+      logger.warn('Rapid re-rendering detected in BaseMedicalForm', {
+        component: 'BaseMedicalForm',
+        renderCount: renderCount.current,
+        timeSinceLastRender
+      });
+    }
+  });
+  
+  // Set up performance observer to detect long tasks
+  useEffect(() => {
+    if (!isOpen || typeof PerformanceObserver === 'undefined') return;
+    
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.duration > 50) {
+          logger.warn('Long task detected in BaseMedicalForm', {
+            component: 'BaseMedicalForm',
+            taskDuration: entry.duration,
+            taskName: entry.name,
+            windowHeight: window.innerHeight
+          });
+        }
+      }
+    });
+    
+    try {
+      observer.observe({ entryTypes: ['longtask'] });
+    } catch (e) {
+      logger.debug('PerformanceObserver not supported for longtask', {
+        component: 'BaseMedicalForm'
+      });
+    }
+    
+    return () => observer.disconnect();
+  }, [isOpen]);
   const { 
     handleTextInputChange, 
     handleSelectChange, 
@@ -105,17 +165,34 @@ const BaseMedicalForm = ({
     width: window.innerWidth || 1024,
     height: window.innerHeight || 768
   });
+  const resizeCallCount = useRef(0);
 
   useEffect(() => {
     let resizeTimeout;
     const handleResize = () => {
+      resizeCallCount.current++;
+      logger.debug('Window resize event', {
+        component: 'BaseMedicalForm',
+        resizeCallCount: resizeCallCount.current,
+        currentWidth: window.innerWidth,
+        currentHeight: window.innerHeight
+      });
+      
       // Debounce resize events to prevent excessive updates
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        setWindowSize({
+        const newSize = {
           width: window.innerWidth || 1024,
           height: window.innerHeight || 768
+        };
+        
+        logger.debug('Setting new window size', {
+          component: 'BaseMedicalForm',
+          oldSize: windowSize,
+          newSize
         });
+        
+        setWindowSize(newSize);
       }, 150);
     };
 
@@ -213,16 +290,56 @@ const BaseMedicalForm = ({
         // Use memoized function to get responsive dropdown height
         const responsiveMaxHeight = getResponsiveDropdownHeight(maxDropdownHeight);
         
+        logger.debug('Rendering Select field', {
+          component: 'BaseMedicalForm',
+          fieldName: name,
+          optionsCount: selectOptions.length,
+          responsiveMaxHeight,
+          windowHeight: windowSize.height,
+          isFieldLoading,
+          searchable,
+          clearable
+        });
+        
+        // Disable certain features on small screens to prevent performance issues
+        const isSmallScreen = windowSize.height < 800;
+        
         return (
           <Select
             {...baseProps}
             data={selectOptions}
             onChange={handleSelectChange(name)}
-            searchable={searchable}
+            searchable={searchable && !isSmallScreen}
             clearable={clearable}
             maxDropdownHeight={responsiveMaxHeight}
             disabled={isFieldLoading}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
+            withinPortal={true}
+            portalProps={{ 
+              target: document.body,
+              style: { zIndex: 9999 }
+            }}
+            transitionProps={{ 
+              transition: isSmallScreen ? 'fade' : 'pop',
+              duration: isSmallScreen ? 100 : 150
+            }}
+            limit={isSmallScreen ? 20 : undefined}
+            onDropdownOpen={() => {
+              dropdownOpenCount.current++;
+              logger.info('Select dropdown opened', {
+                component: 'BaseMedicalForm',
+                fieldName: name,
+                dropdownOpenCount: dropdownOpenCount.current,
+                windowHeight: windowSize.height,
+                maxDropdownHeight: responsiveMaxHeight
+              });
+            }}
+            onDropdownClose={() => {
+              logger.info('Select dropdown closed', {
+                component: 'BaseMedicalForm',
+                fieldName: name
+              });
+            }}
           />
         );
 

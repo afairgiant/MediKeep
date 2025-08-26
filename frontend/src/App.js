@@ -65,6 +65,7 @@ import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
 import ReportBuilder from './pages/reports/ReportBuilder';
+import TestMedicationForm from './pages/TestMedicationForm';
 
 // Components
 import { ErrorBoundary } from './components';
@@ -513,6 +514,14 @@ function App() {
                           }
                         />
                         {/* Development/Testing Routes */}
+                        <Route
+                          path="/test/medication-form"
+                          element={
+                            <ProtectedRoute>
+                              <TestMedicationForm />
+                            </ProtectedRoute>
+                          }
+                        />
                         {/* Default redirect */}
                         <Route
                           path="/"
