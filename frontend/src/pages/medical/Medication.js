@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -32,18 +32,43 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import { MedicationCard, MedicationViewModal, MedicationFormWrapper } from '../../components/medical/medications';
+import logger from '../../services/logger';
 
 const Medication = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  
+  // Form state - moved up to be available for refs logic
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingMedication, setViewingMedication] = useState(null);
+  const [editingMedication, setEditingMedication] = useState(null);
 
   // Get practitioners and pharmacies data
   const { practitioners: practitionersObject, pharmacies: pharmaciesObject } =
     usePatientWithStaticData();
 
-  const practitioners = practitionersObject?.practitioners || [];
-  const pharmacies = pharmaciesObject?.pharmacies || [];
+  // Use refs to prevent data from changing while form is open
+  const practitionersRef = useRef([]);
+  const pharmaciesRef = useRef([]);
+  
+  // Only update refs when form is closed
+  useEffect(() => {
+    if (!showAddForm) {
+      practitionersRef.current = practitionersObject?.practitioners || [];
+      pharmaciesRef.current = pharmaciesObject?.pharmacies || [];
+      
+      logger.debug('Updated cached practitioners and pharmacies', {
+        component: 'Medication',
+        practitionersCount: practitionersRef.current.length,
+        pharmaciesCount: pharmaciesRef.current.length
+      });
+    }
+  }, [showAddForm, practitionersObject?.practitioners, pharmaciesObject?.pharmacies]);
+  
+  const practitioners = showAddForm ? practitionersRef.current : (practitionersObject?.practitioners || []);
+  const pharmacies = showAddForm ? pharmaciesRef.current : (pharmaciesObject?.pharmacies || []);
 
   // Modern data management with useMedicalData
   const {
@@ -92,11 +117,7 @@ const Medication = () => {
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
 
-  // Form state
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingMedication, setViewingMedication] = useState(null);
-  const [editingMedication, setEditingMedication] = useState(null);
+  // Form data state
   const [formData, setFormData] = useState({
     medication_name: '',
     dosage: '',
@@ -110,7 +131,7 @@ const Medication = () => {
     pharmacy_id: null,
   });
 
-  const handleInputChange = e => {
+  const handleInputChange = useCallback(e => {
     const { name, value } = e.target;
     let processedValue = value;
 
@@ -127,9 +148,9 @@ const Medication = () => {
       ...prev,
       [name]: processedValue,
     }));
-  };
+  }, []);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       medication_name: '',
       dosage: '',
@@ -144,12 +165,16 @@ const Medication = () => {
     });
     setEditingMedication(null);
     setShowAddForm(false);
-  };
+  }, []);
 
   const handleAddMedication = () => {
     resetForm();
     setShowAddForm(true);
   };
+  
+  const handleCloseForm = useCallback(() => {
+    setShowAddForm(false);
+  }, []);
 
   const handleEditMedication = medication => {
     setFormData({
@@ -222,12 +247,13 @@ const Medication = () => {
       return;
     }
 
+    // Prepare medication data - ensure empty strings become null for optional fields
     const medicationData = {
-      medication_name: formData.medication_name?.trim() || '',
-      dosage: formData.dosage?.trim() || '',
-      frequency: formData.frequency?.trim() || '',
-      route: formData.route?.trim() || '',
-      indication: formData.indication?.trim() || '',
+      medication_name: formData.medication_name?.trim() || '',  // Required field
+      dosage: formData.dosage?.trim() || null,
+      frequency: formData.frequency?.trim() || null,
+      route: formData.route?.trim() || null,
+      indication: formData.indication?.trim() || null,
       status: formData.status || 'active',
       patient_id: currentPatient.id,
       practitioner_id: formData.practitioner_id
@@ -243,6 +269,13 @@ const Medication = () => {
     if (formData.effective_period_end) {
       medicationData.effective_period_end = formData.effective_period_end;
     }
+
+    // Log the data being sent for debugging
+    logger.debug('Submitting medication data', {
+      component: 'Medication',
+      medicationData,
+      formData
+    });
 
     try {
       let success;
@@ -347,7 +380,7 @@ const Medication = () => {
         {/* Form Modal */}
         <MedicationFormWrapper
           isOpen={showAddForm}
-          onClose={() => setShowAddForm(false)}
+          onClose={handleCloseForm}
           title={editingMedication ? 'Edit Medication' : 'Add New Medication'}
           formData={formData}
           onInputChange={handleInputChange}
