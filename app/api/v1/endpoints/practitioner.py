@@ -136,3 +136,13 @@ def search_practitioners_by_name(
     with handle_database_errors(request=request):
         practitioners = practitioner.search_by_name(db, name=name)
         return practitioners
+
+
+@router.get("/specialties")
+def get_all_specialties(
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get all unique medical specialties from the database."""
+    specialties = practitioner.get_all_specialties(db)
+    return {"specialties": specialties}

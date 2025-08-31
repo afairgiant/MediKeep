@@ -699,14 +699,13 @@ export const practitionerFormFields = [
   },
   {
     name: 'specialty',
-    type: 'select',
+    type: 'combobox',
     label: 'Medical Specialty',
-    placeholder: 'Select specialty',
-    description: 'Primary area of medical practice',
+    placeholder: 'Search specialties or type custom...',
+    description: 'Select from list or type a custom specialty',
     required: true,
     gridColumn: 6,
-    searchable: true,
-    maxDropdownHeight: 300,
+    maxDropdownHeight: 200,
     dynamicOptions: 'specialties',
   },
   {

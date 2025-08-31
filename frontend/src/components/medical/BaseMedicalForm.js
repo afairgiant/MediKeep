@@ -3,6 +3,10 @@ import {
   Modal,
   TextInput,
   Select,
+  Autocomplete,
+  Combobox,
+  InputBase,
+  useCombobox,
   Textarea,
   NumberInput,
   Button,
@@ -166,67 +170,10 @@ const BaseMedicalForm = ({
     onSubmit(e);
   };
 
-  // Track window size to handle responsive changes
-  // Use a ref for the current size to avoid dependency issues
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth || 1024,
-    height: window.innerHeight || 768
-  });
-  const resizeCallCount = useRef(0);
-
-  useEffect(() => {
-    let resizeTimeout;
-    const handleResize = () => {
-      resizeCallCount.current++;
-      
-      // Debounce resize events to prevent excessive updates
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        setWindowSize(prevSize => {
-          const newSize = {
-            width: window.innerWidth || 1024,
-            height: window.innerHeight || 768
-          };
-          
-          // Only update if size actually changed
-          if (prevSize.width === newSize.width && prevSize.height === newSize.height) {
-            return prevSize;
-          }
-          
-          if (process.env.NODE_ENV === 'development') {
-            logger.debug('Window size changed', {
-              component: 'BaseMedicalForm',
-              oldSize: prevSize,
-              newSize
-            });
-          }
-          
-          return newSize;
-        });
-      }, 250); // Increased debounce time
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(resizeTimeout);
-    };
-  }, []); // Empty dependency array - no need for windowSize here
-
-  // Memoize dropdown height calculation based on window size
-  const getResponsiveDropdownHeight = useMemo(() => {
-    return (providedHeight) => {
-      if (providedHeight) return providedHeight;
-      
-      if (windowSize.height < 600) {
-        return 150; // Very small screens (phones in landscape)
-      } else if (windowSize.height < 800) {
-        return 200; // Small screens (tablets, small laptops) 
-      } else {
-        return 280; // Larger screens
-      }
-    };
-  }, [windowSize.height]);
+  // Static dropdown height to avoid resize observer issues
+  const getResponsiveDropdownHeight = (providedHeight) => {
+    return providedHeight || 250; // Fixed height to prevent ResizeObserver loops
+  };
 
   // Render individual form field based on configuration
   const renderField = (fieldConfig) => {
@@ -241,6 +188,7 @@ const BaseMedicalForm = ({
       dynamicOptions: dynamicOptionsKey,
       searchable = false,
       clearable = false,
+      creatable = false,
       minRows,
       maxRows,
       maxDate,
@@ -307,7 +255,7 @@ const BaseMedicalForm = ({
             fieldName: name,
             optionsCount: selectOptions.length,
             responsiveMaxHeight,
-            windowHeight: windowSize.height,
+            windowHeight: window.innerHeight,
             isFieldLoading,
             searchable,
             clearable
@@ -315,7 +263,7 @@ const BaseMedicalForm = ({
         }
         
         // Disable certain features on small screens to prevent performance issues
-        const isSmallScreen = windowSize.height < 800;
+        const isSmallScreen = window.innerHeight < 800;
         
         return (
           <Select
@@ -334,7 +282,7 @@ const BaseMedicalForm = ({
                 component: 'BaseMedicalForm',
                 fieldName: name,
                 dropdownOpenCount: dropdownOpenCount.current,
-                windowHeight: windowSize.height,
+                windowHeight: window.innerHeight,
                 maxDropdownHeight: responsiveMaxHeight
               });
             }}
@@ -346,6 +294,142 @@ const BaseMedicalForm = ({
             }}
           />
         );
+
+      case 'autocomplete':
+        // Convert options to simple string array for Autocomplete
+        const autocompleteOptions = selectOptions.map(option => 
+          typeof option === 'object' ? option.value : option
+        );
+        
+        return (
+          <Autocomplete
+            {...baseProps}
+            data={autocompleteOptions}
+            onChange={(value) => {
+              // Call the form's input change handler
+              onInputChange({ target: { name, value } });
+            }}
+            value={formData[name] || ''}
+            maxDropdownHeight={200}
+            disabled={isFieldLoading}
+            placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
+            limit={50}
+          />
+        );
+
+      case 'combobox':
+        // Enhanced combobox for specialty selection with custom input capability
+        const ComboboxField = () => {
+          const combobox = useCombobox({
+            onDropdownClose: () => combobox.resetSelectedOption(),
+          });
+
+          const [search, setSearch] = useState(formData[name] || '');
+          const [value, setValue] = useState(formData[name] || '');
+          
+          // Sync local state when formData changes (e.g., when editing different records)
+          useEffect(() => {
+            const currentValue = formData[name] || '';
+            setValue(currentValue);
+            
+            // Find if it's a known option to display the label instead of value
+            const option = selectOptions.find(opt => opt.value === currentValue);
+            if (option && option.label) {
+              setSearch(option.label);
+            } else {
+              setSearch(currentValue);
+            }
+          }, [formData[name], selectOptions]); // Re-run when formData[name] or options change
+
+          const exactOptionMatch = selectOptions.find(
+            (item) => item.value === search || item.label === search
+          );
+
+          const filteredOptions = exactOptionMatch
+            ? selectOptions
+            : selectOptions.filter((item) =>
+                (item.label || item.value).toLowerCase().includes(search.toLowerCase().trim())
+              );
+
+          const options = filteredOptions.map((item) => (
+            <Combobox.Option value={item.value} key={item.value}>
+              {item.label || item.value}
+            </Combobox.Option>
+          ));
+
+          return (
+            <Combobox
+              store={combobox}
+              withinPortal={true}
+              position="bottom-start"
+              middlewares={{ flip: true, shift: true }}
+              onOptionSubmit={(val) => {
+                if (val === '$create') {
+                  setValue(search);
+                  onInputChange({ target: { name, value: search } });
+                  
+                  // If this is the specialty field, add it to the cache for future use
+                  if (name === 'specialty') {
+                    // Dynamically import to avoid circular dependencies
+                    import('../../config/medicalSpecialties').then(({ addSpecialtyToCache, clearSpecialtiesCache }) => {
+                      addSpecialtyToCache(search);
+                      // Also clear cache to force fresh load next time
+                      clearSpecialtiesCache();
+                    });
+                  }
+                } else {
+                  const selectedOption = selectOptions.find(item => item.value === val);
+                  const displayValue = selectedOption ? selectedOption.label || selectedOption.value : val;
+                  setValue(displayValue);
+                  setSearch(displayValue);
+                  onInputChange({ target: { name, value: val } });
+                }
+                combobox.closeDropdown();
+              }}
+            >
+              <Combobox.Target>
+                <InputBase
+                  {...baseProps}
+                  rightSection={<Combobox.Chevron />}
+                  value={search}
+                  onChange={(event) => {
+                    combobox.openDropdown();
+                    combobox.updateSelectedOptionIndex();
+                    setSearch(event.currentTarget.value);
+                  }}
+                  onClick={() => combobox.openDropdown()}
+                  onFocus={() => combobox.openDropdown()}
+                  onBlur={() => {
+                    combobox.closeDropdown();
+                    setSearch(value || '');
+                  }}
+                  placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
+                  rightSectionPointerEvents="none"
+                  disabled={isFieldLoading}
+                />
+              </Combobox.Target>
+
+              <Combobox.Dropdown>
+                <Combobox.Options 
+                  style={{ 
+                    maxHeight: '200px', 
+                    overflowY: 'auto',
+                    overflowX: 'hidden'
+                  }}
+                >
+                  {search.trim() && !exactOptionMatch && (
+                    <Combobox.Option value="$create" style={{ fontWeight: 'bold', borderBottom: '1px solid #e9ecef' }}>
+                      + Add "{search}"
+                    </Combobox.Option>
+                  )}
+                  {options}
+                </Combobox.Options>
+              </Combobox.Dropdown>
+            </Combobox>
+          );
+        };
+
+        return <ComboboxField />;
 
       case 'number':
         return (
@@ -554,14 +638,14 @@ const BaseMedicalForm = ({
   const responsiveModalSize = useMemo(() => {
     if (typeof modalSize === 'string') {
       // Override modal size on small screens to prevent overflow
-      if (windowSize.width < 768) {
+      if (window.innerWidth < 768) {
         return 'sm'; // Force smaller modal on mobile
-      } else if (windowSize.width < 1024) {
+      } else if (window.innerWidth < 1024) {
         return modalSize === 'xl' ? 'lg' : modalSize; // Cap at 'lg' on tablets/small laptops
       }
     }
     return modalSize;
-  }, [modalSize, windowSize.width]);
+  }, [modalSize]);
 
   return (
     <Modal
@@ -576,8 +660,8 @@ const BaseMedicalForm = ({
       centered
       styles={{
         body: { 
-          padding: windowSize.width < 768 ? '1rem' : '1.5rem', 
-          paddingBottom: windowSize.width < 768 ? '1.5rem' : '2rem' 
+          padding: window.innerWidth < 768 ? '1rem' : '1.5rem', 
+          paddingBottom: window.innerWidth < 768 ? '1.5rem' : '2rem' 
         },
         header: { paddingBottom: '1rem' },
       }}
