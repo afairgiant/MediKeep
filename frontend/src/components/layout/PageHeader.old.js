@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, Button } from '@mantine/core';
@@ -50,7 +52,7 @@ const PageHeader = ({
         );
       }
     } catch (error) {
-      console.error('Error checking admin status:', error);
+      logger.error('Error checking admin status:', error);
     }
     return false;
   };

@@ -8,6 +8,7 @@ class UserPreferencesBase(BaseModel):
     """Base User Preferences schema with common fields."""
 
     unit_system: str
+    session_timeout_minutes: Optional[int] = 30
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None
     paperless_api_token: Optional[str] = None
@@ -16,6 +17,27 @@ class UserPreferencesBase(BaseModel):
     default_storage_backend: Optional[str] = "local"
     paperless_auto_sync: Optional[bool] = False
     paperless_sync_tags: Optional[bool] = True
+
+    @validator("session_timeout_minutes")
+    def validate_session_timeout(cls, v):
+        """
+        Validate that the session timeout is within reasonable bounds.
+        
+        Args:
+            v: The session timeout in minutes
+            
+        Returns:
+            Validated timeout value
+            
+        Raises:
+            ValueError: If timeout is not within allowed range
+        """
+        if v is not None:
+            if v < 5:
+                raise ValueError("Session timeout must be at least 5 minutes")
+            if v > 1440:  # 24 hours
+                raise ValueError("Session timeout cannot exceed 1440 minutes (24 hours)")
+        return v
 
     @validator("unit_system")
     def validate_unit_system(cls, v):
@@ -111,6 +133,7 @@ class UserPreferencesUpdate(BaseModel):
     """Schema for updating user preferences."""
 
     unit_system: Optional[str] = None
+    session_timeout_minutes: Optional[int] = None
     paperless_enabled: Optional[bool] = None
     paperless_url: Optional[str] = None
     paperless_username: Optional[str] = None
@@ -118,6 +141,16 @@ class UserPreferencesUpdate(BaseModel):
     default_storage_backend: Optional[str] = None
     paperless_auto_sync: Optional[bool] = None
     paperless_sync_tags: Optional[bool] = None
+
+    @validator("session_timeout_minutes")
+    def validate_session_timeout(cls, v):
+        """Validate session timeout if provided."""
+        if v is not None:
+            if v < 5:
+                raise ValueError("Session timeout must be at least 5 minutes")
+            if v > 1440:  # 24 hours
+                raise ValueError("Session timeout cannot exceed 1440 minutes (24 hours)")
+        return v
 
     @validator("unit_system")
     def validate_unit_system(cls, v):

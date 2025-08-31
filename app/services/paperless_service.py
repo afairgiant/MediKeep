@@ -2003,8 +2003,8 @@ class PaperlessServiceWithFallback:
                 if token_service:
                     try:
                         await token_service.__aexit__(None, None, None)
-                    except:
-                        pass
+                    except Exception:
+                        pass  # Silently ignore cleanup errors
         
         # Fallback to username/password if available
         if self.encrypted_username and self.encrypted_password:

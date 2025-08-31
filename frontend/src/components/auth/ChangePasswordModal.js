@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState } from 'react';
 import { Modal } from '../ui';
 import { Button, Alert } from '../ui';
@@ -84,7 +86,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         handleClose();
       }, 2000);
     } catch (error) {
-      console.error('Error changing password:', error);
+      logger.error('Error changing password:', error);
       setError(error.message || 'Failed to change password. Please try again.');
     } finally {
       setIsChangingPassword(false);

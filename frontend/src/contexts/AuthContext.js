@@ -20,6 +20,7 @@ const initialState = {
   error: null,
   tokenExpiry: null,
   lastActivity: Date.now(),
+  sessionTimeoutMinutes: 30, // Default timeout
 };
 
 // Auth Actions
@@ -32,6 +33,7 @@ const AUTH_ACTIONS = {
   UPDATE_ACTIVITY: 'UPDATE_ACTIVITY',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR',
+  UPDATE_SESSION_TIMEOUT: 'UPDATE_SESSION_TIMEOUT',
 };
 
 // Auth Reducer
@@ -53,6 +55,7 @@ function authReducer(state, action) {
         error: null,
         tokenExpiry: action.payload.tokenExpiry,
         lastActivity: Date.now(),
+        sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 30,
       };
 
     case AUTH_ACTIONS.LOGIN_FAILURE:
@@ -97,6 +100,12 @@ function authReducer(state, action) {
       return {
         ...state,
         error: null,
+      };
+
+    case AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT:
+      return {
+        ...state,
+        sessionTimeoutMinutes: action.payload,
       };
 
     default:
@@ -324,13 +333,15 @@ export function AuthProvider({ children }) {
     const checkActivity = () => {
       try {
         const timeSinceLastActivity = Date.now() - state.lastActivity;
+        // Use user's custom timeout or fallback to config
+        const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
         
-        if (timeSinceLastActivity > config.SESSION_TIMEOUT) {
+        if (timeSinceLastActivity > sessionTimeoutMs) {
           secureActivityLogger.logSessionEvent({
             action: 'session_expired',
             reason: 'inactivity',
             timeSinceLastActivity,
-            sessionTimeout: config.SESSION_TIMEOUT
+            sessionTimeout: sessionTimeoutMs
           });
           
           toast.info('Session expired due to inactivity');
@@ -357,9 +368,11 @@ export function AuthProvider({ children }) {
     try {
       activityTimer = setInterval(checkActivity, config.SESSION_CHECK_INTERVAL);
       
+      const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
       secureActivityLogger.logSessionEvent({
         action: 'session_monitoring_started',
-        sessionTimeout: config.SESSION_TIMEOUT,
+        sessionTimeout: sessionTimeoutMs,
+        sessionTimeoutMinutes: state.sessionTimeoutMinutes || 30,
         checkInterval: config.SESSION_CHECK_INTERVAL
       });
     } catch (error) {
@@ -446,7 +459,7 @@ export function AuthProvider({ children }) {
       // Check if this is SSO login (user object + token) or regular login (credentials)
       const isSSO = tokenFromSSO !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
       
-      let user, token, tokenExpiry;
+      let user, token, tokenExpiry, result;
       
       if (isSSO) {
         // SSO login - we already have user and token
@@ -484,7 +497,7 @@ export function AuthProvider({ children }) {
         });
       } else {
         // Regular username/password login
-        const result = await authService.login(credentialsOrUser);
+        result = await authService.login(credentialsOrUser);
 
         if (!result.success) {
           dispatch({
@@ -555,12 +568,16 @@ export function AuthProvider({ children }) {
       await updateStoredToken(token, tokenExpiry);
       await updateStoredUser(user);
 
+      // Get session timeout from result or use default
+      const sessionTimeoutMinutes = (isSSO ? 30 : result?.sessionTimeoutMinutes) || 30;
+      
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: {
           user,
           token,
           tokenExpiry,
+          sessionTimeoutMinutes,
         },
       });
 
@@ -663,6 +680,18 @@ export function AuthProvider({ children }) {
     return false;
   };
 
+  const updateSessionTimeout = (timeoutMinutes) => {
+    dispatch({ 
+      type: AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT, 
+      payload: timeoutMinutes 
+    });
+    logger.info('Session timeout updated', {
+      category: 'auth_timeout_update',
+      newTimeout: timeoutMinutes,
+      userId: state.user?.id
+    });
+  };
+
   const contextValue = {
     // State
     user: state.user,
@@ -670,6 +699,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
     error: state.error,
+    sessionTimeoutMinutes: state.sessionTimeoutMinutes,
 
     // Actions
     login,
@@ -677,6 +707,7 @@ export function AuthProvider({ children }) {
     updateActivity,
     clearError,
     updateUser,
+    updateSessionTimeout,
 
     // Utilities
     hasRole,

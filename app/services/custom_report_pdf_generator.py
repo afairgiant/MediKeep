@@ -227,7 +227,7 @@ class CustomReportPDFGenerator:
         if isinstance(gen_date, str):
             try:
                 gen_date = datetime.fromisoformat(gen_date)
-            except:
+            except ValueError:
                 gen_date = datetime.now()
         
         info_text = f"Generated: {gen_date.strftime('%B %d, %Y at %I:%M %p')} | Confidential Medical Information"
@@ -292,8 +292,8 @@ class CustomReportPDFGenerator:
             if isinstance(dob, str):
                 try:
                     dob = datetime.fromisoformat(dob).strftime('%m/%d/%Y')
-                except:
-                    pass
+                except ValueError:
+                    pass  # Keep original format if parsing fails
             patient_info.append(['DOB:', str(dob)])
         
         # Calculate age if DOB available
@@ -305,8 +305,8 @@ class CustomReportPDFGenerator:
                     birth_date = patient_data['date_of_birth']
                 age = datetime.now().year - birth_date.year
                 patient_info.append(['Age:', f"{age} years"])
-            except:
-                pass
+            except (ValueError, TypeError, AttributeError):
+                pass  # Skip age if date of birth is invalid
         
         if patient_data.get('gender'):
             patient_info.append(['Gender:', patient_data.get('gender')])
@@ -533,8 +533,8 @@ class CustomReportPDFGenerator:
             if isinstance(dob, str):
                 try:
                     dob = datetime.fromisoformat(dob).strftime('%B %d, %Y')
-                except:
-                    pass
+                except ValueError:
+                    pass  # Keep original format if parsing fails
             patient_info.append(['Date of Birth:', str(dob)])
         
         if patient_data.get('gender'):
@@ -1552,10 +1552,10 @@ class CustomReportPDFGenerator:
             try:
                 date_obj = datetime.fromisoformat(date_value.replace('Z', '+00:00'))
                 return date_obj.strftime('%B %d, %Y')
-            except:
+            except ValueError:
                 return date_value
         
         try:
             return date_value.strftime('%B %d, %Y')
-        except:
+        except AttributeError:
             return str(date_value)

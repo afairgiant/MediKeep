@@ -129,8 +129,8 @@ class CredentialEncryption:
             base64.urlsafe_b64decode(token.encode())
             # If it's much longer than original token, it's likely encrypted
             return len(token) > 60  # Paperless tokens are ~40 chars, encrypted much longer
-        except:
-            return False
+        except (ValueError, TypeError):
+            return False  # Invalid base64 or encoding
     
     def _is_valid_token_format(self, token: str) -> bool:
         """

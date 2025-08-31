@@ -2,6 +2,8 @@
  * Activity Tracking Configuration
  * Centralized configuration for session timeout and activity tracking
  */
+import logger from '../services/logger';
+
 
 /**
  * Session and Activity Configuration
@@ -65,12 +67,12 @@ export const validateActivityConfig = () => {
   );
   
   if (maxThrottle >= config.SESSION_TIMEOUT / 2) {
-    console.warn('Activity throttle intervals may be too large compared to session timeout');
+    logger.warn('Activity throttle intervals may be too large compared to session timeout');
   }
   
   // Ensure session check interval is reasonable
   if (config.SESSION_CHECK_INTERVAL >= config.SESSION_TIMEOUT / 3) {
-    console.warn('Session check interval may be too large for effective timeout detection');
+    logger.warn('Session check interval may be too large for effective timeout detection');
   }
   
   return true;

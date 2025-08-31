@@ -1,3 +1,5 @@
+import logger from '../logger';
+
 import { apiService } from './index';
 
 /**
@@ -158,7 +160,7 @@ export const exportPaperlessData = async () => {
  * @returns {Promise} Task status and result
  */
 export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, intervalMs = 1000, onBackgroundTransition = null) => {
-  console.log(`🔍 Starting task polling for ${taskUuid} with ${maxAttempts} max attempts`);
+  logger.info(`🔍 Starting task polling for ${taskUuid} with ${maxAttempts} max attempts`);
   
   const FOREGROUND_ATTEMPTS = 30; // 30 seconds of foreground polling
   
@@ -166,17 +168,17 @@ export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, interv
     try {
       const response = await apiService.get(`/paperless/tasks/${taskUuid}/status`);
       
-      console.log(`🔍 Attempt ${attempt + 1}/${maxAttempts}: Task status = ${response.status}`, response);
+      logger.info(`🔍 Attempt ${attempt + 1}/${maxAttempts}: Task status = ${response.status}`, response);
       
       // Check if task is completed (SUCCESS or FAILURE)
       if (response.status === 'SUCCESS' || response.status === 'FAILURE') {
-        console.log(`✅ Task completed after ${attempt + 1} attempts with status: ${response.status}`);
+        logger.info(`✅ Task completed after ${attempt + 1} attempts with status: ${response.status}`);
         return response;
       }
       
       // After 30 seconds (30 attempts), transition to background processing
       if (attempt === FOREGROUND_ATTEMPTS - 1 && onBackgroundTransition) {
-        console.log(`🔄 Transitioning to background processing after ${FOREGROUND_ATTEMPTS} attempts`);
+        logger.info(`🔄 Transitioning to background processing after ${FOREGROUND_ATTEMPTS} attempts`);
         
         // Notify caller that we're going to background
         onBackgroundTransition(taskUuid);
@@ -193,11 +195,11 @@ export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, interv
       if (attempt < maxAttempts - 1) {
         // Use longer intervals after transitioning to background (if we somehow get here)
         const currentInterval = attempt >= FOREGROUND_ATTEMPTS ? 10000 : intervalMs;
-        console.log(`⏱️ Waiting ${currentInterval}ms before next attempt...`);
+        logger.info(`⏱️ Waiting ${currentInterval}ms before next attempt...`);
         await new Promise(resolve => setTimeout(resolve, currentInterval));
       }
     } catch (error) {
-      console.log(`❌ Attempt ${attempt + 1}/${maxAttempts} failed:`, error.message);
+      logger.info(`❌ Attempt ${attempt + 1}/${maxAttempts} failed:`, error.message);
       // If we can't get task status, continue polling unless it's the last attempt
       if (attempt === maxAttempts - 1) {
         throw new Error(`Task status polling failed: ${error.message}`);
@@ -218,7 +220,7 @@ export const pollPaperlessTaskStatus = async (taskUuid, maxAttempts = 60, interv
  * @returns {Promise} Resolution result
  */
 export const resolveBackgroundTask = async (taskUuid, entityType, entityId, fileName) => {
-  console.log(`🔄 Starting background task resolution for ${taskUuid}`);
+  logger.info(`🔄 Starting background task resolution for ${taskUuid}`);
   
   const MAX_BACKGROUND_ATTEMPTS = 60; // 10 minutes with 10-second intervals
   const BACKGROUND_INTERVAL = 10000; // 10 seconds
@@ -227,11 +229,11 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
     try {
       const response = await apiService.get(`/paperless/tasks/${taskUuid}/status`);
       
-      console.log(`🔄 Background attempt ${attempt + 1}/${MAX_BACKGROUND_ATTEMPTS}: Task status = ${response.status}`);
+      logger.info(`🔄 Background attempt ${attempt + 1}/${MAX_BACKGROUND_ATTEMPTS}: Task status = ${response.status}`);
       
       // Check if task is completed (SUCCESS or FAILURE)
       if (response.status === 'SUCCESS' || response.status === 'FAILURE') {
-        console.log(`✅ Background task completed after ${attempt + 1} attempts with status: ${response.status}`);
+        logger.info(`✅ Background task completed after ${attempt + 1} attempts with status: ${response.status}`);
         
         // Update the entity file with the final result
         try {
@@ -258,7 +260,7 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
           }).catch(console.warn);
           
         } catch (updateError) {
-          console.error('❌ Failed to update entity file after background resolution:', updateError);
+          logger.error('❌ Failed to update entity file after background resolution:', updateError);
         }
         
         return response;
@@ -266,15 +268,15 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
       
       // Wait before next attempt if task is still pending/running
       if (attempt < MAX_BACKGROUND_ATTEMPTS - 1) {
-        console.log(`⏱️ Background waiting ${BACKGROUND_INTERVAL}ms before next attempt...`);
+        logger.info(`⏱️ Background waiting ${BACKGROUND_INTERVAL}ms before next attempt...`);
         await new Promise(resolve => setTimeout(resolve, BACKGROUND_INTERVAL));
       }
     } catch (error) {
-      console.log(`❌ Background attempt ${attempt + 1}/${MAX_BACKGROUND_ATTEMPTS} failed:`, error.message);
+      logger.info(`❌ Background attempt ${attempt + 1}/${MAX_BACKGROUND_ATTEMPTS} failed:`, error.message);
       
       // If we can't get task status, continue polling unless it's the last attempt
       if (attempt === MAX_BACKGROUND_ATTEMPTS - 1) {
-        console.error('❌ Background task resolution failed after all attempts');
+        logger.error('❌ Background task resolution failed after all attempts');
         
         // Mark as failed
         try {
@@ -287,7 +289,7 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
             sync_status: 'failed'
           });
         } catch (updateError) {
-          console.error('❌ Failed to mark task as failed:', updateError);
+          logger.error('❌ Failed to mark task as failed:', updateError);
         }
         
         throw new Error(`Background task resolution failed: ${error.message}`);
@@ -296,7 +298,7 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
     }
   }
   
-  console.error('❌ Background task resolution timed out');
+  logger.error('❌ Background task resolution timed out');
   throw new Error('Background task resolution timeout');
 };
 
@@ -342,7 +344,7 @@ export const searchDocumentByFilenameAndTime = async (filename, uploadTime = nul
         }
       }
     } catch (titleSearchError) {
-      console.warn('Title search failed, trying date-based search:', titleSearchError);
+      logger.warn('Title search failed, trying date-based search:', titleSearchError);
     }
     
     // Fallback: search with filename without title: prefix
@@ -374,13 +376,13 @@ export const searchDocumentByFilenameAndTime = async (filename, uploadTime = nul
         }
       }
     } catch (dateSearchError) {
-      console.warn('Simple filename search failed:', dateSearchError);
+      logger.warn('Simple filename search failed:', dateSearchError);
     }
     
     return null;
     
   } catch (error) {
-    console.error('Error searching for document by filename and time:', error);
+    logger.error('Error searching for document by filename and time:', error);
     return null;
   }
 };

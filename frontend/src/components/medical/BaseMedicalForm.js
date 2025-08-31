@@ -378,7 +378,7 @@ const BaseMedicalForm = ({
               dateValue = null;
             }
           } catch (error) {
-            console.error(`Error parsing date for field ${name}:`, error);
+            logger.error(`Error parsing date for field ${name}:`, error);
             dateValue = null;
           }
         }
@@ -422,7 +422,7 @@ const BaseMedicalForm = ({
             }
           }
         } catch (error) {
-          console.error(`Error calculating dynamic min date:`, error);
+          logger.error(`Error calculating dynamic min date:`, error);
         }
         
         // Handle dynamic maxDate - use current date if maxDate is a function
@@ -430,7 +430,7 @@ const BaseMedicalForm = ({
         try {
           dynamicMaxDate = typeof maxDate === 'function' ? maxDate() : maxDate;
         } catch (error) {
-          console.error(`Error calculating dynamic max date:`, error);
+          logger.error(`Error calculating dynamic max date:`, error);
         }
 
         return (
@@ -493,7 +493,7 @@ const BaseMedicalForm = ({
         );
 
       default:
-        console.warn(`Unknown field type: ${type} for field: ${name}`);
+        logger.warn(`Unknown field type: ${type} for field: ${name}`);
         return null;
     }
   };

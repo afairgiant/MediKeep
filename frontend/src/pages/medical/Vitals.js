@@ -2,6 +2,8 @@
  * Vitals Page Component - Enhanced Version with Mantine UI
  * Main page for managing patient vital signs with modern UX
  */
+import logger from '../../services/logger';
+
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
@@ -184,7 +186,7 @@ const Vitals = () => {
       const statsData = statsResponse?.data || statsResponse;
       setStats(statsData);
     } catch (error) {
-      console.error('Error loading vitals stats:', error);
+      logger.error('Error loading vitals stats:', error);
       setStatsError('Failed to load vitals statistics');
       setStats(null);
     } finally {
@@ -285,7 +287,7 @@ const Vitals = () => {
           await loadStats();
         }
       } catch (error) {
-        console.error('Error saving vitals:', error);
+        logger.error('Error saving vitals:', error);
         throw error; // Let the form handle the error display
       }
     },

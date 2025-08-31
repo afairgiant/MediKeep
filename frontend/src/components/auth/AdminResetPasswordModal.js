@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState } from 'react';
 import { Modal } from '../ui';
 import { Button, Alert } from '../ui';
@@ -80,7 +82,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
         handleClose();
       }, 2000);
     } catch (error) {
-      console.error('Error resetting password:', error);
+      logger.error('Error resetting password:', error);
       setError(error.message || 'Failed to reset password. Please try again.');
     } finally {
       setIsResetting(false);

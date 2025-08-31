@@ -216,6 +216,7 @@ class SimpleAuthService {
         user,
         token: data.access_token,
         tokenExpiry: payload.exp * 1000, // Convert to milliseconds
+        sessionTimeoutMinutes: data.session_timeout_minutes || 30, // Get user's timeout preference
       };
     } catch (error) {
       logger.error('Login error occurred', {

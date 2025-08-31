@@ -1,3 +1,5 @@
+import logger from '../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -169,7 +171,7 @@ const Dashboard = () => {
       await legacyMigration.migrateFromLocalStorage();
       const token = await secureStorage.getItem('token');
       
-      console.log('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
+      logger.info('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
         hasToken: !!token,
         tokenPreview: token ? token.substring(0, 20) + '...' : null,
         timestamp: new Date().toISOString()
@@ -182,7 +184,7 @@ const Dashboard = () => {
           userRole.toLowerCase() === 'admin' ||
           userRole.toLowerCase() === 'administrator';
         
-        console.log('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
+        logger.info('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
           role: userRole,
           isAdmin: adminCheck,
           fullPayload: payload,
@@ -461,11 +463,11 @@ const Dashboard = () => {
     const Icon = module.icon;
 
     const handleClick = (e) => {
-      console.log('ModuleCard clicked:', module.link);
+      logger.info('ModuleCard clicked:', module.link);
       try {
         navigate(module.link);
       } catch (error) {
-        console.error('Navigation error:', error);
+        logger.error('Navigation error:', error);
         frontendLogger.logError('Navigation error from ModuleCard', {
           error: error.message,
           component: 'Dashboard',
@@ -871,11 +873,11 @@ const Dashboard = () => {
                         p="sm"
                         radius="md"
                         onClick={(e) => {
-                          console.log('Additional resource clicked:', module.link);
+                          logger.info('Additional resource clicked:', module.link);
                           try {
                             navigate(module.link);
                           } catch (error) {
-                            console.error('Navigation error:', error);
+                            logger.error('Navigation error:', error);
                             frontendLogger.logError('Navigation error from additional resource', {
                               error: error.message,
                               component: 'Dashboard',

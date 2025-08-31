@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -32,7 +34,7 @@ const ModelView = () => {
         setMetadata(metadataResult);
         setRecord(recordResult);
       } catch (err) {
-        console.error('Error loading record:', err);
+        logger.error('Error loading record:', err);
         setError(err.message || 'Failed to load record');
       } finally {
         setLoading(false);

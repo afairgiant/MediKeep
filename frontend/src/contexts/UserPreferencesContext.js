@@ -52,6 +52,7 @@ export const UserPreferencesProvider = ({ children }) => {
         // Set default preferences on error
         const defaultPrefs = {
           unit_system: 'imperial',
+          session_timeout_minutes: 30,
           ...PAPERLESS_SETTING_DEFAULTS,
           // Override the sync tags default for this context
           paperless_sync_tags: true,

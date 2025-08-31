@@ -164,7 +164,7 @@ const Visits = () => {
           setConditions(response || []);
         })
         .catch(error => {
-          console.error('Failed to fetch conditions:', error);
+          logger.error('Failed to fetch conditions:', error);
           setConditions([]);
         });
     }
@@ -191,7 +191,7 @@ const Visits = () => {
         const count = Array.isArray(files) ? files.length : 0;
         setFileCounts(prev => ({ ...prev, [visit.id]: count }));
       } catch (error) {
-        console.error(`Error loading file count for visit ${visit.id}:`, error);
+        logger.error(`Error loading file count for visit ${visit.id}:`, error);
         setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
       } finally {
         setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
@@ -235,7 +235,7 @@ const Visits = () => {
       const count = Array.isArray(files) ? files.length : 0;
       setFileCounts(prev => ({ ...prev, [visitId]: count }));
     } catch (error) {
-      console.error(`Error refreshing file count for visit ${visitId}:`, error);
+      logger.error(`Error refreshing file count for visit ${visitId}:`, error);
     }
   }, []);
 

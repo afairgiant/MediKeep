@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -48,7 +50,7 @@ const PageHeader = ({
 
   // Check if user is admin
   const isAdmin = () => {
-    console.log('🔑 ADAPTER_ADMIN_CHECK: Checking admin status in PageHeader adapter', {
+    logger.info('🔑 ADAPTER_ADMIN_CHECK: Checking admin status in PageHeader adapter', {
       user,
       userIsAdmin: user?.isAdmin,
       userRole: user?.role,
@@ -153,15 +155,15 @@ const PageHeader = ({
   };
 
   const handleLogout = async () => {
-    console.log('🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process');
+    logger.info('🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process');
     try {
-      console.log('🚪 PAGEHEADER_LOGOUT: Calling AuthContext logout function');
+      logger.info('🚪 PAGEHEADER_LOGOUT: Calling AuthContext logout function');
       // Use AuthContext logout for proper state management
       await logout();
-      console.log('🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully');
+      logger.info('🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully');
       // Navigation will be handled by AuthContext/ProtectedRoute
     } catch (error) {
-      console.log('🚪 PAGEHEADER_LOGOUT: Logout failed with error', error.message);
+      logger.info('🚪 PAGEHEADER_LOGOUT: Logout failed with error', error.message);
       // Fallback navigation if logout fails
       window.location.href = '/login';
     }

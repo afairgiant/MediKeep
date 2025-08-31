@@ -265,7 +265,16 @@ def login(
     # Log successful login
     log_successful_login(getattr(db_user, "id", 0), form_data.username, user_ip)
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Get user's timeout preference
+    from app.crud.user_preferences import user_preferences
+    preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
+    session_timeout_minutes = preferences.session_timeout_minutes if preferences else 30
+
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "session_timeout_minutes": session_timeout_minutes
+    }
 
 
 from pydantic import BaseModel

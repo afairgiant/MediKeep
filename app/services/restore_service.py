@@ -864,9 +864,9 @@ class RestoreService:
                                     logger.debug(
                                         f"Retry {attempt + 1}/{max_retries} to remove uploads directory"
                                     )
-                                    import time
+                                    import asyncio
 
-                                    time.sleep(1)
+                                    await asyncio.sleep(1)
                     else:
                         directory_cleared = True
 

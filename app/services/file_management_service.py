@@ -264,8 +264,8 @@ class FileManagementService:
                                 import json
 
                                 metadata = json.load(f)
-                        except:
-                            pass
+                        except (json.JSONDecodeError, IOError):
+                            pass  # Skip invalid or unreadable metadata files
 
                     trash_contents.append(
                         {
