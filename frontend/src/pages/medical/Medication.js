@@ -290,7 +290,7 @@ const Medication = () => {
         await refreshData();
       }
     } catch (error) {
-      console.error('Error during save operation:', error);
+      logger.error('Error during save operation:', error);
     }
   };
 

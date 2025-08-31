@@ -4,6 +4,8 @@
  * Provides navigation functions for moving between related entities.
  * This is data-focused and works with the entity relationships configuration.
  */
+import logger from '../services/logger';
+
 
 import {
   getRelationship,
@@ -49,7 +51,7 @@ export const buildNavigationUrl = (
 ) => {
   const relationship = getRelationship(sourceEntity, relationshipKey);
   if (!relationship) {
-    console.warn(
+    logger.warn(
       `No relationship found for ${sourceEntity}.${relationshipKey}`
     );
     return null;

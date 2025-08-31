@@ -1,3 +1,5 @@
+import logger from './services/logger';
+
 // Simple test to validate ProtectedRoute syntax
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -18,10 +20,10 @@ jest.mock('./contexts/AuthContext', () => ({
 }));
 
 // Test that ProtectedRoute can be imported and used without syntax errors
-console.log('✅ ProtectedRoute imported successfully');
-console.log('✅ Fix applied successfully - no setState during render');
+logger.info('✅ ProtectedRoute imported successfully');
+logger.info('✅ Fix applied successfully - no setState during render');
 
 // Cleanup
 setTimeout(() => {
-  console.log('Test completed');
+  logger.info('Test completed');
 }, 100);

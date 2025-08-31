@@ -34,7 +34,7 @@ class ErrorBoundary extends React.Component {
       category: 'react_error',
     });
 
-    console.error('Error caught by boundary:', error, errorInfo);
+    logger.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleRetry = () => {

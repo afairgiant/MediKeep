@@ -2,6 +2,8 @@
  * Utilities for formatting field labels and values in medical records
  * Provides consistent formatting across all medical pages
  */
+import logger from '../services/logger';
+
 
 import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from './phoneUtils';
 import { 
@@ -156,7 +158,7 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
     try {
       return formatPhoneNumber(cleanPhoneNumber(value));
     } catch (error) {
-      console.warn(`Error formatting phone field ${fieldName}:`, error);
+      logger.warn(`Error formatting phone field ${fieldName}:`, error);
       return String(value);
     }
   }
@@ -173,7 +175,7 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
       try {
         return rule.format(value);
       } catch (error) {
-        console.warn(`Error formatting ${fieldName} with rule ${ruleType}:`, error);
+        logger.warn(`Error formatting ${fieldName} with rule ${ruleType}:`, error);
         return String(value);
       }
     }

@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -44,7 +46,7 @@ const ModelCreate = () => {
         });
         setFormData(initialData);
       } catch (err) {
-        console.error('Error loading metadata:', err);
+        logger.error('Error loading metadata:', err);
         setError(err.message || 'Failed to load form metadata');
       } finally {
         setLoading(false);
@@ -217,7 +219,7 @@ const ModelCreate = () => {
       );
       navigate(`/admin/models/${modelName}/${createdRecord.id}`);
     } catch (err) {
-      console.error('Error creating record:', err);
+      logger.error('Error creating record:', err);
       setError(err.message || 'Failed to create record');
     } finally {
       setSaving(false);

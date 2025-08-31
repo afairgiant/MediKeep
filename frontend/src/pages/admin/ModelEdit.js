@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -38,7 +40,7 @@ const ModelEdit = () => {
         setRecord(recordResult);
         setFormData(recordResult);
       } catch (err) {
-        console.error('Error loading record:', err);
+        logger.error('Error loading record:', err);
         setError(err.message || 'Failed to load record');
       } finally {
         setLoading(false);
@@ -219,7 +221,7 @@ const ModelEdit = () => {
       
       navigate(`/admin/models/${modelName}/${recordId}`);
     } catch (err) {
-      console.error('Error saving record:', err);
+      logger.error('Error saving record:', err);
       setError(err.message || 'Failed to save record');
     } finally {
       setSaving(false);

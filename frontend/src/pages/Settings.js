@@ -16,7 +16,7 @@ import { toast } from 'react-toastify';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
-  const { user } = useAuth();
+  const { user, updateSessionTimeout } = useAuth();
   const {
     preferences: userPreferences,
     loading: loadingPreferences,
@@ -56,7 +56,8 @@ const Settings = () => {
         ...userPreferences,
         // Ensure new fields have default values if they're missing
         paperless_username: userPreferences.paperless_username || '',
-        paperless_password: userPreferences.paperless_password || ''
+        paperless_password: userPreferences.paperless_password || '',
+        session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30
       });
     }
   }, [userPreferences]);
@@ -93,10 +94,29 @@ const Settings = () => {
       // Filter out unchanged fields to avoid validation issues
       const fieldsToUpdate = {};
       Object.keys(localPreferences).forEach(key => {
-        if (localPreferences[key] !== userPreferences?.[key]) {
-          fieldsToUpdate[key] = localPreferences[key];
+        let localValue = localPreferences[key];
+        let serverValue = userPreferences?.[key];
+        
+        // Special handling for session_timeout_minutes to ensure proper type comparison
+        if (key === 'session_timeout_minutes') {
+          localValue = parseInt(localValue) || 30;
+          serverValue = parseInt(serverValue) || 30;
+        }
+        
+        if (localValue !== serverValue) {
+          fieldsToUpdate[key] = key === 'session_timeout_minutes' ? localValue : localPreferences[key];
         }
       });
+
+      // Debug logging for timeout changes
+      if (fieldsToUpdate.session_timeout_minutes) {
+        frontendLogger.logInfo('Timeout preference change detected', {
+          localValue: localPreferences.session_timeout_minutes,
+          serverValue: userPreferences?.session_timeout_minutes,
+          newValue: fieldsToUpdate.session_timeout_minutes,
+          component: 'Settings'
+        });
+      }
 
       // Only send the update if there are actual changes
       if (Object.keys(fieldsToUpdate).length === 0) {
@@ -104,17 +124,40 @@ const Settings = () => {
         return userPreferences;
       }
 
-      // Check if we're updating paperless settings
-      const hasPaperlessSettings = PAPERLESS_SETTING_KEYS.some(key => key in fieldsToUpdate);
+      // Split fields into paperless and general settings
+      const paperlessFields = {};
+      const generalFields = {};
       
-      let updatedPreferences;
-      if (hasPaperlessSettings) {
-        // Use paperless-specific API for paperless settings (handles encryption)
+      Object.keys(fieldsToUpdate).forEach(key => {
+        if (PAPERLESS_SETTING_KEYS.includes(key)) {
+          paperlessFields[key] = fieldsToUpdate[key];
+        } else {
+          generalFields[key] = fieldsToUpdate[key];
+        }
+      });
+      
+      let updatedPreferences = {};
+      
+      // Update general preferences first
+      if (Object.keys(generalFields).length > 0) {
+        const generalResponse = await updateUserPreferences(generalFields);
+        updatedPreferences = { ...updatedPreferences, ...generalResponse };
+        
+        // Debug the API response specifically for timeout
+        if (generalFields.session_timeout_minutes) {
+          console.log('DEBUG: General API Response for timeout update:', {
+            requestedTimeout: generalFields.session_timeout_minutes,
+            responseTimeout: generalResponse.session_timeout_minutes,
+            fullResponse: generalResponse
+          });
+        }
+      }
+      
+      // Update paperless settings separately
+      if (Object.keys(paperlessFields).length > 0) {
         const { updatePaperlessSettings } = await import('../services/api/paperlessApi');
-        updatedPreferences = await updatePaperlessSettings(fieldsToUpdate);
-      } else {
-        // Use general user preferences API for other settings
-        updatedPreferences = await updateUserPreferences(fieldsToUpdate);
+        const paperlessResponse = await updatePaperlessSettings(paperlessFields);
+        updatedPreferences = { ...updatedPreferences, ...paperlessResponse };
       }
 
       // Update the context but preserve local form values for credentials
@@ -124,10 +167,27 @@ const Settings = () => {
         paperless_username: localPreferences.paperless_username || '',
         paperless_password: localPreferences.paperless_password || ''
       };
+      
+      // Debug what we're setting in local preferences
+      if (fieldsToUpdate.session_timeout_minutes) {
+        console.log('DEBUG: Setting local preferences with:', {
+          originalResponse: updatedPreferences.session_timeout_minutes,
+          withCredentials: updatedPreferencesWithLocalCredentials.session_timeout_minutes,
+          localPrefs: localPreferences.session_timeout_minutes
+        });
+      }
+      
       updateLocalPreferences(updatedPreferencesWithLocalCredentials);
+
+      // Update session timeout in AuthContext if it was changed
+      if (fieldsToUpdate.session_timeout_minutes !== undefined) {
+        updateSessionTimeout(fieldsToUpdate.session_timeout_minutes);
+      }
 
       frontendLogger.logInfo('User preferences saved successfully', {
         updatedFields: Object.keys(fieldsToUpdate),
+        fieldsToUpdate: fieldsToUpdate,
+        updatedPreferences: updatedPreferences,
         component: 'Settings',
       });
 
@@ -148,7 +208,8 @@ const Settings = () => {
       ...userPreferences,
       // Ensure new fields have default values if they're missing
       paperless_username: userPreferences.paperless_username || '',
-      paperless_password: userPreferences.paperless_password || ''
+      paperless_password: userPreferences.paperless_password || '',
+      session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30
     });
     frontendLogger.logInfo('User preferences reset to original values', {
       component: 'Settings',
@@ -351,6 +412,74 @@ const Settings = () => {
                         Metric (kg, cm, °C)
                       </span>
                     </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Session Timeout Option */}
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">Session Timeout</div>
+                <div className="settings-option-description">
+                  Set the duration of inactivity before your session expires (in minutes)
+                </div>
+              </div>
+              <div className="settings-option-control">
+                {loadingPreferences ? (
+                  <span className="settings-value-placeholder">Loading...</span>
+                ) : (
+                  <div className="settings-timeout-control">
+                    <input
+                      type="text"
+                      value={localPreferences?.session_timeout_minutes || 30}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow typing any value, validation happens on blur/save
+                        setLocalPreferences(prev => ({
+                          ...prev,
+                          session_timeout_minutes: value
+                        }));
+                      }}
+                      onBlur={(e) => {
+                        // Validate and correct on blur
+                        const value = parseInt(e.target.value);
+                        if (isNaN(value) || value < 5) {
+                          setLocalPreferences(prev => ({
+                            ...prev,
+                            session_timeout_minutes: 5
+                          }));
+                        } else if (value > 1440) {
+                          setLocalPreferences(prev => ({
+                            ...prev,
+                            session_timeout_minutes: 1440
+                          }));
+                        } else {
+                          setLocalPreferences(prev => ({
+                            ...prev,
+                            session_timeout_minutes: value
+                          }));
+                        }
+                        frontendLogger.logInfo('Session timeout preference changed (not saved yet)', {
+                          newTimeout: parseInt(e.target.value) || 30,
+                          component: 'Settings',
+                        });
+                      }}
+                      placeholder="30"
+                      disabled={savingPreferences}
+                      className="settings-timeout-input"
+                      style={{
+                        width: '100px',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                        fontSize: '14px',
+                        textAlign: 'right'
+                      }}
+                    />
+                    <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
+                      minutes (5-1440)
+                    </span>
                   </div>
                 )}
               </div>

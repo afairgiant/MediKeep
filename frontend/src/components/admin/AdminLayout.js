@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -48,7 +50,7 @@ const AdminLayout = ({ children }) => {
       try {
         payload = JSON.parse(atob(token.split('.')[1]));
       } catch (decodeError) {
-        console.error('Failed to decode token:', decodeError);
+        logger.error('Failed to decode token:', decodeError);
         // Token is corrupted, clear and redirect to login
         await secureStorage.removeItem('token');
         navigate('/login');

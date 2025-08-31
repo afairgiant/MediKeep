@@ -2,6 +2,8 @@
  * Throttling Utilities for Activity Tracking
  * Centralized throttling logic with error handling and safety measures
  */
+import logger from '../services/logger';
+
 
 /**
  * Creates a throttled function with built-in error handling and safety measures
@@ -39,10 +41,10 @@ export function createSafeThrottle(func, delay, options = {}) {
         try {
           onError(error, debugName, lastArgs);
         } catch (handlerError) {
-          console.error(`Error in throttle error handler for ${debugName}:`, handlerError);
+          logger.error(`Error in throttle error handler for ${debugName}:`, handlerError);
         }
       } else {
-        console.error(`Error in throttled function ${debugName}:`, error);
+        logger.error(`Error in throttled function ${debugName}:`, error);
       }
     }
   };
@@ -51,7 +53,7 @@ export function createSafeThrottle(func, delay, options = {}) {
     // Prevent execution if throttle has been destroyed
     if (isDestroyed) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Attempted to call destroyed throttle: ${debugName}`);
+        logger.warn(`Attempted to call destroyed throttle: ${debugName}`);
       }
       return;
     }
@@ -124,7 +126,7 @@ export function createActivityThrottle(activityFunc, delay, activityType) {
     debugName: `activity-${activityType}`,
     onError: (error, debugName, args) => {
       // Log activity tracking errors without exposing sensitive data
-      console.error(`Activity tracking error in ${debugName}:`, {
+      logger.error(`Activity tracking error in ${debugName}:`, {
         error: error.message,
         type: activityType,
         timestamp: new Date().toISOString(),
@@ -196,7 +198,7 @@ export function createRetryWrapper(func, maxRetries = 3, baseDelay = 1000, debug
         lastError = error;
         
         if (attempt === maxRetries) {
-          console.error(`${debugName} failed after ${maxRetries} retries:`, error);
+          logger.error(`${debugName} failed after ${maxRetries} retries:`, error);
           throw error;
         }
         
@@ -205,7 +207,7 @@ export function createRetryWrapper(func, maxRetries = 3, baseDelay = 1000, debug
         await new Promise(resolve => setTimeout(resolve, delay));
         
         if (process.env.NODE_ENV === 'development') {
-          console.warn(`${debugName} retry ${attempt + 1}/${maxRetries} after error:`, error.message);
+          logger.warn(`${debugName} retry ${attempt + 1}/${maxRetries} after error:`, error.message);
         }
       }
     }
@@ -241,7 +243,7 @@ export function createThrottleCleanupManager() {
             throttle.cleanup();
           }
         } catch (error) {
-          console.error('Error cleaning up throttle:', error);
+          logger.error('Error cleaning up throttle:', error);
         }
       }
       throttles.clear();

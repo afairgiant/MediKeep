@@ -1,3 +1,5 @@
+import logger from '../services/logger';
+
 import { useEffect, useRef } from 'react';
 
 /*
@@ -21,7 +23,7 @@ export const addDebugListeners = () => {
 
   localStorage.setItem = function (key, value) {
     if (key === 'token') {
-      console.log('Token SET:', {
+      logger.info('Token SET:', {
         timestamp: new Date().toISOString(),
         key,
         value: value?.substring(0, 20) + '...',
@@ -33,7 +35,7 @@ export const addDebugListeners = () => {
 
   localStorage.removeItem = function (key) {
     if (key === 'token') {
-      console.log('Token REMOVED:', {
+      logger.info('Token REMOVED:', {
         timestamp: new Date().toISOString(),
         key,
         stack: new Error().stack?.split('\n').slice(1, 4).join('\n'),
@@ -46,14 +48,14 @@ export const addDebugListeners = () => {
 
   // Track window events that might cause logout
   window.addEventListener('beforeunload', event => {
-    console.log('Window beforeunload:', {
+    logger.info('Window beforeunload:', {
       timestamp: new Date().toISOString(),
       hasToken: !!localStorage.getItem('token'),
     });
   });
 
   window.addEventListener('unload', event => {
-    console.log('Window unload:', {
+    logger.info('Window unload:', {
       timestamp: new Date().toISOString(),
       hasToken: !!localStorage.getItem('token'),
     });
@@ -61,7 +63,7 @@ export const addDebugListeners = () => {
 
   // Track visibility changes
   document.addEventListener('visibilitychange', () => {
-    console.log('Visibility change:', {
+    logger.info('Visibility change:', {
       timestamp: new Date().toISOString(),
       hidden: document.hidden,
       hasToken: !!localStorage.getItem('token'),
@@ -70,20 +72,20 @@ export const addDebugListeners = () => {
 
   // Track focus events
   window.addEventListener('blur', () => {
-    console.log('Window blur:', {
+    logger.info('Window blur:', {
       timestamp: new Date().toISOString(),
       hasToken: !!localStorage.getItem('token'),
     });
   });
 
   window.addEventListener('focus', () => {
-    console.log('Window focus:', {
+    logger.info('Window focus:', {
       timestamp: new Date().toISOString(),
       hasToken: !!localStorage.getItem('token'),
     });
   });
 
-  console.log('Debug listeners added - watching for logout triggers');
+  logger.info('Debug listeners added - watching for logout triggers');
 };
 
 // React Hook for component lifecycle debugging
@@ -94,13 +96,13 @@ export const useComponentDebug = componentName => {
   renderCount.current += 1;
 
   useEffect(() => {
-    console.log(`${componentName} MOUNTED:`, {
+    logger.info(`${componentName} MOUNTED:`, {
       timestamp: new Date().toISOString(),
       mountTime: mountTime.current,
     });
 
     return () => {
-      console.log(`${componentName} UNMOUNTING:`, {
+      logger.info(`${componentName} UNMOUNTING:`, {
         timestamp: new Date().toISOString(),
         lifespan: Date.now() - mountTime.current,
         renderCount: renderCount.current,
@@ -109,7 +111,7 @@ export const useComponentDebug = componentName => {
     };
   }, [componentName]);
 
-  console.log(`${componentName} RENDER #${renderCount.current}:`, {
+  logger.info(`${componentName} RENDER #${renderCount.current}:`, {
     timestamp: new Date().toISOString(),
     timeSinceMount: Date.now() - mountTime.current,
   });

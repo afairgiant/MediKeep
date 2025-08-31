@@ -110,7 +110,7 @@ const Procedures = () => {
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [procedure.id]: count }));
         } catch (error) {
-          console.error(`Error loading file count for procedure ${procedure.id}:`, error);
+          logger.error(`Error loading file count for procedure ${procedure.id}:`, error);
           setFileCounts(prev => ({ ...prev, [procedure.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [procedure.id]: false }));
@@ -136,7 +136,7 @@ const Procedures = () => {
       setFileCounts(prev => ({ ...prev, [procedureId]: count }));
       loadedFileCountsRef.current.add(procedureId);
     } catch (error) {
-      console.error(`Error refreshing file count for procedure ${procedureId}:`, error);
+      logger.error(`Error refreshing file count for procedure ${procedureId}:`, error);
       setFileCounts(prev => ({ ...prev, [procedureId]: 0 }));
       loadedFileCountsRef.current.add(procedureId);
     } finally {

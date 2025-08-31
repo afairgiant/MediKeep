@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState } from 'react';
 import {
   Modal,
@@ -35,19 +37,19 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
     setError(null);
 
     try {
-      console.log('Attempting to delete account...');
+      logger.info('Attempting to delete account...');
 
       // Use BaseApiService for proper URL handling and authentication
       const apiService = new BaseApiService();
       await apiService.delete('/users/me', 'Failed to delete account');
 
-      console.log('Account deleted successfully');
+      logger.info('Account deleted successfully');
 
       // Account deleted successfully, logout and redirect
       logout();
       // The logout function should handle the redirect
     } catch (err) {
-      console.error('Delete account error:', err);
+      logger.error('Delete account error:', err);
       setError(err.message || 'An error occurred while deleting your account');
     } finally {
       setIsDeleting(false);

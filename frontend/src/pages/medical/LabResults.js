@@ -207,7 +207,7 @@ const LabResults = () => {
       const count = Array.isArray(files) ? files.length : 0;
       setFileCounts(prev => ({ ...prev, [labResultId]: count }));
     } catch (error) {
-      console.error(`Error refreshing file count for lab result ${labResultId}:`, error);
+      logger.error(`Error refreshing file count for lab result ${labResultId}:`, error);
     }
   }, []);
 
@@ -246,7 +246,7 @@ const LabResults = () => {
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [labResult.id]: count }));
         } catch (error) {
-          console.error(`Error loading file count for lab result ${labResult.id}:`, error);
+          logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
           setFileCounts(prev => ({ ...prev, [labResult.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [labResult.id]: false }));

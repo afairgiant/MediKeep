@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -27,16 +29,16 @@ const NavigationWrapper = ({
   // Handle logout - use the proper auth system
   const { logout } = useAuth();
   const handleLogout = useCallback(async () => {
-    console.log('🚪 NAVIGATION_LOGOUT: NavigationWrapper logout clicked', {
+    logger.info('🚪 NAVIGATION_LOGOUT: NavigationWrapper logout clicked', {
       timestamp: new Date().toISOString()
     });
     try {
       await logout();
-      console.log('🚪 NAVIGATION_LOGOUT: AuthContext logout completed, redirecting...', {
+      logger.info('🚪 NAVIGATION_LOGOUT: AuthContext logout completed, redirecting...', {
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('🚪 NAVIGATION_LOGOUT: Error during logout:', error);
+      logger.error('🚪 NAVIGATION_LOGOUT: Error during logout:', error);
       // Fallback: direct redirect if auth logout fails
       window.location.href = '/login';
     }

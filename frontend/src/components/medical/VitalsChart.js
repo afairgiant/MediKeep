@@ -2,6 +2,8 @@
  * VitalsChart Component - Enhanced Version
  * Modern chart visualization for patient vital signs trends using Recharts and Mantine
  */
+import logger from '../../services/logger';
+
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
@@ -198,7 +200,7 @@ const VitalsChart = ({
 
       setVitals(processedData);
     } catch (err) {
-      console.error('Error loading vitals data:', err);
+      logger.error('Error loading vitals data:', err);
       setError(err.message || 'Failed to load vitals data');
       setVitals([]);
     } finally {

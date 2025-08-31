@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
@@ -31,7 +33,7 @@ const ConditionRelationshipsForMedication = ({
   }, [medicationId]);
 
   const fetchMedicationConditions = async () => {
-    console.log('Fetching medication conditions for medicationId:', medicationId);
+    logger.info('Fetching medication conditions for medicationId:', medicationId);
     setLoading(true);
     setError(null);
     
@@ -44,7 +46,7 @@ const ConditionRelationshipsForMedication = ({
       if (missingConditions.length > 0) {
         const conditionPromises = missingConditions.map(rel => 
           apiService.getCondition(rel.condition_id).catch(err => {
-            console.warn(`Condition ${rel.condition_id} not found - may be deleted or orphaned relationship`);
+            logger.warn(`Condition ${rel.condition_id} not found - may be deleted or orphaned relationship`);
             return null;
           })
         );
@@ -62,8 +64,8 @@ const ConditionRelationshipsForMedication = ({
         setConditionsCache(newConditionsCache);
       }
     } catch (error) {
-      console.error('Failed to fetch medication conditions:', error);
-      console.error('Error details:', error.response?.data || error.message);
+      logger.error('Failed to fetch medication conditions:', error);
+      logger.error('Error details:', error.response?.data || error.message);
       setError(`Failed to load related conditions: ${error.response?.data?.detail || error.message}`);
       setRelationships([]);
     } finally {

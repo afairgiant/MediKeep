@@ -1,21 +1,26 @@
 /**
  * Error Message Utilities for Common Patterns
- * 
+ *
  * This file provides utility functions for common error handling patterns
  * used throughout the application, particularly for upload and form systems.
  */
 
-import { 
-  ERROR_MESSAGES, 
-  SUCCESS_MESSAGES, 
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
   WARNING_MESSAGES,
   getUserFriendlyError,
   formatErrorWithContext,
   enhancePaperlessError,
-  getErrorCategory
+  getErrorCategory,
 } from '../constants/errorMessages';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX, IconExclamationMark, IconAlertTriangle } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconX,
+  IconExclamationMark,
+  IconAlertTriangle,
+} from '@tabler/icons-react';
 import logger from '../services/logger';
 
 /**
@@ -28,25 +33,29 @@ import logger from '../services/logger';
  * @param {number} options.autoClose - Auto close time in ms
  * @param {boolean} options.withCloseButton - Whether to show close button
  */
-export const showErrorNotification = (error, operation = 'operation', options = {}) => {
-  const {
-    title,
-    context,
-    autoClose = 7000,
-    withCloseButton = true
-  } = options;
+export const showErrorNotification = (
+  error,
+  operation = 'operation',
+  options = {}
+) => {
+  const { title, context, autoClose = 7000, withCloseButton = true } = options;
 
   let errorMessage = getUserFriendlyError(error, operation);
-  
+
   if (context) {
     errorMessage = formatErrorWithContext(errorMessage, context);
   }
 
-  const defaultTitle = operation === 'upload' ? 'Upload Failed' :
-                       operation === 'save' ? 'Save Failed' :
-                       operation === 'delete' ? 'Delete Failed' :
-                       operation === 'download' ? 'Download Failed' :
-                       'Operation Failed';
+  const defaultTitle =
+    operation === 'upload'
+      ? 'Upload Failed'
+      : operation === 'save'
+        ? 'Save Failed'
+        : operation === 'delete'
+          ? 'Delete Failed'
+          : operation === 'download'
+            ? 'Download Failed'
+            : 'Operation Failed';
 
   notifications.show({
     title: title || defaultTitle,
@@ -67,14 +76,10 @@ export const showErrorNotification = (error, operation = 'operation', options = 
  * @param {number} options.autoClose - Auto close time in ms
  */
 export const showSuccessNotification = (message, options = {}) => {
-  const {
-    title = 'Success!',
-    context,
-    autoClose = 5000
-  } = options;
+  const { title = 'Success!', context, autoClose = 5000 } = options;
 
   let finalMessage = message;
-  
+
   if (context && message === SUCCESS_MESSAGES.UPLOAD_SUCCESS) {
     finalMessage = `"${context}" uploaded successfully!`;
   }
@@ -94,10 +99,7 @@ export const showSuccessNotification = (message, options = {}) => {
  * @param {Object} options - Additional options
  */
 export const showWarningNotification = (message, options = {}) => {
-  const {
-    title = 'Warning',
-    autoClose = 7000
-  } = options;
+  const { title = 'Warning', autoClose = 7000 } = options;
 
   notifications.show({
     title,
@@ -115,13 +117,19 @@ export const showWarningNotification = (message, options = {}) => {
  * @param {number} failedCount - Number of files that failed
  * @param {number} totalCount - Total number of files
  */
-export const handleUploadCompletion = (success, completedCount, failedCount, totalCount) => {
+export const handleUploadCompletion = (
+  success,
+  completedCount,
+  failedCount,
+  totalCount
+) => {
   if (success && failedCount === 0) {
     // Complete success
-    const message = totalCount === 1 ? 
-      SUCCESS_MESSAGES.UPLOAD_SUCCESS : 
-      SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS;
-    
+    const message =
+      totalCount === 1
+        ? SUCCESS_MESSAGES.UPLOAD_SUCCESS
+        : SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS;
+
     showSuccessNotification(message);
   } else if (completedCount > 0 && failedCount > 0) {
     // Partial success
@@ -131,11 +139,9 @@ export const handleUploadCompletion = (success, completedCount, failedCount, tot
     );
   } else {
     // Complete failure
-    showErrorNotification(
-      ERROR_MESSAGES.ALL_UPLOADS_FAILED,
-      'upload',
-      { title: 'Upload Failed' }
-    );
+    showErrorNotification(ERROR_MESSAGES.ALL_UPLOADS_FAILED, 'upload', {
+      title: 'Upload Failed',
+    });
   }
 };
 
@@ -148,7 +154,10 @@ export const handleUploadCompletion = (success, completedCount, failedCount, tot
  */
 export const validateRequiredFields = (formData, requiredFields, setError) => {
   for (const field of requiredFields) {
-    if (!formData[field] || (typeof formData[field] === 'string' && !formData[field].trim())) {
+    if (
+      !formData[field] ||
+      (typeof formData[field] === 'string' && !formData[field].trim())
+    ) {
       setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
       return false;
     }
@@ -182,13 +191,13 @@ export const validateDate = (dateValue, setError, fieldName = 'date') => {
     setError(ERROR_MESSAGES.INVALID_DATE);
     return false;
   }
-  
+
   const date = new Date(dateValue);
   if (isNaN(date.getTime())) {
     setError(ERROR_MESSAGES.INVALID_DATE);
     return false;
   }
-  
+
   return true;
 };
 
@@ -200,13 +209,13 @@ export const validateDate = (dateValue, setError, fieldName = 'date') => {
  */
 export const validateEmail = (email, setError) => {
   if (!email) return true; // Email might be optional
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     setError(ERROR_MESSAGES.INVALID_EMAIL);
     return false;
   }
-  
+
   return true;
 };
 
@@ -218,14 +227,14 @@ export const validateEmail = (email, setError) => {
  */
 export const validatePhone = (phone, setError) => {
   if (!phone) return true; // Phone might be optional
-  
+
   // Basic phone validation - digits, spaces, dashes, parentheses
   const phoneRegex = /^[\d\s\-\(\)\+\.]+$/;
   if (!phoneRegex.test(phone) || phone.replace(/\D/g, '').length < 10) {
     setError(ERROR_MESSAGES.INVALID_PHONE);
     return false;
   }
-  
+
   return true;
 };
 
@@ -270,7 +279,12 @@ export const logAndHandleError = (error, context = {}) => {
  * @param {string} storageBackend - The storage backend used
  * @param {Object} options - Additional options
  */
-export const handleFileUploadError = (error, fileName, storageBackend = 'local', options = {}) => {
+export const handleFileUploadError = (
+  error,
+  fileName,
+  storageBackend = 'local',
+  options = {}
+) => {
   let errorMessage;
 
   if (storageBackend === 'paperless') {
@@ -288,14 +302,14 @@ export const handleFileUploadError = (error, fileName, storageBackend = 'local',
     component: options.component || 'FileUpload',
     fileName,
     storageBackend,
-    ...options.context
+    ...options.context,
   });
 
   // Show notification unless disabled
   if (!options.skipNotification) {
     showErrorNotification(errorMessage, 'upload', {
       title: 'File Upload Failed',
-      ...options.notificationOptions
+      ...options.notificationOptions,
     });
   }
 
@@ -308,25 +322,30 @@ export const handleFileUploadError = (error, fileName, storageBackend = 'local',
  * @param {string} operation - The operation performed
  * @param {Object} options - Additional options
  */
-export const handleBatchResults = (results, operation = 'operation', options = {}) => {
+export const handleBatchResults = (
+  results,
+  operation = 'operation',
+  options = {}
+) => {
   const successful = results.filter(r => r.success).length;
   const failed = results.filter(r => !r.success).length;
   const total = results.length;
 
   if (failed === 0) {
     // All successful
-    const message = total === 1 ? 
-      `${operation} completed successfully!` :
-      `All ${total} ${operation}s completed successfully!`;
-    
+    const message =
+      total === 1
+        ? `${operation} completed successfully!`
+        : `All ${total} ${operation}s completed successfully!`;
+
     showSuccessNotification(message, options.successOptions);
   } else if (successful > 0) {
     // Partial success
     showWarningNotification(
       `${successful}/${total} ${operation}s completed successfully. ${failed} failed.`,
-      { 
+      {
         title: `${operation} Completed with Errors`,
-        ...options.warningOptions 
+        ...options.warningOptions,
       }
     );
   } else {
@@ -334,9 +353,9 @@ export const handleBatchResults = (results, operation = 'operation', options = {
     showErrorNotification(
       `All ${operation}s failed. Please try again.`,
       operation,
-      { 
+      {
         title: `${operation} Failed`,
-        ...options.errorOptions 
+        ...options.errorOptions,
       }
     );
   }
@@ -349,29 +368,32 @@ export const handleBatchResults = (results, operation = 'operation', options = {
  * @param {Object} taskResult - The task result from Paperless
  * @returns {boolean} True if the error indicates a duplicate document
  */
-export const isDuplicateDocumentError = (taskResult) => {
+export const isDuplicateDocumentError = taskResult => {
   if (!taskResult) return false;
-  
+
   // First check if the backend explicitly marked this as a duplicate
   if (taskResult.error_type === 'duplicate') {
     return true;
   }
-  
+
   // Fallback to checking error message content
   const errorMessage = (
-    taskResult.error || 
-    taskResult.result?.error || 
-    taskResult.result || 
+    taskResult.error ||
+    taskResult.result?.error ||
+    taskResult.result ||
     ''
   ).toLowerCase();
-  
-  return errorMessage.includes('already exists') || 
-         errorMessage.includes('duplicate') ||
-         errorMessage.includes('hash collision') ||
-         errorMessage.includes('identical document') ||
-         errorMessage.includes('same content hash') ||
-         errorMessage.includes('document with identical content') ||
-         errorMessage.includes('not consuming') || errorMessage.includes('duplicate of');
+
+  return (
+    errorMessage.includes('already exists') ||
+    errorMessage.includes('duplicate') ||
+    errorMessage.includes('hash collision') ||
+    errorMessage.includes('identical document') ||
+    errorMessage.includes('same content hash') ||
+    errorMessage.includes('document with identical content') ||
+    errorMessage.includes('not consuming') ||
+    errorMessage.includes('duplicate of')
+  );
 };
 
 /**
@@ -379,7 +401,7 @@ export const isDuplicateDocumentError = (taskResult) => {
  * @param {Object} taskResult - The task result from Paperless
  * @returns {boolean} True if the task failed
  */
-export const isPaperlessTaskFailed = (taskResult) => {
+export const isPaperlessTaskFailed = taskResult => {
   return taskResult?.status === 'FAILURE' || taskResult?.status === 'RETRY';
 };
 
@@ -388,9 +410,11 @@ export const isPaperlessTaskFailed = (taskResult) => {
  * @param {Object} taskResult - The task result from Paperless
  * @returns {boolean} True if the task succeeded and has a document ID
  */
-export const isPaperlessTaskSuccessful = (taskResult) => {
-  return taskResult?.status === 'SUCCESS' && 
-         (taskResult?.result?.document_id || taskResult?.document_id);
+export const isPaperlessTaskSuccessful = taskResult => {
+  return (
+    taskResult?.status === 'SUCCESS' &&
+    (taskResult?.result?.document_id || taskResult?.document_id)
+  );
 };
 
 /**
@@ -398,9 +422,9 @@ export const isPaperlessTaskSuccessful = (taskResult) => {
  * @param {Object} taskResult - The task result from Paperless
  * @returns {string|null} Document ID if available, null otherwise
  */
-export const extractDocumentIdFromTaskResult = (taskResult) => {
+export const extractDocumentIdFromTaskResult = taskResult => {
   if (!isPaperlessTaskSuccessful(taskResult)) return null;
-  
+
   return taskResult?.result?.document_id || taskResult?.document_id || null;
 };
 
@@ -412,14 +436,23 @@ export const extractDocumentIdFromTaskResult = (taskResult) => {
  */
 export const getPaperlessTaskErrorMessage = (taskResult, fileName) => {
   if (isDuplicateDocumentError(taskResult)) {
-    return formatErrorWithContext(ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT, fileName);
+    return formatErrorWithContext(
+      ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT,
+      fileName
+    );
   }
-  
+
   if (isPaperlessTaskFailed(taskResult)) {
-    return formatErrorWithContext(ERROR_MESSAGES.PAPERLESS_TASK_FAILED, fileName);
+    return formatErrorWithContext(
+      ERROR_MESSAGES.PAPERLESS_TASK_FAILED,
+      fileName
+    );
   }
-  
-  return formatErrorWithContext(ERROR_MESSAGES.PAPERLESS_UPLOAD_FAILED, fileName);
+
+  return formatErrorWithContext(
+    ERROR_MESSAGES.PAPERLESS_UPLOAD_FAILED,
+    fileName
+  );
 };
 
 /**
@@ -429,11 +462,15 @@ export const getPaperlessTaskErrorMessage = (taskResult, fileName) => {
  * @param {Object} options - Additional options
  * @returns {Object} Result object with success status and message
  */
-export const handlePaperlessTaskCompletion = (taskResult, fileName, options = {}) => {
+export const handlePaperlessTaskCompletion = (
+  taskResult,
+  fileName,
+  options = {}
+) => {
   // Handle background processing status
   if (taskResult?.status === 'PROCESSING_BACKGROUND') {
     const message = `"${fileName}" is being processed in the background. You will be notified when complete.`;
-    
+
     // Don't show duplicate notifications - the API service already handles this
     // Just return success=null to indicate "processing" state
     return {
@@ -441,62 +478,62 @@ export const handlePaperlessTaskCompletion = (taskResult, fileName, options = {}
       message,
       documentId: null,
       isDuplicate: false,
-      isBackgroundProcessing: true
+      isBackgroundProcessing: true,
     };
   }
-  
+
   if (isPaperlessTaskSuccessful(taskResult)) {
     const documentId = extractDocumentIdFromTaskResult(taskResult);
     const message = `"${fileName}" uploaded to Paperless successfully!`;
-    
+
     if (!options.skipNotification) {
       showSuccessNotification(message, {
         title: 'Document Added to Paperless',
-        ...options.notificationOptions
+        ...options.notificationOptions,
       });
     }
-    
+
     return {
       success: true,
       message,
       documentId,
-      isDuplicate: false
+      isDuplicate: false,
     };
   }
-  
+
   if (isDuplicateDocumentError(taskResult)) {
     const message = getPaperlessTaskErrorMessage(taskResult, fileName);
-    
+
     if (!options.skipNotification) {
       showWarningNotification(message, {
         title: 'Duplicate Document',
-        ...options.notificationOptions
+        ...options.notificationOptions,
       });
     }
-    
+
     return {
       success: false,
       message,
       documentId: null,
-      isDuplicate: true
+      isDuplicate: true,
     };
   }
-  
+
   // Task failed for other reasons
   const message = getPaperlessTaskErrorMessage(taskResult, fileName);
-  
+
   if (!options.skipNotification) {
     showErrorNotification(message, 'upload', {
       title: 'Paperless Upload Failed',
-      ...options.notificationOptions
+      ...options.notificationOptions,
     });
   }
-  
+
   return {
     success: false,
     message,
     documentId: null,
-    isDuplicate: false
+    isDuplicate: false,
   };
 };
 
@@ -507,14 +544,14 @@ export const handlePaperlessTaskCompletion = (taskResult, fileName, options = {}
  * @returns {Function} Error handler function
  */
 export const createErrorHandler = (operation, context = {}) => {
-  return (error) => {
+  return error => {
     const errorMessage = logAndHandleError(error, {
       operation,
-      ...context
+      ...context,
     });
 
     showErrorNotification(error, operation, {
-      title: `${operation.charAt(0).toUpperCase() + operation.slice(1)} Failed`
+      title: `${operation.charAt(0).toUpperCase() + operation.slice(1)} Failed`,
     });
 
     return errorMessage;

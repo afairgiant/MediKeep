@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -36,7 +38,7 @@ const PageHeader = ({
         // Migrate legacy data first
         await legacyMigration.migrateFromLocalStorage();
         const token = await secureStorage.getItem('token');
-        console.log('🔑 ADMIN_CHECK: Checking admin status', {
+        logger.info('🔑 ADMIN_CHECK: Checking admin status', {
           hasToken: !!token,
           tokenPreview: token ? token.substring(0, 20) + '...' : null,
           timestamp: new Date().toISOString()
@@ -50,7 +52,7 @@ const PageHeader = ({
             userRole.toLowerCase() === 'administrator'
           );
           
-          console.log('🔑 ADMIN_CHECK: Token payload analysis', {
+          logger.info('🔑 ADMIN_CHECK: Token payload analysis', {
             role: userRole,
             isAdmin: isAdminResult,
             fullPayload: payload,
@@ -62,7 +64,7 @@ const PageHeader = ({
           setAdminStatus(false);
         }
       } catch (error) {
-        console.error('🔑 ADMIN_CHECK: Error checking admin status:', error);
+        logger.error('🔑 ADMIN_CHECK: Error checking admin status:', error);
         setAdminStatus(false);
       }
     };

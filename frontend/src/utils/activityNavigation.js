@@ -1,3 +1,5 @@
+import logger from '../services/logger';
+
 import {
   IconPill,
   IconFlask,
@@ -143,14 +145,14 @@ export const getActivityNavigationUrl = (activity, includeViewParam = true) => {
   const entityType = MODEL_TO_ENTITY_TYPE[modelName];
 
   if (!entityType) {
-    console.warn(`No entity type mapping found for model: ${modelName}`);
+    logger.warn(`No entity type mapping found for model: ${modelName}`);
     return null;
   }
 
   const basePath = ENTITY_TYPE_TO_ROUTE[entityType];
 
   if (!basePath) {
-    console.warn(`No route mapping found for entity type: ${entityType}`);
+    logger.warn(`No route mapping found for entity type: ${entityType}`);
     return null;
   }
 

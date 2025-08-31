@@ -1,6 +1,8 @@
 /**
  * Profile completion utilities
  */
+import logger from '../services/logger';
+
 
 /**
  * Check if a patient's profile is complete
@@ -139,7 +141,7 @@ export const isFirstLogin = username => {
   if (!username) return false;
   const firstLoginKey = `firstLogin_${username}`;
   const isFirst = localStorage.getItem(firstLoginKey) !== 'completed';
-  console.log(`Checking first login for ${username}:`, isFirst);
+  logger.info(`Checking first login for ${username}:`, isFirst);
   return isFirst;
 };
 
@@ -151,7 +153,7 @@ export const markFirstLoginCompleted = username => {
   if (!username) return;
   const firstLoginKey = `firstLogin_${username}`;
   localStorage.setItem(firstLoginKey, 'completed');
-  console.log('First login marked as completed for:', username);
+  logger.info('First login marked as completed for:', username);
 };
 
 /**

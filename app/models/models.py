@@ -1134,6 +1134,9 @@ class UserPreferences(Base):
 
     # Unit system preference: 'imperial' or 'metric'
     unit_system = Column(String, default="imperial", nullable=False)
+    
+    # Session timeout in minutes (default 30 minutes)
+    session_timeout_minutes = Column(Integer, default=30, nullable=False)
 
     # Paperless-ngx integration fields
     paperless_enabled = Column(Boolean, default=False, nullable=False)

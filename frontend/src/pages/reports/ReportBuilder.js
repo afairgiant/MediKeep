@@ -72,7 +72,7 @@ const ReportBuilder = () => {
 
   // Initialize data on mount
   useEffect(() => {
-    console.log('REPORT BUILDER: useEffect called, about to fetch data');
+    logger.info('REPORT BUILDER: useEffect called, about to fetch data');
     fetchDataSummary();
     fetchTemplates();
   }, [fetchDataSummary, fetchTemplates]);

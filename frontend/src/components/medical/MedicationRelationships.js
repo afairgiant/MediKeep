@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
@@ -48,7 +50,7 @@ const MedicationRelationships = ({
       const hasExistingData = conditionMedications && conditionMedications[conditionId];
       if (!hasExistingData) {
         fetchConditionMedications(conditionId).catch(error => {
-          console.error('Failed to fetch condition medications:', error);
+          logger.error('Failed to fetch condition medications:', error);
           setError(error.message || 'Failed to load medication relationships');
         });
       }
@@ -79,7 +81,7 @@ const MedicationRelationships = ({
       setNewRelationship({ medication_id: '' });
       setShowAddModal(false);
     } catch (err) {
-      console.error('Error adding medication relationship:', err);
+      logger.error('Error adding medication relationship:', err);
       setError(err.response?.data?.detail || err.message || 'Failed to add medication relationship');
     } finally {
       setLoading(false);
@@ -103,7 +105,7 @@ const MedicationRelationships = ({
         await fetchConditionMedications(conditionId);
       }
     } catch (err) {
-      console.error('Error deleting medication relationship:', err);
+      logger.error('Error deleting medication relationship:', err);
       setError(err.response?.data?.detail || err.message || 'Failed to delete medication relationship');
     } finally {
       setLoading(false);

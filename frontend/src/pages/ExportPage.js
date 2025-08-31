@@ -1,3 +1,5 @@
+import logger from '../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -89,7 +91,7 @@ const ExportPage = () => {
       } else {
         setError(`Failed to load export data: ${error.message || 'Please try again.'}`);
       }
-      console.error('Export data loading failed:', error);
+      logger.error('Export data loading failed:', error);
     } finally {
       setSummaryLoading(false);
     }

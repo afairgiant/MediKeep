@@ -169,7 +169,7 @@ const Insurance = () => {
       const count = Array.isArray(files) ? files.length : 0;
       setFileCounts(prev => ({ ...prev, [insuranceId]: count }));
     } catch (error) {
-      console.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
+      logger.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
     }
   }, []);
 
@@ -189,7 +189,7 @@ const Insurance = () => {
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [insurance.id]: count }));
         } catch (error) {
-          console.error(`Error loading file count for insurance ${insurance.id}:`, error);
+          logger.error(`Error loading file count for insurance ${insurance.id}:`, error);
           setFileCounts(prev => ({ ...prev, [insurance.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [insurance.id]: false }));

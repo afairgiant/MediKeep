@@ -2,6 +2,8 @@
  * Centralized navigation utility for linking between medical record entities
  * Based on the existing Treatment → Condition pattern
  */
+import logger from '../services/logger';
+
 
 export const ENTITY_ROUTES = {
   condition: '/conditions',
@@ -32,14 +34,14 @@ export const navigateToEntity = (entityType, entityId, navigate) => {
   const route = ENTITY_ROUTES[entityType];
   
   if (!route) {
-    console.error(`Unknown entity type: ${entityType}`);
+    logger.error(`Unknown entity type: ${entityType}`);
     return;
   }
   
   // Sanitize entity ID
   const sanitizedId = parseInt(entityId, 10);
   if (isNaN(sanitizedId)) {
-    console.error('Invalid entity ID');
+    logger.error('Invalid entity ID');
     return;
   }
   

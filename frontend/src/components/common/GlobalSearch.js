@@ -2,6 +2,8 @@
  * GlobalSearch Component
  * Provides a search input with dropdown results for medical records
  */
+import logger from '../../services/logger';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { TextInput, Box } from '@mantine/core';
@@ -46,7 +48,7 @@ const GlobalSearch = ({
         const searchResults = await searchService.searchPatientRecords(debouncedQuery, patientId);
         setResults(searchResults);
       } catch (error) {
-        console.error('Search failed:', error);
+        logger.error('Search failed:', error);
         setResults([]);
       } finally {
         setLoading(false);

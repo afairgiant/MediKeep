@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -168,7 +170,7 @@ const Conditions = () => {
           setMedications(response || []);
         })
         .catch(error => {
-          console.error('Failed to fetch medications:', error);
+          logger.error('Failed to fetch medications:', error);
           setMedications([]);
         });
       
@@ -178,7 +180,7 @@ const Conditions = () => {
           setPractitioners(response || []);
         })
         .catch(error => {
-          console.error('Failed to fetch practitioners:', error);
+          logger.error('Failed to fetch practitioners:', error);
           setPractitioners([]);
         });
     }

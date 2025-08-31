@@ -314,6 +314,7 @@ class Token(BaseModel):
 
     access_token: str
     token_type: str
+    session_timeout_minutes: Optional[int] = 30
 
 
 class TokenData(BaseModel):

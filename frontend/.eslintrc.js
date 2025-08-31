@@ -3,7 +3,7 @@ module.exports = {
   rules: {
     // Add custom rules here
     'no-unused-vars': 'warn',
-    'no-console': 'warn',
+    'no-console': 'error', // Prevent all console statements - use logger instead
   },
   parserOptions: {
     ecmaVersion: 2022,

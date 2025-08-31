@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -46,7 +48,7 @@ const ModelManagement = () => {
       setTotalPages(recordsResult.total_pages);
       setTotalRecords(recordsResult.total);
     } catch (err) {
-      console.error('Error loading model data:', err);
+      logger.error('Error loading model data:', err);
       setError(err.message || 'Failed to load model data');
     } finally {
       setLoading(false);

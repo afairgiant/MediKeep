@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { memo } from 'react';
 import {
   Stack,
@@ -235,14 +237,14 @@ const RenderModeContent = memo(({
               // Use different approaches based on mode
               if (mode === 'create') {
                 // Creation mode: use pending files (no entity ID yet)
-                console.log('RenderModeContent: adding to pending files for creation mode:', file.name);
+                logger.info('RenderModeContent: adding to pending files for creation mode:', file.name);
                 onAddPendingFile(file, description);
               } else if (handleImmediateUpload) {
                 // Edit/view mode: use immediate upload (entity ID exists)
-                console.log('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
+                logger.info('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
                 handleImmediateUpload(file, description || '');
               } else {
-                console.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
+                logger.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
                 onAddPendingFile(file, description);
               }
             });
@@ -271,14 +273,14 @@ const RenderModeContent = memo(({
               // Use different approaches based on mode
               if (mode === 'create') {
                 // Creation mode: use pending files (no entity ID yet)
-                console.log('RenderModeContent: adding to pending files for creation mode:', file.name);
+                logger.info('RenderModeContent: adding to pending files for creation mode:', file.name);
                 onAddPendingFile(file, description);
               } else if (handleImmediateUpload) {
                 // Edit/view mode: use immediate upload (entity ID exists)
-                console.log('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
+                logger.info('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
                 handleImmediateUpload(file, description || '');
               } else {
-                console.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
+                logger.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
                 onAddPendingFile(file, description);
               }
             });

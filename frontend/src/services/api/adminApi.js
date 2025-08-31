@@ -1,3 +1,5 @@
+import logger from '../logger';
+
 import BaseApiService from './baseApi';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
@@ -166,7 +168,7 @@ class AdminApiService extends BaseApiService {
       // Try to get available models - this requires admin access
       return await this.getAvailableModels();
     } catch (error) {
-      console.error('Admin access test failed:', error);
+      logger.error('Admin access test failed:', error);
       throw error;
     }
   }
