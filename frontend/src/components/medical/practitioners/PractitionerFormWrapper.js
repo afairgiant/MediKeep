@@ -3,7 +3,7 @@ import { Text, Anchor } from '@mantine/core';
 import BaseMedicalForm from '../BaseMedicalForm';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
 import { formatPhoneInput, isValidPhoneNumber } from '../../../utils/phoneUtils';
-import { fetchMedicalSpecialties } from '../../../config/medicalSpecialties';
+import { fetchMedicalSpecialties, clearSpecialtiesCache } from '../../../config/medicalSpecialties';
 import logger from '../../../services/logger';
 
 const PractitionerFormWrapper = ({
@@ -41,6 +41,8 @@ const PractitionerFormWrapper = ({
     };
     
     if (isOpen) {
+      // Clear cache to get fresh data including any newly added specialties
+      clearSpecialtiesCache();
       loadSpecialties();
     }
   }, [isOpen]);

@@ -83,6 +83,9 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
  */
 export const fetchMedicalSpecialties = async () => {
   try {
+    // Initialize custom specialties on first run
+    initializeCustomSpecialties();
+    
     // Check cache first
     if (specialtiesCache && cacheTimestamp && Date.now() - cacheTimestamp < CACHE_DURATION) {
       return specialtiesCache;
@@ -144,8 +147,9 @@ export const fetchMedicalSpecialties = async () => {
       }
     } catch (apiError) {
       // API call failed, but that's okay - we'll use defaults
-      logger.debug('medical_specialties_api_unavailable', 'API unavailable, using default specialties', {
-        component: 'medicalSpecialties'
+      logger.warn('medical_specialties_api_unavailable', 'API unavailable, using default specialties', {
+        component: 'medicalSpecialties',
+        error: apiError.message
       });
     }
   } catch (error) {
@@ -155,19 +159,49 @@ export const fetchMedicalSpecialties = async () => {
     });
   }
   
-  // Always return defaults with Other option as fallback
-  const defaultsWithOther = [...DEFAULT_MEDICAL_SPECIALTIES];
-  defaultsWithOther.push({
+  // Always return defaults with any cached custom specialties as fallback
+  // Get any custom specialties from localStorage (fallback when API fails)
+  let customSpecialties = [];
+  try {
+    const stored = localStorage.getItem('customMedicalSpecialties');
+    if (stored) {
+      customSpecialties = JSON.parse(stored);
+    }
+  } catch (e) {
+    logger.debug('custom_specialties_localStorage_error', 'Failed to load from localStorage', {
+      component: 'medicalSpecialties'
+    });
+  }
+  
+  // Combine defaults with custom specialties
+  const allSpecialties = [...DEFAULT_MEDICAL_SPECIALTIES];
+  
+  // Add custom specialties
+  customSpecialties.forEach(customSpec => {
+    if (!allSpecialties.find(s => s.value.toLowerCase() === customSpec.toLowerCase())) {
+      allSpecialties.push({
+        value: customSpec,
+        label: customSpec,
+        isCustom: true
+      });
+    }
+  });
+  
+  // Sort alphabetically
+  const sortedDefaults = allSpecialties.sort((a, b) => a.value.localeCompare(b.value));
+  
+  // Add Other option at the end
+  sortedDefaults.push({
     value: 'Other',
     label: 'Other - Specify in notes',
     isOther: true
   });
   
-  // Cache the defaults too
-  specialtiesCache = defaultsWithOther;
+  // Cache the sorted defaults
+  specialtiesCache = sortedDefaults;
   cacheTimestamp = Date.now();
   
-  return defaultsWithOther;
+  return sortedDefaults;
 };
 
 /**
@@ -188,6 +222,34 @@ export const clearSpecialtiesCache = () => {
  * This makes it available for other forms without waiting for API refresh
  */
 export const addSpecialtyToCache = (specialty) => {
+  // Add to localStorage for persistence
+  try {
+    let customSpecialties = [];
+    const stored = localStorage.getItem('customMedicalSpecialties');
+    if (stored) {
+      customSpecialties = JSON.parse(stored);
+    }
+    
+    // Add if not already exists (case-insensitive)
+    if (!customSpecialties.find(s => s.toLowerCase() === specialty.toLowerCase())) {
+      customSpecialties.push(specialty);
+      localStorage.setItem('customMedicalSpecialties', JSON.stringify(customSpecialties));
+      
+      logger.info('specialty_added_to_localStorage', 'New specialty saved to localStorage', {
+        component: 'medicalSpecialties',
+        specialty: specialty,
+        totalCustom: customSpecialties.length
+      });
+    }
+  } catch (e) {
+    logger.error('specialty_localStorage_save_error', 'Failed to save specialty to localStorage', {
+      component: 'medicalSpecialties',
+      specialty: specialty,
+      error: e.message
+    });
+  }
+  
+  // Also update in-memory cache if it exists
   if (!specialtiesCache) return;
   
   // Check if specialty already exists (case-insensitive)
@@ -236,4 +298,46 @@ export const getSpecialtyLabel = (value) => {
  */
 export const isDefaultSpecialty = (value) => {
   return DEFAULT_MEDICAL_SPECIALTIES.some(s => s.value === value);
+};
+
+/**
+ * Initialize localStorage with known custom specialties from the database
+ * This is a one-time setup function to migrate existing data
+ */
+export const initializeCustomSpecialties = () => {
+  const knownCustomSpecialties = [
+    'Oral and Maxillofacial Surgery',
+    'Test', 
+    'Thing'
+  ];
+  
+  try {
+    let customSpecialties = [];
+    const stored = localStorage.getItem('customMedicalSpecialties');
+    if (stored) {
+      customSpecialties = JSON.parse(stored);
+    }
+    
+    // Add known custom specialties if not already present
+    let updated = false;
+    knownCustomSpecialties.forEach(specialty => {
+      if (!customSpecialties.find(s => s.toLowerCase() === specialty.toLowerCase())) {
+        customSpecialties.push(specialty);
+        updated = true;
+      }
+    });
+    
+    if (updated) {
+      localStorage.setItem('customMedicalSpecialties', JSON.stringify(customSpecialties));
+      logger.info('custom_specialties_initialized', 'Initialized custom specialties in localStorage', {
+        component: 'medicalSpecialties',
+        specialties: customSpecialties
+      });
+    }
+  } catch (e) {
+    logger.error('custom_specialties_init_error', 'Failed to initialize custom specialties', {
+      component: 'medicalSpecialties',
+      error: e.message
+    });
+  }
 };

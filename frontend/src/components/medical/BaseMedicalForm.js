@@ -326,6 +326,20 @@ const BaseMedicalForm = ({
 
           const [search, setSearch] = useState(formData[name] || '');
           const [value, setValue] = useState(formData[name] || '');
+          
+          // Sync local state when formData changes (e.g., when editing different records)
+          useEffect(() => {
+            const currentValue = formData[name] || '';
+            setValue(currentValue);
+            
+            // Find if it's a known option to display the label instead of value
+            const option = selectOptions.find(opt => opt.value === currentValue);
+            if (option && option.label) {
+              setSearch(option.label);
+            } else {
+              setSearch(currentValue);
+            }
+          }, [formData[name], selectOptions]); // Re-run when formData[name] or options change
 
           const exactOptionMatch = selectOptions.find(
             (item) => item.value === search || item.label === search
@@ -357,8 +371,10 @@ const BaseMedicalForm = ({
                   // If this is the specialty field, add it to the cache for future use
                   if (name === 'specialty') {
                     // Dynamically import to avoid circular dependencies
-                    import('../../config/medicalSpecialties').then(({ addSpecialtyToCache }) => {
+                    import('../../config/medicalSpecialties').then(({ addSpecialtyToCache, clearSpecialtiesCache }) => {
                       addSpecialtyToCache(search);
+                      // Also clear cache to force fresh load next time
+                      clearSpecialtiesCache();
                     });
                   }
                 } else {
