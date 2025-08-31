@@ -3,6 +3,7 @@ import { Text, Anchor } from '@mantine/core';
 import BaseMedicalForm from '../BaseMedicalForm';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
 import { formatPhoneInput, isValidPhoneNumber } from '../../../utils/phoneUtils';
+import { fetchMedicalSpecialties } from '../../../config/medicalSpecialties';
 import logger from '../../../services/logger';
 
 const PractitionerFormWrapper = ({
@@ -16,50 +17,33 @@ const PractitionerFormWrapper = ({
   isLoading,
   statusMessage,
 }) => {
-  // Medical specialties with descriptions
-  const specialtyOptions = [
-    {
-      value: 'Cardiology',
-      label: 'Cardiology - Heart & cardiovascular system',
-    },
-    { value: 'Dermatology', label: 'Dermatology - Skin, hair & nails' },
-    {
-      value: 'Emergency Medicine',
-      label: 'Emergency Medicine - Emergency care',
-    },
-    {
-      value: 'Family Medicine',
-      label: 'Family Medicine - General practice',
-    },
-    {
-      value: 'Gastroenterology',
-      label: 'Gastroenterology - Digestive system',
-    },
-    {
-      value: 'General Surgery',
-      label: 'General Surgery - Surgical procedures',
-    },
-    {
-      value: 'Internal Medicine',
-      label: 'Internal Medicine - Internal organ systems',
-    },
-    { value: 'Neurology', label: 'Neurology - Brain & nervous system' },
-    { value: 'Obstetrics and Gynecology', label: "OB/GYN - Women's health" },
-    { value: 'Oncology', label: 'Oncology - Cancer treatment' },
-    { value: 'Ophthalmology', label: 'Ophthalmology - Eye care' },
-    { value: 'Orthopedics', label: 'Orthopedics - Bone & joint care' },
-    { value: 'Pediatrics', label: "Pediatrics - Children's health" },
-    { value: 'Psychiatry', label: 'Psychiatry - Mental health' },
-    { value: 'Radiology', label: 'Radiology - Medical imaging' },
-    { value: 'Urology', label: 'Urology - Urinary system' },
-    { value: 'Endocrinology', label: 'Endocrinology - Hormones & glands' },
-    {
-      value: 'Rheumatology',
-      label: 'Rheumatology - Autoimmune & joint diseases',
-    },
-    { value: 'Anesthesiology', label: 'Anesthesiology - Pain management' },
-    { value: 'Pathology', label: 'Pathology - Disease diagnosis' },
-  ];
+  // State for dynamic specialties
+  const [specialtyOptions, setSpecialtyOptions] = useState([]);
+  const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
+  
+  // Load specialties on component mount
+  useEffect(() => {
+    const loadSpecialties = async () => {
+      try {
+        setIsLoadingSpecialties(true);
+        const specialties = await fetchMedicalSpecialties();
+        // Remove the "Other" option as we'll allow custom input directly
+        const filteredSpecialties = specialties.filter(s => s.value !== 'Other');
+        setSpecialtyOptions(filteredSpecialties);
+      } catch (error) {
+        logger.error('load_specialties_failed', 'Failed to load medical specialties', {
+          component: 'PractitionerFormWrapper',
+          error: error.message
+        });
+      } finally {
+        setIsLoadingSpecialties(false);
+      }
+    };
+    
+    if (isOpen) {
+      loadSpecialties();
+    }
+  }, [isOpen]);
 
   const dynamicOptions = {
     specialties: specialtyOptions,
@@ -182,7 +166,7 @@ const PractitionerFormWrapper = ({
       fields={practitionerFormFields}
       dynamicOptions={dynamicOptions}
       fieldErrors={fieldErrors}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingSpecialties}
     >
       {customContent}
     </BaseMedicalForm>
