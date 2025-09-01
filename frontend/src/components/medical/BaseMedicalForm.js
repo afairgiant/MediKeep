@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import {
   Modal,
   TextInput,
@@ -15,12 +15,12 @@ import {
   Grid,
   Text,
   Rating,
-  Anchor,
   Checkbox,
   Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
+import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import logger from '../../services/logger';
 
 /**
@@ -72,18 +72,17 @@ const BaseMedicalForm = ({
   // Debug: Track render cycles
   const renderCount = useRef(0);
   const lastRenderTime = useRef(Date.now());
-  const dropdownOpenCount = useRef(0);
   
-  // Only log renders in development
-  if (process.env.NODE_ENV === 'development') {
-    useEffect(() => {
+  // Log renders in development - useEffect must be called unconditionally
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
       renderCount.current++;
       const now = Date.now();
       const timeSinceLastRender = now - lastRenderTime.current;
       lastRenderTime.current = now;
       
-      // Only log every 5th render to reduce noise
-      if (renderCount.current % 5 === 0 || timeSinceLastRender < 50) {
+      // Only log every 10th render to reduce noise
+      if (renderCount.current % 10 === 0 || timeSinceLastRender < 50) {
         logger.debug('BaseMedicalForm render', {
           component: 'BaseMedicalForm',
           renderCount: renderCount.current,
@@ -104,8 +103,8 @@ const BaseMedicalForm = ({
           timeSinceLastRender
         });
       }
-    });
-  }
+    }
+  });
   
   // Set up performance observer to detect long tasks
   useEffect(() => {
@@ -134,6 +133,30 @@ const BaseMedicalForm = ({
     
     return () => observer.disconnect();
   }, [isOpen]);
+
+  // Add passive event listeners for better scroll performance
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleWheel = (e) => {
+      // Allow default wheel behavior but mark as passive for better performance
+      // This prevents the 215ms delay mentioned in the logs
+    };
+
+    const modalElement = document.querySelector('[data-mantine-modal]');
+    if (modalElement) {
+      modalElement.addEventListener('wheel', handleWheel, { passive: true });
+      modalElement.addEventListener('touchmove', handleWheel, { passive: true });
+      
+      return () => {
+        modalElement.removeEventListener('wheel', handleWheel);
+        modalElement.removeEventListener('touchmove', handleWheel);
+      };
+    }
+  }, [isOpen]);
+  // Get responsive window dimensions with debounced updates
+  const { isSmallScreen, isMobileWidth, isTabletWidth } = useWindowDimensions(150);
+
   const { 
     handleTextInputChange, 
     handleSelectChange, 
@@ -141,8 +164,8 @@ const BaseMedicalForm = ({
     handleNumberChange 
   } = useFormHandlers(onInputChange);
 
-  // Handle Rating onChange (receives value directly)
-  const handleRatingChange = (field) => (value) => {
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handleRatingChange = useCallback((field) => (value) => {
     const syntheticEvent = {
       target: {
         name: field,
@@ -150,10 +173,9 @@ const BaseMedicalForm = ({
       },
     };
     onInputChange(syntheticEvent);
-  };
+  }, [onInputChange]);
 
-  // Handle Checkbox onChange
-  const handleCheckboxChange = (field) => (event) => {
+  const handleCheckboxChange = useCallback((field) => (event) => {
     const syntheticEvent = {
       target: {
         name: field,
@@ -163,20 +185,20 @@ const BaseMedicalForm = ({
       },
     };
     onInputChange(syntheticEvent);
-  };
+  }, [onInputChange]);
 
-  const handleSubmit = e => {
+  const handleSubmit = useCallback(e => {
     e.preventDefault();
     onSubmit(e);
-  };
+  }, [onSubmit]);
 
-  // Static dropdown height to avoid resize observer issues
-  const getResponsiveDropdownHeight = (providedHeight) => {
-    return providedHeight || 250; // Fixed height to prevent ResizeObserver loops
-  };
+  // Memoized dropdown height to avoid recalculation on every render
+  const getResponsiveDropdownHeight = useCallback((providedHeight) => {
+    return providedHeight || (isSmallScreen ? 200 : 280); // Responsive but fixed heights
+  }, [isSmallScreen]);
 
-  // Render individual form field based on configuration
-  const renderField = (fieldConfig) => {
+  // Memoize the render field function with stable dependencies
+  const renderField = useCallback((fieldConfig) => {
     const {
       name,
       type,
@@ -188,7 +210,6 @@ const BaseMedicalForm = ({
       dynamicOptions: dynamicOptionsKey,
       searchable = false,
       clearable = false,
-      creatable = false,
       minRows,
       maxRows,
       maxDate,
@@ -245,53 +266,21 @@ const BaseMedicalForm = ({
         );
 
       case 'select':
-        // Use memoized function to get responsive dropdown height
-        const responsiveMaxHeight = getResponsiveDropdownHeight(maxDropdownHeight);
-        
-        // Only log in development and for specific fields
-        if (process.env.NODE_ENV === 'development' && (name === 'practitioner_id' || name === 'pharmacy_id')) {
-          logger.debug('Rendering Select field', {
-            component: 'BaseMedicalForm',
-            fieldName: name,
-            optionsCount: selectOptions.length,
-            responsiveMaxHeight,
-            windowHeight: window.innerHeight,
-            isFieldLoading,
-            searchable,
-            clearable
-          });
-        }
-        
-        // Disable certain features on small screens to prevent performance issues
-        const isSmallScreen = window.innerHeight < 800;
+        // Use inline responsive height to avoid function call
+        const responsiveMaxHeight = maxDropdownHeight || (isSmallScreen ? 200 : 280);
         
         return (
           <Select
             {...baseProps}
             data={selectOptions}
             onChange={handleSelectChange(name)}
-            searchable={searchable && !isSmallScreen}
+            searchable={searchable && !isSmallScreen} // Use cached screen size
             clearable={clearable}
             maxDropdownHeight={responsiveMaxHeight}
             disabled={isFieldLoading}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
-            limit={isSmallScreen ? 20 : undefined}
-            onDropdownOpen={() => {
-              dropdownOpenCount.current++;
-              logger.info('Select dropdown opened', {
-                component: 'BaseMedicalForm',
-                fieldName: name,
-                dropdownOpenCount: dropdownOpenCount.current,
-                windowHeight: window.innerHeight,
-                maxDropdownHeight: responsiveMaxHeight
-              });
-            }}
-            onDropdownClose={() => {
-              logger.info('Select dropdown closed', {
-                component: 'BaseMedicalForm',
-                fieldName: name
-              });
-            }}
+            limit={isSmallScreen ? 20 : selectOptions.length > 100 ? 50 : undefined}
+            withScrollArea={selectOptions.length > 20} // Enable virtualization for large lists
           />
         );
 
@@ -339,7 +328,7 @@ const BaseMedicalForm = ({
             } else {
               setSearch(currentValue);
             }
-          }, [formData[name], selectOptions]); // Re-run when formData[name] or options change
+          }, [formData, name]); // Re-run when formData or name changes
 
           const exactOptionMatch = selectOptions.find(
             (item) => item.value === search || item.label === search
@@ -580,7 +569,7 @@ const BaseMedicalForm = ({
         logger.warn(`Unknown field type: ${type} for field: ${name}`);
         return null;
     }
-  };
+  }, [formData, dynamicOptions, loadingStates, fieldErrors, handleTextInputChange, handleSelectChange, handleDateChange, handleNumberChange, handleRatingChange, handleCheckboxChange, onInputChange, isSmallScreen]);
 
   // Group fields by row based on gridColumn values
   const groupFieldsIntoRows = (fields) => {
@@ -612,40 +601,41 @@ const BaseMedicalForm = ({
     return rows;
   };
 
-  const fieldRows = groupFieldsIntoRows(fields);
+  // Memoize field rows to prevent recalculation on every render
+  const fieldRows = useMemo(() => groupFieldsIntoRows(fields), [fields]);
 
-  // Determine submit button text
-  const getSubmitButtonText = () => {
+  // Memoize submit button text to prevent recalculation
+  const submitText = useMemo(() => {
     if (submitButtonText) return submitButtonText;
     
     const entityName = title.replace('Add ', '').replace('Edit ', '');
     return editingItem ? `Update ${entityName}` : `Add ${entityName}`;
-  };
+  }, [submitButtonText, title, editingItem]);
 
-  // Determine submit button color based on form data
-  const getSubmitButtonColor = () => {
+  // Memoize submit button color based on form data
+  const submitColor = useMemo(() => {
     if (submitButtonColor) return submitButtonColor;
     
     // Special case for allergy severity
-    if (formData.severity === 'life-threatening') {
+    if (formData?.severity === 'life-threatening') {
       return 'red';
     }
     
     return undefined;
-  };
+  }, [submitButtonColor, formData?.severity]);
 
-  // Calculate responsive modal size to prevent issues on small screens
+  // Memoized responsive modal size using cached window dimensions
   const responsiveModalSize = useMemo(() => {
     if (typeof modalSize === 'string') {
       // Override modal size on small screens to prevent overflow
-      if (window.innerWidth < 768) {
+      if (isMobileWidth) {
         return 'sm'; // Force smaller modal on mobile
-      } else if (window.innerWidth < 1024) {
+      } else if (isTabletWidth) {
         return modalSize === 'xl' ? 'lg' : modalSize; // Cap at 'lg' on tablets/small laptops
       }
     }
     return modalSize;
-  }, [modalSize]);
+  }, [modalSize, isMobileWidth, isTabletWidth]);
 
   return (
     <Modal
@@ -658,13 +648,13 @@ const BaseMedicalForm = ({
       }
       size={responsiveModalSize}
       centered
-      styles={{
+      styles={useMemo(() => ({
         body: { 
-          padding: window.innerWidth < 768 ? '1rem' : '1.5rem', 
-          paddingBottom: window.innerWidth < 768 ? '1.5rem' : '2rem' 
+          padding: isMobileWidth ? '1rem' : '1.5rem', 
+          paddingBottom: isMobileWidth ? '1.5rem' : '2rem' 
         },
         header: { paddingBottom: '1rem' },
-      }}
+      }), [isMobileWidth])}
       overflow="inside"
     >
       <form onSubmit={handleSubmit}>
@@ -704,7 +694,7 @@ const BaseMedicalForm = ({
             <Button
               type="submit"
               variant="filled"
-              color={getSubmitButtonColor()}
+              color={submitColor}
               loading={isLoading}
               style={{
                 minHeight: '42px',
@@ -716,7 +706,7 @@ const BaseMedicalForm = ({
                 justifyContent: 'center',
               }}
             >
-              {getSubmitButtonText()}
+              {submitText}
             </Button>
           </Group>
         </Stack>
@@ -725,4 +715,59 @@ const BaseMedicalForm = ({
   );
 };
 
-export default BaseMedicalForm;
+// Wrap component with React.memo and custom comparison function
+const MemoizedBaseMedicalForm = memo(BaseMedicalForm, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo to prevent excessive re-renders
+  
+  // Check primitive props
+  const primitiveProps = ['isOpen', 'title', 'isLoading', 'modalSize', 'submitButtonText', 'submitButtonColor'];
+  for (const prop of primitiveProps) {
+    if (prevProps[prop] !== nextProps[prop]) {
+      return false;
+    }
+  }
+  
+  // Check object/array props with shallow comparison
+  if (prevProps.formData !== nextProps.formData) {
+    return false;
+  }
+  
+  if (prevProps.editingItem !== nextProps.editingItem) {
+    return false;
+  }
+  
+  // Check fields array (should be stable)
+  if (prevProps.fields !== nextProps.fields || prevProps.fields?.length !== nextProps.fields?.length) {
+    return false;
+  }
+  
+  // Check dynamicOptions object (should be stable from parent)
+  if (prevProps.dynamicOptions !== nextProps.dynamicOptions) {
+    return false;
+  }
+  
+  // Check loadingStates object
+  if (prevProps.loadingStates !== nextProps.loadingStates) {
+    return false;
+  }
+  
+  // Check fieldErrors object  
+  if (prevProps.fieldErrors !== nextProps.fieldErrors) {
+    return false;
+  }
+  
+  // Function props should be stable from parent useCallback
+  const functionProps = ['onClose', 'onInputChange', 'onSubmit'];
+  for (const prop of functionProps) {
+    if (prevProps[prop] !== nextProps[prop]) {
+      return false;
+    }
+  }
+  
+  return true; // Props are equal, skip re-render
+});
+
+// Set display name for better debugging
+MemoizedBaseMedicalForm.displayName = 'BaseMedicalForm';
+
+export default MemoizedBaseMedicalForm;

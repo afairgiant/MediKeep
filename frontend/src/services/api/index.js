@@ -665,7 +665,10 @@ class ApiService {
               withCloseButton: true,
             });
           })
-          .catch(console.warn);
+          .catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn(err);
+          });
 
         logger.info(
           'api_upload_background_transition',

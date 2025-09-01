@@ -84,6 +84,7 @@ class Logger {
     // Always console log for immediate feedback
     const consoleMethod =
       level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
+    // eslint-disable-next-line no-console
     console[consoleMethod](`[${level.toUpperCase()}] ${message}`, data);
 
     // Send to backend if online
