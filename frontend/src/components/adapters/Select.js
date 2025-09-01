@@ -1,6 +1,5 @@
 import React, { memo, useMemo } from 'react';
 import { Select as MantineSelect } from '@mantine/core';
-import { useDebounce } from '../../hooks/useDebounce';
 
 export const Select = memo(({
   value,

@@ -197,27 +197,151 @@ const BaseMedicalForm = ({
     return providedHeight || (isSmallScreen ? 200 : 280); // Responsive but fixed heights
   }, [isSmallScreen]);
 
-  // Memoize the render field function with stable dependencies
+  // Split renderField into smaller, focused callbacks for better performance
+  
+  // Callback for text-based input fields
+  const renderTextInputField = useCallback((fieldConfig, baseProps) => {
+    const { type, name } = fieldConfig;
+    return (
+      <TextInput
+        {...baseProps}
+        onChange={handleTextInputChange(name)}
+        type={type === 'email' ? 'email' : type === 'tel' ? 'text' : type === 'url' ? 'url' : 'text'}
+        inputMode={type === 'tel' ? 'tel' : undefined}
+      />
+    );
+  }, [handleTextInputChange]);
+
+  // Callback for textarea fields
+  const renderTextareaField = useCallback((fieldConfig, baseProps) => {
+    const { name, minRows, maxRows } = fieldConfig;
+    return (
+      <Textarea
+        {...baseProps}
+        onChange={handleTextInputChange(name)}
+        minRows={minRows}
+        maxRows={maxRows}
+      />
+    );
+  }, [handleTextInputChange]);
+
+  // Callback for select fields
+  const renderSelectField = useCallback((fieldConfig, baseProps, selectOptions, isFieldLoading) => {
+    const { name, dynamicOptions: dynamicOptionsKey, searchable, clearable, maxDropdownHeight } = fieldConfig;
+    const responsiveMaxHeight = maxDropdownHeight || (isSmallScreen ? 200 : 280);
+    
+    return (
+      <Select
+        {...baseProps}
+        data={selectOptions}
+        onChange={handleSelectChange(name)}
+        searchable={searchable && !isSmallScreen}
+        clearable={clearable}
+        maxDropdownHeight={responsiveMaxHeight}
+        disabled={isFieldLoading}
+        placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : baseProps.placeholder}
+        limit={isSmallScreen ? 20 : selectOptions.length > 100 ? 50 : undefined}
+      />
+    );
+  }, [handleSelectChange, isSmallScreen]);
+
+  // Callback for number input fields
+  const renderNumberField = useCallback((fieldConfig, baseProps) => {
+    const { name, min, max } = fieldConfig;
+    return (
+      <NumberInput
+        {...baseProps}
+        onChange={handleNumberChange(name)}
+        value={formData[name] !== undefined && formData[name] !== null && formData[name] !== '' ? Number(formData[name]) : ''}
+        min={min}
+        max={max}
+      />
+    );
+  }, [handleNumberChange, formData]);
+
+  // Callback for date input fields
+  const renderDateField = useCallback((fieldConfig, baseProps) => {
+    const { name, maxDate, minDate } = fieldConfig;
+    // Parse date value with error handling
+    let dateValue = null;
+    if (formData[name]) {
+      try {
+        if (typeof formData[name] === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData[name].trim())) {
+          const [year, month, day] = formData[name].trim().split('-').map(Number);
+          if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+            dateValue = new Date(year, month - 1, day);
+          }
+        } else {
+          dateValue = new Date(formData[name]);
+        }
+        if (isNaN(dateValue.getTime())) {
+          dateValue = null;
+        }
+      } catch (error) {
+        logger.error(`Error parsing date for field ${name}:`, error);
+        dateValue = null;
+      }
+    }
+
+    // Calculate dynamic min/max dates  
+    let dynamicMinDate = minDate;
+    let dynamicMaxDate = typeof maxDate === 'function' ? maxDate() : maxDate;
+    
+    // Handle dynamic minDate for end date fields
+    try {
+      if (name === 'end_date' && formData.onset_date) {
+        dynamicMinDate = new Date(formData.onset_date);
+      } else if (name === 'end_date' && formData.start_date) {
+        dynamicMinDate = new Date(formData.start_date);
+      } else {
+        // Generic pattern: derive start field name from end field name
+        let startFieldName = null;
+        if (name.endsWith('_end_date')) {
+          startFieldName = name.substring(0, name.length - '_end_date'.length) + '_start_date';
+        } else if (name.endsWith('_end') && name.includes('date')) {
+          startFieldName = name.substring(0, name.length - '_end'.length) + '_start';
+        } else if (name.includes('end_date')) {
+          startFieldName = name.replace(/end_date/g, 'start_date');
+        } else if (name.includes('_end_') && name.includes('date')) {
+          startFieldName = name.replace(/_end_/g, '_start_');
+        }
+        
+        if (startFieldName && formData[startFieldName]) {
+          const tempDate = new Date(formData[startFieldName]);
+          if (!isNaN(tempDate.getTime())) {
+            dynamicMinDate = tempDate;
+          }
+        }
+      }
+    } catch (error) {
+      logger.error(`Error calculating dynamic min date:`, error);
+    }
+
+    return (
+      <DateInput
+        {...baseProps}
+        value={dateValue}
+        onChange={handleDateChange(name)}
+        firstDayOfWeek={0}
+        clearable
+        maxDate={dynamicMaxDate}
+        minDate={dynamicMinDate}
+      />
+    );
+  }, [handleDateChange, formData]);
+
+  // Main renderField function now uses smaller callbacks - much simpler with fewer dependencies
   const renderField = useCallback((fieldConfig) => {
     const {
       name,
       type,
+      dynamicOptions: dynamicOptionsKey,
+      options = [],
       label,
       placeholder,
-      required = false,
       description,
-      options = [],
-      dynamicOptions: dynamicOptionsKey,
-      searchable = false,
-      clearable = false,
-      minRows,
-      maxRows,
-      maxDate,
-      minDate,
+      required = false,
       maxLength,
-      min,
-      max,
-      maxDropdownHeight,
     } = fieldConfig;
 
     // Get dynamic options if specified
@@ -227,7 +351,6 @@ const BaseMedicalForm = ({
      
     // Check if this dynamic option is loading
     const isFieldLoading = dynamicOptionsKey && loadingStates[dynamicOptionsKey];
-
 
     // Base field props
     const baseProps = {
@@ -246,43 +369,19 @@ const BaseMedicalForm = ({
       case 'email':
       case 'tel':
       case 'url':
-        return (
-          <TextInput
-            {...baseProps}
-            onChange={handleTextInputChange(name)}
-            type={type === 'email' ? 'email' : type === 'tel' ? 'text' : type === 'url' ? 'url' : 'text'}
-            inputMode={type === 'tel' ? 'tel' : undefined}
-          />
-        );
+        return renderTextInputField(fieldConfig, baseProps);
 
       case 'textarea':
-        return (
-          <Textarea
-            {...baseProps}
-            onChange={handleTextInputChange(name)}
-            minRows={minRows}
-            maxRows={maxRows}
-          />
-        );
+        return renderTextareaField(fieldConfig, baseProps);
 
       case 'select':
-        // Use inline responsive height to avoid function call
-        const responsiveMaxHeight = maxDropdownHeight || (isSmallScreen ? 200 : 280);
-        
-        return (
-          <Select
-            {...baseProps}
-            data={selectOptions}
-            onChange={handleSelectChange(name)}
-            searchable={searchable && !isSmallScreen} // Use cached screen size
-            clearable={clearable}
-            maxDropdownHeight={responsiveMaxHeight}
-            disabled={isFieldLoading}
-            placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
-            limit={isSmallScreen ? 20 : selectOptions.length > 100 ? 50 : undefined}
-            withScrollArea={selectOptions.length > 20} // Enable virtualization for large lists
-          />
-        );
+        return renderSelectField(fieldConfig, baseProps, selectOptions, isFieldLoading);
+
+      case 'number':
+        return renderNumberField(fieldConfig, baseProps);
+
+      case 'date':
+        return renderDateField(fieldConfig, baseProps);
 
       case 'autocomplete':
         // Convert options to simple string array for Autocomplete
@@ -328,7 +427,7 @@ const BaseMedicalForm = ({
             } else {
               setSearch(currentValue);
             }
-          }, [formData, name]); // Re-run when formData or name changes
+          }, [formData[name], name]); // Fixed: Only re-run when specific field value changes
 
           const exactOptionMatch = selectOptions.find(
             (item) => item.value === search || item.label === search
@@ -569,7 +668,7 @@ const BaseMedicalForm = ({
         logger.warn(`Unknown field type: ${type} for field: ${name}`);
         return null;
     }
-  }, [formData, dynamicOptions, loadingStates, fieldErrors, handleTextInputChange, handleSelectChange, handleDateChange, handleNumberChange, handleRatingChange, handleCheckboxChange, onInputChange, isSmallScreen]);
+  }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange]);
 
   // Group fields by row based on gridColumn values
   const groupFieldsIntoRows = (fields) => {

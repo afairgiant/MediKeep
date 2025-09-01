@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 
+// Configuration constants
+const DEFAULT_DIMENSION_CHANGE_THRESHOLD = 5; // pixels
+const DEFAULT_DEBOUNCE_MS = 100;
+
 /**
  * Optimized hook for tracking window dimensions with debounced updates
  * Prevents excessive re-renders and performance issues from constant window size checks
  */
-export const useWindowDimensions = (debounceMs = 100) => {
+export const useWindowDimensions = (debounceMs = DEFAULT_DEBOUNCE_MS, changeThreshold = DEFAULT_DIMENSION_CHANGE_THRESHOLD) => {
   const [dimensions, setDimensions] = useState(() => ({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -38,8 +42,8 @@ export const useWindowDimensions = (debounceMs = 100) => {
           
           // Only update if dimensions actually changed significantly (prevent micro-updates)
           if (
-            Math.abs(prev.width - newWidth) > 5 || 
-            Math.abs(prev.height - newHeight) > 5 ||
+            Math.abs(prev.width - newWidth) > changeThreshold || 
+            Math.abs(prev.height - newHeight) > changeThreshold ||
             prev.isSmallScreen !== newDimensions.isSmallScreen ||
             prev.isMobileWidth !== newDimensions.isMobileWidth ||
             prev.isTabletWidth !== newDimensions.isTabletWidth
@@ -59,7 +63,7 @@ export const useWindowDimensions = (debounceMs = 100) => {
       }
       window.removeEventListener('resize', handleResize);
     };
-  }, [debounceMs]);
+  }, [debounceMs, changeThreshold]);
 
   return dimensions;
 };

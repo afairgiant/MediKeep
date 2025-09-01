@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * Debounce hook to limit the rate of expensive operations
@@ -23,35 +23,40 @@ export const useDebounce = (value, delay) => {
 /**
  * Debounced callback hook for function calls
  * Returns a debounced version of the callback
+ * Fixed: Uses useRef to prevent memory leaks and stale closures
  */
 export const useDebouncedCallback = (callback, delay, dependencies = []) => {
-  const [timeoutId, setTimeoutId] = useState(null);
+  const timeoutRef = useRef(null);
+  const callbackRef = useRef(callback);
 
-  const debouncedCallback = (...args) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
+  // Update callback ref when callback changes
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  const debouncedCallback = useCallback((...args) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
 
-    const newTimeoutId = setTimeout(() => {
-      callback(...args);
+    timeoutRef.current = setTimeout(() => {
+      callbackRef.current(...args);
     }, delay);
-
-    setTimeoutId(newTimeoutId);
-  };
+  }, [delay]);
 
   useEffect(() => {
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
-  }, [timeoutId]);
+  }, []);
 
   useEffect(() => {
     // Reset timeout when dependencies change
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(null);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   }, dependencies);
 
