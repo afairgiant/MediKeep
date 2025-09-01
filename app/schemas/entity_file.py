@@ -11,6 +11,7 @@ class EntityType(str, Enum):
     VISIT = "visit"
     ENCOUNTER = "encounter"  # Alternative name for visit
     PROCEDURE = "procedure"
+    VITALS = "vitals"
 
 
 class EntityFileBase(BaseModel):
