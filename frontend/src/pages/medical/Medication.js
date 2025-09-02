@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -49,26 +49,27 @@ const Medication = () => {
   const { practitioners: practitionersObject, pharmacies: pharmaciesObject } =
     usePatientWithStaticData();
 
-  // Use refs to prevent data from changing while form is open
-  const practitionersRef = useRef([]);
-  const pharmaciesRef = useRef([]);
-  
-  // Only update refs when form is closed
-  useEffect(() => {
-    if (!showAddForm) {
-      practitionersRef.current = practitionersObject?.practitioners || [];
-      pharmaciesRef.current = pharmaciesObject?.pharmacies || [];
-      
-      logger.debug('Updated cached practitioners and pharmacies', {
-        component: 'Medication',
-        practitionersCount: practitionersRef.current.length,
-        pharmaciesCount: pharmaciesRef.current.length
-      });
-    }
-  }, [showAddForm, practitionersObject?.practitioners, pharmaciesObject?.pharmacies]);
-  
-  const practitioners = showAddForm ? practitionersRef.current : (practitionersObject?.practitioners || []);
-  const pharmacies = showAddForm ? pharmaciesRef.current : (pharmaciesObject?.pharmacies || []);
+  // Memoize practitioners and pharmacies to prevent unnecessary re-renders
+  // Only recalculate when the actual data changes (not reference)
+  const practitioners = useMemo(() => {
+    const data = practitionersObject?.practitioners || [];
+    logger.debug('Practitioners data updated', {
+      component: 'Medication',
+      practitionersCount: data.length,
+      showAddForm
+    });
+    return data;
+  }, [practitionersObject?.practitioners, showAddForm]);
+
+  const pharmacies = useMemo(() => {
+    const data = pharmaciesObject?.pharmacies || [];
+    logger.debug('Pharmacies data updated', {
+      component: 'Medication', 
+      pharmaciesCount: data.length,
+      showAddForm
+    });
+    return data;
+  }, [pharmaciesObject?.pharmacies, showAddForm]);
 
   // Modern data management with useMedicalData
   const {
@@ -174,9 +175,10 @@ const Medication = () => {
   
   const handleCloseForm = useCallback(() => {
     setShowAddForm(false);
+    setEditingMedication(null); // Clear editing state when closing
   }, []);
 
-  const handleEditMedication = medication => {
+  const handleEditMedication = useCallback((medication) => {
     setFormData({
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
@@ -191,7 +193,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  };
+  }, []);
 
   const handleViewMedication = medication => {
     setViewingMedication(medication);
@@ -239,7 +241,7 @@ const Medication = () => {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
@@ -292,7 +294,7 @@ const Medication = () => {
     } catch (error) {
       logger.error('Error during save operation:', error);
     }
-  };
+  }, [formData, currentPatient, editingMedication, setError, updateItem, createItem, resetForm, refreshData]);
 
 
   // Get processed data from data management
