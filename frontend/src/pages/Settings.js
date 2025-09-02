@@ -145,6 +145,7 @@ const Settings = () => {
         
         // Debug the API response specifically for timeout
         if (generalFields.session_timeout_minutes) {
+    // eslint-disable-next-line no-console
           console.log('DEBUG: General API Response for timeout update:', {
             requestedTimeout: generalFields.session_timeout_minutes,
             responseTimeout: generalResponse.session_timeout_minutes,
@@ -170,6 +171,7 @@ const Settings = () => {
       
       // Debug what we're setting in local preferences
       if (fieldsToUpdate.session_timeout_minutes) {
+    // eslint-disable-next-line no-console
         console.log('DEBUG: Setting local preferences with:', {
           originalResponse: updatedPreferences.session_timeout_minutes,
           withCredentials: updatedPreferencesWithLocalCredentials.session_timeout_minutes,

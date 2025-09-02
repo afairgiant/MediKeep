@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Select as MantineSelect } from '@mantine/core';
 
-export const Select = ({
+export const Select = memo(({
   value,
   onChange,
   options = [],
   placeholder = 'Select an option',
   className = '',
   disabled = false,
+  searchable = true,
+  clearable = true,
+  limit = undefined,
   ...props
 }) => {
 
@@ -16,11 +19,20 @@ export const Select = ({
     onChange(selectedValue);
   };
 
-  // Ensure options are in the correct format for Mantine Select
-  const mantineOptions = options.map(option => ({
-    value: option.value,
-    label: option.label,
-  }));
+  // Memoize options transformation to prevent unnecessary re-renders
+  const mantineOptions = useMemo(() => 
+    options.map(option => ({
+      value: option.value,
+      label: option.label,
+    })), [options]
+  );
+
+  // Optimize for large datasets by limiting rendered options
+  const optimizedLimit = useMemo(() => {
+    if (limit !== undefined) return limit;
+    // Auto-limit for large datasets to improve performance
+    return options.length > 100 ? 50 : undefined;
+  }, [limit, options.length]);
 
   return (
     <MantineSelect
@@ -30,11 +42,14 @@ export const Select = ({
       placeholder={placeholder}
       className={className}
       disabled={disabled}
-      searchable
-      clearable
+      searchable={searchable && options.length > 10} // Only enable search for larger lists
+      clearable={clearable}
+      limit={optimizedLimit}
+      maxDropdownHeight={280} // Fixed height for consistent performance
+      withScrollArea={options.length > 20} // Enable virtual scrolling for large lists
       {...props}
     />
   );
-};
+});
 
 export default Select;

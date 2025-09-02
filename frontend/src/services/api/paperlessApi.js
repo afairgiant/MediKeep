@@ -257,7 +257,10 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
               autoClose: 8000,
               withCloseButton: true,
             });
-          }).catch(console.warn);
+          }).catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn(err);
+          });
           
         } catch (updateError) {
           logger.error('❌ Failed to update entity file after background resolution:', updateError);
