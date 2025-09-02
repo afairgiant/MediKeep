@@ -21,6 +21,23 @@ export const Select = memo(({
   const renderCount = useRef(0);
   const lastOptionsLength = useRef(options.length);
   
+  // Check if we're in a narrow screen with scrollbar (likely causing lag) - defined early to avoid hoisting issues
+  const isNarrowScreenWithScroll = useMemo(() => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const hasVerticalScrollbar = document.documentElement.scrollHeight > height;
+    const hasHorizontalScrollbar = document.documentElement.scrollWidth > width;
+    return (width < 1024 || height < 768) && (hasVerticalScrollbar || hasHorizontalScrollbar);
+  }, []);
+  
+  // Detect if we need emergency performance mode
+  const needsPerformanceMode = options.length > 200;
+  
+  // Optimize portal usage - disable for narrow screens with scroll to prevent lag
+  const shouldUsePortal = useMemo(() => {
+    return withinPortal && !needsPerformanceMode && !isNarrowScreenWithScroll;
+  }, [withinPortal, needsPerformanceMode, isNarrowScreenWithScroll]);
+  
   useEffect(() => {
     renderCount.current++;
     
@@ -73,26 +90,6 @@ export const Select = memo(({
     if (options.length > 100) return 50;
     return undefined;
   }, [limit, options.length]);
-  
-  // Detect if we need emergency performance mode
-  const needsPerformanceMode = options.length > 200;
-  
-  // Check if we're in a narrow screen with scrollbar (likely causing lag)
-  const isNarrowScreenWithScroll = useMemo(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const hasVerticalScrollbar = document.documentElement.scrollHeight > height;
-    const hasHorizontalScrollbar = document.documentElement.scrollWidth > width;
-    return (width < 1024 || height < 768) && (hasVerticalScrollbar || hasHorizontalScrollbar);
-  }, []);
-  
-  // Optimize portal usage - disable for narrow screens with scroll to prevent lag
-  const shouldUsePortal = useMemo(() => {
-    if (isInScrollableContainer || isNarrowScreenWithScroll) {
-      return false; // Disable portal in scrollable containers to prevent positioning conflicts
-    }
-    return withinPortal && !needsPerformanceMode;
-  }, [withinPortal, needsPerformanceMode, isInScrollableContainer, isNarrowScreenWithScroll]);
   
   // Optimize searchable based on options count and performance
   const optimizedSearchable = useMemo(() => {
