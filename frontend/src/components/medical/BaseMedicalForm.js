@@ -21,7 +21,9 @@ import {
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
+import { useDropdownScrollOptimization } from '../../hooks/useScrollThrottle';
 import logger from '../../services/logger';
+import performanceMonitor from '../../services/performanceMonitor';
 
 /**
  * BaseMedicalForm - Reusable form component for medical data entry
@@ -69,41 +71,92 @@ const BaseMedicalForm = ({
   // Modal customization
   modalSize = "lg",
 }) => {
-  // Debug: Track render cycles
+  // Debug: Track render cycles and performance
   const renderCount = useRef(0);
   const lastRenderTime = useRef(Date.now());
+  const emergencyModeRef = useRef(false);
+  const measureRenderRef = useRef(null);
   
-  // Log renders in development - useEffect must be called unconditionally
+  // Register for emergency mode from performance monitor
   useEffect(() => {
+    const unsubscribe = performanceMonitor.onEmergency((reason) => {
+      logger.error('Form entering emergency mode', {
+        component: 'BaseMedicalForm',
+        reason
+      });
+      emergencyModeRef.current = true;
+      // Force close after delay to prevent freeze
+      setTimeout(() => {
+        if (isOpen && emergencyModeRef.current) {
+          onClose();
+        }
+      }, 500);
+    });
+    return unsubscribe;
+  }, [isOpen, onClose]);
+  
+  // Performance monitoring and emergency fallback
+  useEffect(() => {
+    // Measure render performance
+    if (measureRenderRef.current) {
+      const duration = measureRenderRef.current();
+      if (duration && duration > 100) {
+        logger.warn('Slow render detected', {
+          component: 'BaseMedicalForm',
+          duration,
+          performanceLevel: performance?.performanceLevel
+        });
+      }
+    }
+    measureRenderRef.current = performanceMonitor.startMeasure('BaseMedicalForm');
+    
+    renderCount.current++;
+    const now = Date.now();
+    const timeSinceLastRender = now - lastRenderTime.current;
+    lastRenderTime.current = now;
+    
+    // Detect render loops and emergency situations
+    if (timeSinceLastRender < 16 && renderCount.current > 50) {
+      if (!emergencyModeRef.current) {
+        emergencyModeRef.current = true;
+        logger.error('Render loop detected, entering emergency mode', {
+          component: 'BaseMedicalForm',
+          renderCount: renderCount.current,
+          timeSinceLastRender
+        });
+        performanceMonitor.triggerEmergencyMode({ renderLoop: true, renderCount: renderCount.current });
+      }
+    }
+    
+    // Development logging
     if (process.env.NODE_ENV === 'development') {
-      renderCount.current++;
-      const now = Date.now();
-      const timeSinceLastRender = now - lastRenderTime.current;
-      lastRenderTime.current = now;
-      
-      // Only log every 10th render to reduce noise
       if (renderCount.current % 10 === 0 || timeSinceLastRender < 50) {
         logger.debug('BaseMedicalForm render', {
           component: 'BaseMedicalForm',
           renderCount: renderCount.current,
           timeSinceLastRender,
           isOpen,
-          windowWidth: window.innerWidth,
-          windowHeight: window.innerHeight,
-          fieldsCount: fields.length,
-          formDataKeys: Object.keys(formData || {}).length
-        });
-      }
-      
-      // Warn if rendering too frequently
-      if (timeSinceLastRender < 50 && renderCount.current > 10) {
-        logger.warn('Rapid re-rendering detected in BaseMedicalForm', {
-          component: 'BaseMedicalForm',
-          renderCount: renderCount.current,
-          timeSinceLastRender
+          performanceLevel: performance?.performanceLevel,
+          fieldsCount: fields.length
         });
       }
     }
+    
+    // Reset on modal close
+    if (!isOpen) {
+      emergencyModeRef.current = false;
+      renderCount.current = 0;
+      if (measureRenderRef.current) {
+        measureRenderRef.current();
+        measureRenderRef.current = null;
+      }
+    }
+    
+    return () => {
+      if (measureRenderRef.current) {
+        measureRenderRef.current();
+      }
+    };
   });
   
   // Set up performance observer to detect long tasks
@@ -134,6 +187,9 @@ const BaseMedicalForm = ({
     return () => observer.disconnect();
   }, [isOpen]);
 
+  // Optimize dropdown scroll performance for constrained viewports
+  const dropdownRef = useDropdownScrollOptimization(isOpen, performance?.isConstrainedViewport);
+  
   // Add passive event listeners for better scroll performance
   useEffect(() => {
     if (!isOpen) return;
@@ -154,8 +210,35 @@ const BaseMedicalForm = ({
       };
     }
   }, [isOpen]);
-  // Get responsive window dimensions with debounced updates
-  const { isSmallScreen, isMobileWidth, isTabletWidth } = useWindowDimensions(150);
+  // Get responsive window dimensions with performance mode detection
+  const windowDimensions = useWindowDimensions(150);
+  const { 
+    isSmallScreen, 
+    isMobileWidth, 
+    isTabletWidth,
+    performance,
+    accessibility,
+    shouldReduceAnimations,
+    shouldSimplifyLayout,
+    shouldLimitDropdownItems,
+    getMaxDropdownHeight,
+    getModalSize,
+    getDebounceDelay
+  } = windowDimensions;
+  
+  // Log performance mode on mount and changes
+  useEffect(() => {
+    if (isOpen && performance) {
+      logger.info('Form opened with performance mode', {
+        component: 'BaseMedicalForm',
+        performanceLevel: performance.performanceLevel,
+        isConstrainedViewport: performance.isConstrainedViewport,
+        isAccessibilityMode: accessibility?.isAccessibilityMode,
+        fontSize: accessibility?.fontSize,
+        features: performance.features
+      });
+    }
+  }, [isOpen, performance?.performanceLevel]);
 
   const { 
     handleTextInputChange, 
@@ -192,10 +275,12 @@ const BaseMedicalForm = ({
     onSubmit(e);
   }, [onSubmit]);
 
-  // Memoized dropdown height to avoid recalculation on every render
+  // Use performance-aware dropdown height
   const getResponsiveDropdownHeight = useCallback((providedHeight) => {
-    return providedHeight || (isSmallScreen ? 200 : 280); // Responsive but fixed heights
-  }, [isSmallScreen]);
+    if (providedHeight) return providedHeight;
+    // Use the performance-aware helper
+    return getMaxDropdownHeight ? getMaxDropdownHeight() : 280;
+  }, [getMaxDropdownHeight]);
 
   // Split renderField into smaller, focused callbacks for better performance
   
@@ -225,25 +310,44 @@ const BaseMedicalForm = ({
     );
   }, [handleTextInputChange]);
 
-  // Callback for select fields
+  // Callback for select fields with performance optimizations
   const renderSelectField = useCallback((fieldConfig, baseProps, selectOptions, isFieldLoading) => {
     const { name, dynamicOptions: dynamicOptionsKey, searchable, clearable, maxDropdownHeight } = fieldConfig;
-    const responsiveMaxHeight = maxDropdownHeight || (isSmallScreen ? 200 : 280);
+    
+    // Performance-based configuration
+    const isSearchable = searchable && 
+      performance?.features?.dropdownSearch !== false && 
+      !isSmallScreen;
+    
+    const dropdownHeight = maxDropdownHeight || getResponsiveDropdownHeight();
+    
+    // Aggressive limiting for constrained viewports
+    let itemLimit;
+    if (performance?.performanceLevel === 'minimal') {
+      itemLimit = 10;
+    } else if (performance?.performanceLevel === 'reduced' || shouldLimitDropdownItems?.()) {
+      itemLimit = 20;
+    } else if (selectOptions.length > 100) {
+      itemLimit = 50;
+    }
     
     return (
       <Select
         {...baseProps}
         data={selectOptions}
         onChange={handleSelectChange(name)}
-        searchable={searchable && !isSmallScreen}
+        searchable={isSearchable}
         clearable={clearable}
-        maxDropdownHeight={responsiveMaxHeight}
+        maxDropdownHeight={dropdownHeight}
         disabled={isFieldLoading}
         placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : baseProps.placeholder}
-        limit={isSmallScreen ? 20 : selectOptions.length > 100 ? 50 : undefined}
+        limit={itemLimit}
+        withinPortal={performance?.performanceLevel !== 'minimal' && !performance?.isConstrainedViewport}
+        isInScrollableContainer={performance?.isConstrainedViewport}
+        transitionProps={shouldReduceAnimations?.() ? { duration: 0 } : undefined}
       />
     );
-  }, [handleSelectChange, isSmallScreen]);
+  }, [handleSelectChange, isSmallScreen, performance, getResponsiveDropdownHeight, shouldLimitDropdownItems, shouldReduceAnimations]);
 
   // Callback for number input fields
   const renderNumberField = useCallback((fieldConfig, baseProps) => {
@@ -398,10 +502,12 @@ const BaseMedicalForm = ({
               onInputChange({ target: { name, value } });
             }}
             value={formData[name] || ''}
-            maxDropdownHeight={200}
-            disabled={isFieldLoading}
+            maxDropdownHeight={getMaxDropdownHeight ? getMaxDropdownHeight() : 200}
+            disabled={isFieldLoading || performance?.features?.autoComplete === false}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
-            limit={50}
+            limit={performance?.performanceLevel === 'minimal' ? 10 : 50}
+            withinPortal={performance?.performanceLevel !== 'minimal'}
+            transitionProps={shouldReduceAnimations?.() ? { duration: 0 } : undefined}
           />
         );
 
@@ -415,29 +521,46 @@ const BaseMedicalForm = ({
           const [search, setSearch] = useState(formData[name] || '');
           const [value, setValue] = useState(formData[name] || '');
           
-          // Sync local state when formData changes (e.g., when editing different records)
+          // Sync local state when formData changes with performance guard
           useEffect(() => {
+            // Skip effect in emergency mode
+            if (emergencyModeRef.current) return;
+            
             const currentValue = formData[name] || '';
             setValue(currentValue);
             
-            // Find if it's a known option to display the label instead of value
-            const option = selectOptions.find(opt => opt.value === currentValue);
-            if (option && option.label) {
-              setSearch(option.label);
-            } else {
+            // Skip expensive search in minimal performance mode
+            if (performance?.performanceLevel === 'minimal') {
               setSearch(currentValue);
+            } else {
+              // Find if it's a known option to display the label instead of value
+              const option = selectOptions.find(opt => opt.value === currentValue);
+              if (option && option.label) {
+                setSearch(option.label);
+              } else {
+                setSearch(currentValue);
+              }
             }
-          }, [formData[name], name]); // Fixed: Only re-run when specific field value changes
+          }, [formData[name], name]) // Intentionally not including performance to avoid loops
 
-          const exactOptionMatch = selectOptions.find(
-            (item) => item.value === search || item.label === search
-          );
-
-          const filteredOptions = exactOptionMatch
-            ? selectOptions
-            : selectOptions.filter((item) =>
-                (item.label || item.value).toLowerCase().includes(search.toLowerCase().trim())
-              );
+          // Performance-optimized option filtering
+          let exactOptionMatch = null;
+          let filteredOptions = selectOptions;
+          
+          if (performance?.performanceLevel === 'minimal' || emergencyModeRef.current) {
+            // Skip filtering in minimal mode
+            filteredOptions = selectOptions.slice(0, 10);
+          } else {
+            exactOptionMatch = selectOptions.find(
+              (item) => item.value === search || item.label === search
+            );
+            
+            filteredOptions = exactOptionMatch
+              ? selectOptions
+              : selectOptions.filter((item) =>
+                  (item.label || item.value).toLowerCase().includes(search.toLowerCase().trim())
+                ).slice(0, performance?.performanceLevel === 'reduced' ? 20 : 50);
+          }
 
           const options = filteredOptions.map((item) => (
             <Combobox.Option value={item.value} key={item.value}>
@@ -448,9 +571,12 @@ const BaseMedicalForm = ({
           return (
             <Combobox
               store={combobox}
-              withinPortal={true}
+              withinPortal={!performance?.isConstrainedViewport && performance?.performanceLevel !== 'minimal'}
               position="bottom-start"
-              middlewares={{ flip: true, shift: true }}
+              middlewares={performance?.isConstrainedViewport ? 
+                { flip: false, shift: false } : // Disable positioning middleware on constrained viewports
+                { flip: true, shift: true }
+              }
               onOptionSubmit={(val) => {
                 if (val === '$create') {
                   setValue(search);
@@ -500,9 +626,11 @@ const BaseMedicalForm = ({
               <Combobox.Dropdown>
                 <Combobox.Options 
                   style={{ 
-                    maxHeight: '200px', 
+                    maxHeight: getMaxDropdownHeight ? `${getMaxDropdownHeight()}px` : '200px', 
                     overflowY: 'auto',
-                    overflowX: 'hidden'
+                    overflowX: 'hidden',
+                    willChange: 'transform', // Optimize for animations
+                    backfaceVisibility: 'hidden' // Prevent flicker
                   }}
                 >
                   {search.trim() && !exactOptionMatch && (
@@ -520,102 +648,10 @@ const BaseMedicalForm = ({
         return <ComboboxField />;
 
       case 'number':
-        return (
-          <NumberInput
-            {...baseProps}
-            onChange={handleNumberChange(name)}
-
-            value={formData[name] !== undefined && formData[name] !== null && formData[name] !== '' ? Number(formData[name]) : ''}
-
-            min={min}
-            max={max}
-          />
-        );
+        return renderNumberField(fieldConfig, baseProps);
 
       case 'date':
-        // Parse date value with error handling
-        let dateValue = null;
-        if (formData[name]) {
-          try {
-            if (typeof formData[name] === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(formData[name].trim())) {
-              const [year, month, day] = formData[name].trim().split('-').map(Number);
-              if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                dateValue = new Date(year, month - 1, day); // month is 0-indexed
-              }
-            } else {
-              dateValue = new Date(formData[name]);
-            }
-            // Validate the date
-            if (isNaN(dateValue.getTime())) {
-              dateValue = null;
-            }
-          } catch (error) {
-            logger.error(`Error parsing date for field ${name}:`, error);
-            dateValue = null;
-          }
-        }
-
-        // Calculate dynamic min/max dates
-        let dynamicMinDate = minDate;
-        
-        // Handle dynamic minDate for any end date field based on corresponding start date
-        try {
-          if (name === 'end_date' && formData.onset_date) {
-            dynamicMinDate = new Date(formData.onset_date);
-          } else if (name === 'end_date' && formData.start_date) {
-            dynamicMinDate = new Date(formData.start_date);
-          } else {
-            // Generic pattern: derive start field name from end field name
-            let startFieldName = null;
-            
-            // Pattern 1: ends with '_end_date' -> replace with '_start_date'
-            if (name.endsWith('_end_date')) {
-              startFieldName = name.substring(0, name.length - '_end_date'.length) + '_start_date';
-            }
-            // Pattern 2: ends with '_end' -> replace with '_start'  
-            else if (name.endsWith('_end') && name.includes('date')) {
-              startFieldName = name.substring(0, name.length - '_end'.length) + '_start';
-            }
-            // Pattern 3: contains 'end_date' -> replace with 'start_date'
-            else if (name.includes('end_date')) {
-              startFieldName = name.replace(/end_date/g, 'start_date');
-            }
-            // Pattern 4: for fields like 'completion_end_date' -> 'completion_start_date'
-            else if (name.includes('_end_') && name.includes('date')) {
-              startFieldName = name.replace(/_end_/g, '_start_');
-            }
-            
-            // Apply the derived start field if it exists in formData
-            if (startFieldName && formData[startFieldName]) {
-              const tempDate = new Date(formData[startFieldName]);
-              if (!isNaN(tempDate.getTime())) {
-                dynamicMinDate = tempDate;
-              }
-            }
-          }
-        } catch (error) {
-          logger.error(`Error calculating dynamic min date:`, error);
-        }
-        
-        // Handle dynamic maxDate - use current date if maxDate is a function
-        let dynamicMaxDate = maxDate;
-        try {
-          dynamicMaxDate = typeof maxDate === 'function' ? maxDate() : maxDate;
-        } catch (error) {
-          logger.error(`Error calculating dynamic max date:`, error);
-        }
-
-        return (
-          <DateInput
-            {...baseProps}
-            value={dateValue}
-            onChange={handleDateChange(name)}
-            firstDayOfWeek={0}
-            clearable
-            maxDate={dynamicMaxDate}
-            minDate={dynamicMinDate}
-          />
-        );
+        return renderDateField(fieldConfig, baseProps);
 
       case 'rating':
         return (
@@ -670,8 +706,14 @@ const BaseMedicalForm = ({
     }
   }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange]);
 
-  // Group fields by row based on gridColumn values
-  const groupFieldsIntoRows = (fields) => {
+  // Group fields by row based on gridColumn values with performance optimization
+  const groupFieldsIntoRows = useCallback((fields) => {
+    // Skip complex layouts on minimal performance mode
+    if (shouldSimplifyLayout?.()) {
+      // Simple single-column layout for constrained viewports
+      return fields.map(field => [{ ...field, gridColumn: 12 }]);
+    }
+    
     const rows = [];
     let currentRow = [];
     let currentRowSpan = 0;
@@ -698,10 +740,10 @@ const BaseMedicalForm = ({
     }
 
     return rows;
-  };
+  }, [shouldSimplifyLayout]);
 
-  // Memoize field rows to prevent recalculation on every render
-  const fieldRows = useMemo(() => groupFieldsIntoRows(fields), [fields]);
+  // Memoize field rows with performance consideration
+  const fieldRows = useMemo(() => groupFieldsIntoRows(fields), [fields, groupFieldsIntoRows]);
 
   // Memoize submit button text to prevent recalculation
   const submitText = useMemo(() => {
@@ -723,18 +765,18 @@ const BaseMedicalForm = ({
     return undefined;
   }, [submitButtonColor, formData?.severity]);
 
-  // Memoized responsive modal size using cached window dimensions
+  // Use performance-aware modal sizing
   const responsiveModalSize = useMemo(() => {
+    if (getModalSize) {
+      return getModalSize(modalSize);
+    }
+    // Fallback to legacy logic
     if (typeof modalSize === 'string') {
-      // Override modal size on small screens to prevent overflow
-      if (isMobileWidth) {
-        return 'sm'; // Force smaller modal on mobile
-      } else if (isTabletWidth) {
-        return modalSize === 'xl' ? 'lg' : modalSize; // Cap at 'lg' on tablets/small laptops
-      }
+      if (isMobileWidth) return 'sm';
+      if (isTabletWidth && modalSize === 'xl') return 'lg';
     }
     return modalSize;
-  }, [modalSize, isMobileWidth, isTabletWidth]);
+  }, [modalSize, isMobileWidth, isTabletWidth, getModalSize]);
 
   return (
     <Modal
@@ -746,17 +788,51 @@ const BaseMedicalForm = ({
         </Text>
       }
       size={responsiveModalSize}
-      centered
+      centered={!performance?.isConstrainedViewport}
+      className={
+        performance?.performanceLevel === 'minimal' ? 'performance-minimal' :
+        emergencyModeRef.current ? 'performance-emergency' : ''
+      }
       styles={useMemo(() => ({
         body: { 
-          padding: isMobileWidth ? '1rem' : '1.5rem', 
-          paddingBottom: isMobileWidth ? '1.5rem' : '2rem' 
+          padding: isMobileWidth || performance?.isConstrainedViewport ? '0.75rem' : '1.5rem', 
+          paddingBottom: isMobileWidth || performance?.isConstrainedViewport ? '1rem' : '2rem',
+          maxHeight: performance?.isConstrainedViewport ? '70vh' : undefined,
+          overflowY: performance?.isConstrainedViewport ? 'auto' : undefined
         },
-        header: { paddingBottom: '1rem' },
-      }), [isMobileWidth])}
+        header: { 
+          paddingBottom: performance?.isConstrainedViewport ? '0.5rem' : '1rem',
+          position: performance?.isConstrainedViewport ? 'sticky' : undefined,
+          top: 0,
+          zIndex: 10,
+          backgroundColor: 'white'
+        },
+        content: {
+          maxHeight: performance?.isConstrainedViewport ? '90vh' : undefined
+        }
+      }), [isMobileWidth, performance?.isConstrainedViewport])}
       overflow="inside"
+      transitionProps={shouldReduceAnimations?.() || emergencyModeRef.current ? { duration: 0 } : undefined}
+      withinPortal={!emergencyModeRef.current}
+      portalProps={{
+        style: {
+          position: 'fixed',
+          zIndex: emergencyModeRef.current ? 10000 : 9999
+        }
+      }}
+      lockScroll={!performance?.isConstrainedViewport && !emergencyModeRef.current}
+      closeOnClickOutside={!emergencyModeRef.current}
+      trapFocus={!emergencyModeRef.current}
+      returnFocus={!emergencyModeRef.current}
+      keepMounted={false}
     >
-      <form onSubmit={handleSubmit}>
+      <form 
+        onSubmit={handleSubmit}
+        className={
+          performance?.performanceLevel === 'minimal' ? 'performance-minimal' :
+          emergencyModeRef.current ? 'performance-emergency' : ''
+        }
+      >
         <Stack spacing="md">
           {/* Render form fields */}
           {fieldRows.map((row, rowIndex) => (

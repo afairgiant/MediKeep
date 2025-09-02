@@ -6,6 +6,7 @@
 
 /* Import Medical Page Styles */
 @import './styles/shared/MedicalPageShared.css';
+@import './styles/dropdown-performance.css';
 @import './styles/pages/MedicationTable.css';
 @import './styles/pages/Medication.css';
 @import './styles/pages/Allergies.css';
