@@ -809,7 +809,9 @@ const BaseMedicalForm = ({
           backgroundColor: 'white'
         },
         content: {
-          maxHeight: performance?.isConstrainedViewport ? '90vh' : undefined
+          maxHeight: performance?.isConstrainedViewport ? '90vh' : undefined,
+          maxWidth: '100vw', // Prevent modal from exceeding viewport width
+          boxSizing: 'border-box' // Include padding in width calculation
         }
       }), [isMobileWidth, performance?.isConstrainedViewport])}
       overflow="inside"

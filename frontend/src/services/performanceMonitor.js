@@ -149,15 +149,22 @@ class PerformanceMonitor {
    */
   startMeasure(componentName) {
     const key = `render_${componentName}_${Date.now()}`;
-    performance.mark(`${key}_start`);
+    
+    try {
+      performance.mark(`${key}_start`);
+    } catch (error) {
+      // Fallback if performance API fails
+      return () => {}; // Return no-op function
+    }
     
     return () => {
-      performance.mark(`${key}_end`);
-      performance.measure(key, `${key}_start`, `${key}_end`);
-      
-      const measure = performance.getEntriesByName(key)[0];
-      if (measure) {
-        const duration = measure.duration;
+      try {
+        performance.mark(`${key}_end`);
+        performance.measure(key, `${key}_start`, `${key}_end`);
+        
+        const measure = performance.getEntriesByName(key)[0];
+        if (measure) {
+          const duration = measure.duration;
         
         // Store render time
         const renders = this.metrics.get(`renders_${componentName}`) || [];
@@ -183,11 +190,24 @@ class PerformanceMonitor {
         }
         
         // Clean up marks
-        performance.clearMarks(`${key}_start`);
-        performance.clearMarks(`${key}_end`);
-        performance.clearMeasures(key);
+        try {
+          performance.clearMarks(`${key}_start`);
+          performance.clearMarks(`${key}_end`);
+          performance.clearMeasures(key);
+        } catch (cleanupError) {
+          // Ignore cleanup errors
+        }
         
         return duration;
+        }
+      } catch (error) {
+        // If performance measurement fails, log and return no-op
+        logger.debug('Performance measurement failed', {
+          component: 'PerformanceMonitor',
+          componentName,
+          error: error.message
+        });
+        return 0;
       }
     };
   }

@@ -75,11 +75,11 @@ const detectAccessibilityMode = () => {
 const determinePerformanceMode = (width, height, accessibility) => {
   // Calculate available viewport area
   const viewportArea = width * height;
-  const isConstrainedViewport = viewportArea < 1366 * 768;
+  // Only consider truly constrained viewports (mobile-sized screens)
+  const isConstrainedViewport = viewportArea < 1024 * 640;
   
-  // Check for specific constrained conditions
-  const isUltraSmallScreen = width <= SCREEN_CATEGORIES.ULTRA_SMALL.width || 
-                             height <= SCREEN_CATEGORIES.ULTRA_SMALL.height;
+  // Check for specific constrained conditions - be more conservative
+  const isUltraSmallScreen = width < 1024 || height < 600; // True mobile/tablet sizes
   const isSmallLaptop = width <= SCREEN_CATEGORIES.SMALL_LAPTOP.width && 
                         height <= SCREEN_CATEGORIES.SMALL_LAPTOP.height;
   
