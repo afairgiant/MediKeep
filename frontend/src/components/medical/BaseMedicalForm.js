@@ -187,7 +187,23 @@ const BaseMedicalForm = ({
     return () => observer.disconnect();
   }, [isOpen]);
 
-  // Optimize dropdown scroll performance for constrained viewports
+  // Get responsive window dimensions with performance mode detection FIRST
+  const windowDimensions = useWindowDimensions(150);
+  const { 
+    isSmallScreen, 
+    isMobileWidth, 
+    isTabletWidth,
+    performance,
+    accessibility,
+    shouldReduceAnimations,
+    shouldSimplifyLayout,
+    shouldLimitDropdownItems,
+    getMaxDropdownHeight,
+    getModalSize,
+    getDebounceDelay
+  } = windowDimensions;
+  
+  // Optimize dropdown scroll performance for constrained viewports (now that performance is defined)
   const dropdownRef = useDropdownScrollOptimization(isOpen, performance?.isConstrainedViewport);
   
   // Add passive event listeners for better scroll performance
@@ -210,21 +226,6 @@ const BaseMedicalForm = ({
       };
     }
   }, [isOpen]);
-  // Get responsive window dimensions with performance mode detection
-  const windowDimensions = useWindowDimensions(150);
-  const { 
-    isSmallScreen, 
-    isMobileWidth, 
-    isTabletWidth,
-    performance,
-    accessibility,
-    shouldReduceAnimations,
-    shouldSimplifyLayout,
-    shouldLimitDropdownItems,
-    getMaxDropdownHeight,
-    getModalSize,
-    getDebounceDelay
-  } = windowDimensions;
   
   // Log performance mode on mount and changes
   useEffect(() => {

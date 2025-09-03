@@ -21,31 +21,13 @@ export const Select = memo(({
   const renderCount = useRef(0);
   const lastOptionsLength = useRef(options.length);
   
-  // All performance calculations using useMemo to prevent re-calculation
-  const performanceConfig = useMemo(() => {
-    const width = typeof window !== 'undefined' ? window.innerWidth : 1920;
-    const height = typeof window !== 'undefined' ? window.innerHeight : 1080;
-    const hasVerticalScrollbar = typeof document !== 'undefined' 
-      ? document.documentElement.scrollHeight > height 
-      : false;
-    const hasHorizontalScrollbar = typeof document !== 'undefined'
-      ? document.documentElement.scrollWidth > width
-      : false;
-    
-    const isNarrowScreenWithScroll = (width < 1024 || height < 768) && (hasVerticalScrollbar || hasHorizontalScrollbar);
-    const needsPerformanceMode = options.length > 200;
-    const shouldUsePortal = !isInScrollableContainer && !isNarrowScreenWithScroll && !needsPerformanceMode && withinPortal;
-    
-    return {
-      isNarrowScreenWithScroll,
-      needsPerformanceMode,
-      shouldUsePortal,
-      width,
-      height,
-      hasVerticalScrollbar,
-      hasHorizontalScrollbar
-    };
-  }, [options.length, isInScrollableContainer, withinPortal]);
+  // Simplified performance calculations to avoid initialization issues
+  const width = typeof window !== 'undefined' ? window.innerWidth : 1920;
+  const height = typeof window !== 'undefined' ? window.innerHeight : 1080;
+  const isNarrowScreen = width < 1024 || height < 768;
+  const needsPerformanceMode = options.length > 200;
+  const shouldUsePortal = !isInScrollableContainer && !isNarrowScreen && !needsPerformanceMode && withinPortal;
+  const isNarrowScreenWithScroll = isNarrowScreen; // Simplified for now
   
   useEffect(() => {
     renderCount.current++;
@@ -64,13 +46,17 @@ export const Select = memo(({
     }
     
     // Log performance mode detection for debugging
-    if (performanceConfig.isNarrowScreenWithScroll && renderCount.current === 1) {
+    if (isNarrowScreenWithScroll && renderCount.current === 1) {
       logger.debug('Narrow screen with scroll detected - optimizing dropdown performance', {
         component: 'Select',
-        ...performanceConfig
+        width,
+        height,
+        isNarrowScreen,
+        needsPerformanceMode,
+        shouldUsePortal
       });
     }
-  }, [options.length, performanceConfig]);
+  }, [options.length, isNarrowScreenWithScroll, shouldUsePortal]);
 
   // Handle the onChange - old component passes value directly, Mantine passes value
   const handleChange = selectedValue => {
@@ -101,9 +87,9 @@ export const Select = memo(({
     if (!searchable) return false;
     if (options.length <= 5) return false; // No need for search with few options
     if (options.length > 500) return true; // Force search for huge lists
-    if (performanceConfig.isNarrowScreenWithScroll && options.length < 50) return false; // Disable search on narrow screens with few options
+    if (isNarrowScreenWithScroll && options.length < 50) return false; // Disable search on narrow screens with few options
     return searchable;
-  }, [searchable, options.length, performanceConfig.isNarrowScreenWithScroll]);
+  }, [searchable, options.length, isNarrowScreenWithScroll]);
 
   return (
     <MantineSelect
@@ -114,31 +100,31 @@ export const Select = memo(({
       className={className}
       disabled={disabled}
       searchable={optimizedSearchable}
-      clearable={clearable && !performanceConfig.needsPerformanceMode} // Disable clearable for huge lists
+      clearable={clearable && !needsPerformanceMode} // Disable clearable for huge lists
       limit={optimizedLimit}
-      maxDropdownHeight={props.maxDropdownHeight || (performanceConfig.needsPerformanceMode ? 200 : 280)}
+      maxDropdownHeight={props.maxDropdownHeight || (needsPerformanceMode ? 200 : 280)}
       withScrollArea={options.length > 10} // Enable virtual scrolling earlier
-      withinPortal={performanceConfig.shouldUsePortal}
-      transitionProps={performanceConfig.needsPerformanceMode || performanceConfig.isNarrowScreenWithScroll ? { duration: 0 } : transitionProps}
+      withinPortal={shouldUsePortal}
+      transitionProps={needsPerformanceMode || isNarrowScreenWithScroll ? { duration: 0 } : transitionProps}
       comboboxProps={{
-        transitionProps: performanceConfig.needsPerformanceMode || performanceConfig.isNarrowScreenWithScroll ? { duration: 0 } : undefined,
-        withinPortal: performanceConfig.shouldUsePortal,
-        position: performanceConfig.isNarrowScreenWithScroll ? 'bottom' : 'bottom-start',
+        transitionProps: needsPerformanceMode || isNarrowScreenWithScroll ? { duration: 0 } : undefined,
+        withinPortal: shouldUsePortal,
+        position: isNarrowScreenWithScroll ? 'bottom' : 'bottom-start',
         // Optimize positioning for narrow screens - disable expensive middleware
-        middlewares: performanceConfig.isNarrowScreenWithScroll ? 
+        middlewares: isNarrowScreenWithScroll ? 
           { flip: false, shift: false, inline: false } : // Disable all positioning middleware
           undefined,
-        offset: performanceConfig.isNarrowScreenWithScroll ? 4 : 8, // Smaller offset on narrow screens
+        offset: isNarrowScreenWithScroll ? 4 : 8, // Smaller offset on narrow screens
       }}
       styles={{
         dropdown: {
-          willChange: performanceConfig.isNarrowScreenWithScroll || performanceConfig.needsPerformanceMode ? 'auto' : 'transform',
-          transform: performanceConfig.isNarrowScreenWithScroll ? 'none' : undefined, // Disable transform on narrow screens
+          willChange: isNarrowScreenWithScroll || needsPerformanceMode ? 'auto' : 'transform',
+          transform: isNarrowScreenWithScroll ? 'none' : undefined, // Disable transform on narrow screens
           backfaceVisibility: 'hidden', // Prevent flicker
         }
       }}
       classNames={{
-        dropdown: performanceConfig.isNarrowScreenWithScroll ? 'dropdown-constrained-viewport' : ''
+        dropdown: isNarrowScreenWithScroll ? 'dropdown-constrained-viewport' : ''
       }}
       {...props}
     />
