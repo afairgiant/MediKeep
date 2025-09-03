@@ -17,26 +17,35 @@ export const Select = memo(({
   isInScrollableContainer = false,
   ...props
 }) => {
-  // Performance tracking
+  // Performance tracking refs - declare early
   const renderCount = useRef(0);
   const lastOptionsLength = useRef(options.length);
   
-  // Check if we're in a narrow screen with scrollbar (likely causing lag) - defined early to avoid hoisting issues
-  const isNarrowScreenWithScroll = useMemo(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const hasVerticalScrollbar = document.documentElement.scrollHeight > height;
-    const hasHorizontalScrollbar = document.documentElement.scrollWidth > width;
-    return (width < 1024 || height < 768) && (hasVerticalScrollbar || hasHorizontalScrollbar);
-  }, []);
-  
-  // Detect if we need emergency performance mode
-  const needsPerformanceMode = options.length > 200;
-  
-  // Optimize portal usage - disable for narrow screens with scroll to prevent lag
-  const shouldUsePortal = useMemo(() => {
-    return withinPortal && !needsPerformanceMode && !isNarrowScreenWithScroll;
-  }, [withinPortal, needsPerformanceMode, isNarrowScreenWithScroll]);
+  // All performance calculations using useMemo to prevent re-calculation
+  const performanceConfig = useMemo(() => {
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    const height = typeof window !== 'undefined' ? window.innerHeight : 1080;
+    const hasVerticalScrollbar = typeof document !== 'undefined' 
+      ? document.documentElement.scrollHeight > height 
+      : false;
+    const hasHorizontalScrollbar = typeof document !== 'undefined'
+      ? document.documentElement.scrollWidth > width
+      : false;
+    
+    const isNarrowScreenWithScroll = (width < 1024 || height < 768) && (hasVerticalScrollbar || hasHorizontalScrollbar);
+    const needsPerformanceMode = options.length > 200;
+    const shouldUsePortal = !isInScrollableContainer && !isNarrowScreenWithScroll && !needsPerformanceMode && withinPortal;
+    
+    return {
+      isNarrowScreenWithScroll,
+      needsPerformanceMode,
+      shouldUsePortal,
+      width,
+      height,
+      hasVerticalScrollbar,
+      hasHorizontalScrollbar
+    };
+  }, [options.length, isInScrollableContainer, withinPortal]);
   
   useEffect(() => {
     renderCount.current++;
@@ -51,21 +60,17 @@ export const Select = memo(({
           previousLength: lastOptionsLength.current
         });
       }
-        lastOptionsLength.current = options.length;
+      lastOptionsLength.current = options.length;
     }
     
     // Log performance mode detection for debugging
-    if (isNarrowScreenWithScroll && renderCount.current === 1) {
+    if (performanceConfig.isNarrowScreenWithScroll && renderCount.current === 1) {
       logger.debug('Narrow screen with scroll detected - optimizing dropdown performance', {
         component: 'Select',
-        width: window.innerWidth,
-        height: window.innerHeight,
-        hasVerticalScrollbar: document.documentElement.scrollHeight > window.innerHeight,
-        hasHorizontalScrollbar: document.documentElement.scrollWidth > window.innerWidth,
-        shouldUsePortal
+        ...performanceConfig
       });
     }
-  }, [options.length, isNarrowScreenWithScroll, shouldUsePortal]);
+  }, [options.length, performanceConfig]);
 
   // Handle the onChange - old component passes value directly, Mantine passes value
   const handleChange = selectedValue => {
@@ -96,9 +101,9 @@ export const Select = memo(({
     if (!searchable) return false;
     if (options.length <= 5) return false; // No need for search with few options
     if (options.length > 500) return true; // Force search for huge lists
-    if (isNarrowScreenWithScroll && options.length < 50) return false; // Disable search on narrow screens with few options
+    if (performanceConfig.isNarrowScreenWithScroll && options.length < 50) return false; // Disable search on narrow screens with few options
     return searchable;
-  }, [searchable, options.length, isNarrowScreenWithScroll]);
+  }, [searchable, options.length, performanceConfig.isNarrowScreenWithScroll]);
 
   return (
     <MantineSelect
@@ -109,28 +114,31 @@ export const Select = memo(({
       className={className}
       disabled={disabled}
       searchable={optimizedSearchable}
-      clearable={clearable && !needsPerformanceMode} // Disable clearable for huge lists
+      clearable={clearable && !performanceConfig.needsPerformanceMode} // Disable clearable for huge lists
       limit={optimizedLimit}
-      maxDropdownHeight={props.maxDropdownHeight || (needsPerformanceMode ? 200 : 280)}
+      maxDropdownHeight={props.maxDropdownHeight || (performanceConfig.needsPerformanceMode ? 200 : 280)}
       withScrollArea={options.length > 10} // Enable virtual scrolling earlier
-      withinPortal={shouldUsePortal}
-      transitionProps={needsPerformanceMode || isNarrowScreenWithScroll ? { duration: 0 } : transitionProps}
+      withinPortal={performanceConfig.shouldUsePortal}
+      transitionProps={performanceConfig.needsPerformanceMode || performanceConfig.isNarrowScreenWithScroll ? { duration: 0 } : transitionProps}
       comboboxProps={{
-        transitionProps: needsPerformanceMode || isNarrowScreenWithScroll ? { duration: 0 } : undefined,
-        withinPortal: shouldUsePortal,
-        // Optimize positioning for narrow screens
-        middlewares: isNarrowScreenWithScroll ? 
-          { flip: false, shift: false } : // Disable positioning middleware on narrow screens
-          undefined
+        transitionProps: performanceConfig.needsPerformanceMode || performanceConfig.isNarrowScreenWithScroll ? { duration: 0 } : undefined,
+        withinPortal: performanceConfig.shouldUsePortal,
+        position: performanceConfig.isNarrowScreenWithScroll ? 'bottom' : 'bottom-start',
+        // Optimize positioning for narrow screens - disable expensive middleware
+        middlewares: performanceConfig.isNarrowScreenWithScroll ? 
+          { flip: false, shift: false, inline: false } : // Disable all positioning middleware
+          undefined,
+        offset: performanceConfig.isNarrowScreenWithScroll ? 4 : 8, // Smaller offset on narrow screens
       }}
       styles={{
         dropdown: {
-          willChange: isNarrowScreenWithScroll || needsPerformanceMode ? 'auto' : 'transform', // Optimize for animations only when needed
+          willChange: performanceConfig.isNarrowScreenWithScroll || performanceConfig.needsPerformanceMode ? 'auto' : 'transform',
+          transform: performanceConfig.isNarrowScreenWithScroll ? 'none' : undefined, // Disable transform on narrow screens
           backfaceVisibility: 'hidden', // Prevent flicker
         }
       }}
       classNames={{
-        dropdown: isNarrowScreenWithScroll ? 'dropdown-constrained-viewport' : ''
+        dropdown: performanceConfig.isNarrowScreenWithScroll ? 'dropdown-constrained-viewport' : ''
       }}
       {...props}
     />
