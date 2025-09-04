@@ -6,6 +6,7 @@
 
 /* Import Medical Page Styles */
 @import './styles/shared/MedicalPageShared.css';
+@import './styles/dropdown-performance.css';
 @import './styles/pages/MedicationTable.css';
 @import './styles/pages/Medication.css';
 @import './styles/pages/Allergies.css';
@@ -56,6 +57,18 @@ body {
 #root {
   width: 100%;
   max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Ensure all elements use border-box sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Prevent Mantine modals from causing horizontal overflow */
+[data-mantine-modal] {
+  max-width: 100vw !important;
   overflow-x: hidden;
 }
 
