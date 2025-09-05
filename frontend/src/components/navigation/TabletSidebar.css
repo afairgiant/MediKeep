@@ -1,0 +1,71 @@
+/* TabletSidebar Component Styles */
+
+.tablet-sidebar {
+  /* Base styles handled by Mantine Box */
+}
+
+.tablet-sidebar.open {
+  /* Transform handled inline for animation */
+}
+
+.tablet-sidebar.closed {
+  /* Transform handled inline for animation */
+}
+
+/* Navigation Toggle Button for Tablet */
+.tablet-navigation-toggle {
+  /* Styles handled inline */
+}
+
+/* Navigation Item Styles */
+.tablet-sidebar .nav-item {
+  text-decoration: none;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tablet-sidebar .nav-item:focus {
+  outline: 2px solid var(--mantine-color-blue-4);
+  outline-offset: 2px;
+}
+
+.tablet-sidebar .nav-item.active {
+  font-weight: 600;
+}
+
+/* Ensure sidebar is above other content */
+.tablet-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tablet-sidebar {
+    border-right: 2px solid var(--mantine-color-gray-9);
+  }
+  
+  .tablet-sidebar .nav-item.active {
+    border: 2px solid var(--mantine-color-blue-6);
+  }
+  
+  .tablet-navigation-toggle {
+    border: 2px solid var(--mantine-color-gray-9) !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tablet-sidebar {
+    transition: none !important;
+  }
+  
+  .tablet-sidebar .nav-item {
+    transition: none !important;
+  }
+}

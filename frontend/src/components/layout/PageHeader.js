@@ -3,6 +3,8 @@ import logger from '../../services/logger';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { NavigationWrapper } from '../navigation';
+import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import './PageHeader.css';
@@ -24,7 +26,8 @@ const PageHeader = ({
   showNavigation = true,
 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { isMobile } = useViewport();
   
   // Check if user is admin
   const [adminStatus, setAdminStatus] = useState(false);
@@ -111,8 +114,8 @@ const PageHeader = ({
             {/* Page-specific actions */}
             {actions}
             
-            {/* Global actions */}
-            {showGlobalActions && (
+            {/* Global actions only for mobile (desktop has them in Account dropdown) */}
+            {showGlobalActions && isMobile && (
               <div className="global-actions">
                 <button
                   className="settings-button"
@@ -129,7 +132,17 @@ const PageHeader = ({
         </div>
       </header>
       
-      {/* TODO: Navigation will be replaced in Phase 2 */}
+      {/* Navigation Bar - rendered below header */}
+      {showNavigation && (
+        <NavigationWrapper
+          user={user}
+          isAdmin={isAdmin()}
+          showBackButton={showBackButton && isMobile}
+          backButtonText={backButtonText}
+          backButtonPath={backButtonPath}
+          onBackClick={onBackClick}
+        />
+      )}
     </>
   );
 };
