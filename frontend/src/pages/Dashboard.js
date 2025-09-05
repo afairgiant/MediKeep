@@ -705,8 +705,8 @@ const Dashboard = () => {
       />
 
       <Stack gap="lg">
-        {/* Responsive Test Component (Temporary for PR #1) */}
-        <ResponsiveTest />
+        {/* Responsive Test Component (Temporary for PR #1) - Temporarily disabled */}
+        {/* <ResponsiveTest /> */}
         
         {/* Welcome Section */}
         {showWelcomeBox && (

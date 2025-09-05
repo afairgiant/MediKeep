@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Text, Group, Badge, Stack } from '@mantine/core';
 import { useResponsive } from '../hooks/useResponsive';
 
@@ -76,29 +76,17 @@ function ResponsiveTest() {
 
         {/* Visual breakpoint indicator */}
         <Box
-          style={{
-            height: '20px',
-            background: `linear-gradient(90deg, 
-              #ff6b6b 0%, #ff6b6b 16.6%,
-              #4ecdc4 16.6%, #4ecdc4 33.2%,
-              #45b7d1 33.2%, #45b7d1 49.8%,
-              #96ceb4 49.8%, #96ceb4 66.4%,
-              #ffeaa7 66.4%, #ffeaa7 83%,
-              #dda0dd 83%, #dda0dd 100%
-            )`,
-            borderRadius: '10px',
-            position: 'relative'
-          }}
+          style={INDICATOR_STYLES}
         >
           <Text
             size="xs"
-            style={{
+            style={useMemo(() => ({
               position: 'absolute',
               top: '-18px',
               left: `${((BREAKPOINT_POSITIONS[breakpoint] || 0) * 100)}%`,
               transform: 'translateX(-50%)',
               fontWeight: 600
-            }}
+            }), [breakpoint])}
           >
             ↓ {breakpoint}
           </Text>
@@ -116,6 +104,21 @@ function ResponsiveTest() {
     </Box>
   );
 }
+
+// Static styles to prevent re-creation on every render
+const INDICATOR_STYLES = {
+  height: '20px',
+  background: `linear-gradient(90deg, 
+    #ff6b6b 0%, #ff6b6b 16.6%,
+    #4ecdc4 16.6%, #4ecdc4 33.2%,
+    #45b7d1 33.2%, #45b7d1 49.8%,
+    #96ceb4 49.8%, #96ceb4 66.4%,
+    #ffeaa7 66.6%, #ffeaa7 83%,
+    #dda0dd 83%, #dda0dd 100%
+  )`,
+  borderRadius: '10px',
+  position: 'relative'
+};
 
 // Breakpoint positions for visual indicator
 const BREAKPOINT_POSITIONS = {
