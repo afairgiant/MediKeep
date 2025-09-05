@@ -1,0 +1,31 @@
+/* ResponsiveLayout Component Styles */
+
+.responsive-layout {
+  /* Main layout container */
+}
+
+.responsive-layout-navigation {
+  /* Navigation section */
+  position: relative;
+  z-index: 100;
+}
+
+.responsive-layout-content {
+  /* Main content area */
+  position: relative;
+  z-index: 50;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .responsive-layout {
+    border: 1px solid var(--mantine-color-gray-9);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .responsive-layout-content {
+    transition: none !important;
+  }
+}

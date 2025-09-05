@@ -69,6 +69,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TestMedicationForm from './pages/TestMedicationForm';
+import ResponsiveNavigationTest from './pages/test/ResponsiveNavigationTest';
 
 // Components
 import { ErrorBoundary } from './components';
@@ -523,6 +524,16 @@ function App() {
                           element={
                             <ProtectedRoute>
                               <TestMedicationForm />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Navigation Test Page */}
+                        <Route
+                          path="/test/navigation"
+                          element={
+                            <ProtectedRoute>
+                              <ResponsiveNavigationTest />
                             </ProtectedRoute>
                           }
                         />

@@ -1,0 +1,36 @@
+/* ResponsiveGrid Component Styles */
+
+.responsive-grid {
+  /* Base grid container */
+  width: 100%;
+}
+
+.responsive-grid-cards {
+  /* Card grid specific styles */
+}
+
+.responsive-grid-thumbnails {
+  /* Thumbnail grid specific styles */
+}
+
+.responsive-grid-dashboard {
+  /* Dashboard grid specific styles */
+}
+
+.responsive-grid-default {
+  /* Default grid styles */
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .responsive-grid {
+    border: 1px solid var(--mantine-color-gray-3);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .responsive-grid * {
+    transition: none !important;
+  }
+}

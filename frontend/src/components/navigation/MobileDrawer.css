@@ -1,0 +1,62 @@
+/* MobileDrawer Component Styles */
+
+.mobile-drawer {
+  /* Base styles handled by Mantine Drawer */
+}
+
+/* Mobile Navigation Toggle Button */
+.mobile-navigation-toggle {
+  /* Styles handled inline */
+}
+
+/* Mobile Navigation Item Styles */
+.mobile-nav-item {
+  text-decoration: none;
+  width: 100%;
+  text-align: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mobile-nav-item:focus {
+  outline: 2px solid var(--mantine-color-blue-4);
+  outline-offset: 2px;
+}
+
+.mobile-nav-item.active {
+  font-weight: 600;
+}
+
+/* Ensure proper touch targets for mobile */
+.mobile-nav-item {
+  min-height: 64px;
+  min-width: 64px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-nav-item.active {
+    border: 3px solid var(--mantine-color-blue-6) !important;
+  }
+  
+  .mobile-navigation-toggle {
+    border: 2px solid var(--mantine-color-gray-9) !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav-item {
+    transition: none !important;
+  }
+}
+
+/* Better spacing for very small screens */
+@media (max-width: 360px) {
+  .mobile-nav-item {
+    padding: 12px 8px !important;
+    min-height: 56px;
+  }
+}

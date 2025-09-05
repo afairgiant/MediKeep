@@ -55,21 +55,19 @@ const Medication = () => {
     const data = practitionersObject?.practitioners || [];
     logger.debug('Practitioners data updated', {
       component: 'Medication',
-      practitionersCount: data.length,
-      showAddForm
+      practitionersCount: data.length
     });
     return data;
-  }, [practitionersObject?.practitioners, showAddForm]);
+  }, [practitionersObject?.practitioners]);
 
   const pharmacies = useMemo(() => {
     const data = pharmaciesObject?.pharmacies || [];
     logger.debug('Pharmacies data updated', {
       component: 'Medication', 
-      pharmaciesCount: data.length,
-      showAddForm
+      pharmaciesCount: data.length
     });
     return data;
-  }, [pharmaciesObject?.pharmacies, showAddForm]);
+  }, [pharmaciesObject?.pharmacies]);
 
   // Modern data management with useMedicalData
   const {

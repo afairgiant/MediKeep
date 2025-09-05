@@ -4,6 +4,69 @@
 /* Base Styles */
 /* ============================= */
 
+/* Main Navigation Bar */
+.main-navigation {
+  background: var(--surface-color, white);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
+  position: sticky;
+  top: 72px; /* Below header */
+  z-index: 40;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.main-navigation .nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.main-navigation .nav-items {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.main-navigation .nav-items::-webkit-scrollbar {
+  height: 4px;
+}
+
+.main-navigation .nav-items::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.main-navigation .nav-items::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.main-navigation .nav-items a {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  color: #4b5563;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.main-navigation .nav-items a:hover {
+  color: #3b82f6;
+  background: #f0f9ff;
+  border-bottom-color: #93c5fd;
+}
+
+.main-navigation .nav-items a.active {
+  color: #2563eb;
+  background: #eff6ff;
+  border-bottom-color: #3b82f6;
+}
+
 .page-header {
   display: flex !important;
   align-items: center !important;
