@@ -57,6 +57,7 @@ import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
 import { GlobalSearch } from '../components/common';
 import { InvitationNotifications } from '../components/dashboard';
+import ResponsiveTest from '../components/ResponsiveTest';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
@@ -704,6 +705,9 @@ const Dashboard = () => {
       />
 
       <Stack gap="lg">
+        {/* Responsive Test Component (Temporary for PR #1) */}
+        <ResponsiveTest />
+        
         {/* Welcome Section */}
         {showWelcomeBox && (
           <Paper

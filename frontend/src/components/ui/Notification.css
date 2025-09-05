@@ -124,15 +124,3 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
-  .notification-container {
-    top: 0.5rem;
-    right: 0.5rem;
-    left: 0.5rem;
-    max-width: none;
-  }
-
-  .notification {
-    padding: var(--spacing-md, 1rem);
-  }
-}

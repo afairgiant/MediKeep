@@ -66,22 +66,10 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 /* Mobile content adjustments */
-@media (max-width: 768px) {
-  .medical-page-content {
-    padding: 1rem;
-    max-width: 100vw;
-  }
-}
 
-@media (max-width: 480px) {
-  .medical-page-content {
-    padding: 0.75rem;
-  }
-}
 
 /* Messages */
 .error-message {
@@ -641,19 +629,7 @@
 }
 
 /* Responsive grid adjustments */
-@media (max-width: 480px) {
-  .medical-items-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
 
-@media (min-width: 481px) and (max-width: 768px) {
-  .medical-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
-  }
-}
 
 /* Table Layout for Items */
 .medications-table-container {
@@ -663,19 +639,10 @@
   overflow: hidden;
   border: 1px solid var(--color-border-light, #e9ecef);
   width: 100%;
-  max-width: 100vw;
   box-sizing: border-box;
 }
 
 /* Responsive table container */
-@media (max-width: 768px) {
-  .medications-table-container {
-    overflow-x: auto;
-    margin: 0 -1rem;
-    width: calc(100% + 2rem);
-    border-radius: 0;
-  }
-}
 
 .print-header {
   padding: 1.5rem 2rem;
@@ -779,80 +746,6 @@
   margin: 0.5in;
 }
 
-@media print {
-  /* Hide header, controls, and filters */
-  .medical-page-header,
-  .medical-page-controls,
-  .medical-page-filters,
-  .filter-summary,
-  .clear-filters-btn,
-  .no-print,
-  .settings-button,
-  .theme-toggle-btn,
-  .header-actions,
-  .global-actions,
-  [data-mantine-component='Card']:has(.mantine-Card-root),
-  .mantine-Card-root {
-    display: none !important;
-  }
-
-  /* Hide Mantine filter components specifically */
-  [class*='mantine-Card'],
-  [class*='mantine-TextInput'],
-  [class*='mantine-Select'],
-  [class*='mantine-Button'][class*='Filter'],
-  [class*='mantine-Group']:has([class*='mantine-TextInput']) {
-    display: none !important;
-  }
-
-  .medical-page-container {
-    background: white !important;
-  }
-
-  .medical-page-content {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: none !important;
-  }
-
-  .medications-table-container {
-    box-shadow: none !important;
-    border: 1px solid #333 !important;
-    break-inside: avoid;
-  }
-
-  .print-header {
-    background: white !important;
-    border-bottom: 2px solid #333 !important;
-  }
-
-  .medications-table th {
-    background: #f0f0f0 !important;
-    color: #333 !important;
-    border: 1px solid #333 !important;
-  }
-
-  .medications-table td {
-    border: 1px solid #333 !important;
-  }
-
-  .medications-table {
-    page-break-inside: auto;
-  }
-
-  .medications-table tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
-  .medications-table thead {
-    display: table-header-group;
-  }
-
-  .status-badge-small {
-    border: 1px solid #333 !important;
-  }
-}
 
 /* Item Card */
 .medical-item-card {
@@ -1071,109 +964,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .medical-page-header {
-    padding: 1rem;
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-  }
 
-  .medical-page-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .medical-page-content {
-    padding: 1rem;
-  }
-
-  .medical-page-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .controls-left,
-  .controls-right {
-    width: 100%;
-  }
-
-  .sort-controls {
-    justify-content: space-between;
-  }
-
-  .medical-items-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .medical-form-modal {
-    margin: 1rem;
-    max-height: calc(100vh - 2rem);
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .medical-item-actions {
-    flex-direction: column;
-  }
-
-  .medical-item-header {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .detail-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .detail-item .label {
-    margin-bottom: 0.25rem;
-    margin-right: 0;
-    min-width: auto;
-  }
-
-  .detail-item .value {
-    text-align: left;
-  }
-}
-
-@media (max-width: 480px) {
-  .medical-page-header {
-    padding: 0.75rem;
-  }
-
-  .medical-page-content {
-    padding: 0.75rem;
-  }
-
-  .medical-item-card {
-    padding: 1rem;
-  }
-
-  .medical-items-grid {
-    gap: 1rem;
-  }
-
-  .medical-form-modal {
-    width: 95%;
-    margin: 10px;
-  }
-
-  .medical-form-content {
-    padding: 20px;
-  }
-
-  .item-title {
-    font-size: 1.1rem;
-  }
-}
 
 /* Enhanced Visit Card Styles */
 .visit-type-badge {

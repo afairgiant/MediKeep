@@ -159,13 +159,3 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 480px) {
-  .profile-completion-modal .modal-content {
-    margin: 1rem;
-    max-width: none;
-  }
-
-  .completion-icon {
-    font-size: 2.5rem;
-  }
-}

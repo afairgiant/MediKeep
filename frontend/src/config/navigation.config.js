@@ -3,15 +3,7 @@ import logger from '../services/logger';
 import { ENTITY_TYPES } from '../utils/entityRelationships';
 import { buildEntityUrl } from '../utils/entityNavigation';
 
-// Breakpoint definitions
-export const BREAKPOINTS = {
-  mobile: 768,
-  tablet: 1024,
-  laptop: 1200,
-  desktop: 1440,
-};
-
-// Navigation sections shared across all viewports
+// Navigation sections
 export const NAVIGATION_SECTIONS = {
   medicalRecords: {
     title: 'Medical Records',
@@ -188,43 +180,9 @@ export const ADMIN_SECTION = {
   ],
 };
 
-// Viewport-specific configurations
-export const VIEWPORT_CONFIGS = {
-  mobile: {
-    maxSections: 5,
-    layout: 'sidebar',
-    showLabels: true,
-    featuredOnly: false, // Show all items in mobile sidebar
-    bottomNavItems: [
-      'dashboard',
-      'medications',
-      'lab-results',
-      'visits',
-      'settings',
-    ], // For future bottom nav
-  },
-  tablet: {
-    maxSections: 5,
-    layout: 'dropdown',
-    compactMode: true,
-  },
-  laptop: {
-    maxSections: 6,
-    layout: 'dropdown',
-    showAllSections: true,
-  },
-  desktop: {
-    maxSections: 7,
-    layout: 'dropdown',
-    showAllSections: true,
-    expandedMode: true,
-  },
-};
-
-// Helper function to get navigation sections based on viewport and user role
-export const getNavigationSections = (viewport, isAdmin = false) => {
+// Helper function to get navigation sections based on user role
+export const getNavigationSections = (isAdmin = false) => {
   logger.debug('🧭 NAV_CONFIG: Getting navigation sections', {
-    viewport,
     isAdmin,
     timestamp: new Date().toISOString(),
   });
@@ -243,15 +201,6 @@ export const getNavigationSections = (viewport, isAdmin = false) => {
     logger.debug('🧭 NAV_CONFIG: Admin section NOT added (user not admin)', {
       isAdmin,
       timestamp: new Date().toISOString(),
-    });
-  }
-
-  // Apply viewport-specific modifications
-  const config = VIEWPORT_CONFIGS[viewport];
-
-  if (config?.hideSections) {
-    config.hideSections.forEach(sectionKey => {
-      delete sections[sectionKey];
     });
   }
 

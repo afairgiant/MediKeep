@@ -19,6 +19,9 @@ import '@mantine/notifications/styles.css';
 
 import { theme } from './theme';
 
+// Responsive System
+import { ResponsiveProvider } from './providers/ResponsiveProvider';
+
 // Authentication
 import { AuthProvider } from './contexts/AuthContext';
 import {
@@ -349,8 +352,9 @@ function App() {
             <AppDataProvider>
               <MantineProvider theme={theme}>
                 <Notifications />
-                <DatesProvider settings={{ timezone: 'UTC' }}>
-                  <MantineIntegratedThemeProvider>
+                <ResponsiveProvider>
+                  <DatesProvider settings={{ timezone: 'UTC' }}>
+                    <MantineIntegratedThemeProvider>
                     <NavigationTracker />
                     {/* <ActivityTracker /> */}
                     <div className="App">
@@ -532,8 +536,9 @@ function App() {
 
                     {/* Toast Notifications */}
                     <ThemedToastContainer />
-                  </MantineIntegratedThemeProvider>
-                </DatesProvider>
+                    </MantineIntegratedThemeProvider>
+                  </DatesProvider>
+                </ResponsiveProvider>
               </MantineProvider>
             </AppDataProvider>
           </UserPreferencesProvider>
