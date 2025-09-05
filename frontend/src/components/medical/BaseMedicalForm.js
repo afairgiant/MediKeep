@@ -20,10 +20,7 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
-import { useWindowDimensions } from '../../hooks/useWindowDimensions';
-import { useDropdownScrollOptimization } from '../../hooks/useScrollThrottle';
 import logger from '../../services/logger';
-import performanceMonitor from '../../services/performanceMonitor';
 
 /**
  * BaseMedicalForm - Reusable form component for medical data entry
@@ -71,175 +68,8 @@ const BaseMedicalForm = ({
   // Modal customization
   modalSize = "lg",
 }) => {
-  // Debug: Track render cycles and performance
-  const renderCount = useRef(0);
-  const lastRenderTime = useRef(Date.now());
-  const emergencyModeRef = useRef(false);
-  const measureRenderRef = useRef(null);
-  
-  // Register for emergency mode from performance monitor
-  useEffect(() => {
-    const unsubscribe = performanceMonitor.onEmergency((reason) => {
-      logger.error('Form entering emergency mode', {
-        component: 'BaseMedicalForm',
-        reason
-      });
-      emergencyModeRef.current = true;
-      // Force close after delay to prevent freeze
-      setTimeout(() => {
-        if (isOpen && emergencyModeRef.current) {
-          onClose();
-        }
-      }, 500);
-    });
-    return unsubscribe;
-  }, [isOpen, onClose]);
-  
-  // Performance monitoring and emergency fallback
-  useEffect(() => {
-    // Measure render performance
-    if (measureRenderRef.current) {
-      const duration = measureRenderRef.current();
-      if (duration && duration > 100) {
-        logger.warn('Slow render detected', {
-          component: 'BaseMedicalForm',
-          duration,
-          performanceLevel: performance?.performanceLevel
-        });
-      }
-    }
-    measureRenderRef.current = performanceMonitor.startMeasure('BaseMedicalForm');
-    
-    renderCount.current++;
-    const now = Date.now();
-    const timeSinceLastRender = now - lastRenderTime.current;
-    lastRenderTime.current = now;
-    
-    // Detect render loops and emergency situations
-    if (timeSinceLastRender < 16 && renderCount.current > 50) {
-      if (!emergencyModeRef.current) {
-        emergencyModeRef.current = true;
-        logger.error('Render loop detected, entering emergency mode', {
-          component: 'BaseMedicalForm',
-          renderCount: renderCount.current,
-          timeSinceLastRender
-        });
-        performanceMonitor.triggerEmergencyMode({ renderLoop: true, renderCount: renderCount.current });
-      }
-    }
-    
-    // Development logging
-    if (process.env.NODE_ENV === 'development') {
-      if (renderCount.current % 10 === 0 || timeSinceLastRender < 50) {
-        logger.debug('BaseMedicalForm render', {
-          component: 'BaseMedicalForm',
-          renderCount: renderCount.current,
-          timeSinceLastRender,
-          isOpen,
-          performanceLevel: performance?.performanceLevel,
-          fieldsCount: fields.length
-        });
-      }
-    }
-    
-    // Reset on modal close
-    if (!isOpen) {
-      emergencyModeRef.current = false;
-      renderCount.current = 0;
-      if (measureRenderRef.current) {
-        measureRenderRef.current();
-        measureRenderRef.current = null;
-      }
-    }
-    
-    return () => {
-      if (measureRenderRef.current) {
-        measureRenderRef.current();
-      }
-    };
-  });
-  
-  // Set up performance observer to detect long tasks
-  useEffect(() => {
-    if (!isOpen || typeof PerformanceObserver === 'undefined') return;
-    
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.duration > 50) {
-          logger.warn('Long task detected in BaseMedicalForm', {
-            component: 'BaseMedicalForm',
-            taskDuration: entry.duration,
-            taskName: entry.name,
-            windowHeight: window.innerHeight
-          });
-        }
-      }
-    });
-    
-    try {
-      observer.observe({ entryTypes: ['longtask'] });
-    } catch (e) {
-      logger.debug('PerformanceObserver not supported for longtask', {
-        component: 'BaseMedicalForm'
-      });
-    }
-    
-    return () => observer.disconnect();
-  }, [isOpen]);
 
-  // Get responsive window dimensions with performance mode detection FIRST
-  const windowDimensions = useWindowDimensions(150);
-  const { 
-    isSmallScreen, 
-    isMobileWidth, 
-    isTabletWidth,
-    performance,
-    accessibility,
-    shouldReduceAnimations,
-    shouldSimplifyLayout,
-    shouldLimitDropdownItems,
-    getMaxDropdownHeight,
-    getModalSize,
-    getDebounceDelay
-  } = windowDimensions;
   
-  // Optimize dropdown scroll performance for constrained viewports (now that performance is defined)
-  const dropdownRef = useDropdownScrollOptimization(isOpen, performance?.isConstrainedViewport);
-  
-  // Add passive event listeners for better scroll performance
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleWheel = (e) => {
-      // Allow default wheel behavior but mark as passive for better performance
-      // This prevents the 215ms delay mentioned in the logs
-    };
-
-    const modalElement = document.querySelector('[data-mantine-modal]');
-    if (modalElement) {
-      modalElement.addEventListener('wheel', handleWheel, { passive: true });
-      modalElement.addEventListener('touchmove', handleWheel, { passive: true });
-      
-      return () => {
-        modalElement.removeEventListener('wheel', handleWheel);
-        modalElement.removeEventListener('touchmove', handleWheel);
-      };
-    }
-  }, [isOpen]);
-  
-  // Log performance mode on mount and changes
-  useEffect(() => {
-    if (isOpen && performance) {
-      logger.info('Form opened with performance mode', {
-        component: 'BaseMedicalForm',
-        performanceLevel: performance.performanceLevel,
-        isConstrainedViewport: performance.isConstrainedViewport,
-        isAccessibilityMode: accessibility?.isAccessibilityMode,
-        fontSize: accessibility?.fontSize,
-        features: performance.features
-      });
-    }
-  }, [isOpen, performance?.performanceLevel]);
 
   const { 
     handleTextInputChange, 
@@ -276,12 +106,10 @@ const BaseMedicalForm = ({
     onSubmit(e);
   }, [onSubmit]);
 
-  // Use performance-aware dropdown height
-  const getResponsiveDropdownHeight = useCallback((providedHeight) => {
-    if (providedHeight) return providedHeight;
-    // Use the performance-aware helper
-    return getMaxDropdownHeight ? getMaxDropdownHeight() : 280;
-  }, [getMaxDropdownHeight]);
+  // Standard dropdown height
+  const getDropdownHeight = useCallback((providedHeight) => {
+    return providedHeight || 280;
+  }, []);
 
   // Split renderField into smaller, focused callbacks for better performance
   
@@ -311,44 +139,28 @@ const BaseMedicalForm = ({
     );
   }, [handleTextInputChange]);
 
-  // Callback for select fields with performance optimizations
+  // Callback for select fields
   const renderSelectField = useCallback((fieldConfig, baseProps, selectOptions, isFieldLoading) => {
     const { name, dynamicOptions: dynamicOptionsKey, searchable, clearable, maxDropdownHeight } = fieldConfig;
     
-    // Performance-based configuration
-    const isSearchable = searchable && 
-      performance?.features?.dropdownSearch !== false && 
-      !isSmallScreen;
-    
-    const dropdownHeight = maxDropdownHeight || getResponsiveDropdownHeight();
-    
-    // Aggressive limiting for constrained viewports
-    let itemLimit;
-    if (performance?.performanceLevel === 'minimal') {
-      itemLimit = 10;
-    } else if (performance?.performanceLevel === 'reduced' || shouldLimitDropdownItems?.()) {
-      itemLimit = 20;
-    } else if (selectOptions.length > 100) {
-      itemLimit = 50;
-    }
+    const dropdownHeight = maxDropdownHeight || getDropdownHeight();
+    const itemLimit = selectOptions.length > 100 ? 50 : undefined;
     
     return (
       <Select
         {...baseProps}
         data={selectOptions}
         onChange={handleSelectChange(name)}
-        searchable={isSearchable}
+        searchable={searchable}
         clearable={clearable}
         maxDropdownHeight={dropdownHeight}
         disabled={isFieldLoading}
         placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : baseProps.placeholder}
         limit={itemLimit}
-        withinPortal={performance?.performanceLevel !== 'minimal' && !performance?.isConstrainedViewport}
-        isInScrollableContainer={performance?.isConstrainedViewport}
-        transitionProps={shouldReduceAnimations?.() ? { duration: 0 } : undefined}
+        withinPortal
       />
     );
-  }, [handleSelectChange, isSmallScreen, performance, getResponsiveDropdownHeight, shouldLimitDropdownItems, shouldReduceAnimations]);
+  }, [handleSelectChange, getDropdownHeight]);
 
   // Callback for number input fields
   const renderNumberField = useCallback((fieldConfig, baseProps) => {
@@ -503,12 +315,11 @@ const BaseMedicalForm = ({
               onInputChange({ target: { name, value } });
             }}
             value={formData[name] || ''}
-            maxDropdownHeight={getMaxDropdownHeight ? getMaxDropdownHeight() : 200}
-            disabled={isFieldLoading || performance?.features?.autoComplete === false}
+            maxDropdownHeight={getDropdownHeight()}
+            disabled={isFieldLoading}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
-            limit={performance?.performanceLevel === 'minimal' ? 10 : 50}
-            withinPortal={performance?.performanceLevel !== 'minimal'}
-            transitionProps={shouldReduceAnimations?.() ? { duration: 0 } : undefined}
+            limit={50}
+            withinPortal
           />
         );
 
@@ -522,46 +333,30 @@ const BaseMedicalForm = ({
           const [search, setSearch] = useState(formData[name] || '');
           const [value, setValue] = useState(formData[name] || '');
           
-          // Sync local state when formData changes with performance guard
+          // Sync local state when formData changes
           useEffect(() => {
-            // Skip effect in emergency mode
-            if (emergencyModeRef.current) return;
-            
             const currentValue = formData[name] || '';
             setValue(currentValue);
             
-            // Skip expensive search in minimal performance mode
-            if (performance?.performanceLevel === 'minimal') {
-              setSearch(currentValue);
+            // Find if it's a known option to display the label instead of value
+            const option = selectOptions.find(opt => opt.value === currentValue);
+            if (option && option.label) {
+              setSearch(option.label);
             } else {
-              // Find if it's a known option to display the label instead of value
-              const option = selectOptions.find(opt => opt.value === currentValue);
-              if (option && option.label) {
-                setSearch(option.label);
-              } else {
-                setSearch(currentValue);
-              }
+              setSearch(currentValue);
             }
-          }, [formData[name], name]) // Intentionally not including performance to avoid loops
+          }, [formData[name], name])
 
-          // Performance-optimized option filtering
-          let exactOptionMatch = null;
-          let filteredOptions = selectOptions;
+          // Option filtering
+          const exactOptionMatch = selectOptions.find(
+            (item) => item.value === search || item.label === search
+          );
           
-          if (performance?.performanceLevel === 'minimal' || emergencyModeRef.current) {
-            // Skip filtering in minimal mode
-            filteredOptions = selectOptions.slice(0, 10);
-          } else {
-            exactOptionMatch = selectOptions.find(
-              (item) => item.value === search || item.label === search
-            );
-            
-            filteredOptions = exactOptionMatch
-              ? selectOptions
-              : selectOptions.filter((item) =>
-                  (item.label || item.value).toLowerCase().includes(search.toLowerCase().trim())
-                ).slice(0, performance?.performanceLevel === 'reduced' ? 20 : 50);
-          }
+          const filteredOptions = exactOptionMatch
+            ? selectOptions
+            : selectOptions.filter((item) =>
+                (item.label || item.value).toLowerCase().includes(search.toLowerCase().trim())
+              ).slice(0, 50);
 
           const options = filteredOptions.map((item) => (
             <Combobox.Option value={item.value} key={item.value}>
@@ -572,12 +367,8 @@ const BaseMedicalForm = ({
           return (
             <Combobox
               store={combobox}
-              withinPortal={!performance?.isConstrainedViewport && performance?.performanceLevel !== 'minimal'}
+              withinPortal
               position="bottom-start"
-              middlewares={performance?.isConstrainedViewport ? 
-                { flip: false, shift: false } : // Disable positioning middleware on constrained viewports
-                { flip: true, shift: true }
-              }
               onOptionSubmit={(val) => {
                 if (val === '$create') {
                   setValue(search);
@@ -627,11 +418,9 @@ const BaseMedicalForm = ({
               <Combobox.Dropdown>
                 <Combobox.Options 
                   style={{ 
-                    maxHeight: getMaxDropdownHeight ? `${getMaxDropdownHeight()}px` : '200px', 
+                    maxHeight: `${getDropdownHeight()}px`, 
                     overflowY: 'auto',
-                    overflowX: 'hidden',
-                    willChange: 'transform', // Optimize for animations
-                    backfaceVisibility: 'hidden' // Prevent flicker
+                    overflowX: 'hidden'
                   }}
                 >
                   {search.trim() && !exactOptionMatch && (
@@ -707,14 +496,8 @@ const BaseMedicalForm = ({
     }
   }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange]);
 
-  // Group fields by row based on gridColumn values with performance optimization
+  // Group fields by row based on gridColumn values
   const groupFieldsIntoRows = useCallback((fields) => {
-    // Skip complex layouts on minimal performance mode
-    if (shouldSimplifyLayout?.()) {
-      // Simple single-column layout for constrained viewports
-      return fields.map(field => [{ ...field, gridColumn: 12 }]);
-    }
-    
     const rows = [];
     let currentRow = [];
     let currentRowSpan = 0;
@@ -741,9 +524,9 @@ const BaseMedicalForm = ({
     }
 
     return rows;
-  }, [shouldSimplifyLayout]);
+  }, []);
 
-  // Memoize field rows with performance consideration
+  // Memoize field rows
   const fieldRows = useMemo(() => groupFieldsIntoRows(fields), [fields, groupFieldsIntoRows]);
 
   // Memoize submit button text to prevent recalculation
@@ -766,18 +549,10 @@ const BaseMedicalForm = ({
     return undefined;
   }, [submitButtonColor, formData?.severity]);
 
-  // Use performance-aware modal sizing
-  const responsiveModalSize = useMemo(() => {
-    if (getModalSize) {
-      return getModalSize(modalSize);
-    }
-    // Fallback to legacy logic
-    if (typeof modalSize === 'string') {
-      if (isMobileWidth) return 'sm';
-      if (isTabletWidth && modalSize === 'xl') return 'lg';
-    }
+  // Use standard modal sizing
+  const modalSizeValue = useMemo(() => {
     return modalSize;
-  }, [modalSize, isMobileWidth, isTabletWidth, getModalSize]);
+  }, [modalSize]);
 
   return (
     <Modal
@@ -788,53 +563,27 @@ const BaseMedicalForm = ({
           {title}
         </Text>
       }
-      size={responsiveModalSize}
-      centered={!performance?.isConstrainedViewport}
-      className={
-        performance?.performanceLevel === 'minimal' ? 'performance-minimal' :
-        emergencyModeRef.current ? 'performance-emergency' : ''
-      }
+      size={modalSizeValue}
+      centered
       styles={useMemo(() => ({
         body: { 
-          padding: isMobileWidth || performance?.isConstrainedViewport ? '0.75rem' : '1.5rem', 
-          paddingBottom: isMobileWidth || performance?.isConstrainedViewport ? '1rem' : '2rem',
-          maxHeight: performance?.isConstrainedViewport ? '70vh' : undefined,
-          overflowY: performance?.isConstrainedViewport ? 'auto' : undefined
+          padding: '1.5rem', 
+          paddingBottom: '2rem'
         },
         header: { 
-          paddingBottom: performance?.isConstrainedViewport ? '0.5rem' : '1rem',
-          position: performance?.isConstrainedViewport ? 'sticky' : undefined,
-          top: 0,
-          zIndex: 10,
-          backgroundColor: 'white'
-        },
-        content: {
-          maxHeight: performance?.isConstrainedViewport ? '90vh' : undefined,
-          maxWidth: '100vw', // Prevent modal from exceeding viewport width
-          boxSizing: 'border-box' // Include padding in width calculation
+          paddingBottom: '1rem'
         }
-      }), [isMobileWidth, performance?.isConstrainedViewport])}
+      }), [])}
       overflow="inside"
-      transitionProps={shouldReduceAnimations?.() || emergencyModeRef.current ? { duration: 0 } : undefined}
-      withinPortal={!emergencyModeRef.current}
-      portalProps={{
-        style: {
-          position: 'fixed',
-          zIndex: emergencyModeRef.current ? 10000 : 9999
-        }
-      }}
-      lockScroll={!performance?.isConstrainedViewport && !emergencyModeRef.current}
-      closeOnClickOutside={!emergencyModeRef.current}
-      trapFocus={!emergencyModeRef.current}
-      returnFocus={!emergencyModeRef.current}
+      withinPortal
+      lockScroll
+      closeOnClickOutside
+      trapFocus
+      returnFocus
       keepMounted={false}
     >
       <form 
         onSubmit={handleSubmit}
-        className={
-          performance?.performanceLevel === 'minimal' ? 'performance-minimal' :
-          emergencyModeRef.current ? 'performance-emergency' : ''
-        }
       >
         <Stack spacing="md">
           {/* Render form fields */}

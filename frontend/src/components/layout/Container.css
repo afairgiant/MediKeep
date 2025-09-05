@@ -39,12 +39,3 @@
 }
 
 /* Responsive Padding */
-@media (max-width: 768px) {
-  .padding-default {
-    padding: 1rem;
-  }
-
-  .padding-large {
-    padding: 1.5rem;
-  }
-}

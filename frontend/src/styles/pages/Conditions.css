@@ -20,15 +20,3 @@
 }
 
 /* Additional mobile responsive tweaks specific to conditions */
-@media (max-width: 768px) {
-  .status-badges {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 8px;
-  }
-
-  .medical-item-details {
-    grid-template-columns: 1fr;
-  }
-}

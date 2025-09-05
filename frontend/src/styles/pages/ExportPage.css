@@ -378,24 +378,3 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
-  .export-page {
-    padding: 16px;
-  }
-
-  .export-header h1 {
-    font-size: 2rem;
-  }
-
-  .date-row {
-    grid-template-columns: 1fr;
-  }
-
-  .mode-toggle {
-    flex-direction: column;
-  }
-
-  .checkbox-grid {
-    grid-template-columns: 1fr;
-  }
-}

@@ -69,46 +69,5 @@
 }
 
 /* Responsive Design */
-@media (max-width: 640px) {
-  .timezone-indicator {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-    padding: 0.5rem;
-  }
-
-  .timezone-current-time {
-    font-size: 0.75rem;
-  }
-
-  .timezone-name {
-    font-size: 0.625rem;
-  }
-
-  .timezone-info {
-    display: block;
-    margin-left: 0;
-    margin-top: 0.25rem;
-  }
-}
 
 /* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .timezone-indicator {
-    background: #374151;
-    border-color: #4b5563;
-    color: #d1d5db;
-  }
-
-  .timezone-current-time {
-    color: #f9fafb;
-  }
-
-  .timezone-name {
-    color: #9ca3af;
-  }
-
-  .timezone-info {
-    color: #9ca3af;
-  }
-}

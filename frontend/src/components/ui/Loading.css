@@ -154,16 +154,3 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .loading {
-    min-height: 80px;
-  }
-
-  .loading-content {
-    gap: 0.75rem;
-  }
-
-  .loading-message {
-    font-size: 0.9rem;
-  }
-}
