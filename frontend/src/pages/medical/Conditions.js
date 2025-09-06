@@ -45,9 +45,12 @@ import {
   isEndDateBeforeStartDate 
 } from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
+import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 
 // Modular components
 import {
@@ -59,6 +62,7 @@ import {
 const Conditions = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   
   // Load medications and practitioners for linking dropdowns
@@ -442,7 +446,7 @@ const Conditions = () => {
                 {filteredConditions.map((condition, index) => (
                   <Grid.Col
                     key={condition.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
+                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -464,16 +468,16 @@ const Conditions = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={filteredConditions}
                 columns={[
-                  { header: 'Condition', accessor: 'diagnosis' },
-                  { header: 'Severity', accessor: 'severity' },
-                  { header: 'Onset Date', accessor: 'onset_date' },
-                  { header: 'End Date', accessor: 'end_date' },
-                  { header: 'Status', accessor: 'status' },
-                  { header: 'ICD-10', accessor: 'icd10_code' },
-                  { header: 'Notes', accessor: 'notes' },
+                  { header: 'Condition', accessor: 'diagnosis', priority: 'high', width: 200 },
+                  { header: 'Severity', accessor: 'severity', priority: 'high', width: 120 },
+                  { header: 'Onset Date', accessor: 'onset_date', priority: 'medium', width: 130 },
+                  { header: 'End Date', accessor: 'end_date', priority: 'low', width: 130 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
+                  { header: 'ICD-10', accessor: 'icd10_code', priority: 'low', width: 100 },
+                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName="Conditions"
@@ -489,6 +493,8 @@ const Conditions = () => {
                   icd10_code: getEntityFormatters('conditions').simple,
                   notes: getEntityFormatters('conditions').notes,
                 }}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -510,4 +516,8 @@ const Conditions = () => {
   );
 };
 
-export default Conditions;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Conditions, {
+  injectResponsive: true,
+  displayName: 'ResponsiveConditions'
+});

@@ -770,13 +770,14 @@ const Dashboard = () => {
             align="flex-start"
             gap="md"
             direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
+            wrap="wrap"
+            style={{ width: '100%' }}
           >
             {/* Patient Selector */}
             <Box style={{ 
-              flex: '1', 
-              maxWidth: '500px', 
-              width: '100%',
-              minWidth: '300px' // Ensure minimum visibility
+              flex: '1 1 auto', 
+              maxWidth: '500px',
+              minWidth: '200px'
             }}>
               <PatientSelector
                 onPatientChange={handlePatientChange}
@@ -789,10 +790,10 @@ const Dashboard = () => {
             {/* Search Bar */}
             <Box
               style={{
-                flexShrink: 0,
-                width: '100%',
-                maxWidth: '300px',
-                minWidth: '250px', // Ensure minimum search bar width
+                flexShrink: 1,
+                flex: '0 1 250px',
+                maxWidth: '250px',
+                minWidth: '150px',
               }}
             >
               <GlobalSearch

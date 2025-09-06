@@ -14,7 +14,7 @@ import {
   Skeleton,
   Center
 } from '@mantine/core';
-import { IconSearch, IconSort, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
+import { IconSearch, IconArrowsSort, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
 import { useResponsive } from '../../hooks/useResponsive';
 import { TableLayoutStrategy } from '../../strategies/TableLayoutStrategy';
 import logger from '../../services/logger';
@@ -301,7 +301,7 @@ export const ResponsiveTable = memo(({
                           <IconSortAscending size={rem(12)} /> : 
                           <IconSortDescending size={rem(12)} />
                       ) : (
-                        <IconSort size={rem(12)} />
+                        <IconArrowsSort size={rem(12)} />
                       )}
                     </ActionIcon>
                   )}

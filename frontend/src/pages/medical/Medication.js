@@ -28,15 +28,19 @@ import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import { MedicationCard, MedicationViewModal, MedicationFormWrapper } from '../../components/medical/medications';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 
 const Medication = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   
   // Form state - moved up to be available for refs logic
@@ -300,7 +304,7 @@ const Medication = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="md">
+      <Container size="xl" py="md" style={{ maxWidth: '100%', overflow: 'hidden' }}>
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
@@ -312,7 +316,7 @@ const Medication = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="md" style={{ maxWidth: '100%', overflow: 'hidden' }}>
       <PageHeader title="Medications" icon="💊" />
 
       <Stack gap="lg">
@@ -422,7 +426,7 @@ const Medication = () => {
                 {processedMedications.map((medication, index) => (
                   <Grid.Col
                     key={medication.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
+                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -445,27 +449,29 @@ const Medication = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={processedMedications}
-              columns={[
-                { header: 'Medication Name', accessor: 'medication_name' },
-                { header: 'Dosage', accessor: 'dosage' },
-                { header: 'Frequency', accessor: 'frequency' },
-                { header: 'Route', accessor: 'route' },
-                { header: 'Purpose', accessor: 'indication' },
-                { header: 'Prescriber', accessor: 'practitioner_name' },
-                { header: 'Pharmacy', accessor: 'pharmacy_name' },
-                { header: 'Start Date', accessor: 'effective_period_start' },
-                { header: 'End Date', accessor: 'effective_period_end' },
-                { header: 'Status', accessor: 'status' },
-              ]}
-              patientData={currentPatient}
-              tableName="Medications"
-              onView={handleViewMedication}
-              onEdit={handleEditMedication}
-              onDelete={handleDeleteMedication}
-              formatters={formatters}
-            />
+                columns={[
+                  { header: 'Medication Name', accessor: 'medication_name', priority: 'high', width: 200 },
+                  { header: 'Dosage', accessor: 'dosage', priority: 'high', width: 120 },
+                  { header: 'Frequency', accessor: 'frequency', priority: 'medium', width: 120 },
+                  { header: 'Route', accessor: 'route', priority: 'low', width: 100 },
+                  { header: 'Purpose', accessor: 'indication', priority: 'medium', width: 180 },
+                  { header: 'Prescriber', accessor: 'practitioner_name', priority: 'low', width: 150 },
+                  { header: 'Pharmacy', accessor: 'pharmacy_name', priority: 'low', width: 150 },
+                  { header: 'Start Date', accessor: 'effective_period_start', priority: 'low', width: 120 },
+                  { header: 'End Date', accessor: 'effective_period_end', priority: 'low', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
+                ]}
+                patientData={currentPatient}
+                tableName="Medications"
+                onView={handleViewMedication}
+                onEdit={handleEditMedication}
+                onDelete={handleDeleteMedication}
+                formatters={formatters}
+                dataType="medical"
+                responsive={responsive}
+              />
             </Paper>
           )}
         </motion.div>
@@ -484,4 +490,8 @@ const Medication = () => {
   );
 };
 
-export default Medication;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Medication, {
+  injectResponsive: true,
+  displayName: 'ResponsiveMedication'
+});

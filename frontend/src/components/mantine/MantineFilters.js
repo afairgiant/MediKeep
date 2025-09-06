@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Group,
   TextInput,
@@ -12,6 +12,7 @@ import {
   Collapse,
   ActionIcon,
   useMantineColorScheme,
+  Box,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -61,6 +62,25 @@ const MantineFilters = ({
 
   const { colorScheme } = useMantineColorScheme();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [searchWidth, setSearchWidth] = useState('150px');
+
+  // Adjust search width based on viewport
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width <= 768) {
+        setSearchWidth('120px');
+      } else if (width <= 1024) {
+        setSearchWidth('140px');
+      } else {
+        setSearchWidth('180px');
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Count collapsible filters (excluding always-visible search)
   const filterCount = [
@@ -76,23 +96,44 @@ const MantineFilters = ({
   ].filter(Boolean).length;
 
   return (
-    <Card withBorder shadow="sm" p="md" mb="lg" className="no-print">
+    <Card withBorder shadow="sm" p={{ base: 'sm', sm: 'md' }} mb="lg" className="no-print" style={{ width: '100%', boxSizing: 'border-box' }}>
       <Stack gap="md">
         {/* Compact Header with Filter Button */}
-        <Group justify="space-between" align="center">
-          <Group gap="sm">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'row', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '0.5rem',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            flex: '1 1 50%',
+            minWidth: '0',
+            overflow: 'hidden'
+          }}>
             <ActionIcon
               variant={isExpanded ? 'filled' : 'light'}
               color={hasActiveFilters ? 'blue' : 'gray'}
               size="lg"
               onClick={() => setIsExpanded(!isExpanded)}
+              style={{ flexShrink: 0 }}
             >
               <IconFilter size={18} />
             </ActionIcon>
 
-            <div>
-              <Group gap="xs" align="center">
-                <Text size="md" fw={500}>
+            <div style={{ 
+              flex: '1 1 auto',
+              minWidth: '0',
+              overflow: 'hidden'
+            }}>
+              <Group gap="xs" align="center" style={{ flexWrap: 'nowrap' }}>
+                <Text size="md" fw={500} style={{ whiteSpace: 'nowrap' }}>
                   Filters & Search
                 </Text>
                 {hasActiveFilters && (
@@ -101,7 +142,11 @@ const MantineFilters = ({
                   </Badge>
                 )}
               </Group>
-              <Text size="xs" c="dimmed">
+              <Text size="xs" c="dimmed" style={{ 
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
                 {filteredCount} of {totalCount} items
                 {filterCount > 0 ? ` • ${filterCount} more filters` : ''}
               </Text>
@@ -111,6 +156,7 @@ const MantineFilters = ({
               variant="subtle"
               color="gray"
               onClick={() => setIsExpanded(!isExpanded)}
+              style={{ flexShrink: 0 }}
             >
               {isExpanded ? (
                 <IconChevronUp size={16} />
@@ -118,9 +164,14 @@ const MantineFilters = ({
                 <IconChevronDown size={16} />
               )}
             </ActionIcon>
-          </Group>
+          </div>
 
-          <Group gap="xs">
+          <div style={{ 
+            display: 'flex', 
+            gap: '0.5rem', 
+            flex: '0 1 auto',
+            minWidth: '0'
+          }}>
             {/* Always visible search - most commonly used */}
             {showSearch && (
               <TextInput
@@ -128,8 +179,12 @@ const MantineFilters = ({
                 value={filters.search || ''}
                 onChange={e => updateFilter('search', e.target.value)}
                 leftSection={<IconSearch size={16} />}
-                style={{ width: '200px' }}
                 size="sm"
+                style={{ 
+                  width: searchWidth,
+                  minWidth: '100px',
+                  maxWidth: searchWidth
+                }}
               />
             )}
 
@@ -140,12 +195,14 @@ const MantineFilters = ({
                 size="sm"
                 leftSection={<IconClearAll size={14} />}
                 onClick={clearFilters}
+                compact
+                style={{ flexShrink: 0 }}
               >
                 Clear
               </Button>
             )}
-          </Group>
-        </Group>
+          </div>
+        </div>
 
         {/* Collapsible Filter Controls */}
         <Collapse in={isExpanded}>
