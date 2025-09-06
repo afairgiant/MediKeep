@@ -267,6 +267,110 @@ export class ResponsiveComponentFactory {
   }
 
   /**
+   * Creates responsive table components with medical data optimizations
+   * 
+   * @param {React.Component} TableComponent - Base table component (usually ResponsiveTable)
+   * @param {Object} tableConfig - Table-specific configuration
+   * @returns {React.Component} Medical-optimized responsive table
+   * 
+   * @example
+   * const MedicalTable = ResponsiveComponentFactory.createTable(ResponsiveTable, {
+   *   dataType: 'patientList',
+   *   priorityColumns: ['name', 'mrn', 'date_of_birth'],
+   *   virtualization: 'auto'
+   * });
+   */
+  static createTable(TableComponent, tableConfig = {}) {
+    if (!TableComponent) {
+      throw new Error('ResponsiveComponentFactory.createTable: TableComponent is required');
+    }
+
+    const tableTransformer = (props, responsive) => {
+      const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = responsive;
+      
+      const enhancedProps = { ...props };
+      
+      // Apply table-specific responsive configurations
+      Object.entries(tableConfig).forEach(([prop, value]) => {
+        if (typeof value === 'object' && value !== null && value[breakpoint] !== undefined) {
+          enhancedProps[prop] = value[breakpoint];
+        } else if (typeof value !== 'object') {
+          enhancedProps[prop] = value;
+        }
+      });
+
+      // Medical context optimizations
+      if (tableConfig.dataType) {
+        enhancedProps.medicalContext = tableConfig.dataType;
+      }
+
+      // Mobile-specific optimizations
+      if (isMobile) {
+        enhancedProps.compactCards = tableConfig.compactOnMobile !== false;
+        enhancedProps.showSecondaryInfo = tableConfig.showSecondaryInfo !== false;
+      }
+
+      return enhancedProps;
+    };
+
+    return withResponsiveTransform(TableComponent, tableTransformer);
+  }
+
+  /**
+   * Creates responsive modal components with medical form optimizations
+   * 
+   * @param {React.Component} ModalComponent - Base modal component (usually ResponsiveModal)
+   * @param {Object} modalConfig - Modal-specific configuration
+   * @returns {React.Component} Medical-optimized responsive modal
+   * 
+   * @example
+   * const MedicalFormModal = ResponsiveComponentFactory.createModal(ResponsiveModal, {
+   *   formType: 'patient',
+   *   complexity: 'medium',
+   *   adaptToContent: true
+   * });
+   */
+  static createModal(ModalComponent, modalConfig = {}) {
+    if (!ModalComponent) {
+      throw new Error('ResponsiveComponentFactory.createModal: ModalComponent is required');
+    }
+
+    const modalTransformer = (props, responsive) => {
+      const { breakpoint, deviceType, isMobile, isTablet, isDesktop, width, height } = responsive;
+      
+      const enhancedProps = { ...props };
+      
+      // Apply modal-specific responsive configurations
+      Object.entries(modalConfig).forEach(([prop, value]) => {
+        if (typeof value === 'object' && value !== null && value[breakpoint] !== undefined) {
+          enhancedProps[prop] = value[breakpoint];
+        } else if (typeof value !== 'object') {
+          enhancedProps[prop] = value;
+        }
+      });
+
+      // Medical form context
+      if (modalConfig.formType) {
+        enhancedProps.formType = modalConfig.formType;
+        enhancedProps.isForm = true;
+      }
+
+      if (modalConfig.medicalContext) {
+        enhancedProps.medicalContext = modalConfig.medicalContext;
+      }
+
+      // Force full screen on very small devices or complex forms
+      if (width < 480 || (modalConfig.complexity === 'high' && isMobile)) {
+        enhancedProps.forceFullScreen = true;
+      }
+
+      return enhancedProps;
+    };
+
+    return withResponsiveTransform(ModalComponent, modalTransformer);
+  }
+
+  /**
    * Utility method for debugging responsive components
    * Adds debugging information to responsive components
    * 
