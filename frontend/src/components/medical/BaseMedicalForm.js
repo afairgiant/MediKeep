@@ -1,6 +1,5 @@
 import React, { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import {
-  Modal,
   TextInput,
   Select,
   Autocomplete,
@@ -20,7 +19,14 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
+import { ResponsiveModal } from '../adapters';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
+import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStrategy';
 import logger from '../../services/logger';
+
+// Initialize medical form layout strategy
+const medicalFormStrategy = new MedicalFormLayoutStrategy();
 
 /**
  * BaseMedicalForm - Reusable form component for medical data entry
@@ -30,6 +36,8 @@ import logger from '../../services/logger';
  * - Dynamic field rendering based on configuration
  * - Standardized form handlers and validation
  * - Consistent button layout and styling
+ * - Responsive layout with medical form optimizations
+ * - Breakpoint-aware column spans and spacing
  */
 const BaseMedicalForm = ({
   // Modal props
@@ -67,16 +75,36 @@ const BaseMedicalForm = ({
   
   // Modal customization
   modalSize = "lg",
+  
+  // Form type for responsive optimization
+  formType = 'standard',
+  
+  // Responsive props (injected by withResponsive)
+  responsive,
 }) => {
 
+  // Get responsive state if not provided by HOC
+  const responsiveFromHook = useResponsive();
+  const responsiveState = responsive || responsiveFromHook;
   
-
   const { 
     handleTextInputChange, 
     handleSelectChange, 
     handleDateChange, 
     handleNumberChange 
   } = useFormHandlers(onInputChange);
+  
+  // Calculate responsive layout configuration
+  const layoutConfig = useMemo(() => {
+    const context = {
+      fieldCount: fields.length,
+      formType,
+      complexity: fields.length > 10 ? 'high' : fields.length > 5 ? 'medium' : 'low',
+      medical: true
+    };
+    
+    return medicalFormStrategy.getLayoutConfig(responsiveState.breakpoint, context);
+  }, [fields.length, formType, responsiveState.breakpoint]);
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleRatingChange = useCallback((field) => (value) => {
@@ -115,13 +143,14 @@ const BaseMedicalForm = ({
   
   // Callback for text-based input fields
   const renderTextInputField = useCallback((fieldConfig, baseProps) => {
-    const { type, name } = fieldConfig;
+    const { type, name, minLength } = fieldConfig;
     return (
       <TextInput
         {...baseProps}
         onChange={handleTextInputChange(name)}
         type={type === 'email' ? 'email' : type === 'tel' ? 'text' : type === 'url' ? 'url' : 'text'}
         inputMode={type === 'tel' ? 'tel' : undefined}
+        minLength={minLength}
       />
     );
   }, [handleTextInputChange]);
@@ -259,6 +288,7 @@ const BaseMedicalForm = ({
       description,
       required = false,
       maxLength,
+      minLength,
     } = fieldConfig;
 
     // Get dynamic options if specified
@@ -278,6 +308,7 @@ const BaseMedicalForm = ({
       withAsterisk: required,
       value: formData[name] || '',
       maxLength,
+      minLength,
       error: fieldErrors[name] || null,
     };
 
@@ -496,24 +527,26 @@ const BaseMedicalForm = ({
     }
   }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange]);
 
-  // Group fields by row based on gridColumn values
+  // Group fields by row based on responsive column configuration
   const groupFieldsIntoRows = useCallback((fields) => {
+    const totalColumns = layoutConfig.columns;
     const rows = [];
     let currentRow = [];
     let currentRowSpan = 0;
 
     fields.forEach((field) => {
-      const span = field.gridColumn || 12;
+      // Calculate responsive span based on field type and available columns
+      const span = medicalFormStrategy.getFieldSpan(field, totalColumns);
       
-      // If adding this field would exceed 12 columns, start a new row
-      if (currentRowSpan + span > 12) {
+      // If adding this field would exceed total columns, start a new row
+      if (currentRowSpan + span > totalColumns) {
         if (currentRow.length > 0) {
           rows.push(currentRow);
         }
-        currentRow = [field];
+        currentRow = [{ ...field, calculatedSpan: span }];
         currentRowSpan = span;
       } else {
-        currentRow.push(field);
+        currentRow.push({ ...field, calculatedSpan: span });
         currentRowSpan += span;
       }
     });
@@ -523,8 +556,16 @@ const BaseMedicalForm = ({
       rows.push(currentRow);
     }
 
+    logger.debug('medical_form_field_grouping', 'Medical form fields grouped into rows', {
+      component: 'BaseMedicalForm',
+      breakpoint: responsiveState.breakpoint,
+      totalColumns: totalColumns,
+      fieldCount: fields.length,
+      rowCount: rows.length
+    });
+
     return rows;
-  }, []);
+  }, [layoutConfig.columns, responsiveState.breakpoint]);
 
   // Memoize field rows
   const fieldRows = useMemo(() => groupFieldsIntoRows(fields), [fields, groupFieldsIntoRows]);
@@ -549,13 +590,22 @@ const BaseMedicalForm = ({
     return undefined;
   }, [submitButtonColor, formData?.severity]);
 
-  // Use standard modal sizing
+  // Calculate responsive modal size
   const modalSizeValue = useMemo(() => {
-    return modalSize;
-  }, [modalSize]);
+    const context = {
+      fieldCount: fields.length,
+      complexity: fields.length > 10 ? 'high' : 'medium',
+      formType
+    };
+    
+    const responsiveSize = medicalFormStrategy.getModalSize(responsiveState.breakpoint, context);
+    
+    // Use explicit modalSize if provided, otherwise use responsive calculation
+    return modalSize !== "lg" ? modalSize : responsiveSize;
+  }, [modalSize, fields.length, formType, responsiveState.breakpoint]);
 
   return (
-    <Modal
+    <ResponsiveModal
       opened={isOpen}
       onClose={onClose}
       title={
@@ -567,13 +617,13 @@ const BaseMedicalForm = ({
       centered
       styles={useMemo(() => ({
         body: { 
-          padding: '1.5rem', 
+          padding: layoutConfig.container.padding || '1.5rem', 
           paddingBottom: '2rem'
         },
         header: { 
           paddingBottom: '1rem'
         }
-      }), [])}
+      }), [layoutConfig.container.padding])}
       overflow="inside"
       withinPortal
       lockScroll
@@ -581,16 +631,18 @@ const BaseMedicalForm = ({
       trapFocus
       returnFocus
       keepMounted={false}
+      breakpoint={responsiveState.breakpoint}
+      deviceType={responsiveState.deviceType}
     >
       <form 
         onSubmit={handleSubmit}
       >
-        <Stack spacing="md">
+        <Stack spacing={layoutConfig.spacing}>
           {/* Render form fields */}
           {fieldRows.map((row, rowIndex) => (
-            <Grid key={rowIndex}>
+            <Grid key={rowIndex} columns={layoutConfig.columns}>
               {row.map((field) => (
-                <Grid.Col key={field.name} span={field.gridColumn || 12}>
+                <Grid.Col key={field.name} span={field.calculatedSpan || field.gridColumn || Math.floor(layoutConfig.columns / row.length)}>
                   {renderField(field)}
                 </Grid.Col>
               ))}
@@ -638,7 +690,7 @@ const BaseMedicalForm = ({
           </Group>
         </Stack>
       </form>
-    </Modal>
+    </ResponsiveModal>
   );
 };
 
@@ -697,4 +749,10 @@ const MemoizedBaseMedicalForm = memo(BaseMedicalForm, (prevProps, nextProps) => 
 // Set display name for better debugging
 MemoizedBaseMedicalForm.displayName = 'BaseMedicalForm';
 
-export default MemoizedBaseMedicalForm;
+// Wrap with responsive HOC for enhanced responsive capabilities
+const ResponsiveMedicalForm = withResponsive(MemoizedBaseMedicalForm, {
+  injectResponsive: true,
+  displayName: 'ResponsiveMedicalForm'
+});
+
+export default ResponsiveMedicalForm;

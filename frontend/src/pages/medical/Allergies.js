@@ -28,14 +28,18 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 
 const Allergies = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Standardized data management
@@ -350,7 +354,7 @@ const Allergies = () => {
                 {processedAllergies.map((allergy, index) => (
                   <Grid.Col
                     key={allergy.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
+                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -374,16 +378,16 @@ const Allergies = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={processedAllergies}
                 columns={[
-                  { header: 'Allergen', accessor: 'allergen' },
-                  { header: 'Reaction', accessor: 'reaction' },
-                  { header: 'Severity', accessor: 'severity' },
-                  { header: 'Onset Date', accessor: 'onset_date' },
-                  { header: 'Medication', accessor: 'medication_name' },
-                  { header: 'Status', accessor: 'status' },
-                  { header: 'Notes', accessor: 'notes' },
+                  { header: 'Allergen', accessor: 'allergen', priority: 'high', width: 150 },
+                  { header: 'Reaction', accessor: 'reaction', priority: 'high', width: 180 },
+                  { header: 'Severity', accessor: 'severity', priority: 'high', width: 100 },
+                  { header: 'Onset Date', accessor: 'onset_date', priority: 'medium', width: 120 },
+                  { header: 'Medication', accessor: 'medication_name', priority: 'low', width: 150 },
+                  { header: 'Status', accessor: 'status', priority: 'medium', width: 100 },
+                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName="Allergies"
@@ -391,6 +395,8 @@ const Allergies = () => {
                 onEdit={handleEditAllergy}
                 onDelete={handleDeleteAllergy}
                 formatters={formatters}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -411,4 +417,8 @@ const Allergies = () => {
   );
 };
 
-export default Allergies;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Allergies, {
+  injectResponsive: true,
+  displayName: 'ResponsiveAllergies'
+});
