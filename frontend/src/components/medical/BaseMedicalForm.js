@@ -143,13 +143,14 @@ const BaseMedicalForm = ({
   
   // Callback for text-based input fields
   const renderTextInputField = useCallback((fieldConfig, baseProps) => {
-    const { type, name } = fieldConfig;
+    const { type, name, minLength } = fieldConfig;
     return (
       <TextInput
         {...baseProps}
         onChange={handleTextInputChange(name)}
         type={type === 'email' ? 'email' : type === 'tel' ? 'text' : type === 'url' ? 'url' : 'text'}
         inputMode={type === 'tel' ? 'tel' : undefined}
+        minLength={minLength}
       />
     );
   }, [handleTextInputChange]);
@@ -287,6 +288,7 @@ const BaseMedicalForm = ({
       description,
       required = false,
       maxLength,
+      minLength,
     } = fieldConfig;
 
     // Get dynamic options if specified
@@ -306,6 +308,7 @@ const BaseMedicalForm = ({
       withAsterisk: required,
       value: formData[name] || '',
       maxLength,
+      minLength,
       error: fieldErrors[name] || null,
     };
 

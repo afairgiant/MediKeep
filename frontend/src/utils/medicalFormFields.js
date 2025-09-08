@@ -198,8 +198,10 @@ export const medicationFormFields = [
     label: 'Medication Name',
     placeholder: 'e.g., Lisinopril, Metformin',
     required: true,
-    description: 'Generic or brand name of the medication',
+    description: 'Generic or brand name of the medication (min. 2 characters)',
     gridColumn: 6,
+    minLength: 2,
+    maxLength: 255,
   },
   {
     name: 'dosage',

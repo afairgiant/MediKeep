@@ -251,9 +251,21 @@ const Medication = () => {
       return;
     }
 
+    // Validate medication name
+    const medicationName = formData.medication_name?.trim() || '';
+    if (!medicationName) {
+      setError('Medication name is required');
+      return;
+    }
+    
+    if (medicationName.length < 2) {
+      setError('Medication name must be at least 2 characters long');
+      return;
+    }
+
     // Prepare medication data - ensure empty strings become null for optional fields
     const medicationData = {
-      medication_name: formData.medication_name?.trim() || '',  // Required field
+      medication_name: medicationName,  // Required field, already trimmed
       dosage: formData.dosage?.trim() || null,
       frequency: formData.frequency?.trim() || null,
       route: formData.route?.trim() || null,
