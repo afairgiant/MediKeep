@@ -72,7 +72,6 @@ const ReportBuilder = () => {
 
   // Initialize data on mount
   useEffect(() => {
-    logger.info('REPORT BUILDER: useEffect called, about to fetch data');
     fetchDataSummary();
     fetchTemplates();
   }, [fetchDataSummary, fetchTemplates]);
@@ -93,15 +92,12 @@ const ReportBuilder = () => {
   // Get available categories from data summary
   const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
   
-  // Debug logging
+  // Debug logging for development
   useEffect(() => {
     if (dataSummary) {
-      logger.info('report_builder_data_summary', 'Data summary in ReportBuilder', {
+      logger.debug('report_builder_data_summary', 'Data summary loaded', {
         totalRecords: dataSummary.total_records,
         categoriesCount: availableCategories.length,
-        categories: availableCategories,
-        firstCategory: availableCategories[0],
-        firstCategoryData: dataSummary.categories?.[availableCategories[0]],
         component: 'ReportBuilder',
       });
     }

@@ -64,7 +64,7 @@ class CustomReportService:
         Get summarized data for all categories to support record selection.
         Implements caching for performance optimization.
         """
-        logger.info(f"Fetching data summary for user {user_id}")
+        logger.debug(f"Fetching data summary for user {user_id}")
         
         # Get the active patient for the user first
         user = self.db.query(User).filter(User.id == user_id).first()
@@ -87,7 +87,7 @@ class CustomReportService:
             logger.debug(f"Returning cached summary for user {user_id}, patient {user.active_patient_id}")
             return self._summary_cache[cache_key]['data']
         
-        logger.info(f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}")
+        logger.debug(f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}")
         
         # Get the patient
         patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
@@ -95,7 +95,7 @@ class CustomReportService:
             logger.warning(f"Active patient {user.active_patient_id} not found for user {user_id}")
             return DataSummaryResponse(categories={}, total_records=0)
         
-        logger.info(f"Found active patient {patient.id} for user {user_id}")
+        logger.debug(f"Found active patient {patient.id} for user {user_id}")
         
         categories = {}
         total_records = 0
@@ -110,7 +110,6 @@ class CustomReportService:
                 )
                 categories[category_name] = category_summary
                 total_records += category_summary.count
-                logger.debug(f"Category {category_name}: {category_summary.count} records")
             except Exception as e:
                 logger.error(f"Error getting summary for {category_name}: {str(e)}", exc_info=True)
                 categories[category_name] = CategorySummary(count=0, records=[])
@@ -168,7 +167,7 @@ class CustomReportService:
         # Get total count
         try:
             total_count = query.count()
-            logger.info(f"Category {category}: found {total_count} total records")
+            logger.debug(f"Category {category}: found {total_count} total records")
         except Exception as e:
             logger.error(f"Error counting records for {category}: {str(e)}", exc_info=True)
             return CategorySummary(count=0, records=[], has_more=False)
@@ -206,27 +205,13 @@ class CustomReportService:
     def _convert_to_record_summary(self, item: Any, category: str) -> Optional[RecordSummary]:
         """Convert a database model instance to RecordSummary"""
         try:
-            # Debug logging
             item_id = getattr(item, 'id', 'unknown')
-            logger.debug(f"Converting {category} record {item_id}")
-            
-            # Log first few field values for debugging
-            if hasattr(item, '__table__'):
-                sample_fields = {}
-                for column in list(item.__table__.columns)[:5]:
-                    sample_fields[column.name] = getattr(item, column.name, None)
-                logger.debug(f"Sample fields for {category} record {item_id}: {sample_fields}")
             
             # Use a generic approach that works for all models
             # Try to find the main name/title field
             title_field = self._get_title_field(item, category)
-            logger.debug(f"Title field for {category}: '{title_field}'")
-            
             date_field = self._get_date_field(item, category)
-            logger.debug(f"Date field for {category}: {date_field}")
-            
             key_info = self._get_key_info(item, category)
-            logger.debug(f"Key info for {category}: '{key_info}'")
             
             result = RecordSummary(
                 id=item.id,
@@ -237,7 +222,6 @@ class CustomReportService:
                 status=getattr(item, 'status', None)
             )
             
-            logger.debug(f"Successfully created RecordSummary for {category} record {item_id}")
             return result
             
         except Exception as e:
