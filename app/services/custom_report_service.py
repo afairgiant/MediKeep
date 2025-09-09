@@ -65,24 +65,37 @@ class CustomReportService:
         Implements caching for performance optimization.
         """
         logger.info(f"Fetching data summary for user {user_id}")
-        cache_key = f"summary_{user_id}"
+        
+        # Get the active patient for the user first
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            logger.warning(f"User {user_id} not found")
+            return DataSummaryResponse(categories={}, total_records=0)
+        
+        # Get the active patient ID
+        if not user.active_patient_id:
+            logger.warning(f"No active patient for user {user_id}")
+            return DataSummaryResponse(categories={}, total_records=0)
+        
+        # Include patient ID in cache key so different patients have different caches
+        cache_key = f"summary_{user_id}_{user.active_patient_id}"
         now = time.time()
         
         # Check cache
         if (cache_key in self._summary_cache and 
             now - self._summary_cache[cache_key]['timestamp'] < self._cache_timeout):
-            logger.debug(f"Returning cached summary for user {user_id}")
+            logger.debug(f"Returning cached summary for user {user_id}, patient {user.active_patient_id}")
             return self._summary_cache[cache_key]['data']
         
-        logger.info(f"Generating new data summary for user {user_id}")
+        logger.info(f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}")
         
-        # Get patient ID for the user
-        patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
+        # Get the patient
+        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
         if not patient:
-            logger.warning(f"No patient found for user {user_id}")
+            logger.warning(f"Active patient {user.active_patient_id} not found for user {user_id}")
             return DataSummaryResponse(categories={}, total_records=0)
         
-        logger.info(f"Found patient {patient.id} for user {user_id}")
+        logger.info(f"Found active patient {patient.id} for user {user_id}")
         
         categories = {}
         total_records = 0
