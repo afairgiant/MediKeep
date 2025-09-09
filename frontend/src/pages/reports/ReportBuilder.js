@@ -90,8 +90,10 @@ const ReportBuilder = () => {
     }
   }, [location.search, templates, loadTemplateForReport]);
 
-  // Get available categories from data summary
-  const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
+  // Get available categories from data summary (only categories with data)
+  const availableCategories = dataSummary?.categories 
+    ? Object.keys(dataSummary.categories).filter(cat => dataSummary.categories[cat].count > 0)
+    : [];
 
   // Category display names mapping
   const categoryDisplayNames = {
@@ -271,22 +273,21 @@ const ReportBuilder = () => {
           </Group>
         </Paper>
 
-        {/* Category tabs and record selection */}
-        <Paper shadow="sm" radius="md" withBorder>
-          <CategoryTabs
-            categories={availableCategories}
-            dataSummary={dataSummary}
-            selectedRecords={selectedRecords}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onToggleRecord={toggleRecordSelection}
-            onToggleCategory={toggleCategorySelection}
-            categoryDisplayNames={categoryDisplayNames}
-          />
-        </Paper>
-
-        {/* No data message */}
-        {!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0 && (
+        {/* Category tabs and record selection OR No data message */}
+        {availableCategories.length > 0 ? (
+          <Paper shadow="sm" radius="md" withBorder>
+            <CategoryTabs
+              categories={availableCategories}
+              dataSummary={dataSummary}
+              selectedRecords={selectedRecords}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onToggleRecord={toggleRecordSelection}
+              onToggleCategory={toggleCategorySelection}
+              categoryDisplayNames={categoryDisplayNames}
+            />
+          </Paper>
+        ) : (
           <Paper shadow="sm" p="xl" radius="md">
             <Center py="xl">
               <Stack align="center" gap="md">
