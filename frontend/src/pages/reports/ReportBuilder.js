@@ -90,10 +90,8 @@ const ReportBuilder = () => {
     }
   }, [location.search, templates, loadTemplateForReport]);
 
-  // Get available categories from data summary (only categories with data)
-  const availableCategories = dataSummary?.categories 
-    ? Object.keys(dataSummary.categories).filter(cat => dataSummary.categories[cat].count > 0)
-    : [];
+  // Get available categories from data summary
+  const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
 
   // Category display names mapping
   const categoryDisplayNames = {

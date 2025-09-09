@@ -217,7 +217,7 @@ class ApiService {
           return response.blob();
         }
 
-        return this.handleResponse(response, fullUrl, method);
+        return this.handleResponse(response, method, fullUrl);
       } catch (error) {
         logger.warn(`Failed to connect to ${fullUrl}:`, error.message);
         lastError = error;
