@@ -194,21 +194,28 @@ class CustomReportService:
         """Convert a database model instance to RecordSummary"""
         try:
             # Debug logging
-            logger.debug(f"Converting {category} record {getattr(item, 'id', 'unknown')}")
-            logger.debug(f"Available fields: {[column.name for column in item.__table__.columns]}")
+            item_id = getattr(item, 'id', 'unknown')
+            logger.debug(f"Converting {category} record {item_id}")
+            
+            # Log first few field values for debugging
+            if hasattr(item, '__table__'):
+                sample_fields = {}
+                for column in list(item.__table__.columns)[:5]:
+                    sample_fields[column.name] = getattr(item, column.name, None)
+                logger.debug(f"Sample fields for {category} record {item_id}: {sample_fields}")
             
             # Use a generic approach that works for all models
             # Try to find the main name/title field
             title_field = self._get_title_field(item, category)
-            logger.debug(f"Found title field for {category}")
+            logger.debug(f"Title field for {category}: '{title_field}'")
             
             date_field = self._get_date_field(item, category)
             logger.debug(f"Date field for {category}: {date_field}")
             
             key_info = self._get_key_info(item, category)
-            logger.debug(f"Generated key info for {category}")
+            logger.debug(f"Key info for {category}: '{key_info}'")
             
-            return RecordSummary(
+            result = RecordSummary(
                 id=item.id,
                 title=title_field or f"{category.replace('_', ' ').title()} #{item.id}",
                 date=date_field,
@@ -216,8 +223,12 @@ class CustomReportService:
                 key_info=key_info,
                 status=getattr(item, 'status', None)
             )
+            
+            logger.debug(f"Successfully created RecordSummary for {category} record {item_id}")
+            return result
+            
         except Exception as e:
-            logger.error(f"Error converting {category} record {getattr(item, 'id', 'unknown')}: {str(e)}")
+            logger.error(f"Error converting {category} record {getattr(item, 'id', 'unknown')}: {str(e)}", exc_info=True)
             # Return a basic record instead of None to ensure we don't lose data
             return RecordSummary(
                 id=getattr(item, 'id', 0),

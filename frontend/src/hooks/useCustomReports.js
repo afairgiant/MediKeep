@@ -31,20 +31,47 @@ export const useCustomReports = () => {
     const result = await execute(
       async signal => {
         const response = await apiService.getCustomReportSummary(signal);
-        logger.debug('custom_reports_summary_response', 'Data summary fetched successfully', {
+        
+        // Detailed logging of response
+        logger.info('custom_reports_summary_response', 'Data summary fetched', {
           categoriesCount: Object.keys(response?.categories || {}).length,
           totalRecords: response?.total_records || 0,
+          hasCategories: !!response?.categories,
           component: 'useCustomReports',
         });
+        
+        // Log details of each category
+        if (response?.categories) {
+          Object.entries(response.categories).forEach(([catName, catData]) => {
+            logger.debug('custom_reports_category_data', `Category ${catName} data`, {
+              category: catName,
+              count: catData.count,
+              recordsLength: catData.records?.length || 0,
+              hasMore: catData.has_more,
+              firstRecord: catData.records?.[0],
+              component: 'useCustomReports',
+            });
+          });
+        }
+        
         return response;
       },
       { errorMessage: 'Failed to fetch data summary' }
     );
 
     if (result) {
+      logger.info('custom_reports_setting_data', 'Setting data summary state', {
+        hasResult: true,
+        categoriesCount: Object.keys(result?.categories || {}).length,
+        component: 'useCustomReports',
+      });
       setDataSummary(result);
       return result;
     }
+    
+    logger.warn('custom_reports_no_result', 'No result from API call', {
+      component: 'useCustomReports',
+    });
     return null;
   }, [execute]);
 

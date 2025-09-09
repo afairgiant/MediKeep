@@ -92,6 +92,20 @@ const ReportBuilder = () => {
 
   // Get available categories from data summary
   const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
+  
+  // Debug logging
+  useEffect(() => {
+    if (dataSummary) {
+      logger.info('report_builder_data_summary', 'Data summary in ReportBuilder', {
+        totalRecords: dataSummary.total_records,
+        categoriesCount: availableCategories.length,
+        categories: availableCategories,
+        firstCategory: availableCategories[0],
+        firstCategoryData: dataSummary.categories?.[availableCategories[0]],
+        component: 'ReportBuilder',
+      });
+    }
+  }, [dataSummary, availableCategories]);
 
   // Category display names mapping
   const categoryDisplayNames = {
