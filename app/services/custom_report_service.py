@@ -601,10 +601,17 @@ class CustomReportService:
         selected_records: List[SelectiveRecordRequest]
     ):
         """Ensure user can only access their own records"""
-        # Get patient ID for the user
-        patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
+        # Get the active patient for the user
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise PermissionError("User not found")
+        
+        if not user.active_patient_id:
+            raise PermissionError("No active patient selected")
+        
+        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
         if not patient:
-            raise PermissionError("No patient profile found for user")
+            raise PermissionError("Active patient record not found")
         
         # Categories that don't have patient_id (shared resources)
         shared_categories = ['practitioners', 'pharmacies']
@@ -659,10 +666,9 @@ class CustomReportService:
             # Validate ownership
             await self.validate_record_ownership(user_id, request.selected_records)
             
-            # Get patient information
-            patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
-            if not patient:
-                raise CustomReportError("No patient profile found")
+            # Get the active patient information (already validated in validate_record_ownership)
+            user = self.db.query(User).filter(User.id == user_id).first()
+            patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
             
             # Collect selected data
             report_data = {}
