@@ -72,7 +72,6 @@ const ReportBuilder = () => {
 
   // Initialize data on mount
   useEffect(() => {
-    logger.info('REPORT BUILDER: useEffect called, about to fetch data');
     fetchDataSummary();
     fetchTemplates();
   }, [fetchDataSummary, fetchTemplates]);
@@ -92,6 +91,17 @@ const ReportBuilder = () => {
 
   // Get available categories from data summary
   const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
+  
+  // Debug logging for development
+  useEffect(() => {
+    if (dataSummary) {
+      logger.debug('report_builder_data_summary', 'Data summary loaded', {
+        totalRecords: dataSummary.total_records,
+        categoriesCount: availableCategories.length,
+        component: 'ReportBuilder',
+      });
+    }
+  }, [dataSummary, availableCategories]);
 
   // Category display names mapping
   const categoryDisplayNames = {
@@ -271,22 +281,21 @@ const ReportBuilder = () => {
           </Group>
         </Paper>
 
-        {/* Category tabs and record selection */}
-        <Paper shadow="sm" radius="md" withBorder>
-          <CategoryTabs
-            categories={availableCategories}
-            dataSummary={dataSummary}
-            selectedRecords={selectedRecords}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onToggleRecord={toggleRecordSelection}
-            onToggleCategory={toggleCategorySelection}
-            categoryDisplayNames={categoryDisplayNames}
-          />
-        </Paper>
-
-        {/* No data message */}
-        {!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0 && (
+        {/* Category tabs and record selection OR No data message */}
+        {availableCategories.length > 0 ? (
+          <Paper shadow="sm" radius="md" withBorder>
+            <CategoryTabs
+              categories={availableCategories}
+              dataSummary={dataSummary}
+              selectedRecords={selectedRecords}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onToggleRecord={toggleRecordSelection}
+              onToggleCategory={toggleCategorySelection}
+              categoryDisplayNames={categoryDisplayNames}
+            />
+          </Paper>
+        ) : (
           <Paper shadow="sm" p="xl" radius="md">
             <Center py="xl">
               <Stack align="center" gap="md">

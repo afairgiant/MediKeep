@@ -31,11 +31,14 @@ export const useCustomReports = () => {
     const result = await execute(
       async signal => {
         const response = await apiService.getCustomReportSummary(signal);
-        logger.debug('custom_reports_summary_response', 'Data summary fetched successfully', {
+        
+        // Log response summary
+        logger.debug('custom_reports_summary_response', 'Data summary fetched', {
           categoriesCount: Object.keys(response?.categories || {}).length,
           totalRecords: response?.total_records || 0,
           component: 'useCustomReports',
         });
+        
         return response;
       },
       { errorMessage: 'Failed to fetch data summary' }

@@ -65,22 +65,37 @@ class CustomReportService:
         Implements caching for performance optimization.
         """
         logger.debug(f"Fetching data summary for user {user_id}")
-        cache_key = f"summary_{user_id}"
+        
+        # Get the active patient for the user first
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            logger.warning(f"User {user_id} not found")
+            return DataSummaryResponse(categories={}, total_records=0)
+        
+        # Get the active patient ID
+        if not user.active_patient_id:
+            logger.warning(f"No active patient for user {user_id}")
+            return DataSummaryResponse(categories={}, total_records=0)
+        
+        # Include patient ID in cache key so different patients have different caches
+        cache_key = f"summary_{user_id}_{user.active_patient_id}"
         now = time.time()
         
         # Check cache
         if (cache_key in self._summary_cache and 
             now - self._summary_cache[cache_key]['timestamp'] < self._cache_timeout):
-            logger.debug(f"Returning cached summary for user {user_id}")
+            logger.debug(f"Returning cached summary for user {user_id}, patient {user.active_patient_id}")
             return self._summary_cache[cache_key]['data']
         
-        logger.debug(f"Generating new data summary for user {user_id}")
+        logger.debug(f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}")
         
-        # Get patient ID for the user
-        patient = self.db.query(Patient).filter(Patient.user_id == user_id).first()
+        # Get the patient
+        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
         if not patient:
-            logger.warning(f"No patient found for user {user_id}")
+            logger.warning(f"Active patient {user.active_patient_id} not found for user {user_id}")
             return DataSummaryResponse(categories={}, total_records=0)
+        
+        logger.debug(f"Found active patient {patient.id} for user {user_id}")
         
         categories = {}
         total_records = 0
@@ -96,7 +111,7 @@ class CustomReportService:
                 categories[category_name] = category_summary
                 total_records += category_summary.count
             except Exception as e:
-                logger.error(f"Error getting summary for {category_name}: {str(e)}")
+                logger.error(f"Error getting summary for {category_name}: {str(e)}", exc_info=True)
                 categories[category_name] = CategorySummary(count=0, records=[])
         
         # Get last update timestamp
@@ -107,6 +122,12 @@ class CustomReportService:
             total_records=total_records,
             last_updated=last_updated
         )
+        
+        # Log summary statistics
+        logger.info(f"Data summary for user {user_id}: {total_records} total records across {len([c for c in categories.values() if c.count > 0])} categories with data")
+        for cat_name, cat_data in categories.items():
+            if cat_data.count > 0:
+                logger.debug(f"  - {cat_name}: {cat_data.count} records, {len(cat_data.records)} displayed")
         
         # Update cache
         self._summary_cache[cache_key] = {
@@ -131,31 +152,49 @@ class CustomReportService:
         # Build base query
         if category in shared_categories:
             # For shared resources, get all records
+            logger.debug(f"Querying shared category: {category}")
             query = self.db.query(model_class)
         else:
             # For patient-specific records, filter by patient_id
+            # First check if the model has patient_id field
+            if not hasattr(model_class, 'patient_id'):
+                logger.error(f"Model {model_class.__name__} does not have patient_id field")
+                return CategorySummary(count=0, records=[], has_more=False)
+            
+            logger.debug(f"Querying patient-specific category: {category} for patient_id: {patient_id}")
             query = self.db.query(model_class).filter(model_class.patient_id == patient_id)
         
         # Get total count
-        total_count = query.count()
+        try:
+            total_count = query.count()
+            logger.debug(f"Category {category}: found {total_count} total records")
+        except Exception as e:
+            logger.error(f"Error counting records for {category}: {str(e)}", exc_info=True)
+            return CategorySummary(count=0, records=[], has_more=False)
         
         # Get limited records for display (max 100 for UI performance)
         limit = 100
         
         # Order by created_at if it exists, otherwise by id
-        if hasattr(model_class, 'created_at'):
-            items = query.order_by(model_class.created_at.desc()).limit(limit).all()
-        else:
-            items = query.order_by(model_class.id.desc()).limit(limit).all()
+        try:
+            if hasattr(model_class, 'created_at'):
+                items = query.order_by(model_class.created_at.desc()).limit(limit).all()
+            else:
+                items = query.order_by(model_class.id.desc()).limit(limit).all()
+        except Exception as e:
+            logger.error(f"Error fetching records for {category}: {str(e)}", exc_info=True)
+            return CategorySummary(count=0, records=[], has_more=False)
         
         # Convert to RecordSummary
         for item in items:
-            logger.info(f"Processing {category} item {item.id} for data summary")
+            logger.debug(f"Processing {category} item {item.id} for data summary")
             record_summary = self._convert_to_record_summary(item, category)
             if record_summary:
                 records.append(record_summary)
             else:
                 logger.warning(f"Failed to convert {category} item {item.id} to RecordSummary")
+        
+        logger.debug(f"Successfully converted {len(records)} records for {category}")
         
         return CategorySummary(
             count=total_count,
@@ -166,22 +205,15 @@ class CustomReportService:
     def _convert_to_record_summary(self, item: Any, category: str) -> Optional[RecordSummary]:
         """Convert a database model instance to RecordSummary"""
         try:
-            # Debug logging - using info level temporarily to ensure visibility
-            logger.info(f"Converting {category} record {getattr(item, 'id', 'unknown')}")
-            logger.info(f"Available fields: {[column.name for column in item.__table__.columns]}")
+            item_id = getattr(item, 'id', 'unknown')
             
             # Use a generic approach that works for all models
             # Try to find the main name/title field
             title_field = self._get_title_field(item, category)
-            logger.debug(f"Found title field for {category}")
-            
             date_field = self._get_date_field(item, category)
-            logger.info(f"Date field for {category}: {date_field}")
-            
             key_info = self._get_key_info(item, category)
-            logger.debug(f"Generated key info for {category}")
             
-            return RecordSummary(
+            result = RecordSummary(
                 id=item.id,
                 title=title_field or f"{category.replace('_', ' ').title()} #{item.id}",
                 date=date_field,
@@ -189,8 +221,11 @@ class CustomReportService:
                 key_info=key_info,
                 status=getattr(item, 'status', None)
             )
+            
+            return result
+            
         except Exception as e:
-            logger.error(f"Error converting {category} record {getattr(item, 'id', 'unknown')}: {str(e)}")
+            logger.error(f"Error converting {category} record {getattr(item, 'id', 'unknown')}: {str(e)}", exc_info=True)
             # Return a basic record instead of None to ensure we don't lose data
             return RecordSummary(
                 id=getattr(item, 'id', 0),

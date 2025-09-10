@@ -35,9 +35,10 @@ async def get_custom_report_data_summary(
     try:
         service = CustomReportService(db)
         summary = await service.get_data_summary_for_selection(current_user_id)
+        logger.info(f"Data summary retrieved for user {current_user_id}: {summary.total_records} total records, {len(summary.categories)} categories")
         return summary
     except Exception as e:
-        logger.error(f"Failed to get data summary for user {current_user_id}: {str(e)}")
+        logger.error(f"Failed to get data summary for user {current_user_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve data summary"
