@@ -339,9 +339,21 @@ export const ResponsiveTable = memo(({
                 const columnKey = column.key || column.dataIndex || column.name || column.accessor;
                 const cellValue = row[columnKey];
                 
+                // Use formatters first, fallback to column.render, then raw value
+                let formattedValue = cellValue;
+                if (formatters?.[columnKey]) {
+                  formattedValue = formatters[columnKey](cellValue, row);
+                } else if (column.render) {
+                  formattedValue = column.render(cellValue, row, index);
+                }
+                
                 return (
                   <MantineTable.Td key={columnKey}>
-                    {column.render ? column.render(cellValue, row, index) : cellValue}
+                    {typeof formattedValue === 'string' || typeof formattedValue === 'number' ? (
+                      <Text size="xs">{formattedValue}</Text>
+                    ) : (
+                      formattedValue
+                    )}
                   </MantineTable.Td>
                 );
               })}
@@ -596,7 +608,11 @@ export const ResponsiveTable = memo(({
               return (
                 <MantineTable.Td key={columnKey || colIndex}>
                   <Text size="xs">
-                    {formattedValue}
+                    {typeof formattedValue === 'string' || typeof formattedValue === 'number' ? (
+                      formattedValue
+                    ) : (
+                      formattedValue
+                    )}
                   </Text>
                 </MantineTable.Td>
               );

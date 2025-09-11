@@ -47,15 +47,23 @@ export const standardFormatters = {
 
   // Practitioner/Doctor fields
   practitioner: (value, item, practitioners = []) => {
-    if (!item.practitioner_id) return '-';
-    return (
-      practitioners.find(p => p.id === item.practitioner_id)?.name ||
-      `Practitioner ID: ${item.practitioner_id}`
-    );
+    // Handle nested practitioner object first
+    if (item.practitioner?.name) {
+      return item.practitioner.name;
+    }
+    // Fall back to ID lookup
+    if (!item.practitioner_id) {
+      return '-';
+    }
+    const found = practitioners.find(p => p.id === item.practitioner_id)?.name || `Practitioner ID: ${item.practitioner_id}`;
+    return found;
   },
 
   // Pharmacy fields
-  pharmacy: (value, item) => item.pharmacy?.name || '-',
+  pharmacy: (value, item) => {
+    const result = item.pharmacy?.name || '-';
+    return result;
+  },
 
   // Clickable entity link formatter
   entityLink: (entityType, entityData, navigate, getEntityName = null) => {
@@ -75,10 +83,14 @@ export const standardFormatters = {
 
   // Clickable practitioner link
   practitionerLink: (value, item, practitioners = [], navigate, getEntityName = null) => {
+    // Handle nested practitioner object first
+    if (item.practitioner) {
+      return standardFormatters.entityLink('practitioner', item.practitioner, navigate, getEntityName);
+    }
+    // Fall back to ID lookup
     if (!item.practitioner_id) return '-';
     
     const practitioner = practitioners.find(p => p.id === item.practitioner_id) || 
-                        item.practitioner || 
                         { id: item.practitioner_id };
     
     return standardFormatters.entityLink('practitioner', practitioner, navigate, getEntityName);
@@ -86,9 +98,14 @@ export const standardFormatters = {
 
   // Clickable pharmacy link
   pharmacyLink: (value, item, navigate, getEntityName = null) => {
+    // Handle nested pharmacy object first
+    if (item.pharmacy) {
+      return standardFormatters.entityLink('pharmacy', item.pharmacy, navigate, getEntityName);
+    }
+    // Fall back to ID lookup
     if (!item.pharmacy_id) return '-';
     
-    const pharmacy = item.pharmacy || { id: item.pharmacy_id };
+    const pharmacy = { id: item.pharmacy_id };
     
     return standardFormatters.entityLink('pharmacy', pharmacy, navigate, getEntityName);
   },
@@ -138,7 +155,7 @@ export const getEntityFormatters = (entityType, practitioners = [], navigate = n
           : (value, item) => standardFormatters.practitioner(value, item, practitioners),
         pharmacy_name: navigate 
           ? (value, item) => standardFormatters.pharmacyLink(value, item, navigate, getEntityName)
-          : standardFormatters.pharmacy,
+          : (value, item) => standardFormatters.pharmacy(value, item),
       };
 
     case 'procedures':
