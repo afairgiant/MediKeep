@@ -602,7 +602,6 @@ const ExportPage = () => {
               </Text>
             </Box>
             <Divider />
-            <Group>{/* TODO: Add export information */}</Group>
           </Stack>
         </Paper>
       </Stack>

@@ -408,8 +408,6 @@ const Treatments = () => {
                         page: 'Treatments',
                       });
                     }}
-                dataType="medical"
-                responsive={responsive}
                   />
                 </Grid.Col>
               ))}

@@ -18,6 +18,7 @@ import { IconSearch, IconArrowsSort, IconSortAscending, IconSortDescending } fro
 import { useResponsive } from '../../hooks/useResponsive';
 import { TableLayoutStrategy } from '../../strategies/TableLayoutStrategy';
 import logger from '../../services/logger';
+import { getColumnKey, getColumnDisplayName } from '../../utils/columnHelpers';
 
 /**
  * ResponsiveTable Component
@@ -570,11 +571,12 @@ export const ResponsiveTable = memo(({
       <MantineTable.Thead>
         <MantineTable.Tr>
           {printTableConfig.visibleColumns.map((column, index) => {
-            const columnKey = column.key || column.dataIndex || column.name || column.accessor;
+            const columnKey = getColumnKey(column);
+            const displayName = getColumnDisplayName(column);
             return (
               <MantineTable.Th key={columnKey || index}>
                 <Text size="xs" fw={600}>
-                  {column.header || column.title || column.label || columnKey}
+                  {displayName}
                 </Text>
               </MantineTable.Th>
             );
@@ -586,7 +588,7 @@ export const ResponsiveTable = memo(({
         {processedData.map((row, rowIndex) => (
           <MantineTable.Tr key={row.id || rowIndex}>
             {printTableConfig.visibleColumns.map((column, colIndex) => {
-              const columnKey = column.key || column.dataIndex || column.name || column.accessor;
+              const columnKey = getColumnKey(column);
               const cellValue = row[columnKey];
               const formatter = formatters?.[columnKey];
               const formattedValue = formatter ? formatter(cellValue, row) : (cellValue?.toString() || '');

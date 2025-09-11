@@ -275,7 +275,7 @@
     display: none !important;
   }
 
-  /* Show only print-optimized table in print */
+  /* Show print-optimized tables and legacy table containers in print */
   .print-only,
   .medications-table-container,
   .medical-table-container {
