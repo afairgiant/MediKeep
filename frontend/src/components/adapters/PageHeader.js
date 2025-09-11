@@ -50,13 +50,7 @@ const PageHeader = ({
 
   // Check if user is admin
   const isAdmin = () => {
-    logger.info('🔑 ADAPTER_ADMIN_CHECK: Checking admin status in PageHeader adapter', {
-      user,
-      userIsAdmin: user?.isAdmin,
-      userRole: user?.role,
-      result: user?.isAdmin || false,
-      timestamp: new Date().toISOString()
-    });
+    // Removed frequent admin check logging for performance
     return user?.isAdmin || false;
   };
 

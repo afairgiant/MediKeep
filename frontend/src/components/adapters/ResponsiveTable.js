@@ -18,6 +18,7 @@ import { IconSearch, IconArrowsSort, IconSortAscending, IconSortDescending } fro
 import { useResponsive } from '../../hooks/useResponsive';
 import { TableLayoutStrategy } from '../../strategies/TableLayoutStrategy';
 import logger from '../../services/logger';
+import { getColumnKey, getColumnDisplayName } from '../../utils/columnHelpers';
 
 /**
  * ResponsiveTable Component
@@ -89,6 +90,9 @@ export const ResponsiveTable = memo(({
   showSecondaryInfo = true,
   compactCards = false,
   
+  // Data formatting
+  formatters = {},
+  
   // Container props
   maxHeight,
   fullWidth = false,
@@ -121,17 +125,10 @@ export const ResponsiveTable = memo(({
     columnCount: columns.length
   }), [breakpoint, deviceType, dataType, medicalContext, data.length, columns.length]);
 
-  // Log component mount and responsive changes
+  // Log component mount only (reduced logging for performance)
   useEffect(() => {
-    logger.info('ResponsiveTable mounted', componentContext);
+    logger.debug('ResponsiveTable mounted', componentContext);
   }, []);
-
-  useEffect(() => {
-    logger.debug('ResponsiveTable breakpoint changed', {
-      ...componentContext,
-      previousBreakpoint: breakpoint
-    });
-  }, [breakpoint]);
 
   // Table layout strategy context
   const strategyContext = useMemo(() => ({
@@ -165,15 +162,32 @@ export const ResponsiveTable = memo(({
       spacing: strategy.getSpacing(breakpoint, strategyContext)
     };
 
-    logger.debug('Table configuration calculated', {
-      ...componentContext,
-      displayStrategy: config.displayStrategy,
-      visibleColumnCount: config.visibleColumns.length,
-      virtualized: config.container.virtualized
-    });
+    // Removed frequent configuration logging for performance
 
     return config;
   }, [breakpoint, strategyContext, maxHeight, fullWidth, virtualization, componentContext]);
+
+  // Get print-specific table configuration (always use desktop/xl settings)
+  const printTableConfig = useMemo(() => {
+    const strategy = strategyRef.current;
+    const printBreakpoint = 'xl'; // Force desktop layout for print
+    const config = {
+      displayStrategy: 'full_table', // Force full table for print
+      visibleColumns: columns, // Show all columns for print
+      rowDensity: strategy.getRowDensity(printBreakpoint, strategyContext),
+      container: strategy.getContainer(printBreakpoint, {
+        ...strategyContext,
+        maxHeight: undefined, // Remove height restrictions for print
+        fullWidth: true,
+        enableVirtualization: false // Disable virtualization for print
+      }),
+      features: strategy.getTableFeatures(printBreakpoint, strategyContext),
+      accessibility: strategy.getTableAccessibility(printBreakpoint, strategyContext),
+      spacing: strategy.getSpacing(printBreakpoint, strategyContext)
+    };
+
+    return config;
+  }, [strategyContext, columns]);
 
   // Process data for display
   const processedData = useMemo(() => {
@@ -220,12 +234,7 @@ export const ResponsiveTable = memo(({
     setInternalSortBy(columnKey);
     setInternalSortDirection(newDirection);
 
-    logger.info('Table sort changed', {
-      ...componentContext,
-      sortBy: columnKey,
-      direction: newDirection,
-      previousSort: internalSortBy
-    });
+    // Removed frequent sort logging for performance
 
     if (onSort) {
       onSort(columnKey, newDirection);
@@ -234,11 +243,7 @@ export const ResponsiveTable = memo(({
 
   // Handle row selection
   const handleRowClick = useCallback((row, index, event) => {
-    logger.debug('Table row clicked', {
-      ...componentContext,
-      rowIndex: index,
-      hasRowData: !!row
-    });
+    // Removed frequent row click logging for performance
 
     if (onRowClick) {
       onRowClick(row, index, event);
@@ -251,12 +256,7 @@ export const ResponsiveTable = memo(({
 
   // Handle pagination
   const handlePageChange = useCallback((newPage) => {
-    logger.info('Table page changed', {
-      ...componentContext,
-      newPage,
-      previousPage: page,
-      pageSize
-    });
+    // Removed frequent page change logging for performance
 
     if (onPageChange) {
       onPageChange(newPage);
@@ -271,7 +271,7 @@ export const ResponsiveTable = memo(({
       <MantineTable.Thead>
         <MantineTable.Tr>
           {visibleColumns.map((column) => {
-            const columnKey = column.key || column.dataIndex || column.name;
+            const columnKey = column.key || column.dataIndex || column.name || column.accessor;
             const isSorted = internalSortBy === columnKey;
             
             return (
@@ -288,7 +288,7 @@ export const ResponsiveTable = memo(({
               >
                 <Group gap="xs" wrap="nowrap">
                   <Text fw={500} size={size}>
-                    {column.title || column.label || columnKey}
+                    {column.title || column.label || column.header || columnKey}
                   </Text>
                   {sortable && (
                     <ActionIcon 
@@ -336,7 +336,7 @@ export const ResponsiveTable = memo(({
               data-selected={isSelected}
             >
               {visibleColumns.map((column) => {
-                const columnKey = column.key || column.dataIndex || column.name;
+                const columnKey = column.key || column.dataIndex || column.name || column.accessor;
                 const cellValue = row[columnKey];
                 
                 return (
@@ -378,7 +378,7 @@ export const ResponsiveTable = memo(({
             >
               <Stack gap={compactMode ? "xs" : "sm"}>
                 {displayFields.map((field, fieldIndex) => {
-                  const fieldKey = field.key || field.dataIndex || field.name;
+                  const fieldKey = field.key || field.dataIndex || field.name || field.accessor;
                   const fieldValue = row[fieldKey];
                   const isImportant = fieldIndex < 2; // First two fields are most important
                   
@@ -389,7 +389,7 @@ export const ResponsiveTable = memo(({
                         c="dimmed"
                         fw={isImportant ? 600 : 500}
                       >
-                        {field.title || field.label || fieldKey}
+                        {field.title || field.label || field.header || fieldKey}
                       </Text>
                       <Text 
                         size={compactMode ? "sm" : "md"} 
@@ -533,33 +533,104 @@ export const ResponsiveTable = memo(({
     return renderEmpty();
   }
 
-  // Render based on display strategy
-  const tableContent = tableConfig.displayStrategy === 'cards' ? 
-    renderCards() : (
-      <MantineTable
-        size={size}
-        variant={variant}
-        striped={striped}
-        highlightOnHover={highlightOnHover}
-        withTableBorder={withBorder}
-        withColumnBorders={tableConfig.features.resizable}
-        stickyHeader={tableConfig.features.stickyHeader}
-        {...accessibilityProps}
-        {...props}
-      >
-        {renderTableHeader()}
-        {renderTableRows()}
-      </MantineTable>
-    );
+  // Screen table view - uses regular responsive config
+  const screenTableView = tableConfig.displayStrategy !== 'cards' ? (
+    <MantineTable
+      className="medical-responsive-table screen-and-print"
+      size={size}
+      variant={variant}
+      striped={striped}
+      highlightOnHover={highlightOnHover}
+      withTableBorder={withBorder}
+      withColumnBorders={tableConfig.features.resizable}
+      stickyHeader={tableConfig.features.stickyHeader}
+      {...accessibilityProps}
+      {...props}
+    >
+      {renderTableHeader()}
+      {renderTableRows()}
+    </MantineTable>
+  ) : null;
 
-  // Wrap with ScrollArea if needed
+  // Print table view - always uses desktop/full table config with all columns
+  const printTableView = (
+    <MantineTable
+      className="medical-responsive-table print-only"
+      size={size}
+      variant={variant}
+      striped={striped}
+      highlightOnHover={false} // Disable hover for print
+      withTableBorder={withBorder}
+      withColumnBorders={false} // Simplify borders for print
+      stickyHeader={false} // Disable sticky header for print
+      style={{ display: 'none' }} // Hidden on screen, shown via CSS in print
+      {...accessibilityProps}
+      {...props}
+    >
+      {/* Render header with print config (all columns) */}
+      <MantineTable.Thead>
+        <MantineTable.Tr>
+          {printTableConfig.visibleColumns.map((column, index) => {
+            const columnKey = getColumnKey(column);
+            const displayName = getColumnDisplayName(column);
+            return (
+              <MantineTable.Th key={columnKey || index}>
+                <Text size="xs" fw={600}>
+                  {displayName}
+                </Text>
+              </MantineTable.Th>
+            );
+          })}
+        </MantineTable.Tr>
+      </MantineTable.Thead>
+      {/* Render rows with print config (all columns) */}
+      <MantineTable.Tbody>
+        {processedData.map((row, rowIndex) => (
+          <MantineTable.Tr key={row.id || rowIndex}>
+            {printTableConfig.visibleColumns.map((column, colIndex) => {
+              const columnKey = getColumnKey(column);
+              const cellValue = row[columnKey];
+              const formatter = formatters?.[columnKey];
+              const formattedValue = formatter ? formatter(cellValue, row) : (cellValue?.toString() || '');
+
+              return (
+                <MantineTable.Td key={columnKey || colIndex}>
+                  <Text size="xs">
+                    {formattedValue}
+                  </Text>
+                </MantineTable.Td>
+              );
+            })}
+          </MantineTable.Tr>
+        ))}
+      </MantineTable.Tbody>
+    </MantineTable>
+  );
+
+  // Cards view for mobile/tablet
+  const cardsView = tableConfig.displayStrategy === 'cards' ? (
+    <Box className="medical-responsive-cards screen-only">
+      {renderCards()}
+    </Box>
+  ) : null;
+
+  // Render all views - cards for mobile screen, screen table for desktop screen, print table for print
+  const content = (
+    <>
+      {cardsView}
+      {screenTableView}
+      {printTableView}
+    </>
+  );
+
+  // Wrap with ScrollArea if needed for table view only
   const wrappedContent = tableConfig.container.scrollable ? (
     <ScrollArea
       h={tableConfig.container.maxHeight}
       scrollbarSize={8}
       {...tableConfig.container.scrollAreaProps}
     >
-      {tableContent}
+      {content}
     </ScrollArea>
   ) : (
     <Box 
@@ -567,7 +638,7 @@ export const ResponsiveTable = memo(({
       mah={tableConfig.container.maxHeight}
       style={{ overflow: 'auto' }}
     >
-      {tableContent}
+      {content}
     </Box>
   );
 

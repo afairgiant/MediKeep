@@ -30,6 +30,8 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { 
   ERROR_MESSAGES, 
@@ -37,7 +39,7 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
@@ -51,6 +53,7 @@ const Visits = () => {
   const [viewMode, setViewMode] = useState('cards');
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
 
   // Get practitioners data
   const { practitioners } = usePractitioners();
@@ -676,17 +679,17 @@ const Visits = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={filteredVisits}
                 columns={[
-                  { header: 'Visit Date', accessor: 'date' },
-                  { header: 'Reason', accessor: 'reason' },
-                  { header: 'Visit Type', accessor: 'visit_type' },
-                  { header: 'Facility', accessor: 'location' },
-                  { header: 'Practitioner', accessor: 'practitioner_name' },
-                  { header: 'Related Condition', accessor: 'condition_name' },
-                  { header: 'Diagnosis', accessor: 'diagnosis' },
-                  { header: 'Notes', accessor: 'notes' },
+                  { header: 'Visit Date', accessor: 'date', priority: 'high', width: 120 },
+                  { header: 'Reason', accessor: 'reason', priority: 'high', width: 150 },
+                  { header: 'Visit Type', accessor: 'visit_type', priority: 'medium', width: 120 },
+                  { header: 'Facility', accessor: 'location', priority: 'medium', width: 150 },
+                  { header: 'Practitioner', accessor: 'practitioner_name', priority: 'medium', width: 200 },
+                  { header: 'Related Condition', accessor: 'condition_name', priority: 'low', width: 200 },
+                  { header: 'Diagnosis', accessor: 'diagnosis', priority: 'medium', width: 150 },
+                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 }
                 ]}
                 patientData={currentPatient}
                 tableName="Visit History"
@@ -707,6 +710,8 @@ const Visits = () => {
                   diagnosis: getEntityFormatters('visits').text,
                   notes: getEntityFormatters('visits').text,
                 }}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -759,4 +764,8 @@ const Visits = () => {
   );
 };
 
-export default Visits;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Visits, {
+  injectResponsive: true,
+  displayName: 'ResponsiveVisits'
+});
