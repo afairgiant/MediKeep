@@ -119,12 +119,6 @@ const Medication = () => {
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
 
-  // Debug: Log formatters
-  React.useEffect(() => {
-    console.log('Medication formatters:', Object.keys(formatters));
-    console.log('Has practitioner_name formatter:', !!formatters.practitioner_name);
-    console.log('Has pharmacy_name formatter:', !!formatters.pharmacy_name);
-  }, [formatters]);
 
   // Form data state
   const [formData, setFormData] = useState({

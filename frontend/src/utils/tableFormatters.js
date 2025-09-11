@@ -47,39 +47,21 @@ export const standardFormatters = {
 
   // Practitioner/Doctor fields
   practitioner: (value, item, practitioners = []) => {
-    console.log('Practitioner debug:', { 
-      value, 
-      item: JSON.stringify(item, null, 2), 
-      hasNestedPractitioner: !!item.practitioner,
-      practitionerData: item.practitioner,
-      practitionerId: item.practitioner_id,
-      practitionersArray: practitioners.length 
-    });
     // Handle nested practitioner object first
     if (item.practitioner?.name) {
-      console.log('Found nested practitioner name:', item.practitioner.name);
       return item.practitioner.name;
     }
     // Fall back to ID lookup
     if (!item.practitioner_id) {
-      console.log('No practitioner_id found');
       return '-';
     }
     const found = practitioners.find(p => p.id === item.practitioner_id)?.name || `Practitioner ID: ${item.practitioner_id}`;
-    console.log('Using ID lookup, found:', found);
     return found;
   },
 
   // Pharmacy fields
   pharmacy: (value, item) => {
-    console.log('Pharmacy debug:', { 
-      value, 
-      item: JSON.stringify(item, null, 2),
-      hasNestedPharmacy: !!item.pharmacy,
-      pharmacyData: item.pharmacy 
-    });
     const result = item.pharmacy?.name || '-';
-    console.log('Pharmacy result:', result);
     return result;
   },
 
