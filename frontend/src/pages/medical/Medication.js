@@ -109,7 +109,7 @@ const Medication = () => {
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
   const getMedicationPurpose = (medication, asText = false) => {
     const indication = medication.indication?.trim();
-    return indication || 'No indication specified';
+    return indication || '-';
   };
 
   // Get standardized formatters for medications with linking support
@@ -118,6 +118,13 @@ const Medication = () => {
     // Override indication formatter to use smart display (text version for tables)
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
+
+  // Debug: Log formatters
+  React.useEffect(() => {
+    console.log('Medication formatters:', Object.keys(formatters));
+    console.log('Has practitioner_name formatter:', !!formatters.practitioner_name);
+    console.log('Has pharmacy_name formatter:', !!formatters.pharmacy_name);
+  }, [formatters]);
 
   // Form data state
   const [formData, setFormData] = useState({

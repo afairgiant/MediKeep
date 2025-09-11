@@ -481,9 +481,9 @@ def get_current_user_patient_id(
     current_user_id: int = Depends(get_current_user_id),
 ) -> int:
     """
-    Get the current user's patient ID.
+    Get the current user's active patient ID.
 
-    This is a convenience dependency that handles getting the user's patient record
+    This is a convenience dependency that handles getting the user's active patient record
     and returns the patient_id for use in medical record endpoints.
 
     Args:
@@ -491,21 +491,38 @@ def get_current_user_patient_id(
         current_user_id: Current authenticated user ID
 
     Returns:
-        Patient ID for the current user
+        Active patient ID for the current user
 
     Raises:
         NotFoundException: If patient record not found
+        ValueError: If no active patient is selected
     """
-    from app.crud.patient import patient
+    from app.models.models import User, Patient
 
-    patient_record = patient.get_by_user_id(db, user_id=current_user_id)
+    # Get user with active patient ID (multi-patient system)
+    user = db.query(User).filter(User.id == current_user_id).first()
+    if not user:
+        raise NotFoundException(
+            message="User not found",
+            request=None
+        )
+    
+    if not user.active_patient_id:
+        raise ValueError("No active patient selected for user")
+    
+    # Verify the active patient exists and belongs to this user
+    patient_record = db.query(Patient).filter(
+        Patient.id == user.active_patient_id,
+        Patient.user_id == current_user_id
+    ).first()
+    
     if not patient_record:
         raise NotFoundException(
-            message="Patient record not found",
+            message="Active patient record not found",
             request=None
         )
 
-    return getattr(patient_record, "id")
+    return patient_record.id
 
 
 def verify_patient_record_access(
