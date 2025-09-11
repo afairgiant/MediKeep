@@ -24,8 +24,10 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
@@ -55,6 +57,7 @@ import {
 const Insurance = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
   // Modern data management with useMedicalData
@@ -660,7 +663,8 @@ const Insurance = () => {
               ))}
             </Grid>
           ) : (
-            <MedicalTable
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
               data={processedInsurances}
               columns={tableColumns}
               formatters={formatters}
@@ -671,7 +675,10 @@ const Insurance = () => {
               sortOrder={sortOrder}
               onSortChange={handleSortChange}
               getSortIndicator={getSortIndicator}
+              dataType="medical"
+              responsive={responsive}
             />
+          </Paper>
           )}
         </>
       )}
@@ -765,4 +772,8 @@ const Insurance = () => {
   );
 };
 
-export default Insurance;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Insurance, {
+  injectResponsive: true,
+  displayName: 'ResponsiveInsurance'
+});

@@ -7,9 +7,11 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 
 // Modular components
@@ -27,11 +29,13 @@ import {
   Alert,
   Loader,
   Center,
+  Paper,
 } from '@mantine/core';
 
 const Treatments = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners data
@@ -404,25 +408,28 @@ const Treatments = () => {
                         page: 'Treatments',
                       });
                     }}
+                dataType="medical"
+                responsive={responsive}
                   />
                 </Grid.Col>
               ))}
             </Grid>
           ) : (
-            <MedicalTable
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
               data={filteredTreatments}
               columns={[
-                { header: 'Treatment', accessor: 'treatment_name' },
-                { header: 'Type', accessor: 'treatment_type' },
-                { header: 'Practitioner', accessor: 'practitioner' },
-                { header: 'Related Condition', accessor: 'condition' },
-                { header: 'Start Date', accessor: 'start_date' },
-                { header: 'End Date', accessor: 'end_date' },
-                { header: 'Status', accessor: 'status' },
-                { header: 'Dosage', accessor: 'dosage' },
-                { header: 'Frequency', accessor: 'frequency' },
-                { header: 'Notes', accessor: 'notes' },
-              ]}
+                  { header: 'Treatment', accessor: 'treatment_name', priority: 'high', width: 200 },
+                  { header: 'Type', accessor: 'treatment_type', priority: 'medium', width: 120 },
+                  { header: 'Practitioner', accessor: 'practitioner', priority: 'low', width: 150 },
+                  { header: 'Related Condition', accessor: 'condition', priority: 'low', width: 150 },
+                  { header: 'Start Date', accessor: 'start_date', priority: 'high', width: 120 },
+                  { header: 'End Date', accessor: 'end_date', priority: 'medium', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 120 },
+                  { header: 'Dosage', accessor: 'dosage', priority: 'low', width: 150 },
+                  { header: 'Frequency', accessor: 'frequency', priority: 'low', width: 150 },
+                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 }
+                ]}
               patientData={currentPatient}
               tableName="Treatments"
               onView={handleViewTreatment}
@@ -463,7 +470,10 @@ const Treatments = () => {
                 frequency: getEntityFormatters('treatments').frequency,
                 notes: getEntityFormatters('treatments').notes,
               }}
+              dataType="medical"
+              responsive={responsive}
             />
+          </Paper>
           )}
         </Stack>
       </Container>
@@ -497,4 +507,8 @@ const Treatments = () => {
   );
 };
 
-export default Treatments;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Treatments, {
+  injectResponsive: true,
+  displayName: 'ResponsiveTreatments'
+});

@@ -13,8 +13,10 @@ import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import StatusBadge from '../../components/medical/StatusBadge';
 import { InvitationManager } from '../../components/invitations';
 import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
@@ -59,6 +61,7 @@ import { useDisclosure } from '@mantine/hooks';
 const FamilyHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const { colorScheme } = useMantineColorScheme();
   const [viewMode, setViewMode] = useState('cards');
   const [activeTab, setActiveTab] = useState('my-family');
@@ -1118,78 +1121,82 @@ const FamilyHistory = () => {
               </Button>
             </Card>
           ) : viewMode === 'table' ? (
-            <MedicalTable
-              data={flattenedConditions}
-              columns={[
-                { header: 'Family Member', accessor: 'familyMemberName' },
-                { header: 'Relationship', accessor: 'relationship' },
-                { header: 'Condition', accessor: 'condition_name' },
-                { header: 'Type', accessor: 'condition_type' },
-                { header: 'Severity', accessor: 'severity' },
-                { header: 'Diagnosis Age', accessor: 'diagnosis_age' },
-                { header: 'Status', accessor: 'status' },
-              ]}
-              patientData={currentPatient}
-              tableName="Family History"
-              onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
-              onEdit={row => {
-                if (row.is_shared) {
-                  notifications.show({
-                    title: 'Cannot Edit',
-                    message: 'You cannot edit shared family history records',
-                    color: 'orange',
-                    icon: <IconX size="1rem" />,
-                  });
-                  return;
-                }
-                if (row.conditionId) {
-                  // Edit condition
-                  const familyMember = familyMembers.find(
-                    m => m.id === row.familyMemberId
-                  );
-                  const condition = familyMember?.family_conditions?.find(
-                    c => c.id === row.conditionId
-                  );
-                  if (familyMember && condition) {
-                    handleEditCondition(familyMember, condition);
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
+                data={flattenedConditions}
+                columns={[
+                  { header: 'Family Member', accessor: 'familyMemberName', priority: 'high', width: 150 },
+                  { header: 'Relationship', accessor: 'relationship', priority: 'high', width: 120 },
+                  { header: 'Condition', accessor: 'condition_name', priority: 'high', width: 200 },
+                  { header: 'Type', accessor: 'condition_type', priority: 'medium', width: 120 },
+                  { header: 'Severity', accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: 'Diagnosis Age', accessor: 'diagnosis_age', priority: 'low', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'low', width: 100 },
+                ]}
+                patientData={currentPatient}
+                tableName="Family History"
+                onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
+                onEdit={row => {
+                  if (row.is_shared) {
+                    notifications.show({
+                      title: 'Cannot Edit',
+                      message: 'You cannot edit shared family history records',
+                      color: 'orange',
+                      icon: <IconX size="1rem" />,
+                    });
+                    return;
                   }
-                } else {
-                  // Edit family member (no condition)
-                  const familyMember = familyMembers.find(
-                    m => m.id === row.familyMemberId
-                  );
-                  if (familyMember) {
-                    handleEditMember(familyMember);
+                  if (row.conditionId) {
+                    // Edit condition
+                    const familyMember = familyMembers.find(
+                      m => m.id === row.familyMemberId
+                    );
+                    const condition = familyMember?.family_conditions?.find(
+                      c => c.id === row.conditionId
+                    );
+                    if (familyMember && condition) {
+                      handleEditCondition(familyMember, condition);
+                    }
+                  } else {
+                    // Edit family member (no condition)
+                    const familyMember = familyMembers.find(
+                      m => m.id === row.familyMemberId
+                    );
+                    if (familyMember) {
+                      handleEditMember(familyMember);
+                    }
                   }
-                }
-              }}
-              onDelete={row => {
-                if (row.is_shared) {
-                  notifications.show({
-                    title: 'Cannot Delete',
-                    message: 'You cannot delete shared family history records',
-                    color: 'orange',
-                    icon: <IconX size="1rem" />,
-                  });
-                  return;
-                }
-                if (row.conditionId) {
-                  // Delete condition
-                  handleDeleteCondition(row.familyMemberId, row.conditionId);
-                } else {
-                  // Delete family member
-                  handleDeleteMember(row.familyMemberId);
-                }
-              }}
-              formatters={{
-                relationship: value => value?.replace('_', ' ') || '-',
-                condition_name: value => value || 'No conditions',
-                condition_type: value => value?.replace('_', ' ') || '-',
-                severity: value => value || '-',
-                diagnosis_age: value => (value ? `${value} years` : '-'),
-                status: value => value || '-',
-              }}
-            />
+                }}
+                onDelete={row => {
+                  if (row.is_shared) {
+                    notifications.show({
+                      title: 'Cannot Delete',
+                      message: 'You cannot delete shared family history records',
+                      color: 'orange',
+                      icon: <IconX size="1rem" />,
+                    });
+                    return;
+                  }
+                  if (row.conditionId) {
+                    // Delete condition
+                    handleDeleteCondition(row.familyMemberId, row.conditionId);
+                  } else {
+                    // Delete family member
+                    handleDeleteMember(row.familyMemberId);
+                  }
+                }}
+                formatters={{
+                  relationship: value => value?.replace('_', ' ') || '-',
+                  condition_name: value => value || 'No conditions',
+                  condition_type: value => value?.replace('_', ' ') || '-',
+                  severity: value => value || '-',
+                  diagnosis_age: value => (value ? `${value} years` : '-'),
+                  status: value => value || '-',
+                }}
+                dataType="medical"
+                responsive={responsive}
+              />
+            </Paper>
           ) : (
             <Stack spacing="xl">
               {groupedMembers.map(group => (
@@ -1243,47 +1250,51 @@ const FamilyHistory = () => {
               </Text>
             </Card>
           ) : viewMode === 'table' ? (
-            <MedicalTable
-              data={flattenedSharedConditions}
-              columns={[
-                { header: 'Family Member', accessor: 'familyMemberName' },
-                { header: 'Relationship', accessor: 'relationship' },
-                { header: 'Condition', accessor: 'condition_name' },
-                { header: 'Type', accessor: 'condition_type' },
-                { header: 'Severity', accessor: 'severity' },
-                { header: 'Diagnosis Age', accessor: 'diagnosis_age' },
-                { header: 'Status', accessor: 'status' },
-                { header: 'Shared By', accessor: 'shared_by' },
-              ]}
-              patientData={currentPatient}
-              tableName="Shared Family History"
-              onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
-              onEdit={row => {
-                notifications.show({
-                  title: 'Cannot Edit',
-                  message: 'You cannot edit shared family history records',
-                  color: 'orange',
-                  icon: <IconX size="1rem" />,
-                });
-              }}
-              onDelete={row => {
-                notifications.show({
-                  title: 'Cannot Delete',
-                  message: 'You cannot delete shared family history records',
-                  color: 'orange',
-                  icon: <IconX size="1rem" />,
-                });
-              }}
-              formatters={{
-                relationship: value => value?.replace('_', ' ') || '-',
-                condition_name: value => value || 'No conditions',
-                condition_type: value => value?.replace('_', ' ') || '-',
-                severity: value => value || '-',
-                diagnosis_age: value => (value ? `${value} years` : '-'),
-                status: value => value || '-',
-                shared_by: (value, row) => row.shared_by?.name || 'Unknown',
-              }}
-            />
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
+                data={flattenedSharedConditions}
+                columns={[
+                  { header: 'Family Member', accessor: 'familyMemberName', priority: 'high', width: 150 },
+                  { header: 'Relationship', accessor: 'relationship', priority: 'high', width: 120 },
+                  { header: 'Condition', accessor: 'condition_name', priority: 'high', width: 200 },
+                  { header: 'Type', accessor: 'condition_type', priority: 'medium', width: 120 },
+                  { header: 'Severity', accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: 'Diagnosis Age', accessor: 'diagnosis_age', priority: 'low', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'low', width: 100 },
+                  { header: 'Shared By', accessor: 'shared_by', priority: 'medium', width: 150 },
+                ]}
+                patientData={currentPatient}
+                tableName="Shared Family History"
+                onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
+                onEdit={row => {
+                  notifications.show({
+                    title: 'Cannot Edit',
+                    message: 'You cannot edit shared family history records',
+                    color: 'orange',
+                    icon: <IconX size="1rem" />,
+                  });
+                }}
+                onDelete={row => {
+                  notifications.show({
+                    title: 'Cannot Delete',
+                    message: 'You cannot delete shared family history records',
+                    color: 'orange',
+                    icon: <IconX size="1rem" />,
+                  });
+                }}
+                formatters={{
+                  relationship: value => value?.replace('_', ' ') || '-',
+                  condition_name: value => value || 'No conditions',
+                  condition_type: value => value?.replace('_', ' ') || '-',
+                  severity: value => value || '-',
+                  diagnosis_age: value => (value ? `${value} years` : '-'),
+                  status: value => value || '-',
+                  shared_by: (value, row) => row.shared_by?.name || 'Unknown',
+                }}
+                dataType="medical"
+                responsive={responsive}
+              />
+            </Paper>
           ) : (
             <Stack spacing="xl">
               {/* Group shared family members by relationship */}
@@ -1423,4 +1434,8 @@ const FamilyHistory = () => {
   );
 };
 
-export default FamilyHistory;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(FamilyHistory, {
+  injectResponsive: true,
+  displayName: 'ResponsiveFamilyHistory'
+});

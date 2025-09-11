@@ -31,8 +31,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
@@ -42,6 +44,7 @@ const EmergencyContacts = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
 
   // Standardized data management
   const {
@@ -516,15 +519,15 @@ const EmergencyContacts = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={filteredContacts}
                 columns={[
-                  { header: 'Name', accessor: 'name' },
-                  { header: 'Relationship', accessor: 'relationship' },
-                  { header: 'Phone', accessor: 'phone_number' },
-                  { header: 'Email', accessor: 'email' },
-                  { header: 'Primary', accessor: 'is_primary' },
-                  { header: 'Status', accessor: 'is_active' },
+                  { header: 'Name', accessor: 'name', priority: 'high', width: 200 },
+                  { header: 'Relationship', accessor: 'relationship', priority: 'high', width: 150 },
+                  { header: 'Phone', accessor: 'phone_number', priority: 'low', width: 150 },
+                  { header: 'Email', accessor: 'email', priority: 'medium', width: 150 },
+                  { header: 'Primary', accessor: 'is_primary', priority: 'high', width: 150 },
+                  { header: 'Status', accessor: 'is_active', priority: 'low', width: 150 }
                 ]}
                 patientData={currentPatient}
                 tableName="Emergency Contacts"
@@ -583,6 +586,8 @@ const EmergencyContacts = () => {
                     </Badge>
                   ),
                 }}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -780,4 +785,8 @@ const EmergencyContacts = () => {
   );
 };
 
-export default EmergencyContacts;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(EmergencyContacts, {
+  injectResponsive: true,
+  displayName: 'ResponsiveEmergencyContacts'
+});

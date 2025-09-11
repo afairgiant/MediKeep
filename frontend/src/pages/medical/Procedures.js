@@ -9,6 +9,8 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import { 
@@ -17,7 +19,7 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
@@ -35,11 +37,13 @@ import {
   Loader,
   Center,
   Card,
+  Paper,
 } from '@mantine/core';
 
 const Procedures = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners data
@@ -571,26 +575,30 @@ const Procedures = () => {
               ))}
             </Grid>
           ) : (
-            <MedicalTable
-              data={filteredProcedures}
-              columns={[
-                { header: 'Procedure Name', accessor: 'procedure_name' },
-                { header: 'Type', accessor: 'procedure_type' },
-                { header: 'Code', accessor: 'procedure_code' },
-                { header: 'Date', accessor: 'date' },
-                { header: 'Status', accessor: 'status' },
-                { header: 'Setting', accessor: 'procedure_setting' },
-                { header: 'Facility', accessor: 'facility' },
-                { header: 'Practitioner', accessor: 'practitioner_name' },
-                { header: 'Description', accessor: 'description' },
-              ]}
-              patientData={currentPatient}
-              tableName="Procedures"
-              onView={handleViewProcedure}
-              onEdit={handleEditProcedure}
-              onDelete={handleDeleteProcedure}
-              formatters={formatters}
-            />
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
+                data={filteredProcedures}
+                columns={[
+                  { header: 'Procedure Name', accessor: 'procedure_name', priority: 'high', width: 200 },
+                  { header: 'Type', accessor: 'procedure_type', priority: 'medium', width: 120 },
+                  { header: 'Code', accessor: 'procedure_code', priority: 'low', width: 100 },
+                  { header: 'Date', accessor: 'date', priority: 'high', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
+                  { header: 'Setting', accessor: 'procedure_setting', priority: 'low', width: 120 },
+                  { header: 'Facility', accessor: 'facility', priority: 'medium', width: 150 },
+                  { header: 'Practitioner', accessor: 'practitioner_name', priority: 'medium', width: 150 },
+                  { header: 'Description', accessor: 'description', priority: 'low', width: 200 },
+                ]}
+                patientData={currentPatient}
+                tableName="Procedures"
+                onView={handleViewProcedure}
+                onEdit={handleEditProcedure}
+                onDelete={handleDeleteProcedure}
+                formatters={formatters}
+                dataType="medical"
+                responsive={responsive}
+              />
+            </Paper>
           )}
         </Stack>
       </Container>
@@ -639,4 +647,8 @@ const Procedures = () => {
   );
 };
 
-export default Procedures;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Procedures, {
+  injectResponsive: true,
+  displayName: 'ResponsiveProcedures'
+});

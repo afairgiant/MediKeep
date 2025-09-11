@@ -121,17 +121,10 @@ export const ResponsiveTable = memo(({
     columnCount: columns.length
   }), [breakpoint, deviceType, dataType, medicalContext, data.length, columns.length]);
 
-  // Log component mount and responsive changes
+  // Log component mount only (reduced logging for performance)
   useEffect(() => {
-    logger.info('ResponsiveTable mounted', componentContext);
+    logger.debug('ResponsiveTable mounted', componentContext);
   }, []);
-
-  useEffect(() => {
-    logger.debug('ResponsiveTable breakpoint changed', {
-      ...componentContext,
-      previousBreakpoint: breakpoint
-    });
-  }, [breakpoint]);
 
   // Table layout strategy context
   const strategyContext = useMemo(() => ({
@@ -165,12 +158,7 @@ export const ResponsiveTable = memo(({
       spacing: strategy.getSpacing(breakpoint, strategyContext)
     };
 
-    logger.debug('Table configuration calculated', {
-      ...componentContext,
-      displayStrategy: config.displayStrategy,
-      visibleColumnCount: config.visibleColumns.length,
-      virtualized: config.container.virtualized
-    });
+    // Removed frequent configuration logging for performance
 
     return config;
   }, [breakpoint, strategyContext, maxHeight, fullWidth, virtualization, componentContext]);
@@ -220,12 +208,7 @@ export const ResponsiveTable = memo(({
     setInternalSortBy(columnKey);
     setInternalSortDirection(newDirection);
 
-    logger.info('Table sort changed', {
-      ...componentContext,
-      sortBy: columnKey,
-      direction: newDirection,
-      previousSort: internalSortBy
-    });
+    // Removed frequent sort logging for performance
 
     if (onSort) {
       onSort(columnKey, newDirection);
@@ -234,11 +217,7 @@ export const ResponsiveTable = memo(({
 
   // Handle row selection
   const handleRowClick = useCallback((row, index, event) => {
-    logger.debug('Table row clicked', {
-      ...componentContext,
-      rowIndex: index,
-      hasRowData: !!row
-    });
+    // Removed frequent row click logging for performance
 
     if (onRowClick) {
       onRowClick(row, index, event);
@@ -251,12 +230,7 @@ export const ResponsiveTable = memo(({
 
   // Handle pagination
   const handlePageChange = useCallback((newPage) => {
-    logger.info('Table page changed', {
-      ...componentContext,
-      newPage,
-      previousPage: page,
-      pageSize
-    });
+    // Removed frequent page change logging for performance
 
     if (onPageChange) {
       onPageChange(newPage);
