@@ -30,7 +30,6 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';

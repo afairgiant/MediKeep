@@ -264,14 +264,22 @@
 
   /* Hide cards view completely in print */
   .medical-items-grid,
-  .medical-item-card {
+  .medical-item-card,
+  .medical-responsive-cards,
+  .screen-only {
     display: none !important;
   }
 
-  /* Force table view in print */
+  /* Hide screen table view in print and show only print-optimized table */
+  .screen-and-print {
+    display: none !important;
+  }
+
+  /* Show only print-optimized table in print */
+  .print-only,
   .medications-table-container,
   .medical-table-container {
-    display: block !important;
+    display: table !important;
   }
 
   /* Remove hover effects and transitions */
