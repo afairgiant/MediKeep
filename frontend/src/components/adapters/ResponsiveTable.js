@@ -271,7 +271,7 @@ export const ResponsiveTable = memo(({
       <MantineTable.Thead>
         <MantineTable.Tr>
           {visibleColumns.map((column) => {
-            const columnKey = column.key || column.dataIndex || column.name;
+            const columnKey = column.key || column.dataIndex || column.name || column.accessor;
             const isSorted = internalSortBy === columnKey;
             
             return (
@@ -288,7 +288,7 @@ export const ResponsiveTable = memo(({
               >
                 <Group gap="xs" wrap="nowrap">
                   <Text fw={500} size={size}>
-                    {column.title || column.label || columnKey}
+                    {column.title || column.label || column.header || columnKey}
                   </Text>
                   {sortable && (
                     <ActionIcon 
@@ -336,7 +336,7 @@ export const ResponsiveTable = memo(({
               data-selected={isSelected}
             >
               {visibleColumns.map((column) => {
-                const columnKey = column.key || column.dataIndex || column.name;
+                const columnKey = column.key || column.dataIndex || column.name || column.accessor;
                 const cellValue = row[columnKey];
                 
                 return (
@@ -378,7 +378,7 @@ export const ResponsiveTable = memo(({
             >
               <Stack gap={compactMode ? "xs" : "sm"}>
                 {displayFields.map((field, fieldIndex) => {
-                  const fieldKey = field.key || field.dataIndex || field.name;
+                  const fieldKey = field.key || field.dataIndex || field.name || field.accessor;
                   const fieldValue = row[fieldKey];
                   const isImportant = fieldIndex < 2; // First two fields are most important
                   
@@ -389,7 +389,7 @@ export const ResponsiveTable = memo(({
                         c="dimmed"
                         fw={isImportant ? 600 : 500}
                       >
-                        {field.title || field.label || fieldKey}
+                        {field.title || field.label || field.header || fieldKey}
                       </Text>
                       <Text 
                         size={compactMode ? "sm" : "md"} 

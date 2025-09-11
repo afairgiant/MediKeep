@@ -22,6 +22,7 @@ import {
   ActionIcon,
   Box,
   Center,
+  Collapse,
 } from '@mantine/core';
 import {
   IconDownload,
@@ -34,6 +35,8 @@ import {
   IconX,
   IconArchive,
   IconLock,
+  IconChevronDown,
+  IconChevronUp,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { exportService } from '../services/exportService';
@@ -48,6 +51,7 @@ const ExportPage = () => {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   // Export configuration
   const [exportConfig, setExportConfig] = useState({
@@ -71,7 +75,7 @@ const ExportPage = () => {
     try {
       setSummaryLoading(true);
       setError(null); // Clear any previous errors
-      
+
       const [summaryData, formatsData] = await Promise.all([
         exportService.getSummary(),
         exportService.getSupportedFormats(),
@@ -87,9 +91,13 @@ const ExportPage = () => {
           setTimeout(() => loadInitialData(retryCount + 1), 1000);
           return;
         }
-        setError('Your session has expired. Please refresh the page or log in again to access export features.');
+        setError(
+          'Your session has expired. Please refresh the page or log in again to access export features.'
+        );
       } else {
-        setError(`Failed to load export data: ${error.message || 'Please try again.'}`);
+        setError(
+          `Failed to load export data: ${error.message || 'Please try again.'}`
+        );
       }
       logger.error('Export data loading failed:', error);
     } finally {
@@ -235,16 +243,16 @@ const ExportPage = () => {
               <Text>{error}</Text>
               {error.includes('session has expired') && (
                 <Group gap="xs">
-                  <Button 
-                    size="xs" 
-                    variant="light" 
+                  <Button
+                    size="xs"
+                    variant="light"
                     onClick={() => window.location.reload()}
                   >
                     Refresh Page
                   </Button>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
+                  <Button
+                    size="xs"
+                    variant="light"
                     onClick={() => loadInitialData()}
                   >
                     Retry
@@ -268,33 +276,96 @@ const ExportPage = () => {
           </Alert>
         )}
 
-        {/* Data Summary */}
-        <Paper shadow="sm" p="xl" radius="md" withBorder>
-          <Group mb="lg">
-            <IconChartBar size={20} />
-            <Title order={2}>Available Data Summary</Title>
+        {/* Data Summary - Compact Version */}
+        <Paper shadow="sm" p={{ base: 'md', sm: 'xl' }} radius="md" withBorder>
+          <Group justify="space-between" mb={{ base: 'xs', sm: 'lg' }}>
+            <Group gap="xs">
+              <IconChartBar size={20} />
+              <Title order={{ base: 3, sm: 2 }}>Available Data</Title>
+            </Group>
+            <ActionIcon
+              variant="subtle"
+              onClick={() => setSummaryExpanded(!summaryExpanded)}
+              size={{ base: 'sm', sm: 'md' }}
+            >
+              {summaryExpanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+            </ActionIcon>
           </Group>
-          <Grid>
-            {formats.scopes
-              ?.filter(scope => scope.value !== 'all')
-              .map(scope => (
-                <Grid.Col
-                  key={scope.value}
-                  span={{ base: 12, xs: 6, sm: 4, md: 3 }}
-                >
-                  <Card withBorder p="md" radius="md">
-                    <Stack align="center" gap="xs">
-                      <Text size="xl" fw={700} c="primary">
+          
+          {/* Mobile: Show compact inline summary */}
+          <Box hiddenFrom="sm">
+            <Group gap="xs" wrap="wrap">
+              {formats.scopes
+                ?.filter(scope => scope.value !== 'all')
+                .slice(0, summaryExpanded ? undefined : 3)
+                .map(scope => (
+                  <Badge
+                    key={scope.value}
+                    size="lg"
+                    variant="light"
+                    leftSection={
+                      <Text size="sm" fw={700}>
                         {getRecordCount(scope.value)}
                       </Text>
-                      <Text size="sm" ta="center" c="dimmed">
-                        {scope.label}
-                      </Text>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-              ))}
-          </Grid>
+                    }
+                  >
+                    {scope.label}
+                  </Badge>
+                ))}
+              {!summaryExpanded && formats.scopes?.filter(scope => scope.value !== 'all').length > 3 && (
+                <Text size="xs" c="dimmed">
+                  +{formats.scopes.filter(scope => scope.value !== 'all').length - 3} more
+                </Text>
+              )}
+            </Group>
+          </Box>
+
+          {/* Desktop: Show full grid or collapsed summary */}
+          <Box visibleFrom="sm">
+            <Collapse in={summaryExpanded}>
+              <Grid>
+                {formats.scopes
+                  ?.filter(scope => scope.value !== 'all')
+                  .map(scope => (
+                    <Grid.Col
+                      key={scope.value}
+                      span={{ base: 12, xs: 6, sm: 4, md: 3 }}
+                    >
+                      <Card withBorder p="md" radius="md">
+                        <Stack align="center" gap="xs">
+                          <Text size="xl" fw={700} c="primary">
+                            {getRecordCount(scope.value)}
+                          </Text>
+                          <Text size="sm" ta="center" c="dimmed">
+                            {scope.label}
+                          </Text>
+                        </Stack>
+                      </Card>
+                    </Grid.Col>
+                  ))}
+              </Grid>
+            </Collapse>
+            {!summaryExpanded && (
+              <Group gap="sm" wrap="wrap">
+                {formats.scopes
+                  ?.filter(scope => scope.value !== 'all')
+                  .map(scope => (
+                    <Badge
+                      key={scope.value}
+                      size="lg"
+                      variant="light"
+                      leftSection={
+                        <Text size="sm" fw={700}>
+                          {getRecordCount(scope.value)}
+                        </Text>
+                      }
+                    >
+                      {scope.label}
+                    </Badge>
+                  ))}
+              </Group>
+            )}
+          </Box>
         </Paper>
 
         {/* Export Mode Toggle */}
@@ -531,14 +602,7 @@ const ExportPage = () => {
               </Text>
             </Box>
             <Divider />
-            <Group>
-              <IconLock size={16} />
-              <Text size="sm" c="dimmed">
-                All exports are secured through user authentication. Data is
-                transmitted securely and only accessible to authorized users.
-                Your medical data privacy is our top priority.
-              </Text>
-            </Group>
+            <Group>{/* TODO: Add export information */}</Group>
           </Stack>
         </Paper>
       </Stack>

@@ -307,62 +307,97 @@ export class TableLayoutStrategy extends LayoutStrategy {
       customPriorities = null
     } = context;
 
-    // Use custom priorities if provided, otherwise use medical data type or default priorities
-    let priorities = customPriorities;
-    if (!priorities) {
-      const medicalConfig = this.tableConfig.medicalDataTypes[dataType];
-      priorities = medicalConfig ? {
-        critical: medicalConfig.criticalColumns,
-        important: [],
-        standard: [],
-        optional: []
-      } : this.tableConfig.columnPriorities;
-    }
-
     const deviceType = getDeviceType(breakpoint);
     const visibleColumns = [];
 
-    // Always show critical columns
-    availableColumns.forEach(column => {
-      if (priorities.critical.includes(column.key || column.name || column)) {
-        visibleColumns.push(column);
+    // First, check if columns have their own priority property
+    const hasColumnPriorities = availableColumns.some(col => col.priority);
+    
+    if (hasColumnPriorities) {
+      // Use column-defined priorities
+      availableColumns.forEach(column => {
+        const priority = column.priority;
+        
+        // Always show high priority columns
+        if (priority === 'high' || priority === 'critical') {
+          visibleColumns.push(column);
+        }
+        // Show medium priority on tablets and larger
+        else if ((priority === 'medium' || priority === 'important') && deviceType !== 'mobile') {
+          visibleColumns.push(column);
+        }
+        // Show low priority only on desktop
+        else if ((priority === 'low' || priority === 'standard' || priority === 'optional') && deviceType === 'desktop') {
+          visibleColumns.push(column);
+        }
+      });
+      
+      // If no columns selected on mobile, at least show high priority ones
+      if (visibleColumns.length === 0 && deviceType === 'mobile') {
+        availableColumns.forEach(column => {
+          if (column.priority === 'high' || column.priority === 'critical') {
+            visibleColumns.push(column);
+          }
+        });
       }
-    });
+    } else {
+      // Fall back to the original priority system based on column names
+      let priorities = customPriorities;
+      if (!priorities) {
+        const medicalConfig = this.tableConfig.medicalDataTypes[dataType];
+        priorities = medicalConfig ? {
+          critical: medicalConfig.criticalColumns,
+          important: [],
+          standard: [],
+          optional: []
+        } : this.tableConfig.columnPriorities;
+      }
 
-    // Add important columns based on screen size
-    if (deviceType !== 'mobile') {
+      // Always show critical columns
       availableColumns.forEach(column => {
-        if (priorities.important.includes(column.key || column.name || column) && 
-            !visibleColumns.includes(column)) {
+        const columnKey = column.key || column.name || column.accessor || column.dataIndex || column;
+        if (priorities.critical.includes(columnKey)) {
           visibleColumns.push(column);
         }
       });
+
+      // Add important columns based on screen size
+      if (deviceType !== 'mobile') {
+        availableColumns.forEach(column => {
+          const columnKey = column.key || column.name || column.accessor || column.dataIndex || column;
+          if (priorities.important.includes(columnKey) && 
+              !visibleColumns.includes(column)) {
+            visibleColumns.push(column);
+          }
+        });
+      }
+
+      // Add standard columns on larger screens
+      if (deviceType === 'desktop') {
+        availableColumns.forEach(column => {
+          const columnKey = column.key || column.name || column.accessor || column.dataIndex || column;
+          if (priorities.standard.includes(columnKey) && 
+              !visibleColumns.includes(column)) {
+            visibleColumns.push(column);
+          }
+        });
+      }
+
+      // Add optional columns only on very large screens
+      if (breakpoint === 'xl' || breakpoint === 'xxl') {
+        availableColumns.forEach(column => {
+          const columnKey = column.key || column.name || column.accessor || column.dataIndex || column;
+          if (priorities.optional.includes(columnKey) && 
+              !visibleColumns.includes(column)) {
+            visibleColumns.push(column);
+          }
+        });
+      }
     }
 
-    // Add standard columns on larger screens
-    if (deviceType === 'desktop') {
-      availableColumns.forEach(column => {
-        if (priorities.standard.includes(column.key || column.name || column) && 
-            !visibleColumns.includes(column)) {
-          visibleColumns.push(column);
-        }
-      });
-    }
-
-    // Add optional columns only on very large screens
-    if (breakpoint === 'xl' || breakpoint === 'xxl') {
-      availableColumns.forEach(column => {
-        if (priorities.optional.includes(column.key || column.name || column) && 
-            !visibleColumns.includes(column)) {
-          visibleColumns.push(column);
-        }
-      });
-    }
-
-    // If no columns matched priorities, show first few columns as fallback
+    // If no columns matched priorities, return all columns (ResponsiveTable will handle scrolling)
     if (visibleColumns.length === 0) {
-      const maxColumns = this.getMaxColumnsForBreakpoint(breakpoint);
-      return availableColumns.slice(0, maxColumns);
+      return availableColumns;
     }
 
     return visibleColumns;
@@ -760,9 +795,12 @@ export class TableLayoutStrategy extends LayoutStrategy {
     const medicalConfig = this.tableConfig.medicalDataTypes[dataType];
     if (medicalConfig) {
       const additionalFields = availableColumns.filter(column => {
-        const columnKey = column.key || column.name || column;
+        const columnKey = column.key || column.name || column.accessor || column.dataIndex || column;
         return medicalConfig.searchableFields.includes(columnKey) && 
-               !displayFields.some(field => (field.key || field.name || field) === columnKey);
+               !displayFields.some(field => {
+                 const fieldKey = field.key || field.name || field.accessor || field.dataIndex || field;
+                 return fieldKey === columnKey;
+               });
       });
       
       // Add one searchable field if we have room
