@@ -328,7 +328,7 @@ const Medication = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="md" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <Container size="xl" py="md">
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
@@ -340,7 +340,7 @@ const Medication = () => {
   }
 
   return (
-    <Container size="xl" py="md" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+    <Container size="xl" py="md">
       <PageHeader title="Medications" icon="💊" />
 
       <Stack gap="lg">
