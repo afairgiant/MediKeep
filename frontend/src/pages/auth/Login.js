@@ -13,16 +13,6 @@ const Login = () => {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showCreateUser, setShowCreateUser] = useState(false);
-  const [createUserData, setCreateUserData] = useState({
-    username: '',
-    password: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-  });
-  const [isCreatingUser, setIsCreatingUser] = useState(false);
-  const [createUserError, setCreateUserError] = useState('');
   const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [registrationMessage, setRegistrationMessage] = useState('');
   const [ssoConfig, setSSOConfig] = useState({ enabled: false });
@@ -64,13 +54,6 @@ const Login = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const handleCreateUserChange = e => {
-    setCreateUserError(''); // Clear errors when user types
-    setCreateUserData({
-      ...createUserData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -94,157 +77,8 @@ const Login = () => {
     }
   };
 
-  const handleCreateUser = async e => {
-    e.preventDefault();
-    setIsCreatingUser(true);
-    setCreateUserError('');
-
-    // Client-side validation
-    if (createUserData.firstName.trim().length < 1) {
-      setCreateUserError('Please enter your first name');
-      setIsCreatingUser(false);
-      return;
-    }
-
-    if (createUserData.lastName.trim().length < 1) {
-      setCreateUserError('Please enter your last name');
-      setIsCreatingUser(false);
-      return;
-    }
-
-    if (createUserData.username.length < 3) {
-      setCreateUserError('Username must be at least 3 characters long');
-      setIsCreatingUser(false);
-      return;
-    }
-
-    if (createUserData.password.length < 6) {
-      setCreateUserError('Password must be at least 6 characters long');
-      setIsCreatingUser(false);
-      return;
-    }
-
-    const hasLetter = /[a-zA-Z]/.test(createUserData.password);
-    const hasNumber = /\d/.test(createUserData.password);
-    if (!hasLetter || !hasNumber) {
-      setCreateUserError(
-        'Password must contain at least one letter and one number'
-      );
-      setIsCreatingUser(false);
-      return;
-    }
-    try {
-      // Create the user using the simple auth service
-      const registerResult = await authService.register({
-        username: createUserData.username,
-        password: createUserData.password,
-        email: createUserData.email,
-        full_name: `${createUserData.firstName} ${createUserData.lastName}`,
-        first_name: createUserData.firstName,
-        last_name: createUserData.lastName,
-      });
-
-      if (registerResult.success) {
-        toast.success('Account created successfully! Logging you in...');
-
-        // Automatically log them in after successful registration
-        const loginResult = await login({
-          username: createUserData.username,
-          password: createUserData.password,
-        });
-
-        if (loginResult.success) {
-          setShowCreateUser(false);
-          
-          // Add a small delay to ensure auth state is fully saved before navigation
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Redirect new users to patient info page in edit mode
-          navigate('/patients/me?edit=true', { replace: true });
-        } else {
-          toast.error(
-            'Account created but login failed. Please try logging in manually.'
-          );
-          setShowCreateUser(false);
-        }
-      } else {
-        // Handle different error types
-        let errorMessage = 'Failed to create account';
-
-        if (typeof registerResult.error === 'string') {
-          errorMessage = registerResult.error;
-        } else if (
-          registerResult.error &&
-          typeof registerResult.error === 'object'
-        ) {
-          // Handle validation error objects
-          if (Array.isArray(registerResult.error.detail)) {
-            const validationErrors = registerResult.error.detail
-              .map(err => {
-                if (typeof err === 'object' && err.msg) {
-                  return `${err.loc?.join('.')} - ${err.msg}`;
-                }
-                return String(err);
-              })
-              .join('; ');
-            errorMessage = `Validation Error: ${validationErrors}`;
-          } else if (registerResult.error.detail) {
-            errorMessage = String(registerResult.error.detail);
-          } else {
-            errorMessage = JSON.stringify(registerResult.error);
-          }
-        }
-
-        setCreateUserError(errorMessage);
-      }
-    } catch (error) {
-      frontendLogger.logError('Error creating user', {
-        error: error.message,
-        component: 'Login',
-      });
-
-      // Handle different error formats
-      let errorMessage = 'Failed to create user. Please try again.';
-
-      if (error.detail && Array.isArray(error.detail)) {
-        // Handle validation errors array
-        errorMessage = error.detail
-          .map(error => `${error.loc?.join('.')} - ${error.msg}`)
-          .join('; ');
-      } else if (error.message) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
-
-      setCreateUserError(errorMessage);
-    } finally {
-      setIsCreatingUser(false);
-    }
-  };
-
-  const openCreateUserModal = () => {
-    setShowCreateUser(true);
-    setCreateUserError('');
-    setCreateUserData({
-      username: '',
-      password: '',
-      email: '',
-      firstName: '',
-      lastName: '',
-    });
-  };
-
-  const closeCreateUserModal = () => {
-    setShowCreateUser(false);
-    setCreateUserError('');
-    setCreateUserData({
-      username: '',
-      password: '',
-      email: '',
-      firstName: '',
-      lastName: '',
-    });
+  const handleCreateUserNavigation = () => {
+    navigate('/user-creation');
   };
 
   const handleSSOLogin = async () => {
@@ -329,7 +163,7 @@ const Login = () => {
             <button
               type="button"
               className="create-user-btn"
-              onClick={openCreateUserModal}
+              onClick={handleCreateUserNavigation}
               disabled={isLoading}
             >
               Create New User Account
@@ -342,132 +176,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Create User Modal */}
-      {showCreateUser && (
-        <div className="modal-overlay" onClick={closeCreateUserModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Create New User Account</h2>
-              <button className="close-btn" onClick={closeCreateUserModal}>
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateUser}>
-              {createUserError && (
-                <div className="error-message">{createUserError}</div>
-              )}
-              <div className="form-group">
-                <label htmlFor="create-username">Username *</label>
-                <input
-                  type="text"
-                  id="create-username"
-                  name="username"
-                  value={createUserData.username}
-                  onChange={handleCreateUserChange}
-                  required
-                  disabled={isCreatingUser}
-                  placeholder="Enter username"
-                />
-              </div>{' '}
-              <div className="form-group">
-                <label htmlFor="create-password">Password *</label>
-                <input
-                  type="password"
-                  id="create-password"
-                  name="password"
-                  value={createUserData.password}
-                  onChange={handleCreateUserChange}
-                  required
-                  disabled={isCreatingUser}
-                  placeholder="Enter password (min 6 chars, include letter & number)"
-                  minLength={6}
-                />
-                <div className="password-requirements">
-                  <div
-                    className={`requirement ${createUserData.password.length >= 6 ? 'valid' : ''}`}
-                  >
-                    ✓ At least 6 characters
-                  </div>
-                  <div
-                    className={`requirement ${/[a-zA-Z]/.test(createUserData.password) ? 'valid' : ''}`}
-                  >
-                    ✓ Contains at least one letter
-                  </div>
-                  <div
-                    className={`requirement ${/[0-9]/.test(createUserData.password) ? 'valid' : ''}`}
-                  >
-                    ✓ Contains at least one number
-                  </div>
-                </div>
-              </div>
-              <div className="form-group">
-                <label htmlFor="create-email">Email *</label>
-                <input
-                  type="email"
-                  id="create-email"
-                  name="email"
-                  value={createUserData.email}
-                  onChange={handleCreateUserChange}
-                  required
-                  disabled={isCreatingUser}
-                  placeholder="Enter email address"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="create-firstname">First Name *</label>
-                <input
-                  type="text"
-                  id="create-firstname"
-                  name="firstName"
-                  value={createUserData.firstName}
-                  onChange={handleCreateUserChange}
-                  required
-                  disabled={isCreatingUser}
-                  placeholder="Enter first name"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="create-lastname">Last Name *</label>
-                <input
-                  type="text"
-                  id="create-lastname"
-                  name="lastName"
-                  value={createUserData.lastName}
-                  onChange={handleCreateUserChange}
-                  required
-                  disabled={isCreatingUser}
-                  placeholder="Enter last name"
-                />
-              </div>
-              <div className="form-actions">
-                <Button
-                  variant="secondary"
-                  onClick={closeCreateUserModal}
-                  disabled={isCreatingUser}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={isCreatingUser}
-                  loading={isCreatingUser}
-                >
-                  Create Account
-                </Button>
-              </div>
-            </form>
-
-            <div className="create-user-info">
-              <p>
-                <strong>Note:</strong> A patient record will be automatically
-                created for this user with default role "user".
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -37,6 +37,7 @@ import ProtectedRoute, {
 
 // Pages
 import Login from './pages/auth/Login';
+import UserCreation from './pages/auth/UserCreation';
 import SSOCallback from './components/auth/SSOCallback';
 import Dashboard from './pages/Dashboard';
 import ExportPage from './pages/ExportPage';
@@ -366,6 +367,14 @@ function App() {
                           element={
                             <PublicRoute>
                               <Login />
+                            </PublicRoute>
+                          }
+                        />
+                        <Route
+                          path="/user-creation"
+                          element={
+                            <PublicRoute>
+                              <UserCreation />
                             </PublicRoute>
                           }
                         />

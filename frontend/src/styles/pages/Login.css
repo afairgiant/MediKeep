@@ -130,69 +130,6 @@ button[type="submit"]:disabled {
   transform: none;
 }
 
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem 1rem 2rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #333;
-  font-size: 1.5rem;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #666;
-  cursor: pointer;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-  background: #f8f9fa;
-  color: #333;
-}
-
-.modal-content form {
-  padding: 1.5rem 2rem;
-}
 
 /* Form Actions */
 .form-actions {
@@ -209,7 +146,8 @@ button[type="submit"]:disabled {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 120px;
 }
 
 .btn-primary {
@@ -237,6 +175,16 @@ button[type="submit"]:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Make buttons equal fixed width - target both regular and Mantine buttons */
+.form-actions .btn,
+.form-actions button,
+.form-actions .mantine-Button-root {
+  flex: none !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
 }
 
 /* Create User Info */
