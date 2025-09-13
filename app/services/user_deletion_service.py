@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from app.core.logging_config import get_logger
+from app.core.constants import is_admin_role, get_admin_roles_filter
 from app.models.models import (
     User, Patient, UserPreferences, PatientShare,
     FamilyHistoryShare, Invitation
@@ -199,7 +200,13 @@ class UserDeletionService:
             ValueError: If user cannot be deleted
         """
         # Get user with lock to prevent concurrent modifications
-        user = db.query(User).filter(User.id == user_id).with_for_update().first()
+        # Use nowait to prevent indefinite blocking
+        try:
+            user = db.query(User).filter(User.id == user_id).with_for_update(nowait=True).first()
+        except Exception as e:
+            if "could not obtain lock" in str(e).lower():
+                raise ValueError("User account is currently being modified by another process. Please try again.")
+            raise
 
         if not user:
             raise ValueError(f"User with ID {user_id} not found")
@@ -217,9 +224,9 @@ class UserDeletionService:
             )
 
         # Check if this is the last admin
-        if user.role and user.role.lower() in ["admin", "administrator"]:
+        if is_admin_role(user.role):
             admin_count = db.query(User).filter(
-                User.role.in_(["admin", "Admin", "administrator", "Administrator"])
+                User.role.in_(get_admin_roles_filter())
             ).count()
 
             if admin_count <= 1:

@@ -113,6 +113,14 @@ class User(Base):
         overlaps="shared_with",
     )
 
+    # User preferences relationship with cascade delete
+    preferences = orm_relationship(
+        "UserPreferences",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False
+    )
+
     # Indexes for performance
     __table_args__ = (
         Index("idx_users_email", "email"),
@@ -1157,7 +1165,7 @@ class UserPreferences(Base):
     )
 
     # Relationships
-    user = orm_relationship("User", backref=backref("preferences", cascade="all, delete-orphan", uselist=False))
+    user = orm_relationship("User", back_populates="preferences")
 
 
 class Insurance(Base):
