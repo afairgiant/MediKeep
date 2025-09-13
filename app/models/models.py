@@ -17,7 +17,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, backref
 from sqlalchemy.orm import relationship as orm_relationship
 
 # Import status enums for consistent status management
@@ -111,6 +111,14 @@ class User(Base):
         "PatientShare",
         foreign_keys="PatientShare.shared_with_user_id",
         overlaps="shared_with",
+    )
+
+    # User preferences relationship with cascade delete
+    preferences = orm_relationship(
+        "UserPreferences",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False
     )
 
     # Indexes for performance
@@ -1157,7 +1165,7 @@ class UserPreferences(Base):
     )
 
     # Relationships
-    user = orm_relationship("User", backref="preferences")
+    user = orm_relationship("User", back_populates="preferences")
 
 
 class Insurance(Base):
