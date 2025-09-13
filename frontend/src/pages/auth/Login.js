@@ -23,6 +23,10 @@ const Login = () => {
   });
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [createUserError, setCreateUserError] = useState('');
+  const [registrationEnabled, setRegistrationEnabled] = useState(true);
+  const [registrationMessage, setRegistrationMessage] = useState('');
+  const [ssoConfig, setSSOConfig] = useState({ enabled: false });
+  const [ssoLoading, setSSOLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,6 +39,23 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
+
+  // Check registration status and SSO config on mount
+  useEffect(() => {
+    const checkRegistration = async () => {
+      const status = await authService.checkRegistrationEnabled();
+      setRegistrationEnabled(status.registration_enabled);
+      setRegistrationMessage(status.message || '');
+    };
+    
+    const checkSSO = async () => {
+      const config = await authService.getSSOConfig();
+      setSSOConfig(config);
+    };
+    
+    checkRegistration();
+    checkSSO();
+  }, []);
 
   const handleChange = e => {
     clearError(); // Clear any existing errors
@@ -58,6 +79,9 @@ const Login = () => {
     try {
       const result = await login(formData);
       if (result.success) {
+        // Add a small delay to ensure auth state is fully saved before navigation
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
@@ -131,6 +155,10 @@ const Login = () => {
 
         if (loginResult.success) {
           setShowCreateUser(false);
+          
+          // Add a small delay to ensure auth state is fully saved before navigation
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           // Redirect new users to patient info page in edit mode
           navigate('/patients/me?edit=true', { replace: true });
         } else {
@@ -218,6 +246,27 @@ const Login = () => {
       lastName: '',
     });
   };
+
+  const handleSSOLogin = async () => {
+    setSSOLoading(true);
+    try {
+      // Store current location for redirect after SSO
+      const returnUrl = location.state?.from?.pathname || '/dashboard';
+      sessionStorage.setItem('sso_return_url', returnUrl);
+      
+      const result = await authService.initiateSSOLogin(returnUrl);
+      // Redirect to SSO provider
+      window.location.href = result.auth_url;
+    } catch (error) {
+      frontendLogger.logError('SSO login initiation failed', {
+        error: error.message,
+        component: 'Login',
+      });
+      toast.error(error.message || 'Failed to start SSO login');
+    } finally {
+      setSSOLoading(false);
+    }
+  };
   return (
     <div className="login-container">
       <div className="login-form">
@@ -258,15 +307,38 @@ const Login = () => {
           </button>
         </form>
 
+        {/* SSO Login Option */}
+        {ssoConfig.enabled && (
+          <div className="sso-section">
+            <div className="divider">
+              <span>or</span>
+            </div>
+            <button
+              type="button"
+              className="sso-btn"
+              onClick={handleSSOLogin}
+              disabled={isLoading || ssoLoading}
+            >
+              {ssoLoading ? 'Redirecting...' : `Continue with ${ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO'}`}
+            </button>
+          </div>
+        )}
+
         <div className="login-actions">
-          <button
-            type="button"
-            className="create-user-btn"
-            onClick={openCreateUserModal}
-            disabled={isLoading}
-          >
-            Create New User Account
-          </button>
+          {registrationEnabled ? (
+            <button
+              type="button"
+              className="create-user-btn"
+              onClick={openCreateUserModal}
+              disabled={isLoading}
+            >
+              Create New User Account
+            </button>
+          ) : (
+            <div className="registration-disabled-message">
+              {registrationMessage || 'New user registration is currently disabled.'}
+            </div>
+          )}
         </div>
       </div>
 

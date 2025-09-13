@@ -1,0 +1,32 @@
+/* NavigationToggle Component Styles */
+
+.navigation-toggle {
+  transition: all 0.2s ease;
+}
+
+.navigation-toggle:focus {
+  outline: 2px solid var(--mantine-color-blue-4);
+  outline-offset: 2px;
+}
+
+.navigation-toggle.open {
+  /* Icon rotation handled by icon change */
+}
+
+.navigation-toggle.closed {
+  /* Icon rotation handled by icon change */
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .navigation-toggle {
+    border: 2px solid var(--mantine-color-gray-9);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .navigation-toggle {
+    transition: none !important;
+  }
+}

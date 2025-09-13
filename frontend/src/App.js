@@ -19,6 +19,9 @@ import '@mantine/notifications/styles.css';
 
 import { theme } from './theme';
 
+// Responsive System
+import { ResponsiveProvider } from './providers/ResponsiveProvider';
+
 // Authentication
 import { AuthProvider } from './contexts/AuthContext';
 import {
@@ -34,6 +37,7 @@ import ProtectedRoute, {
 
 // Pages
 import Login from './pages/auth/Login';
+import SSOCallback from './components/auth/SSOCallback';
 import Dashboard from './pages/Dashboard';
 import ExportPage from './pages/ExportPage';
 import PatientInfo from './pages/medical/Patient-Info';
@@ -63,6 +67,9 @@ import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
+import ReportBuilder from './pages/reports/ReportBuilder';
+import TestMedicationForm from './pages/TestMedicationForm';
+import ResponsiveNavigationTest from './pages/test/ResponsiveNavigationTest';
 
 // Components
 import { ErrorBoundary } from './components';
@@ -206,20 +213,33 @@ function ActivityTracker() {
   // Create a working API activity tracker that heavily throttles updateActivity calls
   const { updateActivity } = useAuth();
   const trackApiActivity = useCallback((apiInfo = {}) => {
-    // Only call updateActivity every 60 seconds to avoid navigation interference
+    // Increase throttle to 2 minutes and add form interaction protection
     const now = Date.now();
     const lastUpdate = window._lastActivityUpdate || 0;
-    if (now - lastUpdate > 60000) { // 1 minute throttle
+    if (now - lastUpdate > 120000) { // 2 minute throttle
       window._lastActivityUpdate = now;
-      // Call updateActivity asynchronously to avoid blocking navigation
+      // Call updateActivity asynchronously to avoid blocking form interactions
       setTimeout(() => {
         try {
-          updateActivity();
+          // Don't update activity if user is actively interacting with forms
+          const activeElement = document.activeElement;
+          const isFormInteraction = activeElement && (
+            activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'SELECT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.contentEditable === 'true' ||
+            // Check for modal or date input interaction with combined selector for efficiency
+            activeElement.closest('[role="dialog"], .mantine-Modal-root, .mantine-DateInput-input')
+          );
+          
+          if (!isFormInteraction) {
+            updateActivity();
+          }
         } catch (error) {
           // Activity update failed - this is expected during logout/navigation
           // No need to log as it's normal behavior
         }
-      }, 0);
+      }, 100); // Small delay to allow form interactions to complete
     }
   }, [updateActivity]);
   const getApiStats = () => ({});
@@ -333,8 +353,9 @@ function App() {
             <AppDataProvider>
               <MantineProvider theme={theme}>
                 <Notifications />
-                <DatesProvider settings={{ timezone: 'UTC' }}>
-                  <MantineIntegratedThemeProvider>
+                <ResponsiveProvider>
+                  <DatesProvider settings={{ timezone: 'UTC' }}>
+                    <MantineIntegratedThemeProvider>
                     <NavigationTracker />
                     {/* <ActivityTracker /> */}
                     <div className="App">
@@ -345,6 +366,14 @@ function App() {
                           element={
                             <PublicRoute>
                               <Login />
+                            </PublicRoute>
+                          }
+                        />
+                        <Route
+                          path="/auth/sso/callback"
+                          element={
+                            <PublicRoute>
+                              <SSOCallback />
                             </PublicRoute>
                           }
                         />
@@ -376,6 +405,14 @@ function App() {
                         />
                         {/* Generated entity routes */}
                         {generateEntityRoutes()}
+                        <Route
+                          path="/reports/builder"
+                          element={
+                            <ProtectedRoute>
+                              <ReportBuilder />
+                            </ProtectedRoute>
+                          }
+                        />
                         <Route
                           path="/export"
                           element={
@@ -482,6 +519,24 @@ function App() {
                           }
                         />
                         {/* Development/Testing Routes */}
+                        <Route
+                          path="/test/medication-form"
+                          element={
+                            <ProtectedRoute>
+                              <TestMedicationForm />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Navigation Test Page */}
+                        <Route
+                          path="/test/navigation"
+                          element={
+                            <ProtectedRoute>
+                              <ResponsiveNavigationTest />
+                            </ProtectedRoute>
+                          }
+                        />
                         {/* Default redirect */}
                         <Route
                           path="/"
@@ -492,8 +547,9 @@ function App() {
 
                     {/* Toast Notifications */}
                     <ThemedToastContainer />
-                  </MantineIntegratedThemeProvider>
-                </DatesProvider>
+                    </MantineIntegratedThemeProvider>
+                  </DatesProvider>
+                </ResponsiveProvider>
               </MantineProvider>
             </AppDataProvider>
           </UserPreferencesProvider>

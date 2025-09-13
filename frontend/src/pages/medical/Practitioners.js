@@ -22,8 +22,10 @@ import {
 import { apiService } from '../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import {
   usePractitioners,
@@ -44,6 +46,7 @@ const Practitioners = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
 
   // Using global state for practitioners data
   const {
@@ -365,14 +368,14 @@ const Practitioners = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={filteredPractitioners}
                 columns={[
-                  { header: 'Name', accessor: 'name' },
-                  { header: 'Specialty', accessor: 'specialty' },
-                  { header: 'Practice', accessor: 'practice' },
-                  { header: 'Phone', accessor: 'phone_number' },
-                  { header: 'Rating', accessor: 'rating' },
+                  { header: 'Name', accessor: 'name', priority: 'high', width: 200 },
+                  { header: 'Specialty', accessor: 'specialty', priority: 'high', width: 150 },
+                  { header: 'Practice', accessor: 'practice', priority: 'low', width: 150 },
+                  { header: 'Phone', accessor: 'phone_number', priority: 'low', width: 150 },
+                  { header: 'Rating', accessor: 'rating', priority: 'low', width: 150 }
                 ]}
                 tableName="Healthcare Practitioners"
                 onView={handleViewPractitioner}
@@ -387,6 +390,8 @@ const Practitioners = () => {
                   rating: value =>
                     value !== null && value !== undefined ? `${value}/5` : '-',
                 }}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -418,4 +423,8 @@ const Practitioners = () => {
   );
 };
 
-export default Practitioners;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Practitioners, {
+  injectResponsive: true,
+  displayName: 'ResponsivePractitioners'
+});

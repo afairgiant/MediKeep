@@ -4,6 +4,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, asc, desc, or_, text
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.exc import IntegrityError, DataError, OperationalError
 
 from app.core.logging_config import get_logger
 from app.core.logging_constants import (
@@ -503,26 +504,50 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             )
             return db_obj
 
+        except IntegrityError as e:
+            db.rollback()
+            error_msg = str(e.orig)
+            self.logger.error(f"Integrity error creating {self.model_name}: {error_msg}")
+
+            # Try sequence fix for duplicate key errors
+            if "duplicate key" in error_msg.lower():
+                if self._fix_sequence(db):
+                    self.logger.info(
+                        f"Applied sequence fix for {self.model_name}, retrying creation"
+                    )
+                    db_obj = self.model(**obj_in_data)
+                    db.add(db_obj)
+                    db.commit()
+                    db.refresh(db_obj)
+                    self.logger.info(
+                        f"Successfully created {self.model_name} record {db_obj.id} after sequence fix"
+                    )
+                    return db_obj
+                # If sequence fix didn't help, it's a real duplicate
+                raise IntegrityError(
+                    f"Duplicate {self.model_name} record",
+                    orig=e.orig,
+                    params=None
+                )
+            elif "foreign key" in error_msg.lower():
+                raise IntegrityError(
+                    f"Invalid reference in {self.model_name}",
+                    orig=e.orig,
+                    params=None
+                )
+            else:
+                raise
+        except DataError as e:
+            db.rollback()
+            self.logger.error(f"Data error creating {self.model_name}: {str(e)}")
+            raise DataError(
+                f"Invalid data for {self.model_name}",
+                params=None,
+                orig=e.orig
+            )
         except Exception as e:
             db.rollback()
-            error_msg = str(e)
-            self.logger.error(f"Failed to create {self.model_name} record: {error_msg}")
-
-            # Try sequence fix once, then re-raise
-            if "duplicate key" in error_msg and self._fix_sequence(db):
-                self.logger.info(
-                    f"Applied sequence fix for {self.model_name}, retrying creation"
-                )
-
-                db_obj = self.model(**obj_in_data)
-                db.add(db_obj)
-                db.commit()
-                db.refresh(db_obj)
-
-                self.logger.info(
-                    f"Successfully created {self.model_name} record {db_obj.id} after sequence fix"
-                )
-                return db_obj
+            self.logger.error(f"Unexpected error creating {self.model_name}: {str(e)}")
             raise
 
     def _fix_sequence(self, db: Session) -> bool:
@@ -633,10 +658,37 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             )
             return db_obj
 
+        except IntegrityError as e:
+            db.rollback()
+            error_msg = str(e.orig)
+            self.logger.error(f"Integrity error updating {self.model_name} {record_id}: {error_msg}")
+            
+            if "foreign key" in error_msg.lower():
+                raise IntegrityError(
+                    f"Invalid reference in {self.model_name} update",
+                    orig=e.orig,
+                    params=None
+                )
+            elif "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
+                raise IntegrityError(
+                    f"Duplicate value in {self.model_name} update",
+                    orig=e.orig,
+                    params=None
+                )
+            else:
+                raise
+        except DataError as e:
+            db.rollback()
+            self.logger.error(f"Data error updating {self.model_name} {record_id}: {str(e)}")
+            raise DataError(
+                f"Invalid data for {self.model_name} update",
+                params=None,
+                orig=e.orig
+            )
         except Exception as e:
             db.rollback()
             self.logger.error(
-                f"Failed to update {self.model_name} record {record_id}: {e}"
+                f"Unexpected error updating {self.model_name} record {record_id}: {e}"
             )
             raise
 
@@ -666,7 +718,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                         LogFields.STATUS: "not_found",
                     },
                 )
-                raise ValueError(f"Record with id {id} not found")
+                # This will be caught by endpoints and converted to NotFoundException
+                raise ValueError(f"{self.model_name} with id {id} not found")
 
             # Log some key fields before deletion (for audit purposes)
             obj_data = jsonable_encoder(obj)
@@ -698,11 +751,31 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
             return obj
 
+        except IntegrityError as e:
+            db.rollback()
+            error_msg = str(e.orig)
+            self.logger.error(
+                f"Integrity error deleting {self.model_name} {record_id}: {error_msg}",
+                extra={
+                    LogFields.MODEL: self.model_name,
+                    LogFields.OPERATION: "delete",
+                    LogFields.RECORD_ID: record_id,
+                    LogFields.ERROR: error_msg,
+                    LogFields.STATUS: "integrity_error",
+                },
+            )
+            if "foreign key" in error_msg.lower():
+                raise IntegrityError(
+                    f"Cannot delete {self.model_name}: record is referenced by other data",
+                    orig=e.orig,
+                    params=None
+                )
+            else:
+                raise
         except Exception as e:
             db.rollback()
-
             self.logger.error(
-                f"Failed to delete {self.model_name} record",
+                f"Unexpected error deleting {self.model_name} record",
                 extra={
                     LogFields.MODEL: self.model_name,
                     LogFields.OPERATION: "delete",

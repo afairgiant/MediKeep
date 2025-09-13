@@ -25,7 +25,7 @@ export const useUserPreferences = () => {
 };
 
 export const UserPreferencesProvider = ({ children }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,6 +52,7 @@ export const UserPreferencesProvider = ({ children }) => {
         // Set default preferences on error
         const defaultPrefs = {
           unit_system: 'imperial',
+          session_timeout_minutes: 30,
           ...PAPERLESS_SETTING_DEFAULTS,
           // Override the sync tags default for this context
           paperless_sync_tags: true,
@@ -75,17 +76,20 @@ export const UserPreferencesProvider = ({ children }) => {
     // Only load preferences if user is authenticated
     if (isAuthenticated && user) {
       loadPreferences();
-    } else {
-      // Clear preferences when not authenticated
+    } else if (!authLoading) {
+      // Only clear preferences when not authenticated AND auth is not loading
       setPreferences(null);
       setLoading(false);
       setError(null);
 
-      frontendLogger.logInfo('User logged out, clearing preferences', {
-        component: 'UserPreferencesContext',
-      });
+      // Only log logout if we're not in the initial loading state
+      if (!authLoading) {
+        frontendLogger.logInfo('User logged out, clearing preferences', {
+          component: 'UserPreferencesContext',
+        });
+      }
     }
-  }, [isAuthenticated, user?.id]); // Depend on authentication state and user ID
+  }, [isAuthenticated, user?.id, authLoading]); // Depend on authentication state, user ID, and auth loading state
 
   // Function to update preferences and save to server
   const updatePreferences = async newPreferences => {

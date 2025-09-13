@@ -2,6 +2,8 @@
  * VitalsList Component - Enhanced Version with Mantine UI
  * Displays a list of patient vital signs with options to edit/delete/view details
  */
+import logger from '../../services/logger';
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
@@ -139,7 +141,7 @@ const VitalsList = ({
         await onDelete(vitalsId);
       } catch (err) {
         // Error handling is done by the parent component
-        console.error('Delete failed:', err);
+        logger.error('Delete failed:', err);
       }
       return;
     }

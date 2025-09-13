@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -49,7 +51,7 @@ const InvitationNotifications = () => {
       setPendingInvitations(invitations);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Error loading pending invitations:', error);
+      logger.error('Error loading pending invitations:', error);
     } finally {
       setLoading(false);
     }

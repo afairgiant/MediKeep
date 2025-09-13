@@ -1,10 +1,15 @@
 /**
  * Medical Form Modal Component
  * Provides consistent modal structure for all medical form interactions
+ * Enhanced with responsive behavior for different screen sizes
  */
 
 import React from 'react';
-// Forms and buttons now use Mantine styling
+import { Modal, Stack, ScrollArea } from '@mantine/core';
+// Temporarily disable responsive features to fix dropdown hanging
+// import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
+// import MantineResponsiveAdapter from '../../adapters/MantineResponsiveAdapter';
+// import { useResponsive } from '../../hooks/useResponsive';
 
 const MedicalFormModal = ({
   isOpen,
@@ -12,31 +17,30 @@ const MedicalFormModal = ({
   title,
   children,
   className = '',
+  size = 'lg'
 }) => {
+  // Temporarily disable responsive features to fix dropdown hanging
+  // const responsive = useResponsive();
+
   if (!isOpen) return null;
 
-  const handleOverlayClick = e => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
+  // Use simple modal without responsive enhancements
   return (
-    <div className="medical-form-overlay" onClick={handleOverlayClick}>
-      <div
-        className={`medical-form-modal ${className}`}
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="form-header">
-          <h3>{title}</h3>
-          <button className="close-button" onClick={onClose}>
-            ×
-          </button>
-        </div>
-
-        <div className="medical-form-content">{children}</div>
-      </div>
-    </div>
+    <Modal
+      opened={isOpen}
+      onClose={onClose}
+      title={title}
+      className={className}
+      size={size}
+      closeOnClickOutside={true}
+      closeOnEscape={true}
+      trapFocus
+      returnFocus
+    >
+      <Stack spacing="md">
+        {children}
+      </Stack>
+    </Modal>
   );
 };
 

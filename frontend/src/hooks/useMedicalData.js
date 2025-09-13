@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './useApi';
 import { apiService } from '../services/api';
 import { useCurrentPatient } from './useGlobalData';
+import { useAuth } from '../contexts/AuthContext';
 import logger from '../services/logger';
 
 export const useMedicalData = config => {
@@ -21,11 +22,21 @@ export const useMedicalData = config => {
   // Use global patient context instead of managing patient state locally
   const { patient: currentPatient, loading: patientLoading } =
     useCurrentPatient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const currentPatientRef = useRef(currentPatient);
   const { loading, error, execute, clearError, setError, cleanup } = useApi();
 
   // Refresh data function that uses execute wrapper
   const refreshData = useCallback(async () => {
+    // Don't make API calls if user is not authenticated
+    if (!isAuthenticated) {
+      logger.debug('medical_data_refresh', 'Skipping refresh - user not authenticated', {
+        entityName: entityName,
+        isAuthenticated
+      });
+      return null;
+    }
+
     const config = configRef.current;
     const result = await execute(
       async signal => {
@@ -93,7 +104,7 @@ export const useMedicalData = config => {
       { errorMessage: `Failed to refresh ${config.entityName} data` }
     );
     return result;
-  }, [execute]);
+  }, [execute, isAuthenticated, entityName]);
 
   // Keep ref in sync with global patient state and force refresh when patient changes
   useEffect(() => {
@@ -221,21 +232,53 @@ export const useMedicalData = config => {
     };
   }, [entityName, apiMethodsConfig, requiresPatient, loadFilesCounts]);
 
-  // Initialize data - run once on mount
+  // Initialize data - run once on mount or when patient changes
   useEffect(() => {
     let isMounted = true;
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
     const initializeData = async () => {
+      // Reset initialization flag when patient changes
+      if (currentPatient?.id) {
+        isInitialized.current = false;
+      }
+      
       if (isInitialized.current || !isMounted) return;
+      
+      // Wait for authentication to complete first
+      if (authLoading) {
+        logger.debug('medical_data_init', 'Waiting for authentication to complete', {
+          entityName: entityName,
+          authLoading,
+          isAuthenticated
+        });
+        isInitialized.current = false; // Reset so it can try again when auth completes
+        return;
+      }
+      
+      // Check if user is authenticated
+      if (!isAuthenticated) {
+        logger.debug('medical_data_init', 'User not authenticated, skipping data initialization', {
+          entityName: entityName,
+          isAuthenticated
+        });
+        isInitialized.current = false; // Reset so it can try again when user logs in
+        return;
+      }
+      
+      // Add small delay to prevent race conditions between multiple hooks
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
 
       const config = configRef.current;
 
       logger.info('medical_data_init', 'Starting data initialization', {
         entityName: config.entityName,
         requiresPatient: config.requiresPatient,
-        loadFilesCounts: config.loadFilesCounts
+        loadFilesCounts: config.loadFilesCounts,
+        patientId: currentPatient?.id,
+        isAuthenticated,
+        authLoading
       });
       isInitialized.current = true;
 
@@ -243,11 +286,12 @@ export const useMedicalData = config => {
         // Wait for patient data to be available if required
         if (config.requiresPatient) {
           if (!currentPatient?.id) {
-            logger.warn('medical_data_warning', 'Patient data not available for initialization', {
+            logger.debug('medical_data_init', 'Waiting for patient data to become available', {
               entityName: config.entityName,
               requiresPatient: config.requiresPatient,
               patientAvailable: false
             });
+            isInitialized.current = false; // Reset so it can try again when patient loads
             return;
           }
         }
@@ -349,7 +393,7 @@ export const useMedicalData = config => {
       abortController.abort();
       cleanup();
     };
-  }, [setError, cleanup, currentPatient?.id]); // Include currentPatient.id to reinitialize when patient loads
+  }, [setError, cleanup, currentPatient?.id, isAuthenticated, authLoading]); // Include auth state to reinitialize when auth completes
 
   return {
     // Data
@@ -358,7 +402,7 @@ export const useMedicalData = config => {
     filesCounts,
 
     // State
-    loading: loading || patientLoading, // Combine API loading and patient loading
+    loading: loading || patientLoading || authLoading, // Combine API loading, patient loading, and auth loading
     error,
     successMessage,
 

@@ -9,6 +9,8 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import { 
@@ -17,7 +19,7 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
@@ -35,11 +37,13 @@ import {
   Loader,
   Center,
   Card,
+  Paper,
 } from '@mantine/core';
 
 const Procedures = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
   // Get practitioners data
@@ -85,23 +89,32 @@ const Procedures = () => {
   const [fileCounts, setFileCounts] = useState({});
   const [fileCountsLoading, setFileCountsLoading] = useState({});
 
+  // Track which procedures we've already loaded file counts for
+  const loadedFileCountsRef = useRef(new Set());
+
   // Load file counts for procedures
   useEffect(() => {
     const loadFileCountsForProcedures = async () => {
       if (!procedures || procedures.length === 0) return;
       
-      const countPromises = procedures.map(async (procedure) => {
-        setFileCountsLoading(prev => {
-          if (prev[procedure.id] !== undefined) return prev; // Already loading
-          return { ...prev, [procedure.id]: true };
-        });
+      // Only load file counts for procedures we haven't loaded yet
+      const proceduresToLoad = procedures.filter(procedure => 
+        !loadedFileCountsRef.current.has(procedure.id)
+      );
+      
+      if (proceduresToLoad.length === 0) return;
+      
+      const countPromises = proceduresToLoad.map(async (procedure) => {
+        // Mark as loading
+        loadedFileCountsRef.current.add(procedure.id);
+        setFileCountsLoading(prev => ({ ...prev, [procedure.id]: true }));
         
         try {
           const files = await apiService.getEntityFiles('procedure', procedure.id);
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [procedure.id]: count }));
         } catch (error) {
-          console.error(`Error loading file count for procedure ${procedure.id}:`, error);
+          logger.error(`Error loading file count for procedure ${procedure.id}:`, error);
           setFileCounts(prev => ({ ...prev, [procedure.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [procedure.id]: false }));
@@ -112,16 +125,26 @@ const Procedures = () => {
     };
 
     loadFileCountsForProcedures();
-  }, [procedures]); // Remove fileCounts from dependencies
+  }, [procedures]);
 
-  // Function to refresh file counts for all procedures
+  // Function to refresh file counts for specific procedures
   const refreshFileCount = useCallback(async (procedureId) => {
     try {
+      // Force reload by removing from loaded set
+      loadedFileCountsRef.current.delete(procedureId);
+      setFileCountsLoading(prev => ({ ...prev, [procedureId]: true }));
+      
       const files = await apiService.getEntityFiles('procedure', procedureId);
       const count = Array.isArray(files) ? files.length : 0;
+      
       setFileCounts(prev => ({ ...prev, [procedureId]: count }));
+      loadedFileCountsRef.current.add(procedureId);
     } catch (error) {
-      console.error(`Error refreshing file count for procedure ${procedureId}:`, error);
+      logger.error(`Error refreshing file count for procedure ${procedureId}:`, error);
+      setFileCounts(prev => ({ ...prev, [procedureId]: 0 }));
+      loadedFileCountsRef.current.add(procedureId);
+    } finally {
+      setFileCountsLoading(prev => ({ ...prev, [procedureId]: false }));
     }
   }, []);
 
@@ -299,7 +322,7 @@ const Procedures = () => {
     // deleteItem now properly updates local state to remove the deleted item
     // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Clean up local file counts for the deleted procedure
+      // Clean up local file counts and tracking for the deleted procedure
       setFileCounts(prev => {
         const updated = { ...prev };
         delete updated[procedureId];
@@ -310,6 +333,8 @@ const Procedures = () => {
         delete updated[procedureId];
         return updated;
       });
+      // Remove from loaded tracking
+      loadedFileCountsRef.current.delete(procedureId);
     }
   };
 
@@ -550,26 +575,30 @@ const Procedures = () => {
               ))}
             </Grid>
           ) : (
-            <MedicalTable
-              data={filteredProcedures}
-              columns={[
-                { header: 'Procedure Name', accessor: 'procedure_name' },
-                { header: 'Type', accessor: 'procedure_type' },
-                { header: 'Code', accessor: 'procedure_code' },
-                { header: 'Date', accessor: 'date' },
-                { header: 'Status', accessor: 'status' },
-                { header: 'Setting', accessor: 'procedure_setting' },
-                { header: 'Facility', accessor: 'facility' },
-                { header: 'Practitioner', accessor: 'practitioner_name' },
-                { header: 'Description', accessor: 'description' },
-              ]}
-              patientData={currentPatient}
-              tableName="Procedures"
-              onView={handleViewProcedure}
-              onEdit={handleEditProcedure}
-              onDelete={handleDeleteProcedure}
-              formatters={formatters}
-            />
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
+                data={filteredProcedures}
+                columns={[
+                  { header: 'Procedure Name', accessor: 'procedure_name', priority: 'high', width: 200 },
+                  { header: 'Type', accessor: 'procedure_type', priority: 'medium', width: 120 },
+                  { header: 'Code', accessor: 'procedure_code', priority: 'low', width: 100 },
+                  { header: 'Date', accessor: 'date', priority: 'high', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
+                  { header: 'Setting', accessor: 'procedure_setting', priority: 'low', width: 120 },
+                  { header: 'Facility', accessor: 'facility', priority: 'medium', width: 150 },
+                  { header: 'Practitioner', accessor: 'practitioner_name', priority: 'medium', width: 150 },
+                  { header: 'Description', accessor: 'description', priority: 'low', width: 200 },
+                ]}
+                patientData={currentPatient}
+                tableName="Procedures"
+                onView={handleViewProcedure}
+                onEdit={handleEditProcedure}
+                onDelete={handleDeleteProcedure}
+                formatters={formatters}
+                dataType="medical"
+                responsive={responsive}
+              />
+            </Paper>
           )}
         </Stack>
       </Container>
@@ -618,4 +647,8 @@ const Procedures = () => {
   );
 };
 
-export default Procedures;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Procedures, {
+  injectResponsive: true,
+  displayName: 'ResponsiveProcedures'
+});

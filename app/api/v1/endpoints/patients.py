@@ -200,15 +200,33 @@ def update_my_patient_record(
     patient_id = getattr(existing_patient, "id", None)
 
     try:
-        # Log the incoming data for debugging
-        logger.info(f"Attempting to update patient {patient_id} for user {user_id} with data: {patient_in.dict()}")
+        # Log update attempt without sensitive data
+        logger.info(
+            "Patient record update attempt",
+            extra={
+                "category": "app",
+                "event": "patient_record_update_attempt",
+                "user_id": user_id,
+                "patient_id": patient_id,
+                "ip": user_ip,
+            }
+        )
         
         updated_patient = patient.update_for_user(
             db, user_id=user_id, patient_data=patient_in
         )
 
         if not updated_patient:
-            logger.error(f"Update returned None for patient {patient_id}, user {user_id}")
+            logger.error(
+                "Patient record update returned None",
+                extra={
+                    "category": "app",
+                    "event": "patient_record_update_none_result",
+                    "user_id": user_id,
+                    "patient_id": patient_id,
+                    "ip": user_ip,
+                }
+            )
             raise HTTPException(status_code=500, detail="Failed to update patient record")
 
         # Log successful patient record update
@@ -360,7 +378,15 @@ def create_patient_medication(
         db=db, obj_in=MedicationCreate(**medication_data)
     )
 
-    logger.info(f"✅ MEDICATION CREATED: id={medication_obj.id}")
+    logger.info(
+        "Medication created for patient",
+        extra={
+            "category": "app",
+            "event": "medication_created",
+            "patient_id": patient_id,
+            "medication_id": medication_obj.id,
+        }
+    )
     return medication_obj
 
 

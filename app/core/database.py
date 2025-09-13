@@ -197,7 +197,7 @@ async def check_sequences_on_startup() -> None:
 
         monitor = SequenceMonitor()
 
-        logger.info("🔍 Checking database sequences on startup...")
+        logger.info("Checking database sequences on startup")
         results = monitor.monitor_all_sequences(
             auto_fix=getattr(settings, "SEQUENCE_AUTO_FIX", False)
         )

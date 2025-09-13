@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -100,7 +102,7 @@ const BackupManagement = () => {
       // Hide loading notification and show error
       hideLoading(loadingId);
       showError(actionName, error);
-      console.error(`${actionName} failed:`, error);
+      logger.error(`${actionName} failed:`, error);
     } finally {
       setCreating(prev => ({ ...prev, [type]: false }));
     }
@@ -132,7 +134,7 @@ const BackupManagement = () => {
     } catch (error) {
       hideLoading(loadingId);
       showError('uploadBackup', error);
-      console.error('Upload backup failed:', error);
+      logger.error('Upload backup failed:', error);
     } finally {
       setUploading(false);
     }
@@ -161,7 +163,7 @@ const BackupManagement = () => {
     } catch (error) {
       hideLoading(loadingId);
       showError('downloadBackup', error);
-      console.error('Download failed:', error);
+      logger.error('Download failed:', error);
     }
   };
 
@@ -179,7 +181,7 @@ const BackupManagement = () => {
     } catch (error) {
       hideLoading(loadingId);
       showError('verifyBackup', error);
-      console.error('Verify backup failed:', error);
+      logger.error('Verify backup failed:', error);
     }
   };
 
@@ -202,7 +204,7 @@ const BackupManagement = () => {
       } catch (error) {
         hideLoading(loadingId);
         showError('deleteBackup', error);
-        console.error('Delete backup failed:', error);
+        logger.error('Delete backup failed:', error);
       }
     }
   };
@@ -221,7 +223,7 @@ const BackupManagement = () => {
     } catch (error) {
       hideLoading(loadingId);
       showError('cleanupBackups', error);
-      console.error('Cleanup backups failed:', error);
+      logger.error('Cleanup backups failed:', error);
     }
   };
 
@@ -251,7 +253,7 @@ const BackupManagement = () => {
     } catch (error) {
       hideLoading(loadingId);
       showError('cleanupAllOldData', error);
-      console.error('Complete cleanup failed:', error);
+      logger.error('Complete cleanup failed:', error);
     }
   };
 
@@ -283,7 +285,7 @@ const BackupManagement = () => {
     } catch (error) {
       hideLoading(loadingId);
       showError('restoreBackup', error);
-      console.error('Restore failed:', error);
+      logger.error('Restore failed:', error);
     } finally {
       setRestoring(prev => ({ ...prev, [backupId]: false }));
     }

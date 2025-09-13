@@ -4,6 +4,69 @@
 /* Base Styles */
 /* ============================= */
 
+/* Main Navigation Bar */
+.main-navigation {
+  background: var(--surface-color, white);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
+  position: sticky;
+  top: 72px; /* Below header */
+  z-index: 40;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.main-navigation .nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.main-navigation .nav-items {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.main-navigation .nav-items::-webkit-scrollbar {
+  height: 4px;
+}
+
+.main-navigation .nav-items::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.main-navigation .nav-items::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.main-navigation .nav-items a {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  color: #4b5563;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.main-navigation .nav-items a:hover {
+  color: #3b82f6;
+  background: #f0f9ff;
+  border-bottom-color: #93c5fd;
+}
+
+.main-navigation .nav-items a.active {
+  color: #2563eb;
+  background: #eff6ff;
+  border-bottom-color: #3b82f6;
+}
+
 .page-header {
   display: flex !important;
   align-items: center !important;
@@ -239,28 +302,11 @@
 
 /* Ensure Mantine dropdowns are not cut off */
 [data-mantine-component="Menu.Dropdown"] {
-  max-width: calc(100vw - 20px) !important;
   overflow: visible !important;
   z-index: 99999 !important;
 }
 
 /* Fix dropdown positioning at specific breakpoints */
-@media (min-width: 1024px) and (max-width: 1280px) {
-  /* Force Account dropdown to open to the left to avoid cutoff */
-  .account-dropdown-menu[data-mantine-component="Menu.Dropdown"] {
-    right: 10px !important;
-    left: auto !important;
-    transform: translateX(0) !important;
-  }
-  
-  /* Ensure the account dropdown doesn't get cut off */
-  .account-dropdown + [data-mantine-component="Menu.Dropdown"],
-  .desktop-nav-content > *:last-child [data-mantine-component="Menu.Dropdown"] {
-    right: 10px !important;
-    left: auto !important;
-    max-width: min(300px, calc(100vw - 40px)) !important;
-  }
-}
 
 .nav-dropdown {
   min-width: 200px;
@@ -369,7 +415,6 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
@@ -381,220 +426,25 @@
 /* ============================= */
 
 /* Mobile: <768px */
-@media (max-width: 767px) {
-  .page-header {
-    padding: 0.75rem 1rem !important;
-  }
-  
-  .page-header .header-right {
-    padding-right: 4rem !important; /* Account for mobile nav toggle button */
-  }
-  
-  .page-title {
-    font-size: 1.25rem !important;
-  }
-  
-  .header-actions {
-    display: none !important;
-  }
-  
-  .desktop-nav-bar {
-    display: none !important;
-  }
-  
-  .mobile-nav-header {
-    display: block !important;
-  }
-  
-  .navigation.mobile-sidebar {
-    display: flex !important;
-  }
-}
 
 /* Tablet: 768px - 1023px */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .header-actions .global-actions {
-    display: none !important;
-  }
-  
-  /* Smaller title for tablets */
-  .page-title {
-    font-size: 1.3rem !important;
-  }
-  
-  .page-header .header-center {
-    flex: 1.5 !important;
-  }
-  
-  .desktop-nav-content {
-    padding: 0.4rem 0.5rem !important;
-    gap: 0.25rem !important;
-    justify-content: space-between !important;
-  }
-  
-  .nav-dropdown-trigger {
-    font-size: 0.7rem !important;
-    padding: 0.3rem 0.4rem !important;
-  }
-  
-  /* Ensure dropdowns don't overflow */
-  [data-mantine-component="Menu.Dropdown"] {
-    position: fixed !important;
-  }
-}
 
 
 /* Exactly 1024px - very tight spacing */
-@media (width: 1024px) {
-  /* Make title smaller to save space */
-  .page-title {
-    font-size: 1.2rem !important;
-  }
-  
-  .page-header .title-icon {
-    font-size: 1.1rem !important;
-  }
-  
-  /* Reduce center section flex to give more room to sides */
-  .page-header .header-center {
-    flex: 1.5 !important;
-  }
-  
-  .desktop-nav-content {
-    padding: 0.25rem 0.5rem !important;
-    gap: 0.25rem !important;
-  }
-  
-  .nav-dropdown-trigger {
-    font-size: 0.7rem !important;
-    padding: 0.3rem 0.4rem !important;
-  }
-  
-  .nav-dropdown-trigger.account-dropdown {
-    min-width: 60px !important;
-  }
-}
 
 /* Small Laptop: 1025px - 1200px */
-@media (min-width: 1025px) and (max-width: 1200px) {
-  .header-actions .global-actions .settings-button,
-  .header-actions .global-actions .logout-btn {
-    display: none !important;
-  }
-  
-  /* Smaller title for small laptops */
-  .page-title {
-    font-size: 1.4rem !important;
-  }
-  
-  .page-header .header-center {
-    flex: 1.5 !important;
-  }
-  
-  .desktop-nav-content {
-    padding: 0.4rem 0.75rem !important;
-    gap: 0.35rem !important;
-    justify-content: space-between !important;
-  }
-  
-  .nav-dropdown-trigger {
-    font-size: 0.72rem !important;
-    padding: 0.35rem 0.45rem !important;
-    min-width: auto !important;
-  }
-  
-  /* Fix Account dropdown cutoff */
-  .nav-dropdown-trigger.account-dropdown {
-    min-width: 65px !important;
-    flex-shrink: 0 !important;
-  }
-}
 
 /* Laptop: 1201px - 1439px */
-@media (min-width: 1201px) and (max-width: 1439px) {
-  .header-actions .global-actions .settings-button,
-  .header-actions .global-actions .logout-btn {
-    display: none !important;
-  }
-  
-  .desktop-nav-content {
-    padding: 0.5rem 1rem !important;
-    gap: 0.4rem !important;
-    justify-content: space-between !important;
-  }
-  
-  .nav-dropdown-trigger {
-    font-size: 0.75rem !important;
-    padding: 0.35rem 0.5rem !important;
-    min-width: auto !important;
-  }
-  
-  /* Fix Account dropdown cutoff */
-  .nav-dropdown-trigger.account-dropdown {
-    min-width: 70px !important;
-    flex-shrink: 0 !important;
-  }
-}
 
 /* Desktop: ≥1440px */
-@media (min-width: 1440px) {
-  .desktop-nav-content {
-    padding: 0.75rem 2rem !important;
-    gap: 1rem !important;
-  }
-  
-  .nav-dropdown-trigger {
-    font-size: 0.875rem !important;
-    padding: 0.5rem 1rem !important;
-  }
-  
-  .header-actions {
-    display: flex !important;
-  }
-}
 
 /* Large Desktop: ≥2560px (4K) */
-@media (min-width: 2560px) {
-  .desktop-nav-content {
-    max-width: 1920px;
-    padding: 1rem 3rem !important;
-    gap: 1.5rem !important;
-  }
-  
-  .nav-dropdown-trigger {
-    font-size: 1rem !important;
-    padding: 0.6rem 1.2rem !important;
-  }
-}
 
 /* Landscape Mobile */
-@media (max-height: 500px) and (orientation: landscape) {
-  .page-header {
-    min-height: 50px !important;
-    padding: 0.5rem !important;
-  }
-  
-  .mobile-nav-toggle {
-    width: 44px;
-    height: 44px;
-  }
-}
 
 /* High DPI Screens */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .desktop-nav-bar {
-    border-bottom-width: 0.5px;
-  }
-}
 
 /* Print Styles */
-@media print {
-  .desktop-nav-bar,
-  .mobile-nav-header,
-  .navigation {
-    display: none !important;
-  }
-}
 
 /* Accessibility - Focus States */
 .nav-dropdown-trigger:focus,
@@ -605,24 +455,8 @@
 }
 
 /* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .navigation,
-  .mobile-nav-toggle span,
-  .nav-dropdown-trigger {
-    transition: none !important;
-  }
-}
 
 /* High Contrast Mode */
-@media (prefers-contrast: high) {
-  .nav-dropdown-trigger {
-    border: 2px solid currentColor !important;
-  }
-  
-  .navigation {
-    border-left-width: 3px;
-  }
-}
 
 /* Dark Theme Support */
 [data-theme='dark'] .desktop-nav-bar {

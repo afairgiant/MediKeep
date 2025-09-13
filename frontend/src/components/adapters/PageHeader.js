@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -43,40 +45,21 @@ const PageHeader = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [navOpened, setNavOpened] = useState(false);
 
   // Check if user is admin
   const isAdmin = () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role || '';
-        return (
-          userRole.toLowerCase() === 'admin' ||
-          userRole.toLowerCase() === 'administrator'
-        );
-      }
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-    }
-    return false;
+    // Removed frequent admin check logging for performance
+    return user?.isAdmin || false;
   };
 
   // Navigation items organized by category
   const navigationSections = [
     {
-      title: 'Core',
-      items: [
-        { name: 'Dashboard', path: '/dashboard', icon: '🏥' },
-        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
-        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
-      ],
-    },
-    {
       title: 'Medical Records',
       items: [
+        { name: 'Patient Info', path: '/patients/me', icon: '👤' },
         { name: 'Allergies', path: '/allergies', icon: '⚠️' },
         { name: 'Conditions', path: '/conditions', icon: '🏥' },
         { name: 'Lab Results', path: '/lab-results', icon: '🧪' },
@@ -97,6 +80,7 @@ const PageHeader = ({
     {
       title: 'Other',
       items: [
+        { name: 'Emergency Contacts', path: '/emergency-contacts', icon: '🆘' },
         { name: 'Insurance', path: '/insurance', icon: '💳' },
         { name: 'Pharmacies', path: '/pharmacies', icon: '🏪' },
         { name: 'Practitioners', path: '/practitioners', icon: '👨‍⚕️' },
@@ -164,15 +148,19 @@ const PageHeader = ({
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    // Clear welcome box dismissal so it reappears on next login
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('welcomeBox_dismissed_')) {
-        localStorage.removeItem(key);
-      }
-    });
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    logger.info('🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process');
+    try {
+      logger.info('🚪 PAGEHEADER_LOGOUT: Calling AuthContext logout function');
+      // Use AuthContext logout for proper state management
+      await logout();
+      logger.info('🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully');
+      // Navigation will be handled by AuthContext/ProtectedRoute
+    } catch (error) {
+      logger.info('🚪 PAGEHEADER_LOGOUT: Logout failed with error', error.message);
+      // Fallback navigation if logout fails
+      window.location.href = '/login';
+    }
   };
 
   const isDashboard = variant === 'dashboard';

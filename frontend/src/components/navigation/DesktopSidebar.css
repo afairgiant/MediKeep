@@ -1,0 +1,62 @@
+/* DesktopSidebar Component Styles */
+
+.desktop-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  overflow: hidden;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-sidebar.open {
+  /* Styles handled by Mantine Box */
+}
+
+.desktop-sidebar.collapsed {
+  /* Styles handled by Mantine Box */
+}
+
+/* Navigation Item Styles */
+.desktop-sidebar .nav-item {
+  text-decoration: none;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.desktop-sidebar .nav-item:focus {
+  outline: 2px solid var(--mantine-color-blue-4);
+  outline-offset: 2px;
+}
+
+.desktop-sidebar .nav-item.active {
+  font-weight: 600;
+}
+
+/* Ensure smooth transitions */
+.desktop-sidebar * {
+  box-sizing: border-box;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .desktop-sidebar {
+    border-right: 2px solid var(--mantine-color-gray-9);
+  }
+  
+  .desktop-sidebar .nav-item.active {
+    border: 2px solid var(--mantine-color-blue-6);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .desktop-sidebar,
+  .desktop-sidebar .nav-item {
+    transition: none !important;
+  }
+}

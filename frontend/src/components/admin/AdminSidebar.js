@@ -3,59 +3,30 @@ import { Link } from 'react-router-dom';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  console.log('🗂️ AdminSidebar render:', {
-    timestamp: new Date().toISOString(),
-    isOpen,
-    currentPath,
-    hasOnToggle: typeof onToggle === 'function',
-    isMobile,
-  });
-
-  // Check if we're on mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleToggle = () => {
-    console.log('🗂️ AdminSidebar toggle clicked');
     if (onToggle) {
       onToggle();
-    } else {
-      console.error('❌ onToggle function not provided to AdminSidebar');
     }
   };
 
   const handleLinkClick = path => {
-    console.log('🔗 AdminSidebar link clicked:', {
-      timestamp: new Date().toISOString(),
-      path,
-      currentPath,
-    });
-    // Close sidebar on mobile when a link is clicked
-    if (isMobile && isOpen && onToggle) {
+    // Close sidebar when a link is clicked
+    if (isOpen && onToggle) {
       onToggle();
     }
   };
 
   const handleBackdropClick = () => {
-    if (isMobile && isOpen && onToggle) {
+    if (isOpen && onToggle) {
       onToggle();
     }
   };
 
-  // Close sidebar on escape key press (mobile)
+  // Close sidebar on escape key press
   useEffect(() => {
     const handleEscapeKey = (event) => {
-      if (event.key === 'Escape' && isMobile && isOpen && onToggle) {
+      if (event.key === 'Escape' && isOpen && onToggle) {
         onToggle();
       }
     };
@@ -64,17 +35,15 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isOpen, onToggle, isMobile]);
+  }, [isOpen, onToggle]);
 
   return (
     <>
-      {/* Mobile backdrop */}
-      {isMobile && (
-        <div 
-          className={`mobile-sidebar-backdrop ${isOpen ? 'visible' : ''}`}
-          onClick={handleBackdropClick}
-        />
-      )}
+      {/* Backdrop */}
+      <div 
+        className={`mobile-sidebar-backdrop ${isOpen ? 'visible' : ''}`}
+        onClick={handleBackdropClick}
+      />
       
       <div className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
@@ -106,6 +75,14 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
           >
             <span className="nav-icon">🗄️</span>
             <span className="nav-text">Data Models</span>
+          </Link>
+          <Link
+            to="/admin/models/user"
+            className={`nav-item ${currentPath.includes('/admin/models/user') ? 'active' : ''}`}
+            onClick={() => handleLinkClick('/admin/models/user')}
+          >
+            <span className="nav-icon">👥</span>
+            <span className="nav-text">Manage Users</span>
           </Link>
         </div>
 

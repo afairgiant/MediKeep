@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,10 +38,18 @@ import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { 
+  formatDateForAPI, 
+  getTodayString, 
+  isDateInFuture, 
+  isEndDateBeforeStartDate 
+} from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
+import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 
 // Modular components
 import {
@@ -51,6 +61,7 @@ import {
 const Conditions = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   
   // Load medications and practitioners for linking dropdowns
@@ -112,11 +123,12 @@ const Conditions = () => {
 
   const handleAddCondition = () => {
     setEditingCondition(null);
+    // Apply default status early to avoid validation conflicts
     setFormData({
       condition_name: '',
       diagnosis: '',
       notes: '',
-      status: 'active',
+      status: 'active', // Default status applied early
       severity: '',
       medication_id: '',
       practitioner_id: '',
@@ -161,7 +173,7 @@ const Conditions = () => {
           setMedications(response || []);
         })
         .catch(error => {
-          console.error('Failed to fetch medications:', error);
+          logger.error('Failed to fetch medications:', error);
           setMedications([]);
         });
       
@@ -171,7 +183,7 @@ const Conditions = () => {
           setPractitioners(response || []);
         })
         .catch(error => {
-          console.error('Failed to fetch practitioners:', error);
+          logger.error('Failed to fetch practitioners:', error);
           setPractitioners([]);
         });
     }
@@ -194,11 +206,12 @@ const Conditions = () => {
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
+    // Apply default status early if condition doesn't have one
     setFormData({
       condition_name: condition.condition_name || '',
       diagnosis: condition.diagnosis || '',
       notes: condition.notes || '',
-      status: condition.status || 'active',
+      status: condition.status || 'active', // Default status applied early for consistency
       severity: condition.severity || '',
       medication_id: condition.medication_id ? condition.medication_id.toString() : '',
       practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',
@@ -236,21 +249,52 @@ const Conditions = () => {
       return;
     }
 
+
+    // Validate dates
+    const todayString = getTodayString();
+    
+    if (isDateInFuture(formData.onset_date)) {
+      setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
+    }
+    
+    if (isDateInFuture(formData.end_date)) {
+      setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      return;
+    }
+    
+    if (isEndDateBeforeStartDate(formData.onset_date, formData.end_date)) {
+      setError('End date cannot be before onset date');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.status) {
+      setError('Status is required. Please select a status.');
+      return;
+    }
+    
+    if (!formData.diagnosis) {
+      setError('Diagnosis is required.');
+      return;
+    }
+
     const conditionData = {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: formData.status,
+      status: formData.status || 'active', // Ensure status has a default
       severity: formData.severity || null,
       medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
-      onset_date: formData.onset_date || null, // Use snake_case to match API
-      end_date: formData.end_date || null, // Use snake_case to match API
+      onset_date: formatDateForAPI(formData.onset_date),
+      end_date: formatDateForAPI(formData.end_date),
       patient_id: currentPatient.id,
     };
+
 
     let success;
     if (editingCondition) {
@@ -401,7 +445,7 @@ const Conditions = () => {
                 {filteredConditions.map((condition, index) => (
                   <Grid.Col
                     key={condition.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
+                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -423,16 +467,16 @@ const Conditions = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={filteredConditions}
                 columns={[
-                  { header: 'Condition', accessor: 'diagnosis' },
-                  { header: 'Severity', accessor: 'severity' },
-                  { header: 'Onset Date', accessor: 'onset_date' },
-                  { header: 'End Date', accessor: 'end_date' },
-                  { header: 'Status', accessor: 'status' },
-                  { header: 'ICD-10', accessor: 'icd10_code' },
-                  { header: 'Notes', accessor: 'notes' },
+                  { header: 'Condition', accessor: 'diagnosis', priority: 'high', width: 200 },
+                  { header: 'Severity', accessor: 'severity', priority: 'high', width: 120 },
+                  { header: 'Onset Date', accessor: 'onset_date', priority: 'medium', width: 130 },
+                  { header: 'End Date', accessor: 'end_date', priority: 'low', width: 130 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
+                  { header: 'ICD-10', accessor: 'icd10_code', priority: 'low', width: 100 },
+                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName="Conditions"
@@ -448,6 +492,8 @@ const Conditions = () => {
                   icd10_code: getEntityFormatters('conditions').simple,
                   notes: getEntityFormatters('conditions').notes,
                 }}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -469,4 +515,8 @@ const Conditions = () => {
   );
 };
 
-export default Conditions;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Conditions, {
+  injectResponsive: true,
+  displayName: 'ResponsiveConditions'
+});

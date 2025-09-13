@@ -6,11 +6,45 @@
 
 .model-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 15px;
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--color-border-light, #e5e7eb);
+}
+
+.model-header-top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.model-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: var(--color-gray-100, #f3f4f6);
+  color: var(--color-gray-700, #374151);
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background: var(--color-gray-200, #e5e7eb);
+  color: var(--color-gray-800, #1f2937);
+  border-color: var(--color-gray-400, #9ca3af);
 }
 
 .model-title h1 {
@@ -256,477 +290,13 @@
 
 /* Responsive Design - Sidebar-aware breakpoints */
 /* Large desktop screens - sidebar + content fits comfortably */
-@media (min-width: 1300px) {
-  .model-management {
-    max-width: 1400px;
-    padding: 0 20px;
-  }
-
-  .model-header {
-    margin-bottom: 35px;
-    padding-bottom: 25px;
-  }
-
-  .model-title h1 {
-    font-size: 2.2rem;
-  }
-
-  .model-title p {
-    font-size: 1.1rem;
-  }
-
-  .model-controls {
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-
-  .search-section {
-    max-width: 450px;
-  }
-
-  .search-input {
-    padding: 12px 18px;
-    font-size: 1rem;
-  }
-
-  .per-page-select {
-    padding: 10px 15px;
-    font-size: 1rem;
-  }
-}
 
 /* Medium desktop - account for sidebar width (1024px - 280px = 744px content) */
-@media (min-width: 1024px) and (max-width: 1299px) {
-  .model-management {
-    max-width: 100%;
-    padding: 0 15px;
-  }
-
-  .model-header {
-    margin-bottom: 28px;
-    padding-bottom: 18px;
-  }
-
-  .model-title h1 {
-    font-size: 1.9rem;
-  }
-
-  .model-title p {
-    font-size: 0.95rem;
-  }
-
-  .model-controls {
-    padding: 18px;
-    margin-bottom: 18px;
-  }
-
-  .search-section {
-    max-width: 350px;
-  }
-
-  .search-input {
-    padding: 10px 14px;
-    font-size: 0.9rem;
-  }
-
-  .per-page-select {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
-
-  .model-table-container {
-    overflow-x: auto;
-  }
-
-  .model-table {
-    min-width: 700px;
-  }
-
-  .model-table th,
-  .model-table td {
-    padding: 10px 12px;
-    font-size: 0.85rem;
-  }
-
-  .record-actions {
-    gap: 4px;
-  }
-
-  .btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-  }
-
-  .btn-sm {
-    padding: 4px 8px;
-    font-size: 0.75rem;
-  }
-}
 
 /* Small desktop/large tablet - sidebar significantly reduces available width */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .model-management {
-    max-width: 100%;
-    padding: 0 12px;
-  }
-
-  .model-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-  }
-
-  .model-title h1 {
-    font-size: 1.75rem;
-  }
-
-  .model-title p {
-    font-size: 0.9rem;
-  }
-
-  .model-actions {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .model-controls {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-
-  .search-section {
-    max-width: none;
-  }
-
-  .search-input {
-    padding: 10px 14px;
-    font-size: 0.9rem;
-  }
-
-  .per-page-select {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    align-self: flex-start;
-  }
-
-  .bulk-actions {
-    flex-direction: column;
-    gap: 8px;
-    align-items: stretch;
-    text-align: center;
-    padding: 10px 16px;
-  }
-
-  .model-table-container {
-    overflow-x: auto;
-  }
-
-  .model-table {
-    min-width: 600px;
-  }
-
-  .model-table th,
-  .model-table td {
-    padding: 8px 10px;
-    font-size: 0.8rem;
-  }
-
-  .record-actions {
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-  }
-
-  .btn-sm {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-  }
-
-  .pagination {
-    padding: 16px;
-    gap: 12px;
-  }
-}
 
 /* Small tablets and large mobile screens */
-@media (max-width: 767px) {
-  .model-management {
-    padding: 0 10px;
-  }
-
-  .model-header {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-  }
-
-  .model-title h1 {
-    font-size: 1.6rem;
-  }
-
-  .model-title p {
-    font-size: 0.9rem;
-  }
-
-  .model-actions {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .model-controls {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-
-  .search-section {
-    max-width: none;
-  }
-
-  .search-input {
-    padding: 10px 14px;
-    font-size: 0.9rem;
-  }
-
-  .per-page-select {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    align-self: flex-start;
-    max-width: 120px;
-  }
-
-  .bulk-actions {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-    text-align: center;
-    padding: 12px 16px;
-  }
-
-  .model-table-container {
-    overflow-x: auto;
-    border-radius: 6px;
-  }
-
-  .model-table {
-    min-width: 500px;
-  }
-
-  .model-table th,
-  .model-table td {
-    padding: 8px 10px;
-    font-size: 0.8rem;
-  }
-
-  .record-actions {
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-  }
-
-  .btn-sm {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-  }
-
-  .pagination {
-    padding: 16px;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .pagination-info {
-    order: -1;
-    flex-basis: 100%;
-    text-align: center;
-    margin-bottom: 8px;
-    font-size: 0.85rem;
-  }
-}
 
 /* Mobile phone screens */
-@media (max-width: 480px) {
-  .model-management {
-    padding: 0 8px;
-  }
-
-  .model-header {
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-  }
-
-  .model-title h1 {
-    font-size: 1.4rem;
-  }
-
-  .model-title p {
-    font-size: 0.85rem;
-  }
-
-  .model-controls {
-    padding: 14px;
-    margin-bottom: 14px;
-    border-radius: 6px;
-  }
-
-  .search-input {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
-
-  .per-page-select {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    max-width: 100px;
-  }
-
-  .bulk-actions {
-    padding: 10px 14px;
-    margin-bottom: 14px;
-  }
-
-  .bulk-actions span {
-    font-size: 0.85rem;
-  }
-
-  .model-table-container {
-    border-radius: 6px;
-  }
-
-  .model-table {
-    min-width: 400px;
-  }
-
-  .model-table th,
-  .model-table td {
-    padding: 6px 8px;
-    font-size: 0.75rem;
-  }
-
-  .model-table th {
-    font-size: 0.7rem;
-  }
-
-  .model-table td {
-    max-width: 120px;
-  }
-
-  .record-actions {
-    gap: 2px;
-  }
-
-  .btn {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-  }
-
-  .btn-sm {
-    padding: 3px 6px;
-    font-size: 0.65rem;
-  }
-
-  .pagination {
-    padding: 12px;
-    gap: 8px;
-  }
-
-  .pagination-info {
-    font-size: 0.8rem;
-  }
-
-  .pk-indicator {
-    font-size: 0.6rem;
-    padding: 1px 3px;
-    margin-left: 3px;
-  }
-}
 
 /* Very small mobile screens */
-@media (max-width: 360px) {
-  .model-management {
-    padding: 0 6px;
-  }
-
-  .model-header {
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-  }
-
-  .model-title h1 {
-    font-size: 1.2rem;
-    word-break: break-word;
-  }
-
-  .model-title p {
-    font-size: 0.8rem;
-  }
-
-  .model-controls {
-    padding: 12px;
-    margin-bottom: 12px;
-  }
-
-  .search-input {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-  }
-
-  .per-page-select {
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    max-width: 80px;
-  }
-
-  .model-table {
-    min-width: 320px;
-  }
-
-  .model-table th,
-  .model-table td {
-    padding: 4px 6px;
-    font-size: 0.7rem;
-  }
-
-  .model-table td {
-    max-width: 100px;
-  }
-
-  .btn {
-    padding: 3px 6px;
-    font-size: 0.65rem;
-  }
-
-  .btn-sm {
-    padding: 2px 4px;
-    font-size: 0.6rem;
-  }
-
-  .pagination {
-    padding: 10px;
-    gap: 6px;
-  }
-
-  .pagination-info {
-    font-size: 0.75rem;
-  }
-}

@@ -2,6 +2,8 @@
  * VitalsForm Component - Enhanced Version with Mantine UI
  * Modern form for creating and editing patient vital signs with improved UX
  */
+import logger from '../../services/logger';
+
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -557,7 +559,7 @@ const VitalsForm = ({
       await onSave(processedData);
       toast.success(`Vitals ${isEdit ? 'updated' : 'recorded'} successfully!`);
     } catch (error) {
-      console.error('Error saving vitals:', error);
+      logger.error('Error saving vitals:', error);
       toast.error(`Failed to ${isEdit ? 'update' : 'save'} vitals`);
     } finally {
       setIsLoading(false);

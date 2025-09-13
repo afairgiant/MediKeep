@@ -174,40 +174,5 @@
 /* Remove portrait monitor overlay - let normal layout handle it */
 
 /* Responsive design */
-@media (max-width: 768px) {
-  .admin-sidebar {
-    transform: translateX(-100%);
-    z-index: 1100; /* Higher z-index on mobile to overlay content */
-  }
-
-  .admin-sidebar.open {
-    transform: translateX(0);
-    width: 280px;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3); /* Enhanced shadow for mobile overlay */
-  }
-
-  .admin-sidebar.closed {
-    transform: translateX(-100%);
-  }
-}
 
 /* Mobile overlay backdrop */
-@media (max-width: 768px) {
-  .mobile-sidebar-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1050;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .mobile-sidebar-backdrop.visible {
-    opacity: 1;
-    visibility: visible;
-  }
-}

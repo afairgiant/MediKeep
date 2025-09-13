@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,12 @@ from app.api import deps
 from app.core.config import settings
 from app.core.logging_config import get_logger, log_security_event
 from app.core.security import create_access_token, verify_password
+from app.core.error_handling import (
+    UnauthorizedException,
+    ConflictException,
+    BusinessLogicException,
+    handle_database_errors
+)
 from app.crud.patient import patient
 from app.crud.user import user
 from app.models.models import User as DBUser
@@ -19,6 +25,16 @@ router = APIRouter()
 # Initialize loggers
 logger = get_logger(__name__, "app")
 security_logger = get_logger(__name__, "security")
+
+
+@router.get("/registration-status")
+def get_registration_status():
+    """Check if new user registration is enabled."""
+    return {
+        "registration_enabled": settings.ALLOW_USER_REGISTRATION,
+        "message": "Registration is currently disabled. Please contact an administrator." 
+                   if not settings.ALLOW_USER_REGISTRATION else None
+    }
 
 
 @router.post("/register", response_model=User)
@@ -35,6 +51,22 @@ def register(
     The password will be automatically hashed for security.
     A basic patient record is automatically created for the user.
     """
+    # Check if registration is enabled
+    if not settings.ALLOW_USER_REGISTRATION:
+        logger.warning(
+            f"Registration attempt blocked - registration disabled. Username: {user_in.username}",
+            extra={
+                "category": "security",
+                "event": "registration_blocked",
+                "username": user_in.username,
+                "ip": request.client.host if request.client else "unknown",
+            },
+        )
+        raise UnauthorizedException(
+            message="New user registration is currently disabled. Please contact an administrator.",
+            request=request
+        )
+    
     user_ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
@@ -52,48 +84,22 @@ def register(
     # Check if username already exists
     existing_user = user.get_by_username(db, username=user_in.username)
     if existing_user:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"An account with the username '{user_in.username}' already exists. Please choose a different username."
+        raise ConflictException(
+            message=f"An account with the username '{user_in.username}' already exists. Please choose a different username.",
+            request=request
         )
     
     # Check if email already exists
     existing_email = user.get_by_email(db, email=user_in.email)
     if existing_email:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in."
+        raise ConflictException(
+            message=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in.",
+            request=request
         )
 
-    # Create new user
-    try:
+    # Create new user with database error handling
+    with handle_database_errors(request=request):
         new_user = user.create(db, obj_in=user_in)
-    except Exception as e:
-        # Handle any database constraint violations or other creation errors
-        error_msg = str(e).lower()
-        if "duplicate" in error_msg or "unique" in error_msg:
-            if "username" in error_msg:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"An account with the username '{user_in.username}' already exists. Please choose a different username."
-                )
-            elif "email" in error_msg:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in."
-                )
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail="An account with this information already exists. Please check your username and email."
-                )
-        else:
-            # For other database errors, provide a generic message
-            logger.error(f"Database error during user creation: {e}")
-            raise HTTPException(
-                status_code=500,
-                detail="Unable to create account at this time. Please try again later."
-            )
 
     # Create a basic patient record for the new user using Phase 1 approach
     # Extract first/last names from available user data
@@ -227,17 +233,16 @@ def login(
             },
         )
 
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise UnauthorizedException(
+            message="Incorrect username or password",
+            request=request,
         )
 
     # Validate required fields
     if db_user.id is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User ID is missing in the database record",
+        raise BusinessLogicException(
+            message="User account is incomplete. Please contact support.",
+            request=request
         )
 
     # Get full name, use username as fallback if not set
@@ -260,7 +265,16 @@ def login(
     # Log successful login
     log_successful_login(getattr(db_user, "id", 0), form_data.username, user_ip)
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Get user's timeout preference
+    from app.crud.user_preferences import user_preferences
+    preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
+    session_timeout_minutes = preferences.session_timeout_minutes if preferences else 30
+
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "session_timeout_minutes": session_timeout_minutes
+    }
 
 
 from pydantic import BaseModel
@@ -310,16 +324,16 @@ def change_password(
                 "ip": user_ip,
             },
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Current password is incorrect",
+        raise UnauthorizedException(
+            message="Current password is incorrect",
+            request=request
         )
 
     # Validate new password
     if len(password_data.newPassword) < 6:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="New password must be at least 6 characters long",
+        raise BusinessLogicException(
+            message="New password must be at least 6 characters long",
+            request=request
         )
 
     # Update password

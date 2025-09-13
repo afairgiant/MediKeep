@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -28,22 +28,49 @@ import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
 import { MedicationCard, MedicationViewModal, MedicationFormWrapper } from '../../components/medical/medications';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
+import logger from '../../services/logger';
 
 const Medication = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  
+  // Form state - moved up to be available for refs logic
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingMedication, setViewingMedication] = useState(null);
+  const [editingMedication, setEditingMedication] = useState(null);
 
   // Get practitioners and pharmacies data
   const { practitioners: practitionersObject, pharmacies: pharmaciesObject } =
     usePatientWithStaticData();
 
-  const practitioners = practitionersObject?.practitioners || [];
-  const pharmacies = pharmaciesObject?.pharmacies || [];
+  // Memoize practitioners and pharmacies to prevent unnecessary re-renders
+  // Only recalculate when the actual data changes (not reference)
+  const practitioners = useMemo(() => {
+    const data = practitionersObject?.practitioners || [];
+    logger.debug('Practitioners data updated', {
+      component: 'Medication',
+      practitionersCount: data.length
+    });
+    return data;
+  }, [practitionersObject?.practitioners]);
+
+  const pharmacies = useMemo(() => {
+    const data = pharmaciesObject?.pharmacies || [];
+    logger.debug('Pharmacies data updated', {
+      component: 'Medication', 
+      pharmaciesCount: data.length
+    });
+    return data;
+  }, [pharmaciesObject?.pharmacies]);
 
   // Modern data management with useMedicalData
   const {
@@ -82,7 +109,7 @@ const Medication = () => {
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
   const getMedicationPurpose = (medication, asText = false) => {
     const indication = medication.indication?.trim();
-    return indication || 'No indication specified';
+    return indication || '-';
   };
 
   // Get standardized formatters for medications with linking support
@@ -92,11 +119,8 @@ const Medication = () => {
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
 
-  // Form state
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingMedication, setViewingMedication] = useState(null);
-  const [editingMedication, setEditingMedication] = useState(null);
+
+  // Form data state
   const [formData, setFormData] = useState({
     medication_name: '',
     dosage: '',
@@ -110,7 +134,7 @@ const Medication = () => {
     pharmacy_id: null,
   });
 
-  const handleInputChange = e => {
+  const handleInputChange = useCallback(e => {
     const { name, value } = e.target;
     let processedValue = value;
 
@@ -127,9 +151,9 @@ const Medication = () => {
       ...prev,
       [name]: processedValue,
     }));
-  };
+  }, []);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       medication_name: '',
       dosage: '',
@@ -144,14 +168,19 @@ const Medication = () => {
     });
     setEditingMedication(null);
     setShowAddForm(false);
-  };
+  }, []);
 
   const handleAddMedication = () => {
     resetForm();
     setShowAddForm(true);
   };
+  
+  const handleCloseForm = useCallback(() => {
+    setShowAddForm(false);
+    setEditingMedication(null); // Clear editing state when closing
+  }, []);
 
-  const handleEditMedication = medication => {
+  const handleEditMedication = useCallback((medication) => {
     setFormData({
       medication_name: medication.medication_name || '',
       dosage: medication.dosage || '',
@@ -166,7 +195,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  };
+  }, []);
 
   const handleViewMedication = medication => {
     setViewingMedication(medication);
@@ -214,7 +243,7 @@ const Medication = () => {
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
@@ -222,12 +251,25 @@ const Medication = () => {
       return;
     }
 
+    // Validate medication name
+    const medicationName = formData.medication_name?.trim() || '';
+    if (!medicationName) {
+      setError('Medication name is required');
+      return;
+    }
+    
+    if (medicationName.length < 2) {
+      setError('Medication name must be at least 2 characters long');
+      return;
+    }
+
+    // Prepare medication data - ensure empty strings become null for optional fields
     const medicationData = {
-      medication_name: formData.medication_name?.trim() || '',
-      dosage: formData.dosage?.trim() || '',
-      frequency: formData.frequency?.trim() || '',
-      route: formData.route?.trim() || '',
-      indication: formData.indication?.trim() || '',
+      medication_name: medicationName,  // Required field, already trimmed
+      dosage: formData.dosage?.trim() || null,
+      frequency: formData.frequency?.trim() || null,
+      route: formData.route?.trim() || null,
+      indication: formData.indication?.trim() || null,
       status: formData.status || 'active',
       patient_id: currentPatient.id,
       practitioner_id: formData.practitioner_id
@@ -244,6 +286,13 @@ const Medication = () => {
       medicationData.effective_period_end = formData.effective_period_end;
     }
 
+    // Log the data being sent for debugging
+    logger.debug('Submitting medication data', {
+      component: 'Medication',
+      medicationData,
+      formData
+    });
+
     try {
       let success;
       if (editingMedication) {
@@ -257,13 +306,25 @@ const Medication = () => {
         await refreshData();
       }
     } catch (error) {
-      console.error('Error during save operation:', error);
+      logger.error('Error during save operation:', error);
     }
-  };
+  }, [formData, currentPatient, editingMedication, setError, updateItem, createItem, resetForm, refreshData]);
 
 
-  // Get processed data from data management
-  const processedMedications = dataManagement.data;
+  // Get processed data from data management and add practitioner/pharmacy names for sorting
+  const processedMedications = useMemo(() => {
+    return dataManagement.data.map(medication => ({
+      ...medication,
+      // Add practitioner name for sorting
+      practitioner_name: medication.practitioner_id 
+        ? practitioners.find(p => p.id === medication.practitioner_id)?.name || ''
+        : '',
+      // Add pharmacy name for sorting  
+      pharmacy_name: medication.pharmacy_id
+        ? pharmacies.find(p => p.id === medication.pharmacy_id)?.name || ''
+        : ''
+    }));
+  }, [dataManagement.data, practitioners, pharmacies]);
 
   if (loading) {
     return (
@@ -347,7 +408,7 @@ const Medication = () => {
         {/* Form Modal */}
         <MedicationFormWrapper
           isOpen={showAddForm}
-          onClose={() => setShowAddForm(false)}
+          onClose={handleCloseForm}
           title={editingMedication ? 'Edit Medication' : 'Add New Medication'}
           formData={formData}
           onInputChange={handleInputChange}
@@ -389,7 +450,7 @@ const Medication = () => {
                 {processedMedications.map((medication, index) => (
                   <Grid.Col
                     key={medication.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
+                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -412,27 +473,29 @@ const Medication = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={processedMedications}
-              columns={[
-                { header: 'Medication Name', accessor: 'medication_name' },
-                { header: 'Dosage', accessor: 'dosage' },
-                { header: 'Frequency', accessor: 'frequency' },
-                { header: 'Route', accessor: 'route' },
-                { header: 'Purpose', accessor: 'indication' },
-                { header: 'Prescriber', accessor: 'practitioner_name' },
-                { header: 'Pharmacy', accessor: 'pharmacy_name' },
-                { header: 'Start Date', accessor: 'effective_period_start' },
-                { header: 'End Date', accessor: 'effective_period_end' },
-                { header: 'Status', accessor: 'status' },
-              ]}
-              patientData={currentPatient}
-              tableName="Medications"
-              onView={handleViewMedication}
-              onEdit={handleEditMedication}
-              onDelete={handleDeleteMedication}
-              formatters={formatters}
-            />
+                columns={[
+                  { header: 'Medication Name', accessor: 'medication_name', priority: 'high', width: 200 },
+                  { header: 'Dosage', accessor: 'dosage', priority: 'high', width: 120 },
+                  { header: 'Frequency', accessor: 'frequency', priority: 'medium', width: 120 },
+                  { header: 'Route', accessor: 'route', priority: 'low', width: 100 },
+                  { header: 'Purpose', accessor: 'indication', priority: 'medium', width: 180 },
+                  { header: 'Prescriber', accessor: 'practitioner_name', priority: 'low', width: 150 },
+                  { header: 'Pharmacy', accessor: 'pharmacy_name', priority: 'low', width: 150 },
+                  { header: 'Start Date', accessor: 'effective_period_start', priority: 'low', width: 120 },
+                  { header: 'End Date', accessor: 'effective_period_end', priority: 'low', width: 120 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
+                ]}
+                patientData={currentPatient}
+                tableName="Medications"
+                onView={handleViewMedication}
+                onEdit={handleEditMedication}
+                onDelete={handleDeleteMedication}
+                formatters={formatters}
+                dataType="medical"
+                responsive={responsive}
+              />
             </Paper>
           )}
         </motion.div>
@@ -451,4 +514,8 @@ const Medication = () => {
   );
 };
 
-export default Medication;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Medication, {
+  injectResponsive: true,
+  displayName: 'ResponsiveMedication'
+});

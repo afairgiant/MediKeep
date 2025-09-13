@@ -132,9 +132,3 @@
 }
 
 /* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .loading-spinner__circle,
-  .loading-spinner__inner {
-    animation-duration: 1.5s;
-  }
-}

@@ -42,13 +42,7 @@
     display: none !important;
   }
 
-  /* Hide Mantine UI components but allow containers */
-  [class*='mantine-Card']:not(
-      .medications-table-container [class*='mantine-Card']
-    ),
-  [class*='mantine-Grid']:not(
-      .medications-table-container [class*='mantine-Grid']
-    ),
+  /* Hide Mantine UI components but allow containers and tables */
   [class*='mantine-TextInput'],
   [class*='mantine-Select'],
   [class*='mantine-Button']:not(.print-button),
@@ -151,6 +145,52 @@
   .medical-table thead {
     display: table-header-group;
   }
+  
+  /* Additional rules for Mantine Table headers in ResponsiveTable component */
+  /* These target the specific Mantine Table classes without breaking other elements */
+  table.mantine-Table-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  
+  table.mantine-Table-table thead {
+    display: table-header-group !important;
+  }
+  
+  table.mantine-Table-table th {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #333 !important;
+    font-size: 10px !important;
+    padding: 0.4rem 0.2rem !important;
+    font-weight: bold !important;
+  }
+  
+  table.mantine-Table-table td {
+    border: 1px solid #333 !important;
+    font-size: 9px !important;
+    padding: 0.3rem 0.2rem !important;
+  }
+  
+  /* Show Mantine Group and Text elements ONLY inside table headers */
+  table.mantine-Table-table th [class*='mantine-Group'],
+  table.mantine-Table-table th [class*='mantine-Text'] {
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  
+  /* Hide sort icons in print but keep the text */
+  table.mantine-Table-table th [class*='mantine-ActionIcon'] {
+    display: none !important;
+  }
+  
+  /* Ensure header text is visible */
+  table.mantine-Table-table th [class*='mantine-Text'] {
+    display: inline !important;
+    color: #333 !important;
+    font-weight: bold !important;
+    font-size: 10px !important;
+  }
 
   /* Hide action columns */
   .table-actions,
@@ -224,14 +264,22 @@
 
   /* Hide cards view completely in print */
   .medical-items-grid,
-  .medical-item-card {
+  .medical-item-card,
+  .medical-responsive-cards,
+  .screen-only {
     display: none !important;
   }
 
-  /* Force table view in print */
+  /* Hide screen table view in print and show only print-optimized table */
+  .screen-and-print {
+    display: none !important;
+  }
+
+  /* Show print-optimized tables and legacy table containers in print */
+  .print-only,
   .medications-table-container,
   .medical-table-container {
-    display: block !important;
+    display: table !important;
   }
 
   /* Remove hover effects and transitions */

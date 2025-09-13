@@ -1,6 +1,8 @@
 /**
  * Utility functions for the Medical Records application
  */
+import logger from '../services/logger';
+
 
 import { DATE_FORMATS } from './constants';
 
@@ -70,7 +72,7 @@ export const parseDateSafely = dateInput => {
 
     return new Date(dateInput);
   } catch (error) {
-    console.error('Date parsing error:', error);
+    logger.error('Date parsing error:', error);
     return null;
   }
 };

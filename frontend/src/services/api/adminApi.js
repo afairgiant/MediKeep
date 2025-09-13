@@ -1,4 +1,7 @@
+import logger from '../logger';
+
 import BaseApiService from './baseApi';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
 class AdminApiService extends BaseApiService {
   constructor() {
@@ -48,9 +51,28 @@ class AdminApiService extends BaseApiService {
 
   async getFrontendLogHealth() {
     // Note: This endpoint is not under /admin, so we use the direct path
+    // Migrate legacy data first
+    legacyMigration.migrateFromLocalStorage();
+    const token = secureStorage.getItem('token');
     const response = await fetch('/api/v1/frontend-logs/health', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async getSSOConfig() {
+    // Note: This endpoint is not under /admin, so we use the direct path
+    // Migrate legacy data first
+    legacyMigration.migrateFromLocalStorage();
+    const token = secureStorage.getItem('token');
+    const response = await fetch('/api/v1/auth/sso/config', {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok) {
@@ -146,7 +168,7 @@ class AdminApiService extends BaseApiService {
       // Try to get available models - this requires admin access
       return await this.getAvailableModels();
     } catch (error) {
-      console.error('Admin access test failed:', error);
+      logger.error('Admin access test failed:', error);
       throw error;
     }
   }
@@ -172,7 +194,7 @@ class AdminApiService extends BaseApiService {
     const response = await fetch(
       `${this.baseURL}${this.basePath}/backups/${backupId}/download`,
       {
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
       }
     );
     if (!response.ok) {
@@ -256,7 +278,10 @@ class AdminApiService extends BaseApiService {
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${(() => {
+            legacyMigration.migrateFromLocalStorage();
+            return secureStorage.getItem('token');
+          })()}`,
           // Don't set Content-Type - let browser set it with boundary for FormData
         },
         body: formData,

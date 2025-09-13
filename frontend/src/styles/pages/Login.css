@@ -293,127 +293,82 @@ button[type="submit"]:disabled {
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
-  .login-container {
-    padding: 1rem;
-  }
-  
-  .login-form {
-    padding: 1.5rem;
-    width: 320px;
-    max-width: 90%;
-    margin: 0 auto;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-  
-  .login-form h1 {
-    font-size: 1.4rem;
-    line-height: 1.2;
-  }
-  
-  .login-form h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  .form-group input {
-    padding: 0.65rem;
-    font-size: 0.95rem;
-  }
-  
-  button[type="submit"],
-  .create-user-btn {
-    padding: 0.65rem;
-    font-size: 0.95rem;
-  }
-  
-  .modal-content {
-    margin: 1rem;
-    max-width: calc(100vw - 2rem);
-  }
-  
-  .modal-header,
-  .modal-content form,
-  .create-user-info {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-}
 
 /* Small screens (phones in portrait) */
-@media (max-width: 480px) {
-  .login-form {
-    width: 300px;
-    max-width: 90%;
-    padding: 1.25rem;
-  }
-  
-  .login-form h1 {
-    font-size: 1.3rem;
-    line-height: 1.2;
-  }
-  
-  .login-form h2 {
-    font-size: 1.1rem;
-  }
-}
 
 /* Very small screens */
-@media (max-width: 360px) {
-  .login-form {
-    width: 280px;
-    max-width: 90%;
-    padding: 1rem;
-  }
-  
-  .login-form h1 {
-    font-size: 1.2rem;
-  }
-  
-  .form-group label {
-    font-size: 0.9rem;
-  }
-  
-  .form-group input {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-  
-  button[type="submit"],
-  .create-user-btn {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-}
 
 /* Tablets in portrait mode */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .login-form {
-    width: 340px;
-    max-width: 90%;
-  }
-}
 
 /* Small laptops and regular screens */
-@media (min-width: 1025px) and (max-width: 1366px) {
-  .login-form {
-    width: 340px;
-    max-width: 90%;
-  }
-}
 
 /* Larger screens */
-@media (min-width: 1367px) {
-  .login-form {
-    width: 360px;
-    max-width: 90%;
-  }
+
+/* SSO Section */
+.sso-section {
+  margin: 1.5rem 0;
+}
+
+.divider {
+  text-align: center;
+  margin: 1.5rem 0 1rem 0;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e1e5e9;
+}
+
+.divider span {
+  background: white;
+  color: #666;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  position: relative;
+}
+
+.sso-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #fff;
+  color: #333;
+  border: 2px solid #e1e5e9;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.sso-btn:hover:not(:disabled) {
+  border-color: #667eea;
+  background: #f8f9ff;
+  transform: translateY(-1px);
+}
+
+.sso-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Registration Disabled Message */
+.registration-disabled-message {
+  text-align: center;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #666;
+  font-size: 14px;
+  margin-top: 10px;
 }

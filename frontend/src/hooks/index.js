@@ -28,3 +28,7 @@ export {
   useApiActivityTracker, 
   useNavigationActivityTracker 
 } from './useActivityTracker';
+
+// Custom reports hooks
+export { useCustomReports } from './useCustomReports';
+export { useReportTemplates } from './useReportTemplates';

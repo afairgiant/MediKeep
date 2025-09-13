@@ -16,6 +16,7 @@ from .procedure import procedure
 from .treatment import treatment
 from .user import user
 from .vitals import vitals
+from .insurance import insurance
 
 __all__ = [
     "user",
@@ -34,5 +35,6 @@ __all__ = [
     "treatment",
     "allergy",
     "vitals",
+    "insurance",
     "utils",
 ]

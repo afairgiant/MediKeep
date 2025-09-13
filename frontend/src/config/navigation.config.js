@@ -1,27 +1,22 @@
+import logger from '../services/logger';
+
 import { ENTITY_TYPES } from '../utils/entityRelationships';
 import { buildEntityUrl } from '../utils/entityNavigation';
 
 // Breakpoint definitions
 export const BREAKPOINTS = {
   mobile: 768,
-  tablet: 1024, 
+  tablet: 1024,
   laptop: 1200,
   desktop: 1440,
 };
 
 // Navigation sections shared across all viewports
 export const NAVIGATION_SECTIONS = {
-  core: {
-    title: 'Core',
-    priority: 1,
+  medicalRecords: {
+    title: 'Medical Records',
+    priority: 2,
     items: [
-      { 
-        name: 'Dashboard', 
-        path: '/dashboard', 
-        icon: '🏥',
-        id: 'dashboard',
-        alwaysVisible: true,
-      },
       {
         name: 'Patient Info',
         path: buildEntityUrl(ENTITY_TYPES.PATIENT, 'me'),
@@ -29,12 +24,6 @@ export const NAVIGATION_SECTIONS = {
         id: 'patient-info',
         alwaysVisible: true,
       },
-    ],
-  },
-  medicalRecords: {
-    title: 'Medical Records',
-    priority: 2,
-    items: [
       {
         name: 'Medications',
         path: buildEntityUrl(ENTITY_TYPES.MEDICATION),
@@ -108,9 +97,8 @@ export const NAVIGATION_SECTIONS = {
     ],
   },
   providers: {
-    title: 'Providers',
+    title: 'Misc.',
     priority: 4,
-    hideOnTablet: true, // Special flag for tablet view
     items: [
       {
         name: 'Practitioners',
@@ -124,21 +112,41 @@ export const NAVIGATION_SECTIONS = {
         icon: '🏪',
         id: 'pharmacies',
       },
+      {
+        name: 'Insurance',
+        path: buildEntityUrl(ENTITY_TYPES.INSURANCE),
+        icon: '💳',
+        id: 'insurance',
+      },
+      {
+        name: 'Emergency Contacts',
+        path: buildEntityUrl(ENTITY_TYPES.EMERGENCY_CONTACT),
+        icon: '🚨',
+        id: 'emergency-contacts',
+        alwaysVisible: true,
+      },
     ],
   },
   tools: {
     title: 'Tools',
     priority: 5,
     items: [
-      { 
-        name: 'Export Records', 
-        path: '/export', 
+      {
+        name: 'Custom Reports',
+        path: '/reports/builder',
+        icon: '📊',
+        id: 'custom-reports',
+        featured: true,
+      },
+      {
+        name: 'Export Records',
+        path: '/export',
         icon: '📤',
         id: 'export',
       },
-      { 
-        name: 'Settings', 
-        path: '/settings', 
+      {
+        name: 'Settings',
+        path: '/settings',
         icon: '⚙️',
         id: 'settings',
         alwaysVisible: true,
@@ -153,27 +161,27 @@ export const ADMIN_SECTION = {
   priority: 6,
   requiresAdmin: true,
   items: [
-    { 
-      name: 'Admin Dashboard', 
-      path: '/admin', 
+    {
+      name: 'Admin Dashboard',
+      path: '/admin',
       icon: '🔧',
       id: 'admin-dashboard',
     },
-    { 
-      name: 'Data Models', 
-      path: '/admin/data-models', 
+    {
+      name: 'Data Models',
+      path: '/admin/data-models',
       icon: '🗃️',
       id: 'data-models',
     },
-    { 
-      name: 'Backup Management', 
-      path: '/admin/backup', 
+    {
+      name: 'Backup Management',
+      path: '/admin/backup',
       icon: '💾',
       id: 'backup',
     },
-    { 
-      name: 'System Health', 
-      path: '/admin/system-health', 
+    {
+      name: 'System Health',
+      path: '/admin/system-health',
       icon: '🔍',
       id: 'system-health',
     },
@@ -187,13 +195,18 @@ export const VIEWPORT_CONFIGS = {
     layout: 'sidebar',
     showLabels: true,
     featuredOnly: false, // Show all items in mobile sidebar
-    bottomNavItems: ['dashboard', 'medications', 'lab-results', 'visits', 'settings'], // For future bottom nav
+    bottomNavItems: [
+      'dashboard',
+      'medications',
+      'lab-results',
+      'visits',
+      'settings',
+    ], // For future bottom nav
   },
   tablet: {
-    maxSections: 4,
+    maxSections: 5,
     layout: 'dropdown',
     compactMode: true,
-    hideSections: ['providers'], // Merge providers into tools on tablet
   },
   laptop: {
     maxSections: 6,
@@ -210,29 +223,31 @@ export const VIEWPORT_CONFIGS = {
 
 // Helper function to get navigation sections based on viewport and user role
 export const getNavigationSections = (viewport, isAdmin = false) => {
+  // Removed frequent navigation logging for performance
+
   const sections = { ...NAVIGATION_SECTIONS };
-  
+
   // Add admin section if user is admin
   if (isAdmin) {
     sections.admin = ADMIN_SECTION;
   }
-  
+
   // Apply viewport-specific modifications
   const config = VIEWPORT_CONFIGS[viewport];
-  
+
   if (config?.hideSections) {
     config.hideSections.forEach(sectionKey => {
       delete sections[sectionKey];
     });
   }
-  
+
   return sections;
 };
 
 // Helper to get featured items for quick access
 export const getFeaturedItems = () => {
   const featured = [];
-  
+
   Object.values(NAVIGATION_SECTIONS).forEach(section => {
     section.items.forEach(item => {
       if (item.featured || item.alwaysVisible) {
@@ -243,6 +258,6 @@ export const getFeaturedItems = () => {
       }
     });
   });
-  
+
   return featured;
 };

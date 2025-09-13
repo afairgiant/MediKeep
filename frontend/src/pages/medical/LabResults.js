@@ -9,13 +9,15 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { 
   ERROR_MESSAGES, 
   SUCCESS_MESSAGES,
   getUserFriendlyError
 } from '../../constants/errorMessages';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
@@ -36,11 +38,13 @@ import {
   Text,
   Card,
   Group,
+  Paper,
 } from '@mantine/core';
 
 const LabResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
   // Modern data management with useMedicalData
@@ -207,7 +211,7 @@ const LabResults = () => {
       const count = Array.isArray(files) ? files.length : 0;
       setFileCounts(prev => ({ ...prev, [labResultId]: count }));
     } catch (error) {
-      console.error(`Error refreshing file count for lab result ${labResultId}:`, error);
+      logger.error(`Error refreshing file count for lab result ${labResultId}:`, error);
     }
   }, []);
 
@@ -246,7 +250,7 @@ const LabResults = () => {
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [labResult.id]: count }));
         } catch (error) {
-          console.error(`Error loading file count for lab result ${labResult.id}:`, error);
+          logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
           setFileCounts(prev => ({ ...prev, [labResult.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [labResult.id]: false }));
@@ -614,22 +618,20 @@ const LabResults = () => {
               ))}
             </Grid>
           ) : (
-            <MedicalTable
-              data={filteredLabResults}
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
+                data={filteredLabResults}
               columns={[
-                { header: 'Test Name', accessor: 'test_name' },
-                { header: 'Category', accessor: 'test_category' },
-                { header: 'Type', accessor: 'test_type' },
-                { header: 'Facility', accessor: 'facility' },
-                { header: 'Status', accessor: 'status' },
-                {
-                  header: 'Ordering Practitioner',
-                  accessor: 'practitioner_id',
-                },
-                { header: 'Ordered Date', accessor: 'ordered_date' },
-                { header: 'Completed Date', accessor: 'completed_date' },
-                { header: 'Files', accessor: 'files' },
-              ]}
+                  { header: 'Test Name', accessor: 'test_name', priority: 'high', width: 200 },
+                  { header: 'Category', accessor: 'test_category', priority: 'low', width: 150 },
+                  { header: 'Type', accessor: 'test_type', priority: 'low', width: 120 },
+                  { header: 'Facility', accessor: 'facility', priority: 'low', width: 150 },
+                  { header: 'Status', accessor: 'status', priority: 'high', width: 120 },
+                  { header: 'Ordering Practitioner', accessor: 'practitioner_id', priority: 'low', width: 150 },
+                  { header: 'Ordered Date', accessor: 'ordered_date', priority: 'low', width: 120 },
+                  { header: 'Completed Date', accessor: 'completed_date', priority: 'low', width: 120 },
+                  { header: 'Files', accessor: 'files', priority: 'low', width: 150 }
+                ]}
               patientData={currentPatient}
               tableName="Lab Results"
               onView={handleViewLabResult}
@@ -654,7 +656,10 @@ const LabResults = () => {
                   />
                 ),
               }}
+              dataType="medical"
+              responsive={responsive}
             />
+          </Paper>
           )}
         </Stack>
       </Container>
@@ -713,4 +718,8 @@ const LabResults = () => {
   );
 };
 
-export default LabResults;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(LabResults, {
+  injectResponsive: true,
+  displayName: 'ResponsiveLabResults'
+});

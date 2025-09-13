@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -46,7 +48,7 @@ const ModelManagement = () => {
       setTotalPages(recordsResult.total_pages);
       setTotalRecords(recordsResult.total);
     } catch (err) {
-      console.error('Error loading model data:', err);
+      logger.error('Error loading model data:', err);
       setError(err.message || 'Failed to load model data');
     } finally {
       setLoading(false);
@@ -234,12 +236,23 @@ const ModelManagement = () => {
     <AdminLayout>
       <div className="model-management">
         <div className="model-header">
-          <div className="model-title">
-            <h1>{metadata?.verbose_name_plural || modelName}</h1>
-            <p>{totalRecords} total records</p>
+          <div className="model-header-top">
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/admin/data-models')}
+              className="back-button"
+            >
+              ← Back to Data Models
+            </Button>
           </div>
+          
+          <div className="model-header-main">
+            <div className="model-title">
+              <h1>{metadata?.verbose_name_plural || modelName}</h1>
+              <p>{totalRecords} total records</p>
+            </div>
 
-          <div className="model-actions">
+            <div className="model-actions">
             <Button
               variant="primary"
               onClick={() => {
@@ -253,6 +266,7 @@ const ModelManagement = () => {
             >
               ➕ Add New
             </Button>
+            </div>
           </div>
         </div>
 

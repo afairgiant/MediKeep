@@ -2,6 +2,8 @@
  * Utilities for generating print templates for medical records
  * Provides consistent printing functionality across all medical pages
  */
+import logger from '../services/logger';
+
 
 import { formatDate } from './helpers';
 import { formatFieldLabel, formatFieldValue, formatPhoneFields, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
@@ -350,7 +352,7 @@ export const printInsuranceRecord = (insurance, onSuccess, onError) => {
       onSuccess();
     }
   } catch (error) {
-    console.error('Error generating insurance print:', error);
+    logger.error('Error generating insurance print:', error);
     if (onError) {
       onError(error);
     }

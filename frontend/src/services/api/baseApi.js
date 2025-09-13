@@ -1,5 +1,6 @@
 // Base API service with common functionality
 import logger from '../logger';
+import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 const API_BASE_URL =
   process.env.NODE_ENV === 'production'
     ? process.env.REACT_APP_API_URL || '/api/v1' // Use relative URLs in production
@@ -17,8 +18,10 @@ class BaseApiService {
   }
 
   // Helper method to get auth headers with validation
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
+  async getAuthHeaders() {
+    // Migrate legacy data first
+    await legacyMigration.migrateFromLocalStorage();
+    const token = await secureStorage.getItem('token');
 
     // Validate token before using it
     if (token) {
@@ -42,7 +45,7 @@ class BaseApiService {
             tokenExpired: payload.exp,
             currentTime
           });
-          localStorage.removeItem('token');
+          secureStorage.removeItem('token');
           return { 'Content-Type': 'application/json' };
         }
       } catch (e) {
@@ -51,7 +54,7 @@ class BaseApiService {
           error: e.message,
           action: 'token_removed'
         });
-        localStorage.removeItem('token');
+        secureStorage.removeItem('token');
         return { 'Content-Type': 'application/json' };
       }
     }
@@ -128,14 +131,14 @@ class BaseApiService {
         });
 
         try {
-          const token = localStorage.getItem('token');
+          const token = secureStorage.getItem('token');
           if (!token) {
             logger.error('api_auth_error', {
               message: 'No token found for admin request',
               url,
               action: 'redirect_to_login'
             });
-            localStorage.removeItem('token');
+            secureStorage.removeItem('token');
             window.location.href = '/login';
             return true;
           }
@@ -151,7 +154,7 @@ class BaseApiService {
               url,
               action: 'redirect_to_login'
             });
-            localStorage.removeItem('token');
+            secureStorage.removeItem('token');
             window.location.href = '/login';
             return true;
           }
@@ -172,7 +175,7 @@ class BaseApiService {
             url,
             action: 'redirect_to_login'
           });
-          localStorage.removeItem('token');
+          secureStorage.removeItem('token');
           window.location.href = '/login';
           return true;
         }
@@ -180,9 +183,9 @@ class BaseApiService {
 
       // For non-admin endpoints, handle normally
       try {
-        const token = localStorage.getItem('token');
+        const token = secureStorage.getItem('token');
         if (!token) {
-          localStorage.removeItem('token');
+          secureStorage.removeItem('token');
           window.location.href = '/login';
           return true;
         }
@@ -190,7 +193,7 @@ class BaseApiService {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const currentTime = Date.now() / 1000;
         if (payload.exp < currentTime) {
-          localStorage.removeItem('token');
+          secureStorage.removeItem('token');
           window.location.href = '/login';
           return true;
         }
@@ -204,7 +207,7 @@ class BaseApiService {
         });
         return false;
       } catch (e) {
-        localStorage.removeItem('token');
+        secureStorage.removeItem('token');
         window.location.href = '/login';
         return true;
       }
@@ -305,7 +308,7 @@ class BaseApiService {
       });
 
       const response = await fetch(url, {
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         signal,
       });
 
@@ -327,7 +330,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'POST',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -342,7 +345,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'PUT',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -357,7 +360,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'DELETE',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
         }
       );
       return this.handleResponse(response, errorMessage);
@@ -371,7 +374,7 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'DELETE',
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );

@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/frontend/.cache \
     npm prune --production
 
 # Stage 2: Python backend with built React app
-FROM python:3.12-slim AS backend
+FROM python:3.12-slim-bookworm AS backend
 
 # Set Python environment variables for optimization
 ENV PYTHONDONTWRITEBYTECODE=1 \

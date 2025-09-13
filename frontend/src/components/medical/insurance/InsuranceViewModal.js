@@ -1,3 +1,5 @@
+import logger from '../../../services/logger';
+
 import React from 'react';
 import {
   Modal,
@@ -230,7 +232,7 @@ const InsuranceViewModal = ({
               }
             }}
             onError={(error) => {
-              console.error('Document manager error in insurance view:', error);
+              logger.error('Document manager error in insurance view:', error);
             }}
             showProgressModal={true}
           />

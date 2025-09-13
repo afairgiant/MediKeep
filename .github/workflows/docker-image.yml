@@ -13,7 +13,15 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -21,6 +29,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Normalize image name
+        id: normalize
+        run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}/medical-records" | tr '[:upper:]' '[:lower:]')
+          echo "image=${REGISTRY}/${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -37,25 +52,39 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ steps.normalize.outputs.image }}
           tags: |
             type=raw,value=latest
             type=ref,event=tag
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image by digest
+        id: build
         if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          outputs: type=image,name=${{ steps.normalize.outputs.image }},push-by-digest=true,name-canonical=true,push=true
+      
+      - name: Export digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      
+      - name: Upload digest
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Test Docker image
         if: github.event_name == 'pull_request'
@@ -79,3 +108,54 @@ jobs:
           echo "Stopping container..."
           docker stop test-container
           docker rm test-container
+
+  merge:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    needs:
+      - build
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}/medical-records
+    steps:
+      - name: Normalize image name
+        id: normalize
+        run: |
+          IMAGE_NAME=$(echo "${{ github.repository }}/medical-records" | tr '[:upper:]' '[:lower:]')
+          echo "image=${REGISTRY}/${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+      
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.normalize.outputs.image }}
+          tags: |
+            type=raw,value=latest
+            type=ref,event=tag
+      
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ steps.normalize.outputs.image }}@sha256:%s ' *)

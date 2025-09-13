@@ -143,5 +143,34 @@ export const authErrors = {
         ],
         severity: 'medium',
         domain: 'auth'
+    },
+
+    // Authentication state errors
+    'not authenticated': {
+        title: 'Authentication Required',
+        message: 'Your session has expired or you are not logged in.',
+        color: 'red',
+        icon: 'user-x',
+        suggestions: [
+            'Please refresh the page to restore your session',
+            'Log in again if the problem persists',
+            'Make sure cookies are enabled in your browser'
+        ],
+        severity: 'high',
+        domain: 'auth'
+    },
+
+    'unauthenticated': {
+        title: 'Authentication Required',
+        message: 'Your session has expired or you are not logged in.',
+        color: 'red',
+        icon: 'user-x',
+        suggestions: [
+            'Please refresh the page to restore your session',
+            'Log in again if the problem persists',
+            'Make sure cookies are enabled in your browser'
+        ],
+        severity: 'high',
+        domain: 'auth'
     }
 };

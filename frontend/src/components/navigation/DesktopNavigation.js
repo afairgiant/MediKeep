@@ -67,6 +67,9 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
                 {section.items.map((item) => (
                   <Menu.Item
                     key={item.id}
+                    leftSection={
+                      <span className="nav-icon">{item.icon}</span>
+                    }
                     onClick={() => handleNavigation(item.path)}
                     className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
                   >

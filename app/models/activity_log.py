@@ -148,6 +148,7 @@ class EntityType:
     FAMILY_MEMBER = "family_member"
     INSURANCE = "insurance"
     FAMILY_CONDITION = "family_condition"
+    VITALS = "vitals"
 
     # System entities
     SYSTEM = "system"
@@ -175,6 +176,7 @@ class EntityType:
             cls.FAMILY_MEMBER,
             cls.INSURANCE,
             cls.FAMILY_CONDITION,
+            cls.VITALS,
             cls.SYSTEM,
             cls.BACKUP,
         ]

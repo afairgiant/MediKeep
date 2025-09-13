@@ -1,3 +1,5 @@
+import logger from '../services/logger';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -55,6 +57,7 @@ import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
 import { GlobalSearch } from '../components/common';
 import { InvitationNotifications } from '../components/dashboard';
+import ResponsiveTest from '../components/ResponsiveTest';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
@@ -164,13 +167,31 @@ const Dashboard = () => {
 
   const checkAdminStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // Use secure storage system instead of direct localStorage
+      const { secureStorage, legacyMigration } = await import('../utils/secureStorage');
+      await legacyMigration.migrateFromLocalStorage();
+      const token = await secureStorage.getItem('token');
+      
+      logger.info('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
+        hasToken: !!token,
+        tokenPreview: token ? token.substring(0, 20) + '...' : null,
+        timestamp: new Date().toISOString()
+      });
+      
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const userRole = payload.role || '';
         const adminCheck =
           userRole.toLowerCase() === 'admin' ||
           userRole.toLowerCase() === 'administrator';
+        
+        logger.info('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
+          role: userRole,
+          isAdmin: adminCheck,
+          fullPayload: payload,
+          timestamp: new Date().toISOString()
+        });
+        
         setIsAdmin(adminCheck);
       } else {
         setIsAdmin(false);
@@ -443,11 +464,11 @@ const Dashboard = () => {
     const Icon = module.icon;
 
     const handleClick = (e) => {
-      console.log('ModuleCard clicked:', module.link);
+      logger.info('ModuleCard clicked:', module.link);
       try {
         navigate(module.link);
       } catch (error) {
-        console.error('Navigation error:', error);
+        logger.error('Navigation error:', error);
         frontendLogger.logError('Navigation error from ModuleCard', {
           error: error.message,
           component: 'Dashboard',
@@ -684,6 +705,9 @@ const Dashboard = () => {
       />
 
       <Stack gap="lg">
+        {/* Responsive Test Component (Temporary for PR #1) - Temporarily disabled */}
+        {/* <ResponsiveTest /> */}
+        
         {/* Welcome Section */}
         {showWelcomeBox && (
           <Paper
@@ -746,13 +770,14 @@ const Dashboard = () => {
             align="flex-start"
             gap="md"
             direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
+            wrap="wrap"
+            style={{ width: '100%' }}
           >
             {/* Patient Selector */}
             <Box style={{ 
-              flex: '1', 
-              maxWidth: '500px', 
-              width: '100%',
-              minWidth: '300px' // Ensure minimum visibility
+              flex: '1 1 auto', 
+              maxWidth: '500px',
+              minWidth: '200px'
             }}>
               <PatientSelector
                 onPatientChange={handlePatientChange}
@@ -765,10 +790,10 @@ const Dashboard = () => {
             {/* Search Bar */}
             <Box
               style={{
-                flexShrink: 0,
-                width: '100%',
-                maxWidth: '300px',
-                minWidth: '250px', // Ensure minimum search bar width
+                flexShrink: 1,
+                flex: '0 1 250px',
+                maxWidth: '250px',
+                minWidth: '150px',
               }}
             >
               <GlobalSearch
@@ -853,11 +878,11 @@ const Dashboard = () => {
                         p="sm"
                         radius="md"
                         onClick={(e) => {
-                          console.log('Additional resource clicked:', module.link);
+                          logger.info('Additional resource clicked:', module.link);
                           try {
                             navigate(module.link);
                           } catch (error) {
-                            console.error('Navigation error:', error);
+                            logger.error('Navigation error:', error);
                             frontendLogger.logError('Navigation error from additional resource', {
                               error: error.message,
                               component: 'Dashboard',

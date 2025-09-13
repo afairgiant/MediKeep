@@ -198,8 +198,10 @@ export const medicationFormFields = [
     label: 'Medication Name',
     placeholder: 'e.g., Lisinopril, Metformin',
     required: true,
-    description: 'Generic or brand name of the medication',
+    description: 'Generic or brand name of the medication (min. 2 characters)',
     gridColumn: 6,
+    minLength: 2,
+    maxLength: 255,
   },
   {
     name: 'dosage',
@@ -287,6 +289,7 @@ export const medicationFormFields = [
     gridColumn: 6,
     searchable: true,
     clearable: true,
+    maxDropdownHeight: 200, // Fixed height to prevent viewport calculation loops
     dynamicOptions: 'practitioners',
   },
   {
@@ -298,6 +301,7 @@ export const medicationFormFields = [
     gridColumn: 6,
     searchable: true,
     clearable: true,
+    maxDropdownHeight: 200, // Fixed height to prevent viewport calculation loops
     dynamicOptions: 'pharmacies',
   },
 ];
@@ -697,14 +701,13 @@ export const practitionerFormFields = [
   },
   {
     name: 'specialty',
-    type: 'select',
+    type: 'combobox',
     label: 'Medical Specialty',
-    placeholder: 'Select specialty',
-    description: 'Primary area of medical practice',
+    placeholder: 'Search specialties or type custom...',
+    description: 'Select from list or type a custom specialty',
     required: true,
     gridColumn: 6,
-    searchable: true,
-    maxDropdownHeight: 300,
+    maxDropdownHeight: 200,
     dynamicOptions: 'specialties',
   },
   {

@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useCallback } from 'react';
 import {
   Paper,
@@ -100,7 +102,7 @@ const FileUploadZone = ({
 
     // Immediately upload valid files - NO QUEUE!
     if (validFiles.length > 0 && onUpload) {
-      console.log('Immediately uploading files:', validFiles.map(f => f.file.name));
+      logger.info('Immediately uploading files:', validFiles.map(f => f.file.name));
       onUpload(validFiles);
     }
   }, [disabled, maxFiles, validateFile, onValidationError, onUpload]);

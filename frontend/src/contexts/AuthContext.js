@@ -8,6 +8,8 @@ import {
 import logger from '../services/logger';
 import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
+import { isAdminRole } from '../utils/authUtils';
+import { secureStorage, legacyMigration } from '../utils/secureStorage';
 
 // Auth State Management
 const initialState = {
@@ -18,6 +20,7 @@ const initialState = {
   error: null,
   tokenExpiry: null,
   lastActivity: Date.now(),
+  sessionTimeoutMinutes: 30, // Default timeout
 };
 
 // Auth Actions
@@ -30,6 +33,7 @@ const AUTH_ACTIONS = {
   UPDATE_ACTIVITY: 'UPDATE_ACTIVITY',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR',
+  UPDATE_SESSION_TIMEOUT: 'UPDATE_SESSION_TIMEOUT',
 };
 
 // Auth Reducer
@@ -51,6 +55,7 @@ function authReducer(state, action) {
         error: null,
         tokenExpiry: action.payload.tokenExpiry,
         lastActivity: Date.now(),
+        sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 30,
       };
 
     case AUTH_ACTIONS.LOGIN_FAILURE:
@@ -97,6 +102,12 @@ function authReducer(state, action) {
         error: null,
       };
 
+    case AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT:
+      return {
+        ...state,
+        sessionTimeoutMinutes: action.payload,
+      };
+
     default:
       return state;
   }
@@ -134,9 +145,12 @@ export function AuthProvider({ children }) {
       try {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
 
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        const storedExpiry = localStorage.getItem('tokenExpiry');
+        // Migrate legacy localStorage data if present
+        await legacyMigration.migrateFromLocalStorage();
+        
+        const storedToken = await secureStorage.getItem('token');
+        const storedUser = await secureStorage.getItem('user');
+        const storedExpiry = await secureStorage.getItem('tokenExpiry');
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
@@ -144,6 +158,14 @@ export function AuthProvider({ children }) {
           if (!isTokenExpired(tokenExpiry)) {
             // Token is still valid, verify with server
             try {
+              logger.info('Verifying stored token with server', {
+                category: 'auth_restore_attempt',
+                tokenExpiry: tokenExpiry,
+                currentTime: Date.now(),
+                hoursUntilExpiry: ((tokenExpiry - Date.now()) / (1000 * 60 * 60)).toFixed(2),
+                timestamp: new Date().toISOString()
+              });
+              
               const user = await authService.getCurrentUser();
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -153,14 +175,40 @@ export function AuthProvider({ children }) {
                   tokenExpiry,
                 },
               });
+              
+              logger.info('Authentication restored successfully', {
+                category: 'auth_restore_success',
+                userId: user.id,
+                username: user.username,
+                timestamp: new Date().toISOString()
+              });
             } catch (error) {
               // Token invalid on server, clear local storage
+              logger.warn('Stored token invalid on server, clearing auth data', {
+                category: 'auth_restore_failure',
+                error: error.message,
+                errorStack: error.stack,
+                tokenExpiry: tokenExpiry,
+                currentTime: Date.now(),
+                wasExpired: tokenExpiry < Date.now(),
+                timestamp: new Date().toISOString()
+              });
               clearAuthData();
               dispatch({ type: AUTH_ACTIONS.LOGOUT });
             }
           } else {
             // Token expired, try to refresh
             try {
+              // Check if refreshToken method exists
+              if (typeof authService.refreshToken !== 'function') {
+                logger.warn('Token refresh not available, logging out', {
+                  category: 'auth_refresh_unavailable'
+                });
+                clearAuthData();
+                dispatch({ type: AUTH_ACTIONS.LOGOUT });
+                return;
+              }
+              
               const refreshResult = await authService.refreshToken();
               if (refreshResult.success) {
                 dispatch({
@@ -170,16 +218,36 @@ export function AuthProvider({ children }) {
                     tokenExpiry: refreshResult.tokenExpiry,
                   },
                 });
+                await updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
+                
+                logger.info('Token refreshed successfully during auth initialization', {
+                  category: 'auth_refresh_success',
+                  timestamp: new Date().toISOString()
+                });
               } else {
+                logger.warn('Token refresh failed during auth initialization', {
+                  category: 'auth_refresh_failure',
+                  timestamp: new Date().toISOString()
+                });
                 clearAuthData();
                 dispatch({ type: AUTH_ACTIONS.LOGOUT });
               }
             } catch (error) {
+              logger.error('Token refresh error during auth initialization', {
+                category: 'auth_refresh_error',
+                error: error.message,
+                timestamp: new Date().toISOString()
+              });
               clearAuthData();
               dispatch({ type: AUTH_ACTIONS.LOGOUT });
             }
           }
         } else {
+          // No stored auth data
+          logger.info('No stored authentication data found', {
+            category: 'auth_init_no_data',
+            timestamp: new Date().toISOString()
+          });
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } catch (error) {
@@ -187,12 +255,16 @@ export function AuthProvider({ children }) {
           message: 'Auth initialization failed',
           error: error.message,
           stack: error.stack,
-          hasStoredToken: !!localStorage.getItem('token'),
-          hasStoredUser: !!localStorage.getItem('user'),
-          hasStoredExpiry: !!localStorage.getItem('tokenExpiry'),
+          hasStoredToken: !!(await secureStorage.getItem('token')),
+          hasStoredUser: !!(await secureStorage.getItem('user')),
+          hasStoredExpiry: !!(await secureStorage.getItem('tokenExpiry')),
           timestamp: new Date().toISOString()
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      } finally {
+        // Always ensure loading is set to false when initialization completes
+        // This prevents indefinite loading states
+        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
 
@@ -200,7 +272,9 @@ export function AuthProvider({ children }) {
   }, []);
   // Auto-refresh token before expiry
   useEffect(() => {
-    if (!state.isAuthenticated || !state.tokenExpiry) return;
+    if (!state.isAuthenticated || !state.tokenExpiry) {
+      return;
+    }
 
     const refreshBuffer = 5 * 60 * 1000; // 5 minutes before expiry
     const timeUntilRefresh = state.tokenExpiry - Date.now() - refreshBuffer;
@@ -208,6 +282,13 @@ export function AuthProvider({ children }) {
     if (timeUntilRefresh > 0) {
       const refreshTimer = setTimeout(async () => {
         try {
+          // Check if refreshToken method exists
+          if (typeof authService.refreshToken !== 'function') {
+            clearAuthData();
+            dispatch({ type: AUTH_ACTIONS.LOGOUT });
+            return;
+          }
+          
           const refreshResult = await authService.refreshToken();
           if (refreshResult.success) {
             dispatch({
@@ -217,7 +298,7 @@ export function AuthProvider({ children }) {
                 tokenExpiry: refreshResult.tokenExpiry,
               },
             });
-            updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
+            await updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
           } else {
             clearAuthData();
             dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -252,13 +333,15 @@ export function AuthProvider({ children }) {
     const checkActivity = () => {
       try {
         const timeSinceLastActivity = Date.now() - state.lastActivity;
+        // Use user's custom timeout or fallback to config
+        const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
         
-        if (timeSinceLastActivity > config.SESSION_TIMEOUT) {
+        if (timeSinceLastActivity > sessionTimeoutMs) {
           secureActivityLogger.logSessionEvent({
             action: 'session_expired',
             reason: 'inactivity',
             timeSinceLastActivity,
-            sessionTimeout: config.SESSION_TIMEOUT
+            sessionTimeout: sessionTimeoutMs
           });
           
           toast.info('Session expired due to inactivity');
@@ -285,9 +368,11 @@ export function AuthProvider({ children }) {
     try {
       activityTimer = setInterval(checkActivity, config.SESSION_CHECK_INTERVAL);
       
+      const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
       secureActivityLogger.logSessionEvent({
         action: 'session_monitoring_started',
-        sessionTimeout: config.SESSION_TIMEOUT,
+        sessionTimeout: sessionTimeoutMs,
+        sessionTimeoutMinutes: state.sessionTimeoutMinutes || 30,
         checkInterval: config.SESSION_CHECK_INTERVAL
       });
     } catch (error) {
@@ -317,12 +402,11 @@ export function AuthProvider({ children }) {
 
   // Helper functions
   const clearAuthData = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('tokenExpiry');
+    secureStorage.removeItem('token');
+    secureStorage.removeItem('user');
+    secureStorage.removeItem('tokenExpiry');
     
     // Clear any cached app data to ensure fresh data on next login
-    // This is additional insurance for cache clearing
     const cacheKeys = Object.keys(localStorage).filter(key => 
       key.startsWith('appData_') || 
       key.startsWith('patient_') || 
@@ -330,19 +414,21 @@ export function AuthProvider({ children }) {
     );
     
     cacheKeys.forEach(key => {
+      // Legacy cleanup - remove from both storages
       localStorage.removeItem(key);
+      secureStorage.removeItem(key);
     });
     
     // Note: We don't clear first login status as it should persist across sessions
   };
 
-  const updateStoredToken = (token, tokenExpiry) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('tokenExpiry', tokenExpiry.toString());
+  const updateStoredToken = async (token, tokenExpiry) => {
+    await secureStorage.setItem('token', token);
+    await secureStorage.setItem('tokenExpiry', tokenExpiry.toString());
   };
 
-  const updateStoredUser = user => {
-    localStorage.setItem('user', JSON.stringify(user));
+  const updateStoredUser = async user => {
+    await secureStorage.setJSON('user', user);
   };
 
   // Update user data in context and storage
@@ -358,70 +444,149 @@ export function AuthProvider({ children }) {
       },
     });
 
-    updateStoredUser(updatedUser);
+    // Note: Not awaiting here as this is called synchronously from components
+    // The storage will complete in the background
+    secureStorage.setJSON('user', updatedUser);
     return updatedUser;
   };
 
-  // Auth Actions
-  const login = async credentials => {
+  // Auth Actions - handles both username/password credentials and SSO user/token
+  const login = async (credentialsOrUser, tokenFromSSO = null) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      const result = await authService.login(credentials);
-
-      if (result.success) {
-        const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-        // Clear any existing cache data before login
-        // This ensures fresh data is loaded for the new user session
-        logger.info('Clearing cache before login', {
-          category: 'auth_cache_clear',
-          username: result.user.username,
-          userId: result.user.id,
+      // Check if this is SSO login (user object + token) or regular login (credentials)
+      const isSSO = tokenFromSSO !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
+      
+      let user, token, tokenExpiry, result;
+      
+      if (isSSO) {
+        // SSO login - we already have user and token
+        user = {
+          ...credentialsOrUser,
+          // Ensure isAdmin property is set based on role
+          isAdmin: isAdminRole(credentialsOrUser.role)
+        };
+        token = tokenFromSSO;
+        
+        // Try to extract expiry from the SSO token
+        try {
+          const tokenParts = token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (payload.exp) {
+              tokenExpiry = payload.exp * 1000; // Convert from seconds to milliseconds
+            }
+          }
+        } catch (e) {
+          logger.warn('Failed to extract expiry from SSO token', {
+            category: 'auth_sso_token_parse',
+            error: e.message
+          });
+        }
+        
+        logger.info('Processing SSO login', {
+          category: 'auth_sso_login',
+          username: user.username,
+          userId: user.id,
+          role: user.role,
+          isAdmin: user.isAdmin,
+          tokenExpiry: tokenExpiry,
           timestamp: new Date().toISOString()
         });
-
-        // Clear any existing cached data from localStorage
-        const cacheKeys = Object.keys(localStorage).filter(key => 
-          key.startsWith('appData_') || 
-          key.startsWith('patient_') || 
-          key.startsWith('cache_')
-        );
-        
-        cacheKeys.forEach(key => {
-          localStorage.removeItem(key);
-        });
-
-        // Store in localStorage
-        updateStoredToken(result.token, tokenExpiry);
-        updateStoredUser(result.user);
-
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: {
-            user: result.user,
-            token: result.token,
-            tokenExpiry,
-          },
-        });
-
-        toast.success('Login successful!');
-
-        // Check if profile completion modal should be shown
-        // This will be handled by the component consuming the auth context
-
-        return {
-          success: true,
-          isFirstLogin: isFirstLogin(result.user.username),
-        };
       } else {
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_FAILURE,
-          payload: result.error || 'Login failed',
+        // Regular username/password login
+        result = await authService.login(credentialsOrUser);
+
+        if (!result.success) {
+          dispatch({
+            type: AUTH_ACTIONS.LOGIN_FAILURE,
+            payload: result.error || 'Login failed',
+          });
+          return { success: false, error: result.error };
+        }
+        
+        user = result.user;
+        token = result.token;
+        tokenExpiry = result.tokenExpiry; // Get the actual token expiry from the result
+        
+        logger.info('Processing regular login', {
+          category: 'auth_regular_login',
+          username: user.username,
+          userId: user.id,
+          tokenExpiry: tokenExpiry,
+          timestamp: new Date().toISOString()
         });
-        return { success: false, error: result.error };
       }
+
+      // Use the actual token expiry from the auth service (or fallback to 24 hours for SSO)
+      if (isSSO && !tokenExpiry) {
+        tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;  // 24 hours fallback for SSO
+      }
+      
+      // Fallback if tokenExpiry is still not set
+      if (!tokenExpiry) {
+        tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;  // 24 hours fallback
+      }
+
+      // Clear any existing cache data before login
+      // This ensures fresh data is loaded for the new user session
+      logger.info('Clearing cache before login', {
+        category: 'auth_cache_clear',
+        username: user.username,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
+
+      // Clear any existing cached data from localStorage
+      const cacheKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('appData_') || 
+        key.startsWith('patient_') || 
+        key.startsWith('cache_')
+      );
+      
+      cacheKeys.forEach(key => {
+        // Legacy cleanup - remove from both storages
+        localStorage.removeItem(key);
+        secureStorage.removeItem(key);
+      });
+
+      // Log token expiry details for debugging
+      const expiryDate = new Date(tokenExpiry);
+      const hoursUntilExpiry = (tokenExpiry - Date.now()) / (1000 * 60 * 60);
+      logger.info('Token expiry details before storage', {
+        category: 'auth_token_expiry',
+        tokenExpiry: tokenExpiry,
+        expiryDate: expiryDate.toISOString(),
+        hoursUntilExpiry: hoursUntilExpiry.toFixed(2),
+        currentTime: Date.now(),
+        isExpired: tokenExpiry < Date.now()
+      });
+
+      // Store in localStorage - MUST await to prevent race conditions
+      await updateStoredToken(token, tokenExpiry);
+      await updateStoredUser(user);
+
+      // Get session timeout from result or use default
+      const sessionTimeoutMinutes = (isSSO ? 30 : result?.sessionTimeoutMinutes) || 30;
+      
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: {
+          user,
+          token,
+          tokenExpiry,
+          sessionTimeoutMinutes,
+        },
+      });
+
+      toast.success('Login successful!');
+
+      return {
+        success: true,
+        isFirstLogin: isFirstLogin(user.username),
+      };
     } catch (error) {
       const errorMessage = error.message || 'Login failed';
       dispatch({
@@ -451,21 +616,35 @@ export function AuthProvider({ children }) {
         timestamp: new Date().toISOString()
       });
     } finally {
+      // Clear auth data first
       clearAuthData();
+      
+      // Dispatch logout action to update state
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      
       toast.info('Logged out successfully');
     }
   };
 
   const updateActivity = () => {
     try {
+      // Throttle activity updates to prevent excessive re-renders during form interactions
+      const now = Date.now();
+      const timeSinceLastUpdate = now - state.lastActivity;
+      
+      // Only update if it's been at least 5 seconds since last update
+      if (timeSinceLastUpdate < 5000) {
+        return;
+      }
+      
       dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
       
       // Log activity update in development mode only
       if (process.env.NODE_ENV === 'development') {
         secureActivityLogger.logActivityDetected({
           component: 'AuthContext',
-          action: 'activity_updated'
+          action: 'activity_updated',
+          timeSinceLastUpdate
         });
       }
     } catch (error) {
@@ -501,6 +680,18 @@ export function AuthProvider({ children }) {
     return false;
   };
 
+  const updateSessionTimeout = (timeoutMinutes) => {
+    dispatch({ 
+      type: AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT, 
+      payload: timeoutMinutes 
+    });
+    logger.info('Session timeout updated', {
+      category: 'auth_timeout_update',
+      newTimeout: timeoutMinutes,
+      userId: state.user?.id
+    });
+  };
+
   const contextValue = {
     // State
     user: state.user,
@@ -508,6 +699,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
     error: state.error,
+    sessionTimeoutMinutes: state.sessionTimeoutMinutes,
 
     // Actions
     login,
@@ -515,6 +707,7 @@ export function AuthProvider({ children }) {
     updateActivity,
     clearError,
     updateUser,
+    updateSessionTimeout,
 
     // Utilities
     hasRole,

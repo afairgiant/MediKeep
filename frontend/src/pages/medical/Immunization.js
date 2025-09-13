@@ -34,9 +34,11 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
+import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
 import ViewToggle from '../../components/shared/ViewToggle';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 
 // Modular components
 import {
@@ -49,6 +51,7 @@ const Immunization = () => {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
 
   // Standardized data management
   const {
@@ -375,7 +378,7 @@ const Immunization = () => {
                 {processedImmunizations.map((immunization, index) => (
                   <Grid.Col
                     key={immunization.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
+                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
                   >
                       <ImmunizationCard
                         immunization={immunization}
@@ -391,21 +394,23 @@ const Immunization = () => {
             </Grid>
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
-              <MedicalTable
+              <ResponsiveTable
                 data={processedImmunizations}
                 columns={[
-                  { header: 'Vaccine Name', accessor: 'vaccine_name' },
+                  { header: 'Vaccine Name', accessor: 'vaccine_name', priority: 'high', width: 200 },
                   {
                     header: 'Date Administered',
                     accessor: 'date_administered',
+                    priority: 'high',
+                    width: 150
                   },
-                  { header: 'Dose Number', accessor: 'dose_number' },
-                  { header: 'Manufacturer', accessor: 'manufacturer' },
-                  { header: 'Site', accessor: 'site' },
-                  { header: 'Route', accessor: 'route' },
-                  { header: 'Lot Number', accessor: 'lot_number' },
-                  { header: 'Expiration Date', accessor: 'expiration_date' },
-                  { header: 'Notes', accessor: 'notes' },
+                  { header: 'Dose Number', accessor: 'dose_number', priority: 'medium', width: 100 },
+                  { header: 'Manufacturer', accessor: 'manufacturer', priority: 'medium', width: 150 },
+                  { header: 'Site', accessor: 'site', priority: 'low', width: 100 },
+                  { header: 'Route', accessor: 'route', priority: 'low', width: 100 },
+                  { header: 'Lot Number', accessor: 'lot_number', priority: 'low', width: 120 },
+                  { header: 'Expiration Date', accessor: 'expiration_date', priority: 'medium', width: 130 },
+                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName="Immunizations"
@@ -428,6 +433,8 @@ const Immunization = () => {
                   lot_number: getEntityFormatters('immunizations').lot_number,
                   notes: getEntityFormatters('immunizations').notes,
                 }}
+                dataType="medical"
+                responsive={responsive}
               />
             </Paper>
           )}
@@ -436,4 +443,8 @@ const Immunization = () => {
   );
 };
 
-export default Immunization;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Immunization, {
+  injectResponsive: true,
+  displayName: 'ResponsiveImmunization'
+});

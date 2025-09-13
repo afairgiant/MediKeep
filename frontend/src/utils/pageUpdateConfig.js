@@ -1,3 +1,5 @@
+import logger from '../services/logger';
+
 import fs from 'fs';
 import path from 'path';
 
@@ -101,4 +103,4 @@ const pageConfigs = {
   },
 };
 
-console.log('Medical page configurations:', pageConfigs);
+logger.info('Medical page configurations:', pageConfigs);

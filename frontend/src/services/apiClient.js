@@ -70,9 +70,9 @@ class APIClient {
   }
 
   // Auth interceptor - adds token to requests
-  authInterceptor(config) {
-    const token = authService.getToken();
-    if (token && authService.isTokenValid(token)) {
+  async authInterceptor(config) {
+    const token = await authService.getToken();
+    if (token && await authService.isTokenValid(token)) {
       config.headers = {
         ...config.headers,
         Authorization: `Bearer ${token}`,
@@ -106,10 +106,29 @@ class APIClient {
         });
       }
 
-      // If refresh fails, clear auth data and redirect
+      // Clear auth data but let components handle the error gracefully
+      // Only redirect if this is a critical auth endpoint
       authService.clearTokens();
-      toast.error('Session expired. Please log in again.');
-      window.location.href = '/login';
+      
+      // Check if this is a critical endpoint that requires immediate redirect
+      const criticalEndpoints = ['/auth/', '/login', '/users/me'];
+      const isCriticalEndpoint = criticalEndpoints.some(endpoint => 
+        originalConfig.url.includes(endpoint)
+      );
+      
+      if (isCriticalEndpoint) {
+        toast.error('Session expired. Please log in again.');
+        window.location.href = '/login';
+      } else {
+        // For non-critical endpoints, just add a header to indicate auth failure
+        // This allows components to handle the error appropriately
+        logger.warn('Authentication failed for non-critical endpoint', {
+          category: 'api_client_warning',
+          endpoint: originalConfig.url,
+          message: 'Authentication failed but not redirecting to preserve user experience'
+        });
+      }
+      
       throw error;
     }
 

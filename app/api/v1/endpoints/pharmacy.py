@@ -1,9 +1,12 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.core.error_handling import (
+    handle_database_errors
+)
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_not_found,
@@ -39,27 +42,31 @@ def create_pharmacy(
 @router.get("/", response_model=List[Pharmacy])
 def read_pharmacies(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Retrieve pharmacies."""
-    pharmacies = pharmacy.get_multi(db, skip=skip, limit=limit)
-    return pharmacies
+    with handle_database_errors(request=request):
+        pharmacies = pharmacy.get_multi(db, skip=skip, limit=limit)
+        return pharmacies
 
 
 @router.get("/{id}", response_model=Pharmacy)
 def read_pharmacy(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get pharmacy by ID."""
-    pharmacy_obj = pharmacy.get(db=db, id=id)
-    handle_not_found(pharmacy_obj, "Pharmacy")
-    return pharmacy_obj
+    with handle_database_errors(request=request):
+        pharmacy_obj = pharmacy.get(db=db, id=id)
+        handle_not_found(pharmacy_obj, "Pharmacy", request)
+        return pharmacy_obj
 
 
 @router.put("/{id}", response_model=Pharmacy)
@@ -93,44 +100,45 @@ def delete_pharmacy(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Delete a pharmacy."""
-    from app.models.models import Medication
+    with handle_database_errors(request=request):
+        from app.models.models import Medication
 
-    pharmacy_obj = pharmacy.get(db=db, id=id)
-    handle_not_found(pharmacy_obj, "Pharmacy")
+        pharmacy_obj = pharmacy.get(db=db, id=id)
+        handle_not_found(pharmacy_obj, "Pharmacy", request)
 
-    # Check how many medications reference this pharmacy
-    medication_count = db.query(Medication).filter(Medication.pharmacy_id == id).count()
+        # Check how many medications reference this pharmacy
+        medication_count = db.query(Medication).filter(Medication.pharmacy_id == id).count()
 
-    # Set pharmacy_id to NULL for all medications that reference this pharmacy
-    if medication_count > 0:
-        db.query(Medication).filter(Medication.pharmacy_id == id).update(
-            {"pharmacy_id": None}
+        # Set pharmacy_id to NULL for all medications that reference this pharmacy
+        if medication_count > 0:
+            db.query(Medication).filter(Medication.pharmacy_id == id).update(
+                {"pharmacy_id": None}
+            )
+            db.commit()
+
+        # Log the deletion activity BEFORE deleting with custom description
+        base_description = (
+            f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
         )
-        db.commit()
+        if medication_count > 0:
+            description = f"{base_description}. Updated {medication_count} medication(s) to remove pharmacy reference."
+        else:
+            description = base_description
 
-    # Log the deletion activity BEFORE deleting with custom description
-    base_description = (
-        f"Deleted pharmacy: {getattr(pharmacy_obj, 'name', 'Unknown pharmacy')}"
-    )
-    if medication_count > 0:
-        description = f"{base_description}. Updated {medication_count} medication(s) to remove pharmacy reference."
-    else:
-        description = base_description
+        from app.api.activity_logging import safe_log_activity
+        from app.models.activity_log import ActionType
 
-    from app.api.activity_logging import safe_log_activity
-    from app.models.activity_log import ActionType
+        safe_log_activity(
+            db=db,
+            action=ActionType.DELETED,
+            entity_type=EntityType.PHARMACY,
+            entity_obj=pharmacy_obj,
+            user_id=current_user_id,
+            description=description,
+            request=request,
+        )
 
-    safe_log_activity(
-        db=db,
-        action=ActionType.DELETED,
-        entity_type=EntityType.PHARMACY,
-        entity_obj=pharmacy_obj,
-        user_id=current_user_id,
-        description=description,
-        request=request,
-    )
+        # Delete the pharmacy
+        pharmacy.delete(db=db, id=id)
 
-    # Delete the pharmacy
-    pharmacy.delete(db=db, id=id)
-
-    return {"ok": True}
+        return {"ok": True}

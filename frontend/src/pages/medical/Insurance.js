@@ -24,8 +24,10 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import { PageHeader } from '../../components';
+import { withResponsive } from '../../hoc/withResponsive';
+import { useResponsive } from '../../hooks/useResponsive';
 import MantineFilters from '../../components/mantine/MantineFilters';
-import MedicalTable from '../../components/shared/MedicalTable';
+import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
@@ -55,6 +57,7 @@ import {
 const Insurance = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
   // Modern data management with useMedicalData
@@ -169,7 +172,7 @@ const Insurance = () => {
       const count = Array.isArray(files) ? files.length : 0;
       setFileCounts(prev => ({ ...prev, [insuranceId]: count }));
     } catch (error) {
-      console.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
+      logger.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
     }
   }, []);
 
@@ -189,7 +192,7 @@ const Insurance = () => {
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [insurance.id]: count }));
         } catch (error) {
-          console.error(`Error loading file count for insurance ${insurance.id}:`, error);
+          logger.error(`Error loading file count for insurance ${insurance.id}:`, error);
           setFileCounts(prev => ({ ...prev, [insurance.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [insurance.id]: false }));
@@ -212,70 +215,27 @@ const Insurance = () => {
           item.insurance_type === 'dental' ? 'green' :
           item.insurance_type === 'vision' ? 'purple' : 'orange'
         }
+        size="sm"
       >
         {item.insurance_type?.charAt(0).toUpperCase() + item.insurance_type?.slice(1)}
       </Badge>
     ),
-    company_name: (value, item) => (
-      <div>
-        <Text weight={500}>{item.company_name}</Text>
-        {item.plan_name && <Text size="xs" color="dimmed">{item.plan_name}</Text>}
-      </div>
-    ),
-    member_name: (value, item) => (
-      <div>
-        <Text>{item.member_name}</Text>
-        <Text size="xs" color="dimmed">ID: {item.member_id}</Text>
-      </div>
-    ),
-    effective_date: (value, item) => (
-      <div>
-        <Text size="sm">
-          {formatDate(item.effective_date)} - {item.expiration_date ? formatDate(item.expiration_date) : 'Ongoing'}
-        </Text>
-      </div>
-    ),
+    company_name: (value) => <Text size="sm">{value || '-'}</Text>,
+    plan_name: (value) => <Text size="sm">{value || '-'}</Text>,
+    member_id: (value) => <Text size="sm" fw={600}>{value || '-'}</Text>,
+    group_number: (value) => <Text size="sm">{value || '-'}</Text>,
+    member_name: (value) => <Text size="sm">{value || '-'}</Text>,
+    effective_date: (value) => <Text size="sm">{value ? formatDate(value) : '-'}</Text>,
+    expiration_date: (value) => <Text size="sm">{value ? formatDate(value) : 'Ongoing'}</Text>,
     status: (value, item) => <StatusBadge status={item.status} />,
     is_primary: (value, item) => {
-      if (item.insurance_type === 'medical' && value) {
-        return 'PRIMARY';
+      if (item.is_primary) {
+        return <Badge color="green" variant="filled" size="sm">Yes</Badge>;
       }
-      return '';
+      return <Badge color="gray" variant="light" size="sm">No</Badge>;
     },
   };
 
-  // Table configuration - consistent with medication table approach
-  const tableColumns = [
-    {
-      accessor: 'insurance_type',
-      header: 'Type',
-      sortable: true,
-    },
-    {
-      accessor: 'company_name',
-      header: 'Company',
-      sortable: true,
-    },
-    {
-      accessor: 'member_name',
-      header: 'Member',
-      sortable: true,
-    },
-    {
-      accessor: 'effective_date',
-      header: 'Coverage Period',
-      sortable: true,
-    },
-    {
-      accessor: 'status',
-      header: 'Status',
-      sortable: true,
-    },
-    {
-      accessor: 'is_primary',
-      header: 'Primary',
-    },
-  ];
 
   // Initialize form data using utility
   const initializeFormData = (insurance = null) => {
@@ -660,9 +620,21 @@ const Insurance = () => {
               ))}
             </Grid>
           ) : (
-            <MedicalTable
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
               data={processedInsurances}
-              columns={tableColumns}
+              columns={[
+                { header: 'Type', accessor: 'insurance_type', priority: 'high', width: 100 },
+                { header: 'Company', accessor: 'company_name', priority: 'high', width: 180 },
+                { header: 'Plan', accessor: 'plan_name', priority: 'medium', width: 150 },
+                { header: 'Member ID', accessor: 'member_id', priority: 'high', width: 120 },
+                { header: 'Group #', accessor: 'group_number', priority: 'low', width: 120 },
+                { header: 'Member Name', accessor: 'member_name', priority: 'medium', width: 150 },
+                { header: 'Effective', accessor: 'effective_date', priority: 'medium', width: 100 },
+                { header: 'Expires', accessor: 'expiration_date', priority: 'medium', width: 100 },
+                { header: 'Status', accessor: 'status', priority: 'high', width: 90 },
+                { header: 'Primary', accessor: 'is_primary', priority: 'high', width: 80 },
+              ]}
               formatters={formatters}
               onEdit={handleEdit}
               onDelete={handleDelete}
@@ -671,7 +643,10 @@ const Insurance = () => {
               sortOrder={sortOrder}
               onSortChange={handleSortChange}
               getSortIndicator={getSortIndicator}
+              dataType="medical"
+              responsive={responsive}
             />
+          </Paper>
           )}
         </>
       )}
@@ -765,4 +740,8 @@ const Insurance = () => {
   );
 };
 
-export default Insurance;
+// Wrap with responsive HOC for enhanced responsive capabilities
+export default withResponsive(Insurance, {
+  injectResponsive: true,
+  displayName: 'ResponsiveInsurance'
+});

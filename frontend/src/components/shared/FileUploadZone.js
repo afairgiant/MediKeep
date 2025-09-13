@@ -1,3 +1,5 @@
+import logger from '../../services/logger';
+
 import React, { useState, useCallback } from 'react';
 import {
   Stack,
@@ -106,7 +108,7 @@ const FileUploadZone = ({
     }));
 
     if (filesToUpload.length > 0 && onUpload) {
-      console.log('Uploading files:', filesToUpload.map(f => f.file.name));
+      logger.info('Uploading files:', filesToUpload.map(f => f.file.name));
       onUpload(filesToUpload);
       // Clear selected files after upload
       setSelectedFiles([]);
