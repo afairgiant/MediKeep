@@ -158,6 +158,10 @@ Additionally, a backup/restore CLI is available.
 This can be used with cron to automate scheduled backups.
 See [Backup and Restore CLI](app/scripts/README_BACKUP_CLI.md) for more details.
 
+Backups are stored under ```/app/backups```. This should be mapped to 
+an external location or volume so that it can be stored safely in case a 
+restore is needed.
+=======
 Backups are stored under `/app/backups`. This should be mapped to
 an external location or volume so that it can be stored safely in case a
 restore is needed.

@@ -861,9 +861,6 @@ const Dashboard = () => {
 
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
-              {/* Recent Activity */}
-              <RecentActivityList />
-
               {/* Additional Resources */}
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Title order={3} size="h4" mb="md">
@@ -924,6 +921,10 @@ const Dashboard = () => {
               </Card>
               {/* Invitation Notifications */}
               <InvitationNotifications />
+
+              {/* Recent Activity */}
+              <RecentActivityList />
+
             </Stack>
           </Grid.Col>
         </Grid>
