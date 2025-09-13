@@ -17,7 +17,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, backref
 from sqlalchemy.orm import relationship as orm_relationship
 
 # Import status enums for consistent status management
@@ -1157,7 +1157,7 @@ class UserPreferences(Base):
     )
 
     # Relationships
-    user = orm_relationship("User", backref="preferences")
+    user = orm_relationship("User", backref=backref("preferences", cascade="all, delete-orphan", uselist=False))
 
 
 class Insurance(Base):

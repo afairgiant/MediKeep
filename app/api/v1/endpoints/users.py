@@ -13,6 +13,7 @@ from app.models.activity_log import ActivityLog, EntityType
 from app.models.models import User as UserModel
 from app.schemas.user import User, UserUpdate
 from app.schemas.user_preferences import UserPreferences, UserPreferencesUpdate
+from app.services.user_deletion_service import UserDeletionService
 
 router = APIRouter()
 
@@ -58,106 +59,19 @@ def delete_current_user_account(
 
     WARNING: This action cannot be undone!
     """
+    deletion_service = UserDeletionService()
     user_ip = request.client.host if request.client else "unknown"
 
-    # Get the user object to access username and role
-    current_user = user.get(db, id=user_id)
-    if not current_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
-
-    username = current_user.username
-
     try:
-        # Check if this is the last user in the system (prevent complete system lockout)
-        total_users = db.query(UserModel).count()
-        if total_users <= 1:
-            logger.warning(
-                f"Attempted deletion of last user in system: {username}",
-                extra={
-                    "category": "security",
-                    "event": "last_user_deletion_attempt",
-                    "user_id": user_id,
-                    "username": username,
-                    "ip": user_ip,
-                },
-            )
+        # Get user info for logging before deletion
+        current_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not current_user:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot delete the last remaining user in the system. The system must have at least one user account.",
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
-        # Check if user is the last admin (prevent administrative lockout)
-        if current_user.role is not None and current_user.role.lower() in [
-            "admin",
-            "administrator",
-        ]:
-            admin_count = (
-                db.query(UserModel)
-                .filter(
-                    UserModel.role.in_(
-                        ["admin", "Admin", "administrator", "Administrator"]
-                    )
-                )
-                .count()
-            )
-
-            if admin_count <= 1:
-                logger.warning(
-                    f"Attempted deletion of last admin user {username}",
-                    extra={
-                        "category": "security",
-                        "event": "last_admin_deletion_attempt",
-                        "user_id": user_id,
-                        "username": username,
-                        "ip": user_ip,
-                    },
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cannot delete the last remaining admin user in the system. Please create another admin user first.",
-                )
-
-        # Get the user's patient record for cascade deletion
-        user_patient = patient.get_by_user_id(db, user_id=user_id)
-        patient_id = None
-
-        if user_patient:
-            patient_id = int(user_patient.id) if user_patient.id is not None else None
-
-            if patient_id is not None:
-                # Log patient deletion activity before deletion
-                log_delete(
-                    db=db,
-                    entity_type=EntityType.PATIENT,
-                    entity_obj=user_patient,
-                    user_id=user_id,
-                    request=request,
-                )
-
-                # Preserve audit trail by nullifying patient_id in activity logs
-                # This keeps the activity history while removing the foreign key reference
-                db.query(ActivityLog).filter(
-                    ActivityLog.patient_id == patient_id
-                ).update({"patient_id": None}, synchronize_session=False)
-
-                # Delete patient record (automatically cascades to all medical data)
-                patient.delete(db, id=patient_id)
-
-                logger.info(
-                    f"Patient record and medical data deleted for user {username}",
-                    extra={
-                        "category": "app",
-                        "event": "patient_cascade_deletion",
-                        "user_id": user_id,
-                        "patient_id": patient_id,
-                        "username": username,
-                        "ip": user_ip,
-                    },
-                )
-
-        # Log user deletion activity before deletion
+        username = current_user.username
+        # Log deletion attempt
         log_delete(
             db=db,
             entity_type=EntityType.USER,
@@ -166,14 +80,22 @@ def delete_current_user_account(
             request=request,
         )
 
-        # Preserve audit trail by nullifying user_id in activity logs
-        # This keeps the activity history while removing the foreign key reference
-        db.query(ActivityLog).filter(ActivityLog.user_id == user_id).update(
-            {"user_id": None}, synchronize_session=False
+        # Prepare request metadata for logging
+        request_metadata = {
+            "ip": user_ip,
+            "category": "security",
+            "event": "account_self_deletion"
+        }
+
+        # Use the deletion service to handle all the complex deletion logic
+        deletion_result = deletion_service.delete_user_account(
+            db=db,
+            user_id=user_id,
+            request_metadata=request_metadata
         )
 
-        # Delete the user account
-        user.delete(db, id=user_id)
+        # Commit all changes atomically
+        db.commit()
 
         # Log successful account deletion
         logger.info(
@@ -184,27 +106,46 @@ def delete_current_user_account(
                 "user_id": user_id,
                 "username": username,
                 "ip": user_ip,
-                "had_patient_record": patient_id is not None,
+                "deletion_stats": deletion_result,
             },
         )
 
         return {
             "message": "Account and all associated data deleted successfully",
             "deleted_user_id": user_id,
-            "deleted_patient_id": patient_id,
+            "deleted_patient_id": deletion_result.get("patient_id"),
+            "deletion_summary": deletion_result["deleted_records"],
         }
 
+    except ValueError as e:
+        # Validation errors from the service (last user/admin)
+        db.rollback()
+        logger.warning(
+            f"User deletion validation failed: {str(e)}",
+            extra={
+                "user_id": user_id,
+                "ip": user_ip,
+                "error": str(e),
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except HTTPException:
+        db.rollback()
         raise
     except Exception as e:
+        # Rollback all changes on any error
+        db.rollback()
+
         # Log failed deletion
         logger.error(
-            f"Failed to delete user account {username}: {str(e)}",
+            f"Failed to delete user account: {str(e)}",
             extra={
                 "category": "app",
                 "event": "account_deletion_failed",
                 "user_id": user_id,
-                "username": username,
                 "ip": user_ip,
                 "error": str(e),
             },
