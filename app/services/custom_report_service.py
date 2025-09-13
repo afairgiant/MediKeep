@@ -74,8 +74,87 @@ class CustomReportService:
         
         # Get the active patient ID
         if not user.active_patient_id:
-            logger.warning(f"No active patient for user {user_id}")
-            return DataSummaryResponse(categories={}, total_records=0)
+            # Check if user has a self-record that can be set as active
+            self_record = self.db.query(Patient).filter(
+                Patient.owner_user_id == user_id,
+                Patient.is_self_record == True
+            ).first()
+
+            if self_record:
+                try:
+                    user.active_patient_id = self_record.id
+                    self.db.commit()
+                    self.db.refresh(user)
+
+                    logger.info(
+                        "Auto-setting self-record as active patient",
+                        extra={
+                            "user_id": user_id,
+                            "patient_id": self_record.id,
+                            "context": "custom_report_access"
+                        }
+                    )
+                except Exception as e:
+                    self.db.rollback()
+                    logger.error(
+                        "Failed to set self-record as active patient",
+                        extra={
+                            "user_id": user_id,
+                            "patient_id": self_record.id,
+                            "context": "custom_report_access",
+                            "error": str(e)
+                        }
+                    )
+                    logger.warning(f"No active patient for user {user_id}")
+                    return DataSummaryResponse(categories={}, total_records=0)
+            else:
+                # Check if user has any owned patients at all
+                any_patient = self.db.query(Patient).filter(
+                    Patient.owner_user_id == user_id
+                ).first()
+
+                if any_patient:
+                    try:
+                        user.active_patient_id = any_patient.id
+                        self.db.commit()
+                        self.db.refresh(user)
+
+                        logger.info(
+                            "Auto-setting first available patient as active",
+                            extra={
+                                "user_id": user_id,
+                                "patient_id": any_patient.id,
+                                "context": "custom_report_access"
+                            }
+                        )
+                    except Exception as e:
+                        self.db.rollback()
+                        logger.error(
+                            "Failed to set first available patient as active",
+                            extra={
+                                "user_id": user_id,
+                                "patient_id": any_patient.id,
+                                "context": "custom_report_access",
+                                "error": str(e)
+                            }
+                        )
+                        logger.warning(
+                            "No patients available for user",
+                            extra={
+                                "user_id": user_id,
+                                "context": "custom_report_access"
+                            }
+                        )
+                        return DataSummaryResponse(categories={}, total_records=0)
+                else:
+                    logger.warning(
+                        "No patients available for user",
+                        extra={
+                            "user_id": user_id,
+                            "context": "custom_report_access"
+                        }
+                    )
+                    return DataSummaryResponse(categories={}, total_records=0)
         
         # Include patient ID in cache key so different patients have different caches
         cache_key = f"summary_{user_id}_{user.active_patient_id}"
