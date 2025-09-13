@@ -135,7 +135,7 @@ class UserDeletionService:
                 }
             )
 
-        # 5. Handle patient record deletion
+        # 5. Handle circular dependency with active_patient_id
         patient_record = db.query(Patient).filter(
             Patient.user_id == user_id
         ).first()
@@ -144,13 +144,22 @@ class UserDeletionService:
         if patient_record:
             patient_id = patient_record.id
 
+            # First, nullify any active_patient_id references to this patient
+            # This prevents circular dependency issues during deletion
+            db.query(User).filter(
+                User.active_patient_id == patient_id
+            ).update({"active_patient_id": None}, synchronize_session=False)
+
             # Nullify patient references in activity logs
             db.query(ActivityLog).filter(
                 ActivityLog.patient_id == patient_id
             ).update({"patient_id": None}, synchronize_session=False)
 
-            # Delete patient (cascades to medical data)
+            # Now we can safely delete the patient record (cascades to medical data)
             db.delete(patient_record)
+            
+            # Flush changes to database to handle the circular dependency properly
+            db.flush()
 
             deletion_stats["deleted_records"]["patient"] = 1
             deletion_stats["patient_id"] = patient_id
@@ -167,9 +176,14 @@ class UserDeletionService:
 
         deletion_stats["deleted_records"]["activity_logs_updated"] = updated_logs
 
-        # 7. Finally, delete the user
+        # 7. Nullify the user's own active_patient_id before deletion
         user_obj = db.query(User).filter(User.id == user_id).first()
         if user_obj:
+            if user_obj.active_patient_id:
+                user_obj.active_patient_id = None
+                db.flush()  # Ensure the change is flushed before deletion
+                
+            # Finally, delete the user
             db.delete(user_obj)
             deletion_stats["deleted_records"]["user"] = 1
 
