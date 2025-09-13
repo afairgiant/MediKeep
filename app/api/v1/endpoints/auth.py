@@ -16,7 +16,7 @@ from app.core.error_handling import (
 )
 from app.crud.patient import patient
 from app.crud.user import user
-from app.models.models import User as DBUser
+from app.models.models import User as DBUser, Patient
 from app.schemas.patient import PatientCreate
 from app.schemas.user import Token, User, UserCreate
 
@@ -139,23 +139,44 @@ def register(
             "address": "Please update your address in your profile",  # Placeholder address
         }
         
-        # Create self-record for the new user
-        patient_service.create_patient(
-            user=new_user,
-            patient_data=patient_data,
-            is_self_record=True
-        )
-        
-        # Log successful patient creation
-        logger.info(
-            f"Patient record created for user {user_id} ({user_in.username})",
-            extra={
-                "category": "app",
-                "event": "patient_creation_success",
-                "user_id": user_id,
-                "username": user_in.username,
-            },
-        )
+        # Create self-record for the new user and set as active in a single transaction
+        try:
+            created_patient = patient_service.create_patient(
+                user=new_user,
+                patient_data=patient_data,
+                is_self_record=True
+            )
+
+            # Set the newly created patient as the user's active patient
+            new_user.active_patient_id = created_patient.id
+            db.commit()
+            db.refresh(new_user)
+
+            # Log successful patient creation
+            logger.info(
+                "Patient record created and set as active for new user",
+                extra={
+                    "category": "app",
+                    "event": "patient_creation_success",
+                    "user_id": user_id,
+                    "username": user_in.username,
+                    "patient_id": created_patient.id,
+                },
+            )
+        except Exception as active_patient_error:
+            # If setting active patient fails, rollback and continue without active patient
+            db.rollback()
+            logger.error(
+                "Failed to set active patient during registration",
+                extra={
+                    "category": "app",
+                    "event": "active_patient_set_failed",
+                    "user_id": user_id,
+                    "username": user_in.username,
+                    "error": str(active_patient_error),
+                },
+            )
+            # Continue without active patient - user can set it later
 
     except Exception as e:
         # If patient creation fails, we should still return the user
@@ -170,6 +191,8 @@ def register(
                 "error": str(e),
             },
         )
+        # For new user registration failures, we may want to consider rolling back
+        # the user creation as well, but for now we'll just continue without a patient
 
     return new_user
 
@@ -244,6 +267,32 @@ def login(
             message="User account is incomplete. Please contact support.",
             request=request
         )
+
+    # Check if user has an active patient, if not try to set one
+    if not db_user.active_patient_id:
+        # Single query with priority ordering: self-records first, then by ID
+        available_patient = db.query(Patient).filter(
+            Patient.owner_user_id == db_user.id
+        ).order_by(
+            Patient.is_self_record.desc(),
+            Patient.id.asc()
+        ).first()
+
+        if available_patient:
+            db_user.active_patient_id = available_patient.id
+            db.commit()
+            db.refresh(db_user)
+
+            logger.info(
+                "Auto-setting active patient during login",
+                extra={
+                    "category": "app",
+                    "event": "active_patient_auto_set",
+                    "user_id": db_user.id,
+                    "patient_id": available_patient.id,
+                    "is_self_record": available_patient.is_self_record,
+                },
+            )
 
     # Get full name, use username as fallback if not set
     full_name = getattr(db_user, "full_name", None) or db_user.username
