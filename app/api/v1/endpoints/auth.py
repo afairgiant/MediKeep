@@ -139,20 +139,21 @@ def register(
             "address": "Please update your address in your profile",  # Placeholder address
         }
         
-        # Create self-record for the new user and set as active in a single transaction
-        try:
-            created_patient = patient_service.create_patient(
-                user=new_user,
-                patient_data=patient_data,
-                is_self_record=True
-            )
+        # Create self-record for the new user and set as active
+        # Note: PatientManagementService.create_patient() handles its own transaction
+        created_patient = patient_service.create_patient(
+            user=new_user,
+            patient_data=patient_data,
+            is_self_record=True
+        )
 
-            # Set the newly created patient as the user's active patient
+        # Try to set the newly created patient as the user's active patient
+        try:
             new_user.active_patient_id = created_patient.id
             db.commit()
             db.refresh(new_user)
 
-            # Log successful patient creation
+            # Log successful patient creation and activation
             logger.info(
                 "Patient record created and set as active for new user",
                 extra={
@@ -164,19 +165,20 @@ def register(
                 },
             )
         except Exception as active_patient_error:
-            # If setting active patient fails, rollback and continue without active patient
-            db.rollback()
-            logger.error(
-                "Failed to set active patient during registration",
+            # Patient was created successfully, but setting as active failed
+            # This is not critical - user can set active patient later
+            logger.warning(
+                "Patient created but failed to set as active during registration",
                 extra={
                     "category": "app",
                     "event": "active_patient_set_failed",
                     "user_id": user_id,
                     "username": user_in.username,
+                    "patient_id": created_patient.id,
                     "error": str(active_patient_error),
                 },
             )
-            # Continue without active patient - user can set it later
+            # Continue - patient exists, just not set as active
 
     except Exception as e:
         # If patient creation fails, we should still return the user
@@ -279,20 +281,34 @@ def login(
         ).first()
 
         if available_patient:
-            db_user.active_patient_id = available_patient.id
-            db.commit()
-            db.refresh(db_user)
+            try:
+                db_user.active_patient_id = available_patient.id
+                db.commit()
+                db.refresh(db_user)
 
-            logger.info(
-                "Auto-setting active patient during login",
-                extra={
-                    "category": "app",
-                    "event": "active_patient_auto_set",
-                    "user_id": db_user.id,
-                    "patient_id": available_patient.id,
-                    "is_self_record": available_patient.is_self_record,
-                },
-            )
+                logger.info(
+                    "Auto-setting active patient during login",
+                    extra={
+                        "category": "app",
+                        "event": "active_patient_auto_set",
+                        "user_id": db_user.id,
+                        "patient_id": available_patient.id,
+                        "is_self_record": available_patient.is_self_record,
+                    },
+                )
+            except Exception as e:
+                db.rollback()
+                logger.warning(
+                    "Failed to set active patient during login",
+                    extra={
+                        "category": "app",
+                        "event": "active_patient_auto_set_failed",
+                        "user_id": db_user.id,
+                        "patient_id": available_patient.id,
+                        "error": str(e),
+                    },
+                )
+                # Continue login without active patient - user can set it later
 
     # Get full name, use username as fallback if not set
     full_name = getattr(db_user, "full_name", None) or db_user.username

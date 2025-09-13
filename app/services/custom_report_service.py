@@ -81,18 +81,32 @@ class CustomReportService:
             ).first()
 
             if self_record:
-                user.active_patient_id = self_record.id
-                self.db.commit()
-                self.db.refresh(user)
+                try:
+                    user.active_patient_id = self_record.id
+                    self.db.commit()
+                    self.db.refresh(user)
 
-                logger.info(
-                    "Auto-setting self-record as active patient",
-                    extra={
-                        "user_id": user_id,
-                        "patient_id": self_record.id,
-                        "context": "custom_report_access"
-                    }
-                )
+                    logger.info(
+                        "Auto-setting self-record as active patient",
+                        extra={
+                            "user_id": user_id,
+                            "patient_id": self_record.id,
+                            "context": "custom_report_access"
+                        }
+                    )
+                except Exception as e:
+                    self.db.rollback()
+                    logger.error(
+                        "Failed to set self-record as active patient",
+                        extra={
+                            "user_id": user_id,
+                            "patient_id": self_record.id,
+                            "context": "custom_report_access",
+                            "error": str(e)
+                        }
+                    )
+                    logger.warning(f"No active patient for user {user_id}")
+                    return DataSummaryResponse(categories={}, total_records=0)
             else:
                 # Check if user has any owned patients at all
                 any_patient = self.db.query(Patient).filter(
@@ -100,18 +114,38 @@ class CustomReportService:
                 ).first()
 
                 if any_patient:
-                    user.active_patient_id = any_patient.id
-                    self.db.commit()
-                    self.db.refresh(user)
+                    try:
+                        user.active_patient_id = any_patient.id
+                        self.db.commit()
+                        self.db.refresh(user)
 
-                    logger.info(
-                        "Auto-setting first available patient as active",
-                        extra={
-                            "user_id": user_id,
-                            "patient_id": any_patient.id,
-                            "context": "custom_report_access"
-                        }
-                    )
+                        logger.info(
+                            "Auto-setting first available patient as active",
+                            extra={
+                                "user_id": user_id,
+                                "patient_id": any_patient.id,
+                                "context": "custom_report_access"
+                            }
+                        )
+                    except Exception as e:
+                        self.db.rollback()
+                        logger.error(
+                            "Failed to set first available patient as active",
+                            extra={
+                                "user_id": user_id,
+                                "patient_id": any_patient.id,
+                                "context": "custom_report_access",
+                                "error": str(e)
+                            }
+                        )
+                        logger.warning(
+                            "No patients available for user",
+                            extra={
+                                "user_id": user_id,
+                                "context": "custom_report_access"
+                            }
+                        )
+                        return DataSummaryResponse(categories={}, total_records=0)
                 else:
                     logger.warning(
                         "No patients available for user",
