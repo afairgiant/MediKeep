@@ -101,6 +101,7 @@ const Immunization = () => {
     site: '',
     route: '',
     expiration_date: '',
+    location: '',
     notes: '',
     practitioner_id: null,
   });
@@ -123,6 +124,7 @@ const Immunization = () => {
       site: '',
       route: '',
       expiration_date: '',
+      location: '',
       notes: '',
       practitioner_id: null,
     });
@@ -145,6 +147,7 @@ const Immunization = () => {
       site: immunization.site || '',
       route: immunization.route || '',
       expiration_date: immunization.expiration_date || '',
+      location: immunization.location || '',
       notes: immunization.notes || '',
       practitioner_id: immunization.practitioner_id || null,
     });
@@ -172,6 +175,7 @@ const Immunization = () => {
       site: formData.site || null,
       route: formData.route || null,
       expiration_date: formData.expiration_date || null,
+      location: formData.location || null,
       notes: formData.notes || null,
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id, 10)

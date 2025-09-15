@@ -81,13 +81,18 @@ const ImmunizationCard = ({
         render: (value) => value
       },
       immunization.site && {
-        label: 'Site',
+        label: 'Injection Site',
         value: immunization.site,
         render: (value) => value
       },
       immunization.route && {
         label: 'Route',
         value: immunization.route,
+        render: (value) => value
+      },
+      immunization.location && {
+        label: 'Location',
+        value: immunization.location,
         render: (value) => value
       },
       immunization.expiration_date && {

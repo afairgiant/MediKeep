@@ -93,6 +93,8 @@ const ImmunizationFormWrapper = ({
               handleInputChange('date_administered', formattedDate);
             }}
             placeholder="Select administration date"
+            required
+            withAsterisk
           />
 
           <Group grow>
@@ -186,6 +188,14 @@ const ImmunizationFormWrapper = ({
             placeholder="Select expiration date"
           />
 
+          <TextInput
+            label="Location"
+            name="location"
+            value={formData.location || ''}
+            onChange={(e) => onInputChange(e)}
+            placeholder="e.g., CVS Pharmacy, Hospital, Clinic, Health Department"
+          />
+
           <Select
             label="Practitioner"
             name="practitioner_id"
@@ -213,7 +223,7 @@ const ImmunizationFormWrapper = ({
             </Button>
             <SubmitButton
               loading={isLoading}
-              disabled={!formData.vaccine_name?.trim()}
+              disabled={!formData.vaccine_name?.trim() || !formData.date_administered}
             >
               {editingImmunization ? 'Update' : 'Create'} Immunization
             </SubmitButton>
