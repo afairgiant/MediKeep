@@ -615,6 +615,9 @@ class Immunization(Base):
     site = Column(String, nullable=True)  # Injection site
     route = Column(String, nullable=True)  # Route of administration
     expiration_date = Column(Date, nullable=True)  # Vaccine expiration date
+    location = Column(
+        String, nullable=True
+    )  # Where vaccine was administered (clinic, hospital, pharmacy, etc.)
     notes = Column(Text, nullable=True)  # Additional notes
 
     # Audit fields

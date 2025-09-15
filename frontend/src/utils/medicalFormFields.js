@@ -491,6 +491,14 @@ export const immunizationFormFields = [
     gridColumn: 12,
   },
   {
+    name: 'location',
+    type: 'text',
+    label: 'Location',
+    placeholder: 'e.g., CVS Pharmacy, Hospital, Clinic, Health Department',
+    description: 'Where the vaccine was administered',
+    gridColumn: 12,
+  },
+  {
     name: 'notes',
     type: 'textarea',
     label: 'Additional Notes',

@@ -24,6 +24,9 @@ class ImmunizationBase(BaseModel):
         None, max_length=50, description="Route of administration"
     )
     expiration_date: Optional[date] = Field(None, description="Vaccine expiration date")
+    location: Optional[str] = Field(
+        None, max_length=200, description="Where vaccine was administered (clinic, hospital, pharmacy, etc.)"
+    )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
@@ -88,6 +91,7 @@ class ImmunizationUpdate(BaseModel):
     site: Optional[str] = Field(None, max_length=100)
     route: Optional[str] = Field(None, max_length=50)
     expiration_date: Optional[date] = None
+    location: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=1000)
     practitioner_id: Optional[int] = Field(None, gt=0)
 

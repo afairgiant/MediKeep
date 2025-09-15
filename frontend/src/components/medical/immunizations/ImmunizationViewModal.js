@@ -164,6 +164,14 @@ const ImmunizationViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
+                    Location:
+                  </Text>
+                  <Text size="sm" c={immunization.location ? 'inherit' : 'dimmed'}>
+                    {immunization.location || 'Not specified'}
+                  </Text>
+                </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
                     Practitioner:
                   </Text>
                   {immunization.practitioner_id ? (
