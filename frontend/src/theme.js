@@ -76,39 +76,168 @@ export const theme = createTheme({
     fontWeight: '600',
   },
 
-  /** Component-specific theme overrides */
+  /** Comprehensive CSS Variables for Mantine v8 */
+  vars: (theme) => ({
+    // Text colors
+    '--mantine-color-text': '#000000',
+    '--mantine-color-placeholder': '#4a5568',
+    '--mantine-color-dimmed': '#4a5568',
+    
+    // Input specific
+    '--input-color': '#000000',
+    '--input-placeholder-color': '#4a5568',
+    '--input-section-color': '#000000',
+    
+    // Border colors
+    '--input-bd': '#e2e8f0',
+    '--input-bd-focus': theme.colors.primary[5],
+    
+    // Background colors
+    '--mantine-color-body': '#ffffff',
+    '--mantine-color-default': '#ffffff',
+    
+    // Component specific
+    '--card-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
+    '--button-font-weight': '500',
+  }),
+
+  /** Component-specific theme overrides using CSS variables */
   components: {
     Button: {
       styles: {
         root: {
-          fontWeight: 500,
+          fontWeight: 'var(--button-font-weight)',
         },
       },
     },
     Card: {
       styles: {
         root: {
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          boxShadow: 'var(--card-shadow)',
         },
       },
     },
     TextInput: {
       styles: {
         input: {
-          borderColor: '#e2e8f0',
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
           '&:focus': {
-            borderColor: '#667eea',
+            borderColor: 'var(--input-bd-focus)',
           },
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+        section: {
+          color: 'var(--input-section-color)',
         },
       },
     },
     Select: {
       styles: {
         input: {
-          borderColor: '#e2e8f0',
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
           '&:focus': {
-            borderColor: '#667eea',
+            borderColor: 'var(--input-bd-focus)',
           },
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+        option: {
+          color: 'var(--mantine-color-text)',
+        },
+        rightSection: {
+          color: 'var(--input-section-color)',
+        },
+        section: {
+          color: 'var(--input-section-color)',
+        },
+      },
+    },
+    Combobox: {
+      styles: {
+        input: {
+          color: 'var(--input-color)',
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+        option: {
+          color: 'var(--mantine-color-text)',
+        },
+        section: {
+          color: 'var(--input-section-color)',
+        },
+      },
+    },
+    MultiSelect: {
+      styles: {
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': {
+            borderColor: 'var(--input-bd-focus)',
+          },
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+        option: {
+          color: 'var(--mantine-color-text)',
+        },
+        section: {
+          color: 'var(--input-section-color)',
+        },
+      },
+    },
+    DateInput: {
+      styles: {
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': {
+            borderColor: 'var(--input-bd-focus)',
+          },
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+        section: {
+          color: 'var(--input-section-color)',
+        },
+      },
+    },
+    Textarea: {
+      styles: {
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': {
+            borderColor: 'var(--input-bd-focus)',
+          },
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+      },
+    },
+    NumberInput: {
+      styles: {
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': {
+            borderColor: 'var(--input-bd-focus)',
+          },
+          '&::placeholder': {
+            color: 'var(--input-placeholder-color)',
+          },
+        },
+        section: {
+          color: 'var(--input-section-color)',
         },
       },
     },
