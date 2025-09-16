@@ -78,15 +78,15 @@ export const theme = createTheme({
 
   /** Comprehensive CSS Variables for Mantine v8 */
   vars: (theme) => ({
-    // Text colors
+    // Base text colors
     '--mantine-color-text': '#000000',
-    '--mantine-color-placeholder': '#4a5568',
     '--mantine-color-dimmed': '#4a5568',
+    '--mantine-color-placeholder': 'var(--mantine-color-dimmed)',
     
-    // Input specific
-    '--input-color': '#000000',
-    '--input-placeholder-color': '#4a5568',
-    '--input-section-color': '#000000',
+    // Input specific - referencing base variables
+    '--input-color': 'var(--mantine-color-text)',
+    '--input-placeholder-color': 'var(--mantine-color-placeholder)',
+    '--input-section-color': 'var(--mantine-color-text)',
     
     // Border colors
     '--input-bd': '#e2e8f0',
