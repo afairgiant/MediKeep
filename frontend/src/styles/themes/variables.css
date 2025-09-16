@@ -41,9 +41,9 @@
   --color-gray-900: #212529;
 
   /* Text Colors */
-  --color-text-primary: #212529;
-  --color-text-secondary: #6c757d;
-  --color-text-muted: #868e96;
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+  --color-text-muted: #4a5568;
   --color-text-light: #fff;
 
   /* Background Colors */

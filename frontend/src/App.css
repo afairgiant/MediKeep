@@ -1,6 +1,3 @@
-/* Import CSS Variables */
-@import './styles/themes/variables.css';
-
 /* Global App Styles */
 * {
   margin: 0;
