@@ -245,8 +245,8 @@
 /* ============================= */
 
 .desktop-nav-bar {
-  background: var(--color-background-primary, white);
-  border-bottom: 1px solid var(--color-border, #e9ecef);
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: block !important;
   visibility: visible !important;
@@ -366,7 +366,7 @@
 .mobile-nav-toggle span {
   width: 24px;
   height: 3px;
-  background: white;
+  background: var(--color-text-light);
   border-radius: 3px;
   transition: all 0.3s ease;
 }
@@ -396,8 +396,8 @@
   height: 100vh;
   width: clamp(280px, 85vw, 400px);
   max-width: 90vw;
-  background: var(--color-background-primary, white);
-  border-left: 1px solid var(--color-border, #e9ecef);
+  background: var(--color-bg-primary);
+  border-left: 1px solid var(--color-border-light);
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   transform: translateX(100%);

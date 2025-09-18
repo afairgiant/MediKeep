@@ -1,8 +1,8 @@
 /* DesktopNavigation.css */
 
 .desktop-navigation {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
   position: sticky;
   top: 72px;
   z-index: 40;
@@ -24,18 +24,18 @@
 }
 
 .desktop-nav-trigger {
-  color: #374151;
+  color: var(--color-text-primary);
   font-weight: 500;
   font-size: 0.875rem;
 }
 
 .desktop-nav-trigger.account-trigger {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
 }
 
 .desktop-nav-trigger.account-trigger:hover {
-  background: #2563eb;
+  background: var(--color-primary-dark);
 }
 
 .desktop-nav-dropdown {
@@ -47,7 +47,7 @@
 }
 
 .nav-item-active {
-  color: #3b82f6;
+  color: var(--color-primary);
   font-weight: 600;
 }
 

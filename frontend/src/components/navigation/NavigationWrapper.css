@@ -9,8 +9,8 @@
   top: 1rem;
   right: 1rem;
   z-index: 1000;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
   border-radius: 0.5rem;
   padding: 0.625rem;
   cursor: pointer;
@@ -24,19 +24,19 @@
 }
 
 .mobile-nav-toggle:hover {
-  background: #f3f4f6;
+  background: var(--color-bg-secondary);
   transform: scale(1.05);
 }
 
 .mobile-nav-toggle.active {
-  background: #f3f4f6;
+  background: var(--color-bg-secondary);
 }
 
 .hamburger-line {
   display: block;
   height: 2px;
   width: 20px;
-  background: #4b5563;
+  background: var(--color-text-primary);
   border-radius: 1px;
   transition: all 0.3s ease;
 }
