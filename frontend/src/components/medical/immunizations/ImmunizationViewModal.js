@@ -74,6 +74,11 @@ const ImmunizationViewModal = ({
             <Group justify="space-between" align="flex-start">
               <Stack gap="xs" style={{ flex: 1 }}>
                 <Title order={3}>{immunization.vaccine_name}</Title>
+                {immunization.vaccine_trade_name && (
+                  <Text size="sm" fw={500}>
+                    {immunization.vaccine_trade_name}
+                  </Text>
+                )}
                 {immunization.manufacturer && (
                   <Text size="sm" c="dimmed">
                     Manufactured by: {immunization.manufacturer}
@@ -115,6 +120,14 @@ const ImmunizationViewModal = ({
                   </Text>
                   <Text size="sm" c={immunization.lot_number ? 'inherit' : 'dimmed'}>
                     {immunization.lot_number || 'Not specified'}
+                  </Text>
+                </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
+                    NDC:
+                  </Text>
+                  <Text size="sm" c={immunization.ndc_number ? 'inherit' : 'dimmed'}>
+                    {immunization.ndc_number || 'Not specified'}
                   </Text>
                 </Group>
                 <Group>

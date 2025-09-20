@@ -80,6 +80,11 @@ const ImmunizationCard = ({
         value: immunization.lot_number,
         render: (value) => value
       },
+      immunization.ndc_number && {
+        label: 'NDC Number',
+        value: immunization.ndc_number,
+        render: (value) => value
+      },
       immunization.site && {
         label: 'Injection Site',
         value: immunization.site,
@@ -123,7 +128,9 @@ const ImmunizationCard = ({
     return (
       <BaseMedicalCard
         title={immunization.vaccine_name}
-        subtitle={getImmunizationIcon(immunization.vaccine_name)}
+        subtitle={immunization.vaccine_trade_name ? 
+          `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}` : 
+          getImmunizationIcon(immunization.vaccine_name)}
         badges={badges}
         fields={fields}
         notes={immunization.notes}
