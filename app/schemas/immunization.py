@@ -1,11 +1,15 @@
 from datetime import date
 from typing import Optional
+
 from pydantic import BaseModel, Field, validator
 
 
 class ImmunizationBase(BaseModel):
     vaccine_name: str = Field(
         ..., min_length=2, max_length=200, description="Name of the vaccine"
+    )
+    vaccine_trade_name: Optional[str] = Field(
+        None, max_length=200, description="Formal/trade name (e.g., Flublok TRIV 2025-2026 PFS)"
     )
     date_administered: date = Field(
         ..., description="Date when the vaccine was administered"
@@ -16,6 +20,9 @@ class ImmunizationBase(BaseModel):
     lot_number: Optional[str] = Field(
         None, max_length=50, description="Vaccine lot number"
     )
+    ndc_number: Optional[str] = Field(
+        None, max_length=50, description="NDC number of the vaccine"
+    )
     manufacturer: Optional[str] = Field(
         None, max_length=200, description="Vaccine manufacturer"
     )
@@ -25,7 +32,9 @@ class ImmunizationBase(BaseModel):
     )
     expiration_date: Optional[date] = Field(None, description="Vaccine expiration date")
     location: Optional[str] = Field(
-        None, max_length=200, description="Where vaccine was administered (clinic, hospital, pharmacy, etc.)"
+        None,
+        max_length=200,
+        description="Where vaccine was administered (clinic, hospital, pharmacy, etc.)",
     )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
@@ -84,9 +93,11 @@ class ImmunizationCreate(ImmunizationBase):
 
 class ImmunizationUpdate(BaseModel):
     vaccine_name: Optional[str] = Field(None, min_length=2, max_length=200)
+    vaccine_trade_name: Optional[str] = Field(None, max_length=200)
     date_administered: Optional[date] = None
     dose_number: Optional[int] = Field(None, ge=1)
     lot_number: Optional[str] = Field(None, max_length=50)
+    ndc_number: Optional[str] = Field(None, max_length=50)
     manufacturer: Optional[str] = Field(None, max_length=200)
     site: Optional[str] = Field(None, max_length=100)
     route: Optional[str] = Field(None, max_length=50)

@@ -452,6 +452,14 @@ export const immunizationFormFields = [
     gridColumn: 6,
   },
   {
+    name: 'ndc_number',
+    type: 'text',
+    label: 'NDC Number',
+    placeholder: 'e.g., 12345-6789-01',
+    description: 'National Drug Code for the vaccine',
+    gridColumn: 6,
+  },
+  {
     name: 'manufacturer',
     type: 'select',
     label: 'Manufacturer',

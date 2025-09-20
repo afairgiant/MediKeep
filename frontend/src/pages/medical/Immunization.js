@@ -94,9 +94,11 @@ const Immunization = () => {
   const [editingImmunization, setEditingImmunization] = useState(null);
   const [formData, setFormData] = useState({
     vaccine_name: '',
+    vaccine_trade_name: '',
     date_administered: '',
     dose_number: '',
     lot_number: '',
+    ndc_number: '',
     manufacturer: '',
     site: '',
     route: '',
@@ -117,9 +119,11 @@ const Immunization = () => {
   const resetForm = () => {
     setFormData({
       vaccine_name: '',
+      vaccine_trade_name: '',
       date_administered: '',
       dose_number: '',
       lot_number: '',
+      ndc_number: '',
       manufacturer: '',
       site: '',
       route: '',
@@ -140,9 +144,11 @@ const Immunization = () => {
   const handleEditImmunization = immunization => {
     setFormData({
       vaccine_name: immunization.vaccine_name || '',
+      vaccine_trade_name: immunization.vaccine_trade_name || '',
       date_administered: immunization.date_administered || '',
       dose_number: immunization.dose_number || '',
       lot_number: immunization.lot_number || '',
+      ndc_number: immunization.ndc_number || '',
       manufacturer: immunization.manufacturer || '',
       site: immunization.site || '',
       route: immunization.route || '',
@@ -165,12 +171,14 @@ const Immunization = () => {
 
     const immunizationData = {
       vaccine_name: formData.vaccine_name,
+      vaccine_trade_name: formData.vaccine_trade_name || null,
       date_administered: formData.date_administered,
       patient_id: currentPatient.id,
       dose_number: formData.dose_number
         ? parseInt(formData.dose_number, 10)
         : null,
       lot_number: formData.lot_number || null,
+      ndc_number: formData.ndc_number || null,
       manufacturer: formData.manufacturer || null,
       site: formData.site || null,
       route: formData.route || null,

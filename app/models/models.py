@@ -17,7 +17,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-from sqlalchemy.orm import declarative_base, backref
+from sqlalchemy.orm import backref, declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
 
 # Import status enums for consistent status management
@@ -66,19 +66,25 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
     full_name = Column(String, nullable=False)  # Role-based access control
-    role = Column(
-        String, nullable=False
-    )  # e.g., 'admin', 'user', 'guest'    
-    
+    role = Column(String, nullable=False)  # e.g., 'admin', 'user', 'guest'
+
     # SSO fields
-    auth_method = Column(String(20), nullable=False, default='local')  # 'local', 'sso', 'hybrid'
-    external_id = Column(String(255), nullable=True, unique=True)  # SSO provider user ID
+    auth_method = Column(
+        String(20), nullable=False, default="local"
+    )  # 'local', 'sso', 'hybrid'
+    external_id = Column(
+        String(255), nullable=True, unique=True
+    )  # SSO provider user ID
     sso_provider = Column(String(50), nullable=True)  # 'google', 'github', 'oidc', etc.
     sso_metadata = Column(JSON, nullable=True)  # Additional SSO data
     last_sso_login = Column(DateTime, nullable=True)  # Last SSO login timestamp
-    account_linked_at = Column(DateTime, nullable=True)  # When account was linked to SSO
-    sso_linking_preference = Column(String(20), nullable=True)  # 'auto_link', 'create_separate', 'always_ask'
-    
+    account_linked_at = Column(
+        DateTime, nullable=True
+    )  # When account was linked to SSO
+    sso_linking_preference = Column(
+        String(20), nullable=True
+    )  # 'auto_link', 'create_separate', 'always_ask'
+
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
@@ -118,13 +124,11 @@ class User(Base):
         "UserPreferences",
         back_populates="user",
         cascade="all, delete-orphan",
-        uselist=False
+        uselist=False,
     )
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_users_email", "email"),
-    )
+    __table_args__ = (Index("idx_users_email", "email"),)
 
 
 class Patient(Base):
@@ -221,9 +225,7 @@ class Patient(Base):
     )
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_patients_owner_user_id", "owner_user_id"),
-    )
+    __table_args__ = (Index("idx_patients_owner_user_id", "owner_user_id"),)
 
 
 class Practitioner(Base):
@@ -351,9 +353,7 @@ class Encounter(Base):
     condition = orm_relationship("Condition")
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_encounters_patient_id", "patient_id"),
-    )
+    __table_args__ = (Index("idx_encounters_patient_id", "patient_id"),)
 
 
 class LabResult(Base):
@@ -606,8 +606,10 @@ class Immunization(Base):
 
     # Primary vaccine information
     vaccine_name = Column(String, nullable=False)  # Name of the vaccine
+    vaccine_trade_name = Column(String, nullable=True)  # Formal/trade name (e.g., "Flublok TRIV 2025-2026 PFS")
     date_administered = Column(Date, nullable=False)  # Date when administered
     dose_number = Column(Integer, nullable=True)  # Dose number in series
+    ndc_number = Column(String, nullable=True)  # NDC number of the vaccine
 
     # Vaccine details
     lot_number = Column(String, nullable=True)  # Vaccine lot number
@@ -631,9 +633,7 @@ class Immunization(Base):
     practitioner = orm_relationship("Practitioner", back_populates="immunizations")
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_immunizations_patient_id", "patient_id"),
-    )
+    __table_args__ = (Index("idx_immunizations_patient_id", "patient_id"),)
 
 
 class Procedure(Base):
@@ -688,9 +688,7 @@ class Procedure(Base):
     condition = orm_relationship("Condition", back_populates="procedures")
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_procedures_patient_id", "patient_id"),
-    )
+    __table_args__ = (Index("idx_procedures_patient_id", "patient_id"),)
 
 
 class Treatment(Base):
@@ -763,9 +761,7 @@ class Allergy(Base):
     medication = orm_relationship("Medication", back_populates="allergies")
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_allergies_patient_id", "patient_id"),
-    )
+    __table_args__ = (Index("idx_allergies_patient_id", "patient_id"),)
 
 
 class Vitals(Base):
@@ -810,9 +806,7 @@ class Vitals(Base):
     practitioner = orm_relationship("Practitioner", back_populates="vitals")
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_vitals_patient_id", "patient_id"),
-    )
+    __table_args__ = (Index("idx_vitals_patient_id", "patient_id"),)
 
 
 class Pharmacy(Base):
@@ -1145,7 +1139,7 @@ class UserPreferences(Base):
 
     # Unit system preference: 'imperial' or 'metric'
     unit_system = Column(String, default="imperial", nullable=False)
-    
+
     # Session timeout in minutes (default 30 minutes)
     session_timeout_minutes = Column(Integer, default=30, nullable=False)
 
@@ -1240,23 +1234,27 @@ class ReportTemplate(Base):
     __tablename__ = "report_templates"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
     # Template information
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    
+
     # Report configuration stored as JSONB
     selected_records = Column(JSONB, nullable=False)  # Record selections and filters
-    report_settings = Column(JSONB, nullable=False, default={})  # UI preferences, sorting, grouping
-    
+    report_settings = Column(
+        JSONB, nullable=False, default={}
+    )  # UI preferences, sorting, grouping
+
     # Sharing and visibility
     is_public = Column(Boolean, nullable=False, default=False)
     shared_with_family = Column(Boolean, nullable=False, default=False)
-    
+
     # Soft delete
     is_active = Column(Boolean, nullable=False, default=True)
-    
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
@@ -1270,9 +1268,21 @@ class ReportTemplate(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="unique_user_template_name"),
         Index("idx_report_template_user_id", "user_id"),
-        Index("idx_report_template_is_active", "is_active", postgresql_where=(column("is_active") == True)),
-        Index("idx_report_template_shared_family", "shared_with_family", postgresql_where=(column("shared_with_family") == True)),
-        Index("idx_report_template_selected_records", "selected_records", postgresql_using="gin"),
+        Index(
+            "idx_report_template_is_active",
+            "is_active",
+            postgresql_where=(column("is_active") == True),
+        ),
+        Index(
+            "idx_report_template_shared_family",
+            "shared_with_family",
+            postgresql_where=(column("shared_with_family") == True),
+        ),
+        Index(
+            "idx_report_template_selected_records",
+            "selected_records",
+            postgresql_using="gin",
+        ),
     )
 
 
@@ -1285,21 +1295,27 @@ class ReportGenerationAudit(Base):
     __tablename__ = "report_generation_audit"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+
     # Report details
-    report_type = Column(String(50), nullable=False)  # 'custom_report', 'full_export', etc.
+    report_type = Column(
+        String(50), nullable=False
+    )  # 'custom_report', 'full_export', etc.
     categories_included = Column(ARRAY(Text), nullable=True)  # Array of category names
     total_records = Column(Integer, nullable=True)
-    
+
     # Performance metrics
     generation_time_ms = Column(Integer, nullable=True)
     file_size_bytes = Column(Integer, nullable=True)
-    
+
     # Status tracking
-    status = Column(String(20), nullable=False, default="success")  # success, failed, timeout
+    status = Column(
+        String(20), nullable=False, default="success"
+    )  # success, failed, timeout
     error_details = Column(Text, nullable=True)
-    
+
     # Audit timestamp
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
 

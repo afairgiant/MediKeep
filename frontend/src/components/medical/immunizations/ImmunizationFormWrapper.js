@@ -69,7 +69,17 @@ const ImmunizationFormWrapper = ({
             value={formData.vaccine_name || ''}
             onChange={(e) => onInputChange(e)}
             required
-            placeholder="Enter vaccine name"
+            placeholder="e.g., Flu Shot, COVID-19, Tdap"
+            description="Common name for the vaccine"
+          />
+
+          <TextInput
+            label="Formal/Trade Name (Optional)"
+            name="vaccine_trade_name"
+            value={formData.vaccine_trade_name || ''}
+            onChange={(e) => onInputChange(e)}
+            placeholder="e.g., Flublok TRIV 2025-2026 PFS"
+            description="Complete formal name from vaccine documentation"
           />
 
           <DateInput
@@ -117,13 +127,23 @@ const ImmunizationFormWrapper = ({
             />
           </Group>
 
-          <TextInput
-            label="Manufacturer"
-            name="manufacturer"
-            value={formData.manufacturer || ''}
-            onChange={(e) => onInputChange(e)}
-            placeholder="Enter manufacturer"
-          />
+          <Group grow>
+            <TextInput
+              label="NDC Number"
+              name="ndc_number"
+              value={formData.ndc_number || ''}
+              onChange={(e) => onInputChange(e)}
+              placeholder="e.g., 12345-6789-01"
+            />
+
+            <TextInput
+              label="Manufacturer"
+              name="manufacturer"
+              value={formData.manufacturer || ''}
+              onChange={(e) => onInputChange(e)}
+              placeholder="Enter manufacturer"
+            />
+          </Group>
 
           <Group grow>
             <Select
