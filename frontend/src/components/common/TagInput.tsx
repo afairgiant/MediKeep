@@ -26,8 +26,25 @@ export function TagInput({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [popularTags, setPopularTags] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [debouncedInput] = useDebouncedValue(inputValue, 300);
+
+  // Fetch popular tags on mount
+  useEffect(() => {
+    const fetchPopularTags = async () => {
+      try {
+        const response = await apiService.get('/tags/suggestions?limit=20');
+        setPopularTags(response.data || response || []);
+      } catch (error) {
+        logger.error('Failed to fetch popular tags', {
+          component: 'TagInput',
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    };
+    fetchPopularTags();
+  }, []);
 
   // Fetch tag suggestions based on input
   useEffect(() => {
@@ -40,9 +57,11 @@ export function TagInput({
       setIsLoadingSuggestions(true);
       try {
         const response = await apiService.get(`/tags/autocomplete?q=${encodeURIComponent(debouncedInput)}&limit=10`);
+        
         // Filter out already selected tags
-        const tags = response.data || [];
+        const tags = response.data || response || [];
         const filtered = tags.filter((tag: string) => !value.includes(tag));
+        
         setSuggestions(filtered);
         setShowSuggestions(filtered.length > 0);
       } catch (error) {
@@ -143,7 +162,12 @@ export function TagInput({
                   setTimeout(() => setShowSuggestions(false), 200);
                 }}
                 onFocus={() => {
-                  if (suggestions.length > 0) {
+                  // Show popular tags if no input, otherwise show suggestions
+                  if (inputValue === '' && popularTags.length > 0) {
+                    const filtered = popularTags.filter(tag => !value.includes(tag));
+                    setSuggestions(filtered);
+                    setShowSuggestions(filtered.length > 0);
+                  } else if (suggestions.length > 0) {
                     setShowSuggestions(true);
                   }
                 }}
@@ -177,7 +201,13 @@ export function TagInput({
             {isLoadingSuggestions ? (
               <Text size="sm" c="dimmed">Loading suggestions...</Text>
             ) : (
-              suggestions.map((suggestion) => (
+              <>
+                {inputValue === '' && suggestions.length > 0 && (
+                  <Text size="xs" c="dimmed" p="xs" style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    Common tags:
+                  </Text>
+                )}
+                {suggestions.map((suggestion) => (
                 <div
                   key={suggestion}
                   onClick={() => handleSuggestionClick(suggestion)}
@@ -196,7 +226,8 @@ export function TagInput({
                 >
                   <Text size="sm">{suggestion}</Text>
                 </div>
-              ))
+                ))}
+              </>
             )}
           </Paper>
         )}

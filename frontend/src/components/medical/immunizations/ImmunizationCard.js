@@ -68,6 +68,15 @@ const ImmunizationCard = ({
       });
     }
 
+    // Add tags as badges
+    if (immunization.tags && immunization.tags.length > 0) {
+      badges.push({
+        label: `🏷️ ${immunization.tags[0]}${immunization.tags.length > 1 ? ` +${immunization.tags.length - 1}` : ''}`,
+        color: 'gray',
+        variant: 'outline'
+      });
+    }
+
     // Generate dynamic fields
     const fields = [
       {

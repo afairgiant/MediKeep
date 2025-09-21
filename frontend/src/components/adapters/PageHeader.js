@@ -89,6 +89,7 @@ const PageHeader = ({
     {
       title: 'Tools',
       items: [
+        { name: 'Tag Management', path: '/tools/tags', icon: '🏷️' },
         { name: 'Export Records', path: '/export', icon: '📤' },
         { name: 'Settings', path: '/settings', icon: '⚙️' },
       ],

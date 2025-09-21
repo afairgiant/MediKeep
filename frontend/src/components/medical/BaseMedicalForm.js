@@ -526,14 +526,25 @@ const BaseMedicalForm = ({
         // Handle custom components
         if (fieldConfig.component === 'TagInput') {
           return (
-            <TagInput
-              value={formData[name] || []}
-              onChange={(tags) => onInputChange({ target: { name, value: tags } })}
-              placeholder={placeholder}
-              maxTags={fieldConfig.maxTags || 15}
-              disabled={false}
-              error={fieldErrors[name]}
-            />
+            <div>
+              <Text size="sm" fw={500} mb={5}>
+                {label}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </Text>
+              {description && (
+                <Text size="xs" c="dimmed" mb={5}>
+                  {description}
+                </Text>
+              )}
+              <TagInput
+                value={formData[name] || []}
+                onChange={(tags) => onInputChange({ target: { name, value: tags } })}
+                placeholder={placeholder}
+                maxTags={fieldConfig.maxTags || 15}
+                disabled={false}
+                error={fieldErrors[name]}
+              />
+            </div>
           );
         }
         logger.warn(`Unknown custom component: ${fieldConfig.component} for field: ${name}`);

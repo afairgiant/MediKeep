@@ -191,6 +191,7 @@ const Immunization = () => {
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id, 10)
         : null,
+      tags: formData.tags || [],
     };
 
     let success;

@@ -116,6 +116,15 @@ const ConditionCard = ({
       });
     }
 
+    // Add tags as badges
+    if (condition.tags && condition.tags.length > 0) {
+      badges.push({
+        label: `🏷️ ${condition.tags[0]}${condition.tags.length > 1 ? ` +${condition.tags.length - 1}` : ''}`,
+        color: 'gray',
+        variant: 'outline'
+      });
+    }
+
     // Generate dynamic fields
     const fields = [
       {

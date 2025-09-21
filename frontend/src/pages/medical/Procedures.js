@@ -393,6 +393,7 @@ const Procedures = () => {
         : null,
       anesthesia_type: formData.anesthesia_type || null,
       anesthesia_notes: formData.anesthesia_notes || null,
+      tags: formData.tags || [],
       patient_id: currentPatient.id,
     };
 

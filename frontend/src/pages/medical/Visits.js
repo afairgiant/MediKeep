@@ -422,6 +422,7 @@ const Visits = () => {
       duration_minutes: formData.duration_minutes || null,
       location: formData.location || null,
       priority: formData.priority || null,
+      tags: formData.tags || [],
       patient_id: currentPatient.id,
     };
 

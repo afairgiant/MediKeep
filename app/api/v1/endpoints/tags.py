@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.services.tag_service import tag_service
@@ -11,6 +12,10 @@ from app.core.logging_config import get_logger
 logger = get_logger(__name__, "app")
 
 router = APIRouter()
+
+
+class TagCreateRequest(BaseModel):
+    tag: str
 
 
 @router.get("/popular", response_model=List[Dict[str, Any]])
@@ -30,6 +35,9 @@ async def get_popular_tags_across_entities(
         "entity_types": entity_types,
         "limit": limit
     })
+    
+    # First sync any tags from medical records that aren't in user_tags yet
+    tag_service.sync_tags_from_records(db, user_id=current_user.id)
     
     return tag_service.get_popular_tags_across_entities(
         db, entity_types=entity_types, limit=limit
@@ -104,3 +112,95 @@ async def get_tag_suggestions(
     
     # Extract just the tag names for suggestions
     return [item["tag"] for item in result]
+
+
+@router.put("/rename", response_model=Dict[str, Any])
+async def rename_tag(
+    old_tag: str = Query(..., description="Current tag name to rename"),
+    new_tag: str = Query(..., description="New tag name"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Rename a tag across all entities"""
+    
+    logger.info("Renaming tag across entities", extra={
+        "user_id": current_user.id,
+        "old_tag": old_tag,
+        "new_tag": new_tag
+    })
+    
+    result = tag_service.rename_tag_across_entities(
+        db, old_tag=old_tag, new_tag=new_tag
+    )
+    
+    return {
+        "message": f"Successfully renamed '{old_tag}' to '{new_tag}'",
+        "records_updated": result
+    }
+
+
+@router.delete("/delete", response_model=Dict[str, Any])
+async def delete_tag(
+    tag: str = Query(..., description="Tag name to delete"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Delete a tag from all entities"""
+    
+    logger.info("Deleting tag across entities", extra={
+        "user_id": current_user.id,
+        "tag": tag
+    })
+    
+    result = tag_service.delete_tag_across_entities(db, tag=tag)
+    
+    return {
+        "message": f"Successfully deleted tag '{tag}'",
+        "records_updated": result
+    }
+
+
+@router.put("/replace", response_model=Dict[str, Any])
+async def replace_tag(
+    old_tag: str = Query(..., description="Tag to replace"),
+    new_tag: str = Query(..., description="Replacement tag"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Replace one tag with another across all entities"""
+    
+    logger.info("Replacing tag across entities", extra={
+        "user_id": current_user.id,
+        "old_tag": old_tag,
+        "new_tag": new_tag
+    })
+    
+    result = tag_service.replace_tag_across_entities(
+        db, old_tag=old_tag, new_tag=new_tag
+    )
+    
+    return {
+        "message": f"Successfully replaced '{old_tag}' with '{new_tag}'",
+        "records_updated": result
+    }
+
+
+@router.post("/create", response_model=Dict[str, Any])
+async def create_tag(
+    request: TagCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Create a new tag in the user tags registry"""
+    
+    logger.info("Creating new tag", extra={
+        "user_id": current_user.id,
+        "tag": request.tag
+    })
+    
+    result = tag_service.create_tag(db, tag=request.tag, user_id=current_user.id)
+    
+    return {
+        "message": f"Successfully created tag '{request.tag}'",
+        "tag": request.tag
+    }

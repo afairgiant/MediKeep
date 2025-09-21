@@ -44,6 +44,18 @@ const MedicationCard = ({
                 {medication.dosage}
               </Badge>
             )}
+            {medication.tags && medication.tags.length > 0 && (
+              <Group gap="xs">
+                <Badge
+                  variant="outline"
+                  color="gray"
+                  size="sm"
+                  style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                >
+                  🏷️ {medication.tags[0]}{medication.tags.length > 1 ? ` +${medication.tags.length - 1}` : ''}
+                </Badge>
+              </Group>
+            )}
           </Stack>
           <StatusBadge status={medication.status} />
         </Group>

@@ -9,6 +9,7 @@ import { Container, Title, Paper, Stack, Text, Button, Group } from '@mantine/co
 // Import TypeScript components into JavaScript - works perfectly!
 import { TagInput } from '../common/TagInput';
 import { TagFilter } from '../common/TagFilter';
+import logger from '../../services/logger';
 
 /**
  * Example 1: Using TagInput in a form
@@ -17,7 +18,10 @@ export function TagInputExample() {
   const [tags, setTags] = useState(['example', 'demo']);
 
   const handleSubmit = () => {
-    console.log('Saving tags:', tags);
+    logger.debug('tagging_example_submit', 'Saving tags in example', {
+      tags,
+      component: 'TaggingExample'
+    });
     // In a real form, you'd include tags in your API call:
     // api.post('/api/v1/medications/', { ...formData, tags })
   };
@@ -53,9 +57,10 @@ export function TagFilterExample() {
   const [matchAll, setMatchAll] = useState(false);
 
   const handleSearch = () => {
-    console.log('Filtering with:', { 
-      tags: selectedTags, 
-      matchAll 
+    logger.debug('tagging_example_filter', 'Filtering with tags in example', {
+      tags: selectedTags,
+      matchAll,
+      component: 'TaggingExample'
     });
     
     // In a real component, you'd call your API with these filters:

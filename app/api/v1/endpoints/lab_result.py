@@ -97,6 +97,9 @@ def get_lab_results(
             )
 
     # Convert to response format with practitioner names
+    # NOTE: Manual dictionary building is required here because LabResultWithRelations
+    # expects computed string fields (practitioner_name, patient_name) that aren't 
+    # actual database columns. Other endpoints avoid this by returning nested objects.
     response_results = []
     for result in results:
         result_dict = {

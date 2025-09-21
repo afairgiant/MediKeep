@@ -1352,3 +1352,24 @@ class ReportGenerationAudit(Base):
         Index("idx_report_audit_status", "status"),
         Index("idx_report_audit_created_at", "created_at"),
     )
+
+
+class UserTag(Base):
+    """Model for user-created tags"""
+    
+    __tablename__ = "user_tags"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    tag = Column(String(100), nullable=False)
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    
+    # Relationships
+    user = orm_relationship("User")
+    
+    # Constraints and indexes
+    __table_args__ = (
+        UniqueConstraint("user_id", "tag", name="uq_user_tag"),
+        Index("idx_user_tags_user_id", "user_id"),
+        Index("idx_user_tags_tag", "tag"),
+    )

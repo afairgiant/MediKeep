@@ -295,6 +295,7 @@ const Conditions = () => {
       code_description: formData.code_description || null,
       onset_date: formatDateForAPI(formData.onset_date),
       end_date: formatDateForAPI(formData.end_date),
+      tags: formData.tags || [],
       patient_id: currentPatient.id,
     };
 
