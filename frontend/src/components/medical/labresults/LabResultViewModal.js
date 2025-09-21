@@ -188,6 +188,24 @@ const LabResultViewModal = ({
             </div>
           )}
 
+          {/* Tags Section */}
+          {labResult.tags && labResult.tags.length > 0 && (
+            <div>
+              <Title order={4} mb="sm">Tags</Title>
+              <Group gap="xs">
+                {labResult.tags.map((tag, index) => (
+                  <StatusBadge
+                    key={index}
+                    status={tag}
+                    variant="light"
+                    color="blue"
+                    size="sm"
+                  />
+                ))}
+              </Group>
+            </div>
+          )}
+
           {/* Document Management Section */}
           <div>
             <Title order={4} mb="sm">Associated Files</Title>

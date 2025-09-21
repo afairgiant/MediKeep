@@ -7,6 +7,7 @@
  * This follows the Strategy pattern to allow different layout behaviors
  * for different component types (grids, forms, tables, etc.)
  */
+import logger from '../services/logger';
 export class LayoutStrategy {
   /**
    * Constructor
@@ -167,25 +168,13 @@ export class LayoutStrategy {
    */
   debug(breakpoint, context, result) {
     if (process.env.NODE_ENV === 'development') {
-      // Use structured logging instead of console for better ESLint compliance
-      const debugData = {
+      logger.debug('layout_calculation', `Layout calculation for ${this.config.name}`, {
         component: `${this.config.name}LayoutStrategy`,
         breakpoint,
         context,
-        result
-      };
-      
-      // This is a debug method - console usage is acceptable in development mode
-      // eslint-disable-next-line no-console
-      console.group(`[${this.config.name}] Layout calculation`);
-      // eslint-disable-next-line no-console
-      console.log('Breakpoint:', breakpoint);
-      // eslint-disable-next-line no-console
-      console.log('Context:', context);
-      // eslint-disable-next-line no-console
-      console.log('Result:', result);
-      // eslint-disable-next-line no-console
-      console.groupEnd();
+        result,
+        strategyName: this.config.name
+      });
     }
   }
 }

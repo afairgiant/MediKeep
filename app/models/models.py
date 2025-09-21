@@ -281,6 +281,9 @@ class Medication(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="medications")
     practitioner = orm_relationship("Practitioner", back_populates="medications")
@@ -347,6 +350,9 @@ class Encounter(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="encounters")
     practitioner = orm_relationship("Practitioner", back_populates="encounters")
@@ -387,6 +393,9 @@ class LabResult(Base):
     # Audit fields
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
+
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="lab_results")
@@ -573,6 +582,9 @@ class Condition(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="conditions")
     practitioner = orm_relationship("Practitioner", back_populates="conditions")
@@ -628,6 +640,9 @@ class Immunization(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="immunizations")
     practitioner = orm_relationship("Practitioner", back_populates="immunizations")
@@ -682,6 +697,9 @@ class Procedure(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="procedures")
     practitioner = orm_relationship("Practitioner", back_populates="procedures")
@@ -727,6 +745,9 @@ class Treatment(Base):
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
 
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="treatments")
     practitioner = orm_relationship("Practitioner", back_populates="treatments")
@@ -755,6 +776,9 @@ class Allergy(Base):
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
     )
+
+    # Tagging system
+    tags = Column(JSONB, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="allergies")
@@ -1327,4 +1351,25 @@ class ReportGenerationAudit(Base):
         Index("idx_report_audit_user_created", "user_id", "created_at"),
         Index("idx_report_audit_status", "status"),
         Index("idx_report_audit_created_at", "created_at"),
+    )
+
+
+class UserTag(Base):
+    """Model for user-created tags"""
+    
+    __tablename__ = "user_tags"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    tag = Column(String(100), nullable=False)
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    
+    # Relationships
+    user = orm_relationship("User")
+    
+    # Constraints and indexes
+    __table_args__ = (
+        UniqueConstraint("user_id", "tag", name="uq_user_tag"),
+        Index("idx_user_tags_user_id", "user_id"),
+        Index("idx_user_tags_tag", "tag"),
     )

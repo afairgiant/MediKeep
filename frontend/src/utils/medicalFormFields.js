@@ -3,6 +3,19 @@
  * Defines the structure and validation for each medical form type
  */
 
+// Add tags field configuration that can be used across all forms
+const tagsFieldConfig = {
+  name: 'tags',
+  type: 'custom',  // Custom type for TagInput component
+  component: 'TagInput',  // Component to use
+  label: 'Tags',
+  placeholder: 'Add tags to organize and find this record',
+  description: 'Add tags to help organize and search for this record later',
+  gridColumn: 12,
+  maxTags: 15,
+  required: false,
+};
+
 // Allergy Form Field Configuration
 export const allergyFormFields = [
   {
@@ -91,6 +104,7 @@ export const allergyFormFields = [
     minRows: 3,
     maxRows: 6,
   },
+  tagsFieldConfig,  // Add tags field to allergy form
 ];
 
 // Export field configurations for other forms (to be added later)
@@ -189,6 +203,7 @@ export const conditionFormFields = [
     minRows: 4,
     maxRows: 8,
   },
+  tagsFieldConfig,  // Add tags field to condition form
 ];
 
 export const medicationFormFields = [
@@ -304,6 +319,7 @@ export const medicationFormFields = [
     maxDropdownHeight: 200, // Fixed height to prevent viewport calculation loops
     dynamicOptions: 'pharmacies',
   },
+  tagsFieldConfig,  // Add tags field to medication form
 ];
 
 // Lab Result Form Field Configuration
@@ -411,6 +427,7 @@ export const labResultFormFields = [
     minRows: 3,
     maxRows: 6,
   },
+  tagsFieldConfig,  // Add tags field to lab result form
 ];
 
 // Immunization Form Field Configuration
@@ -516,6 +533,7 @@ export const immunizationFormFields = [
     minRows: 3,
     maxRows: 6,
   },
+  tagsFieldConfig,  // Add tags field to immunization form
 ];
 
 // Procedure Form Field Configuration
@@ -702,6 +720,7 @@ export const procedureFormFields = [
     description: 'Any notes about anesthesia administration',
     gridColumn: 6,
   },
+  tagsFieldConfig,  // Add tags field to procedure form
 ];
 
 // Practitioner Form Field Configuration
@@ -1003,6 +1022,7 @@ export const visitFormFields = [
     minRows: 3,
     maxRows: 6,
   },
+  tagsFieldConfig,  // Add tags field to visit form
 ];
 
 // Pharmacy Form Field Configuration
@@ -1250,6 +1270,7 @@ export const treatmentFormFields = [
     minRows: 3,
     maxRows: 6,
   },
+  tagsFieldConfig,  // Add tags field to treatment form
 ];
 
 // Family Member Form Field Configuration

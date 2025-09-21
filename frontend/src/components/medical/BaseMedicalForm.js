@@ -23,6 +23,7 @@ import { ResponsiveModal } from '../adapters';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStrategy';
+import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
 
 // Initialize medical form layout strategy
@@ -520,6 +521,34 @@ const BaseMedicalForm = ({
             )}
           </div>
         );
+
+      case 'custom':
+        // Handle custom components
+        if (fieldConfig.component === 'TagInput') {
+          return (
+            <div>
+              <Text size="sm" fw={500} mb={5}>
+                {label}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </Text>
+              {description && (
+                <Text size="xs" c="dimmed" mb={5}>
+                  {description}
+                </Text>
+              )}
+              <TagInput
+                value={formData[name] || []}
+                onChange={(tags) => onInputChange({ target: { name, value: tags } })}
+                placeholder={placeholder}
+                maxTags={fieldConfig.maxTags || 15}
+                disabled={false}
+                error={fieldErrors[name]}
+              />
+            </div>
+          );
+        }
+        logger.warn(`Unknown custom component: ${fieldConfig.component} for field: ${name}`);
+        return null;
 
       default:
         logger.warn(`Unknown field type: ${type} for field: ${name}`);

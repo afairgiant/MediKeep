@@ -119,6 +119,7 @@ const Conditions = () => {
     code_description: '',
     onset_date: '', // Form field name
     end_date: '', // Form field name
+    tags: [],
   });
 
   const handleAddCondition = () => {
@@ -137,6 +138,7 @@ const Conditions = () => {
       code_description: '',
       onset_date: '',
       end_date: '',
+      tags: [],
     });
     setShowModal(true);
   };
@@ -222,6 +224,7 @@ const Conditions = () => {
         ? condition.onset_date.split('T')[0]
         : '',
       end_date: condition.end_date ? condition.end_date.split('T')[0] : '',
+      tags: condition.tags || [],
     });
     setShowModal(true);
   };
@@ -292,6 +295,7 @@ const Conditions = () => {
       code_description: formData.code_description || null,
       onset_date: formatDateForAPI(formData.onset_date),
       end_date: formatDateForAPI(formData.end_date),
+      tags: formData.tags || [],
       patient_id: currentPatient.id,
     };
 

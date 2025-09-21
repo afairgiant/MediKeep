@@ -132,6 +132,12 @@ export const NAVIGATION_SECTIONS = {
     priority: 5,
     items: [
       {
+        name: 'Tag Management',
+        path: '/tools/tags',
+        icon: '🏷️',
+        id: 'tag-management',
+      },
+      {
         name: 'Custom Reports',
         path: '/reports/builder',
         icon: '📊',

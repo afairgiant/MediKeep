@@ -666,8 +666,10 @@ class ApiService {
             });
           })
           .catch((err) => {
-            // eslint-disable-next-line no-console
-            console.warn(err);
+            logger.warn('background_notification_import_failed', 'Failed to import Mantine notifications for background upload', {
+              error: err.message,
+              component: 'apiService'
+            });
           });
 
         logger.info(

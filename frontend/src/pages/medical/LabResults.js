@@ -300,6 +300,7 @@ const LabResults = () => {
       completed_date: '',
       notes: '',
       practitioner_id: '',
+      tags: [],
     });
     setShowModal(true);
   };
@@ -319,6 +320,7 @@ const LabResults = () => {
       completed_date: labResult.completed_date || '',
       notes: labResult.notes || '',
       practitioner_id: labResult.practitioner_id || '',
+      tags: labResult.tags || [],
     });
 
     // Note: File loading is now handled by DocumentManager component
@@ -406,6 +408,7 @@ const LabResults = () => {
       ordered_date: formData.ordered_date || null,
       completed_date: formData.completed_date || null,
     };
+    
 
     try {
       let success;

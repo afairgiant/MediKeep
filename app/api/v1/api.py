@@ -28,6 +28,7 @@ from app.api.v1.endpoints import (
     procedure,
     sso,
     system,
+    tags,
     treatment,
     users,
     utils,
@@ -58,6 +59,9 @@ api_router.include_router(
 api_router.include_router(
     entity_file.router, prefix="/entity-files", tags=["entity-files"]
 )
+
+# Cross-entity tag management
+api_router.include_router(tags.router, prefix="/tags", tags=["tags"])
 
 # Medical record endpoints
 api_router.include_router(encounter.router, prefix="/encounters", tags=["encounters"])

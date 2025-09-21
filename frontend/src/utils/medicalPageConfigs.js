@@ -41,7 +41,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search conditions, notes...',
+      searchPlaceholder: 'Search conditions, notes, tags...',
       title: 'Filter & Sort Conditions',
       showDateRange: true,
     },
@@ -221,7 +221,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search medications, indications, dosages...',
+      searchPlaceholder: 'Search medications, indications, dosages, tags...',
       title: 'Filter & Sort Medications',
       showCategory: true,
       showDateRange: true,
@@ -259,7 +259,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search procedures...',
+      searchPlaceholder: 'Search procedures, notes, tags...',
       title: 'Filter & Sort Procedures',
       showDateRange: true,
     },
@@ -392,7 +392,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search treatments...',
+      searchPlaceholder: 'Search treatments, notes, tags...',
       title: 'Filter & Sort Treatments',
       showDateRange: true,
     },
@@ -416,7 +416,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search visits...',
+      searchPlaceholder: 'Search visits, reasons, notes, tags...',
       title: 'Filter & Sort Visits',
       showStatus: false,
       showDateRange: true,
@@ -441,7 +441,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search immunizations...',
+      searchPlaceholder: 'Search immunizations, vaccines, tags...',
       title: 'Filter & Sort Immunizations',
       showStatus: false,
       showDateRange: true,
@@ -479,7 +479,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search allergies...',
+      searchPlaceholder: 'Search allergies, reactions, tags...',
       title: 'Filter & Sort Allergies',
       showStatus: false,
       showCategory: true,
@@ -950,7 +950,7 @@ export const medicalPageConfigs = {
     },
     filterControls: {
       searchPlaceholder:
-        'Search lab results, test codes, facilities, practitioners...',
+        'Search lab results, test codes, facilities, practitioners, tags...',
       title: 'Filter & Sort Lab Results',
       showCategory: true,
       showOrderedDate: true,
@@ -1170,6 +1170,27 @@ export const medicalPageConfigs = {
         });
         
         if (matchesBasic) return true;
+        
+        // Search in tags
+        if (item.tags && Array.isArray(item.tags)) {
+          const matchesTags = item.tags.some(tag => {
+            if (!tag) return false;
+            try {
+              return tag.toString().toLowerCase().includes(sanitizedTerm);
+            } catch (error) {
+              logger.warn(`Error processing tag search`, {
+                component: 'medicalPageConfigs',
+                tag,
+                tagType: typeof tag,
+                error: error.message,
+                searchTerm: sanitizedTerm
+              });
+              return false;
+            }
+          });
+          
+          if (matchesTags) return true;
+        }
         
         // Search in family conditions
         if (item.family_conditions && Array.isArray(item.family_conditions)) {

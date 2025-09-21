@@ -1,10 +1,12 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field, validator
 
+from app.schemas.base_tags import TaggedEntityMixin
 
-class ImmunizationBase(BaseModel):
+
+class ImmunizationBase(TaggedEntityMixin):
     vaccine_name: str = Field(
         ..., min_length=2, max_length=200, description="Name of the vaccine"
     )
@@ -105,6 +107,7 @@ class ImmunizationUpdate(BaseModel):
     location: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=1000)
     practitioner_id: Optional[int] = Field(None, gt=0)
+    tags: Optional[List[str]] = None
 
     @validator("date_administered", pre=True)
     def validate_date_administered(cls, v):

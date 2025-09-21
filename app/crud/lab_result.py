@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
+from app.crud.base_tags import TagFilterMixin
 from app.models.models import LabResult, LabResultCondition
 from app.schemas.lab_result import (
     LabResultCreate, 
@@ -14,7 +15,7 @@ from app.schemas.lab_result import (
 )
 
 
-class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate]):
+class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate], TagFilterMixin):
     """CRUD operations for LabResult"""
 
     def __init__(self):

@@ -280,10 +280,17 @@ export const useFiltering = (data = [], config = {}) => {
           if (!matchesCustomSearch) return false;
         } else {
           // Default field-based search
-          const matchesSearch = searchFields.some(field => {
+          const matchesSearchFields = searchFields.some(field => {
             const value = getNestedValue(item, field);
             return value?.toString()?.toLowerCase()?.includes(searchTerm);
           });
+          
+          // Check tags if the field search doesn't match
+          const matchesTags = item.tags && Array.isArray(item.tags) 
+            ? item.tags.some(tag => tag?.toString()?.toLowerCase()?.includes(searchTerm))
+            : false;
+          
+          const matchesSearch = matchesSearchFields || matchesTags;
           if (!matchesSearch) return false;
         }
       }

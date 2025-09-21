@@ -111,6 +111,7 @@ const Allergies = () => {
     status: 'active',
     notes: '',
     medication_id: '',
+    tags: [],
   });
 
   const handleInputChange = e => {
@@ -127,6 +128,7 @@ const Allergies = () => {
       status: 'active',
       notes: '',
       medication_id: '',
+      tags: [],
     });
     setEditingAllergy(null);
     setShowAddForm(false);
@@ -169,6 +171,7 @@ const Allergies = () => {
       status: allergy.status || 'active',
       notes: allergy.notes || '',
       medication_id: allergy.medication_id ? allergy.medication_id.toString() : '',
+      tags: allergy.tags || [],
     });
     setEditingAllergy(allergy);
     setShowAddForm(true);

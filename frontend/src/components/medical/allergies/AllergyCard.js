@@ -86,6 +86,15 @@ const AllergyCard = ({
       });
     }
 
+    // Add tags as badges
+    if (allergy.tags && allergy.tags.length > 0) {
+      badges.push({
+        label: `🏷️ ${allergy.tags[0]}${allergy.tags.length > 1 ? ` +${allergy.tags.length - 1}` : ''}`,
+        color: 'gray',
+        variant: 'outline'
+      });
+    }
+
     // Generate dynamic fields
     const fields = [
       {

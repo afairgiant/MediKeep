@@ -69,6 +69,7 @@ import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
 import ReportBuilder from './pages/reports/ReportBuilder';
+import TagManagement from './pages/tools/TagManagement';
 import TestMedicationForm from './pages/TestMedicationForm';
 import ResponsiveNavigationTest from './pages/test/ResponsiveNavigationTest';
 
@@ -419,6 +420,14 @@ function App() {
                           element={
                             <ProtectedRoute>
                               <ReportBuilder />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/tools/tags"
+                          element={
+                            <ProtectedRoute>
+                              <TagManagement />
                             </ProtectedRoute>
                           }
                         />

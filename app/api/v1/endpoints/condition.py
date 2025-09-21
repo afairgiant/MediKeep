@@ -64,12 +64,27 @@ def read_conditions(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     status: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Retrieve conditions for the current user or specified patient (Phase 1 support)."""
     with handle_database_errors(request=request):
         # Filter conditions by the verified accessible patient_id
-        if status:
+        if tags:
+            # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if status:
+                filters["status"] = status
+            conditions = condition.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                skip=skip,
+                limit=limit,
+                **filters
+            )
+        elif status:
             conditions = condition.get_by_status(
                 db, status=status, patient_id=target_patient_id
             )

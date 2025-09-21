@@ -258,8 +258,10 @@ export const resolveBackgroundTask = async (taskUuid, entityType, entityId, file
               withCloseButton: true,
             });
           }).catch((err) => {
-            // eslint-disable-next-line no-console
-            console.warn(err);
+            logger.warn('paperless_notification_import_failed', 'Failed to import Mantine notifications', {
+              error: err.message,
+              component: 'paperlessApi'
+            });
           });
           
         } catch (updateError) {

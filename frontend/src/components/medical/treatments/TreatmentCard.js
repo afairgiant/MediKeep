@@ -65,6 +65,15 @@ const TreatmentCard = ({
       });
     }
 
+    // Add tags as badges
+    if (treatment.tags && treatment.tags.length > 0) {
+      badges.push({
+        label: `🏷️ ${treatment.tags[0]}${treatment.tags.length > 1 ? ` +${treatment.tags.length - 1}` : ''}`,
+        color: 'gray',
+        variant: 'outline'
+      });
+    }
+
     // Generate dynamic fields
     const fields = [
       {

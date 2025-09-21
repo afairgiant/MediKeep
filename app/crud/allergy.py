@@ -3,11 +3,12 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
+from app.crud.base_tags import TagFilterMixin
 from app.models.models import Allergy
 from app.schemas.allergy import AllergyCreate, AllergyUpdate
 
 
-class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate]):
+class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate], TagFilterMixin):
     """
     Allergy-specific CRUD operations for patient allergies.
 
