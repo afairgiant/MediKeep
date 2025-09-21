@@ -29,8 +29,8 @@ class ConditionStatus(Enum):
 class MedicationStatus(Enum):
     """Status values for medications"""
     ACTIVE = "active"
-    INACTIVE = "inactive"  # Mapped from old "stopped"
-    ON_HOLD = "on_hold"    # Mapped from old "on-hold"
+    STOPPED = "stopped"
+    ON_HOLD = "on-hold"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
@@ -40,6 +40,7 @@ class AllergyStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     RESOLVED = "resolved"
+    UNCONFIRMED = "unconfirmed"
 
 
 class LabResultStatus(Enum):
@@ -79,7 +80,7 @@ class SeverityLevel(Enum):
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"
-    CRITICAL = "critical"
+    LIFE_THREATENING = "life-threatening"
 
 
 class FamilyRelationship(Enum):
