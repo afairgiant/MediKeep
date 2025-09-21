@@ -67,21 +67,24 @@ const SearchResults = ({
   }
 
   return (
-    <Paper 
-      withBorder 
-      shadow="md" 
+    <Paper
+      withBorder
+      shadow="md"
       p={0}
-      style={{ 
+      style={{
         position: 'absolute',
         top: '100%',
         left: 0,
-        right: 0,
+        width: '500px',
         zIndex: 1000,
-        maxHeight: '400px'
+        maxHeight: '400px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
       {/* Header */}
-      <Group justify="space-between" p="md" pb="xs">
+      <Group justify="space-between" p="md" pb="xs" style={{ flexShrink: 0 }}>
         <Group gap="xs">
           <IconSearch size="1rem" />
           <Text size="sm" fw={500}>
@@ -102,7 +105,15 @@ const SearchResults = ({
       <Divider />
 
       {/* Results */}
-      <ScrollArea style={{ maxHeight: '320px' }}>
+      <ScrollArea 
+        style={{ 
+          flex: '1 1 auto',
+          minHeight: 0,
+          maxHeight: '300px',
+          overflow: 'auto'
+        }}
+        scrollbarSize={8}
+        type="scroll">
         {loading ? (
           <Group justify="center" p="xl">
             <Loader size="sm" />
@@ -184,12 +195,12 @@ const SearchResults = ({
 
       {/* Footer */}
       {results.length > 0 && (
-        <>
+        <div style={{ flexShrink: 0 }}>
           <Divider />
           <Text size="xs" c="dimmed" p="sm" ta="center">
             {results.length} result{results.length !== 1 ? 's' : ''} found
           </Text>
-        </>
+        </div>
       )}
     </Paper>
   );

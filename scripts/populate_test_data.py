@@ -398,11 +398,11 @@ class TestDataPopulator:
         lab_results_data = [
             {
                 "test_name": "Complete Blood Count (CBC)",
-                "test_category": "Blood Work",
-                "test_type": "Routine",
+                "test_category": "blood work",
+                "test_type": "routine",
                 "facility": "City Lab Services",
                 "status": LabResultStatus.COMPLETED.value,
-                "labs_result": "Normal",
+                "labs_result": "normal",
                 "ordered_date": date(2024, 8, 1),
                 "completed_date": date(2024, 8, 3),
                 "notes": "All values within normal limits",
@@ -410,11 +410,11 @@ class TestDataPopulator:
             },
             {
                 "test_name": "Lipid Panel",
-                "test_category": "Blood Work",
-                "test_type": "Routine",
+                "test_category": "blood work",
+                "test_type": "routine",
                 "facility": "City Lab Services",
                 "status": LabResultStatus.COMPLETED.value,
-                "labs_result": "Elevated cholesterol",
+                "labs_result": "high",
                 "ordered_date": date(2024, 7, 15),
                 "completed_date": date(2024, 7, 17),
                 "notes": "Total cholesterol 240 mg/dL (elevated)",
@@ -422,11 +422,11 @@ class TestDataPopulator:
             },
             {
                 "test_name": "Hemoglobin A1C",
-                "test_category": "Blood Work",
-                "test_type": "Diabetes Monitoring",
+                "test_category": "blood work",
+                "test_type": "follow-up",
                 "facility": "Diabetes Care Lab",
                 "status": LabResultStatus.COMPLETED.value,
-                "labs_result": "Controlled",
+                "labs_result": "normal",
                 "ordered_date": date(2024, 8, 10),
                 "completed_date": date(2024, 8, 12),
                 "notes": "A1C 6.8% - diabetes well controlled",
@@ -434,11 +434,11 @@ class TestDataPopulator:
             },
             {
                 "test_name": "Chest X-Ray",
-                "test_category": "Imaging",
-                "test_type": "Diagnostic",
+                "test_category": "imaging",
+                "test_type": "screening",
                 "facility": "Riverside Imaging Center",
                 "status": LabResultStatus.COMPLETED.value,
-                "labs_result": "Normal",
+                "labs_result": "normal",
                 "ordered_date": date(2024, 6, 20),
                 "completed_date": date(2024, 6, 20),
                 "notes": "No acute findings. Lungs clear.",
@@ -835,10 +835,10 @@ class TestDataPopulator:
                 base_height = patient.height if patient.height is not None else 68.0
                 current_weight = base_weight + (i * 0.5)
 
-                # Calculate BMI safely
+                # Calculate BMI safely (weight in lbs, height in inches)
                 bmi = None
                 if base_height and current_weight:
-                    bmi = round(current_weight / ((base_height/12) ** 2), 1)
+                    bmi = round((current_weight / (base_height ** 2)) * 703, 1)
 
                 vitals = Vitals(
                     patient_id=patient.id,
