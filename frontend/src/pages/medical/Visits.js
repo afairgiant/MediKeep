@@ -120,6 +120,7 @@ const Visits = () => {
         duration_minutes: '',
         location: '',
         priority: '',
+        tags: [],
       });
       
       // Only refresh if we created a new visit during form submission
@@ -277,6 +278,7 @@ const Visits = () => {
     duration_minutes: '',
     location: '',
     priority: '',
+    tags: [],
   });
 
   const handleAddVisit = () => {
@@ -297,6 +299,7 @@ const Visits = () => {
       duration_minutes: '',
       location: '',
       priority: '',
+      tags: [],
     });
     setShowModal(true);
   };
@@ -330,6 +333,7 @@ const Visits = () => {
       duration_minutes: visit.duration_minutes || '',
       location: visit.location || '',
       priority: visit.priority || '',
+      tags: visit.tags || [],
     });
     setShowModal(true);
   };

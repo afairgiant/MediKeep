@@ -3,8 +3,10 @@ from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
+from app.schemas.base_tags import TaggedEntityMixin
 
-class LabResultBase(BaseModel):
+
+class LabResultBase(TaggedEntityMixin):
     """Base schema for LabResult - simple test tracking"""
 
     test_name: str
@@ -219,6 +221,7 @@ class LabResultUpdate(BaseModel):
     completed_date: Optional[date] = None
     notes: Optional[str] = None
     practitioner_id: Optional[int] = None
+    tags: Optional[List[str]] = None
 
     @field_validator("test_name")
     @classmethod

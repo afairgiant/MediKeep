@@ -3,11 +3,12 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
+from app.crud.base_tags import TagFilterMixin
 from app.models.models import Procedure
 from app.schemas.procedure import ProcedureCreate, ProcedureUpdate
 
 
-class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate]):
+class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate], TagFilterMixin):
     """
     Procedure-specific CRUD operations for medical procedures.
 

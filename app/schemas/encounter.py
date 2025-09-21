@@ -1,10 +1,12 @@
 from datetime import date as DateType
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, validator
 
+from app.schemas.base_tags import TaggedEntityMixin
 
-class EncounterBase(BaseModel):
+
+class EncounterBase(TaggedEntityMixin):
     """Base schema for Encounter"""
 
     reason: str
@@ -150,6 +152,7 @@ class EncounterUpdate(BaseModel):
     duration_minutes: Optional[int] = None
     location: Optional[str] = None
     priority: Optional[str] = None
+    tags: Optional[List[str]] = None
 
     @validator("reason")
     def validate_reason(cls, v):

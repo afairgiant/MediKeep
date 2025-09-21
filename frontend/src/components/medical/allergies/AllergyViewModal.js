@@ -266,6 +266,30 @@ const AllergyViewModal = ({
             </Stack>
           </Card>
 
+          {allergy.tags && allergy.tags.length > 0 && (
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  TAGS
+                </Text>
+                <Divider />
+                <Group gap="xs">
+                  {allergy.tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="light"
+                      color="blue"
+                      size="sm"
+                      radius="md"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </Group>
+              </Stack>
+            </Card>
+          )}
+
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>

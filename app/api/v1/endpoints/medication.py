@@ -66,18 +66,40 @@ def read_medications(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     name: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Retrieve medications for the current user or specified patient (Phase 1 support)."""
     
     with handle_database_errors(request=request):
-        medications = medication.get_by_patient(
-            db=db,
-            patient_id=target_patient_id,
-            skip=skip,
-            limit=limit,
-            load_relations=["practitioner", "pharmacy", "condition"],
-        )
+        if tags:
+            # Use tag filtering with patient constraint
+            medications = medication.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+            )
+            # Load relationships manually for tag-filtered results
+            for med in medications:
+                if hasattr(med, 'practitioner_id') and med.practitioner_id:
+                    db.refresh(med, ["practitioner"])
+                if hasattr(med, 'pharmacy_id') and med.pharmacy_id:
+                    db.refresh(med, ["pharmacy"])
+                if hasattr(med, 'condition_id') and med.condition_id:
+                    db.refresh(med, ["condition"])
+        else:
+            # Use regular patient filtering
+            medications = medication.get_by_patient(
+                db=db,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+                load_relations=["practitioner", "pharmacy", "condition"],
+            )
 
         # Apply name filter if provided
         if name:

@@ -1,14 +1,16 @@
 from datetime import date
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 
 from pydantic import BaseModel, root_validator, validator
+
+from app.schemas.base_tags import TaggedEntityMixin
 
 if TYPE_CHECKING:
     from app.schemas.pharmacy import Pharmacy
     from app.schemas.practitioner import Practitioner
 
 
-class MedicationBase(BaseModel):
+class MedicationBase(TaggedEntityMixin):
     """Base schema for Medication"""
 
     medication_name: str
@@ -137,6 +139,7 @@ class MedicationUpdate(BaseModel):
     status: Optional[str] = None
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
+    tags: Optional[List[str]] = None
 
     @root_validator(pre=True)
     def clean_empty_strings(cls, values):

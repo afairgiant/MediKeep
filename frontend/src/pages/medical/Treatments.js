@@ -108,6 +108,7 @@ const Treatments = () => {
     notes: '',
     condition_id: '',
     practitioner_id: '',
+    tags: [],
   });
 
   const handleAddTreatment = () => {
@@ -124,6 +125,7 @@ const Treatments = () => {
       notes: '',
       condition_id: '',
       practitioner_id: '',
+      tags: [],
     });
     setShowModal(true);
   };
@@ -142,6 +144,7 @@ const Treatments = () => {
       notes: treatment.notes || '',
       condition_id: treatment.condition_id ? String(treatment.condition_id) : '',
       practitioner_id: treatment.practitioner_id ? String(treatment.practitioner_id) : '',
+      tags: treatment.tags || [],
     });
     setShowModal(true);
   };

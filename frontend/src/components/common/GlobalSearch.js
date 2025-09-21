@@ -14,7 +14,7 @@ import { searchService } from '../../services/searchService';
 
 const GlobalSearch = ({ 
   patientId, 
-  placeholder = "Search medical records...",
+  placeholder = "Search medical records, tags...",
   width = 300,
   style = {},
   ...props 

@@ -56,6 +56,8 @@ def read_procedures(
     limit: int = Query(default=100, le=100),
     practitioner_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """
@@ -64,7 +66,22 @@ def read_procedures(
     
     # Filter procedures by the target patient_id
     with handle_database_errors(request=request):
-        if status:
+        if tags:
+            # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if status:
+                filters["status"] = status
+            if practitioner_id:
+                filters["practitioner_id"] = practitioner_id
+            procedures = procedure.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                skip=skip,
+                limit=limit,
+                **filters
+            )
+        elif status:
             procedures = procedure.get_by_status(
                 db, status=status, patient_id=target_patient_id
             )

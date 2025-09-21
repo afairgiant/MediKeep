@@ -308,6 +308,31 @@ const ProcedureViewModal = ({
             </Stack>
           </Card>
 
+          {/* Tags Section */}
+          {procedure.tags && procedure.tags.length > 0 && (
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  TAGS
+                </Text>
+                <Divider />
+                <Group gap="xs">
+                  {procedure.tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="light"
+                      color="blue"
+                      size="sm"
+                      radius="md"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </Group>
+              </Stack>
+            </Card>
+          )}
+
           {/* Document Management */}
           <Card withBorder p="md">
             <Stack gap="sm">

@@ -4,6 +4,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
+from app.crud.base_tags import TagFilterMixin
 from app.models.models import Condition, ConditionMedication
 from app.schemas.condition import (
     ConditionCreate, 
@@ -13,7 +14,7 @@ from app.schemas.condition import (
 )
 
 
-class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate]):
+class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate], TagFilterMixin):
     """
     Condition-specific CRUD operations for medical conditions.
 

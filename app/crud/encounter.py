@@ -3,11 +3,12 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
+from app.crud.base_tags import TagFilterMixin
 from app.models.models import Encounter
 from app.schemas.encounter import EncounterCreate, EncounterUpdate
 
 
-class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate]):
+class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate], TagFilterMixin):
     """
     Encounter-specific CRUD operations for medical encounters.
 

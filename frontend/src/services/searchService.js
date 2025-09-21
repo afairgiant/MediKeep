@@ -63,9 +63,17 @@ class SearchService {
         });
       };
 
+      // Helper function to check if tags match the query
+      const matchesTags = (item) => {
+        if (!item.tags || !Array.isArray(item.tags)) return false;
+        return item.tags.some(tag => 
+          tag?.toString()?.toLowerCase()?.includes(queryLower)
+        );
+      };
+
       // Search allergies
       allergies.forEach(item => {
-        if (matchesQuery(item, ['allergen', 'reaction', 'severity', 'notes'])) {
+        if (matchesQuery(item, ['allergen', 'reaction', 'severity', 'notes']) || matchesTags(item)) {
           matchedResults.push({
             type: 'allergy',
             id: item.id,
@@ -82,7 +90,7 @@ class SearchService {
 
       // Search conditions
       conditions.forEach(item => {
-        if (matchesQuery(item, ['condition_name', 'status', 'notes'])) {
+        if (matchesQuery(item, ['condition_name', 'diagnosis', 'status', 'notes']) || matchesTags(item)) {
           matchedResults.push({
             type: 'condition',
             id: item.id,
@@ -105,7 +113,7 @@ class SearchService {
             'dosage',
             'frequency',
             'notes',
-          ])
+          ]) || matchesTags(item)
         ) {
           matchedResults.push({
             type: 'medication',
@@ -129,7 +137,7 @@ class SearchService {
             'manufacturer',
             'lot_number',
             'notes',
-          ])
+          ]) || matchesTags(item)
         ) {
           matchedResults.push({
             type: 'immunization',
@@ -147,7 +155,7 @@ class SearchService {
 
       // Search procedures
       procedures.forEach(item => {
-        if (matchesQuery(item, ['procedure_name', 'provider', 'notes'])) {
+        if (matchesQuery(item, ['procedure_name', 'provider', 'notes']) || matchesTags(item)) {
           matchedResults.push({
             type: 'procedure',
             id: item.id,
@@ -165,7 +173,7 @@ class SearchService {
       // Search treatments
       treatments.forEach(item => {
         if (
-          matchesQuery(item, ['treatment_name', 'provider', 'status', 'notes'])
+          matchesQuery(item, ['treatment_name', 'provider', 'status', 'notes']) || matchesTags(item)
         ) {
           matchedResults.push({
             type: 'treatment',
@@ -208,11 +216,13 @@ class SearchService {
         if (
           matchesQuery(item, [
             'encounter_type',
+            'reason',
+            'visit_type',
             'provider',
             'chief_complaint',
             'diagnosis',
             'notes',
-          ])
+          ]) || matchesTags(item)
         ) {
           matchedResults.push({
             type: 'encounter',
@@ -231,7 +241,7 @@ class SearchService {
       // Search lab results
       labResults.forEach(item => {
         if (
-          matchesQuery(item, ['test_name', 'result_value', 'unit', 'notes'])
+          matchesQuery(item, ['test_name', 'test_code', 'test_category', 'result_value', 'unit', 'notes']) || matchesTags(item)
         ) {
           matchedResults.push({
             type: 'lab_result',

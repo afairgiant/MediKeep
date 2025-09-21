@@ -1,10 +1,12 @@
 from datetime import date as DateType
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field, validator
 
+from app.schemas.base_tags import TaggedEntityMixin
 
-class ProcedureBase(BaseModel):
+
+class ProcedureBase(TaggedEntityMixin):
     procedure_name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the procedure"
     )
@@ -91,6 +93,7 @@ class ProcedureUpdate(BaseModel):
     practitioner_id: Optional[int] = Field(None, gt=0)
     anesthesia_type: Optional[str] = Field(None, max_length=100)
     anesthesia_notes: Optional[str] = Field(None, max_length=1000)
+    tags: Optional[List[str]] = None
 
     @validator("date")
     def validate_date(cls, v):

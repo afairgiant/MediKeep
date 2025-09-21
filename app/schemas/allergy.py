@@ -1,9 +1,11 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field, validator
 
+from app.schemas.base_tags import TaggedEntityMixin
 
-class AllergyBase(BaseModel):
+
+class AllergyBase(TaggedEntityMixin):
     allergen: str = Field(
         ..., min_length=2, max_length=200, description="Name of the allergen"
     )
@@ -54,6 +56,7 @@ class AllergyUpdate(BaseModel):
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
     medication_id: Optional[int] = Field(None, gt=0)
+    tags: Optional[List[str]] = None
 
     @validator("severity")
     def validate_severity(cls, v):

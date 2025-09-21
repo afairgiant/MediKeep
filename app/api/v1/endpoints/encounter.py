@@ -54,13 +54,28 @@ def read_encounters(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     practitioner_id: Optional[int] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Retrieve encounters for the current user or specified patient (Phase 1 support)."""
     
     # Filter encounters by the verified accessible patient_id
     with handle_database_errors(request=request):
-        if practitioner_id:
+        if tags:
+            # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if practitioner_id:
+                filters["practitioner_id"] = practitioner_id
+            encounters = encounter.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                skip=skip,
+                limit=limit,
+                **filters
+            )
+        elif practitioner_id:
             encounters = encounter.get_by_practitioner(
                 db,
                 practitioner_id=practitioner_id,

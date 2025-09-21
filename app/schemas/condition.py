@@ -1,13 +1,15 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field, validator, field_validator
+
+from app.schemas.base_tags import TaggedEntityMixin
 
 # Import status enums for validation
 from ..models.enums import get_all_condition_statuses, get_all_severity_levels
 
 
-class ConditionBase(BaseModel):
+class ConditionBase(TaggedEntityMixin):
     condition_name: Optional[str] = Field(
         None, max_length=500, description="Name of the condition"
     )
@@ -97,6 +99,7 @@ class ConditionUpdate(BaseModel):
     code_description: Optional[str] = Field(None, max_length=500)
     practitioner_id: Optional[int] = Field(None, gt=0)
     medication_id: Optional[int] = Field(None, gt=0)
+    tags: Optional[List[str]] = None
 
     @validator("status")
     def validate_status(cls, v):

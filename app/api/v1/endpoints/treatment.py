@@ -56,13 +56,30 @@ def read_treatments(
     limit: int = Query(default=100, le=100),
     condition_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Retrieve treatments for the current user or accessible patient."""
     
     with handle_database_errors(request=request):
         # Filter treatments by the target patient_id
-        if status:
+        if tags:
+            # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if status:
+                filters["status"] = status
+            if condition_id:
+                filters["condition_id"] = condition_id
+            treatments = treatment.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                skip=skip,
+                limit=limit,
+                **filters
+            )
+        elif status:
             treatments = treatment.get_by_status(
                 db,
                 status=status,

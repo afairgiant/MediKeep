@@ -106,6 +106,7 @@ const Immunization = () => {
     location: '',
     notes: '',
     practitioner_id: null,
+    tags: [],
   });
 
   const handleInputChange = e => {
@@ -131,6 +132,7 @@ const Immunization = () => {
       location: '',
       notes: '',
       practitioner_id: null,
+      tags: [],
     });
     setEditingImmunization(null);
     setShowAddForm(false);
@@ -156,6 +158,7 @@ const Immunization = () => {
       location: immunization.location || '',
       notes: immunization.notes || '',
       practitioner_id: immunization.practitioner_id || null,
+      tags: immunization.tags || [],
     });
     setEditingImmunization(immunization);
     setShowAddForm(true);

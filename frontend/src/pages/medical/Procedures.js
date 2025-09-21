@@ -168,6 +168,7 @@ const Procedures = () => {
     practitioner_id: '',
     anesthesia_type: '',
     anesthesia_notes: '',
+    tags: [],
   });
 
   // Document management state
@@ -210,6 +211,7 @@ const Procedures = () => {
         practitioner_id: '',
         anesthesia_type: '',
         anesthesia_notes: '',
+        tags: [],
       });
       
       // Only refresh if we created a new procedure during form submission
@@ -247,6 +249,7 @@ const Procedures = () => {
       practitioner_id: '',
       anesthesia_type: '',
       anesthesia_notes: '',
+      tags: [],
     });
     setShowModal(true);
   };
@@ -297,6 +300,7 @@ const Procedures = () => {
       practitioner_id: procedure.practitioner_id ? String(procedure.practitioner_id) : '',
       anesthesia_type: procedure.anesthesia_type || '',
       anesthesia_notes: procedure.anesthesia_notes || '',
+      tags: procedure.tags || [],
     });
     setShowModal(true);
   };

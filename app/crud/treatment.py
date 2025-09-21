@@ -3,11 +3,12 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
+from app.crud.base_tags import TagFilterMixin
 from app.models.models import Treatment
 from app.schemas.treatment import TreatmentCreate, TreatmentUpdate
 
 
-class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate]):
+class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate], TagFilterMixin):
     """
     Treatment-specific CRUD operations for medical treatments.
 

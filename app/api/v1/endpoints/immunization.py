@@ -54,13 +54,43 @@ def read_immunizations(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     vaccine_name: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Retrieve immunizations for the current user or accessible patient."""
     
     # Filter immunizations by the target patient_id
     with handle_database_errors(request=request):
-        if vaccine_name:
+        if tags:
+            # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if vaccine_name:
+                # Note: get_multi_with_tag_filters doesn't support search, so we'll filter manually
+                all_immunizations = immunization.get_multi_with_tag_filters(
+                    db,
+                    tags=tags,
+                    tag_match_all=tag_match_all,
+                    skip=0,
+                    limit=1000,  # Get more to filter manually
+                    **filters
+                )
+                immunizations = [
+                    imm for imm in all_immunizations 
+                    if vaccine_name.lower() in getattr(imm, "vaccine_name", "").lower()
+                ]
+                # Apply pagination after filtering
+                immunizations = immunizations[skip:skip + limit]
+            else:
+                immunizations = immunization.get_multi_with_tag_filters(
+                    db,
+                    tags=tags,
+                    tag_match_all=tag_match_all,
+                    skip=skip,
+                    limit=limit,
+                    **filters
+                )
+        elif vaccine_name:
             immunizations = immunization.get_by_vaccine(
                 db, vaccine_name=vaccine_name, patient_id=target_patient_id
             )

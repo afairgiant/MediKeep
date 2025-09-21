@@ -364,6 +364,31 @@ const VisitViewModal = ({
             </Stack>
           </Card>
 
+          {/* Tags Section */}
+          {visit.tags && visit.tags.length > 0 && (
+            <Card withBorder p="md">
+              <Stack gap="sm">
+                <Text fw={600} size="sm" c="dimmed">
+                  TAGS
+                </Text>
+                <Divider />
+                <Group gap="xs">
+                  {visit.tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      variant="light"
+                      color="blue"
+                      size="sm"
+                      radius="md"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </Group>
+              </Stack>
+            </Card>
+          )}
+
           {/* Document Management Section */}
           <Card withBorder p="md">
             <Stack gap="sm">

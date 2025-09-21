@@ -165,6 +165,7 @@ const Medication = () => {
       status: 'active',
       practitioner_id: null,
       pharmacy_id: null,
+      tags: [],
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -192,6 +193,7 @@ const Medication = () => {
       status: medication.status || 'active',
       practitioner_id: medication.practitioner_id ? String(medication.practitioner_id) : null,
       pharmacy_id: medication.pharmacy_id ? String(medication.pharmacy_id) : null,
+      tags: medication.tags || [],
     });
     setEditingMedication(medication);
     setShowAddForm(true);
@@ -276,6 +278,7 @@ const Medication = () => {
         ? parseInt(formData.practitioner_id)
         : null,
       pharmacy_id: formData.pharmacy_id ? parseInt(formData.pharmacy_id) : null,
+      tags: formData.tags || [],  // Include tags from form data
     };
 
     // Add dates if provided

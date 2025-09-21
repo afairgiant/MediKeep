@@ -59,6 +59,8 @@ def read_allergies(
     limit: int = Query(default=100, le=100),
     severity: Optional[str] = Query(None),
     allergen: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """
@@ -67,7 +69,26 @@ def read_allergies(
     
     # Filter allergies by the target patient_id
     with handle_database_errors(request=request):
-        if severity:
+        if tags:
+            # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if severity:
+                filters["severity"] = severity
+            allergies = allergy.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                skip=skip,
+                limit=limit,
+                **filters
+            )
+            # Apply allergen filter manually if both tags and allergen are specified
+            if allergen:
+                allergies = [
+                    allrg for allrg in allergies 
+                    if allergen.lower() in getattr(allrg, "allergen", "").lower()
+                ]
+        elif severity:
             allergies = allergy.get_by_severity(
                 db, severity=severity, patient_id=target_patient_id
             )

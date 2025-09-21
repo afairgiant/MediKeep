@@ -61,6 +61,8 @@ def get_lab_results(
     request: Request,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     db: Session = Depends(get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ):
@@ -68,13 +70,31 @@ def get_lab_results(
 
     with handle_database_errors(request=request):
         # Filter lab results by the target patient_id with practitioner relationship loaded
-        results = lab_result.get_by_patient(
-            db,
-            patient_id=target_patient_id,
-            skip=skip,
-            limit=limit,
-            load_relations=["practitioner", "patient"],
-        )
+        if tags:
+            # Use tag filtering with patient constraint
+            results = lab_result.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+            )
+            # Load relationships manually for tag-filtered results
+            for result in results:
+                if hasattr(result, 'practitioner_id') and result.practitioner_id:
+                    db.refresh(result, ["practitioner"])
+                if hasattr(result, 'patient_id') and result.patient_id:
+                    db.refresh(result, ["patient"])
+        else:
+            # Use regular patient filtering
+            results = lab_result.get_by_patient(
+                db,
+                patient_id=target_patient_id,
+                skip=skip,
+                limit=limit,
+                load_relations=["practitioner", "patient"],
+            )
 
     # Convert to response format with practitioner names
     response_results = []
@@ -93,6 +113,7 @@ def get_lab_results(
             "ordered_date": result.ordered_date,
             "completed_date": result.completed_date,
             "notes": result.notes,
+            "tags": result.tags or [],
             "created_at": result.created_at,
             "updated_at": result.updated_at,
             "practitioner_name": (
@@ -143,6 +164,7 @@ def get_lab_result(
         "ordered_date": db_lab_result.ordered_date,
         "completed_date": db_lab_result.completed_date,
         "notes": db_lab_result.notes,
+        "tags": db_lab_result.tags or [],
         "created_at": db_lab_result.created_at,
         "updated_at": db_lab_result.updated_at,
         "practitioner_name": (
@@ -263,14 +285,28 @@ def get_lab_results_by_patient(
     request: Request,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     db: Session = Depends(get_db),
     patient_id: int = Depends(deps.verify_patient_access),
 ):
     """Get all lab results for a specific patient."""
     with handle_database_errors(request=request):
-        results = lab_result.get_by_patient(
-            db, patient_id=patient_id, skip=skip, limit=limit
-        )
+        if tags:
+            # Use tag filtering with patient constraint
+            results = lab_result.get_multi_with_tag_filters(
+                db,
+                tags=tags,
+                tag_match_all=tag_match_all,
+                patient_id=patient_id,
+                skip=skip,
+                limit=limit,
+            )
+        else:
+            # Use regular patient filtering
+            results = lab_result.get_by_patient(
+                db, patient_id=patient_id, skip=skip, limit=limit
+            )
         return results
 
 
