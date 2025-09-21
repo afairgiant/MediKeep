@@ -1,6 +1,7 @@
 from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import text, or_
+from sqlalchemy.sql import quoted_name
 
 from app.core.logging_config import get_logger
 
@@ -21,6 +22,19 @@ class TagService:
         "allergy": "allergies"
     }
     
+    def _validate_entity_type(self, entity_type: str) -> str:
+        """Validate and return table name for entity type to prevent SQL injection"""
+        if entity_type not in self.ENTITY_TABLES:
+            raise ValueError(f"Invalid entity type: {entity_type}")
+        return self.ENTITY_TABLES[entity_type]
+    
+    def _validate_table_name(self, table_name: str) -> str:
+        """Validate table name against allowed tables to prevent SQL injection"""
+        allowed_tables = set(self.ENTITY_TABLES.values())
+        if table_name not in allowed_tables:
+            raise ValueError(f"Invalid table name: {table_name}")
+        return table_name
+    
     def get_popular_tags_across_entities(
         self, db: Session, *, 
         entity_types: List[str] = None, 
@@ -34,15 +48,33 @@ class TagService:
         
         # Build subquery for usage counts across all entity types
         usage_subqueries = []
+        query_params = {}
+        
         for entity_type in entity_types:
-            if entity_type in self.ENTITY_TABLES:
-                table_name = self.ENTITY_TABLES[entity_type]
+            try:
+                # Validate entity type and get safe table name
+                table_name = self._validate_entity_type(entity_type)
+                
+                # Validate the table name is in our allowed list
+                self._validate_table_name(table_name)
+                
+                # Since we've validated the table name against our whitelist, it's safe to use
+                # We use parameterized queries for the entity_type value
+                param_key = f"entity_type_{len(usage_subqueries)}"
+                query_params[param_key] = entity_type
+                
                 usage_subqueries.append(f"""
-                    SELECT tag, COUNT(*) as usage_count, '{entity_type}' as entity_type
-                    FROM {table_name}, jsonb_array_elements_text(tags) as tag
+                    SELECT tag, COUNT(*) as usage_count, :{param_key} as entity_type
+                    FROM "{table_name}", jsonb_array_elements_text(tags) as tag
                     WHERE tags IS NOT NULL
                     GROUP BY tag
                 """)
+            except ValueError as e:
+                logger.warning("Invalid entity type in tag search", extra={
+                    "entity_type": entity_type,
+                    "error": str(e)
+                })
+                continue
         
         if not usage_subqueries:
             # If no entity tables, just return user tags with 0 usage
@@ -74,7 +106,9 @@ class TagService:
             """
         
         try:
-            result = db.execute(text(query), {"limit": limit}).fetchall()
+            # Combine limit parameter with entity type parameters
+            final_params = {"limit": limit, **query_params}
+            result = db.execute(text(query), final_params).fetchall()
             
             logger.info("Retrieved user tags with usage counts", extra={
                 "tag_count": len(result),
@@ -110,43 +144,64 @@ class TagService:
         results = {}
         
         for entity_type in entity_types:
-            if entity_type in self.ENTITY_TABLES:
-                table_name = self.ENTITY_TABLES[entity_type]
+            try:
+                # Validate entity type and get safe table name
+                table_name = self._validate_entity_type(entity_type)
+                self._validate_table_name(table_name)
                 
-                # Build tag filter conditions
+                # Build tag filter conditions using parameterized queries
                 tag_conditions = []
-                for tag in tags:
-                    tag_conditions.append(f"tags @> '[\"{tag}\"]'")
+                query_params = {"limit": limit_per_entity}
+                
+                for i, tag in enumerate(tags):
+                    # Validate tag input to prevent injection
+                    if not isinstance(tag, str) or len(tag) > 100:
+                        logger.warning("Invalid tag in search", extra={
+                            "tag": tag,
+                            "entity_type": entity_type
+                        })
+                        continue
+                    
+                    param_key = f"tag_{i}"
+                    query_params[param_key] = f'["{tag}"]'
+                    tag_conditions.append(f"tags @> :{param_key}")
                 
                 if tag_conditions:
                     query = f"""
-                        SELECT * FROM {table_name}
+                        SELECT * FROM "{table_name}"
                         WHERE {' OR '.join(tag_conditions)}
                         ORDER BY created_at DESC
                         LIMIT :limit
                     """
                     
-                    try:
-                        entity_results = db.execute(
-                            text(query), 
-                            {"limit": limit_per_entity}
-                        ).fetchall()
+                    entity_results = db.execute(
+                        text(query), 
+                        query_params
+                    ).fetchall()
+                    
+                    results[entity_type] = entity_results
+                    
+                    logger.debug("Retrieved records by tags", extra={
+                        "entity_type": entity_type,
+                        "tags": tags,
+                        "result_count": len(entity_results)
+                    })
+                else:
+                    results[entity_type] = []
                         
-                        results[entity_type] = entity_results
-                        
-                        logger.debug("Retrieved records by tags", extra={
-                            "entity_type": entity_type,
-                            "tags": tags,
-                            "result_count": len(entity_results)
-                        })
-                        
-                    except Exception as e:
-                        logger.error("Failed to search entity by tags", extra={
-                            "entity_type": entity_type,
-                            "tags": tags,
-                            "error": str(e)
-                        })
-                        results[entity_type] = []
+            except ValueError as e:
+                logger.error("Invalid entity type in tag search", extra={
+                    "entity_type": entity_type,
+                    "error": str(e)
+                })
+                results[entity_type] = []
+            except Exception as e:
+                logger.error("Failed to search entity by tags", extra={
+                    "entity_type": entity_type,
+                    "tags": tags,
+                    "error": str(e)
+                })
+                results[entity_type] = []
         
         logger.info("Completed cross-entity tag search", extra={
             "tags": tags,
@@ -198,9 +253,12 @@ class TagService:
         
         for table_name in self.ENTITY_TABLES.values():
             try:
+                # Validate table name for security
+                self._validate_table_name(table_name)
+                
                 # Update records that contain the old tag
                 query = f"""
-                    UPDATE {table_name}
+                    UPDATE "{table_name}"
                     SET tags = (
                         SELECT jsonb_agg(
                             CASE 
@@ -257,9 +315,12 @@ class TagService:
         
         for table_name in self.ENTITY_TABLES.values():
             try:
+                # Validate table name for security
+                self._validate_table_name(table_name)
+                
                 # Remove the tag from records that contain it
                 query = f"""
-                    UPDATE {table_name}
+                    UPDATE "{table_name}"
                     SET tags = (
                         SELECT jsonb_agg(tag_element)
                         FROM jsonb_array_elements_text(tags) AS tag_element
@@ -308,9 +369,12 @@ class TagService:
         
         for table_name in self.ENTITY_TABLES.values():
             try:
+                # Validate table name for security
+                self._validate_table_name(table_name)
+                
                 # Replace old tag with new tag, avoiding duplicates
                 query = f"""
-                    UPDATE {table_name}
+                    UPDATE "{table_name}"
                     SET tags = (
                         SELECT jsonb_agg(DISTINCT tag_element ORDER BY tag_element)
                         FROM (
@@ -425,13 +489,16 @@ class TagService:
             # Get all unique tags used in this user's medical records
             union_queries = []
             for table_name in self.ENTITY_TABLES.values():
+                # Validate table name for security
+                self._validate_table_name(table_name)
+                
                 union_queries.append(f"""
                     SELECT DISTINCT tag
-                    FROM {table_name} r
+                    FROM "{table_name}" r
                     JOIN patients p ON r.patient_id = p.id
                     JOIN users u ON p.user_id = u.id,
                     jsonb_array_elements_text(r.tags) as tag
-                    WHERE r.tags IS NOT NULL AND u.id = {user_id}
+                    WHERE r.tags IS NOT NULL AND u.id = :user_id
                 """)
             
             if not union_queries:
@@ -440,14 +507,14 @@ class TagService:
             # Insert all found tags into user_tags (ignore duplicates)
             sync_query = f"""
                 INSERT INTO user_tags (user_id, tag, created_at)
-                SELECT DISTINCT {user_id}, tag, CURRENT_TIMESTAMP
+                SELECT DISTINCT :user_id, tag, CURRENT_TIMESTAMP
                 FROM (
                     {' UNION '.join(union_queries)}
                 ) all_user_tags
                 ON CONFLICT (user_id, tag) DO NOTHING
             """
             
-            result = db.execute(text(sync_query))
+            result = db.execute(text(sync_query), {"user_id": user_id})
             synced_count = result.rowcount
             
             db.commit()

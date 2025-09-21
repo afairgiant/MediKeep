@@ -27,8 +27,19 @@ export function TagInput({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [popularTags, setPopularTags] = useState<string[]>([]);
+  const [validationError, setValidationError] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [debouncedInput] = useDebouncedValue(inputValue, 300);
+
+  // Clear validation error after 3 seconds
+  useEffect(() => {
+    if (validationError) {
+      const timer = setTimeout(() => {
+        setValidationError('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [validationError]);
 
   // Fetch popular tags on mount
   useEffect(() => {
@@ -83,15 +94,31 @@ export function TagInput({
     
     // Validation
     if (!trimmedTag) return;
-    if (value.includes(trimmedTag)) return;
-    if (value.length >= maxTags) {
-      logger.warn(`Maximum of ${maxTags} tags allowed`, {
+    
+    if (value.includes(trimmedTag)) {
+      setValidationError('Tag already exists');
+      logger.debug('Duplicate tag attempted', {
+        tag: trimmedTag,
         component: 'TagInput'
       });
       return;
     }
+    
+    if (value.length >= maxTags) {
+      setValidationError(`Maximum ${maxTags} tags allowed`);
+      logger.debug('Max tags limit reached', {
+        currentCount: value.length,
+        maxTags,
+        component: 'TagInput'
+      });
+      return;
+    }
+    
     if (trimmedTag.length > 50) {
-      logger.warn('Tag must be 50 characters or less', {
+      setValidationError('Tag must be 50 characters or less');
+      logger.debug('Tag exceeds character limit', {
+        tag: trimmedTag,
+        length: trimmedTag.length,
         component: 'TagInput'
       });
       return;
@@ -100,6 +127,7 @@ export function TagInput({
     onChange([...value, trimmedTag]);
     setInputValue('');
     setShowSuggestions(false);
+    setValidationError(''); // Clear any existing error on successful add
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -155,6 +183,10 @@ export function TagInput({
                 onChange={(e) => {
                   setInputValue(e.target.value);
                   setShowSuggestions(true);
+                  // Clear validation error when user starts typing again
+                  if (validationError) {
+                    setValidationError('');
+                  }
                 }}
                 onKeyDown={handleKeyDown}
                 onBlur={() => {
@@ -176,7 +208,7 @@ export function TagInput({
                 variant="unstyled"
                 style={{ minWidth: 120, flex: 1 }}
                 disabled={disabled}
-                error={error}
+                error={validationError || error}
               />
             )}
           </Group>
@@ -238,9 +270,9 @@ export function TagInput({
         {value.length}/{maxTags} tags • Press Enter to add a tag
       </Text>
       
-      {error && (
+      {(validationError || error) && (
         <Text size="xs" c="red" mt={4}>
-          {error}
+          {validationError || error}
         </Text>
       )}
     </div>
