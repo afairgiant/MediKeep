@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Personal Medical Records Keeper</Name>
+  <Repository>ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest</Repository>
+  <Registry>https://ghcr.io</Registry>
+  <Network>bridge</Network>
+  <MyIP />
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/afairgiant/Personal-Medical-Records-Keeper/issues</Support>
+  <Project>https://github.com/afairgiant/Personal-Medical-Records-Keeper</Project>
+  <Overview>A Medical Records Management System with React frontend and FastAPI
+    backend. Provides secure patient record management, and medical history
+    tracking.</Overview>
+  <Category>Other:</Category>
+  <WebUI>http://[IP]:[PORT:8000]</WebUI>
+  <TemplateURL>
+    https://raw.githubusercontent.com/afairgiant/Personal-Medical-Records-Keeper/main/docker/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/afairgiant/medical-records/main/docs/assets/Icon.png</Icon>
+  <ExtraParams />
+  <PostArgs />
+  <CPUset />
+  <DateInstalled></DateInstalled>
+  <DonateText>If you find this application useful, please consider supporting the development.</DonateText>
+  <DonateLink>https://github.com/sponsors/afairgiant</DonateLink>
+  <Requires>PostgreSQL database (can use postgresql container)</Requires>
+  <Config Name="WebUI Port" Target="8000" Default="8000" Mode="tcp"
+    Description="Port for accessing the web interface" Type="Port" Display="always" Required="true"
+    Mask="false">8000</Config>
+  <Config Name="Database Host" Target="DB_HOST" Default="postgres" Mode=""
+    Description="PostgreSQL database hostname or IP" Type="Variable" Display="always"
+    Required="true" Mask="false">postgres</Config>
+  <Config Name="Database Port" Target="DB_PORT" Default="5432" Mode=""
+    Description="PostgreSQL database port" Type="Variable" Display="always" Required="true"
+    Mask="false">5432</Config>
+  <Config Name="Database Name" Target="DB_NAME" Default="medical_records" Mode=""
+    Description="PostgreSQL database name" Type="Variable" Display="always" Required="true"
+    Mask="false">medical_records</Config>
+  <Config Name="Database User" Target="DB_USER" Default="medapp" Mode=""
+    Description="PostgreSQL database username" Type="Variable" Display="always" Required="true"
+    Mask="false">medapp</Config>
+  <Config Name="Database Password" Target="DB_PASSWORD" Default="" Mode=""
+    Description="PostgreSQL database password" Type="Variable" Display="always" Required="true"
+    Mask="true" />
+  <Config Name="Secret Key" Target="SECRET_KEY" Default="" Mode=""
+    Description="Secret key for JWT tokens (generate a random string)" Type="Variable"
+    Display="always" Required="true" Mask="true" />
+  <Config Name="Uploads" Target="/app/uploads" Default="/mnt/user/appdata/medical-records/uploads"
+    Mode="rw" Description="Path to store uploaded files" Type="Path" Display="always"
+    Required="true" Mask="false">/mnt/user/appdata/medical-records/uploads</Config>
+  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/medical-records/logs" Mode="rw"
+    Description="Path to store application logs" Type="Path" Display="advanced" Required="false"
+    Mask="false">/mnt/user/appdata/medical-records/logs</Config>
+  <Config Name="Backups" Target="/app/backups" Default="/mnt/user/appdata/medical-records/backups"
+    Mode="rw" Description="Path to store database backups" Type="Path" Display="advanced"
+    Required="false" Mask="false">/mnt/user/appdata/medical-records/backups</Config>
+  <Config Name="Log Level" Target="LOG_LEVEL" Default="INFO" Mode=""
+    Description="Logging level (DEBUG/INFO/WARNING/ERROR)" Type="Variable" Display="advanced"
+    Required="false" Mask="false">INFO</Config>
+  <Config Name="Timezone" Target="TZ" Default="America/New_York" Mode=""
+    Description="Timezone for the application" Type="Variable" Display="advanced" Required="false"
+    Mask="false">America/New_York</Config>
+  <Config Name="Enable SSL" Target="ENABLE_SSL" Default="false" Mode=""
+    Description="Enable HTTPS/SSL (requires certificate setup)" Type="Variable" Display="advanced"
+    Required="false" Mask="false">false</Config>
+  <Config Name="SSO Provider Type" Target="SSO_PROVIDER_TYPE" Default="oidc" Mode=""
+    Description="SSO Provider Type (oidc/saml)" Type="Variable" Display="advanced" Required="false"
+    Mask="false">oidc</Config>
+  <Config Name="SSO Issuer URL" Target="SSO_ISSUER_URL" Default="" Mode=""
+    Description="SSO Issuer/Provider URL" Type="Variable" Display="advanced" Required="false"
+    Mask="false" />
+  <Config Name="SSO Redirect URI" Target="SSO_REDIRECT_URI" Default="" Mode=""
+    Description="SSO Redirect URI" Type="Variable" Display="advanced" Required="false"
+    Mask="false" />
+  <Config Name="SSO Allowed Domains" Target="SSO_ALLOWED_DOMAINS" Default="[]" Mode=""
+    Description="SSO Allowed Domains (JSON array)" Type="Variable" Display="advanced"
+    Required="false" Mask="false">[]</Config>
+  <Config Name="SSO Enabled" Target="SSO_ENABLED" Default="false" Mode=""
+    Description="Enable Single Sign-On" Type="Variable" Display="advanced" Required="false"
+    Mask="false">false</Config>
+  <Config Name="SSO Client ID" Target="SSO_CLIENT_ID" Default="" Mode=""
+    Description="SSO Client ID (if SSO enabled)" Type="Variable" Display="advanced" Required="false"
+    Mask="false" />
+  <Config Name="SSO Client Secret" Target="SSO_CLIENT_SECRET" Default="" Mode=""
+    Description="SSO Client Secret (if SSO enabled)" Type="Variable" Display="advanced"
+    Required="false" Mask="true" />
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID" Type="Variable"
+    Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID" Type="Variable"
+    Display="advanced" Required="false" Mask="false">100</Config>
+</Container>
