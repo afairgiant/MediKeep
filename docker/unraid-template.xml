@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>MedicalRecords</Name>
+  <Name>Personal Medical Records Keeper</Name>
   <Repository>ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest</Repository>
   <Registry>https://ghcr.io</Registry>
   <Network>bridge</Network>
   <MyIP />
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/afairgiant/medical-records/issues</Support>
-  <Project>https://github.com/afairgiant/medical-records</Project>
-  <Overview>A comprehensive Medical Records Management System with React frontend and FastAPI
-    backend. Provides secure patient record management, appointment scheduling, and medical history
+  <Support>https://github.com/afairgiant/Personal-Medical-Records-Keeper/issues</Support>
+  <Project>https://github.com/afairgiant/Personal-Medical-Records-Keeper</Project>
+  <Overview>A Medical Records Management System with React frontend and FastAPI
+    backend. Provides secure patient record management, and medical history
     tracking.</Overview>
-  <Category>Productivity: Tools:</Category>
+  <Category>Other:</Category>
   <WebUI>http://[IP]:[PORT:8000]</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/afairgiant/medical-records/main/unraid
-    template/unraid-template.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/afairgiant/medical-records/main/icon.png</Icon>
+  <TemplateURL>
+    https://raw.githubusercontent.com/afairgiant/Personal-Medical-Records-Keeper/main/docker/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/afairgiant/medical-records/main/docs/assets/Icon.png</Icon>
   <ExtraParams />
   <PostArgs />
   <CPUset />
