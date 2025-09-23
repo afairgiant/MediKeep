@@ -17,7 +17,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "Medical Records Management System"
-    VERSION: str = "0.28.0"
+    VERSION: str = "0.29.0"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
