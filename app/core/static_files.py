@@ -54,6 +54,7 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             logger.info(f"Serving static files from: {static_dir}")
             html_dir = static_dir
 
+
         @app.get("/")
         async def read_index():
             """Serve React app index.html for root path"""
@@ -61,6 +62,46 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             if os.path.exists(index_path):
                 return FileResponse(index_path)
             return {"error": "React app index.html not found"}
+
+        @app.get("/manifest.json")
+        async def read_manifest():
+            """Serve PWA manifest.json"""
+            manifest_path = os.path.join(html_dir, "manifest.json")
+            if os.path.exists(manifest_path):
+                return FileResponse(manifest_path, media_type="application/json")
+            return {"error": "manifest.json not found"}
+
+        @app.get("/service-worker.js")
+        async def read_service_worker():
+            """Serve PWA service worker"""
+            sw_path = os.path.join(html_dir, "service-worker.js")
+            if os.path.exists(sw_path):
+                return FileResponse(sw_path, media_type="application/javascript")
+            return {"error": "service-worker.js not found"}
+
+        @app.get("/icon-256.png")
+        async def read_icon_256():
+            """Serve PWA icon 256x250"""
+            icon_path = os.path.join(html_dir, "icon-256.png")
+            if os.path.exists(icon_path):
+                return FileResponse(icon_path, media_type="image/png")
+            return {"error": "icon-256.png not found"}
+
+        @app.get("/icon-192.png")
+        async def read_icon_192():
+            """Serve PWA icon 192x192"""
+            icon_path = os.path.join(html_dir, "icon-192.png")
+            if os.path.exists(icon_path):
+                return FileResponse(icon_path, media_type="image/png")
+            return {"error": "icon-192.png not found"}
+
+        @app.get("/offline.html")
+        async def read_offline():
+            """Serve offline fallback page"""
+            offline_path = os.path.join(html_dir, "offline.html")
+            if os.path.exists(offline_path):
+                return FileResponse(offline_path, media_type="text/html")
+            return {"error": "offline.html not found"}
 
     else:
         logger.warning("No static directory found - React app will not be served")
