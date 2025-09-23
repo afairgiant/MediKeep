@@ -33,13 +33,27 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable
     ) -> StarletteResponse:
+        # Skip logging for static assets and health checks
+        path = request.url.path
+        skip_paths = [
+            "/icon-", "/favicon", ".png", ".jpg", ".jpeg", ".gif", ".svg",
+            ".css", ".js", "/static/", "/health", "/manifest.json",
+            "/service-worker.js", "/offline.html"
+        ]
+
+        # Check if we should skip logging for this path
+        should_skip = any(skip in path for skip in skip_paths)
+
+        if should_skip:
+            # Process request without logging
+            return await call_next(request)
+
         # Generate correlation ID for this request
         correlation_id = str(uuid.uuid4())
         set_correlation_id(correlation_id)
         # Extract request information
         start_time = time.time()
         method = request.method
-        path = request.url.path
         user_ip = self._get_user_ip(request)
         user_agent = request.headers.get(
             "user-agent", "Unknown"

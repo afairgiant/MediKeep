@@ -173,6 +173,7 @@ class APIClient {
         method: processedConfig.method || 'GET',
         headers,
         body: processedConfig.body,
+        credentials: 'include', // CRITICAL: Include cookies for CORS requests
         ...processedConfig.options,
       }); // Handle response
       let data;

@@ -555,6 +555,18 @@ function App() {
                             </ProtectedRoute>
                           }
                         />
+                        {/* Emergency service worker cleanup route */}
+                        <Route
+                          path="/kill-sw"
+                          element={<div style={{padding: '20px', textAlign: 'center'}}>
+                            <h1>Service Worker Cleanup</h1>
+                            <p>All service workers and caches have been cleared.</p>
+                            <p>Please close this tab and restart your browser completely.</p>
+                            <button onClick={() => window.location.href='/'} style={{padding: '10px 20px', margin: '10px'}}>
+                              Go Back to App
+                            </button>
+                          </div>}
+                        />
                         {/* Default redirect */}
                         <Route
                           path="/"
