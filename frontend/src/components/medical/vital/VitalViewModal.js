@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Modal,
   Stack,
   Group,
   Text,
@@ -29,7 +30,6 @@ import {
   IconTrendingUp,
   IconUser,
 } from '@tabler/icons-react';
-import ResponsiveModal from '../../shared/ResponsiveModal';
 import { formatDate, formatDateTime } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
@@ -170,7 +170,7 @@ const VitalViewModal = ({
   ];
 
   return (
-    <ResponsiveModal
+    <Modal
       opened={isOpen}
       onClose={onClose}
       title={
@@ -182,6 +182,14 @@ const VitalViewModal = ({
         </Group>
       }
       size="xl"
+      centered
+      zIndex={2000}
+      styles={{
+        body: {
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto'
+        }
+      }}
     >
       <Stack gap="lg">
         {/* Vital Signs Sections */}
@@ -291,7 +299,7 @@ const VitalViewModal = ({
           </Button>
         </Group>
       </Stack>
-    </ResponsiveModal>
+    </Modal>
   );
 };
 

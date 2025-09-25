@@ -11,7 +11,6 @@ import {
   Title,
   Divider,
 } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
