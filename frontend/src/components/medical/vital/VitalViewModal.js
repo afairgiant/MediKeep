@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Modal,
   Stack,
   Group,
   Text,
@@ -30,6 +29,7 @@ import {
   IconTrendingUp,
   IconUser,
 } from '@tabler/icons-react';
+import ResponsiveModal from '../../shared/ResponsiveModal';
 import { formatDate, formatDateTime } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
@@ -170,7 +170,7 @@ const VitalViewModal = ({
   ];
 
   return (
-    <Modal
+    <ResponsiveModal
       opened={isOpen}
       onClose={onClose}
       title={
@@ -200,7 +200,7 @@ const VitalViewModal = ({
                 {section.items.map((item, itemIndex) => {
                   const ItemIcon = item.icon;
                   return (
-                    <Grid.Col key={itemIndex} span={6}>
+                    <Grid.Col key={itemIndex} span={{ base: 12, sm: 6 }}>
                       <Card shadow="xs" p="sm" radius="md" withBorder>
                         <Group gap="sm">
                           <ItemIcon
@@ -291,7 +291,7 @@ const VitalViewModal = ({
           </Button>
         </Group>
       </Stack>
-    </Modal>
+    </ResponsiveModal>
   );
 };
 

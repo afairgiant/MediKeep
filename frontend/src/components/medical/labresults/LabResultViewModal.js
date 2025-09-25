@@ -59,8 +59,14 @@ const LabResultViewModal = ({
         onClose={() => !isBlocking && onClose()}
         title={labResult.test_name || 'Lab Result Details'}
         size="xl"
-        scrollAreaComponent={ScrollArea.Autosize}
         centered
+        zIndex={2000}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <Stack gap="lg">
           {/* Header Card */}

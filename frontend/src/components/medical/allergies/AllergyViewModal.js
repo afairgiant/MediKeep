@@ -131,8 +131,15 @@ const AllergyViewModal = ({
             )}
           </Group>
         }
-        size="lg"
+        size="xl"
         centered
+        zIndex={2000}
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
       >
         <Stack gap="md">
           <Card withBorder p="md">
@@ -155,7 +162,7 @@ const AllergyViewModal = ({
           </Card>
 
           <Grid>
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Card withBorder p="md" h="100%">
                 <Stack gap="sm">
                   <Text fw={600} size="sm" c="dimmed">
@@ -215,7 +222,7 @@ const AllergyViewModal = ({
               </Card>
             </Grid.Col>
 
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Card withBorder p="md" h="100%">
                 <Stack gap="sm">
                   <Text fw={600} size="sm" c="dimmed">

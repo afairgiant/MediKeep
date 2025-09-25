@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Modal,
   Badge,
   Button,
   Card,
@@ -7,10 +8,10 @@ import {
   Stack,
   Text,
   Grid,
-  Modal,
   Title,
   Divider,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
@@ -44,6 +45,13 @@ const MedicationViewModal = ({
       }
       size="lg"
       centered
+      zIndex={2000}
+      styles={{
+        body: {
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto'
+        }
+      }}
     >
       {medication && (
         <Stack gap="md">
@@ -72,7 +80,7 @@ const MedicationViewModal = ({
           </Card>
 
           <Grid>
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Card withBorder p="md" h="100%">
                 <Stack gap="sm">
                   <Text fw={600} size="sm" c="dimmed">
@@ -119,7 +127,7 @@ const MedicationViewModal = ({
               </Card>
             </Grid.Col>
 
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Card withBorder p="md" h="100%">
                 <Stack gap="sm">
                   <Text fw={600} size="sm" c="dimmed">
@@ -178,7 +186,7 @@ const MedicationViewModal = ({
               </Text>
               <Divider />
               <Grid>
-                <Grid.Col span={6}>
+                <Grid.Col span={{ base: 12, sm: 6 }}>
                   <Group>
                     <Text size="sm" fw={500} w={80}>
                       Start Date:
@@ -197,7 +205,7 @@ const MedicationViewModal = ({
                     </Text>
                   </Group>
                 </Grid.Col>
-                <Grid.Col span={6}>
+                <Grid.Col span={{ base: 12, sm: 6 }}>
                   <Group>
                     <Text size="sm" fw={500} w={80}>
                       End Date:

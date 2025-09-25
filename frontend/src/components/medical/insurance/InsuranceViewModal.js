@@ -55,6 +55,14 @@ const InsuranceViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
+      zIndex={2000}
+      centered
+      styles={{
+        body: {
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto'
+        }
+      }}
       title={
         <Group position="apart" style={{ width: '100%' }}>
           <Group>
@@ -64,7 +72,6 @@ const InsuranceViewModal = ({
         </Group>
       }
       size="lg"
-      centered
       styles={{
         body: { padding: '1.5rem' },
         header: { paddingBottom: '1rem' },
@@ -111,27 +118,27 @@ const InsuranceViewModal = ({
         <div>
           <Title order={4} mb="sm">Member Information</Title>
           <Grid>
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Text size="sm" weight={500} color="dimmed">Member Name</Text>
               <Text>{insurance.member_name}</Text>
             </Grid.Col>
             {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name ? (
-              <Grid.Col span={6}>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text size="sm" weight={500} color="dimmed">Policy Holder</Text>
                 <Text>{insurance.policy_holder_name}</Text>
               </Grid.Col>
             ) : (
-              <Grid.Col span={6}>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text size="sm" weight={500} color="dimmed">Policy Holder</Text>
                 <Text color="dimmed">Same as member</Text>
               </Grid.Col>
             )}
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Text size="sm" weight={500} color="dimmed">Member ID</Text>
               <Text>{insurance.member_id}</Text>
             </Grid.Col>
             {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name && (
-              <Grid.Col span={6}>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text size="sm" weight={500} color="dimmed">Relationship</Text>
                 <Text style={{ textTransform: 'capitalize' }}>
                   {insurance.relationship_to_holder || 'Self'}
@@ -139,13 +146,13 @@ const InsuranceViewModal = ({
               </Grid.Col>
             )}
             {insurance.group_number && (
-              <Grid.Col span={6}>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text size="sm" weight={500} color="dimmed">Group Number</Text>
                 <Text>{insurance.group_number}</Text>
               </Grid.Col>
             )}
             {insurance.employer_group && (
-              <Grid.Col span={6}>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text size="sm" weight={500} color="dimmed">Employer/Group Sponsor</Text>
                 <Text>{insurance.employer_group}</Text>
               </Grid.Col>
@@ -157,11 +164,11 @@ const InsuranceViewModal = ({
         <div>
           <Title order={4} mb="sm">Coverage Period</Title>
           <Grid>
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Text size="sm" weight={500} color="dimmed">Effective Date</Text>
               <Text>{formatDate(insurance.effective_date)}</Text>
             </Grid.Col>
-            <Grid.Col span={6}>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
               <Text size="sm" weight={500} color="dimmed">Expiration Date</Text>
               <Text>
                 {insurance.expiration_date ? formatDate(insurance.expiration_date) : 'Ongoing'}
@@ -176,7 +183,7 @@ const InsuranceViewModal = ({
             <Title order={4} mb="sm">Coverage Details</Title>
             <Grid>
               {Object.entries(coverageDetails).map(([key, value]) => (
-                <Grid.Col span={6} key={key}>
+                <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
                   <Text size="sm" weight={500} color="dimmed">
                     {formatFieldLabel(key)}
                   </Text>
@@ -193,7 +200,7 @@ const InsuranceViewModal = ({
             <Title order={4} mb="sm">Contact Information</Title>
             <Grid>
               {Object.entries(contactInfo).map(([key, value]) => (
-                <Grid.Col span={key === 'claims_address' || key === 'pharmacy_network_info' ? 12 : 6} key={key}>
+                <Grid.Col span={key === 'claims_address' || key === 'pharmacy_network_info' ? { base: 12, sm: 12 } : { base: 12, sm: 6 }} key={key}>
                   <Text size="sm" weight={500} color="dimmed">
                     {formatFieldLabel(key)}
                   </Text>
