@@ -163,6 +163,14 @@ const FamilyHistoryViewModal = ({
       <Modal
         opened={isOpen}
         onClose={onClose}
+        zIndex={2000}
+        centered
+        styles={{
+          body: {
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto'
+          }
+        }}
         title={
           <Group>
             <Text size="lg" fw={600}>
@@ -176,7 +184,6 @@ const FamilyHistoryViewModal = ({
           </Group>
         }
         size="lg"
-        centered
         zIndex={1000}
         withinPortal
       >

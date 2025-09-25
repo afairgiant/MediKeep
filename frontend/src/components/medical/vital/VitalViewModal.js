@@ -182,6 +182,14 @@ const VitalViewModal = ({
         </Group>
       }
       size="xl"
+      centered
+      zIndex={2000}
+      styles={{
+        body: {
+          maxHeight: 'calc(100vh - 200px)',
+          overflowY: 'auto'
+        }
+      }}
     >
       <Stack gap="lg">
         {/* Vital Signs Sections */}
@@ -200,7 +208,7 @@ const VitalViewModal = ({
                 {section.items.map((item, itemIndex) => {
                   const ItemIcon = item.icon;
                   return (
-                    <Grid.Col key={itemIndex} span={6}>
+                    <Grid.Col key={itemIndex} span={{ base: 12, sm: 6 }}>
                       <Card shadow="xs" p="sm" radius="md" withBorder>
                         <Group gap="sm">
                           <ItemIcon
