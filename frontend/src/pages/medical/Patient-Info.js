@@ -301,7 +301,7 @@ const PatientInfo = () => {
             <Alert
               variant="light"
               color="blue"
-              title="Welcome to Your Medical Records!"
+              title="Welcome to MediKeep!"
             >
               Your account has been created successfully. Please complete your
               patient profile below to get started with managing your medical

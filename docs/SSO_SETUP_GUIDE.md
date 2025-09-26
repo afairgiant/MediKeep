@@ -1,6 +1,6 @@
 # Single Sign-On (SSO) Setup Guide
 
-This guide explains how to configure SSO authentication for the Medical Records application.
+This guide explains how to configure SSO authentication for MediKeep.
 
 ## Overview
 
@@ -93,7 +93,7 @@ SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 1. Go to GitHub → Settings → Developer settings → OAuth Apps
 2. Click "New OAuth App"
 3. Fill in:
-   - Application name: "Medical Records App"
+   - Application name: "MediKeep"
    - Homepage URL: `http://localhost:8000` (or your domain)
    - Authorization callback URL: `http://localhost:8000/auth/sso/callback`
 4. Click "Register application"

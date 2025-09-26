@@ -2,7 +2,7 @@
 
 ## 🚀 5-Minute Setup for Google/GitHub
 
-The Medical Records app has **built-in support** for Google and GitHub OAuth - no complex configuration needed!
+MediKeep has **built-in support** for Google and GitHub OAuth - no complex configuration needed!
 
 ## Google Setup (Recommended)
 
@@ -46,7 +46,7 @@ SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback  # if using port 8005
 1. Go to GitHub → **Settings** → **Developer settings** → **OAuth Apps**
 2. Click **New OAuth App**
 3. Fill in:
-   - **Application name**: Medical Records App
+   - **Application name**: MediKeep
    - **Homepage URL**: `http://localhost:8000`
    - **Authorization callback URL**: `http://localhost:8000/auth/sso/callback`
 4. Copy the **Client ID** and **Client Secret**

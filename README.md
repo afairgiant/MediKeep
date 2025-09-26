@@ -5,6 +5,7 @@
 > This project was formerly known as **Personal-Medical-Records-Keeper** and has been renamed to **MediKeep**.
 >
 > **Breaking Changes:**
+>
 > - Docker image has moved from `ghcr.io/afairgiant/personal-medical-records-keeper/medical-records` to `ghcr.io/afairgiant/medikeep`
 > - Repository will move from `afairgiant/Personal-Medical-Records-Keeper` to `afairgiant/MediKeep`
 > - Container names have changed from `medical-records-*` to `medikeep-*`
@@ -82,8 +83,20 @@ services:
       SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
       TZ: $(TZ:-America/New_York)
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      #PUID: ${PUID} # Enable if using bind mounts
+      #PGID: ${PGID} # Enable if using bind mounts
+
       # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS - Uncomment if needed
       #ENABLE_SSL: ${ENABLE_SSL:-false}
+      # SSO Configuration (Optional) - SSO is disabled by default
+      SSO_ENABLED: ${SSO_ENABLED:-false}
+      #SSO_PROVIDER_TYPE: ${SSO_PROVIDER_TYPE:-oidc}
+      #SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
+      #SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-}
+      #SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
+      #SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
+      #SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
+
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
@@ -128,7 +141,7 @@ networks:
 # Database Configuration
 DB_NAME=medical_records
 DB_USER=medapp
-DB_PASSWORD=your_secure_database_password_here
+DB_PASSWORD=your_secure_database_password_here #Change me
 
 # Application port
 APP_PORT=8005
@@ -159,7 +172,7 @@ Once the containers are up, access the app in your browser at:
 http://localhost:8005
 ```
 
-### Demo Login
+### Default Login
 
 - Username: `admin`
 - Password: `admin123`
@@ -171,10 +184,6 @@ Additionally, a backup/restore CLI is available.
 This can be used with cron to automate scheduled backups.
 See [Backup and Restore CLI](app/scripts/README_BACKUP_CLI.md) for more details.
 
-Backups are stored under ```/app/backups```. This should be mapped to 
-an external location or volume so that it can be stored safely in case a 
-restore is needed.
-=======
 Backups are stored under `/app/backups`. This should be mapped to
 an external location or volume so that it can be stored safely in case a
 restore is needed.

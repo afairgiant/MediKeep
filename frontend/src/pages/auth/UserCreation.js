@@ -73,7 +73,7 @@ const UserCreation = () => {
                 Create Your Account
               </h1>
               <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.875rem' }}>
-                Join us today and get access to your personal medical records
+                Join MediKeep today and manage your health records securely
               </p>
             </div>
           </Group>

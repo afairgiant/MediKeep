@@ -49,7 +49,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
         <div className="completion-header">
           <div className="completion-icon">🏥</div>
           <p className="completion-message">
-            Welcome to your Medical Records System! {message}
+            Welcome to MediKeep! {message}
           </p>
         </div>
 

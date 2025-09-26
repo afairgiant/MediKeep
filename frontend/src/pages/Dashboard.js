@@ -750,7 +750,7 @@ const Dashboard = () => {
               <Group justify="space-between" align="center" pr="xl">
                 <div>
                   <Title order={2} size="h3" fw={600} mb={4}>
-                    Medical Records Dashboard
+                    MediKeep Dashboard
                   </Title>
                   <Text size="sm" opacity={0.9}>
                     Manage your health information securely

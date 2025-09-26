@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Personal Medical Records application supports optional Single Sign-On (SSO) authentication via Docker environment variables for **personal/family use only**. SSO is **disabled by default** and requires explicit configuration.
+MediKeep supports optional Single Sign-On (SSO) authentication via Docker environment variables for **personal/family use only**. SSO is **disabled by default** and requires explicit configuration.
 
 **⚠️ IMPORTANT: This application is NOT HIPAA-compliant and should never be used for professional medical practices or healthcare organizations.**
 
