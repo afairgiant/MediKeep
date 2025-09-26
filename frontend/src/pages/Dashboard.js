@@ -167,30 +167,32 @@ const Dashboard = () => {
   const checkAdminStatus = async () => {
     try {
       // Use secure storage system instead of direct localStorage
-      const { secureStorage, legacyMigration } = await import('../utils/secureStorage');
+      const { secureStorage, legacyMigration } = await import(
+        '../utils/secureStorage'
+      );
       await legacyMigration.migrateFromLocalStorage();
       const token = await secureStorage.getItem('token');
-      
+
       logger.info('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
         hasToken: !!token,
         tokenPreview: token ? token.substring(0, 20) + '...' : null,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const userRole = payload.role || '';
         const adminCheck =
           userRole.toLowerCase() === 'admin' ||
           userRole.toLowerCase() === 'administrator';
-        
+
         logger.info('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
           role: userRole,
           isAdmin: adminCheck,
           fullPayload: payload,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-        
+
         setIsAdmin(adminCheck);
       } else {
         setIsAdmin(false);
@@ -239,7 +241,7 @@ const Dashboard = () => {
       setActivityLoading(true);
       const targetPatientId = patientId || currentActivePatient?.id || user?.id;
       const activity = await apiService.getRecentActivity(targetPatientId);
-      
+
       // Filter out erroneous "deleted" patient information activities
       // This is a temporary fix for a backend issue where patient updates are logged as deletions
       const filteredActivity = activity.filter(item => {
@@ -462,7 +464,7 @@ const Dashboard = () => {
   const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
-    const handleClick = (e) => {
+    const handleClick = e => {
       logger.info('ModuleCard clicked:', module.link);
       try {
         navigate(module.link);
@@ -547,17 +549,17 @@ const Dashboard = () => {
             cursor: isClickable ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
           }}
-          styles={(theme) => ({
+          styles={theme => ({
             root: {
-              backgroundColor: colorScheme === 'dark' 
-                ? theme.colors.dark[7] 
-                : theme.white,
+              backgroundColor:
+                colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
               ...(isClickable
                 ? {
                     '&:hover': {
-                      backgroundColor: colorScheme === 'dark' 
-                        ? theme.colors.dark[6] 
-                        : theme.colors.gray[1],
+                      backgroundColor:
+                        colorScheme === 'dark'
+                          ? theme.colors.dark[6]
+                          : theme.colors.gray[1],
                       transform: 'translateX(4px)',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     },
@@ -651,14 +653,18 @@ const Dashboard = () => {
           ))}
         </Stack>
       ) : (
-        <Paper p="md" radius="md" 
-          styles={(theme) => ({
+        <Paper
+          p="md"
+          radius="md"
+          styles={theme => ({
             root: {
-              backgroundColor: colorScheme === 'dark' 
-                ? theme.colors.dark[6] 
-                : theme.colors.gray[1],
+              backgroundColor:
+                colorScheme === 'dark'
+                  ? theme.colors.dark[6]
+                  : theme.colors.gray[1],
             },
-          })}>
+          })}
+        >
           <Stack align="center" gap="xs">
             <ThemeIcon color="gray" variant="light" size="lg">
               <IconAlertCircle size={20} />
@@ -695,243 +701,259 @@ const Dashboard = () => {
 
   return (
     <>
-    <Container size="xl" py="md">
-      <PageHeader
-        title="Medical Records App"
-        icon="🏥"
-        variant="dashboard"
-        showBackButton={false}
-      />
+      <Container size="xl" py="md">
+        <PageHeader
+          title="MediKeep"
+          icon="🏥"
+          variant="dashboard"
+          showBackButton={false}
+        />
 
-      <Stack gap="lg">
-        {/* Welcome Section */}
-        {showWelcomeBox && (
-          <Paper
-            p="md"
-            radius="md"
-            mb="xl"
-            bg="var(--mantine-primary-color-filled)"
-            c="white"
-            pos="relative"
-          >
-            <ActionIcon
-              variant="subtle"
-              color="rgba(255,255,255,0.7)"
-              size="sm"
-              pos="absolute"
-              top={8}
-              right={8}
-              onClick={() => {
-                setShowWelcomeBox(false);
-                // Persist the dismissal for this user
-                if (authUser?.id) {
-                  localStorage.setItem(
-                    `welcomeBox_dismissed_${authUser.id}`,
-                    'true'
-                  );
-                }
-              }}
-              title="Close welcome message"
-              style={{
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                },
-              }}
+        <Stack gap="lg">
+          {/* Welcome Section */}
+          {showWelcomeBox && (
+            <Paper
+              p="md"
+              radius="md"
+              mb="xl"
+              bg="var(--mantine-primary-color-filled)"
+              c="white"
+              pos="relative"
             >
-              <IconX size={14} />
-            </ActionIcon>
-
-            <Group justify="space-between" align="center" pr="xl">
-              <div>
-                <Title order={2} size="h3" fw={600} mb={4}>
-                  Medical Records Dashboard
-                </Title>
-                <Text size="sm" opacity={0.9}>
-                  Manage your health information securely
-                </Text>
-              </div>
-              {authUser && (
-                <Badge color="rgba(255,255,255,0.2)" variant="filled" size="lg">
-                  Hello, {authUser.fullName || authUser.full_name || authUser.username}!
-                </Badge>
-              )}
-            </Group>
-          </Paper>
-        )}
-
-        {/* Patient Selector and Search Bar - Responsive Layout */}
-        <Stack gap="md" mb="xl">
-          <Flex
-            justify="space-between"
-            align="flex-start"
-            gap="md"
-            direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
-            wrap="wrap"
-            style={{ width: '100%' }}
-          >
-            {/* Patient Selector */}
-            <Box style={{ 
-              flex: '1 1 auto', 
-              maxWidth: '500px',
-              minWidth: '200px'
-            }}>
-              <PatientSelector
-                onPatientChange={handlePatientChange}
-                currentPatientId={currentActivePatient?.id || user?.id}
-                loading={patientSelectorLoading}
-                compact={true}
-              />
-            </Box>
-
-            {/* Search Bar */}
-            <Box
-              style={{
-                flexShrink: 1,
-                flex: '0 1 250px',
-                maxWidth: '250px',
-                minWidth: '150px',
-              }}
-            >
-              <GlobalSearch
-                patientId={currentActivePatient?.id}
-                placeholder="Search medical records..."
-                width="100%"
-              />
-            </Box>
-          </Flex>
-        </Stack>
-
-        {/* Main Content Grid */}
-        <Grid mb="xl">
-          <Grid.Col span={{ base: 12, md: 8 }}>
-            <Stack gap="xl">
-              {/* Core Medical Information */}
-              <div>
-                <Title order={2} size="h3" mb="md">
-                  Core Medical Information
-                </Title>
-                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                  {coreModules.map((module, index) => (
-                    <ModuleCard key={index} module={module} />
-                  ))}
-                </SimpleGrid>
-              </div>
-
-              {/* Treatments and Procedures */}
-              <div>
-                <Title order={2} size="h3" mb="md">
-                  Treatments and Procedures
-                </Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                  {treatmentModules.map((module, index) => (
-                    <ModuleCard key={index} module={module} />
-                  ))}
-                </SimpleGrid>
-              </div>
-
-              {/* Health Monitoring */}
-              <div>
-                <Title order={2} size="h3" mb="md">
-                  Health Monitoring
-                </Title>
-                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                  {monitoringModules.map((module, index) => (
-                    <ModuleCard key={index} module={module} />
-                  ))}
-                </SimpleGrid>
-              </div>
-
-              {/* Prevention & History */}
-              <div>
-                <Title order={2} size="h3" mb="md">
-                  Prevention & History
-                </Title>
-                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                  {preventionModules.map((module, index) => (
-                    <ModuleCard key={index} module={module} />
-                  ))}
-                </SimpleGrid>
-              </div>
-            </Stack>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, md: 4 }}>
-            <Stack gap="md">
-              {/* Additional Resources */}
-              <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Title order={3} size="h4" mb="md">
-                  Additional Resources
-                </Title>
-                <Stack gap="xs">
-                  {additionalModules.map((module, index) => {
-                    const Icon = module.icon;
-                    return (
-                      <Paper
-                        key={index}
-                        p="sm"
-                        radius="md"
-                        onClick={(e) => {
-                          logger.info('Additional resource clicked:', module.link);
-                          try {
-                            navigate(module.link);
-                          } catch (error) {
-                            logger.error('Navigation error:', error);
-                            frontendLogger.logError('Navigation error from additional resource', {
-                              error: error.message,
-                              component: 'Dashboard',
-                              link: module.link,
-                            });
-                          }
-                        }}
-                        style={{ cursor: 'pointer' }}
-                        withBorder
-                        styles={(theme) => ({
-                          root: {
-                            '&:hover': {
-                              backgroundColor: colorScheme === 'dark' 
-                                ? theme.colors.dark[6] 
-                                : theme.colors.gray[1],
-                              transform: 'translateX(4px)',
-                              transition: 'all 0.2s ease',
-                            },
-                          },
-                        })}
-                      >
-                        <Group gap="sm">
-                          <ThemeIcon
-                            color={module.color}
-                            size="sm"
-                            variant="light"
-                          >
-                            <Icon size={14} />
-                          </ThemeIcon>
-                          <Text size="sm" fw={500} style={{ flex: 1 }}>
-                            {module.title}
-                          </Text>
-                          <IconChevronRight size={14} />
-                        </Group>
-                      </Paper>
+              <ActionIcon
+                variant="subtle"
+                color="rgba(255,255,255,0.7)"
+                size="sm"
+                pos="absolute"
+                top={8}
+                right={8}
+                onClick={() => {
+                  setShowWelcomeBox(false);
+                  // Persist the dismissal for this user
+                  if (authUser?.id) {
+                    localStorage.setItem(
+                      `welcomeBox_dismissed_${authUser.id}`,
+                      'true'
                     );
-                  })}
-                </Stack>
-              </Card>
-              {/* Invitation Notifications */}
-              <InvitationNotifications />
+                  }
+                }}
+                title="Close welcome message"
+                style={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                  },
+                }}
+              >
+                <IconX size={14} />
+              </ActionIcon>
 
-              {/* Recent Activity */}
-              <RecentActivityList />
+              <Group justify="space-between" align="center" pr="xl">
+                <div>
+                  <Title order={2} size="h3" fw={600} mb={4}>
+                    MediKeep Dashboard
+                  </Title>
+                  <Text size="sm" opacity={0.9}>
+                    Manage your health information securely
+                  </Text>
+                </div>
+                {authUser && (
+                  <Badge
+                    color="rgba(255,255,255,0.2)"
+                    variant="filled"
+                    size="lg"
+                  >
+                    Hello,{' '}
+                    {authUser.fullName ||
+                      authUser.full_name ||
+                      authUser.username}
+                    !
+                  </Badge>
+                )}
+              </Group>
+            </Paper>
+          )}
 
-            </Stack>
-          </Grid.Col>
-        </Grid>
+          {/* Patient Selector and Search Bar - Responsive Layout */}
+          <Stack gap="md" mb="xl">
+            <Flex
+              justify="space-between"
+              align="flex-start"
+              gap="md"
+              direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
+              wrap="wrap"
+              style={{ width: '100%' }}
+            >
+              {/* Patient Selector */}
+              <Box
+                style={{
+                  flex: '1 1 auto',
+                  maxWidth: '500px',
+                  minWidth: '200px',
+                }}
+              >
+                <PatientSelector
+                  onPatientChange={handlePatientChange}
+                  currentPatientId={currentActivePatient?.id || user?.id}
+                  loading={patientSelectorLoading}
+                  compact={true}
+                />
+              </Box>
 
-        {/* Stats Row */}
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-          {dashboardStatsCards.map((stat, index) => (
-            <StatCard key={index} stat={stat} />
-          ))}
-        </SimpleGrid>
-      </Stack>
+              {/* Search Bar */}
+              <Box
+                style={{
+                  flexShrink: 1,
+                  flex: '0 1 250px',
+                  maxWidth: '250px',
+                  minWidth: '150px',
+                }}
+              >
+                <GlobalSearch
+                  patientId={currentActivePatient?.id}
+                  placeholder="Search medical records..."
+                  width="100%"
+                />
+              </Box>
+            </Flex>
+          </Stack>
+
+          {/* Main Content Grid */}
+          <Grid mb="xl">
+            <Grid.Col span={{ base: 12, md: 8 }}>
+              <Stack gap="xl">
+                {/* Core Medical Information */}
+                <div>
+                  <Title order={2} size="h3" mb="md">
+                    Core Medical Information
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                    {coreModules.map((module, index) => (
+                      <ModuleCard key={index} module={module} />
+                    ))}
+                  </SimpleGrid>
+                </div>
+
+                {/* Treatments and Procedures */}
+                <div>
+                  <Title order={2} size="h3" mb="md">
+                    Treatments and Procedures
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    {treatmentModules.map((module, index) => (
+                      <ModuleCard key={index} module={module} />
+                    ))}
+                  </SimpleGrid>
+                </div>
+
+                {/* Health Monitoring */}
+                <div>
+                  <Title order={2} size="h3" mb="md">
+                    Health Monitoring
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                    {monitoringModules.map((module, index) => (
+                      <ModuleCard key={index} module={module} />
+                    ))}
+                  </SimpleGrid>
+                </div>
+
+                {/* Prevention & History */}
+                <div>
+                  <Title order={2} size="h3" mb="md">
+                    Prevention & History
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+                    {preventionModules.map((module, index) => (
+                      <ModuleCard key={index} module={module} />
+                    ))}
+                  </SimpleGrid>
+                </div>
+              </Stack>
+            </Grid.Col>
+
+            <Grid.Col span={{ base: 12, md: 4 }}>
+              <Stack gap="md">
+                {/* Additional Resources */}
+                <Card shadow="sm" padding="lg" radius="md" withBorder>
+                  <Title order={3} size="h4" mb="md">
+                    Additional Resources
+                  </Title>
+                  <Stack gap="xs">
+                    {additionalModules.map((module, index) => {
+                      const Icon = module.icon;
+                      return (
+                        <Paper
+                          key={index}
+                          p="sm"
+                          radius="md"
+                          onClick={e => {
+                            logger.info(
+                              'Additional resource clicked:',
+                              module.link
+                            );
+                            try {
+                              navigate(module.link);
+                            } catch (error) {
+                              logger.error('Navigation error:', error);
+                              frontendLogger.logError(
+                                'Navigation error from additional resource',
+                                {
+                                  error: error.message,
+                                  component: 'Dashboard',
+                                  link: module.link,
+                                }
+                              );
+                            }
+                          }}
+                          style={{ cursor: 'pointer' }}
+                          withBorder
+                          styles={theme => ({
+                            root: {
+                              '&:hover': {
+                                backgroundColor:
+                                  colorScheme === 'dark'
+                                    ? theme.colors.dark[6]
+                                    : theme.colors.gray[1],
+                                transform: 'translateX(4px)',
+                                transition: 'all 0.2s ease',
+                              },
+                            },
+                          })}
+                        >
+                          <Group gap="sm">
+                            <ThemeIcon
+                              color={module.color}
+                              size="sm"
+                              variant="light"
+                            >
+                              <Icon size={14} />
+                            </ThemeIcon>
+                            <Text size="sm" fw={500} style={{ flex: 1 }}>
+                              {module.title}
+                            </Text>
+                            <IconChevronRight size={14} />
+                          </Group>
+                        </Paper>
+                      );
+                    })}
+                  </Stack>
+                </Card>
+                {/* Invitation Notifications */}
+                <InvitationNotifications />
+
+                {/* Recent Activity */}
+                <RecentActivityList />
+              </Stack>
+            </Grid.Col>
+          </Grid>
+
+          {/* Stats Row */}
+          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
+            {dashboardStatsCards.map((stat, index) => (
+              <StatCard key={index} stat={stat} />
+            ))}
+          </SimpleGrid>
+        </Stack>
       </Container>
     </>
   );

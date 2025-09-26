@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Development server runner for Medical Records Management System.
+Development server runner for MediKeep.
 
 This script starts the FastAPI development server with hot reload enabled.
 """

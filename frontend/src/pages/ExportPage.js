@@ -221,7 +221,7 @@ const ExportPage = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Export Medical Records" icon="📤" />
+      <PageHeader title="Export Health Records" icon="📤" />
 
       <Stack gap="lg">
         <Text size="lg" c="dimmed">

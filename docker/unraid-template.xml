@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>Personal Medical Records Keeper</Name>
-  <Repository>ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest</Repository>
+  <Name>MediKeep</Name>
+  <Repository>ghcr.io/afairgiant/medikeep:latest</Repository>
   <Registry>https://ghcr.io</Registry>
   <Network>bridge</Network>
   <MyIP />
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/afairgiant/Personal-Medical-Records-Keeper/issues</Support>
-  <Project>https://github.com/afairgiant/Personal-Medical-Records-Keeper</Project>
-  <Overview>A Medical Records Management System with React frontend and FastAPI
+  <Support>https://github.com/afairgiant/MediKeep/issues</Support>
+  <Project>https://github.com/afairgiant/MediKeep</Project>
+  <Overview>MediKeep - Your personal health record keeper with React frontend and FastAPI
     backend. Provides secure patient record management, and medical history
     tracking.</Overview>
   <Category>Other:</Category>
   <WebUI>http://[IP]:[PORT:8000]</WebUI>
   <TemplateURL>
-    https://raw.githubusercontent.com/afairgiant/Personal-Medical-Records-Keeper/main/docker/unraid-template.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/afairgiant/medical-records/main/docs/assets/Icon.png</Icon>
+    https://raw.githubusercontent.com/afairgiant/MediKeep/main/docker/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/afairgiant/MediKeep/main/docs/assets/Icon.png</Icon>
   <ExtraParams />
   <PostArgs />
   <CPUset />
@@ -45,15 +45,15 @@
   <Config Name="Secret Key" Target="SECRET_KEY" Default="" Mode=""
     Description="Secret key for JWT tokens (generate a random string)" Type="Variable"
     Display="always" Required="true" Mask="true" />
-  <Config Name="Uploads" Target="/app/uploads" Default="/mnt/user/appdata/medical-records/uploads"
+  <Config Name="Uploads" Target="/app/uploads" Default="/mnt/user/appdata/medikeep/uploads"
     Mode="rw" Description="Path to store uploaded files" Type="Path" Display="always"
-    Required="true" Mask="false">/mnt/user/appdata/medical-records/uploads</Config>
-  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/medical-records/logs" Mode="rw"
+    Required="true" Mask="false">/mnt/user/appdata/medikeep/uploads</Config>
+  <Config Name="Logs" Target="/app/logs" Default="/mnt/user/appdata/medikeep/logs" Mode="rw"
     Description="Path to store application logs" Type="Path" Display="advanced" Required="false"
-    Mask="false">/mnt/user/appdata/medical-records/logs</Config>
-  <Config Name="Backups" Target="/app/backups" Default="/mnt/user/appdata/medical-records/backups"
+    Mask="false">/mnt/user/appdata/medikeep/logs</Config>
+  <Config Name="Backups" Target="/app/backups" Default="/mnt/user/appdata/medikeep/backups"
     Mode="rw" Description="Path to store database backups" Type="Path" Display="advanced"
-    Required="false" Mask="false">/mnt/user/appdata/medical-records/backups</Config>
+    Required="false" Mask="false">/mnt/user/appdata/medikeep/backups</Config>
   <Config Name="Log Level" Target="LOG_LEVEL" Default="INFO" Mode=""
     Description="Logging level (DEBUG/INFO/WARNING/ERROR)" Type="Variable" Display="advanced"
     Required="false" Mask="false">INFO</Config>

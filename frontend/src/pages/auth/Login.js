@@ -104,7 +104,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h1>🏥 Medical Records System</h1>
+        <h1>🏥 MediKeep</h1>
         <h2>Login</h2>
 
         {error && <div className="error-message">{error}</div>}

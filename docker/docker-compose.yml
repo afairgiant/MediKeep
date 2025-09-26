@@ -2,7 +2,7 @@ services:
   # PostgreSQL Database Service
   postgres:
     image: postgres:15.8-alpine
-    container_name: medical-records-db
+    container_name: medikeep-db
     environment:
       POSTGRES_DB: ${DB_NAME:-medical_records}
       POSTGRES_USER: ${DB_USER:-medapp}
@@ -24,15 +24,15 @@ services:
       start_period: 30s
     restart: unless-stopped
     networks:
-      - medical-records-network
+      - medikeep-network
 
   # Combined Frontend + Backend Application Service
-  medical-records-app:
-    image: ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest
+  medikeep-app:
+    image: ghcr.io/afairgiant/medikeep:latest
     # build:
     #   context: ..
     #   dockerfile: docker/Dockerfile
-    container_name: medical-records-app
+    container_name: medikeep-app
     ports:
       - ${APP_PORT:-8005}:8000 # Single port serves both React app and FastAPI
     environment:
@@ -75,7 +75,7 @@ services:
       start_period: 60s
     restart: unless-stopped
     networks:
-      - medical-records-network
+      - medikeep-network
 
 # Named volumes for data persistence
 volumes:
@@ -90,5 +90,5 @@ volumes:
 
 # Network for service communication
 networks:
-  medical-records-network:
+  medikeep-network:
     driver: bridge
