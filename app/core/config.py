@@ -16,7 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 
 class Settings:  # App Info
-    APP_NAME: str = "Medical Records Management System"
+    APP_NAME: str = "MediKeep"
     VERSION: str = "0.29.0"
 
     DEBUG: bool = (

@@ -1,7 +1,7 @@
 {
-  "short_name": "MedRecords",
-  "name": "Medical Records",
-  "description": "Personal health record management system",
+  "short_name": "MediKeep",
+  "name": "MediKeep",
+  "description": "Your personal health record keeper",
   "icons": [
     {
       "src": "icon-256.png",
@@ -37,7 +37,7 @@
       "sizes": "256x256",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Medical Records Dashboard"
+      "label": "MediKeep Dashboard"
     }
   ]
 }

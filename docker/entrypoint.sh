@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 set -e
 
-echo "Starting Medical Records Management System..."
+echo "Starting MediKeep..."
 
 # Fix bind mount permissions for upload directories
 echo "Checking and fixing directory permissions..."

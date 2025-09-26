@@ -1,4 +1,4 @@
-name: Medical Records Docker Image CI
+name: MediKeep Docker Image CI
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/medical-records
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -33,7 +33,7 @@ jobs:
       - name: Normalize image name
         id: normalize
         run: |
-          IMAGE_NAME=$(echo "${{ github.repository }}/medical-records" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           echo "image=${REGISTRY}/${IMAGE_NAME}" >> $GITHUB_OUTPUT
           echo "name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
 
@@ -119,12 +119,12 @@ jobs:
       packages: write
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}/medical-records
+      IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Normalize image name
         id: normalize
         run: |
-          IMAGE_NAME=$(echo "${{ github.repository }}/medical-records" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           echo "image=${REGISTRY}/${IMAGE_NAME}" >> $GITHUB_OUTPUT
           echo "name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
       

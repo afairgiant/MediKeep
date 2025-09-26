@@ -1,4 +1,4 @@
-# Multi-stage build for React + FastAPI Medical Records System
+# Multi-stage build for React + FastAPI MediKeep System
 
 # Stage 1: Build React frontend
 FROM node:20-alpine AS frontend-build
@@ -75,8 +75,8 @@ COPY run.py .
 COPY alembic/ ./alembic/
 
 # Copy and setup logrotate configuration
-COPY config/logrotate.conf /etc/logrotate.d/medical-records
-RUN chmod 644 /etc/logrotate.d/medical-records
+COPY config/logrotate.conf /etc/logrotate.d/medikeep
+RUN chmod 644 /etc/logrotate.d/medikeep
 
 # Copy built React app from frontend stage
 COPY --from=frontend-build /frontend/build ./static
@@ -114,7 +114,7 @@ EXPOSE 8000
 # Add labels for better maintenance
 LABEL maintainer="afairgiant" \
         version="0.7.0" \
-        description="Medical Records System - React + FastAPI"
+        description="MediKeep - Your personal health record keeper"
 
 # Health check with support for both HTTP and HTTPS
 HEALTHCHECK --interval=120s --timeout=15s --start-period=60s --retries=2 \

@@ -1,6 +1,19 @@
-# Medical Records Management System
+# MediKeep
 
-A medical records management system with React frontend and FastAPI backend.
+> **⚠️ IMPORTANT: Repository and Image Name Change**
+>
+> This project was formerly known as **Personal-Medical-Records-Keeper** and has been renamed to **MediKeep**.
+>
+> **Breaking Changes:**
+> - Docker image has moved from `ghcr.io/afairgiant/personal-medical-records-keeper/medical-records` to `ghcr.io/afairgiant/medikeep`
+> - Repository will move from `afairgiant/Personal-Medical-Records-Keeper` to `afairgiant/MediKeep`
+> - Container names have changed from `medical-records-*` to `medikeep-*`
+>
+> Please update your configurations accordingly.
+
+---
+
+Your personal health record keeper - built with React frontend and FastAPI backend.
 
 [![CodeQL](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/github-code-scanning/codeql)
 [![Medical Records Docker Image CI](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml/badge.svg)](https://github.com/afairgiant/Personal-Medical-Records-Keeper/actions/workflows/docker-image.yml)
@@ -53,7 +66,7 @@ services:
 
   # Combined Frontend + Backend Application Service
   medical-records-app:
-    image: ghcr.io/afairgiant/personal-medical-records-keeper/medical-records:latest
+    image: ghcr.io/afairgiant/medikeep:latest
     # build:
     #   context: ..
     #   dockerfile: docker/Dockerfile
