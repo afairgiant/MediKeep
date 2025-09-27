@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, Text
 from app.api import deps
 from app.core.logging_config import get_logger
 from app.models.models import (
@@ -63,7 +63,7 @@ class TreatmentSearchItem(SearchItemBase):
     start_date: Optional[str]
 
 class EncounterSearchItem(SearchItemBase):
-    visit_type: str
+    visit_type: Optional[str]
     chief_complaint: Optional[str]
     reason: Optional[str]
     encounter_date: Optional[str]
@@ -100,7 +100,7 @@ class SearchResponse(BaseModel):
 @router.get("/", response_model=SearchResponse)
 def search_patient_records(
     *,
-    q: str = Query(..., min_length=2, description="Search query"),
+    q: str = Query(..., min_length=1, description="Search query"),
     types: Optional[List[str]] = Query(None, description="Filter by record types"),
     skip: int = Query(0, ge=0, description="Pagination offset"),
     limit: int = Query(default=20, le=100, description="Results per type"),
@@ -117,6 +117,7 @@ def search_patient_records(
         "query": q,
         "patient_id": target_patient_id,
         "types": types,
+        "types_count": len(types) if types else 0,
         "skip": skip,
         "limit": limit
     })
@@ -142,7 +143,7 @@ def search_patient_records(
                     func.lower(Medication.medication_name).contains(query_lower),
                     func.lower(Medication.dosage).contains(query_lower),
                     func.lower(Medication.indication).contains(query_lower),
-                    Medication.tags.contains([q])  # Tag search
+                    func.cast(Medication.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -184,7 +185,7 @@ def search_patient_records(
                     func.lower(Condition.condition_name).contains(query_lower),
                     func.lower(Condition.diagnosis).contains(query_lower),
                     func.lower(Condition.notes).contains(query_lower),
-                    Condition.tags.contains([q])
+                    func.cast(Condition.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -225,7 +226,7 @@ def search_patient_records(
                     func.lower(LabResult.test_name).contains(query_lower),
                     func.lower(LabResult.labs_result).contains(query_lower),
                     func.lower(LabResult.notes).contains(query_lower),
-                    LabResult.tags.contains([q])
+                    func.cast(LabResult.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -266,7 +267,7 @@ def search_patient_records(
                     func.lower(Procedure.procedure_name).contains(query_lower),
                     func.lower(Procedure.description).contains(query_lower),
                     func.lower(Procedure.notes).contains(query_lower),
-                    Procedure.tags.contains([q])
+                    func.cast(Procedure.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -306,7 +307,7 @@ def search_patient_records(
                 or_(
                     func.lower(Immunization.vaccine_name).contains(query_lower),
                     func.lower(Immunization.notes).contains(query_lower),
-                    Immunization.tags.contains([q])
+                    func.cast(Immunization.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -348,7 +349,7 @@ def search_patient_records(
                     func.lower(Treatment.treatment_type).contains(query_lower),
                     func.lower(Treatment.description).contains(query_lower),
                     func.lower(Treatment.notes).contains(query_lower),
-                    Treatment.tags.contains([q])
+                    func.cast(Treatment.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -390,7 +391,7 @@ def search_patient_records(
                     func.lower(Encounter.visit_type).contains(query_lower),
                     func.lower(Encounter.chief_complaint).contains(query_lower),
                     func.lower(Encounter.notes).contains(query_lower),
-                    Encounter.tags.contains([q])
+                    func.cast(Encounter.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -414,7 +415,7 @@ def search_patient_records(
                     reason=enc.reason,
                     encounter_date=enc.date.isoformat() if enc.date else None,
                     tags=enc.tags or [],
-                    highlight=enc.visit_type or enc.reason,
+                    highlight=enc.visit_type or enc.reason or "Encounter",
                     score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for enc in encounters
@@ -431,7 +432,7 @@ def search_patient_records(
                     func.lower(Allergy.allergen).contains(query_lower),
                     func.lower(Allergy.reaction).contains(query_lower),
                     func.lower(Allergy.notes).contains(query_lower),
-                    Allergy.tags.contains([q])
+                    func.cast(Allergy.tags, Text).ilike(f'%{query_lower}%')
                 )
             )
         )
@@ -512,7 +513,8 @@ def search_patient_records(
         "query": q,
         "patient_id": target_patient_id,
         "total_results": total_count,
-        "types_searched": list(results.keys())
+        "types_searched": list(results.keys()),
+        "results_by_type": {k: v.count for k, v in results.items()}
     })
 
     return SearchResponse(

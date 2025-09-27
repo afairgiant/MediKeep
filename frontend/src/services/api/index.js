@@ -167,7 +167,18 @@ class ApiService {
 
     // Handle query parameters
     if (params && Object.keys(params).length > 0) {
-      const searchParams = new URLSearchParams(params);
+      const searchParams = new URLSearchParams();
+
+      // Handle array parameters correctly for FastAPI List[str] parameters
+      Object.entries(params).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          // Add each array item as a separate parameter with the same key
+          value.forEach(item => searchParams.append(key, item));
+        } else {
+          searchParams.append(key, value);
+        }
+      });
+
       url += `?${searchParams.toString()}`;
     }
 
