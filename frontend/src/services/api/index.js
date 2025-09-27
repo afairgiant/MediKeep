@@ -48,7 +48,10 @@ class ApiService {
 
     this.baseURL = baseURL;
     // Fallback URLs for better Docker compatibility
-    this.fallbackURL = '/api/v1';
+    // Use same environment variable for fallback, defaulting to relative path
+    this.fallbackURL = process.env.NODE_ENV === 'development'
+      ? baseURL  // In development, use same URL for fallback
+      : '/api/v1'; // In production, use relative path
   }
 
   async getAuthHeaders() {
@@ -164,7 +167,18 @@ class ApiService {
 
     // Handle query parameters
     if (params && Object.keys(params).length > 0) {
-      const searchParams = new URLSearchParams(params);
+      const searchParams = new URLSearchParams();
+
+      // Handle array parameters correctly for FastAPI List[str] parameters
+      Object.entries(params).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          // Add each array item as a separate parameter with the same key
+          value.forEach(item => searchParams.append(key, item));
+        } else {
+          searchParams.append(key, value);
+        }
+      });
+
       url += `?${searchParams.toString()}`;
     }
 

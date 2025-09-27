@@ -70,6 +70,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import DataModels from './pages/admin/DataModels';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TagManagement from './pages/tools/TagManagement';
+import SearchResults from './pages/SearchResults';
 import TestMedicationForm from './pages/TestMedicationForm';
 import ResponsiveNavigationTest from './pages/test/ResponsiveNavigationTest';
 
@@ -428,6 +429,14 @@ function App() {
                           element={
                             <ProtectedRoute>
                               <TagManagement />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/search"
+                          element={
+                            <ProtectedRoute>
+                              <SearchResults />
                             </ProtectedRoute>
                           }
                         />

@@ -16,7 +16,8 @@ import {
   ActionIcon,
   Badge,
   Divider,
-  ScrollArea
+  ScrollArea,
+  Button
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -29,7 +30,8 @@ import {
   IconFlask,
   IconSearch,
   IconX,
-  IconChevronRight
+  IconChevronRight,
+  IconExternalLink
 } from '@tabler/icons-react';
 import { formatDateTime } from '../../utils/helpers';
 import { searchService } from '../../services/searchService';
@@ -197,9 +199,22 @@ const SearchResults = ({
       {results.length > 0 && (
         <div style={{ flexShrink: 0 }}>
           <Divider />
-          <Text size="xs" c="dimmed" p="sm" ta="center">
-            {results.length} result{results.length !== 1 ? 's' : ''} found
-          </Text>
+          <Group justify="space-between" p="sm">
+            <Text size="xs" c="dimmed">
+              {results.length} result{results.length !== 1 ? 's' : ''} found
+            </Text>
+            <Button
+              size="xs"
+              variant="subtle"
+              rightSection={<IconExternalLink size="0.8rem" />}
+              onClick={() => {
+                navigate(`/search?q=${encodeURIComponent(query)}`);
+                if (onClose) onClose();
+              }}
+            >
+              See All
+            </Button>
+          </Group>
         </div>
       )}
     </Paper>

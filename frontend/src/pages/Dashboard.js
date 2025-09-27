@@ -83,6 +83,7 @@ const Dashboard = () => {
 
   // Using global state for patient data
   const { patient: user, loading: patientLoading } = useCurrentPatient();
+  const { patient: currentPatient, loading: currentPatientLoading } = useCurrentPatient();
   const {
     invalidatePatient,
     refreshPatient,
@@ -95,7 +96,6 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [currentActivePatient, setCurrentActivePatient] = useState(null);
   const [patientSelectorLoading, setPatientSelectorLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [lastActivityUpdate, setLastActivityUpdate] = useState(null);
@@ -123,26 +123,22 @@ const Dashboard = () => {
     loadInitialData();
   }, []);
 
-  // Initialize currentActivePatient when user loads
-  useEffect(() => {
-    if (user && !currentActivePatient) {
-      setCurrentActivePatient(user);
-    }
-  }, [user, currentActivePatient]);
+  // Note: currentPatient is now managed by useCurrentPatient hook
+  // No need for local state management
 
   // Refresh dashboard stats when active patient changes
   useEffect(() => {
-    if (currentActivePatient?.id && initialLoadComplete) {
+    if (currentPatient?.id && initialLoadComplete) {
       fetchDashboardStats();
     }
-  }, [currentActivePatient?.id, initialLoadComplete]);
+  }, [currentPatient?.id, initialLoadComplete]);
 
   // Refresh recent activity when active patient changes
   useEffect(() => {
-    if (currentActivePatient?.id && initialLoadComplete) {
+    if (currentPatient?.id && initialLoadComplete) {
       fetchRecentActivity();
     }
-  }, [currentActivePatient?.id, initialLoadComplete]);
+  }, [currentPatient?.id, initialLoadComplete]);
 
   // Auto-refresh recent activity every 30 seconds to catch new updates
   useEffect(() => {
@@ -151,7 +147,7 @@ const Dashboard = () => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [currentActivePatient, user]);
+  }, [currentPatient, user]);
 
   useEffect(() => {
     if (authUser && user) {
@@ -208,7 +204,7 @@ const Dashboard = () => {
 
   const handlePatientChange = async newPatient => {
     // Prevent infinite loops by checking if patient actually changed
-    if (currentActivePatient?.id === newPatient?.id) {
+    if (currentPatient?.id === newPatient?.id) {
       return;
     }
 
@@ -224,13 +220,13 @@ const Dashboard = () => {
     setPatientSelectorLoading(true);
 
     // Update local state
-    setCurrentActivePatient(newPatient);
+    setCurrentPatient(newPatient);
 
     // Invalidate all caches to force refresh of all medical data for new patient
     invalidateAll();
     refreshPatient();
 
-    // Dashboard data will be refreshed automatically by useEffect when currentActivePatient changes
+    // Dashboard data will be refreshed automatically by useEffect when currentPatient changes
 
     // Hide loading state
     setPatientSelectorLoading(false);
@@ -239,7 +235,7 @@ const Dashboard = () => {
   const fetchRecentActivity = async (patientId = null) => {
     try {
       setActivityLoading(true);
-      const targetPatientId = patientId || currentActivePatient?.id || user?.id;
+      const targetPatientId = patientId || currentPatient?.id || user?.id;
       const activity = await apiService.getRecentActivity(targetPatientId);
 
       // Filter out erroneous "deleted" patient information activities
@@ -273,14 +269,14 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setStatsLoading(true);
-      const patientId = currentActivePatient?.id;
+      const patientId = currentPatient?.id;
       const stats = await apiService.getDashboardStats(patientId);
       setDashboardStats(stats);
     } catch (error) {
       frontendLogger.logError('Error fetching dashboard stats', {
         error: error.message,
         component: 'Dashboard',
-        patientId: currentActivePatient?.id,
+        patientId: currentPatient?.id,
       });
       // Set fallback stats on error
       setDashboardStats({
@@ -793,7 +789,7 @@ const Dashboard = () => {
               >
                 <PatientSelector
                   onPatientChange={handlePatientChange}
-                  currentPatientId={currentActivePatient?.id || user?.id}
+                  currentPatientId={currentPatient?.id || user?.id}
                   loading={patientSelectorLoading}
                   compact={true}
                 />
@@ -809,7 +805,7 @@ const Dashboard = () => {
                 }}
               >
                 <GlobalSearch
-                  patientId={currentActivePatient?.id}
+                  patientId={currentPatient?.id}
                   placeholder="Search medical records..."
                   width="100%"
                 />
