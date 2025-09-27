@@ -14,6 +14,9 @@ logger = get_logger(__name__, "app")
 
 router = APIRouter()
 
+# Constants
+DEFAULT_SEARCH_SCORE = 0.9
+
 # Response models
 class SearchItemBase(BaseModel):
     id: int
@@ -164,7 +167,7 @@ def search_patient_records(
                     start_date=med.start_date.isoformat() if med.start_date else None,
                     tags=med.tags or [],
                     highlight=med.medication_name,
-                    score=0.9  # Simple scoring for now
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for med in medications
             ]
@@ -205,7 +208,7 @@ def search_patient_records(
                     diagnosed_date=cond.diagnosed_date.isoformat() if cond.diagnosed_date else None,
                     tags=cond.tags or [],
                     highlight=cond.condition_name,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for cond in conditions
             ]
@@ -246,7 +249,7 @@ def search_patient_records(
                     test_date=lab.test_date.isoformat() if lab.test_date else None,
                     tags=lab.tags or [],
                     highlight=lab.test_name,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for lab in lab_results
             ]
@@ -287,7 +290,7 @@ def search_patient_records(
                     procedure_date=proc.procedure_date.isoformat() if proc.procedure_date else None,
                     tags=proc.tags or [],
                     highlight=proc.name,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for proc in procedures
             ]
@@ -327,7 +330,7 @@ def search_patient_records(
                     administered_date=imm.administered_date.isoformat() if imm.administered_date else None,
                     tags=imm.tags or [],
                     highlight=imm.vaccine_name,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for imm in immunizations
             ]
@@ -368,7 +371,7 @@ def search_patient_records(
                     start_date=treat.start_date.isoformat() if treat.start_date else None,
                     tags=treat.tags or [],
                     highlight=treat.treatment_type,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for treat in treatments
             ]
@@ -409,7 +412,7 @@ def search_patient_records(
                     encounter_date=enc.encounter_date.isoformat() if enc.encounter_date else None,
                     tags=enc.tags or [],
                     highlight=enc.encounter_type,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for enc in encounters
             ]
@@ -450,7 +453,7 @@ def search_patient_records(
                     identified_date=allergy.identified_date.isoformat() if allergy.identified_date else None,
                     tags=allergy.tags or [],
                     highlight=allergy.allergen,
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for allergy in allergies
             ]
@@ -459,13 +462,11 @@ def search_patient_records(
 
     # Search vitals
     if "vitals" in search_types:
+        # Vitals only has 'notes' field, not 'tags'
         vitals_query = db.query(Vitals).filter(
             and_(
                 Vitals.patient_id == target_patient_id,
-                or_(
-                    func.lower(Vitals.notes).contains(query_lower) if hasattr(Vitals, 'notes') else False,
-                    Vitals.tags.contains([q]) if hasattr(Vitals, 'tags') else False
-                )
+                func.lower(Vitals.notes).contains(query_lower)
             )
         )
 
@@ -491,18 +492,17 @@ def search_patient_records(
                     recorded_date=vital.recorded_date.isoformat() if vital.recorded_date else None,
                     tags=getattr(vital, 'tags', []),
                     highlight=f"BP: {vital.systolic_bp}/{vital.diastolic_bp}" if vital.systolic_bp else "Vitals",
-                    score=0.9
+                    score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for vital in vitals
             ]
         )
         total_count += vital_count
 
-    # Determine if there are more results
+    # Determine if there are more results for any search type
     has_more = any(
-        result.count > skip + limit
+        result.count > limit
         for result in results.values()
-        if hasattr(result, 'count')
     )
 
     logger.info("Search completed", extra={
