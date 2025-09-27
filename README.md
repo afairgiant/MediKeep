@@ -24,12 +24,19 @@ Your personal health record keeper - built with React frontend and FastAPI backe
 ## Screenshots
 
 ### Dashboard
+The main dashboard provides an overview of your health records and recent activity.
 
-![Dashboard View](docs/assets/screenshots_MediKeep/Screenshot%2025-09-27_Dashboard.png)
+![Dashboard View](docs/assets/screenshots_MediKeep/Screenshot%202025-09-27_Dashboard.png)
 
-![Medications Page](docs/assets/screenshots_MediKeep/Screenshot%2025-09-27_Medications.png)
+### Medications
+Track and manage all your medications, dosages, and schedules in one place.
 
-![Report Builder Page](docs/assets/screenshots_MediKeep/Screenshot%2025-09-27_Report%20Builder.png)
+![Medications Page](docs/assets/screenshots_MediKeep/Screenshot%202025-09-27_Medications.png)
+
+### Report Builder
+Generate custom health reports and export your medical data for sharing with healthcare providers.
+
+![Report Builder Page](docs/assets/screenshots_MediKeep/Screenshot%202025-09-27_Report%20Builder.png)
 
 ## Quick Start
 
