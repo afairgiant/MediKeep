@@ -25,7 +25,11 @@ Your personal health record keeper - built with React frontend and FastAPI backe
 
 ### Dashboard
 
-![Dashboard View](docs/assets/screenshots/Screenshot%202025-07-13%20154004_dash.png)
+![Dashboard View](docs\assets\screenshots_MediKeep\Screenshot%2025-09-27_Dashboard.png)
+
+![Medications Page](docs\assets\screenshots_MediKeep\Screenshot%2025-09-27_Medications.png)
+
+![Report Builder Page](docs\assets\screenshots_MediKeep\Screenshot%2025-09-27_Report%Builder.png)
 
 ## Quick Start
 
