@@ -199,9 +199,22 @@ const SearchResults = ({
       {results.length > 0 && (
         <div style={{ flexShrink: 0 }}>
           <Divider />
-          <Text size="xs" c="dimmed" p="sm" ta="center">
-            {results.length} result{results.length !== 1 ? 's' : ''} found
-          </Text>
+          <Group justify="space-between" p="sm">
+            <Text size="xs" c="dimmed">
+              {results.length} result{results.length !== 1 ? 's' : ''} found
+            </Text>
+            <Button
+              size="xs"
+              variant="subtle"
+              rightSection={<IconExternalLink size="0.8rem" />}
+              onClick={() => {
+                navigate(`/search?q=${encodeURIComponent(query)}`);
+                if (onClose) onClose();
+              }}
+            >
+              See All
+            </Button>
+          </Group>
         </div>
       )}
     </Paper>
