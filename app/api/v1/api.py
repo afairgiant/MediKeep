@@ -26,6 +26,7 @@ from app.api.v1.endpoints import (
     pharmacy,
     practitioner,
     procedure,
+    search,
     sso,
     system,
     tags,
@@ -59,6 +60,9 @@ api_router.include_router(
 api_router.include_router(
     entity_file.router, prefix="/entity-files", tags=["entity-files"]
 )
+
+# Search endpoint
+api_router.include_router(search.router, prefix="/search", tags=["search"])
 
 # Cross-entity tag management
 api_router.include_router(tags.router, prefix="/tags", tags=["tags"])
