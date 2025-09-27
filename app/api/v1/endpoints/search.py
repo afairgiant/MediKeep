@@ -56,15 +56,16 @@ class ImmunizationSearchItem(SearchItemBase):
     administered_date: Optional[str]
 
 class TreatmentSearchItem(SearchItemBase):
+    treatment_name: str
     treatment_type: str
     description: Optional[str]
     status: Optional[str]
     start_date: Optional[str]
 
 class EncounterSearchItem(SearchItemBase):
-    encounter_type: str
+    visit_type: str
     chief_complaint: Optional[str]
-    status: Optional[str]
+    reason: Optional[str]
     encounter_date: Optional[str]
 
 class AllergySearchItem(SearchItemBase):
@@ -140,7 +141,7 @@ def search_patient_records(
                 or_(
                     func.lower(Medication.medication_name).contains(query_lower),
                     func.lower(Medication.dosage).contains(query_lower),
-                    func.lower(Medication.notes).contains(query_lower),
+                    func.lower(Medication.indication).contains(query_lower),
                     Medication.tags.contains([q])  # Tag search
                 )
             )
@@ -148,9 +149,9 @@ def search_patient_records(
 
         # Apply sorting
         if sort == "date_desc":
-            medications_query = medications_query.order_by(Medication.start_date.desc())
+            medications_query = medications_query.order_by(Medication.effective_period_start.desc())
         elif sort == "date_asc":
-            medications_query = medications_query.order_by(Medication.start_date.asc())
+            medications_query = medications_query.order_by(Medication.effective_period_start.asc())
 
         med_count = medications_query.count()
         medications = medications_query.offset(skip).limit(limit).all()
@@ -164,7 +165,7 @@ def search_patient_records(
                     medication_name=med.medication_name,
                     dosage=med.dosage,
                     status=med.status,
-                    start_date=med.start_date.isoformat() if med.start_date else None,
+                    start_date=med.effective_period_start.isoformat() if med.effective_period_start else None,
                     tags=med.tags or [],
                     highlight=med.medication_name,
                     score=DEFAULT_SEARCH_SCORE
@@ -222,7 +223,7 @@ def search_patient_records(
                 LabResult.patient_id == target_patient_id,
                 or_(
                     func.lower(LabResult.test_name).contains(query_lower),
-                    func.lower(LabResult.result).contains(query_lower),
+                    func.lower(LabResult.labs_result).contains(query_lower),
                     func.lower(LabResult.notes).contains(query_lower),
                     LabResult.tags.contains([q])
                 )
@@ -230,9 +231,9 @@ def search_patient_records(
         )
 
         if sort == "date_desc":
-            lab_results_query = lab_results_query.order_by(LabResult.test_date.desc())
+            lab_results_query = lab_results_query.order_by(LabResult.completed_date.desc())
         elif sort == "date_asc":
-            lab_results_query = lab_results_query.order_by(LabResult.test_date.asc())
+            lab_results_query = lab_results_query.order_by(LabResult.completed_date.asc())
 
         lab_count = lab_results_query.count()
         lab_results = lab_results_query.offset(skip).limit(limit).all()
@@ -244,9 +245,9 @@ def search_patient_records(
                     id=lab.id,
                     type="lab_result",
                     test_name=lab.test_name,
-                    result=lab.result,
+                    result=lab.labs_result,
                     status=lab.status,
-                    test_date=lab.test_date.isoformat() if lab.test_date else None,
+                    test_date=lab.completed_date.isoformat() if lab.completed_date else None,
                     tags=lab.tags or [],
                     highlight=lab.test_name,
                     score=DEFAULT_SEARCH_SCORE
@@ -262,7 +263,7 @@ def search_patient_records(
             and_(
                 Procedure.patient_id == target_patient_id,
                 or_(
-                    func.lower(Procedure.name).contains(query_lower),
+                    func.lower(Procedure.procedure_name).contains(query_lower),
                     func.lower(Procedure.description).contains(query_lower),
                     func.lower(Procedure.notes).contains(query_lower),
                     Procedure.tags.contains([q])
@@ -271,9 +272,9 @@ def search_patient_records(
         )
 
         if sort == "date_desc":
-            procedures_query = procedures_query.order_by(Procedure.procedure_date.desc())
+            procedures_query = procedures_query.order_by(Procedure.date.desc())
         elif sort == "date_asc":
-            procedures_query = procedures_query.order_by(Procedure.procedure_date.asc())
+            procedures_query = procedures_query.order_by(Procedure.date.asc())
 
         proc_count = procedures_query.count()
         procedures = procedures_query.offset(skip).limit(limit).all()
@@ -284,12 +285,12 @@ def search_patient_records(
                 ProcedureSearchItem(
                     id=proc.id,
                     type="procedure",
-                    name=proc.name,
+                    name=proc.procedure_name,
                     description=proc.description,
                     status=proc.status,
-                    procedure_date=proc.procedure_date.isoformat() if proc.procedure_date else None,
+                    procedure_date=proc.date.isoformat() if proc.date else None,
                     tags=proc.tags or [],
-                    highlight=proc.name,
+                    highlight=proc.procedure_name,
                     score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for proc in procedures
@@ -311,9 +312,9 @@ def search_patient_records(
         )
 
         if sort == "date_desc":
-            immunizations_query = immunizations_query.order_by(Immunization.administered_date.desc())
+            immunizations_query = immunizations_query.order_by(Immunization.date_administered.desc())
         elif sort == "date_asc":
-            immunizations_query = immunizations_query.order_by(Immunization.administered_date.asc())
+            immunizations_query = immunizations_query.order_by(Immunization.date_administered.asc())
 
         imm_count = immunizations_query.count()
         immunizations = immunizations_query.offset(skip).limit(limit).all()
@@ -327,7 +328,7 @@ def search_patient_records(
                     vaccine_name=imm.vaccine_name,
                     dose_number=imm.dose_number,
                     status=imm.status,
-                    administered_date=imm.administered_date.isoformat() if imm.administered_date else None,
+                    administered_date=imm.date_administered.isoformat() if imm.date_administered else None,
                     tags=imm.tags or [],
                     highlight=imm.vaccine_name,
                     score=DEFAULT_SEARCH_SCORE
@@ -343,6 +344,7 @@ def search_patient_records(
             and_(
                 Treatment.patient_id == target_patient_id,
                 or_(
+                    func.lower(Treatment.treatment_name).contains(query_lower),
                     func.lower(Treatment.treatment_type).contains(query_lower),
                     func.lower(Treatment.description).contains(query_lower),
                     func.lower(Treatment.notes).contains(query_lower),
@@ -365,12 +367,13 @@ def search_patient_records(
                 TreatmentSearchItem(
                     id=treat.id,
                     type="treatment",
+                    treatment_name=treat.treatment_name,
                     treatment_type=treat.treatment_type,
                     description=treat.description,
                     status=treat.status,
                     start_date=treat.start_date.isoformat() if treat.start_date else None,
                     tags=treat.tags or [],
-                    highlight=treat.treatment_type,
+                    highlight=treat.treatment_name,
                     score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for treat in treatments
@@ -384,7 +387,7 @@ def search_patient_records(
             and_(
                 Encounter.patient_id == target_patient_id,
                 or_(
-                    func.lower(Encounter.encounter_type).contains(query_lower),
+                    func.lower(Encounter.visit_type).contains(query_lower),
                     func.lower(Encounter.chief_complaint).contains(query_lower),
                     func.lower(Encounter.notes).contains(query_lower),
                     Encounter.tags.contains([q])
@@ -393,9 +396,9 @@ def search_patient_records(
         )
 
         if sort == "date_desc":
-            encounters_query = encounters_query.order_by(Encounter.encounter_date.desc())
+            encounters_query = encounters_query.order_by(Encounter.date.desc())
         elif sort == "date_asc":
-            encounters_query = encounters_query.order_by(Encounter.encounter_date.asc())
+            encounters_query = encounters_query.order_by(Encounter.date.asc())
 
         enc_count = encounters_query.count()
         encounters = encounters_query.offset(skip).limit(limit).all()
@@ -406,12 +409,12 @@ def search_patient_records(
                 EncounterSearchItem(
                     id=enc.id,
                     type="encounter",
-                    encounter_type=enc.encounter_type,
+                    visit_type=enc.visit_type,
                     chief_complaint=enc.chief_complaint,
-                    status=enc.status,
-                    encounter_date=enc.encounter_date.isoformat() if enc.encounter_date else None,
+                    reason=enc.reason,
+                    encounter_date=enc.date.isoformat() if enc.date else None,
                     tags=enc.tags or [],
-                    highlight=enc.encounter_type,
+                    highlight=enc.visit_type or enc.reason,
                     score=DEFAULT_SEARCH_SCORE
                 ).dict()
                 for enc in encounters

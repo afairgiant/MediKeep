@@ -48,7 +48,10 @@ class ApiService {
 
     this.baseURL = baseURL;
     // Fallback URLs for better Docker compatibility
-    this.fallbackURL = '/api/v1';
+    // Use same environment variable for fallback, defaulting to relative path
+    this.fallbackURL = process.env.NODE_ENV === 'development'
+      ? baseURL  // In development, use same URL for fallback
+      : '/api/v1'; // In production, use relative path
   }
 
   async getAuthHeaders() {

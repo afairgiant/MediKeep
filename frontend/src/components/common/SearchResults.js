@@ -16,7 +16,8 @@ import {
   ActionIcon,
   Badge,
   Divider,
-  ScrollArea
+  ScrollArea,
+  Button
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -29,7 +30,8 @@ import {
   IconFlask,
   IconSearch,
   IconX,
-  IconChevronRight
+  IconChevronRight,
+  IconExternalLink
 } from '@tabler/icons-react';
 import { formatDateTime } from '../../utils/helpers';
 import { searchService } from '../../services/searchService';
