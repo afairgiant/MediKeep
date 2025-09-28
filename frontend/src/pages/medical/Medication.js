@@ -497,6 +497,7 @@ const Medication = () => {
                 onDelete={handleDeleteMedication}
                 formatters={formatters}
                 dataType="medical"
+                medicalContext="medications"
                 responsive={responsive}
               />
             </Paper>
