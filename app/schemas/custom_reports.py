@@ -53,6 +53,10 @@ class CustomReportRequest(BaseModel):
         default=True,
         description="Include patient demographic information"
     )
+    include_profile_picture: bool = Field(
+        default=True,
+        description="Include patient profile picture in report header"
+    )
     include_summary: bool = Field(
         default=True,
         description="Include summary statistics"

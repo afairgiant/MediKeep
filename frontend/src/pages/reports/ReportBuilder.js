@@ -337,7 +337,14 @@ const ReportBuilder = () => {
               checked={reportSettings.include_patient_info}
               onChange={(event) => updateReportSettings({ include_patient_info: event.currentTarget.checked })}
             />
-            
+
+            <Switch
+              label="Include Profile Picture"
+              description="Add patient photo to the report header"
+              checked={reportSettings.include_profile_picture}
+              onChange={(event) => updateReportSettings({ include_profile_picture: event.currentTarget.checked })}
+            />
+
             <Switch
               label="Include Summary Statistics"
               description="Add overview and statistics section"

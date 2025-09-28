@@ -983,7 +983,8 @@ class CustomReportService:
             'summary': self._generate_summary(report_data) if request.include_summary else None,
             'failed_categories': failed_categories if failed_categories else None,
             'include_patient_info': request.include_patient_info,
-            'include_summary': request.include_summary
+            'include_summary': request.include_summary,
+            'include_profile_picture': request.include_profile_picture
         }
         
         # Use new PDF generator
