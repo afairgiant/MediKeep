@@ -161,7 +161,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   // Removed loadActivePatient function - now handled in loadPatients
 
   /**
-   * Load patient photos for all available patients
+   * Load patient photos for all available patients with concurrency limit
    */
   const loadPatientPhotos = async () => {
     if (patients.length === 0) return;
@@ -172,23 +172,30 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         patientCount: patients.length
       });
 
-      // Load photos for all patients in parallel
-      const photoPromises = patients.map(async (patient) => {
-        try {
-          const photoUrl = await patientApi.getPhotoUrl(patient.id);
-          return { patientId: patient.id, photoUrl };
-        } catch (error) {
-          // If photo doesn't exist or fails to load, return null
-          logger.debug('patient_selector_photo_failed', {
-            message: 'Failed to load photo for patient',
-            patientId: patient.id,
-            error: error.message
-          });
-          return { patientId: patient.id, photoUrl: null };
-        }
-      });
+      // Load photos with concurrency limit to avoid overwhelming the server
+      const BATCH_SIZE = 5; // Load 5 photos at a time
+      const photoResults = [];
 
-      const photoResults = await Promise.all(photoPromises);
+      for (let i = 0; i < patients.length; i += BATCH_SIZE) {
+        const batch = patients.slice(i, i + BATCH_SIZE);
+        const batchPromises = batch.map(async (patient) => {
+          try {
+            const photoUrl = await patientApi.getPhotoUrl(patient.id);
+            return { patientId: patient.id, photoUrl };
+          } catch (error) {
+            // If photo doesn't exist or fails to load, return null
+            logger.debug('patient_selector_photo_failed', {
+              message: 'Failed to load photo for patient',
+              patientId: patient.id,
+              error: error.message
+            });
+            return { patientId: patient.id, photoUrl: null };
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        photoResults.push(...batchResults);
+      }
 
       // Update state with all photos
       const photoMap = {};

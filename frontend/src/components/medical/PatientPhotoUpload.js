@@ -44,7 +44,7 @@ const PatientPhotoUpload = ({
     try {
       // Validate file size client-side
       if (file.size > PHOTO_MAX_SIZE) {
-        throw new Error(`Photo must be less than ${PHOTO_MAX_SIZE / (1024 * 1024)}MB`);
+        throw new Error(`Photo must be less than ${Math.floor(PHOTO_MAX_SIZE / (1024 * 1024))}MB`);
       }
 
       // Validate file type

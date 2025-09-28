@@ -29,7 +29,10 @@ logger = get_logger(__name__, "app")
 
 class CustomReportPDFGenerator:
     """Generate formatted PDF reports for custom medical data"""
-    
+
+    # Constants for photo handling
+    PATIENT_PHOTO_PATTERN = "patient_{patient_id}_*.jpg"
+
     def __init__(self):
         self.styles = self._create_styles()
         self.category_display_names = {

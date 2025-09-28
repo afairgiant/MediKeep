@@ -380,7 +380,7 @@ class PatientPhotoService:
 
         # Auto-rotate based on EXIF data (important for phone photos)
         try:
-            exif = img._getexif()
+            exif = img.getexif()
             if exif:
                 orientation = next(
                     (v for k, v in exif.items() if TAGS.get(k) == 'Orientation'),
