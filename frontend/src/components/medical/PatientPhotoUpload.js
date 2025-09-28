@@ -24,7 +24,7 @@ const PatientPhotoUpload = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
 
-  const handleUpload = async (file) => {
+  const handleUpload = async file => {
     // Prevent concurrent uploads
     if (isUploading) {
       notifications.show({
@@ -47,7 +47,13 @@ const PatientPhotoUpload = ({
       }
 
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/bmp',
+      ];
       if (!allowedTypes.includes(file.type)) {
         throw new Error('Please upload a JPEG, PNG, GIF, or BMP image');
       }
@@ -76,7 +82,6 @@ const PatientPhotoUpload = ({
         component: 'PatientPhotoUpload',
         patientId,
       });
-
     } catch (error) {
       logger.error('photo_upload_error', 'Photo upload failed', {
         component: 'PatientPhotoUpload',
@@ -114,7 +119,6 @@ const PatientPhotoUpload = ({
         component: 'PatientPhotoUpload',
         patientId,
       });
-
     } catch (error) {
       logger.error('photo_delete_error', 'Photo deletion failed', {
         component: 'PatientPhotoUpload',

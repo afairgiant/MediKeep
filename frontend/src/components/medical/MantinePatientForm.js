@@ -32,6 +32,7 @@ const MantinePatientForm = ({
   practitioners = [],
   saving = false,
   isCreating = false,
+  onPhotoChange, // New callback for photo changes
 }) => {
   const { unitSystem } = useUserPreferences();
 
@@ -74,6 +75,11 @@ const MantinePatientForm = ({
       const photoUrl = await patientApi.getPhotoUrl(formData.id);
       setPhotoUrl(photoUrl);
       setPhotoKey(prev => prev + 1); // Force component re-render
+
+      // Notify parent component about photo change
+      if (onPhotoChange) {
+        onPhotoChange(photoUrl);
+      }
     } catch (error) {
       logger.error('photo_upload_error', 'Failed to upload photo in form', {
         component: 'MantinePatientForm',
@@ -92,6 +98,11 @@ const MantinePatientForm = ({
       await patientApi.deletePhoto(formData.id);
       setPhotoUrl(null);
       setPhotoKey(prev => prev + 1); // Force component re-render
+
+      // Notify parent component about photo deletion
+      if (onPhotoChange) {
+        onPhotoChange(null);
+      }
     } catch (error) {
       logger.error('photo_delete_error', 'Failed to delete photo in form', {
         component: 'MantinePatientForm',

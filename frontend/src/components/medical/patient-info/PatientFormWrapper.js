@@ -20,6 +20,7 @@ const PatientFormWrapper = ({
   statusMessage,
   isCreating = false,
   error = '',
+  onPhotoChange, // New callback for photo changes
 }) => {
   const handleSubmit = (e) => {
     if (e && e.preventDefault) {
@@ -57,6 +58,7 @@ const PatientFormWrapper = ({
             practitioners={practitioners}
             saving={isLoading}
             isCreating={isCreating}
+            onPhotoChange={onPhotoChange}
           />
         </Stack>
       </Modal>

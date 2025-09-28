@@ -6,12 +6,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import patientApi from '../../services/api/patientApi';
 import { formatDate } from '../../utils/helpers';
 import { DATE_FORMATS } from '../../utils/constants';
-import { formatMeasurement, convertForDisplay } from '../../utils/unitConversion';
+import {
+  formatMeasurement,
+  convertForDisplay,
+} from '../../utils/unitConversion';
 import { getUserFriendlyError } from '../../constants/errorMessages';
 import logger from '../../services/logger';
 
 // Hooks and contexts
-import { useCurrentPatient, usePractitioners, useCacheManager } from '../../hooks/useGlobalData';
+import {
+  useCurrentPatient,
+  usePractitioners,
+  useCacheManager,
+} from '../../hooks/useGlobalData';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 
@@ -76,6 +83,15 @@ const PatientInfo = () => {
   // Photo state
   const [photoUrl, setPhotoUrl] = useState(null);
 
+  // Handle photo changes from form modal
+  const handlePhotoChange = useCallback(newPhotoUrl => {
+    logger.debug('photo_change_callback', 'Photo changed from form modal', {
+      component: 'Patient-Info',
+      hasNewPhoto: !!newPhotoUrl,
+    });
+    setPhotoUrl(newPhotoUrl);
+  }, []);
+
   // Form submission hook
   const {
     isBlocking,
@@ -98,7 +114,7 @@ const PatientInfo = () => {
         // Photo will be refreshed automatically when patient data updates
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('patient_form_error', {
         message: 'Form submission error in Patient-Info',
         error: error.message,
@@ -128,7 +144,7 @@ const PatientInfo = () => {
   }, []);
 
   // Populate form data from patient
-  const populateFormData = useCallback((patient) => {
+  const populateFormData = useCallback(patient => {
     setFormData({
       id: patient.id, // Include patient ID for photo upload
       first_name: patient.first_name || '',
@@ -161,11 +177,11 @@ const PatientInfo = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const hasEditParam = urlParams.get('edit') === 'true';
-    
+
     if (hasEditParam && !processedEditParamRef.current) {
       processedEditParamRef.current = true;
       handleEditPatient();
-      
+
       // Remove the edit parameter from URL to clean it up
       urlParams.delete('edit');
       const newSearch = urlParams.toString();
@@ -201,7 +217,6 @@ const PatientInfo = () => {
     }
   }, [patientError]);
 
-
   // Load patient photo when patient data changes
   useEffect(() => {
     const loadPatientPhoto = async () => {
@@ -209,14 +224,14 @@ const PatientInfo = () => {
         try {
           logger.debug('photo_load_start', 'Loading patient photo', {
             component: 'Patient-Info',
-            patientId: patientData.id
+            patientId: patientData.id,
           });
 
           const photoInfo = await patientApi.getPhotoInfo(patientData.id);
           logger.debug('photo_info_result', 'Photo info result', {
             component: 'Patient-Info',
             patientId: patientData.id,
-            hasPhoto: !!photoInfo
+            hasPhoto: !!photoInfo,
           });
 
           if (photoInfo) {
@@ -224,13 +239,13 @@ const PatientInfo = () => {
             logger.debug('photo_url_set', 'Setting photo URL', {
               component: 'Patient-Info',
               patientId: patientData.id,
-              hasPhotoUrl: !!photoUrl
+              hasPhotoUrl: !!photoUrl,
             });
             setPhotoUrl(photoUrl);
           } else {
             logger.debug('photo_not_found', 'No photo found for patient', {
               component: 'Patient-Info',
-              patientId: patientData.id
+              patientId: patientData.id,
             });
             setPhotoUrl(null);
           }
@@ -238,7 +253,7 @@ const PatientInfo = () => {
           logger.error('photo_load_error', 'Failed to load patient photo', {
             component: 'Patient-Info',
             patientId: patientData.id,
-            error: error.message
+            error: error.message,
           });
           setPhotoUrl(null);
         }
@@ -266,13 +281,12 @@ const PatientInfo = () => {
     }));
   };
 
-
   const handleSubmit = async () => {
     try {
       if (!canSubmit) return;
 
       startSubmission();
-      
+
       // Prepare data for API
       const apiData = {
         ...formData,
@@ -295,16 +309,20 @@ const PatientInfo = () => {
       // Invalidate caches
       await invalidatePatientList();
       await invalidatePatient();
-      
+
       // Complete form submission
-      const submitSuccess = completeFormSubmission(true, isCreating ? 'Patient created successfully!' : 'Patient updated successfully!');
-      
+      const submitSuccess = completeFormSubmission(
+        true,
+        isCreating
+          ? 'Patient created successfully!'
+          : 'Patient updated successfully!'
+      );
+
       // For forms without file uploads, we need to manually complete the upload process
       // to trigger the success callback and close the modal
       if (submitSuccess) {
         completeFileUpload(true, 0, 0);
       }
-      
     } catch (error) {
       const userFriendlyMessage = getUserFriendlyError(error, 'patient');
       handleSubmissionFailure(error, userFriendlyMessage);
@@ -355,11 +373,7 @@ const PatientInfo = () => {
 
         <Stack gap="lg">
           {isNewUser && (
-            <Alert
-              variant="light"
-              color="blue"
-              title="Welcome to MediKeep!"
-            >
+            <Alert variant="light" color="blue" title="Welcome to MediKeep!">
               Your account has been created successfully. Please complete your
               patient profile below to get started with managing your medical
               records.
@@ -382,7 +396,9 @@ const PatientInfo = () => {
           <Card withBorder shadow="sm" radius="md" className="patient-card">
             <Stack gap="md">
               <Group justify="space-between" align="center">
-                <Text size="xl" fw={600}>Personal Information</Text>
+                <Text size="xl" fw={600}>
+                  Personal Information
+                </Text>
                 <Button variant="filled" size="sm" onClick={handleEditPatient}>
                   Edit Profile
                 </Button>
@@ -395,16 +411,15 @@ const PatientInfo = () => {
                   <Group align="center" mb="md" gap="lg">
                     <Avatar
                       src={photoUrl}
-                      size={100}
+                      size={200}
                       radius="md"
                       style={{
                         border: '2px solid #e0e0e0',
                         backgroundColor: '#f5f5f5',
                       }}
                     >
-                      {!photoUrl && (
-                        `${patientData.first_name?.[0] || ''}${patientData.last_name?.[0] || ''}`
-                      )}
+                      {!photoUrl &&
+                        `${patientData.first_name?.[0] || ''}${patientData.last_name?.[0] || ''}`}
                     </Avatar>
                     <Stack gap="xs">
                       <Text size="xl" fw={600}>
@@ -500,7 +515,9 @@ const PatientInfo = () => {
                 </div>
               ) : (
                 <Stack align="center" gap="md" py="xl">
-                  <Text size="lg" fw={500}>No Patient Profile Found</Text>
+                  <Text size="lg" fw={500}>
+                    No Patient Profile Found
+                  </Text>
                   <Text ta="center" c="dimmed">
                     Please create your patient profile to get started.
                   </Text>
@@ -518,7 +535,9 @@ const PatientInfo = () => {
       <PatientFormWrapper
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
-        title={editingItem ? 'Edit Patient Information' : 'Create Patient Profile'}
+        title={
+          editingItem ? 'Edit Patient Information' : 'Create Patient Profile'
+        }
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
@@ -528,6 +547,7 @@ const PatientInfo = () => {
         statusMessage={statusMessage}
         isCreating={editingItem === null || !patientExists}
         error={error}
+        onPhotoChange={handlePhotoChange}
       />
     </>
   );
