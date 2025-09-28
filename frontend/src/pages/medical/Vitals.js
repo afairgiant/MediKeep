@@ -50,8 +50,9 @@ import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { VITAL_FILTER_TYPES } from '../../constants/vitalFilters';
 
-// Quick stats card configurations with Mantine icons
+// Quick stats card configurations with Mantine icons and filter mappings
 const STATS_CONFIGS = {
   blood_pressure: {
     title: 'Blood Pressure',
@@ -63,6 +64,8 @@ const STATS_CONFIGS = {
     getUnit: () => 'mmHg',
     getCategory: () => null,
     color: 'red',
+    filterType: VITAL_FILTER_TYPES.WITH_BLOOD_PRESSURE,
+    description: 'Click to filter records with blood pressure'
   },
   heart_rate: {
     title: 'Heart Rate',
@@ -78,6 +81,8 @@ const STATS_CONFIGS = {
       return 'Normal';
     },
     color: 'blue',
+    filterType: VITAL_FILTER_TYPES.WITH_HEART_RATE,
+    description: 'Click to filter records with heart rate'
   },
   temperature: {
     title: 'Latest Temperature',
@@ -93,6 +98,8 @@ const STATS_CONFIGS = {
       return 'Normal';
     },
     color: 'green',
+    filterType: VITAL_FILTER_TYPES.WITH_TEMPERATURE,
+    description: 'Click to filter records with temperature'
   },
   weight: {
     title: 'Latest Weight',
@@ -102,6 +109,8 @@ const STATS_CONFIGS = {
     getUnit: () => 'lbs',
     getCategory: () => null,
     color: 'violet',
+    filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
+    description: 'Click to filter records with weight measurements'
   },
   bmi: {
     title: 'BMI',
@@ -111,6 +120,8 @@ const STATS_CONFIGS = {
     getUnit: () => '',
     getCategory: () => null,
     color: 'yellow',
+    filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
+    description: 'Click to filter records with weight measurements'
   },
 };
 
@@ -215,6 +226,19 @@ const Vitals = () => {
     }
   }, [location.search, filteredVitals, vitalsLoading, showViewModal]);
 
+  // Handle stats card clicks for filtering
+  const handleStatsCardClick = useCallback((vitalType) => {
+    if (!updateFilter) return;
+
+    // If the same filter is already active, clear all filters
+    if (filters?.category === vitalType) {
+      clearFilters();
+    } else {
+      // Apply the specific vital type filter (this will clear others automatically)
+      updateFilter('category', vitalType);
+    }
+  }, [updateFilter, clearFilters, filters?.category]);
+
   // Generate filter options from vitalsData
   const statusOptions = useMemo(() => {
     return pageConfig.filtering?.statusOptions || [];
@@ -318,13 +342,50 @@ const Vitals = () => {
     const value = config.getValue(stats);
     const unit = config.getUnit(stats);
     const category = config.getCategory(stats);
+    const isActive = filters?.category === config.filterType;
 
     return (
-      <Card key={key} shadow="sm" padding="lg" radius="md" withBorder>
+      <Card
+        key={key}
+        shadow="sm"
+        padding="lg"
+        radius="md"
+        withBorder
+        tabIndex={0}
+        role="button"
+        aria-label={`Filter by ${config.title}. ${config.description}`}
+        aria-pressed={isActive}
+        style={{
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          border: isActive ? `2px solid var(--mantine-color-${config.color}-6)` : undefined,
+          backgroundColor: isActive ? `var(--mantine-color-${config.color}-0)` : undefined,
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)';
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleStatsCardClick(config.filterType);
+          }
+        }}
+        onClick={() => handleStatsCardClick(config.filterType)}
+        title={config.description}
+      >
         <Flex align="center" gap="md">
           <ActionIcon
             size="xl"
-            variant="light"
+            variant={isActive ? "filled" : "light"}
             color={config.color}
             radius="md"
           >
@@ -447,7 +508,7 @@ const Vitals = () => {
               <Box>
                 <Title order={3}>Health Summary</Title>
                 <Text c="dimmed" size="sm">
-                  Latest readings and averages
+                  Latest readings and averages • Click any card to filter table below
                 </Text>
               </Box>
               <Button
@@ -485,16 +546,34 @@ const Vitals = () => {
                 </Group>
               </Alert>
             ) : stats ? (
-              <Grid>
-                {Object.entries(STATS_CONFIGS).map(([key, config]) => (
-                  <Grid.Col
-                    key={key}
-                    span={{ base: 12, xs: 6, sm: 4, md: 2.4 }}
-                  >
-                    {renderStatsCard(key, config)}
-                  </Grid.Col>
-                ))}
-              </Grid>
+              <>
+                {filters?.category && filters.category !== 'all' && (
+                  <Group justify="center" mb="md">
+                    <Badge
+                      size="lg"
+                      variant="light"
+                      color="blue"
+                      leftSection="🔍"
+                      style={{ cursor: 'pointer' }}
+                      onClick={clearFilters}
+                      title="Click to clear filter"
+                    >
+                      Filtered by: {Object.values(STATS_CONFIGS).find(config => config.filterType === filters.category)?.title || filters.category}
+                    </Badge>
+                  </Group>
+                )}
+                <Grid>
+                  {Object.entries(STATS_CONFIGS).map(([key, config]) => (
+                    <Grid.Col
+                      key={key}
+                      span={{ base: 12, xs: 6, sm: 4, md: 2.4 }}
+                    >
+                      {renderStatsCard(key, config)}
+                    </Grid.Col>
+                  ))}
+                </Grid>
+              </>
+
             ) : (
               <Center py="xl">
                 <Stack align="center" gap="md">
