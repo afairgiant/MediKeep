@@ -25,13 +25,24 @@ const MedicationCard = ({
     return indication || 'No indication specified';
   };
 
+  // Check if medication is inactive/stopped/finished/completed/on-hold
+  const isInactive = ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'].includes(
+    medication.status?.toLowerCase()
+  );
+
   return (
     <Card
       withBorder
       shadow="sm"
       radius="md"
       h="100%"
-      style={{ display: 'flex', flexDirection: 'column' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        borderLeft: isInactive
+          ? '4px solid var(--mantine-color-red-6)'
+          : '4px solid var(--mantine-color-green-6)'
+      }}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
         <Group justify="space-between" align="flex-start">

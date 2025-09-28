@@ -324,6 +324,10 @@ export const ResponsiveTable = memo(({
           const rowKey = row.id || row.key || index;
           const isSelected = selectedRows.includes(rowKey);
           
+          // Check if row is inactive/stopped/finished/completed/on-hold (for medical context)
+          const isInactive = medicalContext !== 'general' &&
+            ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'].includes(row.status?.toLowerCase());
+
           return (
             <MantineTable.Tr
               key={rowKey}
@@ -331,9 +335,13 @@ export const ResponsiveTable = memo(({
               onDoubleClick={onRowDoubleClick ? (event) => onRowDoubleClick(row, index, event) : undefined}
               style={{
                 cursor: onRowClick || selectable ? 'pointer' : 'default',
-                backgroundColor: isSelected ? 'var(--mantine-color-blue-0)' : undefined
+                backgroundColor: isSelected ? 'var(--mantine-color-blue-0)' : undefined,
+                borderLeft: isInactive
+                  ? '4px solid var(--mantine-color-red-6)'
+                  : '4px solid var(--mantine-color-green-6)'
               }}
               data-selected={isSelected}
+              data-inactive={isInactive}
             >
               {visibleColumns.map((column) => {
                 const columnKey = column.key || column.dataIndex || column.name || column.accessor;
@@ -374,7 +382,11 @@ export const ResponsiveTable = memo(({
         {processedData.map((row, index) => {
           const rowKey = row.id || row.key || index;
           const isSelected = selectedRows.includes(rowKey);
-          
+
+          // Check if row is inactive/stopped/finished/completed/on-hold (for medical context)
+          const isInactive = medicalContext !== 'general' &&
+            ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'].includes(row.status?.toLowerCase());
+
           return (
             <Card
               key={rowKey}
@@ -382,11 +394,15 @@ export const ResponsiveTable = memo(({
               shadow="xs"
               p={compactMode ? "xs" : "sm"}
               onClick={(event) => handleRowClick(row, index, event)}
-              style={{ 
+              style={{
                 cursor: onRowClick || selectable ? 'pointer' : 'default',
-                borderColor: isSelected ? 'var(--mantine-color-blue-6)' : undefined
+                borderColor: isSelected ? 'var(--mantine-color-blue-6)' : undefined,
+                borderLeft: isInactive
+                  ? '4px solid var(--mantine-color-red-6)'
+                  : '4px solid var(--mantine-color-green-6)'
               }}
               data-selected={isSelected}
+              data-inactive={isInactive}
             >
               <Stack gap={compactMode ? "xs" : "sm"}>
                 {displayFields.map((field, fieldIndex) => {
@@ -597,28 +613,42 @@ export const ResponsiveTable = memo(({
       </MantineTable.Thead>
       {/* Render rows with print config (all columns) */}
       <MantineTable.Tbody>
-        {processedData.map((row, rowIndex) => (
-          <MantineTable.Tr key={row.id || rowIndex}>
-            {printTableConfig.visibleColumns.map((column, colIndex) => {
+        {processedData.map((row, rowIndex) => {
+          // Check if row is inactive/stopped/finished/completed/on-hold (for medical context)
+          const isInactive = medicalContext !== 'general' &&
+            ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'].includes(row.status?.toLowerCase());
+
+          return (
+            <MantineTable.Tr
+              key={row.id || rowIndex}
+              style={{
+                borderLeft: isInactive
+                  ? '4px solid var(--mantine-color-red-6)'
+                  : '4px solid var(--mantine-color-green-6)'
+              }}
+              data-inactive={isInactive}
+            >
+              {printTableConfig.visibleColumns.map((column, colIndex) => {
               const columnKey = getColumnKey(column);
               const cellValue = row[columnKey];
               const formatter = formatters?.[columnKey];
               const formattedValue = formatter ? formatter(cellValue, row) : (cellValue?.toString() || '');
 
-              return (
-                <MantineTable.Td key={columnKey || colIndex}>
-                  <Text size="xs">
-                    {typeof formattedValue === 'string' || typeof formattedValue === 'number' ? (
-                      formattedValue
-                    ) : (
-                      formattedValue
-                    )}
-                  </Text>
-                </MantineTable.Td>
-              );
-            })}
-          </MantineTable.Tr>
-        ))}
+                return (
+                  <MantineTable.Td key={columnKey || colIndex}>
+                    <Text size="xs">
+                      {typeof formattedValue === 'string' || typeof formattedValue === 'number' ? (
+                        formattedValue
+                      ) : (
+                        formattedValue
+                      )}
+                    </Text>
+                  </MantineTable.Td>
+                );
+              })}
+            </MantineTable.Tr>
+          );
+        })}
       </MantineTable.Tbody>
     </MantineTable>
   );
