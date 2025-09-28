@@ -25,6 +25,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 // Components
 import { PageHeader } from '../../components';
 import PatientFormWrapper from '../../components/medical/patient-info/PatientFormWrapper';
+import PatientAvatar from '../../components/shared/PatientAvatar';
 
 // Mantine UI
 import {
@@ -409,18 +410,16 @@ const PatientInfo = () => {
                 <div className="patient-details">
                   {/* Patient Photo and Name Header */}
                   <Group align="center" mb="md" gap="lg">
-                    <Avatar
-                      src={photoUrl}
+                    <PatientAvatar
+                      photoUrl={photoUrl}
+                      patient={patientData}
                       size={200}
                       radius="md"
                       style={{
                         border: '2px solid #e0e0e0',
                         backgroundColor: '#f5f5f5',
                       }}
-                    >
-                      {!photoUrl &&
-                        `${patientData.first_name?.[0] || ''}${patientData.last_name?.[0] || ''}`}
-                    </Avatar>
+                    />
                     <Stack gap="xs">
                       <Text size="xl" fw={600}>
                         {patientData.first_name} {patientData.last_name}

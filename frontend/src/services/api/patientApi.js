@@ -291,7 +291,7 @@ class PatientApiService extends BaseApiService {
     // For FormData, don't set Content-Type - let browser set it with boundary
     const finalHeaders = { ...headers };
     if (options.body instanceof FormData) {
-      // Remove Content-Type for FormData so browser sets it correctly
+      // Remove Content-Type from finalHeaders for FormData so browser sets it correctly with boundary
       delete finalHeaders['Content-Type'];
     }
 

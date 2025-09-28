@@ -13,6 +13,7 @@ import { IconCamera, IconX, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import logger from '../../services/logger';
+import { ALLOWED_PHOTO_TYPES, PHOTO_MAX_SIZE, ALLOWED_PHOTO_TYPES_DISPLAY } from '../../constants/fileTypes';
 
 const PatientPhotoUpload = ({
   patientId,
@@ -42,20 +43,13 @@ const PatientPhotoUpload = ({
 
     try {
       // Validate file size client-side
-      if (file.size > 15 * 1024 * 1024) {
-        throw new Error('Photo must be less than 15MB');
+      if (file.size > PHOTO_MAX_SIZE) {
+        throw new Error(`Photo must be less than ${PHOTO_MAX_SIZE / (1024 * 1024)}MB`);
       }
 
       // Validate file type
-      const allowedTypes = [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/gif',
-        'image/bmp',
-      ];
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('Please upload a JPEG, PNG, GIF, or BMP image');
+      if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+        throw new Error(`Please upload a ${ALLOWED_PHOTO_TYPES_DISPLAY} image`);
       }
 
       setUploadProgress('Uploading photo...');

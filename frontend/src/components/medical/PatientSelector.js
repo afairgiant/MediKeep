@@ -50,6 +50,7 @@ import patientSharingApi from '../../services/api/patientSharingApi';
 import logger from '../../services/logger';
 import PatientForm from './PatientForm';
 import PatientSharingModal from './PatientSharingModal';
+import PatientAvatar from '../shared/PatientAvatar';
 
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
   const { colorScheme } = useMantineColorScheme();
@@ -571,15 +572,6 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   /**
-   * Get patient initials for fallback display
-   */
-  const getPatientInitials = (patient) => {
-    const firstInitial = patient.first_name?.[0] || '';
-    const lastInitial = patient.last_name?.[0] || '';
-    return `${firstInitial}${lastInitial}`.toUpperCase();
-  };
-
-  /**
    * Get patient type badge
    */
   const getPatientBadge = (patient) => {
@@ -612,14 +604,13 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     const photoUrl = getPatientPhoto(patient);
     return (
       <Group gap="sm" key={patient.id}>
-        <Avatar
-          src={photoUrl}
+        <PatientAvatar
+          photoUrl={photoUrl}
+          patient={patient}
           size="sm"
           color="blue"
           radius="xl"
-        >
-          {!photoUrl && getPatientInitials(patient)}
-        </Avatar>
+        />
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={500}>
             {formatPatientName(patient)}
@@ -677,14 +668,13 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               : theme.colors.gray[3]}`
           }
         })}>
-        <Avatar
-          src={activePatientPhoto}
+        <PatientAvatar
+          photoUrl={activePatientPhoto}
+          patient={activePatient}
           size="sm"
           color="blue"
           radius="xl"
-        >
-          {!activePatientPhoto && getPatientInitials(activePatient)}
-        </Avatar>
+        />
         <Text fw={500} size="sm" style={{ flex: 1 }}>
           {formatPatientName(activePatient)}
         </Text>
@@ -729,14 +719,13 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 <Menu.Item
                   key={patient.id}
                   leftSection={
-                    <Avatar
-                      src={patientPhoto}
+                    <PatientAvatar
+                      photoUrl={patientPhoto}
+                      patient={patient}
                       size="xs"
                       color="blue"
                       radius="xl"
-                    >
-                      {!patientPhoto && getPatientInitials(patient)}
-                    </Avatar>
+                    />
                   }
                   rightSection={getPatientBadge(patient)}
                   onClick={() => switchPatient(patient.id)}
@@ -829,14 +818,13 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                     : theme.colors.blue[0]
                 }
               })}>
-              <Avatar
-                src={getPatientPhoto(activePatient)}
+              <PatientAvatar
+                photoUrl={getPatientPhoto(activePatient)}
+                patient={activePatient}
                 size="lg"
                 color="blue"
                 radius="xl"
-              >
-                {!getPatientPhoto(activePatient) && getPatientInitials(activePatient)}
-              </Avatar>
+              />
               <div style={{ flex: 1 }}>
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}

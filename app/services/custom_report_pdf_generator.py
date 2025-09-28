@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from PIL import Image as PILImage
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4, letter
@@ -653,8 +654,6 @@ class CustomReportPDFGenerator:
                 return None
 
             # Create image element with appropriate sizing for PDF while maintaining aspect ratio
-            from PIL import Image as PILImage
-
             # Get original image dimensions
             with PILImage.open(photo_path) as pil_img:
                 orig_width, orig_height = pil_img.size

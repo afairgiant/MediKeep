@@ -68,25 +68,6 @@ class PatientPhotoService:
             "content_type": file.content_type
         })
 
-        # Debug: Check if we can reach the database at all
-        try:
-            from sqlalchemy import text
-            test_query = db.execute(text("SELECT 1")).fetchone()
-            logger.debug("Database connection test successful", extra={
-                "patient_id": patient_id,
-                "test_result": test_query
-            })
-        except Exception as db_test_error:
-            logger.error("Database connection test failed", extra={
-                "patient_id": patient_id,
-                "error": str(db_test_error),
-                "error_type": type(db_test_error).__name__
-            })
-            # Let's not fail here, just log the error and continue to see if it works anyway
-            logger.warning("Continuing with photo upload despite database test failure", extra={
-                "patient_id": patient_id
-            })
-
         # Validate the uploaded file
         await self.validate_image(file)
 
@@ -350,15 +331,15 @@ class PatientPhotoService:
                 detail=f"Photo must be less than {self.MAX_FILE_SIZE // (1024*1024)}MB"
             )
 
-        # Check content type (more lenient)
-        if file.content_type and not any(file.content_type.startswith(allowed.split('/')[0]) for allowed in self.ALLOWED_TYPES):
+        # Check content type with strict matching
+        if file.content_type and file.content_type not in self.ALLOWED_TYPES:
             logger.error("Content type validation failed", extra={
                 "content_type": file.content_type,
                 "allowed_types": self.ALLOWED_TYPES
             })
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid file type: {file.content_type}. Please upload a JPEG, PNG, GIF, or BMP image"
+                detail=f"Invalid file type: {file.content_type}. Please upload a JPEG, PNG, GIF, BMP, or HEIC image"
             )
 
         # Verify image can be opened
