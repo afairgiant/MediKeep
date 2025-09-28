@@ -121,7 +121,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         )
         current_weight = latest_weight_reading.weight if latest_weight_reading else None
 
-        # Get latest BMI (from latest reading with BMI data)
+        # Get latest BMI (from latest reading with BMI data, or calculate from weight/height)
         latest_bmi_reading = (
             db.query(self.model)
             .filter(Vitals.patient_id == patient_id, Vitals.bmi.isnot(None))
@@ -129,6 +129,28 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             .first()
         )
         current_bmi = latest_bmi_reading.bmi if latest_bmi_reading else None
+
+        # If no stored BMI, try to calculate from latest weight and height
+        if current_bmi is None and latest_weight_reading and latest_weight_reading.weight:
+            latest_height_reading = (
+                db.query(self.model)
+                .filter(Vitals.patient_id == patient_id, Vitals.height.isnot(None))
+                .order_by(desc(Vitals.recorded_date))
+                .first()
+            )
+            if latest_height_reading and latest_height_reading.height:
+                try:
+                    # Validate reasonable medical ranges before calculation
+                    weight = latest_weight_reading.weight
+                    height = latest_height_reading.height
+
+                    # Reasonable medical ranges: weight 50-1000 lbs, height 24-96 inches
+                    if 50 <= weight <= 1000 and 24 <= height <= 96:
+                        current_bmi = self.calculate_bmi(weight, height)
+                    else:
+                        current_bmi = None
+                except (ValueError, TypeError, ZeroDivisionError):
+                    current_bmi = None
 
         # Get latest temperature (from latest reading with temperature data)
         latest_temperature_reading = (

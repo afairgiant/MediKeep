@@ -971,6 +971,8 @@ export const medicalPageConfigs = {
       categoryOptions: [
         { value: 'all', label: 'All Records' },
         { value: 'with_bp', label: 'With Blood Pressure' },
+        { value: 'with_heart_rate', label: 'With Heart Rate' },
+        { value: 'with_temperature', label: 'With Temperature' },
         { value: 'with_weight', label: 'With Weight' },
         { value: 'with_vitals', label: 'With Core Vitals' },
         { value: 'complete', label: 'Complete Records' },
@@ -980,6 +982,10 @@ export const medicalPageConfigs = {
           switch (filterValue) {
             case 'with_bp':
               return item.systolic_bp != null && item.diastolic_bp != null;
+            case 'with_heart_rate':
+              return item.heart_rate != null;
+            case 'with_temperature':
+              return item.temperature != null;
             case 'with_weight':
               return item.weight != null;
             case 'with_vitals':
