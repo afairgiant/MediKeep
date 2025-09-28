@@ -7,8 +7,10 @@ with proper formatting and data display.
 
 import io
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from PIL import Image as PILImage
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4, letter
@@ -16,7 +18,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import (
     PageBreak, Paragraph, SimpleDocTemplate, Spacer,
-    Table, TableStyle, KeepTogether
+    Table, TableStyle, KeepTogether, Image
 )
 from reportlab.platypus.tableofcontents import TableOfContents
 
@@ -27,7 +29,10 @@ logger = get_logger(__name__, "app")
 
 class CustomReportPDFGenerator:
     """Generate formatted PDF reports for custom medical data"""
-    
+
+    # Constants for photo handling
+    PATIENT_PHOTO_PATTERN = "patient_{patient_id}_*.jpg"
+
     def __init__(self):
         self.styles = self._create_styles()
         self.category_display_names = {
@@ -236,7 +241,12 @@ class CustomReportPDFGenerator:
         
         # Add patient information if included
         if report_data.get('include_patient_info') and report_data.get('patient'):
-            story.extend(self._create_patient_section(report_data['patient']))
+            include_photo = report_data.get('include_profile_picture', False)
+            logger.debug(f"Patient info section: include_profile_picture = {include_photo}")
+            story.extend(self._create_patient_section(
+                report_data['patient'],
+                include_profile_picture=include_photo
+            ))
         
         # Add summary if included
         if report_data.get('include_summary') and report_data.get('summary'):
@@ -514,12 +524,12 @@ class CustomReportPDFGenerator:
         }
         return icons.get(category, '[INFO]')
     
-    def _create_patient_section(self, patient_data: Dict[str, Any]) -> List:
-        """Create patient information section"""
+    def _create_patient_section(self, patient_data: Dict[str, Any], include_profile_picture: bool = False) -> List:
+        """Create patient information section with optional profile picture"""
         story = []
-        
+
         story.append(Paragraph("Patient Information", self.styles['SectionHeader']))
-        
+
         # Create patient info table
         patient_info = []
         
@@ -552,22 +562,134 @@ class CustomReportPDFGenerator:
         if patient_data.get('address'):
             patient_info.append(['Address:', patient_data.get('address')])
         
-        if patient_info:
-            table = Table(patient_info, colWidths=[1.5*inch, 4.5*inch])
-            table.setStyle(TableStyle([
-                ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
-                ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
-                ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
-                ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
-                ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ]))
-            story.append(table)
+        # Create layout with or without photo
+        if include_profile_picture:
+            logger.debug(f"Profile picture enabled for patient {patient_data.get('id')}")
+            photo_element = self._create_patient_photo(patient_data)
+
+            if photo_element and patient_info:
+                logger.debug("Profile picture added to report with side-by-side layout")
+                # Create side-by-side layout: photo on left, info on right
+                layout_data = []
+
+                # Create info table first
+                info_table = Table(patient_info, colWidths=[1.2*inch, 3.0*inch])
+                info_table.setStyle(TableStyle([
+                    ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+                    ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
+                    ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                    ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ]))
+
+                # Create main layout table: [photo, info]
+                layout_data.append([photo_element, info_table])
+
+                layout_table = Table(layout_data, colWidths=[1.8*inch, 4.7*inch])
+                layout_table.setStyle(TableStyle([
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                    ('TOPPADDING', (0, 0), (-1, -1), 0),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                ]))
+
+                story.append(layout_table)
+            else:
+                logger.debug("No profile picture found, using standard layout")
+                # Fallback to standard layout without photo
+                if patient_info:
+                    table = Table(patient_info, colWidths=[1.5*inch, 4.5*inch])
+                    table.setStyle(TableStyle([
+                        ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+                        ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
+                        ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                    ]))
+                    story.append(table)
+        else:
+            # Standard layout without photo
+            if patient_info:
+                table = Table(patient_info, colWidths=[1.5*inch, 4.5*inch])
+                table.setStyle(TableStyle([
+                    ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+                    ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
+                    ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                    ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ]))
+                story.append(table)
         
         story.append(Spacer(1, 0.3*inch))
         return story
-    
+
+    def _create_patient_photo(self, patient_data: Dict[str, Any]) -> Optional[Image]:
+        """Create patient photo element for the report"""
+        try:
+            patient_id = patient_data.get('id')
+            if not patient_id:
+                logger.debug("No patient ID provided for photo lookup")
+                return None
+
+            # Construct photo path (matching the patient photo service path structure)
+            from app.core.config import settings
+            photo_dir = Path(settings.UPLOAD_DIR) / "photos" / "patients"
+
+            # Look for photo files for this patient (they have timestamp in filename)
+            photo_files = list(photo_dir.glob(f"patient_{patient_id}_*.jpg"))
+
+            if not photo_files:
+                logger.debug(f"No photo found for patient {patient_id}")
+                return None
+
+            # Use the most recent photo (sorted by filename which includes timestamp)
+            photo_path = sorted(photo_files)[-1]
+
+            if not photo_path.exists():
+                logger.debug(f"Photo file does not exist: {photo_path}")
+                return None
+
+            # Create image element with appropriate sizing for PDF while maintaining aspect ratio
+            # Get original image dimensions
+            with PILImage.open(photo_path) as pil_img:
+                orig_width, orig_height = pil_img.size
+
+            # Calculate aspect ratio
+            aspect_ratio = orig_width / orig_height
+
+            # Set maximum dimensions
+            max_width = 1.5*inch
+            max_height = 1.5*inch
+
+            # Calculate scaled dimensions while maintaining aspect ratio
+            if aspect_ratio > 1:  # Wider than tall
+                width = max_width
+                height = max_width / aspect_ratio
+                if height > max_height:  # Still too tall
+                    height = max_height
+                    width = max_height * aspect_ratio
+            else:  # Taller than wide
+                height = max_height
+                width = max_height * aspect_ratio
+                if width > max_width:  # Still too wide
+                    width = max_width
+                    height = max_width / aspect_ratio
+
+            image = Image(str(photo_path), width=width, height=height)
+            logger.debug(f"Added patient photo to report: {photo_path} (scaled to {width:.1f}x{height:.1f})")
+            return image
+
+        except Exception as e:
+            logger.error(f"Failed to load patient photo: {e}")
+            return None
+
     def _create_summary_section(self, summary_data: Dict[str, Any]) -> List:
         """Create summary statistics section"""
         story = []

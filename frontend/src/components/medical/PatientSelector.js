@@ -50,6 +50,7 @@ import patientSharingApi from '../../services/api/patientSharingApi';
 import logger from '../../services/logger';
 import PatientForm from './PatientForm';
 import PatientSharingModal from './PatientSharingModal';
+import PatientAvatar from '../shared/PatientAvatar';
 
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
   const { colorScheme } = useMantineColorScheme();
@@ -67,6 +68,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   const [stats, setStats] = useState(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [isMinimized, setIsMinimized] = useState(compact);
+  const [patientPhotos, setPatientPhotos] = useState({}); // Store patient photos by patient ID
   const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
   const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
   const [sharingModalOpened, { open: openSharingModal, close: closeSharingModal }] = useDisclosure(false);
@@ -88,6 +90,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   useEffect(() => {
     if (patients.length > 0 && initialLoadComplete) {
       loadStats();
+      loadPatientPhotos(); // Load photos for all patients
     }
   }, [initialLoadComplete]); // Only depend on initialLoadComplete to run once
 
@@ -156,6 +159,64 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   // Removed loadActivePatient function - now handled in loadPatients
+
+  /**
+   * Load patient photos for all available patients with concurrency limit
+   */
+  const loadPatientPhotos = async () => {
+    if (patients.length === 0) return;
+
+    try {
+      logger.debug('patient_selector_photos_start', {
+        message: 'Loading patient photos for selector',
+        patientCount: patients.length
+      });
+
+      // Load photos with concurrency limit to avoid overwhelming the server
+      const BATCH_SIZE = 5; // Load 5 photos at a time
+      const photoResults = [];
+
+      for (let i = 0; i < patients.length; i += BATCH_SIZE) {
+        const batch = patients.slice(i, i + BATCH_SIZE);
+        const batchPromises = batch.map(async (patient) => {
+          try {
+            const photoUrl = await patientApi.getPhotoUrl(patient.id);
+            return { patientId: patient.id, photoUrl };
+          } catch (error) {
+            // If photo doesn't exist or fails to load, return null
+            logger.debug('patient_selector_photo_failed', {
+              message: 'Failed to load photo for patient',
+              patientId: patient.id,
+              error: error.message
+            });
+            return { patientId: patient.id, photoUrl: null };
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        photoResults.push(...batchResults);
+      }
+
+      // Update state with all photos
+      const photoMap = {};
+      photoResults.forEach(({ patientId, photoUrl }) => {
+        photoMap[patientId] = photoUrl;
+      });
+
+      setPatientPhotos(photoMap);
+
+      logger.debug('patient_selector_photos_loaded', {
+        message: 'Patient photos loaded successfully',
+        photosCount: Object.values(photoMap).filter(url => url !== null).length,
+        totalPatients: patients.length
+      });
+    } catch (error) {
+      logger.error('patient_selector_photos_error', {
+        message: 'Failed to load patient photos',
+        error: error.message
+      });
+    }
+  };
 
   /**
    * Load patient statistics - use data from patient list instead of separate API
@@ -511,6 +572,13 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   /**
+   * Get patient photo URL or null if no photo
+   */
+  const getPatientPhoto = (patient) => {
+    return patientPhotos[patient.id] || null;
+  };
+
+  /**
    * Get patient type badge
    */
   const getPatientBadge = (patient) => {
@@ -539,22 +607,29 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Render patient option for select
    */
-  const renderPatientOption = (patient) => (
-    <Group gap="sm" key={patient.id}>
-      <Avatar size="sm" color="blue" radius="xl">
-        <IconUser size="1rem" />
-      </Avatar>
-      <div style={{ flex: 1 }}>
-        <Text size="sm" fw={500}>
-          {formatPatientName(patient)}
-        </Text>
-        <Text size="xs" c="dimmed">
-          {patient.birth_date} • {patient.privacy_level}
-        </Text>
-      </div>
-      {getPatientBadge(patient)}
-    </Group>
-  );
+  const renderPatientOption = (patient) => {
+    const photoUrl = getPatientPhoto(patient);
+    return (
+      <Group gap="sm" key={patient.id}>
+        <PatientAvatar
+          photoUrl={photoUrl}
+          patient={patient}
+          size="sm"
+          color="blue"
+          radius="xl"
+        />
+        <div style={{ flex: 1 }}>
+          <Text size="sm" fw={500}>
+            {formatPatientName(patient)}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {patient.birth_date} • {patient.privacy_level}
+          </Text>
+        </div>
+        {getPatientBadge(patient)}
+      </Group>
+    );
+  };
 
   /**
    * Create select data for patients
@@ -589,19 +664,24 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
 
   // Minimized view - single line with patient name and expand button
   if (isMinimized && activePatient) {
+    const activePatientPhoto = getPatientPhoto(activePatient);
     return (
-      <Group gap="sm" p="xs" 
+      <Group gap="sm" p="xs"
         styles={(theme) => ({
           root: {
             borderRadius: 8,
-            border: `1px solid ${colorScheme === 'dark' 
-              ? theme.colors.dark[4] 
+            border: `1px solid ${colorScheme === 'dark'
+              ? theme.colors.dark[4]
               : theme.colors.gray[3]}`
           }
         })}>
-        <Avatar size="sm" color="blue" radius="xl">
-          <IconUser size="0.8rem" />
-        </Avatar>
+        <PatientAvatar
+          photoUrl={activePatientPhoto}
+          patient={activePatient}
+          size="sm"
+          color="blue"
+          radius="xl"
+        />
         <Text fw={500} size="sm" style={{ flex: 1 }}>
           {formatPatientName(activePatient)}
         </Text>
@@ -640,28 +720,35 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           
           <Menu.Dropdown>
             <Menu.Label>Switch to Patient</Menu.Label>
-            {patients.map((patient) => (
-              <Menu.Item
-                key={patient.id}
-                leftSection={
-                  <Avatar size="xs" color="blue" radius="xl">
-                    <IconUser size="0.6rem" />
-                  </Avatar>
-                }
-                rightSection={getPatientBadge(patient)}
-                onClick={() => switchPatient(patient.id)}
-                disabled={patient.id === activePatient?.id}
-              >
-                <div>
-                  <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
-                    {formatPatientName(patient)}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {patient.birth_date}
-                  </Text>
-                </div>
-              </Menu.Item>
-            ))}
+            {patients.map((patient) => {
+              const patientPhoto = getPatientPhoto(patient);
+              return (
+                <Menu.Item
+                  key={patient.id}
+                  leftSection={
+                    <PatientAvatar
+                      photoUrl={patientPhoto}
+                      patient={patient}
+                      size="xs"
+                      color="blue"
+                      radius="xl"
+                    />
+                  }
+                  rightSection={getPatientBadge(patient)}
+                  onClick={() => switchPatient(patient.id)}
+                  disabled={patient.id === activePatient?.id}
+                >
+                  <div>
+                    <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
+                      {formatPatientName(patient)}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {patient.birth_date}
+                    </Text>
+                  </div>
+                </Menu.Item>
+              );
+            })}
             
             <Menu.Divider />
             <Menu.Item
@@ -730,17 +817,21 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             <Text size="sm" c="dimmed" mb="xs">
               Currently viewing:
             </Text>
-            <Group gap="sm" p="sm" style={{ borderRadius: 8, position: 'relative' }} 
+            <Group gap="sm" p="sm" style={{ borderRadius: 8, position: 'relative' }}
               styles={(theme) => ({
                 root: {
-                  backgroundColor: colorScheme === 'dark' 
-                    ? theme.colors.dark[6] 
+                  backgroundColor: colorScheme === 'dark'
+                    ? theme.colors.dark[6]
                     : theme.colors.blue[0]
                 }
               })}>
-              <Avatar color="blue" radius="xl">
-                <IconUser size="1.2rem" />
-              </Avatar>
+              <PatientAvatar
+                photoUrl={getPatientPhoto(activePatient)}
+                patient={activePatient}
+                size="lg"
+                color="blue"
+                radius="xl"
+              />
               <div style={{ flex: 1 }}>
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}

@@ -16,6 +16,7 @@ export const useCustomReports = () => {
     report_title: 'Custom Medical Report',
     include_patient_info: true,
     include_summary: true,
+    include_profile_picture: true,
     date_range: null,
   });
 
