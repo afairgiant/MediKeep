@@ -1,19 +1,24 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, File, UploadFile, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.logging_config import get_logger
 from app.crud.patient import patient
 from app.models.activity_log import ActivityLog
+from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import Patient as PatientModel
 from app.models.models import User
 from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
+from app.schemas.patient_photo import PatientPhotoResponse, PatientPhotoWithUrl
+from app.services.patient_photo_service import patient_photo_service
 
 router = APIRouter()
 
@@ -830,3 +835,209 @@ def get_user_recent_activity(
     except Exception as e:
         logger.error(f"Error fetching user recent activity: {str(e)}")
         raise HTTPException(status_code=500, detail="Error fetching recent activity")
+
+
+# Patient Photo Endpoints
+@router.post("/{patient_id}/photo", response_model=PatientPhotoResponse)
+async def upload_patient_photo(
+    patient_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+) -> Any:
+    """
+    Upload a photo for a patient.
+
+    - Accepts JPEG, PNG, GIF, BMP formats
+    - Maximum file size: 15MB
+    - Automatically replaces existing photo
+    - Processes image (resize, rotate, convert to JPEG)
+    """
+    logger.info("Patient photo upload request", extra={
+        "patient_id": patient_id,
+        "user_id": current_user.id,
+        "file_name": file.filename
+    })
+
+    # Verify patient ownership
+    patient_obj = patient.get(db, id=patient_id)
+    if not patient_obj:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    if patient_obj.owner_user_id != current_user.id:
+        # Check if user has access via sharing
+        from app.crud.patient_share import patient_share as share_crud
+        if not share_crud.user_has_access(db, patient_id, current_user.id):
+            raise HTTPException(
+                status_code=403,
+                detail="You don't have permission to update this patient's photo"
+            )
+
+    try:
+        # Upload and process the photo
+        photo = await patient_photo_service.upload_photo(
+            db=db,
+            patient_id=patient_id,
+            file=file,
+            user_id=current_user.id
+        )
+
+        # Log the activity
+        log_create(
+            db=db,
+            entity_type=ActivityEntityType.PATIENT,
+            entity_obj=patient_obj,
+            user_id=current_user.id
+        )
+
+        logger.info("Patient photo uploaded successfully", extra={
+            "patient_id": patient_id,
+            "photo_id": photo.id
+        })
+
+        return photo
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        error_msg = f"Failed to upload patient photo: {type(e).__name__}: {str(e)}"
+        full_traceback = traceback.format_exc()
+
+        logger.error(error_msg)
+        logger.error(f"Photo upload error details - Patient ID: {patient_id}, File: {file.filename if file else 'unknown'}")
+        logger.error(f"Full traceback: {full_traceback}")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to upload photo. Please try again."
+        )
+
+
+@router.get("/{patient_id}/photo", response_class=FileResponse)
+async def get_patient_photo(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+) -> Any:
+    """
+    Get the photo file for a patient.
+    Returns the actual image file.
+    """
+    # Verify patient ownership/access
+    patient_obj = patient.get(db, id=patient_id)
+    if not patient_obj:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    if patient_obj.owner_user_id != current_user.id:
+        from app.crud.patient_share import patient_share as share_crud
+        if not share_crud.user_has_access(db, patient_id, current_user.id):
+            raise HTTPException(
+                status_code=403,
+                detail="You don't have permission to view this patient's photo"
+            )
+
+    # Get the photo file
+    photo_path = await patient_photo_service.get_photo_file(db, patient_id)
+
+    if not photo_path:
+        raise HTTPException(status_code=404, detail="No photo found for this patient")
+
+    return FileResponse(
+        path=photo_path,
+        media_type="image/jpeg",
+        headers={
+            "Cache-Control": "max-age=3600",  # Cache for 1 hour
+        }
+    )
+
+
+@router.get("/{patient_id}/photo/info", response_model=Optional[PatientPhotoResponse])
+async def get_patient_photo_info(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+) -> Any:
+    """
+    Get metadata about a patient's photo.
+    Returns photo information without the actual file.
+    """
+    # Verify patient ownership/access
+    patient_obj = patient.get(db, id=patient_id)
+    if not patient_obj:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    if patient_obj.owner_user_id != current_user.id:
+        from app.crud.patient_share import patient_share as share_crud
+        if not share_crud.user_has_access(db, patient_id, current_user.id):
+            raise HTTPException(
+                status_code=403,
+                detail="You don't have permission to view this patient's photo"
+            )
+
+    # Get photo metadata
+    photo = await patient_photo_service.get_photo(db, patient_id)
+    return photo
+
+
+@router.delete("/{patient_id}/photo", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_patient_photo(
+    patient_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+) -> None:
+    """
+    Delete a patient's photo.
+    Removes both the file and database record.
+    """
+    logger.info("Patient photo delete request", extra={
+        "patient_id": patient_id,
+        "user_id": current_user.id
+    })
+
+    # Verify patient ownership (only owner can delete)
+    patient_obj = patient.get(db, id=patient_id)
+    if not patient_obj:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    if patient_obj.owner_user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the patient owner can delete the photo"
+        )
+
+    try:
+        # Delete the photo
+        deleted = await patient_photo_service.delete_photo(
+            db=db,
+            patient_id=patient_id,
+            user_id=current_user.id
+        )
+
+        if not deleted:
+            raise HTTPException(status_code=404, detail="No photo found for this patient")
+
+        # Log the activity
+        log_delete(
+            db=db,
+            entity_type=ActivityEntityType.PATIENT,
+            entity_obj=patient_obj,
+            user_id=current_user.id
+        )
+
+        logger.info("Patient photo deleted successfully", extra={
+            "patient_id": patient_id
+        })
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to delete patient photo", extra={
+            "patient_id": patient_id,
+            "error": str(e),
+            "error_type": type(e).__name__
+        })
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete photo. Please try again."
+        )

@@ -278,6 +278,208 @@ class PatientApiService extends BaseApiService {
       throw error;
     }
   }
+
+  /**
+   * Make a raw API call (bypasses basePath)
+   * @param {string} url - Full URL path
+   * @param {Object} options - Fetch options
+   * @returns {Promise} Response
+   */
+  async rawApiCall(url, options = {}) {
+    const headers = await this.getAuthHeaders();
+
+    // For FormData, don't set Content-Type - let browser set it with boundary
+    const finalHeaders = { ...headers };
+    if (options.body instanceof FormData) {
+      // Remove Content-Type for FormData so browser sets it correctly
+      delete finalHeaders['Content-Type'];
+    }
+
+    const response = await fetch(`${this.baseURL}${url}`, {
+      ...options,
+      headers: {
+        ...finalHeaders,
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error || `HTTP ${response.status}`);
+    }
+
+    // Handle different response types
+    const contentType = response.headers.get('content-type');
+
+    // Handle 204 No Content responses (like DELETE operations)
+    if (response.status === 204) {
+      return null; // No content to parse
+    }
+
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+    return response;
+  }
+
+  /**
+   * Upload a photo for a patient
+   * @param {number} patientId - Patient ID
+   * @param {File} file - Image file to upload
+   * @returns {Promise<Object>} Photo metadata
+   */
+  async uploadPhoto(patientId, file) {
+    logger.info('patient_photo_upload', {
+      message: 'Uploading patient photo',
+      patientId,
+      fileSize: file.size,
+      fileType: file.type
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      logger.debug('patient_photo_upload_request', {
+        message: 'Making upload request',
+        patientId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        hasFile: !!file
+      });
+
+      const result = await this.rawApiCall(`/patients/${patientId}/photo`, {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type - let browser set it with boundary for multipart
+      });
+
+      logger.info('patient_photo_upload_success', {
+        message: 'Patient photo uploaded successfully',
+        patientId,
+        photoId: result.id
+      });
+
+      return result;
+    } catch (error) {
+      logger.error('patient_photo_upload_error', {
+        message: 'Failed to upload patient photo',
+        patientId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get the photo URL for a patient (with authentication)
+   * @param {number} patientId - Patient ID
+   * @returns {Promise<string|null>} Photo data URL or null
+   */
+  async getPhotoUrl(patientId) {
+    try {
+      const response = await this.rawApiCall(`/patients/${patientId}/photo`, {
+        method: 'GET'
+      });
+
+      // rawApiCall returns the Response object, convert to blob
+      const blob = await response.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      if (error.message.includes('404')) {
+        // No photo exists - this is normal
+        return null;
+      }
+      logger.debug('patient_photo_url_error', {
+        message: 'Failed to get photo URL',
+        patientId,
+        error: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Get photo metadata for a patient
+   * @param {number} patientId - Patient ID
+   * @returns {Promise<Object|null>} Photo metadata or null if no photo
+   */
+  async getPhotoInfo(patientId) {
+    logger.debug('patient_photo_info', {
+      message: 'Getting patient photo info',
+      patientId
+    });
+
+    try {
+      const result = await this.rawApiCall(`/patients/${patientId}/photo/info`);
+      return result;
+    } catch (error) {
+      if (error.message.includes('404')) {
+        // No photo exists - this is normal
+        return null;
+      }
+      logger.error('patient_photo_info_error', {
+        message: 'Failed to get patient photo info',
+        patientId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a patient's photo
+   * @param {number} patientId - Patient ID
+   * @returns {Promise<void>}
+   */
+  async deletePhoto(patientId) {
+    logger.info('patient_photo_delete', {
+      message: 'Deleting patient photo',
+      patientId
+    });
+
+    try {
+      await this.rawApiCall(`/patients/${patientId}/photo`, {
+        method: 'DELETE'
+      });
+
+      logger.info('patient_photo_delete_success', {
+        message: 'Patient photo deleted successfully',
+        patientId
+      });
+    } catch (error) {
+      logger.error('patient_photo_delete_error', {
+        message: 'Failed to delete patient photo',
+        patientId,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a patient has a photo
+   * @param {number} patientId - Patient ID
+   * @returns {Promise<boolean>} True if patient has a photo
+   */
+  async hasPhoto(patientId) {
+    try {
+      const photoInfo = await this.getPhotoInfo(patientId);
+      return photoInfo !== null;
+    } catch (error) {
+      logger.debug('patient_photo_check_error', {
+        message: 'Error checking if patient has photo',
+        patientId,
+        error: error.message
+      });
+      return false;
+    }
+  }
 }
 
 export default new PatientApiService();

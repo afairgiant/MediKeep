@@ -28,6 +28,7 @@ import {
   Container,
   Alert,
   Card,
+  Avatar,
 } from '@mantine/core';
 
 // Styles
@@ -59,6 +60,7 @@ const PatientInfo = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [patientExists, setPatientExists] = useState(true);
   const [formData, setFormData] = useState({
+    id: null,
     first_name: '',
     last_name: '',
     birth_date: '',
@@ -70,6 +72,9 @@ const PatientInfo = () => {
     physician_id: '',
   });
   const [error, setError] = useState('');
+
+  // Photo state
+  const [photoUrl, setPhotoUrl] = useState(null);
 
   // Form submission hook
   const {
@@ -90,6 +95,7 @@ const PatientInfo = () => {
       if (needsRefreshAfterSubmissionRef.current) {
         needsRefreshAfterSubmissionRef.current = false;
         refreshPatient();
+        // Photo will be refreshed automatically when patient data updates
       }
     },
     onError: (error) => {
@@ -108,6 +114,7 @@ const PatientInfo = () => {
   // Form data reset function
   const resetFormData = useCallback(() => {
     setFormData({
+      id: null,
       first_name: '',
       last_name: '',
       birth_date: '',
@@ -123,6 +130,7 @@ const PatientInfo = () => {
   // Populate form data from patient
   const populateFormData = useCallback((patient) => {
     setFormData({
+      id: patient.id, // Include patient ID for photo upload
       first_name: patient.first_name || '',
       last_name: patient.last_name || '',
       birth_date: patient.birth_date || '',
@@ -192,6 +200,55 @@ const PatientInfo = () => {
       setError('');
     }
   }, [patientError]);
+
+
+  // Load patient photo when patient data changes
+  useEffect(() => {
+    const loadPatientPhoto = async () => {
+      if (patientData?.id) {
+        try {
+          logger.debug('photo_load_start', 'Loading patient photo', {
+            component: 'Patient-Info',
+            patientId: patientData.id
+          });
+
+          const photoInfo = await patientApi.getPhotoInfo(patientData.id);
+          logger.debug('photo_info_result', 'Photo info result', {
+            component: 'Patient-Info',
+            patientId: patientData.id,
+            hasPhoto: !!photoInfo
+          });
+
+          if (photoInfo) {
+            const photoUrl = await patientApi.getPhotoUrl(patientData.id);
+            logger.debug('photo_url_set', 'Setting photo URL', {
+              component: 'Patient-Info',
+              patientId: patientData.id,
+              hasPhotoUrl: !!photoUrl
+            });
+            setPhotoUrl(photoUrl);
+          } else {
+            logger.debug('photo_not_found', 'No photo found for patient', {
+              component: 'Patient-Info',
+              patientId: patientData.id
+            });
+            setPhotoUrl(null);
+          }
+        } catch (error) {
+          logger.error('photo_load_error', 'Failed to load patient photo', {
+            component: 'Patient-Info',
+            patientId: patientData.id,
+            error: error.message
+          });
+          setPhotoUrl(null);
+        }
+      } else {
+        setPhotoUrl(null);
+      }
+    };
+
+    loadPatientPhoto();
+  }, [patientData?.id]);
 
   // Form handlers
   const handleInputChange = e => {
@@ -334,6 +391,31 @@ const PatientInfo = () => {
               {/* Patient Summary Display */}
               {patientData ? (
                 <div className="patient-details">
+                  {/* Patient Photo and Name Header */}
+                  <Group align="center" mb="md" gap="lg">
+                    <Avatar
+                      src={photoUrl}
+                      size={100}
+                      radius="md"
+                      style={{
+                        border: '2px solid #e0e0e0',
+                        backgroundColor: '#f5f5f5',
+                      }}
+                    >
+                      {!photoUrl && (
+                        `${patientData.first_name?.[0] || ''}${patientData.last_name?.[0] || ''}`
+                      )}
+                    </Avatar>
+                    <Stack gap="xs">
+                      <Text size="xl" fw={600}>
+                        {patientData.first_name} {patientData.last_name}
+                      </Text>
+                      <Text size="sm" c="dimmed">
+                        Patient ID: {patientData.id}
+                      </Text>
+                    </Stack>
+                  </Group>
+
                   <div className="detail-row">
                     <div className="detail-group">
                       <label>First Name:</label>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Stack,
   Grid,
@@ -9,6 +9,7 @@ import {
   Group,
   Text,
   Textarea,
+  Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
@@ -19,6 +20,9 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+import PatientPhotoUpload from './PatientPhotoUpload';
+import patientApi from '../../services/api/patientApi';
+import logger from '../../services/logger';
 
 const MantinePatientForm = ({
   formData,
@@ -30,6 +34,73 @@ const MantinePatientForm = ({
   isCreating = false,
 }) => {
   const { unitSystem } = useUserPreferences();
+
+  // Photo state
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [photoKey, setPhotoKey] = useState(0); // Force re-render of photo component
+
+  // Load existing photo when form loads (for editing)
+  useEffect(() => {
+    const loadPhoto = async () => {
+      if (!isCreating && formData.id) {
+        try {
+          const hasPhoto = await patientApi.hasPhoto(formData.id);
+          if (hasPhoto) {
+            const photoUrl = await patientApi.getPhotoUrl(formData.id);
+            setPhotoUrl(photoUrl);
+          }
+        } catch (error) {
+          logger.debug('photo_load_error', 'Failed to load patient photo', {
+            component: 'MantinePatientForm',
+            patientId: formData.id,
+            error: error.message
+          });
+        }
+      }
+    };
+
+    loadPhoto();
+  }, [formData.id, isCreating]);
+
+  // Handle photo upload
+  const handlePhotoUpload = async (file) => {
+    if (!formData.id) {
+      throw new Error('Please save the patient first before uploading a photo');
+    }
+
+    try {
+      await patientApi.uploadPhoto(formData.id, file);
+      // Update photo URL after upload
+      const photoUrl = await patientApi.getPhotoUrl(formData.id);
+      setPhotoUrl(photoUrl);
+      setPhotoKey(prev => prev + 1); // Force component re-render
+    } catch (error) {
+      logger.error('photo_upload_error', 'Failed to upload photo in form', {
+        component: 'MantinePatientForm',
+        patientId: formData.id,
+        error: error.message
+      });
+      throw error;
+    }
+  };
+
+  // Handle photo deletion
+  const handlePhotoDelete = async () => {
+    if (!formData.id) return;
+
+    try {
+      await patientApi.deletePhoto(formData.id);
+      setPhotoUrl(null);
+      setPhotoKey(prev => prev + 1); // Force component re-render
+    } catch (error) {
+      logger.error('photo_delete_error', 'Failed to delete photo in form', {
+        component: 'MantinePatientForm',
+        patientId: formData.id,
+        error: error.message
+      });
+      throw error;
+    }
+  };
 
   // Get unit labels and validation ranges for current system
   const labels = unitLabels[unitSystem];
@@ -53,6 +124,31 @@ const MantinePatientForm = ({
       <Text size="lg" fw={600} mb="sm">
         {isCreating ? 'Create Patient Information' : 'Edit Patient Information'}
       </Text>
+
+      {/* Patient Photo Section */}
+      {!isCreating && formData.id && (
+        <>
+          <PatientPhotoUpload
+            key={photoKey}
+            patientId={formData.id}
+            currentPhotoUrl={photoUrl}
+            onPhotoChange={handlePhotoUpload}
+            onPhotoDelete={handlePhotoDelete}
+            disabled={saving}
+          />
+          <Divider />
+        </>
+      )}
+
+      {/* Show note for new patients */}
+      {isCreating && (
+        <>
+          <Text size="sm" c="dimmed" ta="center" style={{ fontStyle: 'italic' }}>
+            Save patient information first, then you can add a photo
+          </Text>
+          <Divider />
+        </>
+      )}
 
       {/* Basic Information */}
       <Grid>
