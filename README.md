@@ -185,8 +185,20 @@ http://localhost:8005
 
 ### Default Login
 
+On fresh installations, a default admin user is created:
 - Username: `admin`
-- Password: `admin123`
+- Password: `admin123` (default)
+
+**Customizing the Default Password:**
+
+You can set a custom default admin password for fresh installations using the `ADMIN_DEFAULT_PASSWORD` environment variable:
+
+```bash
+# Set in your .env file or as environment variable
+ADMIN_DEFAULT_PASSWORD=your_secure_password_here
+```
+
+**Note:** This only affects the initial admin user creation on fresh installations. It does not change passwords for existing users. Always change the default password after your first login.
 
 ## Backup and Restore
 

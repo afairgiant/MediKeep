@@ -173,11 +173,12 @@ def create_default_user():
 
         if admin_count == 0:
             # No admin users exist - create default admin
+            default_password = settings.ADMIN_DEFAULT_PASSWORD
             AuthService.create_user(
-                db, username="admin", password="admin123", is_superuser=True
+                db, username="admin", password=default_password, is_superuser=True
             )
             print("✅ Fresh installation detected - Default admin user created")
-            print("   Username: admin, Password: admin123")
+            print("   Username: admin")
             print("   🔐 Please change the default password after first login!")
         else:
             print(
