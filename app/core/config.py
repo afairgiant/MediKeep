@@ -89,6 +89,9 @@ class Settings:  # App Info
         os.getenv("ALLOW_USER_REGISTRATION", "True").lower() == "true"
     )  # Default: enabled to avoid lockout scenarios
 
+    # Default Admin Password Configuration
+    ADMIN_DEFAULT_PASSWORD: str = os.getenv("ADMIN_DEFAULT_PASSWORD", "admin123")
+
     # SSO Configuration (Simple and Right-Sized)
     SSO_ENABLED: bool = os.getenv("SSO_ENABLED", "False").lower() == "true"
     SSO_PROVIDER_TYPE: str = os.getenv("SSO_PROVIDER_TYPE", "oidc")
