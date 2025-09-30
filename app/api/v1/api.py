@@ -18,6 +18,7 @@ from app.api.v1.endpoints import (
     invitations,
     lab_result,
     lab_result_file,
+    lab_test_component,
     medication,
     paperless,
     patients,
@@ -56,6 +57,9 @@ api_router.include_router(
 )
 api_router.include_router(
     lab_result_file.router, prefix="/lab-result-files", tags=["lab-result-files"]
+)
+api_router.include_router(
+    lab_test_component.router, prefix="/lab-test-components", tags=["lab-test-components"]
 )
 api_router.include_router(
     entity_file.router, prefix="/entity-files", tags=["entity-files"]

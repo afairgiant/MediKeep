@@ -419,6 +419,11 @@ class LabResult(Base):
         "LabResultCondition", back_populates="lab_result", cascade="all, delete-orphan"
     )
 
+    # One-to-Many relationship with individual test components
+    test_components = orm_relationship(
+        "LabTestComponent", back_populates="lab_result", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (
         Index("idx_lab_results_patient_id", "patient_id"),
@@ -525,6 +530,59 @@ class LabResultCondition(Base):
     # Table Relationships
     lab_result = orm_relationship("LabResult", back_populates="condition_relationships")
     condition = orm_relationship("Condition", back_populates="lab_result_relationships")
+
+
+class LabTestComponent(Base):
+    """
+    Individual test components/values within a lab result.
+    Each LabResult can have multiple test components (WBC, RBC, Glucose, etc.).
+    Follows existing MediKeep model patterns exactly.
+    """
+    __tablename__ = "lab_test_components"
+
+    id = Column(Integer, primary_key=True)
+    lab_result_id = Column(Integer, ForeignKey("lab_results.id"), nullable=False)
+
+    # Test identification - following existing string patterns
+    test_name = Column(String, nullable=False)  # e.g., "White Blood Cell Count"
+    abbreviation = Column(String, nullable=True)  # e.g., "WBC"
+    test_code = Column(String, nullable=True)  # LOINC codes like existing models
+
+    # Test values - using Float like Vitals model
+    value = Column(Float, nullable=False)  # Numeric result
+    unit = Column(String, nullable=False)  # e.g., "K/uL", "mg/dL"
+
+    # Reference ranges - following Vitals pattern with min/max
+    ref_range_min = Column(Float, nullable=True)
+    ref_range_max = Column(Float, nullable=True)
+    ref_range_text = Column(String, nullable=True)  # For non-numeric ranges
+
+    # Status and organization - following existing status patterns
+    status = Column(String, nullable=True)  # normal, high, low, critical
+    category = Column(String, nullable=True)  # hematology, chemistry, etc.
+    display_order = Column(Integer, nullable=True)  # For consistent ordering
+
+    # Notes - using Text like other models
+    notes = Column(Text, nullable=True)
+
+    # Timestamps - EXACT pattern from all other models
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Relationships - following exact pattern from LabResultFile
+    lab_result = orm_relationship("LabResult", back_populates="test_components")
+
+    # Indexes - following exact naming pattern from other models
+    __table_args__ = (
+        Index("idx_lab_test_components_lab_result_id", "lab_result_id"),
+        Index("idx_lab_test_components_status", "status"),
+        Index("idx_lab_test_components_category", "category"),
+        # Compound indexes for common query patterns
+        Index("idx_lab_test_components_lab_result_status", "lab_result_id", "status"),
+        Index("idx_lab_test_components_lab_result_category", "lab_result_id", "category"),
+        Index("idx_lab_test_components_test_name_text", "test_name"),
+        Index("idx_lab_test_components_abbreviation_text", "abbreviation"),
+    )
 
 
 class ConditionMedication(Base):
