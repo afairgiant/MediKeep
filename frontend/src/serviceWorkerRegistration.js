@@ -38,7 +38,7 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
-      console.log('SW: Service worker registered successfully');
+      // console.log('SW: Service worker registered successfully');
 
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
@@ -48,12 +48,12 @@ function registerValidSW(swUrl, config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              console.log('SW: New content available, will refresh on next visit');
+              // console.log('SW: New content available, will refresh on next visit');
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
             } else {
-              console.log('SW: Content cached for offline use');
+              // console.log('SW: Content cached for offline use');
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
               }
@@ -63,7 +63,7 @@ function registerValidSW(swUrl, config) {
       };
     })
     .catch(error => {
-      console.error('SW: Service worker registration failed:', error);
+      // console.error('SW: Service worker registration failed:', error);
     });
 }
 
@@ -91,7 +91,7 @@ function checkValidServiceWorker(swUrl, config) {
       }
     })
     .catch(() => {
-      console.log('SW: No internet connection found. App is running in offline mode.');
+      // console.log('SW: No internet connection found. App is running in offline mode.');
     });
 }
 
@@ -100,10 +100,10 @@ export function unregister() {
     navigator.serviceWorker.ready
       .then(registration => {
         registration.unregister();
-        console.log('SW: Service worker unregistered');
+        // console.log('SW: Service worker unregistered');
       })
       .catch(error => {
-        console.error('SW: Service worker unregister failed:', error);
+        // console.error('SW: Service worker unregister failed:', error);
       });
   }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
+import TestComponentSummary from './TestComponentSummary';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
@@ -90,10 +91,10 @@ const LabResultCard = ({
         value: labResult.practitioner_id,
         render: (value) => {
           if (!value) return 'Not specified';
-          
+
           const practitionerName = practitioner?.name || `Practitioner ID: ${value}`;
           return (
-            <Text 
+            <Text
               size="sm"
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
@@ -104,7 +105,10 @@ const LabResultCard = ({
             </Text>
           );
         }
-      }
+      },
+      // NOTE: TestComponentSummary is NOT shown in the card to prevent infinite API calls
+      // Test components are only displayed in the LabResultViewModal's "Test Components" tab
+      // This design decision improves performance and user experience
     ];
 
     return (

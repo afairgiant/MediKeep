@@ -69,6 +69,14 @@ const RenderModeContent = memo(({
   }
 
   // Performance optimization: Memoized storage backend selector with auto-sync indicator
+  logger.debug('render_mode_content_storage_backend_check', 'Checking storage backend render', {
+    paperlessLoading,
+    selectedStorageBackend,
+    paperlessEnabled: paperlessSettings?.paperless_enabled,
+    mode,
+    component: 'RenderModeContent'
+  });
+
   const storageBackendSelector = !paperlessLoading && (
     <Stack gap="xs">
       <StorageBackendSelector
@@ -84,9 +92,9 @@ const RenderModeContent = memo(({
         size="sm"
       />
       {paperlessSettings?.paperless_auto_sync && (
-        <Badge 
-          size="xs" 
-          color="green" 
+        <Badge
+          size="xs"
+          color="green"
           variant="light"
           leftSection={<IconCheck size={10} />}
         >

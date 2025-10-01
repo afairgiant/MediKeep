@@ -875,9 +875,9 @@ const DocumentManager = ({
         });
 
         // Create a new error with the enhanced message
-        const enhancedError = new Error(errorMessage);
-        enhancedError.originalError = error;
-        throw enhancedError;
+        const uploadError = new Error(errorMessage);
+        uploadError.originalError = error;
+        throw uploadError;
       }
     });
 

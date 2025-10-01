@@ -55,7 +55,7 @@ def get_lab_test_components_by_lab_result(
     category: Optional[str] = Query(None, description="Filter by category"),
     status: Optional[str] = Query(None, description="Filter by status"),
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get all test components for a specific lab result."""
 
@@ -65,7 +65,7 @@ def get_lab_test_components_by_lab_result(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify patient access through the lab result
-        deps.verify_patient_access(db, current_user_id, db_lab_result.patient_id)
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Get components with optional filtering
         if category or status:
@@ -95,7 +95,7 @@ def get_lab_test_component(
     request: Request,
     component_id: int,
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get a specific test component by ID with related lab result data."""
 
@@ -108,7 +108,7 @@ def get_lab_test_component(
     assert db_component is not None
 
     # Verify patient access through the lab result
-    deps.verify_patient_access(db, current_user_id, db_component.lab_result.patient_id)
+    deps.verify_patient_access(db_component.lab_result.patient_id, db, current_user)
 
     # Convert to response format with lab result data
     result_dict = {
@@ -157,7 +157,7 @@ def create_lab_test_component(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify patient access
-        deps.verify_patient_access(db, current_user.id, db_lab_result.patient_id)
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Set the lab_result_id from the URL parameter
         lab_test_component_in.lab_result_id = lab_result_id
@@ -193,7 +193,7 @@ def create_lab_test_components_bulk(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify patient access
-        deps.verify_patient_access(db, current_user.id, db_lab_result.patient_id)
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Set the lab_result_id from the URL parameter
         bulk_data.lab_result_id = lab_result_id
@@ -284,7 +284,7 @@ def update_lab_test_component(
 
         # Verify patient access through the lab result
         db_lab_result = lab_result.get(db, db_component.lab_result_id)
-        deps.verify_patient_access(db, current_user.id, db_lab_result.patient_id)
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Update the component
         db_component = handle_update_with_logging(
@@ -318,7 +318,7 @@ def delete_lab_test_component(
 
         # Verify patient access through the lab result
         db_lab_result = lab_result.get(db, db_component.lab_result_id)
-        deps.verify_patient_access(db, current_user.id, db_lab_result.patient_id)
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Delete the component
         handle_delete_with_logging(
@@ -344,6 +344,7 @@ def search_lab_test_components(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ):
     """Search test components by name, abbreviation, or test code."""
@@ -356,7 +357,7 @@ def search_lab_test_components(
         if lab_result_id:
             db_lab_result = lab_result.get(db, lab_result_id)
             handle_not_found(db_lab_result, "Lab result", request)
-            deps.verify_patient_access(db, target_patient_id, db_lab_result.patient_id)
+            deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Search components with patient filter to avoid N+1 queries
         components = lab_test_component.search_components(
@@ -381,6 +382,7 @@ def get_abnormal_lab_test_components(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ):
     """Get all abnormal test results (high, low, critical, abnormal)."""
@@ -390,7 +392,7 @@ def get_abnormal_lab_test_components(
         if lab_result_id:
             db_lab_result = lab_result.get(db, lab_result_id)
             handle_not_found(db_lab_result, "Lab result", request)
-            deps.verify_patient_access(db, target_patient_id, db_lab_result.patient_id)
+            deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Get abnormal results with patient filter to avoid N+1 queries
         components = lab_test_component.get_abnormal_results(
@@ -410,7 +412,7 @@ def get_lab_test_component_statistics(
     request: Request,
     lab_result_id: int,
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get statistics for test components in a lab result."""
 
@@ -420,7 +422,7 @@ def get_lab_test_component_statistics(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify patient access
-        deps.verify_patient_access(db, current_user_id, db_lab_result.patient_id)
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Get statistics
         stats = lab_test_component.get_statistics_by_lab_result(db, lab_result_id=lab_result_id)

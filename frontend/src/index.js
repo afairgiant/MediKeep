@@ -22,11 +22,11 @@ if (process.env.NODE_ENV === 'production') {
     register({
       onUpdate: (registration) => {
         // New version available - could show toast notification
-        console.log('SW: New app version available');
+        // console.log('SW: New app version available');
       },
       onSuccess: (registration) => {
         // Content cached for offline use
-        console.log('SW: App ready for offline use');
+        // console.log('SW: App ready for offline use');
       }
     });
   });
