@@ -282,14 +282,80 @@ def sample_test_file():
     with tempfile.NamedTemporaryFile(mode='w+', suffix='.txt', delete=False) as f:
         f.write("This is a test file for lab results.")
         f.flush()
-        
+
         yield f.name
-        
+
         # Cleanup
         try:
             os.unlink(f.name)
         except OSError:
             pass
+
+
+# Patient Sharing Test Fixtures
+@pytest.fixture
+def test_recipient(db_session: Session) -> User:
+    """Create a second test user for patient sharing tests."""
+    user_data = UserCreate(
+        username="recipient",
+        email="recipient@example.com",
+        password="recipientpass123",
+        full_name="Recipient User",
+        role="user"
+    )
+    return user_crud.create(db_session, obj_in=user_data)
+
+
+@pytest.fixture
+def test_invitation(db_session: Session, test_user: User, test_recipient: User, test_patient: Patient):
+    """Create a pending patient share invitation."""
+    from app.models.models import Invitation
+    from app.core.datetime_utils import get_utc_now
+    from datetime import timedelta
+
+    invitation = Invitation(
+        sent_by_user_id=test_user.id,
+        sent_to_user_id=test_recipient.id,
+        invitation_type='patient_share',
+        status='pending',
+        title=f"Patient Share: {test_patient.first_name} {test_patient.last_name}",
+        context_data={
+            'patient_id': test_patient.id,
+            'patient_name': f"{test_patient.first_name} {test_patient.last_name}",
+            'patient_birth_date': test_patient.birth_date.isoformat() if test_patient.birth_date else None,
+            'permission_level': 'view'
+        },
+        expires_at=get_utc_now() + timedelta(days=7)
+    )
+    db_session.add(invitation)
+    db_session.commit()
+    db_session.refresh(invitation)
+    return invitation
+
+
+@pytest.fixture
+def test_share(db_session: Session, test_user: User, test_recipient: User, test_patient: Patient):
+    """Create an existing patient share."""
+    from app.models.models import PatientShare
+
+    share = PatientShare(
+        patient_id=test_patient.id,
+        shared_by_user_id=test_user.id,
+        shared_with_user_id=test_recipient.id,
+        permission_level='view',
+        is_active=True
+    )
+    db_session.add(share)
+    db_session.commit()
+    db_session.refresh(share)
+    return share
+
+
+@pytest.fixture
+def recipient_token_headers(test_recipient: User) -> dict[str, str]:
+    """Create authentication headers for recipient user."""
+    access_token = create_access_token(subject=test_recipient.id)
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 # Mocking utilities

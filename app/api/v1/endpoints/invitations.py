@@ -4,13 +4,15 @@ API endpoints for invitation management
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import exc as sa
 from typing import List, Optional
 
 from app.core.database import get_db
-from app.models.models import User
+from app.models.models import User, PatientShare
 from app.api.deps import get_current_user
 from app.services.invitation_service import InvitationService
 from app.services.family_history_sharing import FamilyHistoryService
+from app.services.patient_sharing import PatientSharingService
 from app.schemas.invitations import (
     InvitationCreate,
     InvitationResponse,
@@ -18,6 +20,7 @@ from app.schemas.invitations import (
     InvitationSummary
 )
 from app.core.logging_config import get_logger
+from datetime import datetime
 
 logger = get_logger(__name__, "app")
 router = APIRouter()
@@ -192,8 +195,173 @@ def respond_to_invitation(
                         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                         detail="An unexpected error occurred while accepting the family history sharing invitation. Please try again or contact support."
                     )
-        
-        # For all other cases (reject, or non-family-history accepts)
+
+            # Handle patient share invitations
+            elif invitation and invitation.invitation_type == 'patient_share':
+                try:
+                    patient_service = PatientSharingService(db)
+
+                    # Check if bulk invitation
+                    if invitation.context_data.get('is_bulk_invite', False):
+                        # Handle bulk - create multiple shares
+                        patients_data = invitation.context_data.get('patients', [])
+                        if not patients_data:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Invalid bulk invitation context data"
+                            )
+
+                        # Use explicit transaction boundary for atomic bulk operation
+                        try:
+                            shares = []
+                            for patient_data in patients_data:
+                                patient_id = patient_data.get('patient_id')
+                                if not patient_id:
+                                    logger.warning(f"Skipping patient data without ID: {patient_data}")
+                                    continue
+
+                                # Verify patient still exists and sender still owns it
+                                from app.models.models import Patient
+                                patient = db.query(Patient).filter(
+                                    Patient.id == patient_id,
+                                    Patient.owner_user_id == invitation.sent_by_user_id
+                                ).first()
+
+                                if not patient:
+                                    logger.warning("Patient no longer exists or ownership changed", extra={
+                                        "patient_id": patient_id,
+                                        "sender_id": invitation.sent_by_user_id,
+                                        "component": "invitations"
+                                    })
+                                    continue  # Skip this patient in bulk operation
+
+                                # Check if share already exists
+                                existing = db.query(PatientShare).filter(
+                                    PatientShare.patient_id == patient_id,
+                                    PatientShare.shared_with_user_id == current_user.id,
+                                    PatientShare.is_active == True
+                                ).first()
+
+                                if existing:
+                                    logger.info(f"Share already exists for patient {patient_id}, using existing")
+                                    shares.append(existing)
+                                    continue
+
+                                # Extract context data for this patient
+                                permission_level = invitation.context_data.get('permission_level', 'view')
+                                custom_permissions = invitation.context_data.get('custom_permissions')
+                                expires_at_str = invitation.context_data.get('expires_at')
+
+                                expires_at = None
+                                if expires_at_str:
+                                    try:
+                                        expires_at = datetime.fromisoformat(expires_at_str)
+                                    except ValueError:
+                                        pass
+
+                                # Create share
+                                share = PatientShare(
+                                    patient_id=patient_id,
+                                    shared_by_user_id=invitation.sent_by_user_id,
+                                    shared_with_user_id=current_user.id,
+                                    permission_level=permission_level,
+                                    custom_permissions=custom_permissions,
+                                    expires_at=expires_at,
+                                    is_active=True,
+                                    invitation_id=invitation.id
+                                )
+                                db.add(share)
+                                shares.append(share)
+
+                            # Update invitation status within same transaction
+                            invitation.status = 'accepted'
+                            invitation.responded_at = get_utc_now()
+                            if response_data.response_note:
+                                invitation.response_note = response_data.response_note
+                            invitation.updated_at = get_utc_now()
+
+                            # Flush to validate constraints before commit
+                            db.flush()
+
+                            # Commit all changes atomically
+                            db.commit()
+
+                        except sa.exc.IntegrityError as e:
+                            db.rollback()
+                            logger.error("Database constraint violation during bulk acceptance", extra={
+                                "invitation_id": invitation_id,
+                                "user_id": current_user.id,
+                                "error": str(e),
+                                "component": "invitations"
+                            })
+                            raise HTTPException(
+                                status_code=status.HTTP_409_CONFLICT,
+                                detail="Database constraint violation during bulk acceptance"
+                            )
+                        except Exception as e:
+                            db.rollback()
+                            logger.error("Failed to commit bulk invitation acceptance", extra={
+                                "invitation_id": invitation_id,
+                                "user_id": current_user.id,
+                                "error": str(e),
+                                "component": "invitations"
+                            })
+                            raise
+
+                        logger.info(f"Created {len(shares)} patient shares from bulk invitation {invitation.id}")
+
+                        return {
+                            "message": f"Successfully accepted patient share for {len(shares)} patients",
+                            "invitation_id": invitation.id,
+                            "share_ids": [s.id for s in shares],
+                            "share_count": len(shares),
+                            "status": "accepted"
+                        }
+                    else:
+                        # Single invitation
+                        share = patient_service.accept_patient_share_invitation(
+                            current_user,
+                            invitation_id,
+                            response_data.response_note
+                        )
+
+                        patient_name = invitation.context_data.get('patient_name', 'patient')
+                        return {
+                            "message": f"Successfully accepted patient share for {patient_name}",
+                            "invitation_id": invitation.id,
+                            "share_id": share.id,
+                            "status": "accepted"
+                        }
+                except ValueError as ve:
+                    error_msg = str(ve)
+                    if "not found" in error_msg.lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="The invitation or patient record could not be found"
+                        )
+                    elif "expired" in error_msg.lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="This invitation has expired and can no longer be accepted"
+                        )
+                    elif "already shared" in error_msg.lower():
+                        raise HTTPException(
+                            status_code=status.HTTP_409_CONFLICT,
+                            detail="This patient is already shared with you"
+                        )
+                    else:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Unable to accept patient share: {error_msg}"
+                        )
+                except Exception as e:
+                    logger.error(f"Unexpected error accepting patient share invitation {invitation_id}: {e}")
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="An unexpected error occurred while accepting the patient share invitation"
+                    )
+
+        # For all other cases (reject, or non-special-type accepts)
         invitation_service = InvitationService(db)
         invitation = invitation_service.respond_to_invitation(
             current_user, 
@@ -283,37 +451,44 @@ def revoke_invitation(
 ):
     """Revoke an accepted invitation (specifically for family history shares)"""
     try:
-        logger.info(f"DEBUG: Revoke request for invitation {invitation_id} by user {current_user.id}")
+        logger.info("Invitation revoke request received", extra={
+            "invitation_id": invitation_id,
+            "user_id": current_user.id,
+            "component": "invitations"
+        })
         
         # Get the invitation first
         invitation_service = InvitationService(db)
         invitation = invitation_service.get_invitation_by_id(invitation_id)
         
         if not invitation:
-            logger.info(f"DEBUG: Invitation {invitation_id} not found")
+            logger.warning("Invitation not found for revoke request", extra={
+                "invitation_id": invitation_id,
+                "component": "invitations"
+            })
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Invitation not found"
             )
-        
-        logger.info(f"DEBUG: Found invitation {invitation_id} - sent_by={invitation.sent_by_user_id}, current_user={current_user.id}")
-        
+
         # Verify the user owns this invitation
         if invitation.sent_by_user_id != current_user.id:
-            logger.info(f"DEBUG: Authorization failed - invitation sent by {invitation.sent_by_user_id}, current user is {current_user.id}")
+            logger.warning("Unauthorized revoke attempt", extra={
+                "invitation_id": invitation_id,
+                "invitation_owner_id": invitation.sent_by_user_id,
+                "requesting_user_id": current_user.id,
+                "component": "invitations"
+            })
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to revoke this invitation"
             )
-        
-        # Handle family history share revocation  
-        logger.info(f"DEBUG: Checking invitation {invitation_id} - type={invitation.invitation_type}, status={invitation.status}")
+
+        # Handle family history share revocation
         if invitation.invitation_type == 'family_history_share' and invitation.status == 'accepted':
             family_service = FamilyHistoryService(db)
             shared_with_user_id = invitation.sent_to_user_id
-            
-            logger.info(f"DEBUG: Revoking invitation {invitation_id} - shared_with_user_id={shared_with_user_id}, context_data={invitation.context_data}")
-            
+
             # Check if this is a bulk invitation
             if invitation.context_data.get('is_bulk_invite', False):
                 # Handle bulk invitation - revoke all shares

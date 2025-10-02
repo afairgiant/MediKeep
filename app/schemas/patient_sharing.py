@@ -1,0 +1,80 @@
+"""
+Pydantic schemas for patient sharing invitations
+"""
+
+from typing import Optional, List, Dict
+from datetime import datetime
+from pydantic import BaseModel, Field, validator
+
+
+class PatientShareInvitationRequest(BaseModel):
+    """Request schema for sending patient share invitation"""
+
+    patient_id: int = Field(..., gt=0, le=2147483647, description="ID of patient to share")
+    shared_with_user_identifier: str = Field(..., min_length=1, max_length=255, description="Username or email of recipient")
+    permission_level: str = Field(default='view', description="Permission level: view, edit, or full")
+    expires_at: Optional[datetime] = Field(None, description="Optional share expiration date")
+    custom_permissions: Optional[Dict] = Field(None, description="Optional custom permissions")
+    message: Optional[str] = Field(None, max_length=1000, description="Optional message to recipient")
+    expires_hours: Optional[int] = Field(168, ge=1, le=8760, description="Hours until invitation expires (1 hour to 1 year)")
+
+    @validator('patient_id')
+    def validate_patient_id(cls, v):
+        # Additional bounds check for reasonable IDs
+        if v > 100000000:
+            raise ValueError('Patient ID exceeds reasonable bounds')
+        return v
+
+    @validator('shared_with_user_identifier')
+    def validate_identifier(cls, v):
+        v = v.strip()
+        if len(v) == 0:
+            raise ValueError('Recipient identifier cannot be empty')
+        return v
+
+    @validator('permission_level')
+    def validate_permission_level(cls, v):
+        valid_levels = ['view', 'edit', 'full']
+        if v not in valid_levels:
+            raise ValueError(f'Permission level must be one of: {valid_levels}')
+        return v
+
+
+class PatientShareBulkInvitationRequest(BaseModel):
+    """Request schema for sending bulk patient share invitation"""
+
+    patient_ids: List[int] = Field(..., description="List of patient IDs to share")
+    shared_with_user_identifier: str = Field(..., min_length=1, max_length=255, description="Username or email of recipient")
+    permission_level: str = Field(default='view', description="Permission level: view, edit, or full")
+    expires_at: Optional[datetime] = Field(None, description="Optional share expiration date")
+    custom_permissions: Optional[Dict] = Field(None, description="Optional custom permissions")
+    message: Optional[str] = Field(None, max_length=1000, description="Optional message to recipient")
+    expires_hours: Optional[int] = Field(168, ge=1, le=8760, description="Hours until invitation expires (1 hour to 1 year)")
+
+    @validator('patient_ids')
+    def validate_patient_ids(cls, v):
+        if not v or len(v) == 0:
+            raise ValueError('At least one patient_id required')
+        if len(v) > 50:  # Limit based on reasonable batch size
+            raise ValueError('Cannot share more than 50 patients at once')
+        # Validate all IDs are positive integers within bounds
+        if not all(isinstance(pid, int) and pid > 0 and pid <= 2147483647 for pid in v):
+            raise ValueError('All patient IDs must be positive integers within valid range')
+        # Additional check for reasonable ID values
+        if any(pid > 100000000 for pid in v):
+            raise ValueError('One or more patient IDs exceed reasonable bounds')
+        return v
+
+    @validator('shared_with_user_identifier')
+    def validate_identifier(cls, v):
+        v = v.strip()
+        if len(v) == 0:
+            raise ValueError('Recipient identifier cannot be empty')
+        return v
+
+    @validator('permission_level')
+    def validate_permission_level(cls, v):
+        valid_levels = ['view', 'edit', 'full']
+        if v not in valid_levels:
+            raise ValueError(f'Permission level must be one of: {valid_levels}')
+        return v

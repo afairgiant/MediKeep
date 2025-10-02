@@ -13,6 +13,18 @@ from app.core.logging_config import get_logger
 from app.services.patient_sharing import PatientSharingService
 from app.services.patient_access import PatientAccessService
 from app.models.models import User, PatientShare
+from app.schemas.patient_sharing import (
+    PatientShareInvitationRequest,
+    PatientShareBulkInvitationRequest
+)
+from app.exceptions.patient_sharing import (
+    PatientNotFoundError,
+    AlreadySharedError,
+    PendingInvitationError,
+    RecipientNotFoundError,
+    InvalidPermissionLevelError,
+    ShareNotFoundError,
+)
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
@@ -107,89 +119,169 @@ class RevokeShareRequest(BaseModel):
     shared_with_user_id: int = Field(..., description="ID of the user to revoke access from")
 
 
-@router.post("/", response_model=ShareResponse)
-def share_patient(
+@router.post("/", response_model=dict)
+def send_patient_share_invitation(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    share_request: SharePatientRequest,
+    invitation_request: PatientShareInvitationRequest,
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
-    Share a patient with another user.
-    
+    Send invitation to share patient record
+
+    CHANGED: Now creates invitation instead of direct share
     The current user must own the patient to share it.
     """
     user_ip = request.client.host if request.client else "unknown"
-    
+
     try:
-        # Resolve username/email to user ID
-        user_identifier = share_request.shared_with_user_identifier.strip()
-        target_user = None
-        
-        # Try to find by username first
-        target_user = db.query(User).filter(User.username == user_identifier).first()
-        
-        # If not found by username, try by email
-        if not target_user:
-            target_user = db.query(User).filter(User.email == user_identifier).first()
-        
-        if not target_user:
-            raise HTTPException(
-                status_code=404, 
-                detail=f"User not found with username or email: {user_identifier}"
-            )
-        
         service = PatientSharingService(db)
-        share = service.share_patient(
+        invitation = service.send_patient_share_invitation(
             owner=current_user,
-            patient_id=share_request.patient_id,
-            shared_with_user_id=target_user.id,
-            permission_level=share_request.permission_level,
-            expires_at=share_request.expires_at,
-            custom_permissions=share_request.custom_permissions
+            patient_id=invitation_request.patient_id,
+            shared_with_identifier=invitation_request.shared_with_user_identifier,
+            permission_level=invitation_request.permission_level,
+            expires_at=invitation_request.expires_at,
+            custom_permissions=invitation_request.custom_permissions,
+            message=invitation_request.message,
+            expires_hours=invitation_request.expires_hours
         )
-        
+
         logger.info(
-            f"User {current_user.id} shared patient {share_request.patient_id} with user {target_user.id} ({user_identifier})",
+            f"User {current_user.id} sent patient share invitation",
             extra={
                 "category": "app",
-                "event": "patient_shared",
+                "event": "patient_share_invitation_sent",
                 "user_id": current_user.id,
-                "patient_id": share_request.patient_id,
-                "shared_with_user_id": target_user.id,
-                "shared_with_identifier": user_identifier,
-                "permission_level": share_request.permission_level,
-                "share_id": share.id,
+                "patient_id": invitation_request.patient_id,
+                "shared_with_identifier": invitation_request.shared_with_user_identifier,
+                "invitation_id": invitation.id,
                 "ip": user_ip,
             }
         )
-        
-        return ShareResponse.from_orm(share)
-        
+
+        return {
+            "message": "Patient share invitation sent successfully",
+            "invitation_id": invitation.id,
+            "expires_at": invitation.expires_at,
+            "title": invitation.title
+        }
+
     except HTTPException:
-        # Re-raise HTTPExceptions as-is
         raise
+    except PatientNotFoundError as e:
+        logger.warning(f"Patient not found: {str(e)}", extra={
+            "user_id": current_user.id,
+            "patient_id": invitation_request.patient_id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=404, detail="Patient record not found or you don't have permission to share it")
+    except RecipientNotFoundError as e:
+        logger.warning(f"Recipient not found: {str(e)}", extra={
+            "user_id": current_user.id,
+            "recipient": invitation_request.shared_with_user_identifier,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=404, detail=f"User '{invitation_request.shared_with_user_identifier}' not found")
+    except AlreadySharedError as e:
+        logger.info(f"Patient already shared: {str(e)}", extra={
+            "user_id": current_user.id,
+            "patient_id": invitation_request.patient_id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=409, detail="This patient is already shared with the specified user")
+    except PendingInvitationError as e:
+        logger.info(f"Pending invitation exists: {str(e)}", extra={
+            "user_id": current_user.id,
+            "patient_id": invitation_request.patient_id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=409, detail="A pending invitation already exists for this patient and user")
+    except InvalidPermissionLevelError as e:
+        logger.warning(f"Invalid permission level: {str(e)}", extra={
+            "user_id": current_user.id,
+            "permission_level": invitation_request.permission_level,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(
-            f"Failed to share patient {share_request.patient_id} for user {current_user.id}: {str(e)}",
+            f"Unexpected error sending patient share invitation: {str(e)}",
             extra={
                 "category": "app",
-                "event": "patient_sharing_failed",
+                "event": "patient_share_invitation_failed",
                 "user_id": current_user.id,
-                "patient_id": share_request.patient_id,
-                "shared_with_identifier": share_request.shared_with_user_identifier,
+                "patient_id": invitation_request.patient_id,
                 "error": str(e),
                 "ip": user_ip,
             }
         )
-        
+        raise HTTPException(status_code=500, detail="Unable to send invitation. Please try again or contact support.")
+
+
+@router.post("/bulk-invite", response_model=dict)
+def bulk_send_patient_share_invitations(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    bulk_request: PatientShareBulkInvitationRequest,
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Send bulk patient share invitation (multiple patients to one user)
+
+    The current user must own all patients to share them.
+    """
+    user_ip = request.client.host if request.client else "unknown"
+
+    try:
+        service = PatientSharingService(db)
+        result = service.bulk_send_patient_share_invitations(
+            owner=current_user,
+            patient_ids=bulk_request.patient_ids,
+            shared_with_identifier=bulk_request.shared_with_user_identifier,
+            permission_level=bulk_request.permission_level,
+            expires_at=bulk_request.expires_at,
+            custom_permissions=bulk_request.custom_permissions,
+            message=bulk_request.message,
+            expires_hours=bulk_request.expires_hours
+        )
+
+        logger.info(
+            f"User {current_user.id} sent bulk patient share invitation",
+            extra={
+                "category": "app",
+                "event": "bulk_patient_share_invitation_sent",
+                "user_id": current_user.id,
+                "patient_count": len(bulk_request.patient_ids),
+                "invitation_id": result.get("invitation_id"),
+                "ip": user_ip,
+            }
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to send bulk patient share invitation: {str(e)}",
+            extra={
+                "category": "app",
+                "event": "bulk_patient_share_invitation_failed",
+                "user_id": current_user.id,
+                "error": str(e),
+                "ip": user_ip,
+            }
+        )
+
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=str(e))
-        elif "already shared" in str(e).lower() or "cannot share" in str(e).lower():
+        elif "already shared" in str(e).lower():
             raise HTTPException(status_code=400, detail=str(e))
         else:
-            raise HTTPException(status_code=500, detail="Failed to share patient")
+            raise HTTPException(status_code=500, detail="Failed to send bulk invitation")
 
 
 @router.delete("/remove-my-access/{patient_id}", response_model=dict)

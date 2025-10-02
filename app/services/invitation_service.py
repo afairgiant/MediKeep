@@ -66,8 +66,13 @@ class InvitationService:
                 context_data=context_data,
                 expires_at=expires_at
             )
-            
-            logger.info(f"DEBUG: About to create invitation: {invitation_type} from {sent_by_user.id} to {sent_to_user.id}")
+
+            logger.info("Creating invitation", extra={
+                "invitation_type": invitation_type,
+                "sent_by_user_id": sent_by_user.id,
+                "sent_to_user_id": sent_to_user.id,
+                "component": "invitation_service"
+            })
             self.db.add(invitation)
             self.db.commit()
             self.db.refresh(invitation)  # Refresh to get the ID

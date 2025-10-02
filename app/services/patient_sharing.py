@@ -2,21 +2,36 @@
 Patient Sharing Service - Individual patient sharing functionality
 """
 
-from typing import List, Optional
-from datetime import datetime, timedelta
+from typing import List, Optional, Dict
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_, cast
+import sqlalchemy as sa
 
-from app.models.models import User, Patient, PatientShare
+from app.models.models import User, Patient, PatientShare, Invitation
 from app.core.datetime_utils import get_utc_now
 from app.core.logging_config import get_logger
+from app.services.invitation_service import InvitationService
+from app.exceptions.patient_sharing import (
+    PatientNotFoundError,
+    AlreadySharedError,
+    PendingInvitationError,
+    RecipientNotFoundError,
+    InvalidPermissionLevelError,
+    ShareNotFoundError,
+)
 
 logger = get_logger(__name__, "app")
+
+# Configuration constants for bulk operations
+MAX_BULK_PATIENTS = 50  # Maximum patients in single bulk operation
+BULK_OPERATION_TIMEOUT_SECONDS = 30  # Query timeout for bulk operations
 
 
 class PatientSharingService:
     """Service for managing individual patient sharing"""
-    
+
     def __init__(self, db: Session):
         self.db = db
     
@@ -48,22 +63,22 @@ class PatientSharingService:
         # Validate permission level
         valid_permissions = ['view', 'edit', 'full']
         if permission_level not in valid_permissions:
-            raise ValueError(f"Invalid permission level. Must be one of: {valid_permissions}")
-        
+            raise InvalidPermissionLevelError(f"Invalid permission level. Must be one of: {valid_permissions}")
+
         # Verify patient ownership
         patient = self.db.query(Patient).filter(
             Patient.id == patient_id,
             Patient.owner_user_id == owner.id
         ).first()
-        
+
         if not patient:
-            raise ValueError("Patient not found or not owned by user")
-        
+            raise PatientNotFoundError("Patient not found or not owned by user")
+
         # Verify target user exists
         target_user = self.db.query(User).filter(User.id == shared_with_user_id).first()
         if not target_user:
-            raise ValueError("Target user not found")
-        
+            raise RecipientNotFoundError("Target user not found")
+
         # Check if user is trying to share with themselves
         if owner.id == shared_with_user_id:
             raise ValueError("Cannot share patient with yourself")
@@ -76,7 +91,7 @@ class PatientSharingService:
         
         if existing_share:
             if existing_share.is_active:
-                raise ValueError("Patient is already shared with this user")
+                raise AlreadySharedError("Patient is already shared with this user")
             else:
                 # Reactivate existing share
                 existing_share.is_active = True
@@ -114,40 +129,53 @@ class PatientSharingService:
     def revoke_patient_share(self, owner: User, patient_id: int, shared_with_user_id: int) -> bool:
         """
         Revoke patient sharing access
-        
+        NOW: Also updates invitation status to 'revoked' if invitation exists
+
         Args:
             owner: The user who owns the patient
             patient_id: ID of the patient
             shared_with_user_id: ID of the user to revoke access from
-            
+
         Returns:
             True if share was revoked, False if no share existed
         """
         logger.info(f"User {owner.id} revoking patient {patient_id} access from user {shared_with_user_id}")
-        
+
         # Verify ownership
         patient = self.db.query(Patient).filter(
             Patient.id == patient_id,
             Patient.owner_user_id == owner.id
         ).first()
-        
+
         if not patient:
             raise ValueError("Patient not found or not owned by user")
-        
+
         # Find and deactivate share
         share = self.db.query(PatientShare).filter(
             PatientShare.patient_id == patient_id,
             PatientShare.shared_with_user_id == shared_with_user_id,
             PatientShare.is_active == True
         ).first()
-        
+
         if not share:
             logger.info("No active share found to revoke")
             return False
-        
+
         share.is_active = False
+
+        # NEW: Update invitation status if it exists
+        if share.invitation_id:
+            invitation = self.db.query(Invitation).filter(
+                Invitation.id == share.invitation_id
+            ).first()
+
+            if invitation and invitation.status == 'accepted':
+                invitation.status = 'revoked'
+                invitation.updated_at = get_utc_now()
+                logger.info(f"Updated invitation {invitation.id} status to 'revoked'")
+
         self.db.commit()
-        
+
         logger.info(f"Revoked patient share {share.id}")
         return True
     
@@ -329,6 +357,372 @@ class PatientSharingService:
         # Deactivate the share
         share.is_active = False
         self.db.commit()
-        
+
         logger.info(f"Removed user {user.id} access to patient {patient_id} (share {share.id})")
         return True
+
+    def send_patient_share_invitation(
+        self,
+        owner: User,
+        patient_id: int,
+        shared_with_identifier: str,
+        permission_level: str,
+        expires_at: Optional[datetime] = None,
+        custom_permissions: Optional[dict] = None,
+        message: Optional[str] = None,
+        expires_hours: Optional[int] = 168
+    ) -> Invitation:
+        """
+        Send invitation to share patient record
+
+        Args:
+            owner: User who owns the patient
+            patient_id: ID of patient to share
+            shared_with_identifier: Username or email of recipient
+            permission_level: 'view', 'edit', or 'full'
+            expires_at: Optional share expiration date
+            custom_permissions: Optional custom permissions dict
+            message: Optional message to recipient
+            expires_hours: Hours until invitation expires (default: 7 days)
+
+        Returns:
+            Created Invitation object
+
+        Raises:
+            ValueError: If validation fails
+        """
+        logger.info(f"User {owner.id} sending patient share invitation for patient {patient_id}")
+
+        # Validate permission level
+        valid_permissions = ['view', 'edit', 'full']
+        if permission_level not in valid_permissions:
+            raise ValueError(f"Invalid permission level. Must be one of: {valid_permissions}")
+
+        # Verify patient ownership
+        patient = self.db.query(Patient).filter(
+            Patient.id == patient_id,
+            Patient.owner_user_id == owner.id
+        ).first()
+
+        if not patient:
+            raise ValueError("Patient not found or not owned by user")
+
+        # Find recipient user
+        recipient = self.db.query(User).filter(
+            or_(User.username == shared_with_identifier,
+                User.email == shared_with_identifier)
+        ).first()
+
+        if not recipient:
+            raise ValueError("Recipient user not found")
+
+        if recipient.id == owner.id:
+            raise ValueError("Cannot share patient with yourself")
+
+        # Check for existing active shares
+        existing_share = self.db.query(PatientShare).filter(
+            PatientShare.patient_id == patient_id,
+            PatientShare.shared_with_user_id == recipient.id,
+            PatientShare.is_active == True
+        ).first()
+
+        if existing_share:
+            raise AlreadySharedError("Patient already shared with this user")
+
+        # Check for existing pending invitations using database-level JSONB filtering
+        existing_invitation = self.db.query(Invitation).filter(
+            Invitation.invitation_type == 'patient_share',
+            Invitation.sent_by_user_id == owner.id,
+            Invitation.sent_to_user_id == recipient.id,
+            Invitation.status == 'pending',
+            Invitation.context_data['patient_id'].astext.cast(sa.Integer) == patient_id
+        ).first()
+
+        if existing_invitation:
+            raise PendingInvitationError("Pending invitation already exists for this patient and user")
+
+        # Build context data
+        context_data = {
+            "patient_id": patient_id,
+            "patient_name": f"{patient.first_name} {patient.last_name}",
+            "patient_birth_date": patient.birth_date.isoformat() if patient.birth_date else None,
+            "permission_level": permission_level,
+            "custom_permissions": custom_permissions,
+            "expires_at": expires_at.isoformat() if expires_at else None
+        }
+
+        # Create invitation title
+        title = f"Patient Record Share: {patient.first_name} {patient.last_name}"
+
+        # Create invitation using InvitationService
+        invitation_service = InvitationService(self.db)
+        invitation = invitation_service.create_invitation(
+            sent_by_user=owner,
+            sent_to_identifier=shared_with_identifier,
+            invitation_type='patient_share',
+            title=title,
+            context_data=context_data,
+            message=message,
+            expires_hours=expires_hours
+        )
+
+        logger.info(f"Created patient share invitation {invitation.id}")
+        return invitation
+
+    def accept_patient_share_invitation(
+        self,
+        user: User,
+        invitation_id: int,
+        response_note: Optional[str] = None
+    ) -> PatientShare:
+        """
+        Accept patient share invitation and create PatientShare
+
+        Args:
+            user: User accepting the invitation
+            invitation_id: ID of invitation to accept
+            response_note: Optional response note
+
+        Returns:
+            Created PatientShare object
+
+        Raises:
+            ValueError: If invitation invalid or expired
+        """
+        logger.info(f"User {user.id} accepting patient share invitation {invitation_id}")
+
+        # Get invitation
+        invitation = self.db.query(Invitation).filter(
+            Invitation.id == invitation_id,
+            Invitation.sent_to_user_id == user.id,
+            Invitation.status == 'pending',
+            Invitation.invitation_type == 'patient_share'
+        ).first()
+
+        if not invitation:
+            raise ValueError("Invitation not found or not pending")
+
+        # Check expiration
+        if invitation.expires_at:
+            now = get_utc_now()
+            expires_at = invitation.expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at < now:
+                invitation.status = 'expired'
+                self.db.commit()
+                raise ValueError("Invitation has expired")
+
+        # Extract context data
+        context = invitation.context_data
+        patient_id = context.get('patient_id')
+        permission_level = context.get('permission_level', 'view')
+        custom_permissions = context.get('custom_permissions')
+        expires_at_str = context.get('expires_at')
+
+        if not patient_id:
+            raise ValueError("Invalid invitation: missing patient_id")
+
+        # Parse expires_at from context
+        expires_at = None
+        if expires_at_str:
+            try:
+                expires_at = datetime.fromisoformat(expires_at_str)
+            except ValueError:
+                logger.warning(f"Invalid expires_at format in invitation {invitation_id}: {expires_at_str}")
+
+        # Attempt to create share - use try/except to handle race conditions
+        # This prevents duplicate shares even if two requests arrive simultaneously
+        try:
+            share = PatientShare(
+                patient_id=patient_id,
+                shared_by_user_id=invitation.sent_by_user_id,
+                shared_with_user_id=user.id,
+                permission_level=permission_level,
+                custom_permissions=custom_permissions,
+                expires_at=expires_at,
+                is_active=True,
+                invitation_id=invitation.id
+            )
+
+            self.db.add(share)
+
+            # Update invitation status
+            invitation.status = 'accepted'
+            invitation.responded_at = get_utc_now()
+            invitation.response_note = response_note
+            invitation.updated_at = get_utc_now()
+
+            # Flush to validate constraints before commit
+            self.db.flush()
+
+            # Commit both share and invitation update
+            self.db.commit()
+            self.db.refresh(share)
+
+            logger.info(f"Created patient share {share.id} from invitation {invitation.id}")
+            return share
+
+        except IntegrityError as e:
+            # Race condition: share was created by another request
+            self.db.rollback()
+            logger.info(f"Share already exists (race condition detected) for patient {patient_id}, user {user.id}")
+
+            # Get the existing share
+            existing_share = self.db.query(PatientShare).filter(
+                PatientShare.patient_id == patient_id,
+                PatientShare.shared_with_user_id == user.id,
+                PatientShare.is_active == True
+            ).first()
+
+            if existing_share:
+                # Update invitation status separately
+                invitation.status = 'accepted'
+                invitation.responded_at = get_utc_now()
+                invitation.response_note = response_note
+                invitation.updated_at = get_utc_now()
+                self.db.commit()
+                return existing_share
+            else:
+                # Unexpected: constraint violation but no existing share found
+                logger.error(f"IntegrityError but no existing share found: {str(e)}")
+                raise
+
+    def bulk_send_patient_share_invitations(
+        self,
+        owner: User,
+        patient_ids: List[int],
+        shared_with_identifier: str,
+        permission_level: str = 'view',
+        expires_at: Optional[datetime] = None,
+        custom_permissions: Optional[dict] = None,
+        message: Optional[str] = None,
+        expires_hours: Optional[int] = 168
+    ) -> Dict:
+        """
+        Send ONE invitation to share multiple patients
+
+        Args:
+            owner: User who owns the patients
+            patient_ids: List of patient IDs to share
+            shared_with_identifier: Username or email of recipient
+            permission_level: Permission level for all patients
+            expires_at: Optional share expiration
+            custom_permissions: Optional custom permissions
+            message: Optional message to recipient
+            expires_hours: Hours until invitation expires
+
+        Returns:
+            Dict with invitation details and counts
+
+        Raises:
+            ValueError: If validation fails
+        """
+        logger.info(f"User {owner.id} sending bulk patient share invitation for {len(patient_ids)} patients")
+
+        # Validate permission level
+        valid_permissions = ['view', 'edit', 'full']
+        if permission_level not in valid_permissions:
+            raise ValueError(f"Invalid permission level. Must be one of: {valid_permissions}")
+
+        # Set statement timeout for bulk operation to prevent long-running queries
+        # Note: This uses PostgreSQL-specific syntax. For other databases, adjust accordingly.
+        try:
+            self.db.execute(sa.text(f"SET LOCAL statement_timeout = '{BULK_OPERATION_TIMEOUT_SECONDS}s'"))
+        except Exception as e:
+            logger.warning("Failed to set query timeout", extra={
+                "error": str(e),
+                "component": "patient_sharing"
+            })
+
+        # Batch fetch all patients owned by the user
+        patients = self.db.query(Patient).filter(
+            Patient.id.in_(patient_ids),
+            Patient.owner_user_id == owner.id
+        ).all()
+
+        # Verify all patient IDs were found
+        found_patient_ids = {patient.id for patient in patients}
+        missing_ids = set(patient_ids) - found_patient_ids
+        if missing_ids:
+            raise ValueError(f"Patients not found or not owned by user: {', '.join(map(str, missing_ids))}")
+
+        if not patients:
+            raise ValueError("No patients provided")
+
+        # Find recipient user
+        recipient = self.db.query(User).filter(
+            or_(User.username == shared_with_identifier,
+                User.email == shared_with_identifier)
+        ).first()
+
+        if not recipient:
+            raise ValueError("Recipient user not found")
+
+        if recipient.id == owner.id:
+            raise ValueError("Cannot share patients with yourself")
+
+        # Batch check for existing shares
+        existing_shares = self.db.query(PatientShare).filter(
+            PatientShare.patient_id.in_(patient_ids),
+            PatientShare.shared_with_user_id == recipient.id,
+            PatientShare.is_active == True
+        ).all()
+
+        # Create a map of patient_id to patient for quick lookup
+        patient_map = {patient.id: patient for patient in patients}
+
+        # Check if any shares already exist
+        if existing_shares:
+            already_shared = [
+                f"{patient_map[share.patient_id].first_name} {patient_map[share.patient_id].last_name}"
+                for share in existing_shares
+            ]
+            raise ValueError(f"Already shared with this user: {', '.join(already_shared)}")
+
+        # Build context data
+        patients_data = []
+        for patient in patients:
+            patients_data.append({
+                "patient_id": patient.id,
+                "patient_name": f"{patient.first_name} {patient.last_name}",
+                "patient_birth_date": patient.birth_date.isoformat() if patient.birth_date else None
+            })
+
+        context_data = {
+            "patients": patients_data,
+            "permission_level": permission_level,
+            "custom_permissions": custom_permissions,
+            "expires_at": expires_at.isoformat() if expires_at else None,
+            "is_bulk_invite": True,
+            "patient_count": len(patients)
+        }
+
+        # Create invitation title
+        patient_names = [f"{p.first_name} {p.last_name}" for p in patients]
+        if len(patient_names) > 3:
+            title = f"Patient Records Share: {patient_names[0]}, {patient_names[1]}, {patient_names[2]} and {len(patient_names) - 3} more"
+        else:
+            title = f"Patient Records Share: {', '.join(patient_names)}"
+
+        # Create invitation
+        invitation_service = InvitationService(self.db)
+        invitation = invitation_service.create_invitation(
+            sent_by_user=owner,
+            sent_to_identifier=shared_with_identifier,
+            invitation_type='patient_share',
+            title=title,
+            context_data=context_data,
+            message=message,
+            expires_hours=expires_hours
+        )
+
+        logger.info(f"Created bulk patient share invitation {invitation.id} for {len(patients)} patients")
+
+        return {
+            "success": True,
+            "invitation_id": invitation.id,
+            "patient_count": len(patients),
+            "patient_ids": patient_ids,
+            "message": f"Bulk invitation sent for {len(patients)} patients"
+        }

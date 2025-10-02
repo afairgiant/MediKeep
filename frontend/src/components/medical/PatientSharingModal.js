@@ -44,7 +44,9 @@ import {
 // Note: Using simple date input instead of @mantine/dates DateTimePicker
 import { toast } from 'react-toastify';
 import patientSharingApi from '../../services/api/patientSharingApi';
+import invitationApi from '../../services/api/invitationApi';
 import logger from '../../services/logger';
+import { useCacheManager } from '../../hooks/useGlobalData';
 
 /**
  * Safely parse JSON string with error handling
@@ -73,13 +75,15 @@ const safeParseJSON = (jsonString, fieldName = 'custom_permissions') => {
   }
 };
 
-const PatientSharingModal = ({ 
-  opened, 
-  onClose, 
-  patient, 
-  onShareUpdate 
+const PatientSharingModal = ({
+  opened,
+  onClose,
+  patient,
+  onShareUpdate
 }) => {
+  const { invalidatePatientList } = useCacheManager();
   const [shares, setShares] = useState([]);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [editingShare, setEditingShare] = useState(null);
@@ -92,14 +96,17 @@ const PatientSharingModal = ({
     expires_at: null,
     has_expiration: false,
     custom_permissions: '',
+    message: '',
+    expires_hours: 168,
   });
   
   const [formErrors, setFormErrors] = useState({});
 
-  // Load shares when modal opens
+  // Load shares and pending invitations when modal opens
   useEffect(() => {
     if (opened && patient) {
       loadPatientShares();
+      loadPendingInvitations();
     }
   }, [opened, patient]);
 
@@ -120,6 +127,8 @@ const PatientSharingModal = ({
       expires_at: null,
       has_expiration: false,
       custom_permissions: '',
+      message: '',
+      expires_hours: 168,
     });
     setFormErrors({});
   };
@@ -184,49 +193,121 @@ const PatientSharingModal = ({
   };
 
   /**
-   * Create a new share
+   * Load pending invitations for this patient
+   */
+  const loadPendingInvitations = async () => {
+    if (!patient) return;
+
+    try {
+      const invitations = await invitationApi.getSentInvitations('patient_share');
+
+      const filtered = invitations.filter(inv =>
+        inv.context_data?.patient_id === patient.id &&
+        inv.status === 'pending'
+      );
+
+      setPendingInvitations(filtered);
+
+      logger.debug('patient_sharing_modal_invitations_loaded', {
+        message: 'Pending invitations loaded',
+        patientId: patient.id,
+        invitationCount: filtered.length
+      });
+    } catch (error) {
+      logger.error('patient_sharing_modal_invitations_error', {
+        message: 'Failed to load pending invitations',
+        patientId: patient.id,
+        error: error.message
+      });
+    }
+  };
+
+  /**
+   * Cancel a pending invitation
+   */
+  const cancelInvitation = async (invitationId) => {
+    try {
+      setLoading(true);
+
+      await invitationApi.respondToInvitation(invitationId, 'cancelled');
+
+      toast.success('Invitation cancelled successfully');
+
+      await loadPendingInvitations();
+
+      // Invalidate patient list cache since invitation status changed
+      await invalidatePatientList();
+
+      if (onShareUpdate) {
+        onShareUpdate();
+      }
+
+      logger.info('patient_sharing_modal_invitation_cancelled', {
+        message: 'Invitation cancelled',
+        invitationId
+      });
+    } catch (error) {
+      logger.error('patient_sharing_modal_cancel_error', {
+        message: 'Failed to cancel invitation',
+        invitationId,
+        error: error.message
+      });
+
+      toast.error(`Failed to cancel invitation: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Send patient share invitation
    */
   const createShare = async (values) => {
     if (!patient) return;
 
     try {
       setLoading(true);
-      
-      const shareData = {
+
+      const invitationData = {
         patient_id: patient.id,
         shared_with_user_identifier: values.shared_with_user_identifier,
         permission_level: values.permission_level,
         expires_at: values.has_expiration ? values.expires_at : null,
         custom_permissions: values.custom_permissions ? safeParseJSON(values.custom_permissions, 'custom permissions') : null,
+        message: values.message || null,
+        expires_hours: values.expires_hours || 168,
       };
-      
-      await patientSharingApi.sharePatient(shareData);
-      
-      toast.success(`Patient shared successfully with ${values.shared_with_user_identifier}`);
-      
-      // Reload shares and reset form
-      await loadPatientShares();
+
+      await patientSharingApi.sendInvitation(invitationData);
+
+      toast.success(`Invitation sent successfully to ${values.shared_with_user_identifier}`);
+
+      // Reload invitations and reset form
+      await loadPendingInvitations();
       resetForm();
       setShowCreateForm(false);
-      
+
+      // Note: We don't invalidate patient list here because the recipient hasn't accepted yet
+      // Cache will be invalidated when the recipient accepts the invitation
+
       if (onShareUpdate) {
         onShareUpdate();
       }
-      
-      logger.info('patient_sharing_modal_created', {
-        message: 'Patient share created successfully',
+
+      logger.info('patient_sharing_modal_invitation_sent', {
+        message: 'Patient share invitation sent',
         patientId: patient.id,
         sharedWithIdentifier: values.shared_with_user_identifier
       });
     } catch (error) {
-      logger.error('patient_sharing_modal_create_error', {
-        message: 'Failed to create patient share',
+      logger.error('patient_sharing_modal_invitation_error', {
+        message: 'Failed to send patient share invitation',
         patientId: patient.id,
         sharedWithIdentifier: values.shared_with_user_identifier,
         error: error.message
       });
-      
-      toast.error(`Share Failed: ${error.message}`);
+
+      toast.error(`Invitation Failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -422,7 +503,7 @@ const PatientSharingModal = ({
             onClick={() => setShowCreateForm(true)}
             disabled={loading}
           >
-            New Share
+            Send Invitation
           </Button>
           
           <Button
@@ -442,7 +523,7 @@ const PatientSharingModal = ({
             <form onSubmit={handleFormSubmit}>
               <Stack gap="md">
                 <Title order={5}>
-                  {editingShare ? 'Edit Share' : 'Create New Share'}
+                  {editingShare ? 'Edit Share' : 'Send Invitation'}
                 </Title>
 
                 <TextInput
@@ -469,8 +550,32 @@ const PatientSharingModal = ({
                   error={formErrors.permission_level}
                 />
 
+                <Textarea
+                  label="Message (Optional)"
+                  placeholder="Add a note about why you're sharing this patient..."
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  minRows={2}
+                  maxRows={4}
+                />
+
+                <Select
+                  label="Invitation Expiration"
+                  description="How long the invitation link will be valid"
+                  data={[
+                    { value: '24', label: '1 Day' },
+                    { value: '72', label: '3 Days' },
+                    { value: '168', label: '1 Week (Default)' },
+                    { value: '336', label: '2 Weeks' },
+                    { value: '720', label: '1 Month' },
+                  ]}
+                  value={String(formData.expires_hours)}
+                  onChange={(value) => setFormData({...formData, expires_hours: parseInt(value)})}
+                />
+
                 <Switch
-                  label="Set expiration date"
+                  label="Set share expiration date (after acceptance)"
+                  description="When the share itself expires (different from invitation expiration)"
                   checked={formData.has_expiration}
                   onChange={(event) => setFormData({...formData, has_expiration: event.currentTarget.checked})}
                 />
@@ -511,7 +616,7 @@ const PatientSharingModal = ({
                     color="blue"
                     loading={loading}
                   >
-                    {editingShare ? 'Update Share' : 'Create Share'}
+                    {editingShare ? 'Update Share' : 'Send Invitation'}
                   </Button>
                 </Group>
               </Stack>
@@ -519,11 +624,75 @@ const PatientSharingModal = ({
           </Paper>
         )}
 
+        {/* Pending Invitations */}
+        {pendingInvitations.length > 0 && (
+          <div>
+            <Title order={5} mb="md">
+              <IconClock size="1rem" style={{ marginRight: 8 }} />
+              Pending Invitations ({pendingInvitations.length})
+            </Title>
+
+            <Table striped highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Sent To</Table.Th>
+                  <Table.Th>Permission</Table.Th>
+                  <Table.Th>Expires</Table.Th>
+                  <Table.Th>Actions</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {pendingInvitations.map((invitation) => (
+                  <Table.Tr key={invitation.id}>
+                    <Table.Td>
+                      <Group gap="xs">
+                        <Avatar size="sm" radius="xl">
+                          <IconUser size="1rem" />
+                        </Avatar>
+                        <div>
+                          <Text size="sm" fw={500}>
+                            {invitation.sent_to?.name || invitation.sent_to?.username || 'Unknown'}
+                          </Text>
+                          <Text size="xs" c="dimmed">
+                            {invitation.sent_to?.email || ''}
+                          </Text>
+                        </div>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge color="blue" variant="light">
+                        {invitation.context_data?.permission_level || 'view'}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">
+                        {invitation.expires_at
+                          ? new Date(invitation.expires_at).toLocaleDateString()
+                          : 'No expiration'}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <ActionIcon
+                        color="red"
+                        variant="light"
+                        onClick={() => cancelInvitation(invitation.id)}
+                        disabled={loading}
+                      >
+                        <IconTrash size="1rem" />
+                      </ActionIcon>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </div>
+        )}
+
         {/* Existing Shares */}
         <div>
           <Title order={5} mb="md">
             <IconUsers size="1rem" style={{ marginRight: 8 }} />
-            Current Shares ({shares.length})
+            Active Shares ({shares.length})
           </Title>
 
           {loading && shares.length === 0 ? (

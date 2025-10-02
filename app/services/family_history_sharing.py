@@ -224,8 +224,12 @@ class FamilyHistoryService:
             
             # 2. Extract context data with error handling
             context_data = invitation.context_data
-            logger.info(f"DEBUG: Processing invitation {invitation_id} with context_data: {context_data}")
-            
+            logger.debug("Processing family history invitation", extra={
+                "invitation_id": invitation_id,
+                "has_context_data": bool(context_data),
+                "component": "family_history_sharing"
+            })
+
             if not context_data:
                 raise ValueError("Invitation context data is missing")
             
@@ -430,15 +434,26 @@ class FamilyHistoryService:
                                 FamilyHistoryShare.invitation_id == invitation.id,
                                 FamilyHistoryShare.is_active == True
                             ).count()
-                            
-                            logger.info(f"DEBUG: Bulk invitation {invitation.id} has {active_shares_count} active shares remaining")
-                            
+
+                            logger.debug("Checking bulk invitation status", extra={
+                                "invitation_id": invitation.id,
+                                "active_shares_count": active_shares_count,
+                                "component": "family_history_sharing"
+                            })
+
                             if active_shares_count <= 1:  # This share will become inactive after commit
                                 invitation.status = 'revoked'
                                 invitation.updated_at = get_utc_now()
-                                logger.info(f"DEBUG: Marking bulk invitation {invitation.id} as revoked")
+                                logger.info("Marking bulk invitation as revoked", extra={
+                                    "invitation_id": invitation.id,
+                                    "component": "family_history_sharing"
+                                })
                             else:
-                                logger.info(f"DEBUG: Not revoking bulk invitation {invitation.id} - still has {active_shares_count} active shares")
+                                logger.debug("Bulk invitation still has active shares", extra={
+                                    "invitation_id": invitation.id,
+                                    "active_shares_count": active_shares_count,
+                                    "component": "family_history_sharing"
+                                })
                         else:
                             # Single invitation - always mark as revoked
                             invitation.status = 'revoked'
@@ -511,14 +526,23 @@ class FamilyHistoryService:
                         FamilyHistoryShare.shared_with_user_id == user.id,
                         FamilyHistoryShare.is_active == True
                     ).count()
-                    
-                    logger.info(f"DEBUG: Bulk invitation {invitation.id} has {active_shares_count} active shares remaining for user {user.id}")
-                    
+
+                    logger.debug("Recipient removed access from bulk invitation", extra={
+                        "invitation_id": invitation.id,
+                        "user_id": user.id,
+                        "active_shares_count": active_shares_count,
+                        "component": "family_history_sharing"
+                    })
+
                     # Note: We don't change the invitation status here because the recipient removed access,
                     # not the sender. The invitation remains 'accepted' but the shares are inactive.
                 else:
                     # Single invitation - recipient removed access but invitation remains accepted
-                    logger.info(f"DEBUG: Recipient {user.id} removed access to single invitation {invitation.id}")
+                    logger.info("Recipient removed access from single invitation", extra={
+                        "invitation_id": invitation.id,
+                        "user_id": user.id,
+                        "component": "family_history_sharing"
+                    })
             
             self.db.commit()
             logger.info(f"User {user.id} removed their own access to family history share: {share.id}")
