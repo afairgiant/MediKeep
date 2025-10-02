@@ -2,6 +2,30 @@
 Application constants and configuration values.
 """
 
+# Lab Test Component validation constants
+LAB_TEST_COMPONENT_LIMITS = {
+    "MAX_TEST_NAME_LENGTH": 200,
+    "MAX_ABBREVIATION_LENGTH": 20,
+    "MAX_TEST_CODE_LENGTH": 50,
+    "MAX_UNIT_LENGTH": 50,
+    "MAX_REF_RANGE_TEXT_LENGTH": 100,
+    "MAX_NOTES_LENGTH": 500,
+    "MAX_SEARCH_QUERY_LENGTH": 100,
+    "MAX_BULK_COMPONENTS": 50
+}
+
+# Lab Test Component valid statuses
+LAB_TEST_COMPONENT_STATUSES = [
+    "normal", "abnormal", "critical", "high", "low", "borderline"
+]
+
+# Lab Test Component valid categories
+LAB_TEST_COMPONENT_CATEGORIES = [
+    "chemistry", "hematology", "immunology", "microbiology",
+    "endocrinology", "toxicology", "genetics", "molecular",
+    "pathology", "other"
+]
+
 # User roles
 ADMIN_ROLES = ["admin", "administrator"]
 

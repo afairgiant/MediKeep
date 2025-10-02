@@ -136,6 +136,7 @@ class EntityType:
     MEDICATION = "medication"
     LAB_RESULT = "lab_result"
     LAB_RESULT_FILE = "lab_result_file"
+    LAB_TEST_COMPONENT = "lab_test_component"
     ENTITY_FILE = "entity_file"
     CONDITION = "condition"
     TREATMENT = "treatment"

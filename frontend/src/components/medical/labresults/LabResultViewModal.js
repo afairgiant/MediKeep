@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   Stack,
@@ -9,10 +9,21 @@ import {
   Group,
   Button,
   ScrollArea,
+  Tabs,
+  Badge,
+  Box,
 } from '@mantine/core';
+import {
+  IconInfoCircle,
+  IconFlask,
+  IconUsers,
+  IconTags,
+  IconFileText,
+} from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import ConditionRelationships from '../ConditionRelationships';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import TestComponentsTab from './TestComponentsTab';
 import { formatDate } from '../../../utils/helpers';
 import logger from '../../../services/logger';
 
@@ -30,6 +41,8 @@ const LabResultViewModal = ({
   isBlocking,
   onError
 }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+
   const handleError = (error, context) => {
     logger.error('lab_result_view_modal_error', {
       message: `Error in LabResultViewModal: ${context}`,
@@ -87,158 +100,213 @@ const LabResultViewModal = ({
             </Group>
           </Paper>
 
-          {/* Test Information Section */}
-          <div>
-            <Title order={4} mb="sm">Test Information</Title>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Test Code</Text>
-                <Text>{labResult.test_code || 'N/A'}</Text>
-              </Stack>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Category</Text>
-                <Text>{labResult.test_category || 'N/A'}</Text>
-              </Stack>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Test Type</Text>
-                <Text c={labResult.test_type ? 'inherit' : 'dimmed'}>
-                  {labResult.test_type || 'Not specified'}
-                </Text>
-              </Stack>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Facility</Text>
-                <Text c={labResult.facility ? 'inherit' : 'dimmed'}>
-                  {labResult.facility || 'Not specified'}
-                </Text>
-              </Stack>
-            </SimpleGrid>
-          </div>
-
-          {/* Test Results Section */}
-          <div>
-            <Title order={4} mb="sm">Test Results</Title>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Status</Text>
-                <StatusBadge status={labResult.status} />
-              </Stack>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Lab Result</Text>
-                {labResult.labs_result ? (
-                  <StatusBadge status={labResult.labs_result} />
-                ) : (
-                  <Text c="dimmed">Not specified</Text>
-                )}
-              </Stack>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Ordered Date</Text>
-                <Text>{formatDate(labResult.ordered_date)}</Text>
-              </Stack>
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Completed Date</Text>
-                <Text c={labResult.completed_date ? 'inherit' : 'dimmed'}>
-                  {labResult.completed_date
-                    ? formatDate(labResult.completed_date)
-                    : 'Not completed'}
-                </Text>
-              </Stack>
-            </SimpleGrid>
-          </div>
-
-          {/* Practitioner Information Section */}
-          <div>
-            <Title order={4} mb="sm">Ordering Practitioner</Title>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-              <Stack gap="xs">
-                <Text fw={500} size="sm" c="dimmed">Doctor</Text>
-                <Text c={labResult.practitioner_id ? 'inherit' : 'dimmed'}>
-                  {labResult.practitioner_id
-                    ? practitioner?.name || `Practitioner ID: ${labResult.practitioner_id}`
-                    : 'Not specified'}
-                </Text>
-              </Stack>
-              {practitioner?.specialty && (
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">Specialty</Text>
-                  <Text>{practitioner.specialty}</Text>
-                </Stack>
+          {/* Tabbed Content */}
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+                Overview
+              </Tabs.Tab>
+              <Tabs.Tab value="test-components" leftSection={<IconFlask size={16} />}>
+                Test Components
+              </Tabs.Tab>
+              {fetchLabResultConditions && (
+                <Tabs.Tab value="conditions" leftSection={<IconUsers size={16} />}>
+                  Related Conditions
+                </Tabs.Tab>
               )}
-            </SimpleGrid>
-          </div>
+              {labResult.tags && labResult.tags.length > 0 && (
+                <Tabs.Tab value="tags" leftSection={<IconTags size={16} />}>
+                  Tags
+                  <Badge size="sm" color="blue" style={{ marginLeft: 8 }}>
+                    {labResult.tags.length}
+                  </Badge>
+                </Tabs.Tab>
+              )}
+              <Tabs.Tab value="files" leftSection={<IconFileText size={16} />}>
+                Files
+              </Tabs.Tab>
+            </Tabs.List>
 
-          {/* Notes Section */}
-          <div>
-            <Title order={4} mb="sm">Notes</Title>
-            <Paper withBorder p="sm" bg="gray.1">
-              <Text
-                style={{ whiteSpace: 'pre-wrap' }}
-                c={labResult.notes ? 'inherit' : 'dimmed'}
-              >
-                {labResult.notes || 'No notes available'}
-              </Text>
-            </Paper>
-          </div>
+            {/* Overview Tab */}
+            <Tabs.Panel value="overview">
+              <Box mt="md">
+                <Stack gap="lg">
+                  {/* Test Information Section */}
+                  <div>
+                    <Title order={4} mb="sm">Test Information</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Test Code</Text>
+                        <Text>{labResult.test_code || 'N/A'}</Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Category</Text>
+                        <Text>{labResult.test_category || 'N/A'}</Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Test Type</Text>
+                        <Text c={labResult.test_type ? 'inherit' : 'dimmed'}>
+                          {labResult.test_type || 'Not specified'}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Facility</Text>
+                        <Text c={labResult.facility ? 'inherit' : 'dimmed'}>
+                          {labResult.facility || 'Not specified'}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
+                  </div>
 
-          {/* Related Conditions Section */}
-          {fetchLabResultConditions && (
-            <div>
-              <Title order={4} mb="sm">Related Conditions</Title>
-              <ConditionRelationships
-                labResultId={labResult.id}
-                labResultConditions={labResultConditions}
-                conditions={conditions}
-                fetchLabResultConditions={fetchLabResultConditions}
-                navigate={navigate}
-                isViewMode={true}
-              />
-            </div>
-          )}
+                  {/* Test Results Section */}
+                  <div>
+                    <Title order={4} mb="sm">Test Results</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Status</Text>
+                        <StatusBadge status={labResult.status} />
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Lab Result</Text>
+                        {labResult.labs_result ? (
+                          <StatusBadge status={labResult.labs_result} />
+                        ) : (
+                          <Text c="dimmed">Not specified</Text>
+                        )}
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Ordered Date</Text>
+                        <Text>{formatDate(labResult.ordered_date)}</Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Completed Date</Text>
+                        <Text c={labResult.completed_date ? 'inherit' : 'dimmed'}>
+                          {labResult.completed_date
+                            ? formatDate(labResult.completed_date)
+                            : 'Not completed'}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
+                  </div>
 
-          {/* Tags Section */}
-          {labResult.tags && labResult.tags.length > 0 && (
-            <div>
-              <Title order={4} mb="sm">Tags</Title>
-              <Group gap="xs">
-                {labResult.tags.map((tag, index) => (
-                  <StatusBadge
-                    key={index}
-                    status={tag}
-                    variant="light"
-                    color="blue"
-                    size="sm"
+                  {/* Practitioner Information Section */}
+                  <div>
+                    <Title order={4} mb="sm">Ordering Practitioner</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Doctor</Text>
+                        <Text c={labResult.practitioner_id ? 'inherit' : 'dimmed'}>
+                          {labResult.practitioner_id
+                            ? practitioner?.name || `Practitioner ID: ${labResult.practitioner_id}`
+                            : 'Not specified'}
+                        </Text>
+                      </Stack>
+                      {practitioner?.specialty && (
+                        <Stack gap="xs">
+                          <Text fw={500} size="sm" c="dimmed">Specialty</Text>
+                          <Text>{practitioner.specialty}</Text>
+                        </Stack>
+                      )}
+                    </SimpleGrid>
+                  </div>
+
+                  {/* Notes Section */}
+                  <div>
+                    <Title order={4} mb="sm">Notes</Title>
+                    <Paper withBorder p="sm" bg="gray.1">
+                      <Text
+                        style={{ whiteSpace: 'pre-wrap' }}
+                        c={labResult.notes ? 'inherit' : 'dimmed'}
+                      >
+                        {labResult.notes || 'No notes available'}
+                      </Text>
+                    </Paper>
+                  </div>
+                </Stack>
+              </Box>
+            </Tabs.Panel>
+
+            {/* Test Components Tab */}
+            <Tabs.Panel value="test-components">
+              <Box mt="md">
+                <TestComponentsTab
+                  labResultId={labResult.id}
+                  isViewMode={false}
+                  onError={handleError}
+                />
+              </Box>
+            </Tabs.Panel>
+
+            {/* Related Conditions Tab */}
+            {fetchLabResultConditions && (
+              <Tabs.Panel value="conditions">
+                <Box mt="md">
+                  <ConditionRelationships
+                    labResultId={labResult.id}
+                    labResultConditions={labResultConditions}
+                    conditions={conditions}
+                    fetchLabResultConditions={fetchLabResultConditions}
+                    navigate={navigate}
+                    isViewMode={true}
                   />
-                ))}
-              </Group>
-            </div>
-          )}
+                </Box>
+              </Tabs.Panel>
+            )}
 
-          {/* Document Management Section */}
-          <div>
-            <Title order={4} mb="sm">Associated Files</Title>
-            <DocumentManagerWithProgress
-              entityType="lab-result"
-              entityId={labResult.id}
-              mode="view"
-              config={{
-                acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-                maxSize: 10 * 1024 * 1024, // 10MB
-                maxFiles: 10
-              }}
-              onUploadComplete={onFileUploadComplete}
-              onError={handleDocumentError}
-              showProgressModal={true}
-            />
-          </div>
+            {/* Tags Tab */}
+            {labResult.tags && labResult.tags.length > 0 && (
+              <Tabs.Panel value="tags">
+                <Box mt="md">
+                  <Stack gap="md">
+                    <Title order={4}>Tags</Title>
+                    <Group gap="xs">
+                      {labResult.tags.map((tag, index) => (
+                        <StatusBadge
+                          key={index}
+                          status={tag}
+                          variant="light"
+                          color="blue"
+                          size="sm"
+                        />
+                      ))}
+                    </Group>
+                  </Stack>
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Files Tab */}
+            <Tabs.Panel value="files">
+              <Box mt="md">
+                <Stack gap="md">
+                  <Title order={4}>Associated Files</Title>
+                  <DocumentManagerWithProgress
+                    entityType="lab-result"
+                    entityId={labResult.id}
+                    mode="view"
+                    config={{
+                      acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+                      maxSize: 10 * 1024 * 1024, // 10MB
+                      maxFiles: 10
+                    }}
+                    onUploadComplete={onFileUploadComplete}
+                    onError={handleDocumentError}
+                    showProgressModal={true}
+                  />
+                </Stack>
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
 
           {/* Action Buttons */}
           <Group justify="space-between" mt="md">
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
-            <Button 
-              onClick={() => { 
-                onClose(); 
-                onEdit(labResult); 
+            <Button
+              onClick={() => {
+                onClose();
+                onEdit(labResult);
               }}
             >
               Edit Lab Result

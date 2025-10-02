@@ -4,6 +4,7 @@ from .practitioner import *
 from .medication import *
 from .lab_result import *
 from .lab_result_file import *
+from .lab_test_component import *
 from .entity_file import *
 from .encounter import *
 from .condition import *

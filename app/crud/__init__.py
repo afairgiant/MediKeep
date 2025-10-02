@@ -8,6 +8,7 @@ from .family_member import family_member
 from .immunization import immunization
 from .lab_result import lab_result
 from .lab_result_file import lab_result_file
+from .lab_test_component import lab_test_component
 from .medication import medication
 from .patient import patient
 from .pharmacy import pharmacy
@@ -26,6 +27,7 @@ __all__ = [
     "medication",
     "lab_result",
     "lab_result_file",
+    "lab_test_component",
     "encounter",
     "condition",
     "family_member",

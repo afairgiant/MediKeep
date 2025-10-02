@@ -279,6 +279,11 @@ class BaseApiService {
       throw new Error(error.detail || errorMessage);
     }
 
+    // Handle 204 No Content responses (common for DELETE operations)
+    if (response.status === 204) {
+      return null;
+    }
+
     return response.json();
   }
 

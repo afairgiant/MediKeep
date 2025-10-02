@@ -24,10 +24,10 @@ const StorageBackendSelector = ({
   size = 'sm',
   className = ''
 }) => {
-  // Don't render if paperless is not enabled
-  if (!paperlessEnabled) {
-    return null;
-  }
+  // Always show the selector, but disable paperless option if not enabled
+  // if (!paperlessEnabled) {
+  //   return null;
+  // }
 
   const data = [
     {
@@ -42,10 +42,12 @@ const StorageBackendSelector = ({
       label: 'Paperless-ngx',
       icon: paperlessConnected ? IconCloud : IconServer,
       color: paperlessConnected ? 'green' : 'orange',
-      description: paperlessConnected 
-        ? 'Store files in your paperless-ngx instance' 
-        : 'Paperless not configured properly - check Settings',
-      disabled: !paperlessConnected
+      description: paperlessConnected
+        ? 'Store files in your paperless-ngx instance'
+        : paperlessEnabled
+          ? 'Paperless enabled but connection not verified - check Settings'
+          : 'Paperless not enabled - enable in Settings',
+      disabled: false  // Always allow selection, let upload handle errors
     }
   ];
 

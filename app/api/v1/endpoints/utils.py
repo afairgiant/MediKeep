@@ -15,6 +15,7 @@ from app.core.error_handling import (
     handle_database_errors,
     DatabaseException
 )
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 
 logger = get_logger(__name__, "app")
 
@@ -498,3 +499,61 @@ def create_sanitized_http_exception(
         status_code=status_code,
         detail=sanitized_message
     )
+
+
+def validate_search_input(query: str, max_length: int = None) -> str:
+    """
+    Validate and sanitize search input to prevent injection attacks and excessive queries.
+
+    Args:
+        query: The search query string
+        max_length: Maximum allowed length for search queries (defaults to constant)
+
+    Returns:
+        Sanitized search query
+
+    Raises:
+        HTTPException: If query is invalid or potentially malicious
+    """
+    if max_length is None:
+        max_length = LAB_TEST_COMPONENT_LIMITS["MAX_SEARCH_QUERY_LENGTH"]
+    if not query:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Search query cannot be empty"
+        )
+
+    # Remove leading/trailing whitespace
+    query = query.strip()
+
+    # Check length
+    if len(query) > max_length:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Search query too long. Maximum {max_length} characters allowed."
+        )
+
+    # Check for minimum length
+    if len(query) < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Search query must be at least 1 character long"
+        )
+
+    # Remove or replace potentially problematic characters
+    # Allow alphanumeric, spaces, hyphens, underscores, periods
+    import re
+    if not re.match(r'^[a-zA-Z0-9\s\-_.]+$', query):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Search query contains invalid characters. Only letters, numbers, spaces, hyphens, underscores, and periods are allowed."
+        )
+
+    # Prevent excessive wildcards or pattern matching abuse
+    if query.count('%') > 0 or query.count('_') > 10:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Search query contains too many wildcard characters"
+        )
+
+    return query

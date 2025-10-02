@@ -1,5 +1,5 @@
 // Service Worker Registration for Medical Records PWA
-// IMPORTANT: Uses console.log only to prevent logging loops
+import logger from './services/logger';
 
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
@@ -38,7 +38,10 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
-      console.log('SW: Service worker registered successfully');
+      logger.info('service_worker_registered', 'Service worker registered successfully', {
+        component: 'serviceWorkerRegistration',
+        swUrl
+      });
 
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
@@ -48,12 +51,16 @@ function registerValidSW(swUrl, config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              console.log('SW: New content available, will refresh on next visit');
+              logger.info('service_worker_update_available', 'New content available, will refresh on next visit', {
+                component: 'serviceWorkerRegistration'
+              });
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
             } else {
-              console.log('SW: Content cached for offline use');
+              logger.info('service_worker_cached', 'Content cached for offline use', {
+                component: 'serviceWorkerRegistration'
+              });
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
               }
@@ -63,7 +70,10 @@ function registerValidSW(swUrl, config) {
       };
     })
     .catch(error => {
-      console.error('SW: Service worker registration failed:', error);
+      logger.error('service_worker_registration_failed', 'Service worker registration failed', {
+        component: 'serviceWorkerRegistration',
+        error: error.message
+      });
     });
 }
 
@@ -91,7 +101,9 @@ function checkValidServiceWorker(swUrl, config) {
       }
     })
     .catch(() => {
-      console.log('SW: No internet connection found. App is running in offline mode.');
+      logger.warn('service_worker_offline', 'No internet connection found. App is running in offline mode.', {
+        component: 'serviceWorkerRegistration'
+      });
     });
 }
 
@@ -100,10 +112,15 @@ export function unregister() {
     navigator.serviceWorker.ready
       .then(registration => {
         registration.unregister();
-        console.log('SW: Service worker unregistered');
+        logger.info('service_worker_unregistered', 'Service worker unregistered', {
+          component: 'serviceWorkerRegistration'
+        });
       })
       .catch(error => {
-        console.error('SW: Service worker unregister failed:', error);
+        logger.error('service_worker_unregister_failed', 'Service worker unregister failed', {
+          component: 'serviceWorkerRegistration',
+          error: error.message
+        });
       });
   }
 }
