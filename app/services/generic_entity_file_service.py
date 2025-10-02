@@ -564,7 +564,12 @@ class GenericEntityFileService:
                 )
 
             # Route to appropriate storage backend for download
-            logger.info(f"DEBUG: File {file_id} storage backend: {file_record.storage_backend}, paperless_doc_id: {file_record.paperless_document_id}")
+            logger.debug("Routing file download request", extra={
+                "file_id": file_id,
+                "storage_backend": file_record.storage_backend,
+                "has_paperless_doc_id": bool(file_record.paperless_document_id),
+                "component": "generic_entity_file_service"
+            })
             if file_record.storage_backend == "paperless":
                 return await self._get_paperless_download_info(db, file_record, current_user_id)
             else:

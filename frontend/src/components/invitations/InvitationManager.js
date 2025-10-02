@@ -31,6 +31,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCacheManager } from '../../hooks/useGlobalData';
 import invitationApi from '../../services/api/invitationApi';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import logger from '../../services/logger';
@@ -39,6 +40,7 @@ import InvitationResponseModal from './InvitationResponseModal';
 
 const InvitationManager = ({ opened, onClose, onUpdate }) => {
   const { user: authUser } = useAuth();
+  const { invalidatePatientList } = useCacheManager();
   const [sentInvitations, setSentInvitations] = useState([]);
   const [receivedInvitations, setReceivedInvitations] = useState([]);
   const [sharedWithMe, setSharedWithMe] = useState([]);
@@ -126,6 +128,15 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         invitationId: invitation.id,
         response
       });
+
+      // Invalidate patient list cache if accepting a patient share invitation
+      if (response === 'accepted' && invitation.invitation_type === 'patient_share') {
+        await invalidatePatientList();
+        logger.info('Invalidated patient list cache after accepting patient share', {
+          component: 'InvitationManager',
+          invitationId: invitation.id
+        });
+      }
 
       notifications.show({
         title: `Invitation ${response}`,
@@ -242,7 +253,16 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
     }
   };
 
-  const handleResponseModalSuccess = () => {
+  const handleResponseModalSuccess = async () => {
+    // Invalidate patient list cache if this was a patient share invitation
+    if (selectedInvitation && selectedInvitation.invitation_type === 'patient_share') {
+      await invalidatePatientList();
+      logger.info('Invalidated patient list cache after patient share response', {
+        component: 'InvitationManager',
+        invitationId: selectedInvitation.id
+      });
+    }
+
     closeResponseModal();
     setSelectedInvitation(null);
     loadInvitations();

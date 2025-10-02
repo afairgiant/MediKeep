@@ -483,10 +483,14 @@ async def download_file(
         # Handle different return types (local path vs paperless content)
         if isinstance(file_info, bytes):
             # Paperless file - fix filename if content was converted
-            logger.info(f"DEBUG: Processing Paperless download - original filename: {filename}, content size: {len(file_info)}")
             corrected_filename = fix_filename_for_paperless_content(filename, file_info)
-            logger.info(f"DEBUG: Filename after correction: {corrected_filename}")
-            
+            logger.debug("Processing Paperless download", extra={
+                "original_filename": filename,
+                "corrected_filename": corrected_filename,
+                "content_size": len(file_info),
+                "component": "entity_file"
+            })
+
             # Paperless file - return as StreamingResponse with proper binary handling
             from fastapi.responses import Response
             import mimetypes
@@ -497,12 +501,18 @@ async def download_file(
                 guessed_type, _ = mimetypes.guess_type(corrected_filename)
                 if guessed_type:
                     content_type = guessed_type
-                    logger.info(f"DEBUG: Guessed content type from corrected filename: {content_type}")
+                    logger.debug("Guessed content type from filename", extra={
+                        "filename": corrected_filename,
+                        "content_type": content_type,
+                        "component": "entity_file"
+                    })
 
             # Override content type for PDF files to ensure proper handling
             if corrected_filename.endswith('.pdf'):
                 content_type = 'application/pdf'
-                logger.info(f"DEBUG: Forced content type to application/pdf for PDF file")
+                logger.debug("Forced content type for PDF file", extra={
+                    "component": "entity_file"
+                })
 
             # Set proper headers for binary content
             headers = {
@@ -510,9 +520,6 @@ async def download_file(
                 "Content-Length": str(len(file_info)),
                 "Cache-Control": "no-cache",
             }
-            
-            logger.info(f"DEBUG: Response headers: {headers}")
-            logger.info(f"DEBUG: Response content-type: {content_type}")
 
             return Response(
                 content=file_info,
@@ -589,10 +596,14 @@ async def view_file(
         # Handle different return types (local path vs paperless content)
         if isinstance(file_info, bytes):
             # Paperless file - fix filename if content was converted
-            logger.info(f"DEBUG: Processing Paperless download - original filename: {filename}, content size: {len(file_info)}")
             corrected_filename = fix_filename_for_paperless_content(filename, file_info)
-            logger.info(f"DEBUG: Filename after correction: {corrected_filename}")
-            
+            logger.debug("Processing Paperless file view", extra={
+                "original_filename": filename,
+                "corrected_filename": corrected_filename,
+                "content_size": len(file_info),
+                "component": "entity_file"
+            })
+
             # Paperless file - return as StreamingResponse with proper binary handling
             from fastapi.responses import Response
             import mimetypes
@@ -603,12 +614,18 @@ async def view_file(
                 guessed_type, _ = mimetypes.guess_type(corrected_filename)
                 if guessed_type:
                     content_type = guessed_type
-                    logger.info(f"DEBUG: Guessed content type from corrected filename: {content_type}")
+                    logger.debug("Guessed content type for view", extra={
+                        "filename": corrected_filename,
+                        "content_type": content_type,
+                        "component": "entity_file"
+                    })
 
             # Override content type for PDF files to ensure proper handling
             if corrected_filename.endswith('.pdf'):
                 content_type = 'application/pdf'
-                logger.info(f"DEBUG: Forced content type to application/pdf for PDF file")
+                logger.debug("Forced content type for PDF view", extra={
+                    "component": "entity_file"
+                })
 
             # Set secure headers for inline file viewing with proper binary handling
             headers = {

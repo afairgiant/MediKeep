@@ -1096,6 +1096,9 @@ class PatientShare(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     expires_at = Column(DateTime, nullable=True)
 
+    # Link to invitation (nullable for backward compatibility with existing shares)
+    invitation_id = Column(Integer, ForeignKey("invitations.id"), nullable=True)
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
@@ -1110,6 +1113,7 @@ class PatientShare(Base):
     shared_with = orm_relationship(
         "User", foreign_keys=[shared_with_user_id], overlaps="shared_patients_with_me"
     )
+    invitation = orm_relationship("Invitation", foreign_keys=[invitation_id])
 
     # Constraints
     __table_args__ = (

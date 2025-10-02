@@ -12,32 +12,72 @@ class PatientSharingApiService extends BaseApiService {
   }
 
   /**
-   * Share a patient with another user
-   * @param {Object} shareData - Sharing data
-   * @returns {Promise<Object>} Created share
+   * Send patient share invitation (invitation-based sharing)
+   * @param {Object} invitationData - Invitation data
+   * @returns {Promise<Object>} Created invitation
    */
-  async sharePatient(shareData) {
-    logger.info('patient_sharing_create', {
-      message: 'Creating patient share',
-      patientId: shareData.patient_id,
-      sharedWithIdentifier: shareData.shared_with_user_identifier,
-      permissionLevel: shareData.permission_level
+  async sendInvitation(invitationData) {
+    logger.info('patient_sharing_invitation_send', {
+      message: 'Sending patient share invitation',
+      patientId: invitationData.patient_id,
+      sharedWithIdentifier: invitationData.shared_with_user_identifier,
+      permissionLevel: invitationData.permission_level
     });
 
     try {
-      const result = await this.post('/', shareData, 'Failed to share patient');
-      logger.info('patient_sharing_create_success', {
-        message: 'Patient shared successfully',
-        shareId: result.id,
-        patientId: shareData.patient_id,
-        sharedWithIdentifier: shareData.shared_with_user_identifier
+      const result = await this.post('/', invitationData, 'Failed to send patient share invitation');
+      logger.info('patient_sharing_invitation_send_success', {
+        message: 'Patient share invitation sent successfully',
+        invitationId: result.invitation_id,
+        patientId: invitationData.patient_id,
+        sharedWithIdentifier: invitationData.shared_with_user_identifier
       });
       return result;
     } catch (error) {
-      logger.error('patient_sharing_create_error', {
-        message: 'Failed to share patient',
-        patientId: shareData.patient_id,
-        sharedWithIdentifier: shareData.shared_with_user_identifier,
+      logger.error('patient_sharing_invitation_send_error', {
+        message: 'Failed to send patient share invitation',
+        patientId: invitationData.patient_id,
+        sharedWithIdentifier: invitationData.shared_with_user_identifier,
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * @deprecated Use sendInvitation() instead - sharing now uses invitation system
+   */
+  async sharePatient(shareData) {
+    return this.sendInvitation(shareData);
+  }
+
+  /**
+   * Send bulk patient share invitations
+   * @param {Object} bulkInvitationData - Bulk invitation data
+   * @returns {Promise<Object>} Created bulk invitation
+   */
+  async bulkSendInvitations(bulkInvitationData) {
+    logger.info('patient_sharing_bulk_invitation_send', {
+      message: 'Sending bulk patient share invitations',
+      patientIds: bulkInvitationData.patient_ids,
+      sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier,
+      permissionLevel: bulkInvitationData.permission_level
+    });
+
+    try {
+      const result = await this.post('/bulk-invite', bulkInvitationData, 'Failed to send bulk patient share invitations');
+      logger.info('patient_sharing_bulk_invitation_send_success', {
+        message: 'Bulk patient share invitations sent successfully',
+        invitationId: result.invitation_id,
+        patientCount: bulkInvitationData.patient_ids.length,
+        sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier
+      });
+      return result;
+    } catch (error) {
+      logger.error('patient_sharing_bulk_invitation_send_error', {
+        message: 'Failed to send bulk patient share invitations',
+        patientIds: bulkInvitationData.patient_ids,
+        sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier,
         error: error.message
       });
       throw error;

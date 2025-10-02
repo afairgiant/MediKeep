@@ -28,15 +28,18 @@ import {
   IconRefresh,
   IconBell,
   IconDots,
+  IconUserShare,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import invitationApi from '../../services/api/invitationApi';
 import { InvitationManager } from '../invitations';
 import { formatDateTime } from '../../utils/helpers';
+import { useCacheManager } from '../../hooks/useGlobalData';
 
 const InvitationNotifications = () => {
   const { colorScheme } = useMantineColorScheme();
+  const { invalidatePatientList } = useCacheManager();
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -101,14 +104,19 @@ const InvitationNotifications = () => {
 
     try {
       await invitationApi.respondToInvitation(selectedInvitation.id, 'accepted');
-      
+
+      // Invalidate patient list cache if this was a patient share invitation
+      if (selectedInvitation.invitation_type === 'patient_share') {
+        await invalidatePatientList();
+      }
+
       notifications.show({
         title: 'Invitation accepted',
         message: 'Successfully accepted the invitation',
         color: 'green',
         icon: <IconCheck size="1rem" />
       });
-      
+
       // Refresh the list
       loadPendingInvitations();
       closeConfirmModal();
@@ -138,6 +146,8 @@ const InvitationNotifications = () => {
     switch (type) {
       case 'family_history_share':
         return <IconUsers size="1rem" />;
+      case 'patient_share':
+        return <IconUserShare size="1rem" />;
       default:
         return <IconMail size="1rem" />;
     }
