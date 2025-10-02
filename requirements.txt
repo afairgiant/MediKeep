@@ -34,7 +34,7 @@ MarkupSafe==3.0.2
 multidict==6.4.4
 packaging==25.0
 passlib==1.7.4
-pillow==11.2.1
+pillow==11.3.0
 pluggy==1.6.0
 propcache==0.3.2
 psutil==6.1.0
