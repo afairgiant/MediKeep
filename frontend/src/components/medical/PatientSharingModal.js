@@ -229,7 +229,7 @@ const PatientSharingModal = ({
     try {
       setLoading(true);
 
-      await invitationApi.respondToInvitation(invitationId, 'cancelled');
+      await invitationApi.cancelInvitation(invitationId);
 
       toast.success('Invitation cancelled successfully');
 
@@ -570,7 +570,7 @@ const PatientSharingModal = ({
                     { value: '720', label: '1 Month' },
                   ]}
                   value={String(formData.expires_hours)}
-                  onChange={(value) => setFormData({...formData, expires_hours: parseInt(value)})}
+                  onChange={(value) => setFormData({...formData, expires_hours: parseInt(value || '168')})}
                 />
 
                 <Switch

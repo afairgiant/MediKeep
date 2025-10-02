@@ -58,7 +58,12 @@ class PatientSharingService:
         Returns:
             The created PatientShare object
         """
-        logger.info(f"User {owner.id} sharing patient {patient_id} with user {shared_with_user_id}")
+        logger.info("Creating patient share", extra={
+            "user_id": owner.id,
+            "patient_id": patient_id,
+            "shared_with_user_id": shared_with_user_id,
+            "component": "patient_sharing"
+        })
         
         # Validate permission level
         valid_permissions = ['view', 'edit', 'full']
@@ -99,7 +104,10 @@ class PatientSharingService:
                 existing_share.expires_at = expires_at
                 existing_share.custom_permissions = custom_permissions
                 self.db.commit()
-                logger.info(f"Reactivated existing share {existing_share.id}")
+                logger.info("Reactivated existing share", extra={
+                    "share_id": existing_share.id,
+                    "component": "patient_sharing"
+                })
                 return existing_share
         
         # Create new share
@@ -118,7 +126,10 @@ class PatientSharingService:
             self.db.commit()
             self.db.refresh(share)
             
-            logger.info(f"Created patient share {share.id}")
+            logger.info("Patient share created", extra={
+                "share_id": share.id,
+                "component": "patient_sharing"
+            })
             return share
             
         except IntegrityError as e:
@@ -148,7 +159,7 @@ class PatientSharingService:
         ).first()
 
         if not patient:
-            raise ValueError("Patient not found or not owned by user")
+            raise PatientNotFoundError("Patient not found or not owned by user")
 
         # Find and deactivate share
         share = self.db.query(PatientShare).filter(
@@ -211,7 +222,7 @@ class PatientSharingService:
         ).first()
         
         if not patient:
-            raise ValueError("Patient not found or not owned by user")
+            raise PatientNotFoundError("Patient not found or not owned by user")
         
         # Find existing share
         share = self.db.query(PatientShare).filter(
@@ -221,13 +232,13 @@ class PatientSharingService:
         ).first()
         
         if not share:
-            raise ValueError("No active share found to update")
+            raise ShareNotFoundError("No active share found to update")
         
         # Update fields if provided
         if permission_level is not None:
             valid_permissions = ['view', 'edit', 'full']
             if permission_level not in valid_permissions:
-                raise ValueError(f"Invalid permission level. Must be one of: {valid_permissions}")
+                raise InvalidPermissionLevelError(f"Invalid permission level. Must be one of: {valid_permissions}")
             share.permission_level = permission_level
         
         if expires_at is not None:
@@ -260,7 +271,7 @@ class PatientSharingService:
         ).first()
         
         if not patient:
-            raise ValueError("Patient not found or not owned by user")
+            raise PatientNotFoundError("Patient not found or not owned by user")
         
         shares = self.db.query(PatientShare).filter(
             PatientShare.patient_id == patient_id,
@@ -338,7 +349,7 @@ class PatientSharingService:
         # Check if user is the owner (they cannot remove their own ownership)
         patient = self.db.query(Patient).filter(Patient.id == patient_id).first()
         if not patient:
-            raise ValueError("Patient not found")
+            raise PatientNotFoundError("Patient not found")
         
         if patient.owner_user_id == user.id:
             raise ValueError("Cannot remove access to patients you own")
@@ -391,12 +402,16 @@ class PatientSharingService:
         Raises:
             ValueError: If validation fails
         """
-        logger.info(f"User {owner.id} sending patient share invitation for patient {patient_id}")
+        logger.info("Sending patient share invitation", extra={
+            "user_id": owner.id,
+            "patient_id": patient_id,
+            "component": "patient_sharing"
+        })
 
         # Validate permission level
         valid_permissions = ['view', 'edit', 'full']
         if permission_level not in valid_permissions:
-            raise ValueError(f"Invalid permission level. Must be one of: {valid_permissions}")
+            raise InvalidPermissionLevelError(f"Invalid permission level. Must be one of: {valid_permissions}")
 
         # Verify patient ownership
         patient = self.db.query(Patient).filter(
@@ -405,7 +420,7 @@ class PatientSharingService:
         ).first()
 
         if not patient:
-            raise ValueError("Patient not found or not owned by user")
+            raise PatientNotFoundError("Patient not found or not owned by user")
 
         # Find recipient user
         recipient = self.db.query(User).filter(
@@ -414,7 +429,7 @@ class PatientSharingService:
         ).first()
 
         if not recipient:
-            raise ValueError("Recipient user not found")
+            raise RecipientNotFoundError("Recipient user not found")
 
         if recipient.id == owner.id:
             raise ValueError("Cannot share patient with yourself")
@@ -489,7 +504,11 @@ class PatientSharingService:
         Raises:
             ValueError: If invitation invalid or expired
         """
-        logger.info(f"User {user.id} accepting patient share invitation {invitation_id}")
+        logger.info("Accepting patient share invitation", extra={
+            "user_id": user.id,
+            "invitation_id": invitation_id,
+            "component": "patient_sharing"
+        })
 
         # Get invitation
         invitation = self.db.query(Invitation).filter(
@@ -560,7 +579,11 @@ class PatientSharingService:
             self.db.commit()
             self.db.refresh(share)
 
-            logger.info(f"Created patient share {share.id} from invitation {invitation.id}")
+            logger.info("Patient share created from invitation", extra={
+                "share_id": share.id,
+                "invitation_id": invitation.id,
+                "component": "patient_sharing"
+            })
             return share
 
         except IntegrityError as e:
@@ -587,6 +610,138 @@ class PatientSharingService:
                 # Unexpected: constraint violation but no existing share found
                 logger.error(f"IntegrityError but no existing share found: {str(e)}")
                 raise
+
+    def accept_bulk_patient_share_invitation(
+        self,
+        user: User,
+        invitation: Invitation,
+        response_note: Optional[str] = None
+    ) -> List[PatientShare]:
+        """
+        Accept bulk patient share invitation and create multiple PatientShares
+
+        Args:
+            user: User accepting the invitation
+            invitation: Bulk invitation object
+            response_note: Optional response note
+
+        Returns:
+            List of created/existing PatientShare objects
+
+        Raises:
+            ValueError: If invitation invalid or bulk data missing
+        """
+        logger.info("Accepting bulk patient share invitation", extra={
+            "user_id": user.id,
+            "invitation_id": invitation.id,
+            "component": "patient_sharing"
+        })
+
+        # Extract bulk invitation data
+        patients_data = invitation.context_data.get('patients', [])
+        if not patients_data:
+            raise ValueError("Invalid bulk invitation: missing patients data")
+
+        # Use explicit transaction boundary for atomic bulk operation
+        try:
+            shares = []
+            for patient_data in patients_data:
+                patient_id = patient_data.get('patient_id')
+                if not patient_id:
+                    logger.warning("Skipping patient data without ID", extra={
+                        "patient_data": patient_data,
+                        "component": "patient_sharing"
+                    })
+                    continue
+
+                # Verify patient still exists and sender still owns it
+                patient = self.db.query(Patient).filter(
+                    Patient.id == patient_id,
+                    Patient.owner_user_id == invitation.sent_by_user_id
+                ).first()
+
+                if not patient:
+                    logger.warning("Patient no longer exists or ownership changed", extra={
+                        "patient_id": patient_id,
+                        "sender_id": invitation.sent_by_user_id,
+                        "component": "patient_sharing"
+                    })
+                    continue  # Skip this patient in bulk operation
+
+                # Check if share already exists
+                existing = self.db.query(PatientShare).filter(
+                    PatientShare.patient_id == patient_id,
+                    PatientShare.shared_with_user_id == user.id,
+                    PatientShare.is_active == True
+                ).first()
+
+                if existing:
+                    logger.info("Share already exists, using existing", extra={
+                        "patient_id": patient_id,
+                        "share_id": existing.id,
+                        "component": "patient_sharing"
+                    })
+                    shares.append(existing)
+                    continue
+
+                # Extract context data for this patient
+                permission_level = invitation.context_data.get('permission_level', 'view')
+                custom_permissions = invitation.context_data.get('custom_permissions')
+                expires_at_str = invitation.context_data.get('expires_at')
+
+                expires_at = None
+                if expires_at_str:
+                    try:
+                        expires_at = datetime.fromisoformat(expires_at_str)
+                    except ValueError:
+                        logger.warning("Invalid expires_at format", extra={
+                            "expires_at_str": expires_at_str,
+                            "component": "patient_sharing"
+                        })
+
+                # Create share
+                share = PatientShare(
+                    patient_id=patient_id,
+                    shared_by_user_id=invitation.sent_by_user_id,
+                    shared_with_user_id=user.id,
+                    permission_level=permission_level,
+                    custom_permissions=custom_permissions,
+                    expires_at=expires_at,
+                    is_active=True,
+                    invitation_id=invitation.id
+                )
+                self.db.add(share)
+                shares.append(share)
+
+            # Update invitation status within same transaction
+            invitation.status = 'accepted'
+            invitation.responded_at = get_utc_now()
+            invitation.response_note = response_note
+            invitation.updated_at = get_utc_now()
+
+            # Flush to validate constraints before commit
+            self.db.flush()
+
+            # Commit all changes atomically
+            self.db.commit()
+
+            logger.info("Bulk patient share invitation accepted", extra={
+                "invitation_id": invitation.id,
+                "shares_created": len(shares),
+                "component": "patient_sharing"
+            })
+
+            return shares
+
+        except IntegrityError as e:
+            self.db.rollback()
+            logger.error("Database constraint violation during bulk acceptance", extra={
+                "invitation_id": invitation.id,
+                "user_id": user.id,
+                "error": str(e),
+                "component": "patient_sharing"
+            })
+            raise
 
     def bulk_send_patient_share_invitations(
         self,
@@ -623,7 +778,7 @@ class PatientSharingService:
         # Validate permission level
         valid_permissions = ['view', 'edit', 'full']
         if permission_level not in valid_permissions:
-            raise ValueError(f"Invalid permission level. Must be one of: {valid_permissions}")
+            raise InvalidPermissionLevelError(f"Invalid permission level. Must be one of: {valid_permissions}")
 
         # Set statement timeout for bulk operation to prevent long-running queries
         # Note: This uses PostgreSQL-specific syntax. For other databases, adjust accordingly.
@@ -645,7 +800,7 @@ class PatientSharingService:
         found_patient_ids = {patient.id for patient in patients}
         missing_ids = set(patient_ids) - found_patient_ids
         if missing_ids:
-            raise ValueError(f"Patients not found or not owned by user: {', '.join(map(str, missing_ids))}")
+            raise PatientNotFoundError(f"Patients not found or not owned by user: {', '.join(map(str, missing_ids))}")
 
         if not patients:
             raise ValueError("No patients provided")
@@ -657,7 +812,7 @@ class PatientSharingService:
         ).first()
 
         if not recipient:
-            raise ValueError("Recipient user not found")
+            raise RecipientNotFoundError("Recipient user not found")
 
         if recipient.id == owner.id:
             raise ValueError("Cannot share patients with yourself")
@@ -678,7 +833,7 @@ class PatientSharingService:
                 f"{patient_map[share.patient_id].first_name} {patient_map[share.patient_id].last_name}"
                 for share in existing_shares
             ]
-            raise ValueError(f"Already shared with this user: {', '.join(already_shared)}")
+            raise AlreadySharedError(f"Already shared with this user: {', '.join(already_shared)}")
 
         # Build context data
         patients_data = []

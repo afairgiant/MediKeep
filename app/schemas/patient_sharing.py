@@ -78,3 +78,28 @@ class PatientShareBulkInvitationRequest(BaseModel):
         if v not in valid_levels:
             raise ValueError(f'Permission level must be one of: {valid_levels}')
         return v
+
+
+class PatientShareInvitationResponse(BaseModel):
+    """Response schema for patient share invitation"""
+
+    message: str = Field(..., description="Success message")
+    invitation_id: int = Field(..., description="ID of created invitation")
+    expires_at: Optional[datetime] = Field(None, description="When the invitation expires")
+    title: str = Field(..., description="Invitation title")
+
+    class Config:
+        from_attributes = True
+
+
+class BulkPatientShareInvitationResponse(BaseModel):
+    """Response schema for bulk patient share invitation"""
+
+    message: str = Field(..., description="Success message")
+    invitation_id: int = Field(..., description="ID of created bulk invitation")
+    patient_count: int = Field(..., description="Number of patients in the invitation")
+    expires_at: Optional[datetime] = Field(None, description="When the invitation expires")
+    title: str = Field(..., description="Invitation title")
+
+    class Config:
+        from_attributes = True
