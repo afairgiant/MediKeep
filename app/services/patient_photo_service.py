@@ -78,7 +78,20 @@ class PatientPhotoService:
         })
 
         # Ensure storage directory exists (retry if init failed due to permissions)
-        self.storage_base.mkdir(parents=True, exist_ok=True)
+        try:
+            self.storage_base.mkdir(parents=True, exist_ok=True)
+        except PermissionError as e:
+            logger.warning(
+                "Could not create storage directory during photo upload",
+                extra={
+                    "storage_path": str(self.storage_base),
+                    "error": str(e)
+                }
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Server cannot create storage directory for patient photos due to permissions."
+            )
 
         # Validate the uploaded file
         await self.validate_image(file)
