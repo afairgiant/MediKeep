@@ -3,7 +3,7 @@
  * Provides predefined test templates where users can enter both values and reference ranges
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   Card,
   Stack,
@@ -26,7 +26,8 @@ import {
   ScrollArea,
   Tooltip,
   Center,
-  Box
+  Box,
+  Autocomplete
 } from '@mantine/core';
 import {
   IconPlus,
@@ -43,6 +44,7 @@ import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import logger from '../../../services/logger';
+import { getAutocompleteOptions, extractTestName, getTestByName } from '../../../constants/testLibrary';
 
 interface TestTemplate {
   id: string;
@@ -75,6 +77,9 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  // Track when an autocomplete option was just selected to prevent onChange from overwriting
+  const justSelectedRef = useRef<{index: number, value: string} | null>(null);
 
   const handleError = useCallback((error: Error, context: string) => {
     logger.error('test_component_templates_error', {
@@ -191,6 +196,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       ref_range_max: number | '';
       ref_range_text?: string;
       status?: string;
+      category?: string;
       display_order?: number;
       notes?: string;
     }>;
@@ -321,6 +327,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       ref_range_max: '' as number | '',
       ref_range_text: '',
       status: '',
+      category: template.category, // Set category from template
       display_order: test.default_display_order,
       notes: test.notes || ''
     }));
@@ -381,21 +388,28 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         component: 'TestComponentTemplates'
       });
 
-      // Convert form data to API format
+      // Sanitize function to prevent XSS
+      const sanitizeInput = (input: string | undefined): string | null => {
+        if (!input) return null;
+        // Trim whitespace and strip HTML tags
+        return input.trim().replace(/<[^>]*>/g, '') || null;
+      };
+
+      // Convert form data to API format with sanitization
       const componentsToCreate: LabTestComponentCreate[] = filledComponents.map(component => ({
         lab_result_id: labResultId,
-        test_name: component.test_name,
-        abbreviation: component.abbreviation || null,
-        test_code: component.test_code || null,
+        test_name: sanitizeInput(component.test_name) || '',
+        abbreviation: sanitizeInput(component.abbreviation),
+        test_code: sanitizeInput(component.test_code),
         value: component.value as number,
-        unit: component.unit,
+        unit: sanitizeInput(component.unit) || '',
         ref_range_min: component.ref_range_min === '' ? null : component.ref_range_min as number,
         ref_range_max: component.ref_range_max === '' ? null : component.ref_range_max as number,
-        ref_range_text: component.ref_range_text || null,
+        ref_range_text: sanitizeInput(component.ref_range_text),
         status: (component.status as "normal" | "high" | "low" | "critical" | "abnormal" | "borderline" | null) || null,
-        category: (selectedTemplate?.category as "chemistry" | "hematology" | "endocrinology" | "immunology" | "microbiology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
+        category: (component.category as "chemistry" | "hematology" | "endocrinology" | "immunology" | "microbiology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
         display_order: component.display_order || null,
-        notes: component.notes || null
+        notes: sanitizeInput(component.notes)
       }));
 
       // Call the API to create components in bulk
@@ -687,11 +701,51 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                       <Group gap="xs" wrap="nowrap" align="center">
                         <Box style={{ width: '180px', minWidth: '180px' }}>
                           {selectedTemplate?.id === 'custom_entry' ? (
-                            <TextInput
-                              placeholder="Test name"
+                            <Autocomplete
+                              placeholder="Type to search tests..."
                               size="xs"
                               value={component.test_name}
-                              onChange={(event) => updateComponent(index, 'test_name', event.target.value)}
+                              onChange={(value) => {
+                                // Check if this onChange is from a selection
+                                if (justSelectedRef.current?.index === index) {
+                                  // Use the clean value from the selection
+                                  updateComponent(index, 'test_name', justSelectedRef.current.value);
+                                  justSelectedRef.current = null; // Clear flag
+                                } else {
+                                  // Normal typing - allow any value
+                                  updateComponent(index, 'test_name', value);
+                                }
+                              }}
+                              onOptionSubmit={(value) => {
+                                // This fires when user selects from dropdown (clicks or presses Enter)
+                                const cleanTestName = extractTestName(value);
+
+                                // Set flag so onChange knows this was a selection
+                                justSelectedRef.current = { index, value: cleanTestName };
+
+                                // Update test name to clean version (without abbreviation)
+                                updateComponent(index, 'test_name', cleanTestName);
+
+                                // Auto-fill unit, category, abbreviation when selecting from library
+                                const libraryTest = getTestByName(cleanTestName);
+
+                                if (libraryTest) {
+                                  // Always overwrite when selecting from dropdown (not just when empty)
+                                  updateComponent(index, 'unit', libraryTest.default_unit);
+                                  updateComponent(index, 'category', libraryTest.category);
+                                  if (libraryTest.abbreviation) {
+                                    updateComponent(index, 'abbreviation', libraryTest.abbreviation);
+                                  }
+                                }
+                              }}
+                              data={getAutocompleteOptions(component.test_name || '', 200)}
+                              limit={200}
+                              maxDropdownHeight={400}
+                              comboboxProps={{
+                                zIndex: 3003,
+                                transitionProps: { duration: 0, transition: 'pop' }
+                              }}
+                              withScrollArea={true}
                             />
                           ) : (
                             <Stack gap={2}>

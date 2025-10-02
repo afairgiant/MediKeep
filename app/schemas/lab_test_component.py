@@ -61,6 +61,18 @@ class LabTestComponentBase(BaseModel):
             raise ValueError("Test value is required")
         if not isinstance(v, (int, float)):
             raise ValueError("Test value must be a number")
+
+        # Import math for boundary checks
+        import math
+
+        # Check for invalid numbers (NaN, Infinity)
+        if math.isnan(v) or math.isinf(v):
+            raise ValueError("Test value must be a finite number")
+
+        # Reasonable boundary check (prevents display/calculation issues)
+        if abs(v) > 1e15:
+            raise ValueError("Test value is out of reasonable range")
+
         return float(v)
 
     @field_validator("unit")
@@ -77,16 +89,31 @@ class LabTestComponentBase(BaseModel):
     @classmethod
     def validate_ref_range_min(cls, v):
         """Validate reference range minimum"""
-        if v is not None and not isinstance(v, (int, float)):
-            raise ValueError("Reference range minimum must be a number")
+        if v is not None:
+            if not isinstance(v, (int, float)):
+                raise ValueError("Reference range minimum must be a number")
+
+            import math
+            if math.isnan(v) or math.isinf(v):
+                raise ValueError("Reference range minimum must be a finite number")
+            if abs(v) > 1e15:
+                raise ValueError("Reference range minimum is out of reasonable range")
+
         return float(v) if v is not None else None
 
     @field_validator("ref_range_max")
     @classmethod
     def validate_ref_range_max(cls, v):
         """Validate reference range maximum"""
-        if v is not None and not isinstance(v, (int, float)):
-            raise ValueError("Reference range maximum must be a number")
+        if v is not None:
+            if not isinstance(v, (int, float)):
+                raise ValueError("Reference range maximum must be a number")
+
+            import math
+            if math.isnan(v) or math.isinf(v):
+                raise ValueError("Reference range maximum must be a finite number")
+            if abs(v) > 1e15:
+                raise ValueError("Reference range maximum is out of reasonable range")
         return float(v) if v is not None else None
 
     @field_validator("ref_range_text")

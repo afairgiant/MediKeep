@@ -144,6 +144,11 @@ class ApiService {
       status: response.status,
     });
 
+    // Handle 204 No Content responses (common for DELETE operations)
+    if (response.status === 204) {
+      return null;
+    }
+
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return response.json();

@@ -109,6 +109,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     );
 
     const components: ParsedTestComponent[] = [];
+    const failedLines: { lineNumber: number; content: string }[] = [];
 
     // Common patterns for parsing lab results
     const patterns = {
@@ -240,8 +241,24 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
         }
 
         components.push(parsed);
+      } else {
+        // Track failed lines for user feedback
+        failedLines.push({ lineNumber: index + 1, content: trimmedLine });
       }
     });
+
+    // Notify user of failed lines
+    if (failedLines.length > 0 && components.length > 0) {
+      // Use setTimeout to avoid notification during render
+      setTimeout(() => {
+        notifications.show({
+          title: 'Some Lines Could Not Be Parsed',
+          message: `${failedLines.length} line(s) could not be parsed. Check the Preview tab to review and edit the parsed results.`,
+          color: 'yellow',
+          autoClose: 6000
+        });
+      }, 100);
+    }
 
     return components;
   }, [parseSettings]);

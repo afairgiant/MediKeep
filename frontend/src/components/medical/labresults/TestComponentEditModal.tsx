@@ -161,8 +161,11 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     }
   }, [component]);
 
-  // Recalculate status when value or ranges change
+  // Combined effect to prevent race conditions between status and category updates
   useEffect(() => {
+    const updates: Partial<typeof formData> = {};
+
+    // Recalculate status when value or ranges change
     const newStatus = calculateStatus(
       formData.value as number,
       formData.ref_range_min as number | undefined,
@@ -170,19 +173,22 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     );
 
     if (newStatus !== formData.status) {
-      setFormData(prev => ({ ...prev, status: newStatus }));
+      updates.status = newStatus;
     }
-  }, [formData.value, formData.ref_range_min, formData.ref_range_max]);
 
-  // Auto-suggest category when test name changes (only if category is empty)
-  useEffect(() => {
+    // Auto-suggest category when test name changes (only if category is empty)
     if (formData.test_name && !formData.category) {
       const suggestedCategory = suggestCategory(formData.test_name);
       if (suggestedCategory) {
-        setFormData(prev => ({ ...prev, category: suggestedCategory }));
+        updates.category = suggestedCategory;
       }
     }
-  }, [formData.test_name]);
+
+    // Only update if we have changes to apply
+    if (Object.keys(updates).length > 0) {
+      setFormData(prev => ({ ...prev, ...updates }));
+    }
+  }, [formData.value, formData.ref_range_min, formData.ref_range_max, formData.test_name, formData.status, formData.category]);
 
   const handleSubmit = async () => {
     if (!component) return;

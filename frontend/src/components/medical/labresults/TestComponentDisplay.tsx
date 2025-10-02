@@ -135,6 +135,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                     variant="subtle"
                     size="sm"
                     onClick={() => onEdit?.(component)}
+                    aria-label={`Edit ${component.test_name}`}
                   >
                     <IconEdit size={14} />
                   </ActionIcon>
@@ -145,6 +146,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                     color="red"
                     size="sm"
                     onClick={() => onDelete?.(component)}
+                    aria-label={`Delete ${component.test_name}`}
                   >
                     <IconTrash size={14} />
                   </ActionIcon>

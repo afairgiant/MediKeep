@@ -19,7 +19,8 @@ import {
   Center,
   Box,
   LoadingOverlay,
-  Menu
+  Menu,
+  Tooltip
 } from '@mantine/core';
 import {
   IconFlask,
@@ -218,12 +219,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
     loadComponents();
   }, [loadComponents]);
 
-  // Auto-refresh when switching to display tab
-  useEffect(() => {
-    if (activeTab === 'display' && !loading) {
-      loadComponents(false);
-    }
-  }, [activeTab, loading, loadComponents]);
+  // Note: Removed auto-refresh on tab switch to prevent unnecessary API calls
+  // Users can manually refresh using the refresh button if needed
 
   const getTabIcon = (tabValue: string) => {
     switch (tabValue) {
@@ -433,9 +430,16 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             <Tabs.Tab value="templates" leftSection={<IconTemplate size={16} />}>
               Templates
             </Tabs.Tab>
-            <Tabs.Tab value="bulk" leftSection={<IconUpload size={16} />}>
-              Bulk Import
-            </Tabs.Tab>
+            <Tooltip label="Bulk import is currently locked for further development">
+              <Tabs.Tab
+                value="bulk"
+                leftSection={<IconUpload size={16} />}
+                disabled
+                style={{ cursor: 'not-allowed', opacity: 0.5 }}
+              >
+                Bulk Import (Locked)
+              </Tabs.Tab>
+            </Tooltip>
           </Tabs.List>
 
           <Tabs.Panel value="templates" pt="md">

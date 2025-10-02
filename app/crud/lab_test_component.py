@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
 from app.models.models import LabTestComponent
@@ -94,10 +94,10 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             query = query.filter(self.model.lab_result_id == lab_result_id)
 
         if patient_id:
-            # Join with lab_results table to filter by patient_id
+            # Join with lab_results table to filter by patient_id and eager load to prevent N+1
             query = query.join(self.model.lab_result).filter(
                 self.model.lab_result.has(patient_id=patient_id)
-            )
+            ).options(joinedload(self.model.lab_result))
 
         return (
             query
@@ -135,10 +135,13 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         limit: int = 100
     ) -> List[LabTestComponent]:
         """Search test components by name, abbreviation, or test code"""
+        # Escape SQL wildcards to prevent DoS via slow queries
+        escaped_query = query_text.replace('%', r'\%').replace('_', r'\_')
+
         search_filter = or_(
-            self.model.test_name.ilike(f"%{query_text}%"),
-            self.model.abbreviation.ilike(f"%{query_text}%"),
-            self.model.test_code.ilike(f"%{query_text}%")
+            self.model.test_name.ilike(f"%{escaped_query}%", escape='\\'),
+            self.model.abbreviation.ilike(f"%{escaped_query}%", escape='\\'),
+            self.model.test_code.ilike(f"%{escaped_query}%", escape='\\')
         )
 
         query_obj = db.query(self.model).filter(search_filter)
@@ -147,10 +150,10 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             query_obj = query_obj.filter(self.model.lab_result_id == lab_result_id)
 
         if patient_id:
-            # Join with lab_results table to filter by patient_id
+            # Join with lab_results table to filter by patient_id and eager load to prevent N+1
             query_obj = query_obj.join(self.model.lab_result).filter(
                 self.model.lab_result.has(patient_id=patient_id)
-            )
+            ).options(joinedload(self.model.lab_result))
 
         if category:
             query_obj = query_obj.filter(self.model.category == category.lower())
