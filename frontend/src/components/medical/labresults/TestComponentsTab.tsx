@@ -3,7 +3,7 @@
  * Brings together all test component functionality in a tabbed interface
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Stack,
   Group,
@@ -41,6 +41,7 @@ import TestComponentTemplates from './TestComponentTemplates';
 import TestComponentBulkEntry from './TestComponentBulkEntry';
 import TestComponentStats from './TestComponentStats';
 import TestComponentEditModal from './TestComponentEditModal';
+import TestComponentTrendsPanel from './TestComponentTrendsPanel';
 import {
   LabTestComponent,
   labTestComponentApi,
@@ -70,6 +71,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [addModalTab, setAddModalTab] = useState<string>('templates');
 
   const { patient: currentPatient } = useCurrentPatient() as any;
+  const loadingRef = useRef(false);
 
   const handleError = useCallback((error: Error, context: string) => {
     logger.error('test_components_tab_error', {
@@ -94,6 +96,11 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   }, [labResultId, onError]);
 
   const loadComponents = useCallback(async (showLoading = true) => {
+    // Skip if already loading to prevent duplicate fetches
+    if (loadingRef.current) return;
+
+    loadingRef.current = true;
+
     if (showLoading) {
       setLoading(true);
     } else {
@@ -115,6 +122,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
     } finally {
       setLoading(false);
       setRefreshing(false);
+      loadingRef.current = false;
     }
   }, [labResultId, filters, currentPatient?.id, handleError]);
 
@@ -135,6 +143,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
   const [editingComponent, setEditingComponent] = useState<LabTestComponent | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [trendPanelOpen, setTrendPanelOpen] = useState(false);
+  const [selectedTestName, setSelectedTestName] = useState<string | null>(null);
 
   const handleComponentEdit = useCallback((component: LabTestComponent) => {
     logger.info('test_component_edit_requested', {
@@ -213,6 +223,17 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const handleRefresh = useCallback(() => {
     loadComponents(false);
   }, [loadComponents]);
+
+  const handleTrendClick = useCallback((testName: string) => {
+    logger.info('test_component_trend_requested', {
+      message: 'Test component trend view requested',
+      testName,
+      component: 'TestComponentsTab',
+    });
+
+    setSelectedTestName(testName);
+    setTrendPanelOpen(true);
+  }, []);
 
   // Load components on mount and when labResultId changes
   useEffect(() => {
@@ -336,6 +357,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               showActions={!isViewMode}
               onEdit={handleComponentEdit}
               onDelete={handleComponentDelete}
+              onTrendClick={handleTrendClick}
               onError={(error: Error) => handleError(error, 'component')}
             />
           </Box>
@@ -459,6 +481,19 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           </Tabs.Panel>
         </Tabs>
       </Modal>
+
+      {/* Trend Analysis Panel */}
+      {currentPatient?.id && (
+        <TestComponentTrendsPanel
+          opened={trendPanelOpen}
+          onClose={() => {
+            setTrendPanelOpen(false);
+            setSelectedTestName(null);
+          }}
+          testName={selectedTestName}
+          patientId={currentPatient.id}
+        />
+      )}
     </Stack>
   );
 };

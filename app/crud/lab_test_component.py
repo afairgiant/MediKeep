@@ -172,16 +172,17 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
     def get_by_patient_and_test_name(
         self, db: Session, *, patient_id: int, test_name: str
     ) -> List[LabTestComponent]:
-        """Get all test components for a patient by test name (across all lab results)"""
+        """Get all test components for a patient by exact test name (case-insensitive, across all lab results)"""
         return (
             db.query(self.model)
             .join(self.model.lab_result)
             .filter(
                 and_(
                     self.model.lab_result.has(patient_id=patient_id),
-                    self.model.test_name.ilike(f"%{test_name}%")
+                    self.model.test_name.ilike(test_name)  # Exact match, case-insensitive
                 )
             )
+            .options(joinedload(self.model.lab_result))  # Prevent N+1 queries
             .order_by(self.model.created_at.desc())
             .all()
         )

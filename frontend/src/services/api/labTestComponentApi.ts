@@ -53,6 +53,47 @@ export interface LabTestComponentStatistics {
   normal_count: number;
 }
 
+// Trend tracking types
+export interface TrendDataPoint {
+  id: number;
+  value: number;
+  unit: string;
+  status?: string | null;
+  ref_range_min?: number | null;
+  ref_range_max?: number | null;
+  ref_range_text?: string | null;
+  recorded_date?: string | null;
+  created_at: string;
+  lab_result: {
+    id: number;
+    test_name: string;
+    completed_date?: string | null;
+  };
+}
+
+export interface TrendStatistics {
+  count: number;
+  latest?: number | null;
+  average?: number | null;
+  min?: number | null;
+  max?: number | null;
+  std_dev?: number | null;
+  trend_direction: 'increasing' | 'decreasing' | 'stable';
+  time_in_range_percent?: number | null;
+  normal_count: number;
+  abnormal_count: number;
+}
+
+export interface TrendResponse {
+  test_name: string;
+  unit: string;
+  category?: string | null;
+  data_points: TrendDataPoint[];
+  statistics: TrendStatistics;
+  is_aggregated: boolean;
+  aggregation_period?: string | null;
+}
+
 export interface TestTemplate {
   name: string;
   description: string;
@@ -464,6 +505,50 @@ class LabTestComponentApi {
       return response;
     } catch (error: any) {
       logger.error('abbreviation_suggestions_error', {
+        error: error.message,
+        component: 'LabTestComponentApi'
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get trend data for a specific test component across all lab results
+   */
+  async getTrendsByPatientAndTest(
+    patientId: number,
+    testName: string,
+    options?: {
+      dateFrom?: string;  // YYYY-MM-DD
+      dateTo?: string;    // YYYY-MM-DD
+      limit?: number;
+    },
+    signal?: AbortSignal
+  ): Promise<TrendResponse> {
+    try {
+      const params: any = {};
+
+      if (options?.dateFrom) params.date_from = options.dateFrom;
+      if (options?.dateTo) params.date_to = options.dateTo;
+      if (options?.limit) params.limit = options.limit;
+
+      const response = await apiService.get(
+        `/lab-test-components/patient/${patientId}/trends/${encodeURIComponent(testName)}`,
+        { params, signal }
+      );
+
+      logger.debug('trend_data_fetched', {
+        patientId,
+        testName,
+        dataPointCount: response?.data_points?.length || 0,
+        component: 'LabTestComponentApi'
+      });
+
+      return response;
+    } catch (error: any) {
+      logger.error('trend_data_fetch_error', {
+        patientId,
+        testName,
         error: error.message,
         component: 'LabTestComponentApi'
       });

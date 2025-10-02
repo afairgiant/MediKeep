@@ -41,7 +41,15 @@ const LabResultViewModal = ({
   isBlocking,
   onError
 }) => {
+  // Reset activeTab when modal opens with new labResult
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when labResult changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, labResult?.id]);
 
   const handleError = (error, context) => {
     logger.error('lab_result_view_modal_error', {
@@ -230,6 +238,7 @@ const LabResultViewModal = ({
             <Tabs.Panel value="test-components">
               <Box mt="md">
                 <TestComponentsTab
+                  key={`test-components-${labResult.id}`}
                   labResultId={labResult.id}
                   isViewMode={false}
                   onError={handleError}

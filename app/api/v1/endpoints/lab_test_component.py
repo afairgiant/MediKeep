@@ -1,4 +1,6 @@
 from typing import Any, Dict, List, Optional
+from datetime import datetime
+from datetime import date as date_type
 
 from fastapi import (
     APIRouter,
@@ -37,6 +39,10 @@ from app.schemas.lab_test_component import (
     LabTestComponentResponse,
     LabTestComponentUpdate,
     LabTestComponentWithLabResult,
+    LabTestComponentTrendResponse,
+    LabTestComponentTrendDataPoint,
+    LabTestComponentTrendStatistics,
+    LabResultBasicForTrend,
 )
 from app.core.logging_config import get_logger
 
@@ -461,3 +467,226 @@ def get_abbreviation_suggestions(
         abbreviations = lab_test_component.get_unique_abbreviations(db, limit=limit)
 
     return abbreviations
+
+
+# Helper function for trend statistics
+def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendStatistics:
+    """Calculate statistics for trend data."""
+    if not components:
+        return LabTestComponentTrendStatistics(
+            count=0,
+            normal_count=0,
+            abnormal_count=0,
+            trend_direction="stable"
+        )
+
+    values = [c.value for c in components]
+
+    # Basic stats
+    count = len(values)
+    latest = values[0] if values else None
+    average = sum(values) / count if count > 0 else None
+    minimum = min(values) if values else None
+    maximum = max(values) if values else None
+
+    # Trend direction (compare first half vs second half)
+    trend = "stable"
+    if count >= 4:
+        mid = count // 2
+        first_half_avg = sum(values[:mid]) / mid
+        second_half_avg = sum(values[mid:]) / (count - mid)
+
+        # Only calculate percentage if first_half_avg is meaningful
+        # Use absolute threshold to avoid division by zero and unstable percentages
+        if abs(first_half_avg) > 0.01:
+            change_percent = ((second_half_avg - first_half_avg) / abs(first_half_avg)) * 100
+
+            if change_percent > 5:
+                trend = "increasing"
+            elif change_percent < -5:
+                trend = "decreasing"
+        elif abs(second_half_avg - first_half_avg) > 0.01:
+            # For near-zero values, use absolute difference instead of percentage
+            if second_half_avg > first_half_avg:
+                trend = "increasing"
+            elif second_half_avg < first_half_avg:
+                trend = "decreasing"
+
+    # Time in range (count normal vs abnormal)
+    normal_count = sum(1 for c in components if c.status == "normal")
+    time_in_range_percent = (normal_count / count * 100) if count > 0 else None
+
+    # Standard deviation
+    if count > 1 and average is not None:
+        variance = sum((x - average) ** 2 for x in values) / count
+        std_dev = variance ** 0.5
+    else:
+        std_dev = None
+
+    return LabTestComponentTrendStatistics(
+        count=count,
+        latest=round(latest, 2) if latest is not None else None,
+        average=round(average, 2) if average is not None else None,
+        min=round(minimum, 2) if minimum is not None else None,
+        max=round(maximum, 2) if maximum is not None else None,
+        std_dev=round(std_dev, 2) if std_dev is not None else None,
+        trend_direction=trend,
+        time_in_range_percent=round(time_in_range_percent, 1) if time_in_range_percent is not None else None,
+        normal_count=normal_count,
+        abnormal_count=count - normal_count
+    )
+
+
+# Trend Tracking Endpoint
+@router.get("/patient/{patient_id}/trends/{test_name}", response_model=LabTestComponentTrendResponse)
+def get_lab_test_component_trends(
+    *,
+    request: Request,
+    patient_id: int,
+    test_name: str,
+    date_from: Optional[date_type] = Query(None, description="Start date (YYYY-MM-DD)"),
+    date_to: Optional[date_type] = Query(None, description="End date (YYYY-MM-DD)"),
+    limit: int = Query(100, ge=1, le=100, description="Max results (max 100)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Get trend data for a specific test component across all lab results for a patient.
+    Returns historical values with statistics.
+
+    Decision: Uses exact test name matching (no fuzzy matching).
+    Decision: Uses lab_result.completed_date if available, otherwise created_at.
+    Decision: Shows warnings in response for unit mismatches or missing dates (handled client-side).
+    """
+
+    with handle_database_errors(request=request):
+        # Verify patient access
+        deps.verify_patient_access(patient_id, db, current_user)
+
+        # Validate and sanitize test_name
+        validated_test_name = validate_search_input(test_name)
+
+        # Get all test components for this patient and test name
+        components = lab_test_component.get_by_patient_and_test_name(
+            db,
+            patient_id=patient_id,
+            test_name=validated_test_name
+        )
+
+        # Helper function to get recorded date for a component
+        def get_recorded_date(component):
+            """Get the recorded date, preferring completed_date over created_at."""
+            return component.lab_result.completed_date if component.lab_result.completed_date else component.created_at.date()
+
+        # Apply date filtering if provided (FastAPI already parsed dates)
+        if date_from or date_to:
+            filtered_components = []
+            for component in components:
+                recorded_date = get_recorded_date(component)
+
+                if date_from and recorded_date < date_from:
+                    continue
+                if date_to and recorded_date > date_to:
+                    continue
+
+                filtered_components.append(component)
+
+            components = filtered_components
+
+        # Sort by date (most recent first)
+        components.sort(key=get_recorded_date, reverse=True)
+
+        # Apply limit
+        components = components[:limit]
+
+        # Detect unit mismatches
+        if components:
+            primary_unit = components[0].unit
+            units_found = set(c.unit for c in components if c.unit)
+            if len(units_found) > 1:
+                logger.warning(
+                    f"Unit mismatch detected in trend data for {test_name}",
+                    extra={
+                        "user_id": current_user.id,
+                        "patient_id": patient_id,
+                        "test_name": test_name,
+                        "primary_unit": primary_unit,
+                        "all_units": list(units_found),
+                        "component": "lab_test_component_trends"
+                    }
+                )
+
+        # Log the request
+        logger.info(
+            f"Trend data requested for patient {patient_id}, test: {test_name}",
+            extra={
+                "user_id": current_user.id,
+                "patient_id": patient_id,
+                "test_name": test_name,
+                "date_from": str(date_from) if date_from else None,
+                "date_to": str(date_to) if date_to else None,
+                "data_point_count": len(components),
+                "component": "lab_test_component_trends"
+            }
+        )
+
+        # Return empty response if no components found
+        if not components:
+            return LabTestComponentTrendResponse(
+                test_name=test_name,
+                unit="",
+                category=None,
+                data_points=[],
+                statistics=LabTestComponentTrendStatistics(
+                    count=0,
+                    normal_count=0,
+                    abnormal_count=0,
+                    trend_direction="stable"
+                ),
+                is_aggregated=False,
+                aggregation_period=None
+            )
+
+        # Calculate statistics
+        statistics = calculate_trend_statistics(components)
+
+        # Build data points with proper date handling
+        data_points = []
+        for component in components:
+            # Use completed_date if available
+            recorded_date = component.lab_result.completed_date if component.lab_result.completed_date else None
+
+            data_point = LabTestComponentTrendDataPoint(
+                id=component.id,
+                value=component.value,
+                unit=component.unit,
+                status=component.status,
+                ref_range_min=component.ref_range_min,
+                ref_range_max=component.ref_range_max,
+                ref_range_text=component.ref_range_text,
+                recorded_date=recorded_date,
+                created_at=component.created_at,
+                lab_result=LabResultBasicForTrend(
+                    id=component.lab_result.id,
+                    test_name=component.lab_result.test_name,
+                    completed_date=component.lab_result.completed_date
+                )
+            )
+            data_points.append(data_point)
+
+        # Get unit and category from most recent component
+        unit = components[0].unit
+        category = components[0].category
+
+        # Build response
+        response = LabTestComponentTrendResponse(
+            test_name=test_name,
+            unit=unit,
+            category=category,
+            data_points=data_points,
+            statistics=statistics,
+            is_aggregated=False,
+            aggregation_period=None
+        )
+
+        return response
