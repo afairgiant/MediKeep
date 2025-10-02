@@ -20,6 +20,7 @@ from app.exceptions.patient_sharing import (
     RecipientNotFoundError,
     InvalidPermissionLevelError,
     ShareNotFoundError,
+    SelfShareError,
 )
 
 logger = get_logger(__name__, "app")
@@ -86,7 +87,7 @@ class PatientSharingService:
 
         # Check if user is trying to share with themselves
         if owner.id == shared_with_user_id:
-            raise ValueError("Cannot share patient with yourself")
+            raise SelfShareError("Cannot share patient with yourself")
         
         # Check if already shared
         existing_share = self.db.query(PatientShare).filter(
@@ -134,7 +135,10 @@ class PatientSharingService:
             
         except IntegrityError as e:
             self.db.rollback()
-            logger.error(f"Database integrity error: {e}")
+            logger.error("Database integrity error", extra={
+                "error": str(e),
+                "component": "patient_sharing"
+            })
             raise ValueError("Failed to create patient share due to database constraint")
     
     def revoke_patient_share(self, owner: User, patient_id: int, shared_with_user_id: int) -> bool:
@@ -150,7 +154,12 @@ class PatientSharingService:
         Returns:
             True if share was revoked, False if no share existed
         """
-        logger.info(f"User {owner.id} revoking patient {patient_id} access from user {shared_with_user_id}")
+        logger.info("Revoking patient access", extra={
+            "user_id": owner.id,
+            "patient_id": patient_id,
+            "revoked_from_user_id": shared_with_user_id,
+            "component": "patient_sharing"
+        })
 
         # Verify ownership
         patient = self.db.query(Patient).filter(
@@ -183,11 +192,17 @@ class PatientSharingService:
             if invitation and invitation.status == 'accepted':
                 invitation.status = 'revoked'
                 invitation.updated_at = get_utc_now()
-                logger.info(f"Updated invitation {invitation.id} status to 'revoked'")
+                logger.info("Updated invitation status to revoked", extra={
+                    "invitation_id": invitation.id,
+                    "component": "patient_sharing"
+                })
 
         self.db.commit()
 
-        logger.info(f"Revoked patient share {share.id}")
+        logger.info("Revoked patient share", extra={
+            "share_id": share.id,
+            "component": "patient_sharing"
+        })
         return True
     
     def update_patient_share(
@@ -213,7 +228,12 @@ class PatientSharingService:
         Returns:
             The updated PatientShare object
         """
-        logger.info(f"User {owner.id} updating patient {patient_id} share for user {shared_with_user_id}")
+        logger.info("Updating patient share", extra={
+            "user_id": owner.id,
+            "patient_id": patient_id,
+            "shared_with_user_id": shared_with_user_id,
+            "component": "patient_sharing"
+        })
         
         # Verify ownership
         patient = self.db.query(Patient).filter(
@@ -249,8 +269,11 @@ class PatientSharingService:
         
         self.db.commit()
         self.db.refresh(share)
-        
-        logger.info(f"Updated patient share {share.id}")
+
+        logger.info("Updated patient share", extra={
+            "share_id": share.id,
+            "component": "patient_sharing"
+        })
         return share
     
     def get_patient_shares(self, owner: User, patient_id: int) -> List[PatientShare]:
@@ -327,7 +350,10 @@ class PatientSharingService:
             count += 1
         
         self.db.commit()
-        logger.info(f"Deactivated {count} expired patient shares")
+        logger.info("Deactivated expired patient shares", extra={
+            "count": count,
+            "component": "patient_sharing"
+        })
         return count
     
     def remove_user_access(self, user: User, patient_id: int) -> bool:
@@ -344,7 +370,11 @@ class PatientSharingService:
         Returns:
             True if access was removed, False if no active share found
         """
-        logger.info(f"User {user.id} removing their own access to patient {patient_id}")
+        logger.info("User removing own access to patient", extra={
+            "user_id": user.id,
+            "patient_id": patient_id,
+            "component": "patient_sharing"
+        })
         
         # Check if user is the owner (they cannot remove their own ownership)
         patient = self.db.query(Patient).filter(Patient.id == patient_id).first()
@@ -362,14 +392,23 @@ class PatientSharingService:
         ).first()
         
         if not share:
-            logger.warning(f"No active share found for user {user.id} to patient {patient_id}")
+            logger.warning("No active share found for user", extra={
+                "user_id": user.id,
+                "patient_id": patient_id,
+                "component": "patient_sharing"
+            })
             return False
-        
+
         # Deactivate the share
         share.is_active = False
         self.db.commit()
 
-        logger.info(f"Removed user {user.id} access to patient {patient_id} (share {share.id})")
+        logger.info("Removed user access to patient", extra={
+            "user_id": user.id,
+            "patient_id": patient_id,
+            "share_id": share.id,
+            "component": "patient_sharing"
+        })
         return True
 
     def send_patient_share_invitation(
@@ -432,7 +471,7 @@ class PatientSharingService:
             raise RecipientNotFoundError("Recipient user not found")
 
         if recipient.id == owner.id:
-            raise ValueError("Cannot share patient with yourself")
+            raise SelfShareError("Cannot share patient with yourself")
 
         # Check for existing active shares
         existing_share = self.db.query(PatientShare).filter(
@@ -481,7 +520,10 @@ class PatientSharingService:
             expires_hours=expires_hours
         )
 
-        logger.info(f"Created patient share invitation {invitation.id}")
+        logger.info("Created patient share invitation", extra={
+            "invitation_id": invitation.id,
+            "component": "patient_sharing"
+        })
         return invitation
 
     def accept_patient_share_invitation(
@@ -548,7 +590,11 @@ class PatientSharingService:
             try:
                 expires_at = datetime.fromisoformat(expires_at_str)
             except ValueError:
-                logger.warning(f"Invalid expires_at format in invitation {invitation_id}: {expires_at_str}")
+                logger.warning("Invalid expires_at format in invitation", extra={
+                    "invitation_id": invitation_id,
+                    "expires_at_str": expires_at_str,
+                    "component": "patient_sharing"
+                })
 
         # Attempt to create share - use try/except to handle race conditions
         # This prevents duplicate shares even if two requests arrive simultaneously
@@ -589,7 +635,11 @@ class PatientSharingService:
         except IntegrityError as e:
             # Race condition: share was created by another request
             self.db.rollback()
-            logger.info(f"Share already exists (race condition detected) for patient {patient_id}, user {user.id}")
+            logger.info("Share already exists (race condition detected)", extra={
+                "patient_id": patient_id,
+                "user_id": user.id,
+                "component": "patient_sharing"
+            })
 
             # Get the existing share
             existing_share = self.db.query(PatientShare).filter(
@@ -608,7 +658,12 @@ class PatientSharingService:
                 return existing_share
             else:
                 # Unexpected: constraint violation but no existing share found
-                logger.error(f"IntegrityError but no existing share found: {str(e)}")
+                logger.error("IntegrityError but no existing share found", extra={
+                    "error": str(e),
+                    "patient_id": patient_id,
+                    "user_id": user.id,
+                    "component": "patient_sharing"
+                })
                 raise
 
     def accept_bulk_patient_share_invitation(
@@ -773,7 +828,15 @@ class PatientSharingService:
         Raises:
             ValueError: If validation fails
         """
-        logger.info(f"User {owner.id} sending bulk patient share invitation for {len(patient_ids)} patients")
+        logger.info("Sending bulk patient share invitation", extra={
+            "user_id": owner.id,
+            "patient_count": len(patient_ids),
+            "component": "patient_sharing"
+        })
+
+        # Enforce MAX_BULK_PATIENTS limit
+        if len(patient_ids) > MAX_BULK_PATIENTS:
+            raise ValueError(f"Cannot share more than {MAX_BULK_PATIENTS} patients at once. Received {len(patient_ids)} patient IDs.")
 
         # Validate permission level
         valid_permissions = ['view', 'edit', 'full']
@@ -784,11 +847,19 @@ class PatientSharingService:
         # Note: This uses PostgreSQL-specific syntax. For other databases, adjust accordingly.
         try:
             self.db.execute(sa.text(f"SET LOCAL statement_timeout = '{BULK_OPERATION_TIMEOUT_SECONDS}s'"))
-        except Exception as e:
-            logger.warning("Failed to set query timeout", extra={
-                "error": str(e),
+            logger.debug("Set query timeout for bulk operation", extra={
+                "timeout_seconds": BULK_OPERATION_TIMEOUT_SECONDS,
                 "component": "patient_sharing"
             })
+        except Exception as e:
+            # Log as error since this is a safety mechanism - should investigate if it fails
+            logger.error("Failed to set query timeout for bulk operation", extra={
+                "error": str(e),
+                "timeout_seconds": BULK_OPERATION_TIMEOUT_SECONDS,
+                "component": "patient_sharing",
+                "action": "continuing_without_timeout"
+            })
+            # Continue anyway - timeout is a safety measure, not a hard requirement
 
         # Batch fetch all patients owned by the user
         patients = self.db.query(Patient).filter(
@@ -815,7 +886,7 @@ class PatientSharingService:
             raise RecipientNotFoundError("Recipient user not found")
 
         if recipient.id == owner.id:
-            raise ValueError("Cannot share patients with yourself")
+            raise SelfShareError("Cannot share patients with yourself")
 
         # Batch check for existing shares
         existing_shares = self.db.query(PatientShare).filter(
@@ -872,12 +943,16 @@ class PatientSharingService:
             expires_hours=expires_hours
         )
 
-        logger.info(f"Created bulk patient share invitation {invitation.id} for {len(patients)} patients")
-
-        return {
-            "success": True,
+        logger.info("Created bulk patient share invitation", extra={
             "invitation_id": invitation.id,
             "patient_count": len(patients),
-            "patient_ids": patient_ids,
-            "message": f"Bulk invitation sent for {len(patients)} patients"
+            "component": "patient_sharing"
+        })
+
+        return {
+            "message": f"Bulk invitation sent for {len(patients)} patients",
+            "invitation_id": invitation.id,
+            "patient_count": len(patients),
+            "expires_at": invitation.expires_at,
+            "title": title
         }

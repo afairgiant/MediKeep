@@ -15,7 +15,9 @@ from app.services.patient_access import PatientAccessService
 from app.models.models import User, PatientShare
 from app.schemas.patient_sharing import (
     PatientShareInvitationRequest,
-    PatientShareBulkInvitationRequest
+    PatientShareBulkInvitationRequest,
+    PatientShareInvitationResponse,
+    BulkPatientShareInvitationResponse
 )
 from app.exceptions.patient_sharing import (
     PatientNotFoundError,
@@ -24,6 +26,7 @@ from app.exceptions.patient_sharing import (
     RecipientNotFoundError,
     InvalidPermissionLevelError,
     ShareNotFoundError,
+    SelfShareError,
 )
 
 router = APIRouter()
@@ -119,7 +122,7 @@ class RevokeShareRequest(BaseModel):
     shared_with_user_id: int = Field(..., description="ID of the user to revoke access from")
 
 
-@router.post("/", response_model=dict)
+@router.post("/", response_model=PatientShareInvitationResponse)
 def send_patient_share_invitation(
     *,
     request: Request,
@@ -205,6 +208,13 @@ def send_patient_share_invitation(
             "ip": user_ip,
         })
         raise HTTPException(status_code=400, detail=str(e))
+    except SelfShareError as e:
+        logger.info(f"Attempted self-share: {str(e)}", extra={
+            "user_id": current_user.id,
+            "patient_id": invitation_request.patient_id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=400, detail="Cannot share patient with yourself")
     except Exception as e:
         logger.error(
             f"Unexpected error sending patient share invitation: {str(e)}",
@@ -220,7 +230,7 @@ def send_patient_share_invitation(
         raise HTTPException(status_code=500, detail="Unable to send invitation. Please try again or contact support.")
 
 
-@router.post("/bulk-invite", response_model=dict)
+@router.post("/bulk-invite", response_model=BulkPatientShareInvitationResponse)
 def bulk_send_patient_share_invitations(
     *,
     request: Request,
@@ -264,9 +274,45 @@ def bulk_send_patient_share_invitations(
 
     except HTTPException:
         raise
+    except PatientNotFoundError as e:
+        logger.warning(f"Patient not found: {str(e)}", extra={
+            "user_id": current_user.id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=404, detail=str(e))
+    except RecipientNotFoundError as e:
+        logger.warning(f"Recipient not found: {str(e)}", extra={
+            "user_id": current_user.id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=404, detail=str(e))
+    except AlreadySharedError as e:
+        logger.info(f"Already shared: {str(e)}", extra={
+            "user_id": current_user.id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=409, detail=str(e))
+    except InvalidPermissionLevelError as e:
+        logger.warning(f"Invalid permission: {str(e)}", extra={
+            "user_id": current_user.id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=400, detail=str(e))
+    except SelfShareError as e:
+        logger.info(f"Self-share attempt: {str(e)}", extra={
+            "user_id": current_user.id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as e:
+        logger.warning(f"Validation error: {str(e)}", extra={
+            "user_id": current_user.id,
+            "ip": user_ip,
+        })
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(
-            f"Failed to send bulk patient share invitation: {str(e)}",
+            f"Unexpected error sending bulk patient share invitation: {str(e)}",
             extra={
                 "category": "app",
                 "event": "bulk_patient_share_invitation_failed",
@@ -275,13 +321,7 @@ def bulk_send_patient_share_invitations(
                 "ip": user_ip,
             }
         )
-
-        if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
-        elif "already shared" in str(e).lower():
-            raise HTTPException(status_code=400, detail=str(e))
-        else:
-            raise HTTPException(status_code=500, detail="Failed to send bulk invitation")
+        raise HTTPException(status_code=500, detail="Failed to send bulk invitation")
 
 
 @router.delete("/remove-my-access/{patient_id}", response_model=dict)

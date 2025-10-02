@@ -36,3 +36,8 @@ class InvalidPermissionLevelError(PatientSharingError):
 class ShareNotFoundError(PatientSharingError):
     """Raised when a share is not found"""
     pass
+
+
+class SelfShareError(PatientSharingError):
+    """Raised when attempting to share a patient with yourself"""
+    pass

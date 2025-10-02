@@ -10,6 +10,7 @@ from .patient_sharing import (
     RecipientNotFoundError,
     InvalidPermissionLevelError,
     ShareNotFoundError,
+    SelfShareError,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "RecipientNotFoundError",
     "InvalidPermissionLevelError",
     "ShareNotFoundError",
+    "SelfShareError",
 ]
