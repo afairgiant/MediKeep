@@ -792,17 +792,19 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
  * Helper Functions
  */
 
+// Pre-sorted test library for performance (avoid repeated sorting)
+const SORTED_TEST_LIBRARY = [...TEST_LIBRARY].sort((a, b) =>
+  a.test_name.localeCompare(b.test_name)
+);
+
 /**
  * Search tests by name, abbreviation, or common names
  * Supports fuzzy matching for better UX
  */
 export function searchTests(query: string, limit: number = 200): TestLibraryItem[] {
   if (!query || query.trim().length === 0) {
-    // Return all tests sorted alphabetically if no query
-    return TEST_LIBRARY
-      .slice()
-      .sort((a, b) => a.test_name.localeCompare(b.test_name))
-      .slice(0, limit);
+    // Return pre-sorted tests (performance optimization)
+    return SORTED_TEST_LIBRARY.slice(0, limit);
   }
 
   const searchTerm = query.toLowerCase().trim();

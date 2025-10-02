@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 from typing import List, Optional
 
@@ -61,9 +62,6 @@ class LabTestComponentBase(BaseModel):
             raise ValueError("Test value is required")
         if not isinstance(v, (int, float)):
             raise ValueError("Test value must be a number")
-
-        # Import math for boundary checks
-        import math
 
         # Check for invalid numbers (NaN, Infinity)
         if math.isnan(v) or math.isinf(v):

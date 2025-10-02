@@ -3,7 +3,7 @@
  * Allows users to copy/paste lab results and parse them automatically
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Card,
   Stack,
@@ -77,6 +77,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
 }) => {
   const [rawText, setRawText] = useState('');
   const [parsedComponents, setParsedComponents] = useState<ParsedTestComponent[]>([]);
+  const [failedLineCount, setFailedLineCount] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [parseMode, setParseMode] = useState<'auto' | 'manual'>('auto');
@@ -102,14 +103,26 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     }
   }, [labResultId, onError]);
 
+  // Notify user of failed parse lines (moved to useEffect for proper React lifecycle)
+  useEffect(() => {
+    if (failedLineCount > 0 && parsedComponents.length > 0) {
+      notifications.show({
+        title: 'Some Lines Could Not Be Parsed',
+        message: `${failedLineCount} line(s) could not be parsed. Check the Preview tab to review and edit the parsed results.`,
+        color: 'yellow',
+        autoClose: 6000
+      });
+    }
+  }, [failedLineCount, parsedComponents.length]);
+
   // Parse text into test components
-  const parseText = useCallback((text: string): ParsedTestComponent[] => {
+  const parseText = useCallback((text: string): { components: ParsedTestComponent[], failedLineCount: number } => {
     const lines = text.split('\n').filter(line =>
       parseSettings.skipEmptyLines ? line.trim().length > 0 : true
     );
 
     const components: ParsedTestComponent[] = [];
-    const failedLines: { lineNumber: number; content: string }[] = [];
+    let failedLineCount = 0;
 
     // Common patterns for parsing lab results
     const patterns = {
@@ -243,31 +256,19 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
         components.push(parsed);
       } else {
         // Track failed lines for user feedback
-        failedLines.push({ lineNumber: index + 1, content: trimmedLine });
+        failedLineCount++;
       }
     });
 
-    // Notify user of failed lines
-    if (failedLines.length > 0 && components.length > 0) {
-      // Use setTimeout to avoid notification during render
-      setTimeout(() => {
-        notifications.show({
-          title: 'Some Lines Could Not Be Parsed',
-          message: `${failedLines.length} line(s) could not be parsed. Check the Preview tab to review and edit the parsed results.`,
-          color: 'yellow',
-          autoClose: 6000
-        });
-      }, 100);
-    }
-
-    return components;
+    return { components, failedLineCount };
   }, [parseSettings]);
 
   const handleTextChange = useCallback((value: string) => {
     setRawText(value);
     if (parseMode === 'auto' && value.trim()) {
-      const parsed = parseText(value);
-      setParsedComponents(parsed);
+      const { components, failedLineCount: failedCount } = parseText(value);
+      setParsedComponents(components);
+      setFailedLineCount(failedCount);
     }
   }, [parseMode, parseText]);
 
@@ -281,12 +282,13 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       return;
     }
 
-    const parsed = parseText(rawText);
-    setParsedComponents(parsed);
+    const { components, failedLineCount: failedCount } = parseText(rawText);
+    setParsedComponents(components);
+    setFailedLineCount(failedCount);
 
     notifications.show({
       title: 'Text Parsed',
-      message: `Found ${parsed.length} potential test results`,
+      message: `Found ${components.length} potential test results`,
       color: 'blue'
     });
   }, [rawText, parseText]);

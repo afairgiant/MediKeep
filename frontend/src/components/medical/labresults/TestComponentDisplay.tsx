@@ -264,11 +264,12 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
       return groups;
     }, {} as Record<string, LabTestComponent[]>);
 
-    // Sort categories and components within each category
+    // Sort categories and components within each category (create new sorted structure)
     const sortedCategories = Object.keys(groupedComponents).sort();
 
-    Object.values(groupedComponents).forEach(categoryComponents => {
-      categoryComponents.sort((a, b) => {
+    // Create new sorted structure to avoid mutation
+    const sortedGroupedComponents = sortedCategories.reduce((acc, category) => {
+      acc[category] = [...groupedComponents[category]].sort((a, b) => {
         // Sort by display_order first, then by test_name
         if (a.display_order !== null && a.display_order !== undefined &&
             b.display_order !== null && b.display_order !== undefined) {
@@ -278,7 +279,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
         if (b.display_order !== null) return 1;
         return a.test_name.localeCompare(b.test_name);
       });
-    });
+      return acc;
+    }, {} as Record<string, LabTestComponent[]>);
 
     const getCategoryDisplayName = (category: string): string => {
       const categoryNames: Record<string, string> = {
@@ -330,13 +332,13 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                   }
                 />
                 <Text size="sm" c="dimmed">
-                  {groupedComponents[category].length} test{groupedComponents[category].length !== 1 ? 's' : ''}
+                  {sortedGroupedComponents[category].length} test{sortedGroupedComponents[category].length !== 1 ? 's' : ''}
                 </Text>
               </Group>
 
               {/* Components Grid */}
               <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                {groupedComponents[category].map((component) => (
+                {sortedGroupedComponents[category].map((component) => (
                   <TestComponentCard key={component.id} component={component} />
                 ))}
               </SimpleGrid>
