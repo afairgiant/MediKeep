@@ -91,7 +91,6 @@ class LabTestComponentBase(BaseModel):
             if not isinstance(v, (int, float)):
                 raise ValueError("Reference range minimum must be a number")
 
-            import math
             if math.isnan(v) or math.isinf(v):
                 raise ValueError("Reference range minimum must be a finite number")
             if abs(v) > 1e15:
@@ -107,7 +106,6 @@ class LabTestComponentBase(BaseModel):
             if not isinstance(v, (int, float)):
                 raise ValueError("Reference range maximum must be a number")
 
-            import math
             if math.isnan(v) or math.isinf(v):
                 raise ValueError("Reference range maximum must be a finite number")
             if abs(v) > 1e15:

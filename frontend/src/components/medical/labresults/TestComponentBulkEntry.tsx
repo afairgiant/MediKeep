@@ -42,7 +42,6 @@ import {
   IconCopy,
   IconSettings
 } from '@tabler/icons-react';
-// import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';

@@ -39,7 +39,6 @@ import {
   IconFlask,
   IconMedicalCross
 } from '@tabler/icons-react';
-// import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import sanitizeHtml from 'sanitize-html';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
