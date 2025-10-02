@@ -41,6 +41,7 @@ import {
 } from '@tabler/icons-react';
 // import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
+import sanitizeHtml from 'sanitize-html';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import logger from '../../../services/logger';
@@ -388,11 +389,15 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         component: 'TestComponentTemplates'
       });
 
-      // Sanitize function to prevent XSS
+      // Sanitize function to prevent XSS using sanitize-html library
       const sanitizeInput = (input: string | undefined): string | null => {
         if (!input) return null;
-        // Trim whitespace and strip HTML tags
-        return input.trim().replace(/<[^>]*>/g, '') || null;
+        // Use sanitize-html to safely remove all HTML tags and scripts
+        const sanitized = sanitizeHtml(input, {
+          allowedTags: [], // Strip all HTML tags
+          allowedAttributes: {} // Strip all attributes
+        }).trim();
+        return sanitized || null;
       };
 
       // Convert form data to API format with sanitization
