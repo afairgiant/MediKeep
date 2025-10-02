@@ -89,7 +89,7 @@ RUN find /app/app/scripts -type f \( -name "*.py" -o -name "backup_*" -o -name "
     find /app -name "entrypoint.sh" -exec sed -i 's/\r$//' {} \;
 
 # Create directories including certs mount point and set all permissions in one layer
-RUN mkdir -p logs uploads/labwork backups certs /usr/local/bin && \
+RUN mkdir -p logs uploads/labwork uploads/photos/patients backups certs /usr/local/bin && \
     chmod +x /app/entrypoint.sh && \
     chmod +x /app/app/scripts/backup_db && \
     chmod +x /app/app/scripts/backup_files && \

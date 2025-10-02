@@ -37,10 +37,19 @@ class PatientPhotoService:
     def __init__(self):
         """Initialize the service and ensure storage directory exists"""
         self.storage_base = Path(settings.UPLOAD_DIR) / "photos" / "patients"
-        self.storage_base.mkdir(parents=True, exist_ok=True)
-        logger.info("PatientPhotoService initialized", extra={
-            "storage_path": str(self.storage_base)
-        })
+        try:
+            self.storage_base.mkdir(parents=True, exist_ok=True)
+            logger.info("PatientPhotoService initialized", extra={
+                "storage_path": str(self.storage_base)
+            })
+        except PermissionError as e:
+            logger.warning(
+                "Could not create storage directory during init, will retry on first use",
+                extra={
+                    "storage_path": str(self.storage_base),
+                    "error": str(e)
+                }
+            )
 
     async def upload_photo(
         self,
@@ -67,6 +76,9 @@ class PatientPhotoService:
             "file_name": file.filename,
             "content_type": file.content_type
         })
+
+        # Ensure storage directory exists (retry if init failed due to permissions)
+        self.storage_base.mkdir(parents=True, exist_ok=True)
 
         # Validate the uploaded file
         await self.validate_image(file)

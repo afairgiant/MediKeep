@@ -100,6 +100,9 @@ fix_directory_permissions() {
 if ! fix_directory_permissions "/app/uploads" "uploads"; then
     echo "WARNING: Failed to fix uploads directory permissions - continuing startup"
 fi
+if ! fix_directory_permissions "/app/uploads/photos/patients" "patient photos"; then
+    echo "WARNING: Failed to fix patient photos directory permissions - continuing startup"
+fi
 if ! fix_directory_permissions "/app/uploads/lab_result_files" "lab result files"; then
     echo "WARNING: Failed to fix lab result files directory permissions - continuing startup"
 fi
