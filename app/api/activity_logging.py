@@ -102,6 +102,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         EntityType.LAB_RESULT: ["test_name", "name"],
         EntityType.LAB_RESULT_FILE: ["file_name", "name"],
         EntityType.EMERGENCY_CONTACT: ["name"],
+        EntityType.INSURANCE: ["company_name"],
         "vitals": [
             "recorded_date"
         ],  # For vitals, use the date since there's no single identifying field
@@ -156,6 +157,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
                     EntityType.LAB_RESULT: "Lab Result",
                     EntityType.LAB_RESULT_FILE: "Lab Result File",
                     EntityType.EMERGENCY_CONTACT: "Emergency Contact",
+                    EntityType.INSURANCE: "Insurance",
                     "vitals": "Vitals",
                     "pharmacy": "Pharmacy",
                     "patient": "Patient",
@@ -194,6 +196,7 @@ def get_entity_description(entity_obj: Any, entity_type: str, action: str) -> st
         EntityType.LAB_RESULT: "Lab Result",
         EntityType.LAB_RESULT_FILE: "Lab Result File",
         EntityType.EMERGENCY_CONTACT: "Emergency Contact",
+        EntityType.INSURANCE: "Insurance",
         "vitals": "Vitals",
         "pharmacy": "Pharmacy",
         "patient": "Patient",

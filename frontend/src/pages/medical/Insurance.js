@@ -113,13 +113,18 @@ const Insurance = () => {
       setIsFormOpen(false);
       setEditingInsurance(null);
       setFormData(initializeFormData());
-      
+      setDocumentManagerMethods(null);
+
       // Only refresh if we created a new insurance during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
       if (needsRefreshAfterSubmissionRef.current) {
         needsRefreshAfterSubmissionRef.current = false;
         refreshData();
       }
+
+      // IMPORTANT: Reset submission state after closing to prevent re-triggering
+      // This prevents the useEffect in the hook from firing again when form reopens
+      setTimeout(() => resetSubmission(), 0);
     },
     onError: (error) => {
       logger.error('insurance_form_error', {
