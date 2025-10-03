@@ -21,7 +21,7 @@ import {
   Alert,
   Skeleton
 } from '@mantine/core';
-import { IconInfoCircle, IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconInfoCircle, IconEdit, IconTrash, IconChartLine } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
 import logger from '../../../services/logger';
@@ -34,6 +34,7 @@ interface TestComponentDisplayProps {
   showActions?: boolean;
   onEdit?: (component: LabTestComponent) => void;
   onDelete?: (component: LabTestComponent) => void;
+  onTrendClick?: (testName: string) => void;
   onError?: (error: Error) => void;
 }
 
@@ -45,6 +46,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
   showActions = false,
   onEdit,
   onDelete,
+  onTrendClick,
   onError
 }) => {
   const handleError = (error: Error, context: string) => {
@@ -109,8 +111,36 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     const statusColor = getStatusColor(component.status, component.value, component.ref_range_min, component.ref_range_max);
     const referenceRange = formatReferenceRange(component);
 
+    const handleCardClick = (e: React.MouseEvent) => {
+      // Don't trigger if clicking on action buttons
+      const target = e.target as HTMLElement;
+      if (target.closest('button')) {
+        return;
+      }
+      onTrendClick?.(component.test_name);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      // Support Enter and Space keys for accessibility
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onTrendClick?.(component.test_name);
+      }
+    };
+
     return (
-      <Card withBorder shadow="sm" radius="md" p="md">
+      <Card
+        withBorder
+        shadow="sm"
+        radius="md"
+        p="md"
+        style={{ cursor: 'pointer' }}
+        onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label={`View trends for ${component.test_name}`}
+      >
         <Stack gap="sm">
           {/* Header */}
           <Group justify="space-between" align="flex-start">
@@ -122,19 +152,29 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                     {component.abbreviation}
                   </Badge>
                 )}
+                {/* Trend indicator badge */}
+                <Tooltip label="Click card to view historical trends">
+                  <Badge variant="light" color="blue" size="xs" leftSection={<IconChartLine size={10} />}>
+                    Trends
+                  </Badge>
+                </Tooltip>
               </Group>
               {component.test_code && (
                 <Text size="xs" c="dimmed">{component.test_code}</Text>
               )}
             </Stack>
 
+            {/* Edit/Delete - only show when actions enabled */}
             {showActions && (
               <Group gap={4}>
                 <Tooltip label="Edit test component">
                   <ActionIcon
                     variant="subtle"
                     size="sm"
-                    onClick={() => onEdit?.(component)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit?.(component);
+                    }}
                     aria-label={`Edit ${component.test_name}`}
                   >
                     <IconEdit size={14} />
@@ -145,7 +185,10 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                     variant="subtle"
                     color="red"
                     size="sm"
-                    onClick={() => onDelete?.(component)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete?.(component);
+                    }}
                     aria-label={`Delete ${component.test_name}`}
                   >
                     <IconTrash size={14} />

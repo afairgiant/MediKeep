@@ -1,5 +1,5 @@
 import math
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
@@ -336,3 +336,59 @@ class LabTestComponentBulkResponse(BaseModel):
     errors: Optional[List[str]] = []
 
     model_config = {"from_attributes": True}
+
+
+# Trend tracking schemas
+
+class LabResultBasicForTrend(BaseModel):
+    """Minimal lab result info for trend data points"""
+
+    id: int
+    test_name: str
+    completed_date: Optional[date] = None
+
+    model_config = {"from_attributes": True}
+
+
+class LabTestComponentTrendDataPoint(BaseModel):
+    """Single data point in trend data"""
+
+    id: int
+    value: float
+    unit: str
+    status: Optional[str] = None
+    ref_range_min: Optional[float] = None
+    ref_range_max: Optional[float] = None
+    ref_range_text: Optional[str] = None
+    recorded_date: Optional[date] = None
+    created_at: datetime
+    lab_result: LabResultBasicForTrend
+
+    model_config = {"from_attributes": True}
+
+
+class LabTestComponentTrendStatistics(BaseModel):
+    """Statistics for trend data"""
+
+    count: int
+    latest: Optional[float] = None
+    average: Optional[float] = None
+    min: Optional[float] = None
+    max: Optional[float] = None
+    std_dev: Optional[float] = None
+    trend_direction: str  # "increasing", "decreasing", "stable"
+    time_in_range_percent: Optional[float] = None
+    normal_count: int
+    abnormal_count: int
+
+
+class LabTestComponentTrendResponse(BaseModel):
+    """Response for trend data request"""
+
+    test_name: str
+    unit: str
+    category: Optional[str] = None
+    data_points: List[LabTestComponentTrendDataPoint]
+    statistics: LabTestComponentTrendStatistics
+    is_aggregated: bool = False
+    aggregation_period: Optional[str] = None  # "month", "week", etc.
