@@ -61,9 +61,9 @@ class ActivityTracker:
         try:
             from app.models.models import (
                 User, Patient, Practitioner, Medication, LabResult, LabResultFile,
-                Condition, Treatment, Immunization, Allergy, Procedure, Encounter
+                Condition, Treatment, Immunization, Allergy, Procedure, Encounter, Insurance
             )
-            
+
             self._entity_type_mapping = {
                 User: EntityType.USER,
                 Patient: EntityType.PATIENT,
@@ -77,6 +77,7 @@ class ActivityTracker:
                 Allergy: EntityType.ALLERGY,
                 Procedure: EntityType.PROCEDURE,
                 Encounter: EntityType.ENCOUNTER,
+                Insurance: EntityType.INSURANCE,
             }
         except ImportError as e:
             activity_logger.warning(f"Could not import all models for activity tracking: {e}")
@@ -211,7 +212,11 @@ class ActivityTracker:
         elif entity_type == EntityType.PRACTITIONER:
             name = getattr(instance, 'name', f'ID {entity_id}')
             return f"{action.title()} practitioner: {name}"
-        
+
+        elif entity_type == EntityType.INSURANCE:
+            company_name = getattr(instance, 'company_name', f'ID {entity_id}')
+            return f"{action.title()} insurance: {company_name}"
+
         # Default description
         return f"{action.title()} {entity_type}: {entity_id}"
 
@@ -262,7 +267,18 @@ class ActivityTracker:
             status = getattr(instance, 'status', None)
             if status:
                 metadata["status"] = str(status)
-        
+
+        elif entity_type == EntityType.INSURANCE:
+            company_name = getattr(instance, 'company_name', None)
+            if company_name:
+                metadata["company_name"] = str(company_name)
+            insurance_type = getattr(instance, 'insurance_type', None)
+            if insurance_type:
+                metadata["insurance_type"] = str(insurance_type)
+            status = getattr(instance, 'status', None)
+            if status:
+                metadata["status"] = str(status)
+
         # Add common fields
         if hasattr(instance, 'status'):
             metadata["status"] = getattr(instance, 'status')

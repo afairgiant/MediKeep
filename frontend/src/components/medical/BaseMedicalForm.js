@@ -585,13 +585,6 @@ const BaseMedicalForm = ({
       rows.push(currentRow);
     }
 
-    logger.debug('medical_form_field_grouping', 'Medical form fields grouped into rows', {
-      component: 'BaseMedicalForm',
-      breakpoint: responsiveState.breakpoint,
-      totalColumns: totalColumns,
-      fieldCount: fields.length,
-      rowCount: rows.length
-    });
 
     return rows;
   }, [layoutConfig.columns, responsiveState.breakpoint]);
