@@ -120,6 +120,14 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
       onTrendClick?.(component.test_name);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      // Support Enter and Space keys for accessibility
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onTrendClick?.(component.test_name);
+      }
+    };
+
     return (
       <Card
         withBorder
@@ -128,6 +136,10 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
         p="md"
         style={{ cursor: 'pointer' }}
         onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label={`View trends for ${component.test_name}`}
       >
         <Stack gap="sm">
           {/* Header */}

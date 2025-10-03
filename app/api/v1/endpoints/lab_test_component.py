@@ -517,6 +517,9 @@ def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendSt
     time_in_range_percent = (normal_count / count * 100) if count > 0 else None
 
     # Standard deviation
+    # Note: Using population variance (divide by N) rather than sample variance (divide by N-1)
+    # This is appropriate for analyzing the complete set of measurements we have for a patient,
+    # rather than estimating variance for a theoretical larger population
     if count > 1 and average is not None:
         variance = sum((x - average) ** 2 for x in values) / count
         std_dev = variance ** 0.5
@@ -566,38 +569,16 @@ def get_lab_test_component_trends(
         # Validate and sanitize test_name
         validated_test_name = validate_search_input(test_name)
 
-        # Get all test components for this patient and test name
+        # Get test components with database-level filtering for better performance
+        # Date filtering and ordering are pushed into the database query
         components = lab_test_component.get_by_patient_and_test_name(
             db,
             patient_id=patient_id,
-            test_name=validated_test_name
+            test_name=validated_test_name,
+            date_from=date_from,
+            date_to=date_to,
+            limit=limit
         )
-
-        # Helper function to get recorded date for a component
-        def get_recorded_date(component):
-            """Get the recorded date, preferring completed_date over created_at."""
-            return component.lab_result.completed_date if component.lab_result.completed_date else component.created_at.date()
-
-        # Apply date filtering if provided (FastAPI already parsed dates)
-        if date_from or date_to:
-            filtered_components = []
-            for component in components:
-                recorded_date = get_recorded_date(component)
-
-                if date_from and recorded_date < date_from:
-                    continue
-                if date_to and recorded_date > date_to:
-                    continue
-
-                filtered_components.append(component)
-
-            components = filtered_components
-
-        # Sort by date (most recent first)
-        components.sort(key=get_recorded_date, reverse=True)
-
-        # Apply limit
-        components = components[:limit]
 
         # Detect unit mismatches
         if components:

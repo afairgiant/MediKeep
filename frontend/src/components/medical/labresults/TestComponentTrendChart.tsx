@@ -67,9 +67,16 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
     const min = Math.min(...allValues);
     const max = Math.max(...allValues);
 
-    // Add 10% padding
-    const padding = (max - min) * 0.1;
-    return [Math.max(0, min - padding), max + padding];
+    // Calculate padding - handle edge case where all values are identical
+    // Use 10% of the range, or a minimal fallback if range is zero
+    const range = max - min;
+    const padding = range > 0 ? range * 0.1 : Math.abs(max) * 0.1 || 1;
+
+    // Ensure we don't clamp to zero unconditionally
+    const lowerBound = min - padding;
+    const upperBound = max + padding;
+
+    return [lowerBound, upperBound];
   }, [chartData]);
 
   // Custom dot to show status colors
