@@ -34,17 +34,20 @@ import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import invitationApi from '../../services/api/invitationApi';
 import { InvitationManager } from '../invitations';
+import { PatientSharingModal } from '../medical';
 import { formatDateTime } from '../../utils/helpers';
-import { useCacheManager } from '../../hooks/useGlobalData';
+import { useCacheManager, useCurrentPatient } from '../../hooks/useGlobalData';
 
 const InvitationNotifications = () => {
   const { colorScheme } = useMantineColorScheme();
   const { invalidatePatientList } = useCacheManager();
+  const { patient: currentPatient } = useCurrentPatient();
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [invitationManagerOpened, { open: openInvitationManager, close: closeInvitationManager }] = useDisclosure(false);
   const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
+  const [patientSharingOpened, { open: openPatientSharing, close: closePatientSharing }] = useDisclosure(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
 
   const loadPendingInvitations = async () => {
@@ -318,6 +321,17 @@ const InvitationNotifications = () => {
             Manage All Invitations
           </Button>
         )}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={openPatientSharing}
+          leftSection={<IconUserShare size="0.9rem" />}
+          mt="xs"
+          fullWidth
+        >
+          Share Patient
+        </Button>
       </Card>
 
       {/* Invitation Manager Modal */}
@@ -325,6 +339,14 @@ const InvitationNotifications = () => {
         opened={invitationManagerOpened}
         onClose={closeInvitationManager}
         onUpdate={handleInvitationUpdate}
+      />
+
+      {/* Patient Sharing Modal */}
+      <PatientSharingModal
+        opened={patientSharingOpened}
+        onClose={closePatientSharing}
+        patient={currentPatient}
+        onShareUpdate={handleInvitationUpdate}
       />
 
       {/* Confirmation Modal for Accepting Invitations */}
