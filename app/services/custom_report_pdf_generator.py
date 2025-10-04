@@ -16,6 +16,8 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4, letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     PageBreak, Paragraph, SimpleDocTemplate, Spacer,
     Table, TableStyle, KeepTogether, Image
@@ -34,6 +36,7 @@ class CustomReportPDFGenerator:
     PATIENT_PHOTO_PATTERN = "patient_{patient_id}_*.jpg"
 
     def __init__(self):
+        self._register_fonts()
         self.styles = self._create_styles()
         self.category_display_names = {
             'medications': 'Medications',
@@ -50,11 +53,104 @@ class CustomReportPDFGenerator:
             'emergency_contacts': 'Emergency Contacts',
             'family_history': 'Family History'
         }
-    
+
+    def _try_register_font(self, font_name: str, font_paths: List[str]) -> bool:
+        """
+        Helper method to register a font from a list of potential paths.
+
+        Args:
+            font_name: Name to register the font as
+            font_paths: List of potential font file paths to try
+
+        Returns:
+            bool: True if font was successfully registered, False otherwise
+        """
+        for font_path in font_paths:
+            if Path(font_path).exists():
+                try:
+                    pdfmetrics.registerFont(TTFont(font_name, font_path))
+                    logger.info(f"Registered Unicode font '{font_name}': {font_path}")
+                    return True
+                except Exception as e:
+                    logger.debug(f"Failed to register font from {font_path}: {e}")
+                    continue
+        return False
+
+    def _register_fonts(self):
+        """
+        Register Unicode-compatible fonts for international character support.
+
+        This method attempts to find and register fonts that support international
+        characters including Cyrillic, Greek, and other non-Latin scripts.
+
+        Font Selection Priority:
+            1. DejaVu Sans - Best Unicode coverage, supports most international scripts
+            2. Arial - Common on Windows systems, supports Cyrillic and basic Unicode
+            3. Helvetica - Fallback, limited to Latin characters only
+
+        Fallback Behavior:
+            If no Unicode font is found, the system falls back to Helvetica (standard PDF font)
+            which only supports Latin characters. A warning is logged when this occurs.
+
+        The method searches common font directories across Windows, Linux, and macOS.
+        """
+        try:
+            # Font paths for normal weight, prioritized by Unicode coverage
+            font_paths = [
+                # DejaVu Sans (best Unicode support)
+                'C:/Windows/Fonts/DejaVuSans.ttf',  # Windows
+                'C:/Windows/Fonts/dejavu-sans/DejaVuSans.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',  # Linux
+                '/usr/share/fonts/dejavu/DejaVuSans.ttf',
+                '/Library/Fonts/DejaVuSans.ttf',  # macOS
+                '/System/Library/Fonts/Supplemental/DejaVuSans.ttf',
+                # Arial (fallback, available on most Windows systems, supports Cyrillic)
+                'C:/Windows/Fonts/arial.ttf',
+                'C:/Windows/Fonts/Arial.ttf',
+                '/usr/share/fonts/truetype/msttcorefonts/arial.ttf',
+                '/System/Library/Fonts/Supplemental/Arial.ttf',
+            ]
+
+            # Font paths for bold weight
+            bold_paths = [
+                # DejaVu Sans Bold
+                'C:/Windows/Fonts/DejaVuSans-Bold.ttf',
+                'C:/Windows/Fonts/dejavu-sans/DejaVuSans-Bold.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf',
+                '/Library/Fonts/DejaVuSans-Bold.ttf',
+                '/System/Library/Fonts/Supplemental/DejaVuSans-Bold.ttf',
+                # Arial Bold (fallback)
+                'C:/Windows/Fonts/arialbd.ttf',
+                'C:/Windows/Fonts/Arial Bold.ttf',
+                '/usr/share/fonts/truetype/msttcorefonts/arialbd.ttf',
+                '/System/Library/Fonts/Supplemental/Arial Bold.ttf',
+            ]
+
+            # Try to register normal and bold fonts
+            font_registered = self._try_register_font('UnicodeFont', font_paths)
+            bold_registered = self._try_register_font('UnicodeFont-Bold', bold_paths)
+
+            if not font_registered:
+                logger.warning(
+                    "No Unicode font found (DejaVu Sans or Arial). "
+                    "Falling back to Helvetica (limited Unicode support). "
+                    "International characters like Cyrillic may not render correctly."
+                )
+
+            self.font_normal = 'UnicodeFont' if font_registered else 'Helvetica'
+            self.font_bold = 'UnicodeFont-Bold' if bold_registered else 'Helvetica-Bold'
+
+        except Exception as e:
+            logger.error(f"Error registering fonts: {e}")
+            # Fallback to standard fonts
+            self.font_normal = 'Helvetica'
+            self.font_bold = 'Helvetica-Bold'
+
     def _create_styles(self) -> Dict[str, ParagraphStyle]:
         """Create medical-grade styles for the PDF"""
         styles = getSampleStyleSheet()
-        
+
         # Medical document colors (from UI/UX recommendations)
         critical_red = colors.HexColor('#D32F2F')
         warning_orange = colors.HexColor('#F57C00')
@@ -62,7 +158,7 @@ class CustomReportPDFGenerator:
         success_green = colors.HexColor('#388E3C')
         neutral_gray = colors.HexColor('#616161')
         dark_text = colors.HexColor('#212121')
-        
+
         # Title style
         styles.add(ParagraphStyle(
             name='CustomTitle',
@@ -71,9 +167,9 @@ class CustomReportPDFGenerator:
             textColor=dark_text,
             spaceAfter=20,
             alignment=TA_CENTER,
-            fontName='Helvetica-Bold'
+            fontName=self.font_bold
         ))
-        
+
         # Patient header style
         styles.add(ParagraphStyle(
             name='PatientHeader',
@@ -81,24 +177,24 @@ class CustomReportPDFGenerator:
             fontSize=16,
             textColor=dark_text,
             spaceAfter=10,
-            fontName='Helvetica-Bold',
+            fontName=self.font_bold,
             alignment=TA_LEFT
         ))
-        
+
         # Emergency alert style
         styles.add(ParagraphStyle(
             name='EmergencyAlert',
             parent=styles['BodyText'],
             fontSize=12,
             textColor=colors.white,
-            fontName='Helvetica-Bold',
+            fontName=self.font_bold,
             alignment=TA_LEFT,
             leftIndent=10,
             rightIndent=10,
             spaceBefore=5,
             spaceAfter=5
         ))
-        
+
         # Section header style with icon space
         styles.add(ParagraphStyle(
             name='SectionHeader',
@@ -107,10 +203,10 @@ class CustomReportPDFGenerator:
             textColor=info_blue,
             spaceAfter=8,
             spaceBefore=16,
-            fontName='Helvetica-Bold',
+            fontName=self.font_bold,
             leftIndent=0
         ))
-        
+
         # Subsection header style
         styles.add(ParagraphStyle(
             name='SubsectionHeader',
@@ -119,9 +215,9 @@ class CustomReportPDFGenerator:
             textColor=dark_text,
             spaceAfter=4,
             spaceBefore=8,
-            fontName='Helvetica-Bold'
+            fontName=self.font_bold
         ))
-        
+
         # Body text style
         styles.add(ParagraphStyle(
             name='CustomBody',
@@ -129,27 +225,27 @@ class CustomReportPDFGenerator:
             fontSize=10,
             leading=12,
             textColor=dark_text,
-            fontName='Helvetica'
+            fontName=self.font_normal
         ))
-        
+
         # Critical info style
         styles.add(ParagraphStyle(
             name='CriticalInfo',
             parent=styles['BodyText'],
             fontSize=10,
             textColor=critical_red,
-            fontName='Helvetica-Bold'
+            fontName=self.font_bold
         ))
-        
+
         # Warning style
         styles.add(ParagraphStyle(
             name='WarningInfo',
             parent=styles['BodyText'],
             fontSize=10,
             textColor=warning_orange,
-            fontName='Helvetica-Bold'
+            fontName=self.font_bold
         ))
-        
+
         # Info text style (for metadata)
         styles.add(ParagraphStyle(
             name='InfoText',
@@ -157,18 +253,18 @@ class CustomReportPDFGenerator:
             fontSize=9,
             textColor=neutral_gray,
             alignment=TA_RIGHT,
-            fontName='Helvetica'
+            fontName=self.font_normal
         ))
-        
+
         # Small text for references
         styles.add(ParagraphStyle(
             name='SmallText',
             parent=styles['BodyText'],
             fontSize=8,
             textColor=neutral_gray,
-            fontName='Helvetica'
+            fontName=self.font_normal
         ))
-        
+
         return styles
     
     async def generate_pdf(
@@ -332,8 +428,8 @@ class CustomReportPDFGenerator:
         if patient_info:
             table = Table(patient_info, colWidths=[1*inch, 3*inch])
             table.setStyle(TableStyle([
-                ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 11),
-                ('FONT', (1, 0), (1, -1), 'Helvetica', 11),
+                ('FONT', (0, 0), (0, -1), self.font_bold, 11),
+                ('FONT', (1, 0), (1, -1), self.font_normal, 11),
                 ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#212121')),
                 ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
                 ('ALIGN', (1, 0), (1, -1), 'LEFT'),
@@ -575,8 +671,8 @@ class CustomReportPDFGenerator:
                 # Create info table first
                 info_table = Table(patient_info, colWidths=[1.2*inch, 3.0*inch])
                 info_table.setStyle(TableStyle([
-                    ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
-                    ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
+                    ('FONT', (0, 0), (0, -1), self.font_bold, 10),
+                    ('FONT', (1, 0), (1, -1), self.font_normal, 10),
                     ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
                     ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
                     ('ALIGN', (1, 0), (1, -1), 'LEFT'),
@@ -603,8 +699,8 @@ class CustomReportPDFGenerator:
                 if patient_info:
                     table = Table(patient_info, colWidths=[1.5*inch, 4.5*inch])
                     table.setStyle(TableStyle([
-                        ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
-                        ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
+                        ('FONT', (0, 0), (0, -1), self.font_bold, 10),
+                        ('FONT', (1, 0), (1, -1), self.font_normal, 10),
                         ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
                         ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
                         ('ALIGN', (1, 0), (1, -1), 'LEFT'),
@@ -617,8 +713,8 @@ class CustomReportPDFGenerator:
             if patient_info:
                 table = Table(patient_info, colWidths=[1.5*inch, 4.5*inch])
                 table.setStyle(TableStyle([
-                    ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
-                    ('FONT', (1, 0), (1, -1), 'Helvetica', 10),
+                    ('FONT', (0, 0), (0, -1), self.font_bold, 10),
+                    ('FONT', (1, 0), (1, -1), self.font_normal, 10),
                     ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
                     ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
                     ('ALIGN', (1, 0), (1, -1), 'LEFT'),
@@ -717,7 +813,7 @@ class CustomReportPDFGenerator:
             if breakdown_data:
                 table = Table(breakdown_data, colWidths=[3*inch, 1*inch])
                 table.setStyle(TableStyle([
-                    ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+                    ('FONT', (0, 0), (-1, -1), self.font_normal, 10),
                     ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
                     ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
                     ('LINEBELOW', (0, 0), (-1, -2), 0.5, colors.HexColor('#ecf0f1')),
@@ -1576,8 +1672,8 @@ class CustomReportPDFGenerator:
     def _get_detail_table_style(self) -> TableStyle:
         """Get consistent table style for detail tables"""
         return TableStyle([
-            ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 9),
-            ('FONT', (1, 0), (1, -1), 'Helvetica', 9),
+            ('FONT', (0, 0), (0, -1), self.font_bold, 9),
+            ('FONT', (1, 0), (1, -1), self.font_normal, 9),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2c3e50')),
             ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
             ('ALIGN', (1, 0), (1, -1), 'LEFT'),
