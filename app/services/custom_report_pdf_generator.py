@@ -54,23 +54,56 @@ class CustomReportPDFGenerator:
             'family_history': 'Family History'
         }
 
+    def _try_register_font(self, font_name: str, font_paths: List[str]) -> bool:
+        """
+        Helper method to register a font from a list of potential paths.
+
+        Args:
+            font_name: Name to register the font as
+            font_paths: List of potential font file paths to try
+
+        Returns:
+            bool: True if font was successfully registered, False otherwise
+        """
+        for font_path in font_paths:
+            if Path(font_path).exists():
+                try:
+                    pdfmetrics.registerFont(TTFont(font_name, font_path))
+                    logger.info(f"Registered Unicode font '{font_name}': {font_path}")
+                    return True
+                except Exception as e:
+                    logger.debug(f"Failed to register font from {font_path}: {e}")
+                    continue
+        return False
+
     def _register_fonts(self):
-        """Register Unicode-compatible fonts for international character support"""
+        """
+        Register Unicode-compatible fonts for international character support.
+
+        This method attempts to find and register fonts that support international
+        characters including Cyrillic, Greek, and other non-Latin scripts.
+
+        Font Selection Priority:
+            1. DejaVu Sans - Best Unicode coverage, supports most international scripts
+            2. Arial - Common on Windows systems, supports Cyrillic and basic Unicode
+            3. Helvetica - Fallback, limited to Latin characters only
+
+        Fallback Behavior:
+            If no Unicode font is found, the system falls back to Helvetica (standard PDF font)
+            which only supports Latin characters. A warning is logged when this occurs.
+
+        The method searches common font directories across Windows, Linux, and macOS.
+        """
         try:
-            # Try to register Unicode fonts (DejaVu Sans or Arial)
-            # DejaVu Sans has better coverage, but Arial is more commonly available on Windows
+            # Font paths for normal weight, prioritized by Unicode coverage
             font_paths = [
                 # DejaVu Sans (best Unicode support)
-                # Windows paths
-                'C:/Windows/Fonts/DejaVuSans.ttf',
+                'C:/Windows/Fonts/DejaVuSans.ttf',  # Windows
                 'C:/Windows/Fonts/dejavu-sans/DejaVuSans.ttf',
-                # Linux paths
-                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',  # Linux
                 '/usr/share/fonts/dejavu/DejaVuSans.ttf',
-                # macOS paths
-                '/Library/Fonts/DejaVuSans.ttf',
+                '/Library/Fonts/DejaVuSans.ttf',  # macOS
                 '/System/Library/Fonts/Supplemental/DejaVuSans.ttf',
-
                 # Arial (fallback, available on most Windows systems, supports Cyrillic)
                 'C:/Windows/Fonts/arial.ttf',
                 'C:/Windows/Fonts/Arial.ttf',
@@ -78,6 +111,7 @@ class CustomReportPDFGenerator:
                 '/System/Library/Fonts/Supplemental/Arial.ttf',
             ]
 
+            # Font paths for bold weight
             bold_paths = [
                 # DejaVu Sans Bold
                 'C:/Windows/Fonts/DejaVuSans-Bold.ttf',
@@ -86,7 +120,6 @@ class CustomReportPDFGenerator:
                 '/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf',
                 '/Library/Fonts/DejaVuSans-Bold.ttf',
                 '/System/Library/Fonts/Supplemental/DejaVuSans-Bold.ttf',
-
                 # Arial Bold (fallback)
                 'C:/Windows/Fonts/arialbd.ttf',
                 'C:/Windows/Fonts/Arial Bold.ttf',
@@ -94,38 +127,26 @@ class CustomReportPDFGenerator:
                 '/System/Library/Fonts/Supplemental/Arial Bold.ttf',
             ]
 
-            # Try to find and register the normal font
-            font_registered = False
-            font_name = 'UnicodeFont'
-            for font_path in font_paths:
-                if Path(font_path).exists():
-                    pdfmetrics.registerFont(TTFont(font_name, font_path))
-                    font_registered = True
-                    logger.info(f"Registered Unicode font: {font_path}")
-                    break
-
-            # Try to find and register the bold font
-            bold_registered = False
-            bold_name = 'UnicodeFont-Bold'
-            for font_path in bold_paths:
-                if Path(font_path).exists():
-                    pdfmetrics.registerFont(TTFont(bold_name, font_path))
-                    bold_registered = True
-                    logger.info(f"Registered Unicode bold font: {font_path}")
-                    break
+            # Try to register normal and bold fonts
+            font_registered = self._try_register_font('UnicodeFont', font_paths)
+            bold_registered = self._try_register_font('UnicodeFont-Bold', bold_paths)
 
             if not font_registered:
-                logger.warning("No Unicode font found (DejaVu Sans or Arial), falling back to Helvetica (limited Unicode support)")
+                logger.warning(
+                    "No Unicode font found (DejaVu Sans or Arial). "
+                    "Falling back to Helvetica (limited Unicode support). "
+                    "International characters like Cyrillic may not render correctly."
+                )
 
-            self.font_normal = font_name if font_registered else 'Helvetica'
-            self.font_bold = bold_name if bold_registered else 'Helvetica-Bold'
+            self.font_normal = 'UnicodeFont' if font_registered else 'Helvetica'
+            self.font_bold = 'UnicodeFont-Bold' if bold_registered else 'Helvetica-Bold'
 
         except Exception as e:
             logger.error(f"Error registering fonts: {e}")
             # Fallback to standard fonts
             self.font_normal = 'Helvetica'
             self.font_bold = 'Helvetica-Bold'
-    
+
     def _create_styles(self) -> Dict[str, ParagraphStyle]:
         """Create medical-grade styles for the PDF"""
         styles = getSampleStyleSheet()
