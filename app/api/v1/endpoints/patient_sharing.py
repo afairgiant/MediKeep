@@ -5,6 +5,7 @@ V1 Patient Sharing API Endpoints - Individual patient sharing functionality
 from typing import Any, List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
 from sqlalchemy.orm import Session
 
@@ -93,12 +94,55 @@ class ShareWithUserInfo(BaseModel):
     expires_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
-    
+
     # User information
     shared_with_username: Optional[str] = None
     shared_with_email: Optional[str] = None
     shared_with_full_name: Optional[str] = None
-    
+
+    class Config:
+        from_attributes = True
+
+
+class PatientInfo(BaseModel):
+    """Basic patient information"""
+    id: int
+    first_name: str
+    last_name: str
+    birth_date: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserInfo(BaseModel):
+    """Basic user information"""
+    id: int
+    username: str
+    name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ShareWithDetails(BaseModel):
+    """Response model for share with complete patient and user details"""
+    id: int
+    patient_id: int
+    shared_by_user_id: int
+    shared_with_user_id: int
+    permission_level: str
+    custom_permissions: Optional[dict]
+    is_active: bool
+    expires_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+
+    # Related data
+    patient: Optional[PatientInfo] = None
+    shared_by_user: Optional[UserInfo] = None
+    shared_with_user: Optional[UserInfo] = None
+
     class Config:
         from_attributes = True
 
@@ -507,6 +551,138 @@ def update_patient_share(
             raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get("/shared-with-me", response_model=None)
+def get_shares_received(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Get all active shares received by the current user.
+
+    Returns patients that others have shared with the current user, including
+    patient and user details.
+    """
+    try:
+        from sqlalchemy.orm import joinedload
+        from app.models.models import Patient
+
+        shares = db.query(PatientShare).filter(
+            PatientShare.shared_with_user_id == current_user.id,
+            PatientShare.is_active == True
+        ).options(
+            joinedload(PatientShare.patient),
+            joinedload(PatientShare.shared_by),
+            joinedload(PatientShare.shared_with)
+        ).all()
+
+        # Convert to response format with proper naming
+        result = []
+        for share in shares:
+            share_dict = {
+                'id': share.id,
+                'patient_id': share.patient_id,
+                'shared_by_user_id': share.shared_by_user_id,
+                'shared_with_user_id': share.shared_with_user_id,
+                'permission_level': share.permission_level,
+                'custom_permissions': share.custom_permissions,
+                'is_active': share.is_active,
+                'expires_at': share.expires_at.isoformat() if share.expires_at else None,
+                'created_at': share.created_at.isoformat() if share.created_at else None,
+                'updated_at': share.updated_at.isoformat() if share.updated_at else None,
+                'patient': {
+                    'id': share.patient.id,
+                    'first_name': share.patient.first_name,
+                    'last_name': share.patient.last_name,
+                    'birth_date': str(share.patient.birth_date) if share.patient.birth_date else None
+                } if share.patient else None,
+                'shared_by_user': {
+                    'id': share.shared_by.id,
+                    'username': share.shared_by.username,
+                    'name': share.shared_by.full_name if hasattr(share.shared_by, 'full_name') else None
+                } if share.shared_by else None,
+                'shared_with_user': {
+                    'id': share.shared_with.id,
+                    'username': share.shared_with.username,
+                    'name': share.shared_with.full_name if hasattr(share.shared_with, 'full_name') else None
+                } if share.shared_with else None
+            }
+            result.append(share_dict)
+
+        return JSONResponse(content=result)
+
+    except Exception as e:
+        logger.error(f"Failed to get received shares for user {current_user.id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to retrieve received shares")
+
+
+@router.get("/shared-by-me", response_model=None)
+def get_shares_created(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Get all active shares created by the current user.
+
+    Returns patients that the current user has shared with others, including
+    patient and user details.
+    """
+    try:
+        from sqlalchemy.orm import joinedload
+        from app.models.models import Patient
+
+        shares = db.query(PatientShare).filter(
+            PatientShare.shared_by_user_id == current_user.id,
+            PatientShare.is_active == True
+        ).options(
+            joinedload(PatientShare.patient),
+            joinedload(PatientShare.shared_by),
+            joinedload(PatientShare.shared_with)
+        ).all()
+
+        # Convert to response format with proper naming
+        result = []
+        for share in shares:
+            share_dict = {
+                'id': share.id,
+                'patient_id': share.patient_id,
+                'shared_by_user_id': share.shared_by_user_id,
+                'shared_with_user_id': share.shared_with_user_id,
+                'permission_level': share.permission_level,
+                'custom_permissions': share.custom_permissions,
+                'is_active': share.is_active,
+                'expires_at': share.expires_at.isoformat() if share.expires_at else None,
+                'created_at': share.created_at.isoformat() if share.created_at else None,
+                'updated_at': share.updated_at.isoformat() if share.updated_at else None,
+                'patient': {
+                    'id': share.patient.id,
+                    'first_name': share.patient.first_name,
+                    'last_name': share.patient.last_name,
+                    'birth_date': str(share.patient.birth_date) if share.patient.birth_date else None
+                } if share.patient else None,
+                'shared_by_user': {
+                    'id': share.shared_by.id,
+                    'username': share.shared_by.username,
+                    'name': share.shared_by.full_name if hasattr(share.shared_by, 'full_name') else None
+                } if share.shared_by else None,
+                'shared_with_user': {
+                    'id': share.shared_with.id,
+                    'username': share.shared_with.username,
+                    'name': share.shared_with.full_name if hasattr(share.shared_with, 'full_name') else None
+                } if share.shared_with else None
+            }
+            result.append(share_dict)
+
+        return JSONResponse(content=result)
+
+    except Exception as e:
+        logger.error(f"Failed to get created shares for user {current_user.id}: {str(e)}", exc_info=True)
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Exception details: {repr(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve created shares: {str(e)}")
+
+
 @router.get("/{patient_id}", response_model=PatientSharesResponse)
 def get_patient_shares(
     *,
@@ -584,54 +760,6 @@ def get_user_sharing_stats(
     except Exception as e:
         logger.error(f"Failed to get sharing stats for user {current_user.id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve sharing statistics")
-
-
-@router.get("/shared-with-me", response_model=List[ShareResponse])
-def get_shares_received(
-    *,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Get all active shares received by the current user.
-    
-    Returns patients that others have shared with the current user.
-    """
-    try:
-        shares = db.query(PatientShare).filter(
-            PatientShare.shared_with_user_id == current_user.id,
-            PatientShare.is_active == True
-        ).all()
-        
-        return [ShareResponse.from_orm(share) for share in shares]
-        
-    except Exception as e:
-        logger.error(f"Failed to get received shares for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve received shares")
-
-
-@router.get("/shared-by-me", response_model=List[ShareResponse])
-def get_shares_created(
-    *,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Get all active shares created by the current user.
-    
-    Returns patients that the current user has shared with others.
-    """
-    try:
-        shares = db.query(PatientShare).filter(
-            PatientShare.shared_by_user_id == current_user.id,
-            PatientShare.is_active == True
-        ).all()
-        
-        return [ShareResponse.from_orm(share) for share in shares]
-        
-    except Exception as e:
-        logger.error(f"Failed to get created shares for user {current_user.id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve created shares")
 
 
 @router.post("/cleanup-expired", response_model=dict)
