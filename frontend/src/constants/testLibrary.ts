@@ -141,7 +141,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     abbreviation: "LYMPH#",
     default_unit: "K/uL",
     category: "hematology",
-    common_names: ["Absolute Lymphocytes", "ALC"],
+    common_names: ["Absolute Lymphocytes", "ALC", "Lymphs (Absolute)", "Lymphs(Absolute)"],
     is_common: true,
     display_order: 13
   },
@@ -159,7 +159,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     abbreviation: "MONO#",
     default_unit: "K/uL",
     category: "hematology",
-    common_names: ["Absolute Monocytes", "AMC"],
+    common_names: ["Absolute Monocytes", "AMC", "Monocytes(Absolute)"],
     is_common: true,
     display_order: 15
   },
@@ -177,7 +177,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     abbreviation: "EOS#",
     default_unit: "K/uL",
     category: "hematology",
-    common_names: ["Absolute Eosinophils", "AEC"],
+    common_names: ["Absolute Eosinophils", "AEC", "Eos (Absolute)", "Eos(Absolute)"],
     is_common: true,
     display_order: 17
   },
@@ -195,7 +195,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     abbreviation: "BASO#",
     default_unit: "K/uL",
     category: "hematology",
-    common_names: ["Absolute Basophils", "ABC"],
+    common_names: ["Absolute Basophils", "ABC", "Baso (Absolute)", "Baso(Absolute)"],
     is_common: true,
     display_order: 19
   },

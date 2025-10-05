@@ -1474,3 +1474,34 @@ class PatientPhoto(Base):
         UniqueConstraint("patient_id", name="uq_patient_photo"),
         Index("idx_patient_photos_patient_id", "patient_id"),
     )
+
+
+class StandardizedTest(Base):
+    """
+    Standardized test definitions from LOINC database.
+    Used for autocomplete, validation, and ensuring consistent test naming.
+    """
+    __tablename__ = "standardized_tests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    loinc_code = Column(String(20), unique=True, index=True, nullable=True)
+    test_name = Column(String(255), nullable=False, index=True)
+    short_name = Column(String(100), nullable=True, index=True)
+    default_unit = Column(String(50), nullable=True)
+    category = Column(String(50), nullable=True, index=True)
+    common_names = Column(ARRAY(String), nullable=True)
+    is_common = Column(Boolean, default=False, nullable=False, index=True)
+    system = Column(String(100), nullable=True)
+    loinc_class = Column(String(100), nullable=True)
+    display_order = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Full-text search is created via migration
+    __table_args__ = (
+        Index("idx_standardized_tests_loinc_code", "loinc_code", unique=True),
+        Index("idx_standardized_tests_test_name", "test_name"),
+        Index("idx_standardized_tests_category", "category"),
+        Index("idx_standardized_tests_is_common", "is_common"),
+        Index("idx_standardized_tests_short_name", "short_name"),
+    )

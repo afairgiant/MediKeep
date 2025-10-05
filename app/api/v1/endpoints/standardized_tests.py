@@ -1,0 +1,165 @@
+"""
+API endpoints for standardized test search and autocomplete
+"""
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from app.api import deps
+from app.crud import standardized_test
+from app.models.models import StandardizedTest
+from app.core.logging_config import get_logger
+from pydantic import BaseModel
+
+logger = get_logger(__name__, "app")
+
+router = APIRouter()
+
+
+# Pydantic schemas
+class StandardizedTestResponse(BaseModel):
+    id: int
+    loinc_code: Optional[str]
+    test_name: str
+    short_name: Optional[str]
+    default_unit: Optional[str]
+    category: Optional[str]
+    common_names: Optional[List[str]]
+    is_common: bool
+
+    class Config:
+        from_attributes = True
+
+
+class AutocompleteOption(BaseModel):
+    value: str
+    label: str
+    loinc_code: Optional[str]
+    default_unit: Optional[str]
+    category: Optional[str]
+
+
+class TestSearchResponse(BaseModel):
+    tests: List[StandardizedTestResponse]
+    total: int
+
+
+@router.get("/search", response_model=TestSearchResponse)
+def search_standardized_tests(
+    query: str = Query(None, description="Search query"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    limit: int = Query(200, ge=1, le=1000, description="Maximum results"),
+    db: Session = Depends(deps.get_db)
+):
+    """
+    Search standardized tests with full-text search.
+
+    Supports:
+    - Exact name matching
+    - Partial name matching
+    - LOINC code lookup
+    - Category filtering
+    """
+    tests = standardized_test.search_tests(db, query or "", category, limit)
+
+    logger.info("Test search performed", extra={
+        "query": query,
+        "category": category,
+        "results_count": len(tests)
+    })
+
+    return {
+        "tests": tests,
+        "total": len(tests)
+    }
+
+
+@router.get("/autocomplete", response_model=List[AutocompleteOption])
+def get_test_autocomplete(
+    query: str = Query("", description="Autocomplete query"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    limit: int = Query(50, ge=1, le=200, description="Maximum results"),
+    db: Session = Depends(deps.get_db)
+):
+    """
+    Get autocomplete suggestions for test names.
+
+    Optimized for frontend autocomplete components.
+    Returns formatted options with test name, LOINC code, and default unit.
+    """
+    options = standardized_test.get_autocomplete_options(db, query, category, limit)
+
+    logger.debug("Autocomplete request", extra={
+        "query": query,
+        "category": category,
+        "results_count": len(options)
+    })
+
+    return options
+
+
+@router.get("/common", response_model=List[StandardizedTestResponse])
+def get_common_tests(
+    category: Optional[str] = Query(None, description="Filter by category"),
+    limit: int = Query(100, ge=1, le=500, description="Maximum results"),
+    db: Session = Depends(deps.get_db)
+):
+    """Get frequently used/common tests."""
+    tests = standardized_test.get_common_tests(db, category, limit)
+
+    return tests
+
+
+@router.get("/by-category/{category}", response_model=List[StandardizedTestResponse])
+def get_tests_by_category(
+    category: str,
+    db: Session = Depends(deps.get_db)
+):
+    """Get all tests in a specific category (hematology, chemistry, etc.)."""
+    tests = standardized_test.get_tests_by_category(db, category)
+
+    if not tests:
+        raise HTTPException(status_code=404, detail=f"No tests found for category: {category}")
+
+    return tests
+
+
+@router.get("/by-loinc/{loinc_code}", response_model=StandardizedTestResponse)
+def get_test_by_loinc(
+    loinc_code: str,
+    db: Session = Depends(deps.get_db)
+):
+    """Get a standardized test by LOINC code."""
+    test = standardized_test.get_test_by_loinc(db, loinc_code)
+
+    if not test:
+        raise HTTPException(status_code=404, detail=f"Test not found with LOINC code: {loinc_code}")
+
+    return test
+
+
+@router.get("/by-name/{test_name}", response_model=StandardizedTestResponse)
+def get_test_by_name(
+    test_name: str,
+    db: Session = Depends(deps.get_db)
+):
+    """Get a standardized test by name (case-insensitive exact match)."""
+    test = standardized_test.get_test_by_name(db, test_name)
+
+    if not test:
+        raise HTTPException(status_code=404, detail=f"Test not found: {test_name}")
+
+    return test
+
+
+@router.get("/count")
+def count_tests(
+    category: Optional[str] = Query(None, description="Filter by category"),
+    db: Session = Depends(deps.get_db)
+):
+    """Get total count of standardized tests."""
+    count = standardized_test.count_tests(db, category)
+
+    return {
+        "category": category,
+        "count": count
+    }

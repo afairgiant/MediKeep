@@ -50,6 +50,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     gosu \
     logrotate \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    poppler-utils \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 

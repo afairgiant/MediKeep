@@ -104,8 +104,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         sharedPatientsByMeCount: sharedPatientsCreated?.length || 0
       });
 
-      console.log('DEBUG - Patient shares received:', sharedPatients);
-      console.log('DEBUG - Patient shares created:', sharedPatientsCreated);
+      // DEBUG - Patient shares received and created logged via logger
     } catch (error) {
       logger.error('Failed to load invitations and shares', {
         component: 'InvitationManager',

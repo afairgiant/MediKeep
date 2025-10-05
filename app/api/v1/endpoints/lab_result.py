@@ -48,10 +48,14 @@ from app.schemas.lab_result import (
     LabResultResponse,
     LabResultUpdate,
     LabResultWithRelations,
+    PDFExtractionMetadata,
+    PDFExtractionResponse,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
+from app.core.logging_config import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__, "app")
 
 
 # Lab Result Endpoints
@@ -790,3 +794,138 @@ def delete_lab_result_condition(
         # Delete relationship
         lab_result_condition.delete(db, id=relationship_id)
         return {"message": "Lab result condition relationship deleted successfully"}
+
+
+# OCR PDF Parsing Endpoint
+@router.post("/{lab_result_id}/ocr-parse", response_model=PDFExtractionResponse)
+async def parse_lab_pdf_with_ocr(
+    *,
+    request: Request,
+    lab_result_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> PDFExtractionResponse:
+    """
+    Extract text from lab PDF using hybrid OCR approach.
+    Returns raw text for client-side parsing.
+    Does NOT save to database - client reviews and submits separately.
+
+    Args:
+        lab_result_id: ID of the lab result to associate with
+        file: PDF file to process
+
+    Returns:
+        PDFExtractionResponse with extracted text and metadata
+    """
+    with handle_database_errors(request=request):
+        # 1. Verify lab result exists and user has access
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        # Verify patient access through the lab result
+        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
+
+        # 2. Validate file type
+        if not file.filename.lower().endswith('.pdf'):
+            raise BusinessLogicException(
+                message="Only PDF files are supported for OCR extraction",
+                request=request
+            )
+
+        # 3. Check file size (15MB limit)
+        MAX_SIZE = 15 * 1024 * 1024  # 15MB
+
+        # First, try to check size from Content-Length header (more efficient)
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                size = int(content_length)
+                if size > MAX_SIZE:
+                    raise BusinessLogicException(
+                        message=f"File size ({size // (1024*1024)}MB) exceeds {MAX_SIZE // (1024*1024)}MB limit. Please use a smaller file or compress the PDF.",
+                        request=request
+                    )
+            except ValueError:
+                pass  # Invalid content-length, will check after reading
+
+        # Read file with size validation (stream to avoid loading huge files into memory)
+        file_bytes = bytearray()
+        chunk_size = 1024 * 1024  # 1MB chunks
+
+        while True:
+            chunk = await file.read(chunk_size)
+            if not chunk:
+                break
+
+            file_bytes.extend(chunk)
+
+            # Check size as we read to fail fast
+            if len(file_bytes) > MAX_SIZE:
+                raise BusinessLogicException(
+                    message=f"File size exceeds {MAX_SIZE // (1024*1024)}MB limit. Please use a smaller file or compress the PDF.",
+                    request=request
+                )
+
+        # Convert to bytes for consistency with rest of code
+        file_bytes = bytes(file_bytes)
+
+        # 4. Extract text using hybrid service
+        from app.services.pdf_text_extraction_service import pdf_extraction_service
+
+        logger.info(
+            "Starting PDF OCR extraction",
+            extra={
+                "component": "lab_result_ocr_endpoint",
+                "lab_result_id": lab_result_id,
+                "pdf_filename": file.filename,
+                "file_size": len(file_bytes),
+                "user_id": current_user.id
+            }
+        )
+
+        result = pdf_extraction_service.extract_text(
+            pdf_bytes=file_bytes,
+            filename=file.filename
+        )
+
+        # 5. Log activity for audit trail
+        from app.crud.activity_log import activity_log
+
+        activity_log.log_activity(
+            db=db,
+            action="pdf_ocr_extraction",
+            entity_type=EntityType.LAB_RESULT,
+            entity_id=lab_result_id,
+            description=f"PDF OCR extraction: {file.filename} ({result['method']})",
+            user_id=current_user.id,
+            patient_id=db_lab_result.patient_id,
+            metadata={
+                "pdf_filename": file.filename,
+                "method": result['method'],
+                "page_count": result['page_count'],
+                "char_count": result['char_count'],
+                "confidence": result['confidence'],
+                "success": result['error'] is None
+            },
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent")
+        )
+
+        # 6. Return result for client-side parsing using standardized schema
+        metadata = PDFExtractionMetadata(
+            method=result['method'],
+            confidence=result['confidence'],
+            page_count=result['page_count'],
+            char_count=result['char_count'],
+            filename=file.filename,
+            lab_name=result.get('lab_name'),
+            test_count=result.get('test_count')
+        )
+
+        return PDFExtractionResponse(
+            status="success" if result['error'] is None else "error",
+            extracted_text=result['text'],
+            metadata=metadata,
+            error=result['error']
+        )
