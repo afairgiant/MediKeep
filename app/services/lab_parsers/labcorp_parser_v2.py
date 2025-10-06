@@ -39,6 +39,13 @@ class LabCorpParserV2(BaseLabParser):
         results = []
         lines = text.split('\n')
 
+        # Extract date from PDF header (applies to all tests)
+        test_date = self.extract_date_from_text(text)
+        if test_date:
+            logger.info(f"📅 Extracted test date: {test_date}")
+        else:
+            logger.warning("⚠️  No test date found in PDF")
+
         logger.info("="*80)
         logger.info("LABCORP PARSER V2 - PROCESSING LINES")
         logger.info("="*80)
@@ -49,7 +56,7 @@ class LabCorpParserV2(BaseLabParser):
                 continue
 
             # Try to parse this line
-            result = self._parse_line(line)
+            result = self._parse_line(line, test_date=test_date)
             if result:
                 logger.info(f"✓ PARSED: {result.test_name} = {result.value} {result.unit}")
                 results.append(result)
@@ -62,7 +69,7 @@ class LabCorpParserV2(BaseLabParser):
 
         return results
 
-    def _parse_line(self, line: str) -> Optional[LabTestResult]:
+    def _parse_line(self, line: str, test_date: str = None) -> Optional[LabTestResult]:
         """
         Parse a single line looking for lab result pattern.
 
@@ -115,7 +122,8 @@ class LabCorpParserV2(BaseLabParser):
                     unit=unit,
                     reference_range=ref_range,
                     flag=flag,
-                    confidence=0.9  # Slightly lower confidence without superscript
+                    confidence=0.9,  # Slightly lower confidence without superscript
+                    test_date=test_date
                 )
 
         if not match:
@@ -147,7 +155,8 @@ class LabCorpParserV2(BaseLabParser):
             unit=unit,
             reference_range=ref_range,
             flag=flag,
-            confidence=0.95
+            confidence=0.95,
+            test_date=test_date
         )
 
     def _extract_unit(self, text: str) -> str:

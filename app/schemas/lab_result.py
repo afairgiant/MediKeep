@@ -433,6 +433,7 @@ class PDFExtractionMetadata(BaseModel):
     filename: str
     lab_name: Optional[str] = None  # If lab-specific parser was used
     test_count: Optional[int] = None  # If lab-specific parser was used
+    test_date: Optional[str] = None  # Extracted test date in YYYY-MM-DD format
 
     @field_validator("method")
     @classmethod

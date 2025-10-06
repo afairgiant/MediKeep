@@ -54,12 +54,14 @@ interface TestComponentsTabProps {
   labResultId: number;
   isViewMode?: boolean;
   onError?: (error: Error) => void;
+  onLabResultUpdated?: () => void;
 }
 
 const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   labResultId,
   isViewMode = false,
-  onError
+  onError,
+  onLabResultUpdated
 }) => {
   const [activeTab, setActiveTab] = useState<string>('display');
   const [components, setComponents] = useState<LabTestComponent[]>([]);
@@ -471,6 +473,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             <TestComponentBulkEntry
               labResultId={labResultId}
               onComponentsAdded={handleComponentsAdded}
+              onLabResultUpdated={onLabResultUpdated}
               onError={(error: Error) => handleError(error, 'bulk')}
             />
           </Tabs.Panel>

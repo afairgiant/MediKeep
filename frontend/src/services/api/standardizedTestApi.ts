@@ -102,7 +102,12 @@ class StandardizedTestApi {
   /**
    * Match a test name to standardized test (fuzzy matching)
    * Returns the best match or null
+   *
+   * NOTE: This API-based matching is currently UNUSED.
+   * The app uses testLibrary.ts static file for faster, simpler matching.
+   * Keeping this code commented for future reference if we want to switch back.
    */
+  /*
   async matchTestName(testName: string): Promise<StandardizedTest | null> {
     try {
       // First try exact match
@@ -123,10 +128,42 @@ class StandardizedTestApi {
       // Return the first result (best match from full-text search)
       return searchResult.tests[0];
     } catch (error) {
-      console.error('Error matching test name:', error);
+      // Silently return null on error
       return null;
     }
   }
+  */
+
+  /**
+   * Batch match multiple test names at once (much faster than individual calls)
+   * Returns a map of test_name -> StandardizedTest (or null if not found)
+   *
+   * NOTE: This API-based batch matching is currently UNUSED.
+   * The app uses testLibrary.ts static file for instant, synchronous matching.
+   * Keeping this code commented for future reference if we want to switch back.
+   *
+   * Backend endpoint: POST /api/v1/standardized-tests/batch-match
+   */
+  /*
+  async batchMatchTestNames(testNames: string[]): Promise<Map<string, StandardizedTest | null>> {
+    try {
+      const response = await apiService.post(`${this.basePath}/batch-match`, {
+        test_names: testNames
+      });
+
+      const resultMap = new Map<string, StandardizedTest | null>();
+
+      for (const result of response.data.results) {
+        resultMap.set(result.test_name, result.matched_test);
+      }
+
+      return resultMap;
+    } catch (error) {
+      // Return empty map on error
+      return new Map();
+    }
+  }
+  */
 }
 
 export const standardizedTestApi = new StandardizedTestApi();

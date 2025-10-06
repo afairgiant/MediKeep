@@ -68,15 +68,28 @@ def search_tests(
     conditions.append(func.lower(StandardizedTest.test_name) == search_term)
     conditions.append(func.lower(StandardizedTest.short_name) == search_term)
 
-    # 2. Starts with query
+    # 2. Search in common_names array (case-insensitive)
+    # We need to convert all array elements to lowercase and check if search_term is in there
+    # Using PostgreSQL array comparison: search_term = ANY(ARRAY[lower elements])
+    from sqlalchemy.dialects.postgresql import array
+    from sqlalchemy import cast, ARRAY, String, any_
+
+    # Create a condition that checks if the lowercase search term matches any lowercase common name
+    # We'll use a raw SQL expression for this
+    from sqlalchemy.sql import text
+    conditions.append(
+        text(":search_val = ANY(SELECT LOWER(unnest(common_names)))").bindparams(search_val=search_term)
+    )
+
+    # 3. Starts with query
     conditions.append(func.lower(StandardizedTest.test_name).startswith(search_term))
     conditions.append(func.lower(StandardizedTest.short_name).startswith(search_term))
 
-    # 3. Contains query
+    # 4. Contains query
     conditions.append(func.lower(StandardizedTest.test_name).contains(search_term))
     conditions.append(func.lower(StandardizedTest.short_name).contains(search_term))
 
-    # 4. Full-text search on test_name
+    # 5. Full-text search on test_name
     # Using PostgreSQL ts_vector for better performance
     ts_query = func.plainto_tsquery('english', query)
     conditions.append(
@@ -86,8 +99,24 @@ def search_tests(
     # Combine conditions with OR
     q = q.filter(or_(*conditions))
 
-    # Order by: common tests first, then alphabetically
+    # Order by relevance: exact matches first, then partial matches
+    # Using CASE to create a relevance score
+    from sqlalchemy import case
+    relevance_score = case(
+        # Highest priority: exact match on test_name or short_name
+        (func.lower(StandardizedTest.test_name) == search_term, 1),
+        (func.lower(StandardizedTest.short_name) == search_term, 1),
+        # High priority: exact match in common_names array
+        (text(":search_val = ANY(SELECT LOWER(unnest(common_names)))").bindparams(search_val=search_term), 2),
+        # Medium priority: starts with query
+        (func.lower(StandardizedTest.test_name).startswith(search_term), 3),
+        (func.lower(StandardizedTest.short_name).startswith(search_term), 3),
+        # Low priority: contains query or full-text match
+        else_=4
+    )
+
     q = q.order_by(
+        relevance_score.asc(),  # Lower score = higher relevance
         StandardizedTest.is_common.desc(),
         StandardizedTest.test_name
     )

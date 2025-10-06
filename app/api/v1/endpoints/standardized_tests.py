@@ -163,3 +163,58 @@ def count_tests(
         "category": category,
         "count": count
     }
+
+
+class BatchMatchRequest(BaseModel):
+    test_names: List[str]
+
+
+class BatchMatchResult(BaseModel):
+    test_name: str
+    matched_test: Optional[StandardizedTestResponse]
+
+
+class BatchMatchResponse(BaseModel):
+    results: List[BatchMatchResult]
+
+
+@router.post("/batch-match", response_model=BatchMatchResponse)
+def batch_match_tests(
+    request: BatchMatchRequest,
+    db: Session = Depends(deps.get_db)
+):
+    """
+    Match multiple test names at once.
+    Returns the best match for each test name, or null if no match found.
+    Much faster than individual API calls.
+
+    NOTE: This endpoint is currently UNUSED by the frontend.
+    The app uses testLibrary.ts static file for instant, synchronous matching.
+    Keeping this endpoint for future use if we switch to database-based matching.
+    """
+    results = []
+
+    for test_name in request.test_names:
+        # Try exact match first
+        matched = standardized_test.get_test_by_name(db, test_name)
+
+        # If no exact match, try fuzzy search
+        if not matched:
+            search_results = standardized_test.search_tests(db, test_name, limit=1)
+            matched = search_results[0] if search_results else None
+
+        results.append(BatchMatchResult(
+            test_name=test_name,
+            matched_test=StandardizedTestResponse.from_orm(matched) if matched else None
+        ))
+
+    logger.info(
+        f"Batch matched {len(request.test_names)} tests",
+        extra={
+            "component": "standardized_tests_batch_match",
+            "total_tests": len(request.test_names),
+            "matched": sum(1 for r in results if r.matched_test is not None)
+        }
+    )
+
+    return BatchMatchResponse(results=results)

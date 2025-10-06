@@ -26,8 +26,8 @@ import {
   Tabs,
   Progress
 } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import { Dropzone } from '@mantine/dropzone';
-import { getTestByName } from '../../../constants/testLibrary';
 import {
   IconUpload,
   IconEdit,
@@ -46,6 +46,7 @@ import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { apiService } from '../../../services/api';
+import { searchTests } from '../../../constants/testLibrary';
 import logger from '../../../services/logger';
 
 interface ParsedTestComponent {
@@ -58,6 +59,7 @@ interface ParsedTestComponent {
   ref_range_text?: string;
   status?: string;
   category?: string;
+  loinc_code?: string;
   original_line: string;
   confidence: number; // 0-1 score for parsing confidence
   issues: string[];
@@ -66,6 +68,7 @@ interface ParsedTestComponent {
 interface TestComponentBulkEntryProps {
   labResultId: number;
   onComponentsAdded?: (components: LabTestComponent[]) => void;
+  onLabResultUpdated?: () => void; // Callback to refresh lab result after updating completed_date
   onError?: (error: Error) => void;
   disabled?: boolean;
 }
@@ -73,6 +76,7 @@ interface TestComponentBulkEntryProps {
 const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   labResultId,
   onComponentsAdded,
+  onLabResultUpdated,
   onError,
   disabled = false
 }) => {
@@ -98,6 +102,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   const [extractedText, setExtractedText] = useState('');
   const [extractionMetadata, setExtractionMetadata] = useState<any>(null);
   const [extractionError, setExtractionError] = useState('');
+  const [completedDate, setCompletedDate] = useState<Date | null>(null);
 
   const handleError = useCallback((error: Error, context: string) => {
     logger.error('test_component_bulk_entry_error', {
@@ -287,32 +292,8 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       }
 
       if (parsed) {
-        // Match with standardized test library
-        const standardizedTest = getTestByName(parsed.test_name);
-        if (standardizedTest) {
-          // Use standardized test name for consistency in trends
-          parsed.test_name = standardizedTest.test_name;
-
-          // If no abbreviation was parsed, use the standardized one
-          if (!parsed.abbreviation && standardizedTest.abbreviation) {
-            parsed.abbreviation = standardizedTest.abbreviation;
-          }
-
-          // If no unit was detected, use the standardized unit
-          if (!parsed.unit && standardizedTest.default_unit) {
-            parsed.unit = standardizedTest.default_unit;
-            // Remove the "unit not detected" issue if we found it
-            const unitIssueIndex = parsed.issues.indexOf('Unit not detected');
-            if (unitIssueIndex > -1) {
-              parsed.issues.splice(unitIssueIndex, 1);
-            }
-          }
-
-          // Set category from standardized test
-          if (standardizedTest.category) {
-            parsed.category = standardizedTest.category;
-          }
-        }
+        // Note: Test matching happens later via enrichWithStandardizedTests()
+        // We don't do it here to keep parseText synchronous
 
         // Validate parsed data
         if (parsed.test_name.length < 2) {
@@ -328,6 +309,12 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           parsed.issues.push('Reference range not detected');
         }
 
+        // Reduce confidence based on number of issues
+        if (parsed.issues.length > 0) {
+          const issueReduction = Math.min(parsed.issues.length * 0.15, 0.5);
+          parsed.confidence = Math.max(0.1, parsed.confidence - issueReduction);
+        }
+
         components.push(parsed);
       } else {
         // Track failed lines for user feedback
@@ -338,14 +325,60 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     return { components, failedLineCount };
   }, [parseSettings]);
 
+  // Enrich parsed components with standardized test data from testLibrary.ts
+  const enrichWithStandardizedTests = useCallback((components: ParsedTestComponent[]): ParsedTestComponent[] => {
+    return components.map(component => {
+      // Match against testLibrary.ts using fuzzy search (synchronous, no API call)
+      // searchTests() checks test_name, abbreviation, AND common_names
+      const matches = searchTests(component.test_name, 1);
+      const standardizedTest = matches.length > 0 ? matches[0] : null;
+
+      if (standardizedTest) {
+        // Use standardized test name for consistency in trends
+        component.test_name = standardizedTest.test_name;
+
+        // If no abbreviation was parsed, use the standardized one
+        if (!component.abbreviation && standardizedTest.abbreviation) {
+          component.abbreviation = standardizedTest.abbreviation;
+        }
+
+        // If no unit was detected, use the standardized unit
+        if (!component.unit && standardizedTest.default_unit) {
+          component.unit = standardizedTest.default_unit;
+          // Remove the "unit not detected" issue if we found it
+          const unitIssueIndex = component.issues.indexOf('Unit not detected');
+          if (unitIssueIndex > -1) {
+            component.issues.splice(unitIssueIndex, 1);
+          }
+        }
+
+        // Set category from standardized test
+        if (standardizedTest.category) {
+          component.category = standardizedTest.category;
+        }
+
+        // Store LOINC code for reference
+        if (standardizedTest.test_code) {
+          component.loinc_code = standardizedTest.test_code;
+        }
+      }
+      // Note: We don't mark as "not found" - let the user decide if they want to keep it
+
+      return component;
+    });
+  }, []);
+
   const handleTextChange = useCallback((value: string) => {
     setRawText(value);
     if (parseMode === 'auto' && value.trim()) {
       const { components, failedLineCount: failedCount } = parseText(value);
-      setParsedComponents(components);
       setFailedLineCount(failedCount);
+
+      // Enrich with standardized test data (synchronous)
+      const enriched = enrichWithStandardizedTests(components);
+      setParsedComponents(enriched);
     }
-  }, [parseMode, parseText]);
+  }, [parseMode, parseText, enrichWithStandardizedTests]);
 
   const handleManualParse = useCallback(() => {
     if (!rawText.trim()) {
@@ -358,15 +391,18 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     }
 
     const { components, failedLineCount: failedCount } = parseText(rawText);
-    setParsedComponents(components);
     setFailedLineCount(failedCount);
+
+    // Enrich with standardized test data (synchronous)
+    const enriched = enrichWithStandardizedTests(components);
+    setParsedComponents(enriched);
 
     notifications.show({
       title: 'Text Parsed',
-      message: `Found ${components.length} potential test results`,
+      message: `Found ${enriched.length} potential test results`,
       color: 'blue'
     });
-  }, [rawText, parseText]);
+  }, [rawText, parseText, enrichWithStandardizedTests]);
 
   const handleComponentEdit = useCallback((index: number, field: keyof ParsedTestComponent, value: any) => {
     setParsedComponents(prev => {
@@ -391,8 +427,42 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       return;
     }
 
+    // Validate completed_date is provided
+    if (!completedDate) {
+      notifications.show({
+        title: 'Date Required',
+        message: 'Please specify the test completed date. This is required for tracking trends over time.',
+        color: 'orange',
+        autoClose: 6000
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      // First, update the lab result with the completed_date
+      const formattedDate = completedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      logger.info('Updating lab result with completed_date', {
+        component: 'TestComponentBulkEntry',
+        labResultId,
+        completedDate: formattedDate
+      });
+
+      const updateResponse = await apiService.put(`/lab-results/${labResultId}`, {
+        completed_date: formattedDate
+      });
+
+      logger.info('Lab result updated successfully', {
+        component: 'TestComponentBulkEntry',
+        responseCompletedDate: updateResponse?.completed_date
+      });
+
+      // Notify parent to refresh lab result data
+      if (onLabResultUpdated) {
+        onLabResultUpdated();
+      }
+
       const componentsToCreate: LabTestComponentCreate[] = parsedComponents
         .filter(comp => comp.value !== null && comp.test_name.trim())
         .map((comp, index) => ({
@@ -432,6 +502,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       // Reset form after successful submission
       setRawText('');
       setParsedComponents([]);
+      setCompletedDate(null);
     } catch (error) {
       handleError(error as Error, 'submit_bulk');
       notifications.show({
@@ -442,7 +513,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [parsedComponents, labResultId, onComponentsAdded, handleError]);
+  }, [parsedComponents, labResultId, completedDate, onComponentsAdded, handleError, onLabResultUpdated]);
 
   // PDF Upload handlers
   const handlePdfDrop = useCallback(async (files: File[]) => {
@@ -485,12 +556,18 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
         component: 'TestComponentBulkEntry',
         event: 'pdf_ocr_extraction_success',
         method: response.metadata.method,
-        charCount: response.metadata.char_count
+        charCount: response.metadata.char_count,
+        testDate: response.metadata.test_date
       });
+
+      // Set completed date if extracted from PDF
+      if (response.metadata.test_date) {
+        setCompletedDate(new Date(response.metadata.test_date));
+      }
 
       notifications.show({
         title: 'PDF Processed',
-        message: `Extracted ${response.metadata.char_count} characters using ${response.metadata.method} method`,
+        message: `Extracted ${response.metadata.char_count} characters using ${response.metadata.method} method${response.metadata.test_date ? `. Test Date: ${response.metadata.test_date}` : ''}`,
         color: 'green'
       });
 
@@ -520,22 +597,25 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
 
     // Feed to existing parseText function! ✅ REUSE
     const { components, failedLineCount: failedCount } = parseText(extractedText);
-    setParsedComponents(components);
     setFailedLineCount(failedCount);
+
+    // Enrich with standardized test data (synchronous)
+    const enriched = enrichWithStandardizedTests(components);
+    setParsedComponents(enriched);
 
     notifications.show({
       title: 'PDF Parsed',
-      message: `Found ${components.length} test results`,
+      message: `Found ${enriched.length} test results`,
       color: 'green'
     });
 
     logger.info('Extracted text parsed into components', {
       component: 'TestComponentBulkEntry',
       event: 'pdf_text_parsed',
-      componentCount: components.length,
+      componentCount: enriched.length,
       failedLines: failedCount
     });
-  }, [extractedText, parseText]);
+  }, [extractedText, parseText, enrichWithStandardizedTests]);
 
   const validComponents = useMemo(() => {
     return parsedComponents.filter(comp => comp.value !== null && comp.test_name.trim());
@@ -758,6 +838,25 @@ Sodium,140,mEq/L,136-145,Normal`
 
               <Tabs.Panel value="preview">
                 <Stack gap="md" mt="md">
+                  {/* Test Completed Date - required for trends */}
+                  <Alert color="blue" title="Test Date" icon={<IconAlertCircle />}>
+                    <Stack gap="xs">
+                      <Text size="sm">
+                        Specify when these lab results were completed. This date is required for tracking trends over time.
+                      </Text>
+                      <DateInput
+                        value={completedDate}
+                        onChange={(value) => setCompletedDate(value as Date | null)}
+                        label="Test Completed Date"
+                        placeholder="Select date"
+                        clearable
+                        required
+                        maxDate={new Date()}
+                        styles={{ input: { maxWidth: 250 } }}
+                      />
+                    </Stack>
+                  </Alert>
+
                   {parsedComponents.length === 0 ? (
                     <Center p="xl">
                       <Stack align="center" gap="md">

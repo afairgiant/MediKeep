@@ -920,7 +920,8 @@ async def parse_lab_pdf_with_ocr(
             char_count=result['char_count'],
             filename=file.filename,
             lab_name=result.get('lab_name'),
-            test_count=result.get('test_count')
+            test_count=result.get('test_count'),
+            test_date=result.get('test_date')  # Include extracted test date
         )
 
         return PDFExtractionResponse(

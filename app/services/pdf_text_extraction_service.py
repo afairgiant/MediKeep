@@ -431,13 +431,17 @@ class PDFTextExtractionService:
 
             formatted_text = '\n'.join(formatted_lines)
 
+            # Extract test date from first result (all tests from same PDF have same date)
+            test_date = results[0].test_date if results and results[0].test_date else None
+
             logger.info(
                 f"Lab-specific parsing successful: {lab_name}",
                 extra={
                     "component": "PDFTextExtractionService",
                     "lab_name": lab_name,
                     "test_count": len(results),
-                    "avg_confidence": sum(r.confidence for r in results) / max(len(results), 1)
+                    "avg_confidence": sum(r.confidence for r in results) / max(len(results), 1),
+                    "test_date": test_date
                 }
             )
 
@@ -449,7 +453,8 @@ class PDFTextExtractionService:
                 'confidence': 0.98,  # Higher confidence for structured parsing
                 'error': None,
                 'lab_name': lab_name,
-                'test_count': len(results)
+                'test_count': len(results),
+                'test_date': test_date
             }
 
         except Exception as e:

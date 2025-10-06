@@ -346,7 +346,7 @@ const LabResults = () => {
     if (viewingLabResult) {
       refreshFileCount(viewingLabResult.id);
     }
-    
+
     setShowViewModal(false);
     setViewingLabResult(null);
     // Remove view parameter from URL
@@ -356,6 +356,34 @@ const LabResults = () => {
     navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
       replace: true,
     });
+  };
+
+  const handleLabResultUpdated = async () => {
+    // If modal is open, fetch the updated lab result directly
+    if (viewingLabResult) {
+      try {
+        const updatedLabResult = await apiService.getLabResult(viewingLabResult.id);
+        if (updatedLabResult) {
+          setViewingLabResult(updatedLabResult);
+          logger.info('lab_result_updated_in_modal', {
+            message: 'Lab result refreshed in view modal',
+            labResultId: viewingLabResult.id,
+            completedDate: updatedLabResult.completed_date,
+            component: 'LabResults',
+          });
+        }
+      } catch (error) {
+        logger.error('lab_result_refresh_error', {
+          message: 'Failed to refresh lab result in modal',
+          labResultId: viewingLabResult.id,
+          error: error.message,
+          component: 'LabResults',
+        });
+      }
+    }
+
+    // Refresh the lab results list
+    await refreshData();
   };
 
   const handleDeleteLabResult = async labResultId => {
@@ -716,6 +744,7 @@ const LabResults = () => {
             refreshFileCount(viewingLabResult.id);
           }
         }}
+        onLabResultUpdated={handleLabResultUpdated}
       />
     </>
   );
