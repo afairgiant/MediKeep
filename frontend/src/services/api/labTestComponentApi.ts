@@ -225,6 +225,13 @@ class LabTestComponentApi {
 
   /**
    * Create multiple test components for a lab result in bulk
+   *
+   * Response structure:
+   * {
+   *   created_count: number,
+   *   components: LabTestComponent[],
+   *   errors: string[]
+   * }
    */
   async createBulkForLabResult(
     labResultId: number,

@@ -13,6 +13,7 @@ from unittest.mock import patch, MagicMock
 from app.crud.patient import patient as patient_crud
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
+from tests.fixtures.pdf_fixtures import create_minimal_pdf
 
 
 class TestLabResultPDFParsing:
@@ -59,55 +60,9 @@ class TestLabResultPDFParsing:
         assert response.status_code == 201
         return response.json()["id"]
 
-    def create_pdf_file(self, content: bytes = None):
+    def create_pdf_file(self):
         """Create a mock PDF file for testing."""
-        if content is None:
-            # Minimal valid PDF structure
-            content = b"""%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/Resources <<
-/Font <<
-/F1 <<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica
->>
->>
->>
-/Contents 4 0 R
->>
-endobj
-4 0 obj
-<<
-/Length 44
->>
-stream
-BT
-/F1 12 Tf
-100 700 Td
-(Test Results) Tj
-ET
-endstream
-endobj
-%%EOF"""
-
-        return io.BytesIO(content)
+        return create_minimal_pdf()
 
     # ========== File Upload Validation Tests ==========
 

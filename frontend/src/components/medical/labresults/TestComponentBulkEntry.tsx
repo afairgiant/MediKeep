@@ -49,6 +49,58 @@ import { apiService } from '../../../services/api';
 import { searchTests } from '../../../constants/testLibrary';
 import logger from '../../../services/logger';
 
+/**
+ * Regex patterns for parsing various lab result formats.
+ *
+ * Supported formats:
+ * - FULL_PATTERN: "Test Name: Value Unit (Range)" or "Test Name: Value Unit (Ref: Range)"
+ * - TABULAR_PATTERN: "Test    Value    Unit    Range    Status" (tab or space-separated)
+ * - SIMPLE_PATTERN: "Test Value Unit"
+ * - CSV_PATTERN: "Test,Value,Unit,Range,Status"
+ *
+ * Examples:
+ * - "WBC: 7.5 x10E3/uL (Ref: 4.0-11.0)" → FULL_PATTERN
+ * - "Glucose    125    mg/dL    70-100    Normal" → TABULAR_PATTERN
+ * - "Hemoglobin 14.5 g/dL" → SIMPLE_PATTERN
+ * - "BUN,18,mg/dL,7-20,Normal" → CSV_PATTERN
+ */
+
+// Common unit pattern handles: standard units (mg/dL, g/dL, %), ratios (x10E3/uL), and special characters (μ)
+const UNIT_PATTERN = '[a-zA-Z0-9/%μ]+(?:\\/[a-zA-Z0-9]+)?|x10E\\d+\\/[a-zA-Z]+';
+
+const REGEX_PATTERNS = {
+  // Pattern 1: "Test Name: 123.4 mg/dL (Normal range: 70-100)" or "Test Name: 123.4 mg/dL (70-100)"
+  FULL_PATTERN: new RegExp(
+    `^(.+?):\\s*([0-9.,]+)\\s*(${UNIT_PATTERN})?\\s*` +
+    `(?:\\((?:.*?range.*?:\\s*)?([0-9.,]+)\\s*[-–]\\s*([0-9.,]+).*?\\)|` +
+    `\\(([<>≤≥]\\s*[0-9.,]+)\\)|` +
+    `\\(Not\\s+Estab\\.?\\)|` +
+    `(\\([^)]*\\)))?`,
+    'i'
+  ),
+
+  // Pattern 2: "Glucose    123.4    mg/dL    70-100    Normal"
+  TABULAR_PATTERN: new RegExp(
+    `^(.+?)\\s+([0-9.,]+)\\s+(${UNIT_PATTERN})\\s+` +
+    `((?:[0-9.,]+)[-–to\\s]+(?:[0-9.,]+)|[<>≤≥]?[0-9.,]+)\\s*` +
+    `(normal|high|low|critical|abnormal|borderline)?`,
+    'i'
+  ),
+
+  // Pattern 3: "Test Name  Value  Unit"
+  SIMPLE_PATTERN: new RegExp(
+    `^(.+?)\\s+([0-9.,]+)\\s+(${UNIT_PATTERN})`,
+    'i'
+  ),
+
+  // Pattern 4: CSV-like "Test,Value,Unit,Range,Status"
+  CSV_PATTERN: new RegExp(
+    `^(.+?)[,\\t]+([0-9.,]+)[,\\t]+(${UNIT_PATTERN})` +
+    `(?:[,\\t]+([^,\\t]*?))?(?:[,\\t]+([^,\\t]*?))?$`,
+    'i'
+  )
+};
+
 interface ParsedTestComponent {
   test_name: string;
   abbreviation?: string;
@@ -141,20 +193,16 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     // Common patterns for parsing lab results
     const patterns = {
       // Pattern 1: "Test Name: 123.4 mg/dL (Normal range: 70-100)" or "Test Name: 123.4 mg/dL (70-100)"
-      // Updated to handle scientific notation units like "x10E3/uL"
-      fullPattern: /^(.+?):\s*([0-9.,]+)\s*([a-zA-Z0-9/%μ]+(?:\/[a-zA-Z0-9]+)?|x10E\d+\/[a-zA-Z]+)?\s*(?:\((?:.*?range.*?:\s*)?([0-9.,]+)\s*[-–]\s*([0-9.,]+).*?\)|\(([<>≤≥]\s*[0-9.,]+)\)|\(Not\s+Estab\.?\)|(\([^)]*\)))?/i,
+      fullPattern: REGEX_PATTERNS.FULL_PATTERN,
 
       // Pattern 2: "Glucose    123.4    mg/dL    70-100    Normal"
-      // Updated to handle scientific notation units
-      tabularPattern: /^(.+?)\s+([0-9.,]+)\s+([a-zA-Z0-9/%μ]+(?:\/[a-zA-Z0-9]+)?|x10E\d+\/[a-zA-Z]+)\s+((?:[0-9.,]+)[-–to\s]+(?:[0-9.,]+)|[<>≤≥]?[0-9.,]+)\s*(normal|high|low|critical|abnormal|borderline)?/i,
+      tabularPattern: REGEX_PATTERNS.TABULAR_PATTERN,
 
       // Pattern 3: "Test Name  Value  Unit  RefRange  Status"
-      // Updated to handle scientific notation units
-      simplePattern: /^(.+?)\s+([0-9.,]+)\s+([a-zA-Z0-9/%μ]+(?:\/[a-zA-Z0-9]+)?|x10E\d+\/[a-zA-Z]+)/i,
+      simplePattern: REGEX_PATTERNS.SIMPLE_PATTERN,
 
       // Pattern 4: CSV-like "Test,Value,Unit,Range,Status"
-      // Updated to handle scientific notation units
-      csvPattern: /^(.+?)[,\t]+([0-9.,]+)[,\t]+([a-zA-Z0-9/%μ]+(?:\/[a-zA-Z0-9]+)?|x10E\d+\/[a-zA-Z]+)(?:[,\t]+([^,\t]*?))?(?:[,\t]+([^,\t]*?))?$/i
+      csvPattern: REGEX_PATTERNS.CSV_PATTERN
     };
 
     lines.forEach((line, index) => {
@@ -258,10 +306,12 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           }
 
           // Auto-calculate status if not already set and we have a numeric range
-          if (!parsed.status && parsed.value !== null && parsed.ref_range_min !== null && parsed.ref_range_max !== null) {
-            if (parsed.value > parsed.ref_range_max!) {
+          if (!parsed.status && parsed.value !== null &&
+              typeof parsed.ref_range_min === 'number' &&
+              typeof parsed.ref_range_max === 'number') {
+            if (parsed.value > parsed.ref_range_max) {
               parsed.status = 'high';
-            } else if (parsed.value < parsed.ref_range_min!) {
+            } else if (parsed.value < parsed.ref_range_min) {
               parsed.status = 'low';
             } else {
               parsed.status = 'normal';
@@ -438,6 +488,17 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       return;
     }
 
+    // Validate date is not in the future
+    if (completedDate > new Date()) {
+      notifications.show({
+        title: 'Invalid Date',
+        message: 'Test completed date cannot be in the future.',
+        color: 'orange',
+        autoClose: 6000
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // First, update the lab result with the completed_date
@@ -471,7 +532,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           abbreviation: comp.abbreviation || null,
           test_code: null,
           value: comp.value as number,
-          unit: comp.unit.trim() || 'ratio',
+          unit: (comp.unit || '').trim() || 'ratio',
           ref_range_min: comp.ref_range_min,
           ref_range_max: comp.ref_range_max,
           ref_range_text: comp.ref_range_text || null,
@@ -547,8 +608,8 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       setProcessingMessage('Text extracted successfully!');
 
       // Store extracted text (apiService.post returns the response directly, not wrapped in .data)
-      setExtractedText(response.extracted_text);
-      setExtractionMetadata(response.metadata);
+      setExtractedText(response?.extracted_text || '');
+      setExtractionMetadata(response?.metadata || null);
 
       setProcessingProgress(100);
 

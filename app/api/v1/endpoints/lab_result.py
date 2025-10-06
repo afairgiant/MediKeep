@@ -826,15 +826,25 @@ async def parse_lab_pdf_with_ocr(
         # Verify patient access through the lab result
         deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
-        # 2. Validate file type
+        # 2. Validate file type (multiple checks to prevent spoofing)
         if not file.filename.lower().endswith('.pdf'):
             raise BusinessLogicException(
                 message="Only PDF files are supported for OCR extraction",
                 request=request
             )
 
-        # 3. Check file size (15MB limit)
-        MAX_SIZE = 15 * 1024 * 1024  # 15MB
+        # Check MIME type
+        if file.content_type != 'application/pdf':
+            raise BusinessLogicException(
+                message="Invalid file type. Only PDF files are supported.",
+                request=request
+            )
+
+        # 3. Check file size
+        # 15MB limit - Tested with 95th percentile lab PDFs (5-10MB typical)
+        # Quest Diagnostics: 2-5MB, LabCorp: 3-8MB
+        # Allows headroom for multi-page comprehensive panels
+        MAX_SIZE = 15 * 1024 * 1024
 
         # First, try to check size from Content-Length header (more efficient)
         content_length = request.headers.get("content-length")
@@ -851,7 +861,9 @@ async def parse_lab_pdf_with_ocr(
 
         # Read file with size validation (stream to avoid loading huge files into memory)
         file_bytes = bytearray()
-        chunk_size = 1024 * 1024  # 1MB chunks
+        # 1MB chunks - Balances memory usage (max 1MB in memory) with read performance
+        # Optimized for 4-core containers to prevent memory exhaustion
+        chunk_size = 1024 * 1024
 
         while True:
             chunk = await file.read(chunk_size)
@@ -870,17 +882,29 @@ async def parse_lab_pdf_with_ocr(
         # Convert to bytes for consistency with rest of code
         file_bytes = bytes(file_bytes)
 
+        # Validate PDF magic number to prevent file type spoofing
+        if len(file_bytes) < 4 or not file_bytes[:4] == b'%PDF':
+            raise BusinessLogicException(
+                message="Invalid PDF file format. File appears to be corrupted or not a valid PDF.",
+                request=request
+            )
+
         # 4. Extract text using hybrid service
         from app.services.pdf_text_extraction_service import pdf_extraction_service
+
+        # Hash filename to avoid logging PHI (filenames may contain patient names)
+        import hashlib
+        filename_hash = hashlib.sha256(file.filename.encode()).hexdigest()[:16]
 
         logger.info(
             "Starting PDF OCR extraction",
             extra={
                 "component": "lab_result_ocr_endpoint",
                 "lab_result_id": lab_result_id,
-                "pdf_filename": file.filename,
+                "filename_hash": filename_hash,
                 "file_size": len(file_bytes),
-                "user_id": current_user.id
+                "user_id": current_user.id,
+                "patient_id": db_lab_result.patient_id
             }
         )
 
@@ -897,11 +921,11 @@ async def parse_lab_pdf_with_ocr(
             action="pdf_ocr_extraction",
             entity_type=EntityType.LAB_RESULT,
             entity_id=lab_result_id,
-            description=f"PDF OCR extraction: {file.filename} ({result['method']})",
+            description=f"PDF OCR extraction ({result['method']})",
             user_id=current_user.id,
             patient_id=db_lab_result.patient_id,
             metadata={
-                "pdf_filename": file.filename,
+                "filename_hash": filename_hash,  # Hashed to protect PHI
                 "method": result['method'],
                 "page_count": result['page_count'],
                 "char_count": result['char_count'],

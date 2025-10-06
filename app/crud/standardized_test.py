@@ -3,7 +3,10 @@ CRUD operations for standardized tests
 """
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, case
+from sqlalchemy.dialects.postgresql import array
+from sqlalchemy import cast, ARRAY, String, any_
+from sqlalchemy.sql import text
 from app.models.models import StandardizedTest
 from app.core.logging_config import get_logger
 
@@ -69,14 +72,9 @@ def search_tests(
     conditions.append(func.lower(StandardizedTest.short_name) == search_term)
 
     # 2. Search in common_names array (case-insensitive)
-    # We need to convert all array elements to lowercase and check if search_term is in there
-    # Using PostgreSQL array comparison: search_term = ANY(ARRAY[lower elements])
-    from sqlalchemy.dialects.postgresql import array
-    from sqlalchemy import cast, ARRAY, String, any_
-
-    # Create a condition that checks if the lowercase search term matches any lowercase common name
-    # We'll use a raw SQL expression for this
-    from sqlalchemy.sql import text
+    # Use text() with bound parameters for PostgreSQL-specific array operations
+    # This is safe from SQL injection because bindparams() properly escapes values
+    # SQLAlchemy doesn't have native support for unnest() with case-insensitive array matching
     conditions.append(
         text(":search_val = ANY(SELECT LOWER(unnest(common_names)))").bindparams(search_val=search_term)
     )
@@ -101,7 +99,6 @@ def search_tests(
 
     # Order by relevance: exact matches first, then partial matches
     # Using CASE to create a relevance score
-    from sqlalchemy import case
     relevance_score = case(
         # Highest priority: exact match on test_name or short_name
         (func.lower(StandardizedTest.test_name) == search_term, 1),
