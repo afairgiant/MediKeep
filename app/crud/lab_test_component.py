@@ -189,13 +189,14 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         from sqlalchemy import case, func
 
         # Build base query with join
+        # Use RTRIM to normalize test names by removing trailing commas/punctuation
         query = (
             db.query(self.model)
             .join(self.model.lab_result)
             .filter(
                 and_(
                     self.model.lab_result.has(patient_id=patient_id),
-                    self.model.test_name.ilike(test_name)  # Exact match, case-insensitive
+                    func.lower(func.rtrim(self.model.test_name, ',;: ')) == func.lower(test_name)
                 )
             )
         )

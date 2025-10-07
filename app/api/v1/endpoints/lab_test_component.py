@@ -541,12 +541,12 @@ def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendSt
 
 
 # Trend Tracking Endpoint
-@router.get("/patient/{patient_id}/trends/{test_name}", response_model=LabTestComponentTrendResponse)
+@router.get("/patient/{patient_id}/trends", response_model=LabTestComponentTrendResponse)
 def get_lab_test_component_trends(
     *,
     request: Request,
     patient_id: int,
-    test_name: str,
+    test_name: str = Query(..., description="Test component name"),
     date_from: Optional[date_type] = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: Optional[date_type] = Query(None, description="End date (YYYY-MM-DD)"),
     limit: int = Query(100, ge=1, le=100, description="Max results (max 100)"),

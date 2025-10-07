@@ -28,6 +28,8 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { Dropzone } from '@mantine/dropzone';
+import { useDebouncedValue } from '@mantine/hooks';
+import { FixedSizeList } from 'react-window';
 import {
   IconUpload,
   IconEdit,
@@ -125,6 +127,211 @@ interface TestComponentBulkEntryProps {
   disabled?: boolean;
 }
 
+// Memoized row component with local state to prevent parent re-renders on every keystroke
+const VirtualizedRow = React.memo<{
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    components: ParsedTestComponent[];
+    onEdit: (index: number, field: keyof ParsedTestComponent, value: any) => void;
+    onRemove: (index: number) => void;
+    getConfidenceColor: (confidence: number) => string;
+  };
+}>(({ index, style, data }) => {
+  const { components, onEdit, onRemove, getConfidenceColor } = data;
+  const component = components[index];
+
+  // Local state for inputs to avoid triggering parent re-renders on every keystroke
+  const [localTestName, setLocalTestName] = React.useState(component.test_name);
+  const [localUnit, setLocalUnit] = React.useState(component.unit);
+  const [localRefRangeText, setLocalRefRangeText] = React.useState(component.ref_range_text || '');
+
+  // Update local state when component changes from parent
+  React.useEffect(() => {
+    setLocalTestName(component.test_name);
+  }, [component.test_name]);
+
+  React.useEffect(() => {
+    setLocalUnit(component.unit);
+  }, [component.unit]);
+
+  React.useEffect(() => {
+    setLocalRefRangeText(component.ref_range_text || '');
+  }, [component.ref_range_text]);
+
+  // Commit handlers - only update parent state on blur
+  const handleTestNameChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalTestName(e.target.value);
+  }, []);
+
+  const handleTestNameBlur = React.useCallback(() => {
+    if (localTestName !== component.test_name) {
+      onEdit(index, 'test_name', localTestName);
+    }
+  }, [localTestName, component.test_name, index, onEdit]);
+
+  const handleUnitChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalUnit(e.target.value);
+  }, []);
+
+  const handleUnitBlur = React.useCallback(() => {
+    if (localUnit !== component.unit) {
+      onEdit(index, 'unit', localUnit);
+    }
+  }, [localUnit, component.unit, index, onEdit]);
+
+  const handleRefRangeTextChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalRefRangeText(e.target.value);
+  }, []);
+
+  const handleRefRangeTextBlur = React.useCallback(() => {
+    const newValue = localRefRangeText || null;
+    if (newValue !== component.ref_range_text) {
+      onEdit(index, 'ref_range_text', newValue);
+    }
+  }, [localRefRangeText, component.ref_range_text, index, onEdit]);
+
+  return (
+    <div style={style}>
+      <Table striped>
+        <Table.Tbody>
+          <Table.Tr style={{ backgroundColor: index % 2 === 0 ? 'transparent' : 'var(--mantine-color-gray-0)' }}>
+            <Table.Td style={{ width: '180px' }}>
+            <Stack gap={2}>
+              <TextInput
+                value={localTestName}
+                onChange={handleTestNameChange}
+                onBlur={handleTestNameBlur}
+                size="xs"
+              />
+              {component.abbreviation && (
+                <Badge size="xs" variant="outline">
+                  {component.abbreviation}
+                </Badge>
+              )}
+            </Stack>
+          </Table.Td>
+          <Table.Td style={{ width: '100px' }}>
+            <NumberInput
+              value={component.value || ''}
+              onChange={(value) => onEdit(index, 'value', value)}
+              size="xs"
+              styles={{ input: { width: 80 } }}
+            />
+          </Table.Td>
+          <Table.Td style={{ width: '80px' }}>
+            <TextInput
+              value={localUnit}
+              onChange={handleUnitChange}
+              onBlur={handleUnitBlur}
+              size="xs"
+              styles={{ input: { width: 60 } }}
+            />
+          </Table.Td>
+          <Table.Td style={{ width: '140px' }}>
+            <Stack gap={2}>
+              {component.ref_range_min !== null && component.ref_range_max !== null ? (
+                <Group gap={2}>
+                  <NumberInput
+                    value={component.ref_range_min}
+                    onChange={(value) => onEdit(index, 'ref_range_min', value)}
+                    size="xs"
+                    styles={{ input: { width: 50 } }}
+                    hideControls
+                  />
+                  <Text size="xs">-</Text>
+                  <NumberInput
+                    value={component.ref_range_max}
+                    onChange={(value) => onEdit(index, 'ref_range_max', value)}
+                    size="xs"
+                    styles={{ input: { width: 50 } }}
+                    hideControls
+                  />
+                </Group>
+              ) : component.ref_range_text ? (
+                <TextInput
+                  value={localRefRangeText}
+                  onChange={handleRefRangeTextChange}
+                  onBlur={handleRefRangeTextBlur}
+                  size="xs"
+                  styles={{ input: { width: 100 } }}
+                />
+              ) : (
+                <TextInput
+                  placeholder="Not detected"
+                  value={localRefRangeText}
+                  onChange={handleRefRangeTextChange}
+                  onBlur={handleRefRangeTextBlur}
+                  size="xs"
+                  styles={{ input: { width: 100 } }}
+                />
+              )}
+            </Stack>
+          </Table.Td>
+          <Table.Td style={{ width: '120px' }}>
+            <Select
+              value={component.status || ''}
+              onChange={(value) => onEdit(index, 'status', value)}
+              data={[
+                { value: '', label: 'None' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'high', label: 'High' },
+                { value: 'low', label: 'Low' },
+                { value: 'critical', label: 'Critical' },
+                { value: 'abnormal', label: 'Abnormal' },
+                { value: 'borderline', label: 'Borderline' },
+              ]}
+              size="xs"
+              styles={{ input: { width: 100 } }}
+            />
+          </Table.Td>
+          <Table.Td style={{ width: '100px' }}>
+            <Badge
+              size="xs"
+              variant="light"
+              color={component.category === 'other' ? 'gray' : 'blue'}
+            >
+              {component.category || 'other'}
+            </Badge>
+          </Table.Td>
+          <Table.Td style={{ width: '90px' }}>
+            <Badge
+              size="xs"
+              color={getConfidenceColor(component.confidence)}
+            >
+              {Math.round(component.confidence * 100)}%
+            </Badge>
+          </Table.Td>
+          <Table.Td style={{ width: '150px' }}>
+            {component.issues.length > 0 ? (
+              <Text size="xs" c="dimmed">
+                {component.issues.join(', ')}
+              </Text>
+            ) : (
+              <Text size="xs" c="green">
+                ✓
+              </Text>
+            )}
+          </Table.Td>
+          <Table.Td style={{ width: '60px' }}>
+            <ActionIcon
+              size="xs"
+              color="red"
+              variant="subtle"
+              onClick={() => onRemove(index)}
+            >
+              <IconTrash size={12} />
+            </ActionIcon>
+          </Table.Td>
+          </Table.Tr>
+        </Table.Tbody>
+      </Table>
+    </div>
+  );
+});
+
+VirtualizedRow.displayName = 'VirtualizedRow';
+
 const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   labResultId,
   onComponentsAdded,
@@ -133,6 +340,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   disabled = false
 }) => {
   const [rawText, setRawText] = useState('');
+  const [debouncedText] = useDebouncedValue(rawText, 300);
   const [parsedComponents, setParsedComponents] = useState<ParsedTestComponent[]>([]);
   const [failedLineCount, setFailedLineCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -226,7 +434,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       for (const [patternName, pattern] of Object.entries(patterns)) {
         const match = trimmedLine.match(pattern);
         if (match) {
-          const testName = match[1]?.trim();
+          const testName = match[1]?.trim().replace(/[,;:]+$/, ''); // Remove trailing punctuation
           const valueStr = match[2]?.replace(/,/g, '');
           const unit = match[3]?.trim() || '';
 
@@ -330,7 +538,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           const value = parseFloat(fallbackMatch[2].replace(/,/g, ''));
           if (!isNaN(value)) {
             parsed = {
-              test_name: fallbackMatch[1].trim(),
+              test_name: fallbackMatch[1].trim().replace(/[,;:]+$/, ''), // Remove trailing punctuation
               value,
               unit: '',
               original_line: trimmedLine,
@@ -418,17 +626,21 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     });
   }, []);
 
-  const handleTextChange = useCallback((value: string) => {
-    setRawText(value);
-    if (parseMode === 'auto' && value.trim()) {
-      const { components, failedLineCount: failedCount } = parseText(value);
+  // Auto-parse when debounced text changes
+  useEffect(() => {
+    if (parseMode === 'auto' && debouncedText.trim()) {
+      const { components, failedLineCount: failedCount } = parseText(debouncedText);
       setFailedLineCount(failedCount);
 
       // Enrich with standardized test data (synchronous)
       const enriched = enrichWithStandardizedTests(components);
       setParsedComponents(enriched);
+    } else if (parseMode === 'auto' && !debouncedText.trim()) {
+      // Clear parsed components when text is empty
+      setParsedComponents([]);
+      setFailedLineCount(0);
     }
-  }, [parseMode, parseText, enrichWithStandardizedTests]);
+  }, [debouncedText, parseMode, parseText, enrichWithStandardizedTests]);
 
   const handleManualParse = useCallback(() => {
     if (!rawText.trim()) {
@@ -456,6 +668,9 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
 
   const handleComponentEdit = useCallback((index: number, field: keyof ParsedTestComponent, value: any) => {
     setParsedComponents(prev => {
+      // Only update if value actually changed to prevent unnecessary re-renders
+      if (prev[index]?.[field] === value) return prev;
+
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -687,12 +902,20 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     return parsedComponents.reduce((sum, comp) => sum + comp.confidence, 0) / parsedComponents.length;
   }, [parsedComponents]);
 
-  const getConfidenceColor = (confidence: number): string => {
+  const getConfidenceColor = useCallback((confidence: number): string => {
     if (confidence >= 0.8) return 'green';
     if (confidence >= 0.6) return 'yellow';
     if (confidence >= 0.4) return 'orange';
     return 'red';
-  };
+  }, []);
+
+  // Memoize item data for FixedSizeList to prevent re-creating on every render
+  const itemData = useMemo(() => ({
+    components: parsedComponents,
+    onEdit: handleComponentEdit,
+    onRemove: handleComponentRemove,
+    getConfidenceColor
+  }), [parsedComponents, handleComponentEdit, handleComponentRemove, getConfidenceColor]);
 
   const exampleTexts = {
     format1: `Glucose: 125 mg/dL (Normal range: 70-100)
@@ -767,7 +990,7 @@ Sodium,140,mEq/L,136-145,Normal`
                     label="Lab Results Text"
                     placeholder="Paste your lab results here..."
                     value={rawText}
-                    onChange={(event) => handleTextChange(event.currentTarget.value)}
+                    onChange={(event) => setRawText(event.currentTarget.value)}
                     minRows={12}
                     maxRows={20}
                     description="Copy and paste lab results from reports, PDFs, or other sources"
@@ -929,152 +1152,33 @@ Sodium,140,mEq/L,136-145,Normal`
                       </Stack>
                     </Center>
                   ) : (
-                    <ScrollArea h={400}>
-                      <Table striped highlightOnHover>
+                    <Box>
+                      <Table striped>
                         <Table.Thead>
                           <Table.Tr>
-                            <Table.Th>Test Name</Table.Th>
-                            <Table.Th>Value</Table.Th>
-                            <Table.Th>Unit</Table.Th>
-                            <Table.Th>Reference Range</Table.Th>
-                            <Table.Th>Status</Table.Th>
-                            <Table.Th>Category</Table.Th>
-                            <Table.Th>Confidence</Table.Th>
-                            <Table.Th>Issues</Table.Th>
-                            <Table.Th>Actions</Table.Th>
+                            <Table.Th style={{ width: '180px' }}>Test Name</Table.Th>
+                            <Table.Th style={{ width: '100px' }}>Value</Table.Th>
+                            <Table.Th style={{ width: '80px' }}>Unit</Table.Th>
+                            <Table.Th style={{ width: '140px' }}>Reference Range</Table.Th>
+                            <Table.Th style={{ width: '120px' }}>Status</Table.Th>
+                            <Table.Th style={{ width: '100px' }}>Category</Table.Th>
+                            <Table.Th style={{ width: '90px' }}>Confidence</Table.Th>
+                            <Table.Th style={{ width: '150px' }}>Issues</Table.Th>
+                            <Table.Th style={{ width: '60px' }}>Actions</Table.Th>
                           </Table.Tr>
                         </Table.Thead>
-                        <Table.Tbody>
-                          {parsedComponents.map((component, index) => (
-                            <Table.Tr key={index}>
-                              <Table.Td>
-                                <Stack gap={2}>
-                                  <TextInput
-                                    value={component.test_name}
-                                    onChange={(e) => handleComponentEdit(index, 'test_name', e.target.value)}
-                                    size="xs"
-                                  />
-                                  {component.abbreviation && (
-                                    <Badge size="xs" variant="outline">
-                                      {component.abbreviation}
-                                    </Badge>
-                                  )}
-                                </Stack>
-                              </Table.Td>
-                              <Table.Td>
-                                <NumberInput
-                                  value={component.value || ''}
-                                  onChange={(value) => handleComponentEdit(index, 'value', value)}
-                                  size="xs"
-                                  styles={{ input: { width: 80 } }}
-                                />
-                              </Table.Td>
-                              <Table.Td>
-                                <TextInput
-                                  value={component.unit}
-                                  onChange={(e) => handleComponentEdit(index, 'unit', e.target.value)}
-                                  size="xs"
-                                  styles={{ input: { width: 60 } }}
-                                />
-                              </Table.Td>
-                              <Table.Td>
-                                <Stack gap={2}>
-                                  {component.ref_range_min !== null && component.ref_range_max !== null ? (
-                                    <Group gap={2}>
-                                      <NumberInput
-                                        value={component.ref_range_min}
-                                        onChange={(value) => handleComponentEdit(index, 'ref_range_min', value)}
-                                        size="xs"
-                                        styles={{ input: { width: 50 } }}
-                                        hideControls
-                                      />
-                                      <Text size="xs">-</Text>
-                                      <NumberInput
-                                        value={component.ref_range_max}
-                                        onChange={(value) => handleComponentEdit(index, 'ref_range_max', value)}
-                                        size="xs"
-                                        styles={{ input: { width: 50 } }}
-                                        hideControls
-                                      />
-                                    </Group>
-                                  ) : component.ref_range_text ? (
-                                    <TextInput
-                                      value={component.ref_range_text}
-                                      onChange={(e) => handleComponentEdit(index, 'ref_range_text', e.target.value)}
-                                      size="xs"
-                                      styles={{ input: { width: 100 } }}
-                                    />
-                                  ) : (
-                                    <TextInput
-                                      placeholder="Not detected"
-                                      value=""
-                                      onChange={(e) => handleComponentEdit(index, 'ref_range_text', e.target.value)}
-                                      size="xs"
-                                      styles={{ input: { width: 100 } }}
-                                    />
-                                  )}
-                                </Stack>
-                              </Table.Td>
-                              <Table.Td>
-                                <Select
-                                  value={component.status || ''}
-                                  onChange={(value) => handleComponentEdit(index, 'status', value)}
-                                  data={[
-                                    { value: '', label: 'None' },
-                                    { value: 'normal', label: 'Normal' },
-                                    { value: 'high', label: 'High' },
-                                    { value: 'low', label: 'Low' },
-                                    { value: 'critical', label: 'Critical' },
-                                    { value: 'abnormal', label: 'Abnormal' },
-                                    { value: 'borderline', label: 'Borderline' },
-                                  ]}
-                                  size="xs"
-                                  styles={{ input: { width: 100 } }}
-                                />
-                              </Table.Td>
-                              <Table.Td>
-                                <Badge
-                                  size="xs"
-                                  variant="light"
-                                  color={component.category === 'other' ? 'gray' : 'blue'}
-                                >
-                                  {component.category || 'other'}
-                                </Badge>
-                              </Table.Td>
-                              <Table.Td>
-                                <Badge
-                                  size="xs"
-                                  color={getConfidenceColor(component.confidence)}
-                                >
-                                  {Math.round(component.confidence * 100)}%
-                                </Badge>
-                              </Table.Td>
-                              <Table.Td>
-                                {component.issues.length > 0 ? (
-                                  <Text size="xs" c="dimmed">
-                                    {component.issues.join(', ')}
-                                  </Text>
-                                ) : (
-                                  <Text size="xs" c="green">
-                                    ✓
-                                  </Text>
-                                )}
-                              </Table.Td>
-                              <Table.Td>
-                                <ActionIcon
-                                  size="xs"
-                                  color="red"
-                                  variant="subtle"
-                                  onClick={() => handleComponentRemove(index)}
-                                >
-                                  <IconTrash size={12} />
-                                </ActionIcon>
-                              </Table.Td>
-                            </Table.Tr>
-                          ))}
-                        </Table.Tbody>
                       </Table>
-                    </ScrollArea>
+                      <FixedSizeList
+                        height={400}
+                        itemCount={parsedComponents.length}
+                        itemSize={80}
+                        width="100%"
+                        overscanCount={3}
+                        itemData={itemData}
+                      >
+                        {VirtualizedRow}
+                      </FixedSizeList>
+                    </Box>
                   )}
                 </Stack>
               </Tabs.Panel>
@@ -1096,7 +1200,7 @@ Sodium,140,mEq/L,136-145,Normal`
                             size="xs"
                             variant="light"
                             leftSection={<IconCopy size={12} />}
-                            onClick={() => handleTextChange(text)}
+                            onClick={() => setRawText(text)}
                           >
                             Use Example
                           </Button>

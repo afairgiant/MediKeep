@@ -238,25 +238,37 @@ const LabResults = () => {
   useEffect(() => {
     const loadFileCountsForLabResults = async () => {
       if (!labResults || labResults.length === 0) return;
-      
+
       const countPromises = labResults.map(async (labResult) => {
+        // Check if already loaded or loading to prevent duplicate requests
         setFileCountsLoading(prev => {
-          if (prev[labResult.id] !== undefined) return prev; // Already loading
+          // IMPORTANT: Only update if value actually changes to prevent infinite loop
+          if (prev[labResult.id] === true) return prev; // Already loading, return same reference
           return { ...prev, [labResult.id]: true };
         });
-        
+
         try {
           const files = await apiService.getEntityFiles('lab-result', labResult.id);
           const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [labResult.id]: count }));
+          setFileCounts(prev => {
+            // Only update if value changed
+            if (prev[labResult.id] === count) return prev;
+            return { ...prev, [labResult.id]: count };
+          });
         } catch (error) {
           logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [labResult.id]: 0 }));
+          setFileCounts(prev => {
+            if (prev[labResult.id] === 0) return prev;
+            return { ...prev, [labResult.id]: 0 };
+          });
         } finally {
-          setFileCountsLoading(prev => ({ ...prev, [labResult.id]: false }));
+          setFileCountsLoading(prev => {
+            if (prev[labResult.id] === false) return prev;
+            return { ...prev, [labResult.id]: false };
+          });
         }
       });
-      
+
       await Promise.all(countPromises);
     };
 

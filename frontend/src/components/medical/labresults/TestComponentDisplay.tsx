@@ -3,7 +3,7 @@
  * Provides beautiful card-based display grouped by category with status indicators
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Card,
   Stack,
@@ -107,7 +107,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     return 'Not specified';
   };
 
-  const TestComponentCard: React.FC<{ component: LabTestComponent }> = ({ component }) => {
+  const TestComponentCard: React.FC<{ component: LabTestComponent }> = React.memo(({ component }) => {
     const statusColor = getStatusColor(component.status, component.value, component.ref_range_min, component.ref_range_max);
     const referenceRange = formatReferenceRange(component);
 
@@ -240,7 +240,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
         </Stack>
       </Card>
     );
-  };
+  });
 
   const LoadingSkeleton: React.FC = () => (
     <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
@@ -270,6 +270,77 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     </Center>
   );
 
+  // Memoize expensive grouping and sorting to prevent recalculation on every render
+  // Must be called before any early returns (React hooks rules)
+  const { sortedCategories, sortedGroupedComponents } = useMemo(() => {
+    if (!components || components.length === 0) {
+      return { sortedCategories: [], sortedGroupedComponents: {} };
+    }
+
+    // Group components by category
+    const groupedComponents = components.reduce((groups, component) => {
+      const category = component.category || 'other';
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(component);
+      return groups;
+    }, {} as Record<string, LabTestComponent[]>);
+
+    // Sort categories
+    const sortedCategories = Object.keys(groupedComponents).sort();
+
+    // Create sorted structure
+    const sortedGroupedComponents = sortedCategories.reduce((acc, category) => {
+      acc[category] = [...groupedComponents[category]].sort((a, b) => {
+        // Sort by display_order first, then by test_name
+        if (a.display_order !== null && a.display_order !== undefined &&
+            b.display_order !== null && b.display_order !== undefined) {
+          return a.display_order - b.display_order;
+        }
+        if (a.display_order !== null) return -1;
+        if (b.display_order !== null) return 1;
+        return a.test_name.localeCompare(b.test_name);
+      });
+      return acc;
+    }, {} as Record<string, LabTestComponent[]>);
+
+    return { sortedCategories, sortedGroupedComponents };
+  }, [components]);
+
+  // Memoize static mapping functions
+  const getCategoryDisplayName = React.useCallback((category: string): string => {
+    const categoryNames: Record<string, string> = {
+      chemistry: 'Chemistry',
+      hematology: 'Hematology',
+      immunology: 'Immunology',
+      microbiology: 'Microbiology',
+      endocrinology: 'Endocrinology',
+      toxicology: 'Toxicology',
+      genetics: 'Genetics',
+      molecular: 'Molecular',
+      pathology: 'Pathology',
+      other: 'Other Tests'
+    };
+    return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
+  }, []);
+
+  const getCategoryColor = React.useCallback((category: string): string => {
+    const categoryColors: Record<string, string> = {
+      chemistry: 'blue',
+      hematology: 'red',
+      immunology: 'green',
+      microbiology: 'yellow',
+      endocrinology: 'purple',
+      toxicology: 'orange',
+      genetics: 'teal',
+      molecular: 'cyan',
+      pathology: 'pink',
+      other: 'gray'
+    };
+    return categoryColors[category] || 'gray';
+  }, []);
+
   try {
     if (loading) {
       return <LoadingSkeleton />;
@@ -296,66 +367,6 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
         </SimpleGrid>
       );
     }
-
-    // Group components by category
-    const groupedComponents = components.reduce((groups, component) => {
-      const category = component.category || 'other';
-      if (!groups[category]) {
-        groups[category] = [];
-      }
-      groups[category].push(component);
-      return groups;
-    }, {} as Record<string, LabTestComponent[]>);
-
-    // Sort categories and components within each category (create new sorted structure)
-    const sortedCategories = Object.keys(groupedComponents).sort();
-
-    // Create new sorted structure to avoid mutation
-    const sortedGroupedComponents = sortedCategories.reduce((acc, category) => {
-      acc[category] = [...groupedComponents[category]].sort((a, b) => {
-        // Sort by display_order first, then by test_name
-        if (a.display_order !== null && a.display_order !== undefined &&
-            b.display_order !== null && b.display_order !== undefined) {
-          return a.display_order - b.display_order;
-        }
-        if (a.display_order !== null) return -1;
-        if (b.display_order !== null) return 1;
-        return a.test_name.localeCompare(b.test_name);
-      });
-      return acc;
-    }, {} as Record<string, LabTestComponent[]>);
-
-    const getCategoryDisplayName = (category: string): string => {
-      const categoryNames: Record<string, string> = {
-        chemistry: 'Chemistry',
-        hematology: 'Hematology',
-        immunology: 'Immunology',
-        microbiology: 'Microbiology',
-        endocrinology: 'Endocrinology',
-        toxicology: 'Toxicology',
-        genetics: 'Genetics',
-        molecular: 'Molecular',
-        pathology: 'Pathology',
-        other: 'Other Tests'
-      };
-      return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
-    };
-
-    const getCategoryColor = (category: string): string => {
-      const categoryColors: Record<string, string> = {
-        chemistry: 'blue',
-        hematology: 'red',
-        immunology: 'green',
-        microbiology: 'yellow',
-        endocrinology: 'purple',
-        toxicology: 'orange',
-        genetics: 'teal',
-        molecular: 'cyan',
-        pathology: 'pink',
-        other: 'gray'
-      };
-      return categoryColors[category] || 'gray';
-    };
 
     return (
       <Stack gap="xl">
