@@ -572,6 +572,21 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   /**
+   * Format relationship label for display
+   */
+  const formatRelationshipLabel = (relationship) => {
+    if (!relationship) return null;
+
+    // Convert snake_case to Title Case
+    const formatted = relationship
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
+    return `(${formatted})`;
+  };
+
+  /**
    * Get patient photo URL or null if no photo
    */
   const getPatientPhoto = (patient) => {
@@ -621,6 +636,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={500}>
             {formatPatientName(patient)}
+            {patient.relationship_to_self && (
+              <Text span c="dimmed" ml="xs" fw={400}>
+                {formatRelationshipLabel(patient.relationship_to_self)}
+              </Text>
+            )}
           </Text>
           <Text size="xs" c="dimmed">
             {patient.birth_date} • {patient.privacy_level}
@@ -682,9 +702,16 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           color="blue"
           radius="xl"
         />
-        <Text fw={500} size="sm" style={{ flex: 1 }}>
-          {formatPatientName(activePatient)}
-        </Text>
+        <div style={{ flex: 1 }}>
+          <Text fw={500} size="sm">
+            {formatPatientName(activePatient)}
+            {activePatient.relationship_to_self && (
+              <Text span c="dimmed" ml="xs">
+                {formatRelationshipLabel(activePatient.relationship_to_self)}
+              </Text>
+            )}
+          </Text>
+        </div>
         {getPatientBadge(activePatient)}
         
         {/* Loading indicator */}
@@ -741,6 +768,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   <div>
                     <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
                       {formatPatientName(patient)}
+                      {patient.relationship_to_self && (
+                        <Text span c="dimmed" ml="xs" fw={400}>
+                          {formatRelationshipLabel(patient.relationship_to_self)}
+                        </Text>
+                      )}
                     </Text>
                     <Text size="xs" c="dimmed">
                       {patient.birth_date}
@@ -835,6 +867,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               <div style={{ flex: 1 }}>
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}
+                  {activePatient.relationship_to_self && (
+                    <Text span c="dimmed" ml="xs" fw={400} size="md">
+                      {formatRelationshipLabel(activePatient.relationship_to_self)}
+                    </Text>
+                  )}
                 </Text>
                 <Text size="sm" c="dimmed">
                   Born: {activePatient.birth_date}

@@ -63,6 +63,7 @@ const PatientForm = ({
     address: '',
     physician_id: null,
     is_self_record: false,
+    relationship_to_self: '',
   });
 
   const isEditing = !!patient;
@@ -86,6 +87,7 @@ const PatientForm = ({
         address: patient.address || '',
         physician_id: patient.physician_id || null,
         is_self_record: patient.is_self_record || false,
+        relationship_to_self: patient.relationship_to_self || '',
       });
     }
   }, [patient]);
@@ -207,6 +209,27 @@ const PatientForm = ({
     { value: 'Prefer not to say', label: 'Prefer not to say' },
   ];
 
+  const relationshipOptions = [
+    { value: '', label: 'Select relationship (optional)' },
+    { value: 'self', label: 'Self' },
+    { value: 'spouse', label: 'Spouse' },
+    { value: 'partner', label: 'Partner' },
+    { value: 'child', label: 'Child' },
+    { value: 'son', label: 'Son' },
+    { value: 'daughter', label: 'Daughter' },
+    { value: 'parent', label: 'Parent' },
+    { value: 'father', label: 'Father' },
+    { value: 'mother', label: 'Mother' },
+    { value: 'sibling', label: 'Sibling' },
+    { value: 'brother', label: 'Brother' },
+    { value: 'sister', label: 'Sister' },
+    { value: 'grandparent', label: 'Grandparent' },
+    { value: 'grandchild', label: 'Grandchild' },
+    { value: 'other_family', label: 'Other Family' },
+    { value: 'friend', label: 'Friend' },
+    { value: 'other', label: 'Other' },
+  ];
+
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Stack gap="md">
@@ -299,6 +322,19 @@ const PatientForm = ({
                 clearable
               />
             </Group>
+
+            <Select
+              label="Relationship to You"
+              placeholder="Select relationship (optional)"
+              description="How is this person related to you?"
+              data={relationshipOptions}
+              value={formData.relationship_to_self}
+              onChange={value =>
+                setFormData({ ...formData, relationship_to_self: value })
+              }
+              disabled={loading}
+              clearable
+            />
           </Stack>
         </div>
 

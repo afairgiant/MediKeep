@@ -241,6 +241,37 @@ const MantinePatientForm = ({
         </Grid.Col>
       </Grid>
 
+      {/* Relationship to You */}
+      <Select
+        label="Relationship to You"
+        placeholder="Select relationship (optional)"
+        value={formData.relationship_to_self}
+        onChange={handleSelectChange('relationship_to_self')}
+        disabled={saving}
+        data={[
+          { value: 'self', label: 'Self' },
+          { value: 'spouse', label: 'Spouse' },
+          { value: 'partner', label: 'Partner' },
+          { value: 'child', label: 'Child' },
+          { value: 'son', label: 'Son' },
+          { value: 'daughter', label: 'Daughter' },
+          { value: 'parent', label: 'Parent' },
+          { value: 'father', label: 'Father' },
+          { value: 'mother', label: 'Mother' },
+          { value: 'sibling', label: 'Sibling' },
+          { value: 'brother', label: 'Brother' },
+          { value: 'sister', label: 'Sister' },
+          { value: 'grandparent', label: 'Grandparent' },
+          { value: 'grandchild', label: 'Grandchild' },
+          { value: 'other_family', label: 'Other Family' },
+          { value: 'friend', label: 'Friend' },
+          { value: 'other', label: 'Other' },
+        ]}
+        description="How is this person related to you?"
+        clearable
+        searchable
+      />
+
       {/* Address */}
       <Textarea
         label="Address"

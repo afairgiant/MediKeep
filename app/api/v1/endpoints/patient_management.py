@@ -124,6 +124,7 @@ class PatientResponse(BaseModel):
     weight: Optional[float]
     address: Optional[str]
     physician_id: Optional[int]
+    relationship_to_self: Optional[str]
     owner_user_id: int
     is_self_record: bool
     privacy_level: str
