@@ -1162,8 +1162,8 @@ Sodium,140,mEq/L,136-145,Normal`
                               key={index}
                               index={index}
                               component={component}
-                              onEdit={handleEditParsedComponent}
-                              onRemove={handleRemoveParsedComponent}
+                              onEdit={handleComponentEdit}
+                              onRemove={handleComponentRemove}
                               getConfidenceColor={getConfidenceColor}
                             />
                           ))}
