@@ -29,7 +29,6 @@ import {
 import { DateInput } from '@mantine/dates';
 import { Dropzone } from '@mantine/dropzone';
 import { useDebouncedValue } from '@mantine/hooks';
-import { FixedSizeList } from 'react-window';
 import {
   IconUpload,
   IconEdit,
@@ -137,18 +136,13 @@ interface TestComponentBulkEntryProps {
 }
 
 // Memoized row component with local state to prevent parent re-renders on every keystroke
-const VirtualizedRow = React.memo<{
+const TableRow = React.memo<{
   index: number;
-  style: React.CSSProperties;
-  data: {
-    components: ParsedTestComponent[];
-    onEdit: (index: number, field: keyof ParsedTestComponent, value: any) => void;
-    onRemove: (index: number) => void;
-    getConfidenceColor: (confidence: number) => string;
-  };
-}>(({ index, style, data }) => {
-  const { components, onEdit, onRemove, getConfidenceColor } = data;
-  const component = components[index];
+  component: ParsedTestComponent;
+  onEdit: (index: number, field: keyof ParsedTestComponent, value: any) => void;
+  onRemove: (index: number) => void;
+  getConfidenceColor: (confidence: number) => string;
+}>(({ index, component, onEdit, onRemove, getConfidenceColor }) => {
 
   // Local state for inputs to avoid triggering parent re-renders on every keystroke
   const [localTestName, setLocalTestName] = React.useState(component.test_name);
@@ -201,10 +195,7 @@ const VirtualizedRow = React.memo<{
   }, [localRefRangeText, component.ref_range_text, index, onEdit]);
 
   return (
-    <div style={style}>
-      <Table striped>
-        <Table.Tbody>
-          <Table.Tr style={{ backgroundColor: index % 2 === 0 ? 'transparent' : 'var(--mantine-color-gray-0)' }}>
+          <Table.Tr>
             <Table.Td style={{ width: '180px' }}>
             <Stack gap={2}>
               <TextInput
@@ -333,13 +324,10 @@ const VirtualizedRow = React.memo<{
             </ActionIcon>
           </Table.Td>
           </Table.Tr>
-        </Table.Tbody>
-      </Table>
-    </div>
   );
 });
 
-VirtualizedRow.displayName = 'VirtualizedRow';
+TableRow.displayName = 'TableRow';
 
 const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   labResultId,
@@ -918,14 +906,6 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     return 'red';
   }, []);
 
-  // Memoize item data for FixedSizeList to prevent re-creating on every render
-  const itemData = useMemo(() => ({
-    components: parsedComponents,
-    onEdit: handleComponentEdit,
-    onRemove: handleComponentRemove,
-    getConfidenceColor
-  }), [parsedComponents, handleComponentEdit, handleComponentRemove, getConfidenceColor]);
-
   const exampleTexts = {
     format1: `Glucose: 125 mg/dL (Normal range: 70-100)
 Cholesterol: 195 mg/dL (Normal range: <200)
@@ -1161,7 +1141,7 @@ Sodium,140,mEq/L,136-145,Normal`
                       </Stack>
                     </Center>
                   ) : (
-                    <Box>
+                    <ScrollArea h={500}>
                       <Table striped>
                         <Table.Thead>
                           <Table.Tr>
@@ -1176,18 +1156,20 @@ Sodium,140,mEq/L,136-145,Normal`
                             <Table.Th style={{ width: '60px' }}>Actions</Table.Th>
                           </Table.Tr>
                         </Table.Thead>
+                        <Table.Tbody>
+                          {parsedComponents.map((component, index) => (
+                            <TableRow
+                              key={index}
+                              index={index}
+                              component={component}
+                              onEdit={handleEditParsedComponent}
+                              onRemove={handleRemoveParsedComponent}
+                              getConfidenceColor={getConfidenceColor}
+                            />
+                          ))}
+                        </Table.Tbody>
                       </Table>
-                      <FixedSizeList
-                        height={400}
-                        itemCount={parsedComponents.length}
-                        itemSize={80}
-                        width="100%"
-                        overscanCount={3}
-                        itemData={itemData}
-                      >
-                        {VirtualizedRow}
-                      </FixedSizeList>
-                    </Box>
+                    </ScrollArea>
                   )}
                 </Stack>
               </Tabs.Panel>
