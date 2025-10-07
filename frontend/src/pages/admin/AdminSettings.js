@@ -46,6 +46,15 @@ const AdminSettings = () => {
   };
 
   const handleInputChange = (field, value) => {
+    // Allow empty string for temporary editing
+    if (value === '') {
+      setSettings(prev => ({
+        ...prev,
+        [field]: '',
+      }));
+      return;
+    }
+
     const numValue = parseInt(value, 10);
     if (isNaN(numValue) || numValue < 1) {
       return; // Don't update if invalid
@@ -56,16 +65,37 @@ const AdminSettings = () => {
     }));
   };
 
+  const handleBlur = (field, min = 1) => {
+    // On blur, ensure we have a valid number
+    if (settings[field] === '' || settings[field] < min) {
+      setSettings(prev => ({
+        ...prev,
+        [field]: min,
+      }));
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
       setMessage({ type: '', text: '' });
 
+      // Ensure all numeric fields have valid values before saving
+      const validSettings = {
+        backup_retention_days: settings.backup_retention_days || 7,
+        trash_retention_days: settings.trash_retention_days || 30,
+        backup_min_count: settings.backup_min_count || 5,
+        backup_max_count: settings.backup_max_count || 50,
+      };
+
+      // Update local state with valid values
+      setSettings(prev => ({
+        ...prev,
+        ...validSettings,
+      }));
+
       const updateData = {
-        backup_retention_days: settings.backup_retention_days,
-        trash_retention_days: settings.trash_retention_days,
-        backup_min_count: settings.backup_min_count,
-        backup_max_count: settings.backup_max_count,
+        ...validSettings,
         allow_user_registration: settings.allow_user_registration,
       };
 
@@ -218,6 +248,7 @@ const AdminSettings = () => {
                           e.target.value
                         )
                       }
+                      onBlur={() => handleBlur('backup_retention_days', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">days</span>
@@ -242,6 +273,7 @@ const AdminSettings = () => {
                       onChange={e =>
                         handleInputChange('backup_min_count', e.target.value)
                       }
+                      onBlur={() => handleBlur('backup_min_count', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">backups</span>
@@ -266,6 +298,7 @@ const AdminSettings = () => {
                       onChange={e =>
                         handleInputChange('backup_max_count', e.target.value)
                       }
+                      onBlur={() => handleBlur('backup_max_count', 5)}
                       className="settings-input"
                     />
                     <span className="input-suffix">backups</span>
@@ -294,6 +327,7 @@ const AdminSettings = () => {
                           e.target.value
                         )
                       }
+                      onBlur={() => handleBlur('trash_retention_days', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">days</span>
