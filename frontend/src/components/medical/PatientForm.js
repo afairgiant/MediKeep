@@ -39,6 +39,7 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+import { RELATIONSHIP_OPTIONS } from '../../constants/relationshipOptions';
 
 const PatientForm = ({
   patient = null,
@@ -209,26 +210,6 @@ const PatientForm = ({
     { value: 'Prefer not to say', label: 'Prefer not to say' },
   ];
 
-  const relationshipOptions = [
-    { value: '', label: 'Select relationship (optional)' },
-    { value: 'self', label: 'Self' },
-    { value: 'spouse', label: 'Spouse' },
-    { value: 'partner', label: 'Partner' },
-    { value: 'child', label: 'Child' },
-    { value: 'son', label: 'Son' },
-    { value: 'daughter', label: 'Daughter' },
-    { value: 'parent', label: 'Parent' },
-    { value: 'father', label: 'Father' },
-    { value: 'mother', label: 'Mother' },
-    { value: 'sibling', label: 'Sibling' },
-    { value: 'brother', label: 'Brother' },
-    { value: 'sister', label: 'Sister' },
-    { value: 'grandparent', label: 'Grandparent' },
-    { value: 'grandchild', label: 'Grandchild' },
-    { value: 'other_family', label: 'Other Family' },
-    { value: 'friend', label: 'Friend' },
-    { value: 'other', label: 'Other' },
-  ];
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
@@ -327,7 +308,7 @@ const PatientForm = ({
               label="Relationship to You"
               placeholder="Select relationship (optional)"
               description="How is this person related to you?"
-              data={relationshipOptions}
+              data={RELATIONSHIP_OPTIONS}
               value={formData.relationship_to_self}
               onChange={value =>
                 setFormData({ ...formData, relationship_to_self: value })

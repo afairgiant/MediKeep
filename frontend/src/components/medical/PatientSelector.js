@@ -45,6 +45,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePatientList, useCacheManager } from '../../hooks/useGlobalData';
+import { formatRelationshipLabel } from '../../constants/relationshipOptions';
 import patientApi from '../../services/api/patientApi';
 import patientSharingApi from '../../services/api/patientSharingApi';
 import logger from '../../services/logger';
@@ -572,21 +573,6 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   /**
-   * Format relationship label for display
-   */
-  const formatRelationshipLabel = (relationship) => {
-    if (!relationship) return null;
-
-    // Convert snake_case to Title Case
-    const formatted = relationship
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-
-    return `(${formatted})`;
-  };
-
-  /**
    * Get patient photo URL or null if no photo
    */
   const getPatientPhoto = (patient) => {
@@ -638,7 +624,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             {formatPatientName(patient)}
             {patient.relationship_to_self && (
               <Text span c="dimmed" ml="xs" fw={400}>
-                {formatRelationshipLabel(patient.relationship_to_self)}
+                ({formatRelationshipLabel(patient.relationship_to_self)})
               </Text>
             )}
           </Text>
@@ -707,7 +693,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             {formatPatientName(activePatient)}
             {activePatient.relationship_to_self && (
               <Text span c="dimmed" ml="xs">
-                {formatRelationshipLabel(activePatient.relationship_to_self)}
+                ({formatRelationshipLabel(activePatient.relationship_to_self)})
               </Text>
             )}
           </Text>
@@ -770,7 +756,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                       {formatPatientName(patient)}
                       {patient.relationship_to_self && (
                         <Text span c="dimmed" ml="xs" fw={400}>
-                          {formatRelationshipLabel(patient.relationship_to_self)}
+                          ({formatRelationshipLabel(patient.relationship_to_self)})
                         </Text>
                       )}
                     </Text>
@@ -869,7 +855,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   {formatPatientName(activePatient)}
                   {activePatient.relationship_to_self && (
                     <Text span c="dimmed" ml="xs" fw={400} size="md">
-                      {formatRelationshipLabel(activePatient.relationship_to_self)}
+                      ({formatRelationshipLabel(activePatient.relationship_to_self)})
                     </Text>
                   )}
                 </Text>
