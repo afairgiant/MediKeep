@@ -46,6 +46,15 @@ const AdminSettings = () => {
   };
 
   const handleInputChange = (field, value) => {
+    // Allow empty string for temporary editing
+    if (value === '') {
+      setSettings(prev => ({
+        ...prev,
+        [field]: '',
+      }));
+      return;
+    }
+
     const numValue = parseInt(value, 10);
     if (isNaN(numValue) || numValue < 1) {
       return; // Don't update if invalid
@@ -56,16 +65,37 @@ const AdminSettings = () => {
     }));
   };
 
+  const handleBlur = (field, min = 1) => {
+    // On blur, ensure we have a valid number
+    if (settings[field] === '' || settings[field] < min) {
+      setSettings(prev => ({
+        ...prev,
+        [field]: min,
+      }));
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
       setMessage({ type: '', text: '' });
 
+      // Ensure all numeric fields have valid values before saving
+      const validSettings = {
+        backup_retention_days: settings.backup_retention_days || 7,
+        trash_retention_days: settings.trash_retention_days || 30,
+        backup_min_count: settings.backup_min_count || 5,
+        backup_max_count: settings.backup_max_count || 50,
+      };
+
+      // Update local state with valid values
+      setSettings(prev => ({
+        ...prev,
+        ...validSettings,
+      }));
+
       const updateData = {
-        backup_retention_days: settings.backup_retention_days,
-        trash_retention_days: settings.trash_retention_days,
-        backup_min_count: settings.backup_min_count,
-        backup_max_count: settings.backup_max_count,
+        ...validSettings,
         allow_user_registration: settings.allow_user_registration,
       };
 
@@ -116,13 +146,13 @@ const AdminSettings = () => {
     try {
       setSSOTestLoading(true);
       setSSOTestResult(null);
-      
+
       const result = await authService.testSSOConnection();
       setSSOTestResult(result);
     } catch (error) {
       setSSOTestResult({
         success: false,
-        message: error.message || 'Connection test failed'
+        message: error.message || 'Connection test failed',
       });
     } finally {
       setSSOTestLoading(false);
@@ -218,6 +248,7 @@ const AdminSettings = () => {
                           e.target.value
                         )
                       }
+                      onBlur={() => handleBlur('backup_retention_days', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">days</span>
@@ -242,6 +273,7 @@ const AdminSettings = () => {
                       onChange={e =>
                         handleInputChange('backup_min_count', e.target.value)
                       }
+                      onBlur={() => handleBlur('backup_min_count', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">backups</span>
@@ -266,6 +298,7 @@ const AdminSettings = () => {
                       onChange={e =>
                         handleInputChange('backup_max_count', e.target.value)
                       }
+                      onBlur={() => handleBlur('backup_max_count', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">backups</span>
@@ -294,6 +327,7 @@ const AdminSettings = () => {
                           e.target.value
                         )
                       }
+                      onBlur={() => handleBlur('trash_retention_days', 1)}
                       className="settings-input"
                     />
                     <span className="input-suffix">days</span>
@@ -309,13 +343,16 @@ const AdminSettings = () => {
               <h2>User Management</h2>
               <p>Control user registration and access settings</p>
             </div>
-            
+
             <div className="settings-section-content">
               <div className="setting-item">
                 <div className="setting-info">
-                  <div className="setting-title">Allow New User Registration</div>
+                  <div className="setting-title">
+                    Allow New User Registration
+                  </div>
                   <div className="setting-description">
-                    Enable or disable the ability for new users to create accounts from the login page
+                    Enable or disable the ability for new users to create
+                    accounts from the login page
                   </div>
                 </div>
                 <div className="setting-control">
@@ -323,10 +360,12 @@ const AdminSettings = () => {
                     <input
                       type="checkbox"
                       checked={settings.allow_user_registration}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        allow_user_registration: e.target.checked
-                      }))}
+                      onChange={e =>
+                        setSettings(prev => ({
+                          ...prev,
+                          allow_user_registration: e.target.checked,
+                        }))
+                      }
                     />
                     <span className="toggle-slider"></span>
                   </label>
@@ -344,7 +383,7 @@ const AdminSettings = () => {
               <h2>Single Sign-On (SSO)</h2>
               <p>Configure SSO authentication settings</p>
             </div>
-            
+
             <div className="settings-section-content">
               <div className="setting-item">
                 <div className="setting-info">
@@ -354,12 +393,16 @@ const AdminSettings = () => {
                   </div>
                 </div>
                 <div className="setting-control">
-                  <div className={`status-indicator ${ssoConfig.enabled ? 'enabled' : 'disabled'}`}>
+                  <div
+                    className={`status-indicator ${ssoConfig.enabled ? 'enabled' : 'disabled'}`}
+                  >
                     {ssoConfig.enabled ? 'Enabled' : 'Disabled'}
                   </div>
                   {ssoConfig.enabled && ssoConfig.provider_type && (
                     <div className="sso-provider-info">
-                      Provider: {ssoConfig.provider_type.charAt(0).toUpperCase() + ssoConfig.provider_type.slice(1)}
+                      Provider:{' '}
+                      {ssoConfig.provider_type.charAt(0).toUpperCase() +
+                        ssoConfig.provider_type.slice(1)}
                     </div>
                   )}
                 </div>
@@ -375,7 +418,9 @@ const AdminSettings = () => {
                       </div>
                     </div>
                     <div className="setting-control">
-                      <div className={`status-indicator ${ssoConfig.registration_enabled ? 'enabled' : 'disabled'}`}>
+                      <div
+                        className={`status-indicator ${ssoConfig.registration_enabled ? 'enabled' : 'disabled'}`}
+                      >
                         {ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
                       </div>
                     </div>
@@ -405,7 +450,9 @@ const AdminSettings = () => {
                         <div className="setting-title">Test Result</div>
                       </div>
                       <div className="setting-control">
-                        <div className={`sso-test-result ${ssoTestResult.success ? 'success' : 'error'}`}>
+                        <div
+                          className={`sso-test-result ${ssoTestResult.success ? 'success' : 'error'}`}
+                        >
                           {ssoTestResult.success ? '✓ ' : '✗ '}
                           {ssoTestResult.message}
                         </div>
@@ -418,15 +465,28 @@ const AdminSettings = () => {
               {!ssoConfig.enabled && (
                 <div className="sso-disabled-info">
                   <p>
-                    SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:
+                    SSO is currently disabled. To enable SSO, configure the
+                    following environment variables and restart the application:
                   </p>
                   <ul>
-                    <li><code>SSO_ENABLED=true</code></li>
-                    <li><code>SSO_PROVIDER_TYPE</code> (google, github, or oidc)</li>
-                    <li><code>SSO_CLIENT_ID</code></li>
-                    <li><code>SSO_CLIENT_SECRET</code></li>
-                    <li><code>SSO_ISSUER_URL</code> (for OIDC provider)</li>
-                    <li><code>SSO_REDIRECT_URI</code></li>
+                    <li>
+                      <code>SSO_ENABLED=true</code>
+                    </li>
+                    <li>
+                      <code>SSO_PROVIDER_TYPE</code> (google, github, or oidc)
+                    </li>
+                    <li>
+                      <code>SSO_CLIENT_ID</code>
+                    </li>
+                    <li>
+                      <code>SSO_CLIENT_SECRET</code>
+                    </li>
+                    <li>
+                      <code>SSO_ISSUER_URL</code> (for OIDC provider)
+                    </li>
+                    <li>
+                      <code>SSO_REDIRECT_URI</code>
+                    </li>
                   </ul>
                 </div>
               )}
