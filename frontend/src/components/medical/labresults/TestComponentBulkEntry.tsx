@@ -68,37 +68,48 @@ import logger from '../../../services/logger';
  */
 
 // Common unit pattern handles: standard units (mg/dL, g/dL, %), ratios (x10E3/uL), and special characters (μ)
-const UNIT_PATTERN = '[a-zA-Z0-9/%μ]+(?:\\/[a-zA-Z0-9]+)?|x10E\\d+\\/[a-zA-Z]+';
+const UNIT_PATTERN = String.raw`[a-zA-Z0-9/%μ]+(?:/[a-zA-Z0-9]+)?|x10E\d+/[a-zA-Z]+`;
+
+// Pattern components for better readability
+const TEST_NAME = String.raw`(.+?)`;
+const NUMERIC_VALUE = String.raw`([0-9.,]+)`;
+const WHITESPACE = String.raw`\s+`;
+const OPTIONAL_WHITESPACE = String.raw`\s*`;
+const COLON = String.raw`:`;
+const RANGE_SEPARATOR = String.raw`[-–]`;
+const RANGE_VALUE = String.raw`([0-9.,]+)`;
+const COMPARISON_OP = String.raw`[<>≤≥]`;
+const STATUS_VALUES = String.raw`(normal|high|low|critical|abnormal|borderline)?`;
 
 const REGEX_PATTERNS = {
   // Pattern 1: "Test Name: 123.4 mg/dL (Normal range: 70-100)" or "Test Name: 123.4 mg/dL (70-100)"
   FULL_PATTERN: new RegExp(
-    `^(.+?):\\s*([0-9.,]+)\\s*(${UNIT_PATTERN})?\\s*` +
-    `(?:\\((?:.*?range.*?:\\s*)?([0-9.,]+)\\s*[-–]\\s*([0-9.,]+).*?\\)|` +
-    `\\(([<>≤≥]\\s*[0-9.,]+)\\)|` +
-    `\\(Not\\s+Estab\\.?\\)|` +
-    `(\\([^)]*\\)))?`,
+    String.raw`^${TEST_NAME}:${OPTIONAL_WHITESPACE}${NUMERIC_VALUE}${OPTIONAL_WHITESPACE}(${UNIT_PATTERN})?${OPTIONAL_WHITESPACE}` +
+    String.raw`(?:\((?:.*?range.*?:${OPTIONAL_WHITESPACE})?${RANGE_VALUE}${OPTIONAL_WHITESPACE}${RANGE_SEPARATOR}${OPTIONAL_WHITESPACE}${RANGE_VALUE}.*?\)|` +
+    String.raw`\(${COMPARISON_OP}${OPTIONAL_WHITESPACE}${NUMERIC_VALUE}\)|` +
+    String.raw`\(Not${WHITESPACE}+Estab\.?\)|` +
+    String.raw`(\([^)]*\)))?`,
     'i'
   ),
 
   // Pattern 2: "Glucose    123.4    mg/dL    70-100    Normal"
   TABULAR_PATTERN: new RegExp(
-    `^(.+?)\\s+([0-9.,]+)\\s+(${UNIT_PATTERN})\\s+` +
-    `((?:[0-9.,]+)[-–to\\s]+(?:[0-9.,]+)|[<>≤≥]?[0-9.,]+)\\s*` +
-    `(normal|high|low|critical|abnormal|borderline)?`,
+    String.raw`^${TEST_NAME}${WHITESPACE}${NUMERIC_VALUE}${WHITESPACE}(${UNIT_PATTERN})${WHITESPACE}` +
+    String.raw`((?:${NUMERIC_VALUE})${RANGE_SEPARATOR}(?:${NUMERIC_VALUE})|${COMPARISON_OP}?${NUMERIC_VALUE})${OPTIONAL_WHITESPACE}` +
+    STATUS_VALUES,
     'i'
   ),
 
   // Pattern 3: "Test Name  Value  Unit"
   SIMPLE_PATTERN: new RegExp(
-    `^(.+?)\\s+([0-9.,]+)\\s+(${UNIT_PATTERN})`,
+    String.raw`^${TEST_NAME}${WHITESPACE}${NUMERIC_VALUE}${WHITESPACE}(${UNIT_PATTERN})`,
     'i'
   ),
 
   // Pattern 4: CSV-like "Test,Value,Unit,Range,Status"
   CSV_PATTERN: new RegExp(
-    `^(.+?)[,\\t]+([0-9.,]+)[,\\t]+(${UNIT_PATTERN})` +
-    `(?:[,\\t]+([^,\\t]*?))?(?:[,\\t]+([^,\\t]*?))?$`,
+    String.raw`^${TEST_NAME}[,\t]+${NUMERIC_VALUE}[,\t]+(${UNIT_PATTERN})` +
+    String.raw`(?:[,\t]+([^,\t]*?))?(?:[,\t]+([^,\t]*?))?$`,
     'i'
   )
 };

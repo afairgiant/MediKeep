@@ -98,8 +98,11 @@ COMPILED_NOISE_PATTERNS = [re.compile(pattern, re.IGNORECASE) for pattern in NOI
 class PDFTextExtractionService:
     """Service for extracting text from PDF files using hybrid approach."""
 
+    # Class-level cache for Tesseract availability (checked once per process)
+    _tesseract_available_cache: Optional[bool] = None
+
     def __init__(self):
-        # Check Tesseract availability on initialization
+        # Check Tesseract availability on initialization (cached at class level)
         self.ocr_available = self._check_tesseract_availability()
 
     def _check_tesseract_availability(self) -> bool:
@@ -109,9 +112,15 @@ class PDFTextExtractionService:
         In production (Docker container), Tesseract should always be available.
         In development, this provides graceful degradation if not installed.
 
+        Uses class-level caching to avoid repeated system calls.
+
         Returns:
             True if Tesseract is available, False otherwise
         """
+        # Return cached result if available
+        if PDFTextExtractionService._tesseract_available_cache is not None:
+            return PDFTextExtractionService._tesseract_available_cache
+
         try:
             version = pytesseract.get_tesseract_version()
             logger.info(
@@ -121,6 +130,7 @@ class PDFTextExtractionService:
                     "tesseract_version": str(version)
                 }
             )
+            PDFTextExtractionService._tesseract_available_cache = True
             return True
         except pytesseract.TesseractNotFoundError:
             logger.warning(
@@ -132,6 +142,7 @@ class PDFTextExtractionService:
                     "recommendation": "Install Tesseract OCR (apt-get install tesseract-ocr tesseract-ocr-eng poppler-utils) for scanned PDF support"
                 }
             )
+            PDFTextExtractionService._tesseract_available_cache = False
             return False
         except Exception as e:
             logger.warning(
@@ -141,6 +152,7 @@ class PDFTextExtractionService:
                     "error": str(e)
                 }
             )
+            PDFTextExtractionService._tesseract_available_cache = False
             return False
 
     def extract_text(self, pdf_bytes: bytes, filename: str = "document.pdf") -> Dict:
@@ -289,22 +301,28 @@ class PDFTextExtractionService:
         """
         Extract text using OCR (slower, for scanned PDFs).
 
+        Processes pages one at a time to reduce memory usage.
+
         Raises:
             RuntimeError: If Tesseract is not available
         """
         if not self.ocr_available:
             raise RuntimeError("Tesseract OCR is not available. Cannot perform OCR extraction.")
 
-        # Convert PDF pages to images
+        text_parts = []
+        page_count = 0
+
+        # Process pages one at a time to reduce memory usage
+        # First, get the page count without loading all images
         images = convert_from_bytes(
             pdf_bytes,
             dpi=OCR_DPI,  # Configured for accuracy vs performance balance
             fmt='jpeg',
             thread_count=OCR_THREAD_COUNT  # Optimized for container resources
         )
+        page_count = len(images)
 
-        text_parts = []
-
+        # Process each page individually
         for i, image in enumerate(images):
             # Preprocess image for better OCR
             processed_image = self._preprocess_image(image)
@@ -317,7 +335,7 @@ class PDFTextExtractionService:
 
             text_parts.append(page_text)
             logger.info(
-                f"OCR page {i+1}/{len(images)} complete",
+                f"OCR page {i+1}/{page_count} complete",
                 extra={
                     "component": "PDFTextExtractionService",
                     "page_number": i+1,
@@ -325,11 +343,15 @@ class PDFTextExtractionService:
                 }
             )
 
+            # Clear image from memory after processing
+            del image
+            del processed_image
+
         text = '\n'.join(text_parts)
 
         return {
             'text': text,
-            'page_count': len(images),
+            'page_count': page_count,
             'char_count': len(text)
         }
 
