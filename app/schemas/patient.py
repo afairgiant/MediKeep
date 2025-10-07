@@ -29,6 +29,7 @@ class PatientBase(BaseModel):
         None  # in pounds (allows decimals for metric conversion precision)
     )
     physician_id: Optional[int] = None
+    relationship_to_self: Optional[str] = None  # Use RelationshipToSelf enum values
 
     @root_validator(pre=True)
     def convert_empty_strings_to_none(cls, values):
@@ -41,6 +42,7 @@ class PatientBase(BaseModel):
                 "height",
                 "weight",
                 "physician_id",
+                "relationship_to_self",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -100,7 +102,7 @@ class PatientBase(BaseModel):
         Raises:
             ValueError: If gender is not in allowed list
         """
-        if v is not None:
+        if v is not None and v != "":
             allowed_genders = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
             if v.upper() not in allowed_genders:
                 raise ValueError(f"Gender must be one of: {', '.join(allowed_genders)}")
@@ -108,7 +110,7 @@ class PatientBase(BaseModel):
             # Normalize common values
             gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
             return gender_map.get(v.upper(), v.upper())
-        return v
+        return None if v == "" else v
 
     @validator("birth_date")
     def validate_birth_date(cls, v):
@@ -290,6 +292,7 @@ class PatientUpdate(BaseModel):
     height: Optional[float] = None
     weight: Optional[float] = None
     physician_id: Optional[int] = None
+    relationship_to_self: Optional[str] = None
 
     @root_validator(pre=True)
     def convert_empty_strings_to_none(cls, values):
@@ -305,6 +308,7 @@ class PatientUpdate(BaseModel):
                 "height",
                 "weight",
                 "physician_id",
+                "relationship_to_self",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -441,6 +445,7 @@ class Patient(PatientBase):
                 "height",
                 "weight",
                 "physician_id",
+                "relationship_to_self",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None

@@ -83,6 +83,27 @@ class SeverityLevel(Enum):
     LIFE_THREATENING = "life-threatening"
 
 
+class RelationshipToSelf(Enum):
+    """Relationship of patient record to the account owner"""
+    SELF = "self"
+    SPOUSE = "spouse"
+    PARTNER = "partner"
+    CHILD = "child"
+    SON = "son"
+    DAUGHTER = "daughter"
+    PARENT = "parent"
+    FATHER = "father"
+    MOTHER = "mother"
+    SIBLING = "sibling"
+    BROTHER = "brother"
+    SISTER = "sister"
+    GRANDPARENT = "grandparent"
+    GRANDCHILD = "grandchild"
+    OTHER_FAMILY = "other_family"
+    FRIEND = "friend"
+    OTHER = "other"
+
+
 class FamilyRelationship(Enum):
     """Family relationship types for family history"""
     FATHER = "father"
@@ -173,6 +194,11 @@ def get_all_severity_levels():
 def get_all_encounter_priorities():
     """Get all valid encounter priority levels"""
     return get_status_values(EncounterPriority)
+
+
+def get_all_relationship_to_self():
+    """Get all valid relationship to self values"""
+    return get_status_values(RelationshipToSelf)
 
 
 def get_all_family_relationships():

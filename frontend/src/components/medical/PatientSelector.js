@@ -45,6 +45,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePatientList, useCacheManager } from '../../hooks/useGlobalData';
+import { formatRelationshipLabel } from '../../constants/relationshipOptions';
 import patientApi from '../../services/api/patientApi';
 import patientSharingApi from '../../services/api/patientSharingApi';
 import logger from '../../services/logger';
@@ -621,6 +622,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={500}>
             {formatPatientName(patient)}
+            {patient.relationship_to_self && (
+              <Text span c="dimmed" ml="xs" fw={400}>
+                ({formatRelationshipLabel(patient.relationship_to_self)})
+              </Text>
+            )}
           </Text>
           <Text size="xs" c="dimmed">
             {patient.birth_date} • {patient.privacy_level}
@@ -682,9 +688,16 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           color="blue"
           radius="xl"
         />
-        <Text fw={500} size="sm" style={{ flex: 1 }}>
-          {formatPatientName(activePatient)}
-        </Text>
+        <div style={{ flex: 1 }}>
+          <Text fw={500} size="sm">
+            {formatPatientName(activePatient)}
+            {activePatient.relationship_to_self && (
+              <Text span c="dimmed" ml="xs">
+                ({formatRelationshipLabel(activePatient.relationship_to_self)})
+              </Text>
+            )}
+          </Text>
+        </div>
         {getPatientBadge(activePatient)}
         
         {/* Loading indicator */}
@@ -741,6 +754,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   <div>
                     <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
                       {formatPatientName(patient)}
+                      {patient.relationship_to_self && (
+                        <Text span c="dimmed" ml="xs" fw={400}>
+                          ({formatRelationshipLabel(patient.relationship_to_self)})
+                        </Text>
+                      )}
                     </Text>
                     <Text size="xs" c="dimmed">
                       {patient.birth_date}
@@ -835,6 +853,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               <div style={{ flex: 1 }}>
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}
+                  {activePatient.relationship_to_self && (
+                    <Text span c="dimmed" ml="xs" fw={400} size="md">
+                      ({formatRelationshipLabel(activePatient.relationship_to_self)})
+                    </Text>
+                  )}
                 </Text>
                 <Text size="sm" c="dimmed">
                   Born: {activePatient.birth_date}

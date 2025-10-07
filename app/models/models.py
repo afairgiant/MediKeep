@@ -32,6 +32,7 @@ from .enums import (
     LabResultStatus,
     MedicationStatus,
     ProcedureStatus,
+    RelationshipToSelf,
     SeverityLevel,
     TreatmentStatus,
     get_all_allergy_statuses,
@@ -44,6 +45,7 @@ from .enums import (
     get_all_lab_result_statuses,
     get_all_medication_statuses,
     get_all_procedure_statuses,
+    get_all_relationship_to_self,
     get_all_severity_levels,
     get_all_treatment_statuses,
 )
@@ -142,9 +144,9 @@ class Patient(Base):
 
     # V2+: Family context (nullable for V1)
     family_id = Column(Integer, nullable=True)  # Will add FK constraint in V2
-    relationship_to_family = Column(
+    relationship_to_self = Column(
         String, nullable=True
-    )  # self, spouse, child, parent
+    )  # Use RelationshipToSelf enum: self, spouse, child, parent, etc.
 
     # V3+: Advanced permissions (nullable for V1/V2)
     privacy_level = Column(String, default="owner", nullable=False)

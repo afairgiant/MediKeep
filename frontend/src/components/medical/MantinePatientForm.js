@@ -20,6 +20,7 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+import { RELATIONSHIP_OPTIONS } from '../../constants/relationshipOptions';
 import PatientPhotoUpload from './PatientPhotoUpload';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
@@ -240,6 +241,19 @@ const MantinePatientForm = ({
           />
         </Grid.Col>
       </Grid>
+
+      {/* Relationship to You */}
+      <Select
+        label="Relationship to You"
+        placeholder="Select relationship (optional)"
+        value={formData.relationship_to_self}
+        onChange={handleSelectChange('relationship_to_self')}
+        disabled={saving}
+        data={RELATIONSHIP_OPTIONS}
+        description="How is this person related to you?"
+        clearable
+        searchable
+      />
 
       {/* Address */}
       <Textarea

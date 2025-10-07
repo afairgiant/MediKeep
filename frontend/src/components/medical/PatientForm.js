@@ -39,6 +39,7 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+import { RELATIONSHIP_OPTIONS } from '../../constants/relationshipOptions';
 
 const PatientForm = ({
   patient = null,
@@ -63,6 +64,7 @@ const PatientForm = ({
     address: '',
     physician_id: null,
     is_self_record: false,
+    relationship_to_self: '',
   });
 
   const isEditing = !!patient;
@@ -86,6 +88,7 @@ const PatientForm = ({
         address: patient.address || '',
         physician_id: patient.physician_id || null,
         is_self_record: patient.is_self_record || false,
+        relationship_to_self: patient.relationship_to_self || '',
       });
     }
   }, [patient]);
@@ -207,6 +210,7 @@ const PatientForm = ({
     { value: 'Prefer not to say', label: 'Prefer not to say' },
   ];
 
+
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Stack gap="md">
@@ -299,6 +303,19 @@ const PatientForm = ({
                 clearable
               />
             </Group>
+
+            <Select
+              label="Relationship to You"
+              placeholder="Select relationship (optional)"
+              description="How is this person related to you?"
+              data={RELATIONSHIP_OPTIONS}
+              value={formData.relationship_to_self}
+              onChange={value =>
+                setFormData({ ...formData, relationship_to_self: value })
+              }
+              disabled={loading}
+              clearable
+            />
           </Stack>
         </div>
 

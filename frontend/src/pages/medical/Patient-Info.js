@@ -78,6 +78,7 @@ const PatientInfo = () => {
     height: '',
     weight: '',
     physician_id: '',
+    relationship_to_self: '',
   });
   const [error, setError] = useState('');
 
@@ -141,6 +142,7 @@ const PatientInfo = () => {
       height: '',
       weight: '',
       physician_id: '',
+      relationship_to_self: '',
     });
   }, []);
 
@@ -157,6 +159,7 @@ const PatientInfo = () => {
       height: patient.height || '',
       weight: patient.weight || '',
       physician_id: patient.physician_id || '',
+      relationship_to_self: patient.relationship_to_self || '',
     });
   }, []);
 
@@ -172,7 +175,8 @@ const PatientInfo = () => {
     }
     setShowModal(true);
     setError('');
-  }, [patientData, resetSubmission, populateFormData, resetFormData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientData, resetSubmission]);
 
   // Check for edit mode from URL parameter
   useEffect(() => {
@@ -207,7 +211,8 @@ const PatientInfo = () => {
       setPatientExists(false);
       resetFormData();
     }
-  }, [patientData, patientError, populateFormData, resetFormData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientData, patientError]);
 
   // Handle global error state
   useEffect(() => {
@@ -455,6 +460,17 @@ const PatientInfo = () => {
                       <span>{getGenderDisplay(patientData.gender)}</span>
                     </div>
                   </div>
+                  {patientData.relationship_to_self && (
+                    <div className="detail-group full-width">
+                      <label>Relationship to You:</label>
+                      <span>
+                        {patientData.relationship_to_self
+                          .split('_')
+                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ')}
+                      </span>
+                    </div>
+                  )}
                   <div className="detail-group full-width">
                     <label>Address:</label>
                     <span>{patientData.address || 'Not provided'}</span>
