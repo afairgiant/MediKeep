@@ -225,6 +225,13 @@ class LabTestComponentApi {
 
   /**
    * Create multiple test components for a lab result in bulk
+   *
+   * Response structure:
+   * {
+   *   created_count: number,
+   *   components: LabTestComponent[],
+   *   errors: string[]
+   * }
    */
   async createBulkForLabResult(
     labResultId: number,
@@ -532,8 +539,14 @@ class LabTestComponentApi {
       if (options?.dateTo) params.date_to = options.dateTo;
       if (options?.limit) params.limit = options.limit;
 
+      // Normalize test name by removing trailing punctuation
+      const normalizedTestName = testName.trim().replace(/[,;:]+$/, '');
+
+      // Add test_name as a query parameter to avoid issues with special characters in path
+      params.test_name = normalizedTestName;
+
       const response = await apiService.get(
-        `/lab-test-components/patient/${patientId}/trends/${encodeURIComponent(testName)}`,
+        `/lab-test-components/patient/${patientId}/trends`,
         { params, signal }
       );
 

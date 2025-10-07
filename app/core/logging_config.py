@@ -267,6 +267,11 @@ class LoggingConfig:
         else:
             root_logger.setLevel(self.log_level)
 
+        # Suppress verbose third-party library debug logs
+        logging.getLogger('pdfminer').setLevel(logging.WARNING)
+        logging.getLogger('PIL').setLevel(logging.WARNING)
+        logging.getLogger('pytesseract').setLevel(logging.WARNING)
+
         # Create formatters
         json_formatter = MedicalRecordsJSONFormatter()
 

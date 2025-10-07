@@ -69,13 +69,13 @@ const RenderModeContent = memo(({
   }
 
   // Performance optimization: Memoized storage backend selector with auto-sync indicator
-  logger.debug('render_mode_content_storage_backend_check', 'Checking storage backend render', {
-    paperlessLoading,
-    selectedStorageBackend,
-    paperlessEnabled: paperlessSettings?.paperless_enabled,
-    mode,
-    component: 'RenderModeContent'
-  });
+  // logger.debug('render_mode_content_storage_backend_check', 'Checking storage backend render', {
+  //   paperlessLoading,
+  //   selectedStorageBackend,
+  //   paperlessEnabled: paperlessSettings?.paperless_enabled,
+  //   mode,
+  //   component: 'RenderModeContent'
+  // });
 
   const storageBackendSelector = !paperlessLoading && (
     <Stack gap="xs">

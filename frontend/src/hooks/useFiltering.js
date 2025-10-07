@@ -374,12 +374,12 @@ export const useFiltering = (data = [], config = {}) => {
   }, [data, filters, searchFields, config, getNestedValue, matchesDateRange]);
 
   // Update specific filter
-  const updateFilter = (key, value) => {
+  const updateFilter = useCallback((key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
   // Clear all filters
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       search: '',
       status: 'all',
@@ -392,7 +392,7 @@ export const useFiltering = (data = [], config = {}) => {
       files: 'all',
       ...config.initialFilters,
     });
-  };
+  }, [config.initialFilters]);
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {

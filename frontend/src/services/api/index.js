@@ -138,11 +138,11 @@ class ApiService {
       throw new Error(errorMessage);
     }
 
-    logger.debug('API request successful', {
-      method,
-      url,
-      status: response.status,
-    });
+    // logger.debug('API request successful', {
+    //   method,
+    //   url,
+    //   status: response.status,
+    // });
 
     // Handle 204 No Content responses (common for DELETE operations)
     if (response.status === 204) {

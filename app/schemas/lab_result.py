@@ -415,7 +415,58 @@ class LabResultConditionResponse(LabResultConditionBase):
 
 class LabResultConditionWithDetails(LabResultConditionResponse):
     """Schema for lab result condition relationship with condition details"""
-    
+
     condition: Optional[dict] = None  # Will contain condition details
+
+    model_config = {"from_attributes": True}
+
+
+# OCR/PDF Extraction Schemas
+
+class PDFExtractionMetadata(BaseModel):
+    """Metadata about PDF text extraction"""
+
+    method: str  # "native", "ocr", "labcorp_parser", etc.
+    confidence: float  # 0.0 to 1.0
+    page_count: int
+    char_count: int
+    filename: str
+    lab_name: Optional[str] = None  # If lab-specific parser was used
+    test_count: Optional[int] = None  # If lab-specific parser was used
+    test_date: Optional[str] = None  # Extracted test date in YYYY-MM-DD format
+
+    @field_validator("method")
+    @classmethod
+    def validate_method(cls, v):
+        """Validate extraction method"""
+        valid_methods = ["native", "ocr", "failed", "labcorp_parser", "quest_parser"]
+        if v not in valid_methods:
+            raise ValueError(f"Method must be one of: {', '.join(valid_methods)}")
+        return v
+
+    @field_validator("confidence")
+    @classmethod
+    def validate_confidence(cls, v):
+        """Validate confidence is between 0 and 1"""
+        if not 0 <= v <= 1:
+            raise ValueError("Confidence must be between 0.0 and 1.0")
+        return v
+
+
+class PDFExtractionResponse(BaseModel):
+    """Response schema for PDF OCR extraction endpoint"""
+
+    status: str  # "success" or "error"
+    extracted_text: str
+    metadata: PDFExtractionMetadata
+    error: Optional[str] = None
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v):
+        """Validate status"""
+        if v not in ["success", "error"]:
+            raise ValueError("Status must be 'success' or 'error'")
+        return v
 
     model_config = {"from_attributes": True}

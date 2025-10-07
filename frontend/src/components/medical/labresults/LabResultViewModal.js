@@ -39,7 +39,8 @@ const LabResultViewModal = ({
   fetchLabResultConditions,
   navigate,
   isBlocking,
-  onError
+  onError,
+  onLabResultUpdated
 }) => {
   // Reset activeTab when modal opens with new labResult
   const [activeTab, setActiveTab] = useState('overview');
@@ -242,6 +243,7 @@ const LabResultViewModal = ({
                   labResultId={labResult.id}
                   isViewMode={false}
                   onError={handleError}
+                  onLabResultUpdated={onLabResultUpdated}
                 />
               </Box>
             </Tabs.Panel>

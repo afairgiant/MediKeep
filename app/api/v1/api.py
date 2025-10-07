@@ -29,6 +29,7 @@ from app.api.v1.endpoints import (
     procedure,
     search,
     sso,
+    standardized_tests,
     system,
     tags,
     treatment,
@@ -67,6 +68,9 @@ api_router.include_router(
 
 # Search endpoint
 api_router.include_router(search.router, prefix="/search", tags=["search"])
+
+# Standardized tests (LOINC)
+api_router.include_router(standardized_tests.router, prefix="/standardized-tests", tags=["standardized-tests"])
 
 # Cross-entity tag management
 api_router.include_router(tags.router, prefix="/tags", tags=["tags"])

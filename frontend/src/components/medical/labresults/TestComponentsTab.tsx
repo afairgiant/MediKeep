@@ -54,12 +54,14 @@ interface TestComponentsTabProps {
   labResultId: number;
   isViewMode?: boolean;
   onError?: (error: Error) => void;
+  onLabResultUpdated?: () => void;
 }
 
 const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   labResultId,
   isViewMode = false,
-  onError
+  onError,
+  onLabResultUpdated
 }) => {
   const [activeTab, setActiveTab] = useState<string>('display');
   const [components, setComponents] = useState<LabTestComponent[]>([]);
@@ -124,7 +126,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       setRefreshing(false);
       loadingRef.current = false;
     }
-  }, [labResultId, filters, currentPatient?.id, handleError]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labResultId, currentPatient?.id, handleError]);
 
   const handleComponentsAdded = useCallback((newComponents: LabTestComponent[]) => {
     setComponents(prev => [...prev, ...newComponents]);
@@ -238,7 +241,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   // Load components on mount and when labResultId changes
   useEffect(() => {
     loadComponents();
-  }, [loadComponents]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labResultId]);
 
   // Note: Removed auto-refresh on tab switch to prevent unnecessary API calls
   // Users can manually refresh using the refresh button if needed
@@ -452,16 +456,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             <Tabs.Tab value="templates" leftSection={<IconTemplate size={16} />}>
               Templates
             </Tabs.Tab>
-            <Tooltip label="Bulk import is currently locked for further development">
-              <Tabs.Tab
-                value="bulk"
-                leftSection={<IconUpload size={16} />}
-                disabled
-                style={{ cursor: 'not-allowed', opacity: 0.5 }}
-              >
-                Bulk Import (Locked)
-              </Tabs.Tab>
-            </Tooltip>
+            <Tabs.Tab value="bulk" leftSection={<IconUpload size={16} />}>
+              Bulk Import
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="templates" pt="md">
@@ -476,6 +473,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             <TestComponentBulkEntry
               labResultId={labResultId}
               onComponentsAdded={handleComponentsAdded}
+              onLabResultUpdated={onLabResultUpdated}
               onError={(error: Error) => handleError(error, 'bulk')}
             />
           </Tabs.Panel>

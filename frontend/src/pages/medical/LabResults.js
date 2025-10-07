@@ -238,25 +238,37 @@ const LabResults = () => {
   useEffect(() => {
     const loadFileCountsForLabResults = async () => {
       if (!labResults || labResults.length === 0) return;
-      
+
       const countPromises = labResults.map(async (labResult) => {
+        // Check if already loaded or loading to prevent duplicate requests
         setFileCountsLoading(prev => {
-          if (prev[labResult.id] !== undefined) return prev; // Already loading
+          // IMPORTANT: Only update if value actually changes to prevent infinite loop
+          if (prev[labResult.id] === true) return prev; // Already loading, return same reference
           return { ...prev, [labResult.id]: true };
         });
-        
+
         try {
           const files = await apiService.getEntityFiles('lab-result', labResult.id);
           const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [labResult.id]: count }));
+          setFileCounts(prev => {
+            // Only update if value changed
+            if (prev[labResult.id] === count) return prev;
+            return { ...prev, [labResult.id]: count };
+          });
         } catch (error) {
           logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [labResult.id]: 0 }));
+          setFileCounts(prev => {
+            if (prev[labResult.id] === 0) return prev;
+            return { ...prev, [labResult.id]: 0 };
+          });
         } finally {
-          setFileCountsLoading(prev => ({ ...prev, [labResult.id]: false }));
+          setFileCountsLoading(prev => {
+            if (prev[labResult.id] === false) return prev;
+            return { ...prev, [labResult.id]: false };
+          });
         }
       });
-      
+
       await Promise.all(countPromises);
     };
 
@@ -346,7 +358,7 @@ const LabResults = () => {
     if (viewingLabResult) {
       refreshFileCount(viewingLabResult.id);
     }
-    
+
     setShowViewModal(false);
     setViewingLabResult(null);
     // Remove view parameter from URL
@@ -356,6 +368,34 @@ const LabResults = () => {
     navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
       replace: true,
     });
+  };
+
+  const handleLabResultUpdated = async () => {
+    // If modal is open, fetch the updated lab result directly
+    if (viewingLabResult) {
+      try {
+        const updatedLabResult = await apiService.getLabResult(viewingLabResult.id);
+        if (updatedLabResult) {
+          setViewingLabResult(updatedLabResult);
+          logger.info('lab_result_updated_in_modal', {
+            message: 'Lab result refreshed in view modal',
+            labResultId: viewingLabResult.id,
+            completedDate: updatedLabResult.completed_date,
+            component: 'LabResults',
+          });
+        }
+      } catch (error) {
+        logger.error('lab_result_refresh_error', {
+          message: 'Failed to refresh lab result in modal',
+          labResultId: viewingLabResult.id,
+          error: error.message,
+          component: 'LabResults',
+        });
+      }
+    }
+
+    // Refresh the lab results list
+    await refreshData();
   };
 
   const handleDeleteLabResult = async labResultId => {
@@ -716,6 +756,7 @@ const LabResults = () => {
             refreshFileCount(viewingLabResult.id);
           }
         }}
+        onLabResultUpdated={handleLabResultUpdated}
       />
     </>
   );

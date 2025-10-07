@@ -246,9 +246,8 @@ class LabTestComponentUpdate(BaseModel):
     @classmethod
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = ["normal", "abnormal", "critical", "high", "low", "borderline"]
-            if v.lower() not in valid_statuses:
-                raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+            if v.lower() not in LAB_TEST_COMPONENT_STATUSES:
+                raise ValueError(f"Status must be one of: {', '.join(LAB_TEST_COMPONENT_STATUSES)}")
             return v.lower()
         return v
 
@@ -256,20 +255,8 @@ class LabTestComponentUpdate(BaseModel):
     @classmethod
     def validate_category(cls, v):
         if v is not None:
-            valid_categories = [
-                "chemistry",
-                "hematology",
-                "immunology",
-                "microbiology",
-                "endocrinology",
-                "toxicology",
-                "genetics",
-                "molecular",
-                "pathology",
-                "other",
-            ]
-            if v.lower() not in valid_categories:
-                raise ValueError(f"Category must be one of: {', '.join(valid_categories)}")
+            if v.lower() not in LAB_TEST_COMPONENT_CATEGORIES:
+                raise ValueError(f"Category must be one of: {', '.join(LAB_TEST_COMPONENT_CATEGORIES)}")
             return v.lower()
         return v
 

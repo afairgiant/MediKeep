@@ -96,10 +96,24 @@ async def startup_event():
     
     # Run data migrations (after users/database setup is complete)
     run_startup_data_migrations()
-    
+
+    # Initialize standardized tests from LOINC
+    try:
+        from app.core.test_initialization import ensure_tests_initialized
+        from app.database import SessionLocal
+
+        db = SessionLocal()
+        try:
+            ensure_tests_initialized(db)
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"Could not initialize standardized tests: {e}")
+        # Non-fatal - app can still function without pre-loaded tests
+
     # Initialize activity tracking
     # NOTE: Automatic activity tracking disabled to prevent double logging
     # Manual activity logging is used instead via app.api.activity_logging
     logger.info("Activity tracking initialization skipped (using manual logging)")
-    
+
     logger.info("Application startup completed")

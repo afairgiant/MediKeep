@@ -52,15 +52,15 @@ const DocumentManagerContent = ({
   // Store handlers in ref for stable access
   updateHandlersRef(coreHandlers);
 
-  logger.debug('document_manager_with_progress_render', 'DocumentManagerWithProgress rendering', {
-    mode,
-    entityType,
-    entityId,
-    paperlessLoading: coreHandlers.paperlessLoading,
-    selectedStorageBackend: coreHandlers.selectedStorageBackend,
-    filesCount: coreHandlers.files?.length || 0,
-    component: 'DocumentManagerWithProgress'
-  });
+  // logger.debug('document_manager_with_progress_render', 'DocumentManagerWithProgress rendering', {
+  //   mode,
+  //   entityType,
+  //   entityId,
+  //   paperlessLoading: coreHandlers.paperlessLoading,
+  //   selectedStorageBackend: coreHandlers.selectedStorageBackend,
+  //   filesCount: coreHandlers.files?.length || 0,
+  //   component: 'DocumentManagerWithProgress'
+  // });
 
   return (
     <Stack gap="md" className={className}>

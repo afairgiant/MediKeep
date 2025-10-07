@@ -30,7 +30,7 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
+# package-lock.json should be committed for reproducible builds
 yarn.lock
 *.env.local
 *.env.development.local

@@ -523,8 +523,8 @@ def validate_search_input(query: str, max_length: int = None) -> str:
             detail="Search query cannot be empty"
         )
 
-    # Remove leading/trailing whitespace
-    query = query.strip()
+    # Remove leading/trailing whitespace and trailing punctuation
+    query = query.strip().rstrip(',;:')
 
     # Check length
     if len(query) > max_length:
@@ -541,19 +541,20 @@ def validate_search_input(query: str, max_length: int = None) -> str:
         )
 
     # Remove or replace potentially problematic characters
-    # Allow alphanumeric, spaces, hyphens, underscores, periods
+    # Allow alphanumeric, spaces, hyphens, underscores, periods, commas, parentheses, forward slashes, percent signs
     import re
-    if not re.match(r'^[a-zA-Z0-9\s\-_.]+$', query):
+    if not re.match(r'^[a-zA-Z0-9\s\-_.,()\/\%]+$', query):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Search query contains invalid characters. Only letters, numbers, spaces, hyphens, underscores, and periods are allowed."
+            detail="Search query contains invalid characters. Only letters, numbers, spaces, hyphens, underscores, periods, commas, parentheses, forward slashes, and percent signs are allowed."
         )
 
-    # Prevent excessive wildcards or pattern matching abuse
-    if query.count('%') > 0 or query.count('_') > 10:
+    # Note: We allow % in test names (e.g., "% Free Testosterone") since we use parameterized queries
+    # Only prevent excessive underscores which could be used for SQL LIKE wildcards
+    if query.count('_') > 10:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Search query contains too many wildcard characters"
+            detail="Search query contains too many underscore characters"
         )
 
     return query
