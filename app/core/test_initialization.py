@@ -71,10 +71,12 @@ FRIENDLY_NAMES = {
     '2885-2': ['Total Protein', 'Protein'],
 
     # Lipids
-    '2093-3': ['Total Cholesterol', 'Cholesterol'],
-    '2571-8': ['Triglycerides', 'Trig'],
-    '2085-9': ['HDL', 'HDL Cholesterol'],
-    '13457-7': ['LDL Calculated', 'LDL', 'LDL Cholesterol'],
+    '2093-3': ['Total Cholesterol', 'Cholesterol', 'CHOLESTEROL, TOTAL', 'Cholesterol Total'],
+    '2571-8': ['Triglycerides', 'Trig', 'TRIGLYCERIDES'],
+    '2085-9': ['HDL', 'HDL Cholesterol', 'HDL CHOLESTEROL'],
+    '13457-7': ['LDL Calculated', 'LDL', 'LDL Cholesterol', 'LDL-CHOLESTEROL'],
+    '9830-1': ['Cholesterol/HDL Ratio', 'CHOL/HDLC RATIO', 'Total Cholesterol/HDL Ratio'],
+    '13458-5': ['Non-HDL Cholesterol', 'NON HDL CHOLESTEROL', 'Non HDL-C'],
 
     # Endocrinology
     '3016-3': ['TSH', 'Thyroid Stimulating Hormone'],

@@ -484,11 +484,16 @@ class PDFTextExtractionService:
                 }
             )
 
+            # Normalize lab name for method field (remove spaces, convert to lowercase)
+            # "Quest Diagnostics" -> "quest_parser"
+            # "LabCorp" -> "labcorp_parser"
+            lab_method = lab_name.lower().replace(' ', '_').replace('diagnostics', '').replace('__', '_').strip('_') + '_parser'
+
             return {
                 'text': formatted_text,
                 'page_count': 1,  # Not tracking pages in structured parsing
                 'char_count': len(formatted_text),
-                'method': f'{lab_name.lower()}_parser',
+                'method': lab_method,
                 'confidence': 0.98,  # Higher confidence for structured parsing
                 'error': None,
                 'lab_name': lab_name,

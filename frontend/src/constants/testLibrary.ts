@@ -388,7 +388,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     test_code: "2093-3",
     default_unit: "mg/dL",
     category: "lipids",
-    common_names: ["Cholesterol", "Total Chol"],
+    common_names: ["Cholesterol", "Total Chol", "CHOLESTEROL, TOTAL", "Cholesterol Total"],
     is_common: true,
     display_order: 38
   },
@@ -398,7 +398,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     test_code: "18262-6",
     default_unit: "mg/dL",
     category: "lipids",
-    common_names: ["LDL", "LDL-C", "Bad Cholesterol"],
+    common_names: ["LDL", "LDL-C", "Bad Cholesterol", "LDL-CHOLESTEROL", "LDL Calculated"],
     is_common: true,
     display_order: 39
   },
@@ -408,7 +408,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     test_code: "2085-9",
     default_unit: "mg/dL",
     category: "lipids",
-    common_names: ["HDL", "HDL-C", "Good Cholesterol"],
+    common_names: ["HDL", "HDL-C", "Good Cholesterol", "HDL CHOLESTEROL"],
     is_common: true,
     display_order: 40
   },
@@ -418,7 +418,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     test_code: "2571-8",
     default_unit: "mg/dL",
     category: "lipids",
-    common_names: ["Triglycerides", "TG", "Trig"],
+    common_names: ["Triglycerides", "TG", "Trig", "TRIGLYCERIDES"],
     is_common: true,
     display_order: 41
   },
@@ -436,7 +436,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     abbreviation: "Non-HDL",
     default_unit: "mg/dL",
     category: "lipids",
-    common_names: ["Non-HDL", "Non-HDL-C"],
+    common_names: ["Non-HDL", "Non-HDL-C", "NON HDL CHOLESTEROL", "Non HDL-C"],
     is_common: false,
     display_order: 43
   },
@@ -734,7 +734,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     abbreviation: "LDL/HDL",
     default_unit: "ratio",
     category: "lipids",
-    common_names: ["LDL/HDL Ratio", "Cholesterol Ratio"],
+    common_names: ["LDL/HDL Ratio", "Cholesterol Ratio", "CHOL/HDLC RATIO", "Total Cholesterol/HDL Ratio"],
     is_common: false,
     display_order: 72
   },

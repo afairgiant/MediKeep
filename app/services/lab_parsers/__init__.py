@@ -8,6 +8,7 @@ detect and parse different lab formats (LabCorp, Quest, etc.).
 from typing import List, Optional
 from .base_parser import BaseLabParser, LabTestResult
 from .labcorp_parser_v2 import LabCorpParserV2
+from .quest_parser import QuestParser
 
 
 class LabParserRegistry:
@@ -17,8 +18,8 @@ class LabParserRegistry:
         # Register all available parsers
         self.parsers: List[BaseLabParser] = [
             LabCorpParserV2(),  # Using improved V2 parser
+            QuestParser(),
             # Add more parsers here as they're implemented:
-            # QuestParser(),
             # SonoraQuestParser(),
             # etc.
         ]
@@ -66,6 +67,7 @@ __all__ = [
     'BaseLabParser',
     'LabTestResult',
     'LabCorpParserV2',
+    'QuestParser',
     'LabParserRegistry',
     'lab_parser_registry'
 ]
