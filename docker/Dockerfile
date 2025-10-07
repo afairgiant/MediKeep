@@ -15,9 +15,9 @@ WORKDIR /frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 
 # Install dependencies with cache mount for faster builds
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --silent --no-audit --no-fund --force && \
-    npm install --save-dev @types/react-window
+# Force fresh install without cache to ensure types are installed
+RUN npm install --silent --no-audit --no-fund --force && \
+    npm list @types/react-window || npm install --save-dev @types/react-window --force
 
 # Copy frontend source excluding test files
 COPY frontend/ ./
