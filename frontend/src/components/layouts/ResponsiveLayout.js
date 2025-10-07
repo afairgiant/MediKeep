@@ -66,11 +66,11 @@ const ResponsiveLayout = ({
         className="responsive-layout-content"
         style={{
           flex: 1,
-          marginLeft: withNavigation && (responsive.isAbove('md') || responsive.matches('lg')) 
-            ? '280px' 
+          marginLeft: withNavigation && (responsive.isAbove('md') || responsive.matches('lg'))
+            ? '280px'
             : '0',
           transition: 'margin-left 0.3s ease',
-          paddingTop: responsive.matches('xs') || responsive.matches('sm') 
+          paddingTop: responsive.matches('xs') || responsive.matches('sm')
             ? '60px' // Account for mobile navigation toggle
             : '0'
         }}

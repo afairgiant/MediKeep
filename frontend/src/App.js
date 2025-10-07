@@ -76,6 +76,7 @@ import ResponsiveNavigationTest from './pages/test/ResponsiveNavigationTest';
 
 // Components
 import { ErrorBoundary } from './components';
+import Footer from './components/shared/Footer';
 
 import logger from './services/logger';
 import { timezoneService } from './services/timezoneService';
@@ -362,7 +363,8 @@ function App() {
                     <NavigationTracker />
                     {/* <ActivityTracker /> */}
                     <div className="App">
-                      <Routes>
+                      <div style={{ flex: 1 }}>
+                        <Routes>
                         {/* Public Routes */}
                         <Route
                           path="/login"
@@ -582,6 +584,10 @@ function App() {
                           element={<Navigate to="/dashboard" />}
                         />
                       </Routes>
+                      </div>
+
+                      {/* Footer */}
+                      <Footer />
                     </div>
 
                     {/* Toast Notifications */}
