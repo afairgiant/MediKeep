@@ -64,6 +64,13 @@ const MantineFilters = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchWidth, setSearchWidth] = useState('150px');
 
+  // Helper functions for theme-aware colors
+  const getDividerColor = () =>
+    colorScheme === 'dark' ? 'var(--mantine-color-dark-4)' : 'var(--mantine-color-gray-3)';
+
+  const getLabelColor = () =>
+    colorScheme === 'dark' ? 'gray.4' : 'dark';
+
   // Adjust search width based on viewport
   useEffect(() => {
     const handleResize = () => {
@@ -358,9 +365,30 @@ const MantineFilters = ({
                   />
                 )}
 
-                {/* Sort Controls */}
+                {/* Sort Controls - Visually separated from filters */}
                 {sortOptions && sortOptions.length > 1 && (
                   <>
+                    <Box
+                      style={{
+                        height: '36px',
+                        width: '1px',
+                        backgroundColor: getDividerColor(),
+                        margin: '0 8px',
+                        alignSelf: 'center'
+                      }}
+                    />
+                    <Text
+                      size="sm"
+                      fw={500}
+                      c={getLabelColor()}
+                      style={{
+                        alignSelf: 'center',
+                        whiteSpace: 'nowrap',
+                        marginRight: '8px'
+                      }}
+                    >
+                      Sort by:
+                    </Text>
                     <Select
                       placeholder="Sort by"
                       value={sortBy}
