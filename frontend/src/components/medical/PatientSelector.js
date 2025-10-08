@@ -56,6 +56,16 @@ import PatientAvatar from '../shared/PatientAvatar';
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
   const { colorScheme } = useMantineColorScheme();
   const { user: currentUser } = useAuth();
+
+  // Helper function for relationship text color
+  const getRelationshipTextColor = () => {
+    return colorScheme === 'light' ? '#000000' : '#e0e0e0';
+  };
+
+  // Helper function for icon color
+  const getIconColor = (darkColor) => {
+    return colorScheme === 'dark' ? darkColor : 'dark';
+  };
   
   // Use cached patient list from global state
   const { patientList: patients, loading: patientListLoading, error: patientListError, refresh: refreshPatientList } = usePatientList();
@@ -623,7 +633,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           <Text size="sm" fw={500}>
             {formatPatientName(patient)}
             {patient.relationship_to_self && (
-              <Text span c="dimmed" ml="xs" fw={400}>
+              <Text span ml="xs" fw={400} style={{ color: getRelationshipTextColor() }}>
                 ({formatRelationshipLabel(patient.relationship_to_self)})
               </Text>
             )}
@@ -692,7 +702,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           <Text fw={500} size="sm">
             {formatPatientName(activePatient)}
             {activePatient.relationship_to_self && (
-              <Text span c="dimmed" ml="xs">
+              <Text span ml="xs" style={{ color: getRelationshipTextColor() }}>
                 ({formatRelationshipLabel(activePatient.relationship_to_self)})
               </Text>
             )}
@@ -707,24 +717,26 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         <Tooltip label="Expand patient selector">
           <ActionIcon
             variant="subtle"
-            color="blue"
+            color={getIconColor('blue')}
             size="sm"
             onClick={() => setIsMinimized(false)}
             disabled={combinedLoading || externalLoading}
+            style={colorScheme === 'light' ? { color: '#000000' } : undefined}
           >
             <IconChevronDown size="0.8rem" />
           </ActionIcon>
         </Tooltip>
-        
+
         {/* Quick patient switch menu */}
         <Menu shadow="md" width={300} position="bottom-start">
           <Menu.Target>
             <Tooltip label="Switch patient">
               <ActionIcon
                 variant="subtle"
-                color="gray"
+                color={getIconColor('gray')}
                 size="sm"
                 disabled={combinedLoading || externalLoading}
+                style={colorScheme === 'light' ? { color: '#000000' } : undefined}
               >
                 <IconUsers size="0.8rem" />
               </ActionIcon>
@@ -755,7 +767,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                     <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
                       {formatPatientName(patient)}
                       {patient.relationship_to_self && (
-                        <Text span c="dimmed" ml="xs" fw={400}>
+                        <Text span ml="xs" fw={400} style={{ color: getRelationshipTextColor() }}>
                           ({formatRelationshipLabel(patient.relationship_to_self)})
                         </Text>
                       )}
@@ -854,7 +866,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}
                   {activePatient.relationship_to_self && (
-                    <Text span c="dimmed" ml="xs" fw={400} size="md">
+                    <Text span ml="xs" fw={400} size="md" style={{ color: getRelationshipTextColor() }}>
                       ({formatRelationshipLabel(activePatient.relationship_to_self)})
                     </Text>
                   )}
