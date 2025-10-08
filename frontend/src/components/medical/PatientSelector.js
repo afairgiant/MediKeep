@@ -623,7 +623,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           <Text size="sm" fw={500}>
             {formatPatientName(patient)}
             {patient.relationship_to_self && (
-              <Text span c="dimmed" ml="xs" fw={400}>
+              <Text span ml="xs" fw={400} style={colorScheme === 'light' ? { color: '#000000' } : { color: '#e0e0e0' }}>
                 ({formatRelationshipLabel(patient.relationship_to_self)})
               </Text>
             )}
@@ -692,7 +692,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           <Text fw={500} size="sm">
             {formatPatientName(activePatient)}
             {activePatient.relationship_to_self && (
-              <Text span c="dimmed" ml="xs">
+              <Text span ml="xs" style={colorScheme === 'light' ? { color: '#000000' } : { color: '#e0e0e0' }}>
                 ({formatRelationshipLabel(activePatient.relationship_to_self)})
               </Text>
             )}
@@ -707,24 +707,26 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         <Tooltip label="Expand patient selector">
           <ActionIcon
             variant="subtle"
-            color="blue"
+            color={colorScheme === 'dark' ? 'blue' : undefined}
             size="sm"
             onClick={() => setIsMinimized(false)}
             disabled={combinedLoading || externalLoading}
+            style={colorScheme === 'light' ? { color: '#000000' } : undefined}
           >
             <IconChevronDown size="0.8rem" />
           </ActionIcon>
         </Tooltip>
-        
+
         {/* Quick patient switch menu */}
         <Menu shadow="md" width={300} position="bottom-start">
           <Menu.Target>
             <Tooltip label="Switch patient">
               <ActionIcon
                 variant="subtle"
-                color="gray"
+                color={colorScheme === 'dark' ? 'gray' : undefined}
                 size="sm"
                 disabled={combinedLoading || externalLoading}
+                style={colorScheme === 'light' ? { color: '#000000' } : undefined}
               >
                 <IconUsers size="0.8rem" />
               </ActionIcon>
@@ -755,7 +757,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                     <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
                       {formatPatientName(patient)}
                       {patient.relationship_to_self && (
-                        <Text span c="dimmed" ml="xs" fw={400}>
+                        <Text span ml="xs" fw={400} style={colorScheme === 'light' ? { color: '#000000' } : { color: '#e0e0e0' }}>
                           ({formatRelationshipLabel(patient.relationship_to_self)})
                         </Text>
                       )}
@@ -854,7 +856,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}
                   {activePatient.relationship_to_self && (
-                    <Text span c="dimmed" ml="xs" fw={400} size="md">
+                    <Text span ml="xs" fw={400} size="md" style={colorScheme === 'light' ? { color: '#000000' } : { color: '#e0e0e0' }}>
                       ({formatRelationshipLabel(activePatient.relationship_to_self)})
                     </Text>
                   )}
