@@ -11,6 +11,20 @@ import { Loading } from '../../components';
 import { formatDateTime } from '../../utils/helpers';
 import './BackupManagement.css';
 
+// Default retention settings constants
+const DEFAULT_RETENTION_SETTINGS = {
+  BACKUP_RETENTION_DAYS: 7,
+  BACKUP_MIN_COUNT: 5,
+  BACKUP_MAX_COUNT: 50,
+};
+
+// Minimum allowed values for each setting
+const MIN_VALUES = {
+  backup_retention_days: 1,
+  backup_min_count: 1,
+  backup_max_count: 5,
+};
+
 const BackupManagement = () => {
   const navigate = useNavigate();
   const [creating, setCreating] = useState({});
@@ -21,12 +35,26 @@ const BackupManagement = () => {
   // Tab management
   const [activeTab, setActiveTab] = useState('backups');
 
+  // Handle tab change with unsaved changes warning
+  const handleTabChange = (newTab) => {
+    if (activeTab === 'settings' && hasUnsavedChanges) {
+      const confirmSwitch = window.confirm(
+        'You have unsaved changes in your retention settings.\n\nAre you sure you want to leave without saving?'
+      );
+      if (!confirmSwitch) {
+        return;
+      }
+    }
+    setActiveTab(newTab);
+  };
+
   // Retention settings state
   const [retentionSettings, setRetentionSettings] = useState({
-    backup_retention_days: 7,
-    backup_min_count: 5,
-    backup_max_count: 50,
+    backup_retention_days: DEFAULT_RETENTION_SETTINGS.BACKUP_RETENTION_DAYS,
+    backup_min_count: DEFAULT_RETENTION_SETTINGS.BACKUP_MIN_COUNT,
+    backup_max_count: DEFAULT_RETENTION_SETTINGS.BACKUP_MAX_COUNT,
   });
+  const [originalSettings, setOriginalSettings] = useState(null);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(false);
 
@@ -81,6 +109,17 @@ const BackupManagement = () => {
 
   const backups = backupData?.backups || [];
 
+  // Detect unsaved changes
+  const hasUnsavedChanges = React.useMemo(() => {
+    if (!originalSettings) return false;
+
+    return (
+      retentionSettings.backup_retention_days !== originalSettings.backup_retention_days ||
+      retentionSettings.backup_min_count !== originalSettings.backup_min_count ||
+      retentionSettings.backup_max_count !== originalSettings.backup_max_count
+    );
+  }, [retentionSettings, originalSettings]);
+
   // Load retention settings on mount
   React.useEffect(() => {
     loadRetentionSettings();
@@ -92,11 +131,14 @@ const BackupManagement = () => {
       const data = await adminApiService.getRetentionSettings();
 
       // Only extract backup-related settings
-      setRetentionSettings({
-        backup_retention_days: data.backup_retention_days || 7,
-        backup_min_count: data.backup_min_count || 5,
-        backup_max_count: data.backup_max_count || 50,
-      });
+      const loadedSettings = {
+        backup_retention_days: data.backup_retention_days || DEFAULT_RETENTION_SETTINGS.BACKUP_RETENTION_DAYS,
+        backup_min_count: data.backup_min_count || DEFAULT_RETENTION_SETTINGS.BACKUP_MIN_COUNT,
+        backup_max_count: data.backup_max_count || DEFAULT_RETENTION_SETTINGS.BACKUP_MAX_COUNT,
+      };
+
+      setRetentionSettings(loadedSettings);
+      setOriginalSettings(loadedSettings);
 
       logger.info('Retention settings loaded successfully', {
         component: 'BackupManagement',
@@ -123,6 +165,7 @@ const BackupManagement = () => {
 
     const numValue = parseInt(value, 10);
     if (isNaN(numValue) || numValue < 1) {
+      showWarning('Invalid Input', 'Please enter a positive number');
       return;
     }
     setRetentionSettings(prev => ({
@@ -131,7 +174,8 @@ const BackupManagement = () => {
     }));
   };
 
-  const handleSettingsBlur = (field, min = 1) => {
+  const handleSettingsBlur = (field) => {
+    const min = MIN_VALUES[field] || 1;
     if (retentionSettings[field] === '' || retentionSettings[field] < min) {
       setRetentionSettings(prev => ({
         ...prev,
@@ -146,9 +190,9 @@ const BackupManagement = () => {
 
       // Ensure all numeric fields have valid values before saving
       const validSettings = {
-        backup_retention_days: retentionSettings.backup_retention_days || 7,
-        backup_min_count: retentionSettings.backup_min_count || 5,
-        backup_max_count: retentionSettings.backup_max_count || 50,
+        backup_retention_days: retentionSettings.backup_retention_days || DEFAULT_RETENTION_SETTINGS.BACKUP_RETENTION_DAYS,
+        backup_min_count: retentionSettings.backup_min_count || DEFAULT_RETENTION_SETTINGS.BACKUP_MIN_COUNT,
+        backup_max_count: retentionSettings.backup_max_count || DEFAULT_RETENTION_SETTINGS.BACKUP_MAX_COUNT,
       };
 
       // Update local state with valid values
@@ -163,11 +207,13 @@ const BackupManagement = () => {
 
       // Update local state with confirmed values
       if (response.current_settings) {
-        setRetentionSettings({
+        const confirmedSettings = {
           backup_retention_days: response.current_settings.backup_retention_days,
           backup_min_count: response.current_settings.backup_min_count,
           backup_max_count: response.current_settings.backup_max_count,
-        });
+        };
+        setRetentionSettings(confirmedSettings);
+        setOriginalSettings(confirmedSettings);
       }
 
       logger.info('Retention settings updated successfully', {
@@ -439,7 +485,7 @@ const BackupManagement = () => {
           </div>
 
           {/* Tab Switcher */}
-          <TabSwitcher activeTab={activeTab} onTabChange={setActiveTab} />
+          <TabSwitcher activeTab={activeTab} onTabChange={handleTabChange} hasUnsavedChanges={hasUnsavedChanges} />
         </AdminCard>
 
         {/* Conditional Content Based on Active Tab */}
@@ -566,7 +612,7 @@ const BackupManagement = () => {
 };
 
 // Tab Switcher Component
-const TabSwitcher = ({ activeTab, onTabChange }) => (
+const TabSwitcher = ({ activeTab, onTabChange, hasUnsavedChanges }) => (
   <div className="backup-tabs">
     <button
       className={`tab-button ${activeTab === 'backups' ? 'active' : ''}`}
@@ -585,6 +631,12 @@ const TabSwitcher = ({ activeTab, onTabChange }) => (
       aria-controls="settings-panel"
     >
       ⚙️ Settings
+      {hasUnsavedChanges && (
+        <span className="unsaved-indicator">
+          <span className="unsaved-badge" title="Unsaved changes" aria-label="Unsaved changes"></span>
+          <span className="unsaved-text">Unsaved</span>
+        </span>
+      )}
     </button>
   </div>
 );
@@ -655,7 +707,7 @@ const RetentionSettings = ({
                 onChange={e =>
                   onInputChange('backup_retention_days', e.target.value)
                 }
-                onBlur={() => onBlur('backup_retention_days', 1)}
+                onBlur={() => onBlur('backup_retention_days')}
                 className="settings-input"
                 aria-label="Backup retention days"
               />
@@ -679,7 +731,7 @@ const RetentionSettings = ({
                 max="100"
                 value={settings.backup_min_count}
                 onChange={e => onInputChange('backup_min_count', e.target.value)}
-                onBlur={() => onBlur('backup_min_count', 1)}
+                onBlur={() => onBlur('backup_min_count')}
                 className="settings-input"
                 aria-label="Minimum backup count"
               />
@@ -703,7 +755,7 @@ const RetentionSettings = ({
                 max="500"
                 value={settings.backup_max_count}
                 onChange={e => onInputChange('backup_max_count', e.target.value)}
-                onBlur={() => onBlur('backup_max_count', 5)}
+                onBlur={() => onBlur('backup_max_count')}
                 className="settings-input"
                 aria-label="Maximum backup count"
               />
