@@ -7,6 +7,12 @@ import { adminApiService } from '../../services/api/adminApi';
 import { AdminResetPasswordModal } from '../../components/auth';
 import { Loading } from '../../components';
 import { Button } from '../../components/ui';
+import { MEDICAL_MODELS } from '../../constants/modelConstants';
+import { EDIT_EXCLUDED_FIELDS } from '../../constants/validationConstants';
+import { useFieldHandlers } from '../../hooks/useFieldHandlers';
+import { validateForm } from '../../utils/fieldValidation';
+import { formatFieldLabel } from '../../utils/formatters';
+import FieldRenderer from '../../components/admin/FieldRenderer';
 import './ModelEdit.css';
 
 const ModelEdit = () => {
@@ -23,6 +29,9 @@ const ModelEdit = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [resetUserId, setResetUserId] = useState(null);
   const [resetUsername, setResetUsername] = useState('');
+
+  // Use the shared field handlers hook
+  const { handleFieldChange } = useFieldHandlers(setFormData, setValidationErrors);
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,87 +61,17 @@ const ModelEdit = () => {
     }
   }, [modelName, recordId]);
 
-  const handleFieldChange = (fieldName, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: value,
-    }));
-
-    // Clear validation error for this field when user starts typing
-    if (validationErrors[fieldName]) {
-      setValidationErrors(prev => ({
-        ...prev,
-        [fieldName]: null,
-      }));
-    }
-  };
-
-  const validateField = (field, value) => {
-    const errors = [];
-
-    // Required field validation
-    if (
-      !field.nullable &&
-      (value === null || value === undefined || value === '')
-    ) {
-      errors.push(`${field.name} is required`);
-    }
-
-    // Max length validation
-    if (
-      field.max_length &&
-      typeof value === 'string' &&
-      value.length > field.max_length
-    ) {
-      errors.push(
-        `${field.name} must be ${field.max_length} characters or less`
-      );
-    }
-
-    // Type validation
-    if (value !== null && value !== undefined && value !== '') {
-      if (field.type === 'number' && isNaN(Number(value))) {
-        errors.push(`${field.name} must be a valid number`);
-      }
-
-      if (
-        field.type === 'email' &&
-        value &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-      ) {
-        errors.push(`${field.name} must be a valid email address`);
-      }
-    }
-
-    return errors;
-  };
-
-  const validateForm = () => {
-    const errors = {};
-    let hasErrors = false;
-
-    metadata.fields.forEach(field => {
-      // Don't validate primary keys or password fields since they're excluded from updates
-      if (
-        !field.primary_key &&
-        field.name !== 'password_hash' &&
-        field.name !== 'password' &&
-        !field.name.includes('password')
-      ) {
-        const fieldErrors = validateField(field, formData[field.name]);
-        if (fieldErrors.length > 0) {
-          errors[field.name] = fieldErrors;
-          hasErrors = true;
-        }
-      }
+  const handleValidateForm = () => {
+    const { hasErrors, errors } = validateForm(metadata, formData, {
+      skipPasswordFields: true,
+      modelName,
     });
-
     setValidationErrors(errors);
     return !hasErrors;
   };
 
   const handleSave = async () => {
-    if (!validateForm()) {
+    if (!handleValidateForm()) {
       return;
     }
 
@@ -140,16 +79,21 @@ const ModelEdit = () => {
       setSaving(true);
       setError(null);
 
-      // Create update data excluding primary key fields and password fields
+      // Create update data excluding primary key fields, password fields, and timestamp fields
       const updateData = {};
       metadata.fields.forEach(field => {
         if (
           !field.primary_key &&
-          field.name !== 'password_hash' &&
-          field.name !== 'password' &&
-          !field.name.includes('password')
+          field.name !== 'created_at' &&
+          field.name !== 'updated_at' &&
+          !EDIT_EXCLUDED_FIELDS.some(excluded => field.name.includes(excluded))
         ) {
-          updateData[field.name] = formData[field.name];
+          // Special handling for medication_type - always include with default
+          if (field.name === 'medication_type' && modelName === 'medication') {
+            updateData[field.name] = formData[field.name] || 'prescription';
+          } else {
+            updateData[field.name] = formData[field.name];
+          }
         }
       });
 
@@ -163,7 +107,7 @@ const ModelEdit = () => {
           // If admin is changing their own username, show warning
           if (record.username === currentUsername) {
             const confirmChange = window.confirm(
-              `⚠️ WARNING: You are about to change your own username from "${record.username}" to "${updateData.username}".\n\n` +
+              `WARNING: You are about to change your own username from "${record.username}" to "${updateData.username}".\n\n` +
               `This will log you out immediately and you'll need to log back in with the new username.\n\n` +
               `Are you sure you want to continue?`
             );
@@ -184,7 +128,7 @@ const ModelEdit = () => {
           // If changing admin to non-admin, warn about potential lockout
           if (['admin', 'administrator'].includes(recordRole) && !['admin', 'administrator'].includes(newRole)) {
             const confirmRoleChange = window.confirm(
-              `⚠️ WARNING: You are about to remove admin privileges from this user.\n\n` +
+              `WARNING: You are about to remove admin privileges from this user.\n\n` +
               `If this is the last admin user in the system, you may lose admin access.\n\n` +
               `Are you sure you want to continue?`
             );
@@ -206,7 +150,7 @@ const ModelEdit = () => {
         
         if (record.username === currentUsername) {
           alert(
-            `✅ Username updated successfully!\n\n` +
+            `Username updated successfully!\n\n` +
             `You have been logged out because your username changed.\n` +
             `Please log back in with your new username: "${updateData.username}"`
           );
@@ -245,150 +189,7 @@ const ModelEdit = () => {
   const handleCancel = () => {
     navigate(`/admin/models/${modelName}/${recordId}`);
   };
-  const renderFieldInput = field => {
-    const value = formData[field.name] || '';
-    const hasError = validationErrors[field.name];
 
-    // Don't render primary key fields as they shouldn't be editable
-    if (field.primary_key) {
-      return (
-        <div className="field-value readonly">
-          {value}
-          <small className="field-note">Primary key (read-only)</small>
-        </div>
-      );
-    }
-
-    // Password fields should be read-only for security reasons
-    if (
-      field.name === 'password_hash' ||
-      field.name === 'password' ||
-      field.name.includes('password')
-    ) {
-      const maskedValue = value
-        ? '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'
-        : '';
-      return (
-        <div className="field-value readonly password-field">
-          <div className="password-display">{maskedValue}</div>
-          <div className="password-actions">
-            <small className="field-note">
-              Password hash (read-only for security)
-            </small>
-            {modelName === 'user' && (
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => handleChangePassword(recordId)}
-                style={{
-                  marginLeft: '1rem',
-                }}
-              >
-                🔑 Reset Password
-              </Button>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // Hide patient_id field for medical records - it should not be changed
-    const medicalModels = [
-      'medication',
-      'lab_result',
-      'condition',
-      'allergy',
-      'immunization',
-      'procedure',
-      'treatment',
-      'encounter',
-    ];
-    if (field.name === 'patient_id' && medicalModels.includes(modelName)) {
-      return (
-        <div className="field-value readonly">
-          {value}
-          <small className="field-note">
-            Patient ID (locked to current user)
-          </small>
-        </div>
-      );
-    }
-
-    const commonProps = {
-      value: value,
-      onChange: e => handleFieldChange(field.name, e.target.value),
-      className: `field-input ${hasError ? 'error' : ''}`,
-      disabled: saving,
-    };
-
-    switch (field.type) {
-      case 'boolean':
-        return (
-          <select
-            {...commonProps}
-            value={value === null ? '' : String(value)}
-            onChange={e => {
-              const val =
-                e.target.value === '' ? null : e.target.value === 'true';
-              handleFieldChange(field.name, val);
-            }}
-          >
-            <option value="">-- Select --</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        );
-
-      case 'datetime':
-      case 'date':
-        return (
-          <input
-            {...commonProps}
-            type={field.type === 'datetime' ? 'datetime-local' : 'date'}
-            value={
-              value
-                ? new Date(value)
-                    .toISOString()
-                    .slice(0, field.type === 'datetime' ? 16 : 10)
-                : ''
-            }
-          />
-        );
-
-      case 'number':
-        return <input {...commonProps} type="number" />;
-
-      case 'email':
-        return <input {...commonProps} type="email" />;
-      case 'text':
-        if (field.max_length && field.max_length > 255) {
-          return (
-            <textarea {...commonProps} rows={4} maxLength={field.max_length} />
-          );
-        }
-      // Fall through to default
-
-      default:
-        // Check if field has predefined choices (for dropdowns)
-        if (field.choices && field.choices.length > 0) {
-          return (
-            <select {...commonProps}>
-              <option value="">-- Select {field.name} --</option>
-              {field.choices.map(choice => (
-                <option key={choice} value={choice}>
-                  {choice.charAt(0).toUpperCase() +
-                    choice.slice(1).replace('-', ' ')}
-                </option>
-              ))}
-            </select>
-          );
-        }
-
-        return (
-          <input {...commonProps} type="text" maxLength={field.max_length} />
-        );
-    }
-  };
   if (loading) {
     return (
       <AdminLayout>
@@ -436,7 +237,7 @@ const ModelEdit = () => {
               disabled={saving}
               loading={saving}
             >
-              💾 Save Changes
+              Save Changes
             </Button>
           </div>
         </div>
@@ -452,7 +253,7 @@ const ModelEdit = () => {
             {metadata?.fields.map(field => (
               <div key={field.name} className="field-group">
                 <label className="field-label">
-                  {field.name}
+                  {formatFieldLabel(field.name)}
                   {field.primary_key && <span className="pk-badge">PK</span>}
                   {field.foreign_key && <span className="fk-badge">FK</span>}
                   {!field.nullable && !field.primary_key && (
@@ -460,7 +261,17 @@ const ModelEdit = () => {
                   )}
                 </label>
 
-                {renderFieldInput(field)}
+                <FieldRenderer
+                  field={field}
+                  value={formData[field.name]}
+                  mode="edit"
+                  modelName={modelName}
+                  hasError={!!validationErrors[field.name]}
+                  saving={saving}
+                  onFieldChange={handleFieldChange}
+                  onPasswordReset={handleChangePassword}
+                  recordId={recordId}
+                />
 
                 {validationErrors[field.name] && (
                   <div className="field-errors">
