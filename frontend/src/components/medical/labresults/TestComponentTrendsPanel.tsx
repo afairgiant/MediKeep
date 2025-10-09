@@ -159,7 +159,13 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
   useEffect(() => {
     if (opened && testName) {
-      loadTrendData();
+      // Defer data loading slightly to allow drawer to render first
+      // This prevents the main thread from being blocked during the drawer animation
+      const timeoutId = setTimeout(() => {
+        loadTrendData();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [opened, testName, loadTrendData]);
 

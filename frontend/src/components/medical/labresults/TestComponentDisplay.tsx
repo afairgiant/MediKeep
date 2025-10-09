@@ -107,26 +107,68 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     return 'Not specified';
   };
 
+  const EditDeleteActions: React.FC<{
+    component: LabTestComponent;
+    onEdit?: (component: LabTestComponent) => void;
+    onDelete?: (component: LabTestComponent) => void;
+  }> = React.memo(({ component, onEdit, onDelete }) => {
+    const handleEdit = React.useCallback((e: React.MouseEvent) => {
+      e.stopPropagation();
+      onEdit?.(component);
+    }, [component, onEdit]);
+
+    const handleDelete = React.useCallback((e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete?.(component);
+    }, [component, onDelete]);
+
+    return (
+      <Group gap={4}>
+        <Tooltip label="Edit test component">
+          <ActionIcon
+            variant="subtle"
+            size="sm"
+            onClick={handleEdit}
+            aria-label={`Edit ${component.test_name}`}
+          >
+            <IconEdit size={14} />
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label="Delete test component">
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            size="sm"
+            onClick={handleDelete}
+            aria-label={`Delete ${component.test_name}`}
+          >
+            <IconTrash size={14} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    );
+  });
+
   const TestComponentCard: React.FC<{ component: LabTestComponent }> = React.memo(({ component }) => {
     const statusColor = getStatusColor(component.status, component.value, component.ref_range_min, component.ref_range_max);
     const referenceRange = formatReferenceRange(component);
 
-    const handleCardClick = (e: React.MouseEvent) => {
+    const handleCardClick = React.useCallback((e: React.MouseEvent) => {
       // Don't trigger if clicking on action buttons
       const target = e.target as HTMLElement;
       if (target.closest('button')) {
         return;
       }
       onTrendClick?.(component.test_name);
-    };
+    }, [component.test_name]);
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
       // Support Enter and Space keys for accessibility
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         onTrendClick?.(component.test_name);
       }
-    };
+    }, [component.test_name]);
 
     return (
       <Card
@@ -166,35 +208,11 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
 
             {/* Edit/Delete - only show when actions enabled */}
             {showActions && (
-              <Group gap={4}>
-                <Tooltip label="Edit test component">
-                  <ActionIcon
-                    variant="subtle"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit?.(component);
-                    }}
-                    aria-label={`Edit ${component.test_name}`}
-                  >
-                    <IconEdit size={14} />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip label="Delete test component">
-                  <ActionIcon
-                    variant="subtle"
-                    color="red"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete?.(component);
-                    }}
-                    aria-label={`Delete ${component.test_name}`}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                </Tooltip>
-              </Group>
+              <EditDeleteActions
+                component={component}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             )}
           </Group>
 

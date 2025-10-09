@@ -21,7 +21,8 @@ class Settings:  # App Info
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
-    )  # Enable debug by default in development    # Database Configuration
+    )  # Enable debug by default in development    
+    # Database Configuration
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
         (

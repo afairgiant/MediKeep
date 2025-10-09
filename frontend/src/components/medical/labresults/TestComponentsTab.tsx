@@ -148,6 +148,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [trendPanelOpen, setTrendPanelOpen] = useState(false);
   const [selectedTestName, setSelectedTestName] = useState<string | null>(null);
+  const trendClickDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleComponentEdit = useCallback((component: LabTestComponent) => {
     logger.info('test_component_edit_requested', {
@@ -228,15 +229,30 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   }, [loadComponents]);
 
   const handleTrendClick = useCallback((testName: string) => {
-    logger.info('test_component_trend_requested', {
-      message: 'Test component trend view requested',
-      testName,
-      component: 'TestComponentsTab',
-    });
+    // Prevent opening if already opening or open with same test
+    if (trendPanelOpen && selectedTestName === testName) {
+      return;
+    }
 
+    // Clear any pending debounced calls
+    if (trendClickDebounceRef.current) {
+      clearTimeout(trendClickDebounceRef.current);
+      trendClickDebounceRef.current = null;
+    }
+
+    // Immediately update state to ensure responsive UI
     setSelectedTestName(testName);
     setTrendPanelOpen(true);
-  }, []);
+
+    // Log after state update to not block UI
+    requestAnimationFrame(() => {
+      logger.info('test_component_trend_requested', {
+        message: 'Test component trend view requested',
+        testName,
+        component: 'TestComponentsTab',
+      });
+    });
+  }, [trendPanelOpen, selectedTestName]);
 
   // Load components on mount and when labResultId changes
   useEffect(() => {
@@ -362,7 +378,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               onEdit={handleComponentEdit}
               onDelete={handleComponentDelete}
               onTrendClick={handleTrendClick}
-              onError={(error: Error) => handleError(error, 'component')}
+              onError={(error: Error) => handleError(error, 'component_display')}
             />
           </Box>
         </Tabs.Panel>

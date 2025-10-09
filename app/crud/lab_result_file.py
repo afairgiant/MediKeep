@@ -186,6 +186,39 @@ class CRUDLabResultFile(
             .count()
         )
 
+    def count_files_by_lab_results_batch(
+        self, db: Session, *, lab_result_ids: List[int]
+    ) -> Dict[int, int]:
+        """
+        Count files for multiple lab results in a single query.
+        Much more efficient than making N separate count queries.
+
+        Returns a dictionary mapping lab_result_id to file count.
+        """
+        from sqlalchemy import func
+
+        if not lab_result_ids:
+            return {}
+
+        # Single query to get counts for all lab results
+        # GROUP BY lab_result_id and COUNT(*)
+        results = (
+            db.query(
+                LabResultFile.lab_result_id,
+                func.count(LabResultFile.id).label('file_count')
+            )
+            .filter(LabResultFile.lab_result_id.in_(lab_result_ids))
+            .group_by(LabResultFile.lab_result_id)
+            .all()
+        )
+
+        # Convert to dictionary, defaulting to 0 for lab results with no files
+        counts = {lab_result_id: 0 for lab_result_id in lab_result_ids}
+        for lab_result_id, file_count in results:
+            counts[lab_result_id] = file_count
+
+        return counts
+
     def get_files_by_patient(
         self, db: Session, *, patient_id: int, skip: int = 0, limit: int = 100
     ) -> List[LabResultFile]:

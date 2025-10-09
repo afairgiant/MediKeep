@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Group,
   TextInput,
@@ -65,6 +65,42 @@ const MantineFilters = ({
   const { colorScheme } = useMantineColorScheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchWidth, setSearchWidth] = useState('150px');
+
+  // Local search state for immediate UI feedback
+  const [localSearch, setLocalSearch] = useState(filters?.search || '');
+  const searchDebounceRef = useRef(null);
+
+  // Debounced search handler - prevents excessive re-renders during typing
+  const handleSearchChange = useCallback((value) => {
+    setLocalSearch(value);
+
+    // Clear existing timeout
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    // Set new timeout to update filter after 300ms of no typing
+    searchDebounceRef.current = setTimeout(() => {
+      updateFilter('search', value);
+      searchDebounceRef.current = null;
+    }, 300);
+  }, [updateFilter]);
+
+  // Sync local search with filter when filters change externally
+  useEffect(() => {
+    if (filters?.search !== localSearch) {
+      setLocalSearch(filters?.search || '');
+    }
+  }, [filters?.search]);
+
+  // Cleanup debounce timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
 
   // Helper functions for theme-aware colors
   const getDividerColor = () =>
@@ -186,8 +222,8 @@ const MantineFilters = ({
             {showSearch && (
               <TextInput
                 placeholder={searchPlaceholder}
-                value={filters.search || ''}
-                onChange={e => updateFilter('search', e.target.value)}
+                value={localSearch}
+                onChange={e => handleSearchChange(e.target.value)}
                 leftSection={<IconSearch size={16} />}
                 size="sm"
                 style={{ 

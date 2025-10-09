@@ -428,6 +428,37 @@ def get_file_count_by_lab_result(
     return {"lab_result_id": lab_result_id, "file_count": count}
 
 
+@router.post("/stats/batch-counts")
+def get_batch_file_counts(
+    *,
+    db: Session = Depends(deps.get_db),
+    lab_result_ids: List[int],
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Get file counts for multiple lab results in a single request.
+    This is much more efficient than making N separate requests.
+
+    Returns a dictionary mapping lab_result_id to file_count.
+    """
+    if not lab_result_ids:
+        return {}
+
+    # Limit to prevent abuse
+    if len(lab_result_ids) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot request counts for more than 100 lab results at once"
+        )
+
+    # Get counts for all lab results in a single query
+    counts = lab_result_file.count_files_by_lab_results_batch(
+        db=db, lab_result_ids=lab_result_ids
+    )
+
+    return counts
+
+
 @router.post("/batch-operation")
 def batch_file_operation(
     *,
