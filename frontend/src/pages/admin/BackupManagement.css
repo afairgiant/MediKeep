@@ -636,4 +636,365 @@
   background: var(--color-bg-secondary);
 }
 
+/* Tab Navigation Styles */
+.backup-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  border-bottom: 2px solid var(--color-border-light);
+  padding: 0 1rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  bottom: -2px;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+}
+
+.tab-button.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tab-button:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Unsaved changes indicator */
+.unsaved-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 0.75rem;
+}
+
+.unsaved-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-warning);
+  border-radius: 50%;
+  animation: pulse-warning 1.5s ease-in-out infinite;
+  box-shadow: 0 0 4px var(--color-warning);
+  flex-shrink: 0;
+}
+
+.unsaved-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-warning);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 4px var(--color-warning);
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+    box-shadow: 0 0 8px var(--color-warning);
+  }
+}
+
+/* Dark theme tab styles */
+[data-theme='dark'] .backup-tabs {
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .tab-button:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* Retention Settings Styles */
+.retention-settings-card {
+  margin-top: 1.5rem;
+}
+
+.retention-info-card {
+  background-color: rgba(66, 135, 245, 0.05);
+  border: 1px solid rgba(66, 135, 245, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.retention-info-header h3 {
+  color: #4287f5;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.retention-info-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--color-text-primary);
+  list-style-type: disc;
+}
+
+.retention-info-list li {
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.retention-info-list li:last-child {
+  margin-bottom: 0;
+}
+
+.retention-info-list li strong {
+  color: #4287f5;
+  font-weight: 600;
+}
+
+.retention-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.retention-settings-form .setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.retention-settings-form .setting-item:last-child {
+  border-bottom: none;
+}
+
+.retention-settings-form .setting-info {
+  flex: 1;
+  margin-right: 2rem;
+}
+
+.retention-settings-form .setting-title {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.retention-settings-form .setting-description {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.retention-settings-form .setting-control {
+  flex-shrink: 0;
+}
+
+.retention-settings-form .input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-input {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border-light);
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100px;
+  text-align: center;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.input-suffix {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.retention-settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.settings-btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.settings-btn.primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.settings-btn.primary:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.settings-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.settings-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+/* Dark theme retention settings styles */
+[data-theme='dark'] .retention-info-card {
+  background-color: rgba(66, 135, 245, 0.1);
+  border-color: rgba(66, 135, 245, 0.3);
+}
+
+[data-theme='dark'] .retention-settings-form .setting-item {
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .settings-input {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .settings-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+[data-theme='dark'] .retention-settings-actions {
+  border-top-color: var(--color-border);
+}
+
+/* Mobile responsive styles for tabs and settings */
+@media (max-width: 768px) {
+  .backup-tabs {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .tab-button {
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border-light);
+    border-left: 3px solid transparent;
+  }
+
+  .tab-button.active {
+    border-left-color: var(--color-primary);
+    border-bottom-color: var(--color-border-light);
+    background: var(--color-bg-secondary);
+  }
+
+  .retention-settings-form .setting-item {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .retention-settings-form .setting-info {
+    margin-right: 0;
+  }
+
+  .retention-settings-form .setting-control {
+    width: 100%;
+  }
+
+  .retention-settings-form .input-group {
+    justify-content: space-between;
+  }
+
+  .settings-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .backup-tabs {
+    margin-top: 1rem;
+  }
+
+  .tab-button {
+    font-size: 0.9rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .retention-info-card {
+    padding: 1rem;
+  }
+
+  .retention-info-header h3 {
+    font-size: 1rem;
+  }
+
+  .retention-info-list {
+    font-size: 0.875rem;
+  }
+
+  .retention-settings-form .setting-title {
+    font-size: 1rem;
+  }
+
+  .retention-settings-form .setting-description {
+    font-size: 0.875rem;
+  }
+
+  .settings-input {
+    width: 80px;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .input-suffix {
+    font-size: 0.85rem;
+  }
+}
+
 /* Mobile responsive for new compact layout */
