@@ -3,6 +3,10 @@
  */
 
 import logger from '../services/logger';
+import {
+  MEDICATION_TYPES,
+  MEDICATION_TYPE_LABELS,
+} from '../constants/medicationTypes';
 
 // Constants for search functionality
 // Maximum length for search terms to prevent performance issues with large text inputs.
@@ -190,6 +194,14 @@ export const medicalPageConfigs = {
         { value: 'stopped', label: 'Stopped' },
         { value: 'on-hold', label: 'On Hold' },
       ],
+      medicationTypeField: 'medication_type',
+      medicationTypeOptions: [
+        { value: 'all', label: 'All Types' },
+        ...Object.keys(MEDICATION_TYPES).map(key => ({
+          value: MEDICATION_TYPES[key],
+          label: MEDICATION_TYPE_LABELS[MEDICATION_TYPES[key]],
+        })),
+      ],
       categoryField: 'route',
       categoryLabel: 'Routes',
       dateField: 'effective_period_start',
@@ -223,6 +235,7 @@ export const medicalPageConfigs = {
     filterControls: {
       searchPlaceholder: 'Search medications, indications, dosages, tags...',
       title: 'Filter & Sort Medications',
+      showMedicationType: true,
       showCategory: true,
       showDateRange: true,
     },

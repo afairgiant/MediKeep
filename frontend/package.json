@@ -1,5 +1,5 @@
 {
-  "name": "medical-records-frontend",
+  "name": "medikeep-frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

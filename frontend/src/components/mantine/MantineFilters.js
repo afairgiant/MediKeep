@@ -31,6 +31,7 @@ const MantineFilters = ({
   hasActiveFilters,
   statusOptions,
   categoryOptions,
+  medicationTypeOptions,
   dateRangeOptions,
   orderedDateOptions,
   completedDateOptions,
@@ -51,6 +52,7 @@ const MantineFilters = ({
     description,
     showStatus = true,
     showCategory = false,
+    showMedicationType = false,
     showDateRange = false,
     showOrderedDate = false,
     showCompletedDate = false,
@@ -93,6 +95,7 @@ const MantineFilters = ({
   const filterCount = [
     showStatus && statusOptions?.length > 1,
     showCategory && categoryOptions?.length > 1,
+    showMedicationType && medicationTypeOptions?.length > 1,
     showDateRange && dateRangeOptions?.length > 1,
     showOrderedDate && orderedDateOptions?.length > 1,
     showCompletedDate && completedDateOptions?.length > 1,
@@ -243,6 +246,25 @@ const MantineFilters = ({
                     style={{ minWidth: '120px', flex: '0 1 150px' }}
                   />
                 )}
+
+                {/* Medication Type Filter */}
+                {showMedicationType &&
+                  medicationTypeOptions &&
+                  medicationTypeOptions.length > 1 && (
+                    <Select
+                      placeholder="Medication Type"
+                      value={filters.medicationType}
+                      onChange={value =>
+                        updateFilter('medicationType', value || 'all')
+                      }
+                      data={medicationTypeOptions.map(option => ({
+                        value: option.value,
+                        label: option.label,
+                      }))}
+                      clearable={true}
+                      style={{ minWidth: '140px', flex: '0 1 160px' }}
+                    />
+                  )}
 
                 {/* Category Filter */}
                 {showCategory &&

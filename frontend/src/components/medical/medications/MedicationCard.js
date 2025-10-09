@@ -11,6 +11,7 @@ import {
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
+import { MEDICATION_TYPE_LABELS } from '../../../constants/medicationTypes';
 
 const MedicationCard = ({
   medication,
@@ -50,11 +51,18 @@ const MedicationCard = ({
             <Text fw={600} size="lg">
               {medication.medication_name}
             </Text>
-            {medication.dosage && (
-              <Badge variant="light" color="blue" size="md">
-                {medication.dosage}
-              </Badge>
-            )}
+            <Group gap="xs">
+              {medication.dosage && (
+                <Badge variant="light" color="blue" size="md">
+                  {medication.dosage}
+                </Badge>
+              )}
+              {medication.medication_type && medication.medication_type !== 'prescription' && (
+                <Badge variant="light" color="grape" size="sm">
+                  {MEDICATION_TYPE_LABELS[medication.medication_type]}
+                </Badge>
+              )}
+            </Group>
             {medication.tags && medication.tags.length > 0 && (
               <Group gap="xs">
                 <Badge

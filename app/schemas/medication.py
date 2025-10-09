@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Optional, List
 
 from pydantic import BaseModel, root_validator, validator
 
+from app.models.enums import get_all_medication_statuses, get_all_medication_types
 from app.schemas.base_tags import TaggedEntityMixin
 
 if TYPE_CHECKING:
@@ -14,6 +15,7 @@ class MedicationBase(TaggedEntityMixin):
     """Base schema for Medication"""
 
     medication_name: str
+    medication_type: Optional[str] = 'prescription'
     dosage: Optional[str] = None
     frequency: Optional[str] = None
     route: Optional[str] = None
@@ -36,6 +38,7 @@ class MedicationBase(TaggedEntityMixin):
                 "route",
                 "indication",
                 "status",
+                "medication_type",
                 "practitioner_id",
                 "pharmacy_id",
             ]:
@@ -96,13 +99,25 @@ class MedicationBase(TaggedEntityMixin):
             raise ValueError(f"Route must be one of: {', '.join(valid_routes)}")
         return v.lower() if v else None
 
+    @validator("medication_type")
+    def validate_medication_type(cls, v):  # noqa
+        """Validate medication type using enum"""
+        if v is not None:
+            valid_types = get_all_medication_types()
+            if v not in valid_types:
+                raise ValueError(f"Medication type must be one of: {', '.join(valid_types)}")
+            return v
+        return 'prescription'
+
     @validator("status")
     def validate_status(cls, v):  # noqa
-        """Validate medication status"""
-        valid_statuses = ["active", "stopped", "on-hold", "completed", "cancelled"]
-        if v and v.lower() not in valid_statuses:
-            raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
-        return v.lower() if v else None
+        """Validate medication status using enum"""
+        if v is not None:
+            valid_statuses = get_all_medication_statuses()
+            if v.lower() not in valid_statuses:
+                raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+            return v.lower()
+        return v
 
     @validator("effective_period_end")
     def validate_effective_period(cls, v, values):
@@ -130,6 +145,7 @@ class MedicationUpdate(BaseModel):
     """Schema for updating an existing medication"""
 
     medication_name: Optional[str] = None
+    medication_type: Optional[str] = None
     dosage: Optional[str] = None
     frequency: Optional[str] = None
     route: Optional[str] = None
@@ -147,6 +163,7 @@ class MedicationUpdate(BaseModel):
         if isinstance(values, dict):
             for field in [
                 "medication_name",
+                "medication_type",
                 "dosage",
                 "frequency",
                 "route",
@@ -204,10 +221,19 @@ class MedicationUpdate(BaseModel):
             return v.lower()
         return v
 
+    @validator("medication_type")
+    def validate_medication_type(cls, v):
+        if v is not None:
+            valid_types = get_all_medication_types()
+            if v not in valid_types:
+                raise ValueError(f"Medication type must be one of: {', '.join(valid_types)}")
+            return v
+        return v
+
     @validator("status")
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = ["active", "stopped", "on-hold", "completed", "cancelled"]
+            valid_statuses = get_all_medication_statuses()
             if v.lower() not in valid_statuses:
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
             return v.lower()

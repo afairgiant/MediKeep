@@ -17,11 +17,14 @@ export const useFiltering = (data = [], config = {}) => {
     result: 'all',
     type: 'all',
     files: 'all',
+    medicationType: 'all',
     ...config.initialFilters,
   });
 
-  // Search fields configuration
-  const searchFields = config.searchFields || ['name'];
+  // Search fields configuration - memoized to prevent dependency changes
+  const searchFields = useMemo(() => {
+    return config.searchFields || ['name'];
+  }, [config.searchFields]);
 
   // Status options
   const statusOptions = config.statusOptions || [
@@ -79,6 +82,11 @@ export const useFiltering = (data = [], config = {}) => {
   // Files options (for file attachments)
   const filesOptions = config.filesOptions || [
     { value: 'all', label: 'All Records' },
+  ];
+
+  // Medication type options
+  const medicationTypeOptions = config.medicationTypeOptions || [
+    { value: 'all', label: 'All Types' },
   ];
 
   // Ordered date options
@@ -327,6 +335,11 @@ export const useFiltering = (data = [], config = {}) => {
         if (item[config.typeField] !== filters.type) return false;
       }
 
+      // Medication type filter
+      if (filters.medicationType !== 'all' && config.medicationTypeField) {
+        if (item[config.medicationTypeField] !== filters.medicationType) return false;
+      }
+
       // Date range filter
       if (filters.dateRange !== 'all' && config.dateField) {
         if (!matchesDateRange(item[config.dateField], filters.dateRange, item))
@@ -390,6 +403,7 @@ export const useFiltering = (data = [], config = {}) => {
       result: 'all',
       type: 'all',
       files: 'all',
+      medicationType: 'all',
       ...config.initialFilters,
     });
   }, [config.initialFilters]);
@@ -418,6 +432,7 @@ export const useFiltering = (data = [], config = {}) => {
     resultOptions,
     typeOptions,
     filesOptions,
+    medicationTypeOptions,
     totalCount: Array.isArray(data) ? data.length : 0,
     filteredCount: filteredData.length,
   };
