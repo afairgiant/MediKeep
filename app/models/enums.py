@@ -35,6 +35,14 @@ class MedicationStatus(Enum):
     CANCELLED = "cancelled"
 
 
+class MedicationType(Enum):
+    """Types of medications for categorization"""
+    PRESCRIPTION = "prescription"
+    OTC = "otc"
+    SUPPLEMENT = "supplement"
+    HERBAL = "herbal"
+
+
 class AllergyStatus(Enum):
     """Status values for allergies"""
     ACTIVE = "active"
@@ -164,6 +172,11 @@ def get_all_condition_statuses():
 def get_all_medication_statuses():
     """Get all valid medication status values"""
     return get_status_values(MedicationStatus)
+
+
+def get_all_medication_types():
+    """Get all valid medication types"""
+    return get_status_values(MedicationType)
 
 
 def get_all_allergy_statuses():

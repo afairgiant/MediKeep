@@ -3,6 +3,11 @@
  * Defines the structure and validation for each medical form type
  */
 
+import {
+  MEDICATION_TYPES,
+  MEDICATION_TYPE_LABELS,
+} from '../constants/medicationTypes';
+
 // Add tags field configuration that can be used across all forms
 const tagsFieldConfig = {
   name: 'tags',
@@ -217,6 +222,19 @@ export const medicationFormFields = [
     gridColumn: 6,
     minLength: 2,
     maxLength: 255,
+  },
+  {
+    name: 'medication_type',
+    type: 'select',
+    label: 'Medication Type',
+    placeholder: 'Select Type',
+    required: true,
+    description: 'Category of medication',
+    gridColumn: 6,
+    options: Object.keys(MEDICATION_TYPES).map(key => ({
+      value: MEDICATION_TYPES[key],
+      label: MEDICATION_TYPE_LABELS[MEDICATION_TYPES[key]],
+    })),
   },
   {
     name: 'dosage',

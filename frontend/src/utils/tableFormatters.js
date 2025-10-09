@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatDate } from './helpers';
 import { createEntityLinkProps } from './linkNavigation';
+import { MEDICATION_TYPE_LABELS } from '../constants/medicationTypes';
 
 /**
  * Standardized table formatters for medical pages
@@ -121,6 +122,11 @@ export const standardFormatters = {
 
   // Simple text with fallback
   simple: value => value || '-',
+
+  // Medication type - simple text for table readability
+  medicationType: value => {
+    return MEDICATION_TYPE_LABELS[value] || 'Prescription';
+  },
 };
 
 /**
@@ -144,16 +150,17 @@ export const getEntityFormatters = (entityType, practitioners = [], navigate = n
       return {
         ...baseFormatters,
         medication_name: standardFormatters.primaryName,
+        medication_type: standardFormatters.medicationType,
         dosage: standardFormatters.code,
         frequency: standardFormatters.simple,
         route: standardFormatters.setting,
         indication: value => standardFormatters.text(value, 50),
         effective_period_start: standardFormatters.date,
         effective_period_end: standardFormatters.date,
-        practitioner_name: navigate 
+        practitioner_name: navigate
           ? (value, item) => standardFormatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
           : (value, item) => standardFormatters.practitioner(value, item, practitioners),
-        pharmacy_name: navigate 
+        pharmacy_name: navigate
           ? (value, item) => standardFormatters.pharmacyLink(value, item, navigate, getEntityName)
           : (value, item) => standardFormatters.pharmacy(value, item),
       };

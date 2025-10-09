@@ -31,6 +31,7 @@ from .enums import (
     InsuranceType,
     LabResultStatus,
     MedicationStatus,
+    MedicationType,
     ProcedureStatus,
     RelationshipToSelf,
     SeverityLevel,
@@ -44,6 +45,7 @@ from .enums import (
     get_all_insurance_types,
     get_all_lab_result_statuses,
     get_all_medication_statuses,
+    get_all_medication_types,
     get_all_procedure_statuses,
     get_all_relationship_to_self,
     get_all_severity_levels,
@@ -270,6 +272,9 @@ class Medication(Base):
     id = Column(Integer, primary_key=True)
 
     medication_name = Column(String, nullable=False)
+    medication_type = Column(
+        String(20), nullable=False, default='prescription'
+    )  # Use MedicationType enum: prescription, otc, supplement, herbal
     dosage = Column(String, nullable=True)
     frequency = Column(String, nullable=True)
     route = Column(
@@ -309,6 +314,7 @@ class Medication(Base):
     __table_args__ = (
         Index("idx_medications_patient_id", "patient_id"),
         Index("idx_medications_patient_status", "patient_id", "status"),
+        Index("idx_medications_patient_type", "patient_id", "medication_type"),
     )
 
 
