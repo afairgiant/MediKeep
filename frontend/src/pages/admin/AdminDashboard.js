@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,6 +32,7 @@ import {
   ThemeIcon,
   Progress,
   Divider,
+  LoadingOverlay,
 } from '@mantine/core';
 import {
   IconRefresh,
@@ -51,10 +54,11 @@ import {
   IconAlertCircle,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import ChartErrorBoundary from '../../components/shared/ChartErrorBoundary';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { formatDate, formatDateTime } from '../../utils/helpers';
-import { useTheme } from '../../contexts/ThemeContext';
+import useThemeColors from '../../hooks/useThemeColors';
 import './AdminDashboard.css';
 
 // Register Chart.js components
@@ -70,11 +74,28 @@ ChartJS.register(
   ArcElement
 );
 
+// Dashboard Configuration Constants
+const DASHBOARD_CONFIG = {
+  RECENT_ACTIVITY_LIMIT: 15,
+  ANALYTICS_DAYS: 7,
+  REFRESH_INTERVAL: 30000,
+  ACTIVITY_MAX_HEIGHT: 300,
+  DEFAULT_WEEK_LABELS: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  DEFAULT_WEEK_DATA: [0, 0, 0, 0, 0, 0, 0],
+  // Staggered refresh delays to prevent thundering herd
+  REFRESH_STAGGER: {
+    STATS: 0,
+    ACTIVITY: 2000,
+    HEALTH: 4000,
+  },
+};
+
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { theme } = useTheme();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const themeColors = useThemeColors();
 
-  // Dashboard Stats with auto-refresh
+  // Dashboard Stats (no auto-refresh - manual refresh only)
   const {
     data: stats,
     loading: statsLoading,
@@ -85,11 +106,10 @@ const AdminDashboard = () => {
     apiMethodsConfig: {
       load: signal => adminApiService.getDashboardStats(signal),
     },
-    autoRefresh: true,
-    refreshInterval: 30000,
+    autoRefresh: false,
   });
 
-  // Recent Activity
+  // Recent Activity (staggered refresh)
   const {
     data: recentActivity,
     loading: activityLoading,
@@ -98,13 +118,12 @@ const AdminDashboard = () => {
   } = useAdminData({
     entityName: 'Recent Activity',
     apiMethodsConfig: {
-      load: signal => adminApiService.getRecentActivity(15, signal),
+      load: signal => adminApiService.getRecentActivity(DASHBOARD_CONFIG.RECENT_ACTIVITY_LIMIT, signal),
     },
-    autoRefresh: true,
-    refreshInterval: 30000,
+    autoRefresh: false,
   });
 
-  // System Health
+  // System Health (staggered refresh)
   const {
     data: systemHealth,
     loading: healthLoading,
@@ -115,8 +134,7 @@ const AdminDashboard = () => {
     apiMethodsConfig: {
       load: signal => adminApiService.getSystemHealth(signal),
     },
-    autoRefresh: true,
-    refreshInterval: 30000,
+    autoRefresh: false,
   });
 
   // Analytics Data
@@ -128,95 +146,56 @@ const AdminDashboard = () => {
   } = useAdminData({
     entityName: 'Analytics Data',
     apiMethodsConfig: {
-      load: signal => adminApiService.getAnalyticsData(7, signal),
+      load: signal => adminApiService.getAnalyticsData(DASHBOARD_CONFIG.ANALYTICS_DAYS, signal),
     },
   });
 
   const loading =
     statsLoading || activityLoading || healthLoading || analyticsLoading;
 
-  const handleRefreshAll = async () => {
-    await Promise.all([
-      refreshStats(true),
-      refreshActivity(true),
-      refreshHealth(true),
-      refreshAnalytics(true),
-    ]);
-  };
+  // Note: Auto-refresh disabled to reduce log noise and unnecessary API calls
+  // Users can manually refresh using the "Refresh All" button
+
+  const handleRefreshAll = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Stagger the refresh calls slightly to avoid network congestion
+      refreshStats(true);
+      setTimeout(() => refreshActivity(true), 500);
+      setTimeout(() => refreshHealth(true), 1000);
+      setTimeout(() => refreshAnalytics(true), 1500);
+
+      // Wait for staggered requests to complete
+      await new Promise(resolve => setTimeout(resolve, 2500));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refreshStats, refreshActivity, refreshHealth, refreshAnalytics]);
 
   const getHealthStatusColor = status => {
-    // Get CSS variables from the document root
-    const rootStyles = getComputedStyle(document.documentElement);
-
     switch (status?.toLowerCase()) {
       case 'healthy':
-        return (
-          rootStyles.getPropertyValue('--color-success').trim() || '#10b981'
-        );
+        return themeColors.success;
       case 'warning':
-        return (
-          rootStyles.getPropertyValue('--color-warning').trim() || '#f59e0b'
-        );
+        return themeColors.warning;
       case 'error':
       case 'critical':
-        return (
-          rootStyles.getPropertyValue('--color-danger').trim() || '#ef4444'
-        );
+        return themeColors.danger;
       default:
-        return (
-          rootStyles.getPropertyValue('--color-text-secondary').trim() ||
-          '#6b7280'
-        );
+        return themeColors.textSecondary;
     }
   };
 
-  const getActivityIcon = (modelName, action) => {
-    const baseIcons = {
-      User: '👥',
-      Patient: '🏥',
-      LabResult: '🧪',
-      Medication: '💊',
-      Procedure: '🩺',
-      Allergy: '⚠️',
-      Immunization: '💉',
-      Condition: '📋',
-    };
-
-    const actionModifiers = {
-      created: '✨',
-      updated: '📝',
-      deleted: '🗑️',
-      viewed: '👁️',
-      downloaded: '📥',
-    };
-
-    const baseIcon = baseIcons[modelName] || '📄';
-    const actionIcon = actionModifiers[action?.toLowerCase()] || '';
-    return actionIcon ? `${actionIcon} ${baseIcon}` : baseIcon;
-  };
-
-  const createChartData = () => {
-    const rootStyles = getComputedStyle(document.documentElement);
-    const primaryColor =
-      rootStyles.getPropertyValue('--color-primary').trim() || '#3b82f6';
-
+  const chartData = useMemo(() => {
     return {
       activity: {
-        labels: analyticsData?.weekly_activity?.labels || [
-          'Mon',
-          'Tue',
-          'Wed',
-          'Thu',
-          'Fri',
-          'Sat',
-          'Sun',
-        ],
+        labels: analyticsData?.weekly_activity?.labels || DASHBOARD_CONFIG.DEFAULT_WEEK_LABELS,
         datasets: [
           {
             label: 'User Activity',
-            data: analyticsData?.weekly_activity?.data || [0, 0, 0, 0, 0, 0, 0],
-            borderColor: primaryColor,
-            backgroundColor: `${primaryColor}1a`, // Add transparency
+            data: analyticsData?.weekly_activity?.data || DASHBOARD_CONFIG.DEFAULT_WEEK_DATA,
+            borderColor: themeColors.primary,
+            backgroundColor: `${themeColors.primary}1a`,
             tension: 0.4,
           },
         ],
@@ -241,31 +220,22 @@ const AdminDashboard = () => {
               stats?.total_vitals || 0,
             ],
             backgroundColor: [
-              rootStyles.getPropertyValue('--color-primary').trim() ||
-                '#3b82f6',
-              rootStyles.getPropertyValue('--color-success').trim() ||
-                '#10b981',
-              rootStyles.getPropertyValue('--color-warning').trim() ||
-                '#f59e0b',
-              rootStyles.getPropertyValue('--color-danger').trim() || '#ef4444',
-              '#8b5cf6', // Purple - using hardcoded as no CSS variable defined
-              rootStyles.getPropertyValue('--color-info').trim() || '#06b6d4',
+              themeColors.primary,
+              themeColors.success,
+              themeColors.warning,
+              themeColors.danger,
+              themeColors.purple,
+              themeColors.info,
             ],
             borderWidth: 0,
           },
         ],
       },
     };
-  };
+  }, [analyticsData, stats, themeColors]);
 
-  // Chart configuration functions that depend on current theme
-  const createLineChartOptions = () => {
-    const rootStyles = getComputedStyle(document.documentElement);
-    const textColor =
-      rootStyles.getPropertyValue('--color-text-primary').trim() || '#212529';
-    const gridColor =
-      rootStyles.getPropertyValue('--color-border-light').trim() || '#e9ecef';
-
+  // Memoized chart configuration options
+  const lineChartOptions = useMemo(() => {
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -273,31 +243,27 @@ const AdminDashboard = () => {
         legend: {
           display: false,
           labels: {
-            color: textColor,
+            color: themeColors.textPrimary,
           },
         },
       },
       scales: {
         y: {
           beginAtZero: true,
-          title: { display: true, text: 'Activities', color: textColor },
-          ticks: { color: textColor },
-          grid: { color: gridColor },
+          title: { display: true, text: 'Activities', color: themeColors.textPrimary },
+          ticks: { color: themeColors.textPrimary },
+          grid: { color: themeColors.borderLight },
         },
         x: {
-          title: { display: true, text: 'Day of Week', color: textColor },
-          ticks: { color: textColor },
-          grid: { color: gridColor },
+          title: { display: true, text: 'Day of Week', color: themeColors.textPrimary },
+          ticks: { color: themeColors.textPrimary },
+          grid: { color: themeColors.borderLight },
         },
       },
     };
-  };
+  }, [themeColors]);
 
-  const createDoughnutChartOptions = () => {
-    const rootStyles = getComputedStyle(document.documentElement);
-    const textColor =
-      rootStyles.getPropertyValue('--color-text-primary').trim() || '#212529';
-
+  const doughnutChartOptions = useMemo(() => {
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -305,12 +271,12 @@ const AdminDashboard = () => {
         legend: {
           position: 'bottom',
           labels: {
-            color: textColor,
+            color: themeColors.textPrimary,
           },
         },
       },
     };
-  };
+  }, [themeColors]);
 
   if (loading && !stats) {
     return (
@@ -324,8 +290,6 @@ const AdminDashboard = () => {
       </AdminLayout>
     );
   }
-
-  const chartData = createChartData();
 
   return (
     <AdminLayout>
@@ -442,10 +406,12 @@ const AdminDashboard = () => {
                   )}
 
                   <div className="chart-container">
-                    <Line
-                      data={chartData.activity}
-                      options={createLineChartOptions()}
-                    />
+                    <ChartErrorBoundary onReset={refreshAnalytics}>
+                      <Line
+                        data={chartData.activity}
+                        options={lineChartOptions}
+                      />
+                    </ChartErrorBoundary>
                   </div>
                 </Card>
               </Grid.Col>
@@ -464,10 +430,12 @@ const AdminDashboard = () => {
                   </Group>
 
                   <div className="chart-container doughnut">
-                    <Doughnut
-                      data={chartData.distribution}
-                      options={createDoughnutChartOptions()}
-                    />
+                    <ChartErrorBoundary onReset={refreshStats}>
+                      <Doughnut
+                        data={chartData.distribution}
+                        options={doughnutChartOptions}
+                      />
+                    </ChartErrorBoundary>
                   </div>
                 </Card>
               </Grid.Col>
@@ -482,6 +450,7 @@ const AdminDashboard = () => {
                   loading={healthLoading}
                   error={healthError}
                   getHealthStatusColor={getHealthStatusColor}
+                  isRefreshing={isRefreshing}
                 />
               </Grid.Col>
 
@@ -490,7 +459,7 @@ const AdminDashboard = () => {
                   activities={recentActivity || []}
                   loading={activityLoading}
                   error={activityError}
-                  getActivityIcon={getActivityIcon}
+                  isRefreshing={isRefreshing}
                 />
               </Grid.Col>
 
@@ -531,14 +500,24 @@ const StatCard = ({ icon: IconComponent, value, label, change, color }) => (
   </Card>
 );
 
+StatCard.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  label: PropTypes.string.isRequired,
+  change: PropTypes.string,
+  color: PropTypes.string.isRequired,
+};
+
 // Reusable SystemHealthCard Component
 const SystemHealthCard = ({
   systemHealth,
   loading,
   error,
   getHealthStatusColor,
+  isRefreshing = false,
 }) => (
-  <Card shadow="sm" p="lg" withBorder h="100%">
+  <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
+    <LoadingOverlay visible={isRefreshing} />
     <Group justify="space-between" mb="md">
       <Group>
         <ThemeIcon size="lg" variant="light" color="blue">
@@ -608,66 +587,123 @@ const SystemHealthCard = ({
   </Card>
 );
 
+SystemHealthCard.propTypes = {
+  systemHealth: PropTypes.shape({
+    database_status: PropTypes.string,
+    total_records: PropTypes.number,
+    system_uptime: PropTypes.string,
+    last_backup: PropTypes.string,
+  }),
+  loading: PropTypes.bool.isRequired,
+  error: PropTypes.object,
+  getHealthStatusColor: PropTypes.func.isRequired,
+  isRefreshing: PropTypes.bool,
+};
+
 // Reusable ActivityCard Component
-const ActivityCard = ({ activities, loading, error, getActivityIcon }) => (
-  <Card shadow="sm" p="lg" withBorder h="100%">
-    <Group justify="space-between" mb="md">
-      <Group>
-        <ThemeIcon size="lg" variant="light" color="green">
-          <IconActivity size={20} />
-        </ThemeIcon>
-        <div>
-          <Text size="lg" fw={600}>
-            Recent Activity
-          </Text>
-          <Text size="sm" c="dimmed">
-            Latest system events
-          </Text>
-        </div>
+const ActivityCard = ({ activities, loading, error, isRefreshing = false }) => {
+  const getActivityIcon = (modelName, action) => {
+    const iconMap = {
+      User: IconUsers,
+      Patient: IconStethoscope,
+      LabResult: IconFlask,
+      Medication: IconPill,
+      Procedure: IconHeart,
+      Allergy: IconAlertCircle,
+      Immunization: IconShieldCheck,
+      Condition: IconReportAnalytics,
+    };
+
+    const IconComponent = iconMap[modelName] || IconReportAnalytics;
+
+    const colorMap = {
+      created: 'green',
+      updated: 'blue',
+      deleted: 'red',
+      viewed: 'cyan',
+      downloaded: 'violet',
+    };
+
+    const color = colorMap[action?.toLowerCase()] || 'gray';
+
+    return { IconComponent, color };
+  };
+
+  return (
+    <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
+      <LoadingOverlay visible={isRefreshing} />
+      <Group justify="space-between" mb="md">
+        <Group>
+          <ThemeIcon size="lg" variant="light" color="green">
+            <IconActivity size={20} />
+          </ThemeIcon>
+          <div>
+            <Text size="lg" fw={600}>
+              Recent Activity
+            </Text>
+            <Text size="sm" c="dimmed">
+              Latest system events
+            </Text>
+          </div>
+        </Group>
+        <Badge variant="light" color="green">
+          {activities.length} activities
+        </Badge>
       </Group>
-      <Badge variant="light" color="green">
-        {activities.length} activities
-      </Badge>
-    </Group>
 
-    {loading && (
-      <Center py="xl">
-        <Loader size="sm" />
-      </Center>
-    )}
+      {loading && (
+        <Center py="xl">
+          <Loader size="sm" />
+        </Center>
+      )}
 
-    {error && (
-      <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
-        Error loading activity
-      </Alert>
-    )}
+      {error && (
+        <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
+          Error loading activity
+        </Alert>
+      )}
 
-    {!loading && !error && (
-      <Stack gap="sm" mah={300} style={{ overflowY: 'auto' }}>
-        {activities.length > 0 ? (
-          activities.map((activity, index) => (
-            <ActivityItem
-              key={index}
-              activity={activity}
-              icon={getActivityIcon(activity.model_name, activity.action)}
-            />
-          ))
-        ) : (
-          <Center py="xl">
-            <Stack align="center">
-              <ThemeIcon size="xl" variant="light" color="gray">
-                <IconActivity size={24} />
-              </ThemeIcon>
-              <Text c="dimmed" size="sm">
-                No recent activity to display
-              </Text>
-            </Stack>
-          </Center>
-        )}
-      </Stack>
-    )}
-  </Card>
-);
+      {!loading && !error && (
+        <Stack gap="sm" mah={DASHBOARD_CONFIG.ACTIVITY_MAX_HEIGHT} style={{ overflowY: 'auto' }}>
+          {activities.length > 0 ? (
+            activities.map((activity, index) => (
+              <ActivityItem
+                key={index}
+                activity={activity}
+                iconData={getActivityIcon(activity.model_name, activity.action)}
+              />
+            ))
+          ) : (
+            <Center py="xl">
+              <Stack align="center">
+                <ThemeIcon size="xl" variant="light" color="gray">
+                  <IconActivity size={24} />
+                </ThemeIcon>
+                <Text c="dimmed" size="sm">
+                  No recent activity to display
+                </Text>
+              </Stack>
+            </Center>
+          )}
+        </Stack>
+      )}
+    </Card>
+  );
+};
+
+ActivityCard.propTypes = {
+  activities: PropTypes.arrayOf(
+    PropTypes.shape({
+      model_name: PropTypes.string,
+      action: PropTypes.string,
+      description: PropTypes.string,
+      timestamp: PropTypes.string,
+    })
+  ).isRequired,
+  loading: PropTypes.bool.isRequired,
+  error: PropTypes.object,
+  isRefreshing: PropTypes.bool,
+};
 
 // Reusable QuickActionsCard Component
 const QuickActionsCard = () => (
@@ -743,66 +779,96 @@ const HealthMetric = ({ icon: IconComponent, label, value, color }) => (
   </Group>
 );
 
-const ActivityItem = ({ activity, icon }) => (
-  <Paper p="sm" withBorder>
-    <Group justify="space-between">
-      <Group>
-        <Text size="sm">{icon}</Text>
-        <div>
-          <Text size="sm" fw={500} lineClamp={1}>
-            {activity.description}
-          </Text>
-          <Group gap="xs">
-            <Text size="xs" c="dimmed">
-              {formatDateTime(activity.timestamp)}
-            </Text>
-            <Badge size="xs" variant="light" color="gray">
-              {activity.model_name}
-            </Badge>
-            <Badge
-              size="xs"
-              variant="light"
-              color={
-                activity.action === 'deleted'
-                  ? 'red'
-                  : activity.action === 'updated'
-                    ? 'blue'
-                    : activity.action === 'viewed'
-                      ? 'cyan'
-                      : 'green'
-              }
-            >
-              {activity.action || 'created'}
-            </Badge>
-          </Group>
-        </div>
-      </Group>
-    </Group>
-  </Paper>
-);
+HealthMetric.propTypes = {
+  icon: PropTypes.elementType.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  color: PropTypes.string.isRequired,
+};
 
-const ActionButton = ({ href, icon: IconComponent, title, desc, color }) => (
-  <Paper
-    p="md"
-    withBorder
-    style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
-    onClick={() => (window.location.href = href)}
-    className="action-button-hover"
-  >
-    <Stack align="center" gap="xs">
-      <ThemeIcon size="lg" variant="light" color={color}>
-        <IconComponent size={20} />
-      </ThemeIcon>
-      <div style={{ textAlign: 'center' }}>
-        <Text size="sm" fw={600} mb="xs">
-          {title}
-        </Text>
-        <Text size="xs" c="dimmed" lineClamp={2}>
-          {desc}
-        </Text>
-      </div>
-    </Stack>
-  </Paper>
-);
+const ActivityItem = ({ activity, iconData }) => {
+  const { IconComponent, color } = iconData;
+
+  return (
+    <Paper p="sm" withBorder>
+      <Group justify="space-between">
+        <Group>
+          <ThemeIcon size="md" variant="light" color={color}>
+            <IconComponent size={16} />
+          </ThemeIcon>
+          <div>
+            <Text size="sm" fw={500} lineClamp={1}>
+              {activity.description}
+            </Text>
+            <Group gap="xs">
+              <Text size="xs" c="dimmed">
+                {formatDateTime(activity.timestamp)}
+              </Text>
+              <Badge size="xs" variant="light" color="gray">
+                {activity.model_name}
+              </Badge>
+              <Badge size="xs" variant="light" color={color}>
+                {activity.action || 'created'}
+              </Badge>
+            </Group>
+          </div>
+        </Group>
+      </Group>
+    </Paper>
+  );
+};
+
+ActivityItem.propTypes = {
+  activity: PropTypes.shape({
+    model_name: PropTypes.string,
+    action: PropTypes.string,
+    description: PropTypes.string.isRequired,
+    timestamp: PropTypes.string.isRequired,
+  }).isRequired,
+  iconData: PropTypes.shape({
+    IconComponent: PropTypes.elementType.isRequired,
+    color: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
+const ActionButton = ({ href, icon: IconComponent, title, desc, color }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(href);
+  };
+
+  return (
+    <Paper
+      p="md"
+      withBorder
+      style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+      onClick={handleClick}
+      className="action-button-hover"
+    >
+      <Stack align="center" gap="xs">
+        <ThemeIcon size="lg" variant="light" color={color}>
+          <IconComponent size={20} />
+        </ThemeIcon>
+        <div style={{ textAlign: 'center' }}>
+          <Text size="sm" fw={600} mb="xs">
+            {title}
+          </Text>
+          <Text size="xs" c="dimmed" lineClamp={2}>
+            {desc}
+          </Text>
+        </div>
+      </Stack>
+    </Paper>
+  );
+};
+
+ActionButton.propTypes = {
+  href: PropTypes.string.isRequired,
+  icon: PropTypes.elementType.isRequired,
+  title: PropTypes.string.isRequired,
+  desc: PropTypes.string.isRequired,
+  color: PropTypes.string.isRequired,
+};
 
 export default AdminDashboard;

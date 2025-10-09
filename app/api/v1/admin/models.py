@@ -300,6 +300,7 @@ FIELD_DISPLAY_CONFIG = {
         "list_fields": [
             "id",
             "medication_name",
+            "medication_type",
             "dosage",
             "frequency",
             "status",
@@ -309,6 +310,7 @@ FIELD_DISPLAY_CONFIG = {
         "detail_fields": [
             "id",
             "medication_name",
+            "medication_type",
             "dosage",
             "frequency",
             "route",
@@ -1454,6 +1456,17 @@ def update_model_record(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"{model_name} record with id {record_id} not found",
             )
+
+        # Security: Prevent password updates through this endpoint
+        # Passwords should only be updated through dedicated password reset endpoints
+        if model_name == "user":
+            password_fields = ["password", "password_hash", "hashed_password"]
+            for field in password_fields:
+                if field in update_data:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Password cannot be updated through this endpoint. Use the password reset functionality instead.",
+                    )
 
         # Process date and datetime fields using centralized mapping
         update_data = process_field_mappings(update_data, model_name)

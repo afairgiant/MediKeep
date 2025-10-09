@@ -1,6 +1,5 @@
-import logger from '../../services/logger';
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
@@ -8,7 +7,29 @@ import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig'
 import { Loading } from '../../components';
 import { Button } from '../../components/ui';
 import { formatDate } from '../../utils/helpers';
+import logger from '../../services/logger';
+import { IMPORTANT_FIELDS } from '../../constants/modelConstants';
 import './ModelManagement.css';
+
+// Constants
+const PER_PAGE_OPTIONS = [10, 25, 50, 100];
+
+// Utility function for formatting field values
+const formatFieldValue = (value, fieldType) => {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+
+  if (fieldType === 'datetime' || fieldType === 'date') {
+    return formatDate(value);
+  }
+
+  if (typeof value === 'boolean') {
+    return value ? 'Yes' : 'No';
+  }
+
+  return String(value);
+};
 
 const ModelManagement = () => {
   const { modelName } = useParams();
@@ -48,7 +69,11 @@ const ModelManagement = () => {
       setTotalPages(recordsResult.total_pages);
       setTotalRecords(recordsResult.total);
     } catch (err) {
-      logger.error('Error loading model data:', err);
+      logger.error('model_data_load_error', 'Error loading model data', {
+        component: 'ModelManagement',
+        modelName,
+        error: err.message,
+      });
       setError(err.message || 'Failed to load model data');
     } finally {
       setLoading(false);
@@ -61,29 +86,31 @@ const ModelManagement = () => {
     }
   }, [modelName, loadModelData]);
 
-  const handlePageChange = newPage => {
+  const handlePageChange = useCallback((newPage) => {
     setCurrentPage(newPage);
     setSelectedRecords(new Set());
-  };
+  }, []);
 
-  const handlePerPageChange = newPerPage => {
+  const handlePerPageChange = useCallback((newPerPage) => {
     setPerPage(newPerPage);
     setCurrentPage(1);
     setSelectedRecords(new Set());
-  };
+  }, []);
 
-  const handleSelectRecord = recordId => {
-    const newSelected = new Set(selectedRecords);
-    if (newSelected.has(recordId)) {
-      newSelected.delete(recordId);
-    } else {
-      newSelected.add(recordId);
-    }
-    setSelectedRecords(newSelected);
-    setShowBulkActions(newSelected.size > 0);
-  };
+  const handleSelectRecord = useCallback((recordId) => {
+    setSelectedRecords(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(recordId)) {
+        newSelected.delete(recordId);
+      } else {
+        newSelected.add(recordId);
+      }
+      setShowBulkActions(newSelected.size > 0);
+      return newSelected;
+    });
+  }, []);
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedRecords.size === records.length) {
       setSelectedRecords(new Set());
       setShowBulkActions(false);
@@ -92,8 +119,9 @@ const ModelManagement = () => {
       setSelectedRecords(allIds);
       setShowBulkActions(true);
     }
-  };
-  const handleDeleteRecord = async recordId => {
+  }, [selectedRecords.size, records]);
+
+  const handleDeleteRecord = useCallback(async (recordId) => {
     const record = records.find(r => r.id === recordId);
     const confirmationMessage = getDeletionConfirmationMessage(
       modelName,
@@ -106,13 +134,13 @@ const ModelManagement = () => {
 
     try {
       await adminApiService.deleteModelRecord(modelName, recordId);
-      loadModelData(); // Refresh the data
+      loadModelData();
     } catch (err) {
       alert('Failed to delete record: ' + err.message);
     }
-  };
+  }, [modelName, records, loadModelData]);
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = useCallback(async () => {
     const selectedRecordsArray = Array.from(selectedRecords).map(id =>
       records.find(r => r.id === id)
     );
@@ -133,79 +161,41 @@ const ModelManagement = () => {
       );
       setSelectedRecords(new Set());
       setShowBulkActions(false);
-      loadModelData(); // Refresh the data
+      loadModelData();
     } catch (err) {
       alert('Failed to delete records: ' + err.message);
     }
-  };
+  }, [modelName, selectedRecords, records, loadModelData]);
 
-  const formatFieldValue = (value, fieldType) => {
-    if (value === null || value === undefined) {
-      return '-';
-    }
-
-    if (fieldType === 'datetime' || fieldType === 'date') {
-      return formatDate(value);
-    }
-
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-
-    return String(value);
-  };
-  const getDisplayFields = () => {
+  // Memoized display fields calculation
+  const displayFields = useMemo(() => {
     if (!metadata) return [];
 
-    // Show primary key and first few important fields
-    const displayFields = metadata.fields
-      .filter(
-        field =>
-          field.primary_key ||
-          [
-            // User fields
-            'username',
-            'email',
-            'full_name',
-            'role',
-            // Patient fields
-            'first_name',
-            'last_name',
-            'birth_date',
-            // Practitioner fields
-            'name',
-            'specialty',
-            'practice',
-            // Medical record fields
-            'medication_name',
-            'allergen',
-            'diagnosis',
-            'vaccine_name',
-            'test_name',
-            'reason',
-            'name',
-            // Status and date fields
-            'status',
-            'severity',
-            'date',
-            'start_date',
-            'end_date',
-            'onset_date',
-            'duration',
-          ].includes(field.name)
+    const fields = metadata.fields
+      .filter(field =>
+        field.primary_key || IMPORTANT_FIELDS.includes(field.name)
       )
       .slice(0, 5);
 
     // Always include id if not already included
-    if (!displayFields.find(f => f.name === 'id')) {
+    if (!fields.find(f => f.name === 'id')) {
       const idField = metadata.fields.find(f => f.name === 'id');
       if (idField) {
-        displayFields.unshift(idField);
+        fields.unshift(idField);
       }
     }
 
-    return displayFields;
-  };
+    return fields;
+  }, [metadata]);
+
+  const handleNavigateToCreate = useCallback(() => {
+    if (modelName === 'user') {
+      navigate('/admin/create-user');
+    } else {
+      navigate(`/admin/models/${modelName}/create`);
+    }
+  }, [modelName, navigate]);
+
   if (loading) {
     return (
       <AdminLayout>
@@ -230,180 +220,298 @@ const ModelManagement = () => {
     );
   }
 
-  const displayFields = getDisplayFields();
-
   return (
     <AdminLayout>
       <div className="model-management">
-        <div className="model-header">
-          <div className="model-header-top">
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/admin/data-models')}
-              className="back-button"
-            >
-              ← Back to Data Models
-            </Button>
-          </div>
-          
-          <div className="model-header-main">
-            <div className="model-title">
-              <h1>{metadata?.verbose_name_plural || modelName}</h1>
-              <p>{totalRecords} total records</p>
-            </div>
+        <ModelHeader
+          modelName={modelName}
+          metadata={metadata}
+          totalRecords={totalRecords}
+          onNavigateBack={() => navigate('/admin/data-models')}
+          onNavigateToCreate={handleNavigateToCreate}
+        />
 
-            <div className="model-actions">
-            <Button
-              variant="primary"
-              onClick={() => {
-                // For user model, use our specialized admin user creation page
-                if (modelName === 'user') {
-                  navigate('/admin/create-user');
-                } else {
-                  navigate(`/admin/models/${modelName}/create`);
-                }
-              }}
-            >
-              ➕ Add New
-            </Button>
-            </div>
-          </div>
-        </div>
+        <ModelControls
+          perPage={perPage}
+          onPerPageChange={handlePerPageChange}
+        />
 
-        {/* Search and Filters */}
-        <div className="model-controls">
-          <div className="pagination-controls">
-            <select
-              value={perPage}
-              onChange={e => handlePerPageChange(Number(e.target.value))}
-              className="per-page-select"
-            >
-              <option value={10}>10 per page</option>
-              <option value={25}>25 per page</option>
-              <option value={50}>50 per page</option>
-              <option value={100}>100 per page</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Bulk Actions */}
         {showBulkActions && (
-          <div className="bulk-actions">
-            <span>{selectedRecords.size} selected</span>
-            <Button variant="danger" onClick={handleBulkDelete}>
-              🗑️ Delete Selected
-            </Button>
-          </div>
+          <BulkActions
+            selectedCount={selectedRecords.size}
+            onBulkDelete={handleBulkDelete}
+          />
         )}
 
-        {/* Data Table */}
-        <div className="model-table-container">
-          <table className="model-table">
-            <thead>
-              <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedRecords.size === records.length &&
-                      records.length > 0
-                    }
-                    onChange={handleSelectAll}
-                  />
-                </th>
-                {displayFields.map(field => (
-                  <th key={field.name}>
-                    {field.name}
-                    {field.primary_key && (
-                      <span className="pk-indicator">PK</span>
-                    )}
-                  </th>
-                ))}
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map(record => (
-                <tr key={record.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedRecords.has(record.id)}
-                      onChange={() => handleSelectRecord(record.id)}
-                    />
-                  </td>
-                  {displayFields.map(field => (
-                    <td key={field.name}>
-                      {formatFieldValue(record[field.name], field.type)}
-                    </td>
-                  ))}
-                  <td>
-                    <div className="record-actions">
-                      <Button
-                        onClick={() =>
-                          navigate(`/admin/models/${modelName}/${record.id}`)
-                        }
-                        variant="secondary"
-                        size="small"
-                        title="View Details"
-                      >
-                        👁️
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          navigate(
-                            `/admin/models/${modelName}/${record.id}/edit`
-                          )
-                        }
-                        variant="primary"
-                        size="small"
-                        title="Edit"
-                      >
-                        ✏️
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteRecord(record.id)}
-                        variant="danger"
-                        size="small"
-                        title="Delete"
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ModelTable
+          records={records}
+          displayFields={displayFields}
+          selectedRecords={selectedRecords}
+          modelName={modelName}
+          onSelectAll={handleSelectAll}
+          onSelectRecord={handleSelectRecord}
+          onDelete={handleDeleteRecord}
+          navigate={navigate}
+        />
 
-        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="pagination">
-            <Button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              variant="secondary"
-            >
-              ← Previous
-            </Button>
-
-            <span className="pagination-info">
-              Page {currentPage} of {totalPages}
-            </span>
-
-            <Button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              variant="secondary"
-            >
-              Next →
-            </Button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         )}
       </div>
     </AdminLayout>
   );
+};
+
+// Extracted Components with PropTypes
+
+const ModelHeader = ({ modelName, metadata, totalRecords, onNavigateBack, onNavigateToCreate }) => (
+  <div className="model-header">
+    <div className="model-header-top">
+      <Button
+        variant="secondary"
+        onClick={onNavigateBack}
+        className="back-button"
+        aria-label="Back to Data Models"
+      >
+        ← Back to Data Models
+      </Button>
+    </div>
+
+    <div className="model-header-main">
+      <div className="model-title">
+        <h1>{metadata?.verbose_name_plural || modelName}</h1>
+        <p>{totalRecords} total records</p>
+      </div>
+
+      <div className="model-actions">
+        <Button
+          variant="primary"
+          onClick={onNavigateToCreate}
+          aria-label="Add New Record"
+        >
+          + Add New
+        </Button>
+      </div>
+    </div>
+  </div>
+);
+
+ModelHeader.propTypes = {
+  modelName: PropTypes.string.isRequired,
+  metadata: PropTypes.shape({
+    verbose_name_plural: PropTypes.string,
+  }),
+  totalRecords: PropTypes.number.isRequired,
+  onNavigateBack: PropTypes.func.isRequired,
+  onNavigateToCreate: PropTypes.func.isRequired,
+};
+
+const ModelControls = ({ perPage, onPerPageChange }) => (
+  <div className="model-controls">
+    <div className="pagination-controls">
+      <select
+        value={perPage}
+        onChange={e => onPerPageChange(Number(e.target.value))}
+        className="per-page-select"
+        aria-label="Records per page"
+      >
+        {PER_PAGE_OPTIONS.map(option => (
+          <option key={option} value={option}>
+            {option} per page
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+);
+
+ModelControls.propTypes = {
+  perPage: PropTypes.number.isRequired,
+  onPerPageChange: PropTypes.func.isRequired,
+};
+
+const BulkActions = ({ selectedCount, onBulkDelete }) => (
+  <div className="bulk-actions">
+    <span>{selectedCount} selected</span>
+    <Button variant="danger" onClick={onBulkDelete} aria-label="Delete Selected Records">
+      Delete Selected
+    </Button>
+  </div>
+);
+
+BulkActions.propTypes = {
+  selectedCount: PropTypes.number.isRequired,
+  onBulkDelete: PropTypes.func.isRequired,
+};
+
+const ModelTable = ({
+  records,
+  displayFields,
+  selectedRecords,
+  modelName,
+  onSelectAll,
+  onSelectRecord,
+  onDelete,
+  navigate,
+}) => (
+  <div className="model-table-container">
+    <table className="model-table">
+      <thead>
+        <tr>
+          <th>
+            <input
+              type="checkbox"
+              checked={selectedRecords.size === records.length && records.length > 0}
+              onChange={onSelectAll}
+              aria-label="Select all records"
+            />
+          </th>
+          {displayFields.map(field => (
+            <th key={field.name}>
+              {field.name}
+              {field.primary_key && (
+                <span className="pk-indicator" title="Primary Key">PK</span>
+              )}
+            </th>
+          ))}
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {records.map(record => (
+          <TableRow
+            key={record.id}
+            record={record}
+            displayFields={displayFields}
+            isSelected={selectedRecords.has(record.id)}
+            modelName={modelName}
+            onSelect={onSelectRecord}
+            onDelete={onDelete}
+            navigate={navigate}
+          />
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+ModelTable.propTypes = {
+  records: PropTypes.arrayOf(PropTypes.object).isRequired,
+  displayFields: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      type: PropTypes.string,
+      primary_key: PropTypes.bool,
+    })
+  ).isRequired,
+  selectedRecords: PropTypes.instanceOf(Set).isRequired,
+  modelName: PropTypes.string.isRequired,
+  onSelectAll: PropTypes.func.isRequired,
+  onSelectRecord: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  navigate: PropTypes.func.isRequired,
+};
+
+const TableRow = React.memo(({ record, displayFields, isSelected, modelName, onSelect, onDelete, navigate }) => (
+  <tr>
+    <td>
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={() => onSelect(record.id)}
+        aria-label={`Select record ${record.id}`}
+      />
+    </td>
+    {displayFields.map(field => (
+      <td key={field.name}>
+        {formatFieldValue(record[field.name], field.type)}
+      </td>
+    ))}
+    <td>
+      <div className="record-actions">
+        <Button
+          onClick={() => navigate(`/admin/models/${modelName}/${record.id}`)}
+          variant="secondary"
+          size="small"
+          title="View Details"
+          aria-label="View Details"
+        >
+          View
+        </Button>
+        <Button
+          onClick={() => navigate(`/admin/models/${modelName}/${record.id}/edit`)}
+          variant="primary"
+          size="small"
+          title="Edit"
+          aria-label="Edit Record"
+        >
+          Edit
+        </Button>
+        <Button
+          onClick={() => onDelete(record.id)}
+          variant="danger"
+          size="small"
+          title="Delete"
+          aria-label="Delete Record"
+        >
+          Delete
+        </Button>
+      </div>
+    </td>
+  </tr>
+));
+
+TableRow.displayName = 'TableRow';
+
+TableRow.propTypes = {
+  record: PropTypes.object.isRequired,
+  displayFields: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      type: PropTypes.string,
+    })
+  ).isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  modelName: PropTypes.string.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  navigate: PropTypes.func.isRequired,
+};
+
+const Pagination = ({ currentPage, totalPages, onPageChange }) => (
+  <div className="pagination">
+    <Button
+      onClick={() => onPageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+      variant="secondary"
+      aria-label="Previous page"
+    >
+      ← Previous
+    </Button>
+
+    <span className="pagination-info" aria-live="polite">
+      Page {currentPage} of {totalPages}
+    </span>
+
+    <Button
+      onClick={() => onPageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      variant="secondary"
+      aria-label="Next page"
+    >
+      Next →
+    </Button>
+  </div>
+);
+
+Pagination.propTypes = {
+  currentPage: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
 };
 
 export default ModelManagement;
