@@ -7,7 +7,7 @@ import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
-const LabResultCard = ({
+const LabResultCard = React.memo(({
   labResult,
   onEdit,
   onDelete,
@@ -131,6 +131,24 @@ const LabResultCard = ({
     handleError(error);
     return null;
   }
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  // Only re-render if these specific props change
+  return (
+    prevProps.labResult.id === nextProps.labResult.id &&
+    prevProps.labResult.test_name === nextProps.labResult.test_name &&
+    prevProps.labResult.status === nextProps.labResult.status &&
+    prevProps.labResult.labs_result === nextProps.labResult.labs_result &&
+    prevProps.labResult.ordered_date === nextProps.labResult.ordered_date &&
+    prevProps.labResult.completed_date === nextProps.labResult.completed_date &&
+    prevProps.fileCount === nextProps.fileCount &&
+    prevProps.fileCountLoading === nextProps.fileCountLoading &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onView === nextProps.onView
+  );
+});
+
+LabResultCard.displayName = 'LabResultCard';
 
 export default LabResultCard;

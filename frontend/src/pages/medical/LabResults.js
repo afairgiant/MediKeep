@@ -207,8 +207,15 @@ const LabResults = () => {
   // Function to refresh file counts for all lab results
   const refreshFileCount = useCallback(async (labResultId) => {
     try {
+      // Invalidate cache for this lab result
+      delete fileCountCacheRef.current[labResultId];
+
       const files = await apiService.getEntityFiles('lab-result', labResultId);
       const count = Array.isArray(files) ? files.length : 0;
+
+      // Update cache
+      fileCountCacheRef.current[labResultId] = count;
+
       setFileCounts(prev => ({ ...prev, [labResultId]: count }));
     } catch (error) {
       logger.error(`Error refreshing file count for lab result ${labResultId}:`, error);
@@ -234,34 +241,72 @@ const LabResults = () => {
     practitioner_id: '',
   });
 
-  // Load file counts for lab results
+  // Ref to track file count loading abort controllers
+  const fileCountAbortControllersRef = useRef({});
+  const fileCountCacheRef = useRef({}); // Cache file counts to prevent redundant API calls
+
+  // Load file counts for lab results with abort controller and caching
   useEffect(() => {
     const loadFileCountsForLabResults = async () => {
       if (!labResults || labResults.length === 0) return;
 
+      // Abort any pending requests for lab results that are no longer in the list
+      const currentLabResultIds = new Set(labResults.map(lr => lr.id));
+      Object.keys(fileCountAbortControllersRef.current).forEach(id => {
+        if (!currentLabResultIds.has(parseInt(id))) {
+          fileCountAbortControllersRef.current[id]?.abort();
+          delete fileCountAbortControllersRef.current[id];
+        }
+      });
+
+      // Load file counts with batching and caching
       const countPromises = labResults.map(async (labResult) => {
-        // Check if already loaded or loading to prevent duplicate requests
+        // Check cache first
+        if (fileCountCacheRef.current[labResult.id] !== undefined) {
+          setFileCounts(prev => {
+            if (prev[labResult.id] === fileCountCacheRef.current[labResult.id]) return prev;
+            return { ...prev, [labResult.id]: fileCountCacheRef.current[labResult.id] };
+          });
+          return;
+        }
+
+        // Check if already loading to prevent duplicate requests
+        if (fileCountAbortControllersRef.current[labResult.id]) {
+          return; // Already loading
+        }
+
+        // Create abort controller for this request
+        const abortController = new AbortController();
+        fileCountAbortControllersRef.current[labResult.id] = abortController;
+
         setFileCountsLoading(prev => {
-          // IMPORTANT: Only update if value actually changes to prevent infinite loop
-          if (prev[labResult.id] === true) return prev; // Already loading, return same reference
+          if (prev[labResult.id] === true) return prev;
           return { ...prev, [labResult.id]: true };
         });
 
         try {
-          const files = await apiService.getEntityFiles('lab-result', labResult.id);
+          const files = await apiService.getEntityFiles('lab-result', labResult.id, abortController.signal);
           const count = Array.isArray(files) ? files.length : 0;
+
+          // Cache the result
+          fileCountCacheRef.current[labResult.id] = count;
+
           setFileCounts(prev => {
-            // Only update if value changed
             if (prev[labResult.id] === count) return prev;
             return { ...prev, [labResult.id]: count };
           });
         } catch (error) {
+          // Ignore abort errors
+          if (error.name === 'AbortError') return;
+
           logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
           setFileCounts(prev => {
             if (prev[labResult.id] === 0) return prev;
             return { ...prev, [labResult.id]: 0 };
           });
+          fileCountCacheRef.current[labResult.id] = 0;
         } finally {
+          delete fileCountAbortControllersRef.current[labResult.id];
           setFileCountsLoading(prev => {
             if (prev[labResult.id] === false) return prev;
             return { ...prev, [labResult.id]: false };
@@ -273,7 +318,15 @@ const LabResults = () => {
     };
 
     loadFileCountsForLabResults();
-  }, [labResults]); // Remove fileCounts from dependencies
+
+    // Cleanup: abort all pending requests on unmount
+    return () => {
+      Object.values(fileCountAbortControllersRef.current).forEach(controller => {
+        controller?.abort();
+      });
+      fileCountAbortControllersRef.current = {};
+    };
+  }, [labResults]);
 
 
   // Handle URL parameters for direct linking to specific lab results
@@ -295,8 +348,8 @@ const LabResults = () => {
 
   // Note: File management functions removed - now handled by DocumentManager component
 
-  // Modern CRUD handlers using useMedicalData
-  const handleAddLabResult = () => {
+  // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
+  const handleAddLabResult = useCallback(() => {
     resetSubmission(); // Reset submission state
     setEditingLabResult(null);
     setDocumentManagerMethods(null); // Reset document manager methods
@@ -315,9 +368,9 @@ const LabResults = () => {
       tags: [],
     });
     setShowModal(true);
-  };
+  }, [resetSubmission]);
 
-  const handleEditLabResult = async labResult => {
+  const handleEditLabResult = useCallback(async labResult => {
     resetSubmission(); // Reset submission state to prevent modal flash
     setEditingLabResult(labResult);
     setFormData({
@@ -337,9 +390,9 @@ const LabResults = () => {
 
     // Note: File loading is now handled by DocumentManager component
     setShowModal(true);
-  };
+  }, [resetSubmission]);
 
-  const handleViewLabResult = async labResult => {
+  const handleViewLabResult = useCallback(async labResult => {
     setViewingLabResult(labResult);
     setShowViewModal(true);
 
@@ -351,9 +404,9 @@ const LabResults = () => {
     navigate(`${location.pathname}?${searchParams.toString()}`, {
       replace: true,
     });
-  };
+  }, [navigate, location.pathname]);
 
-  const handleCloseViewModal = () => {
+  const handleCloseViewModal = useCallback(() => {
     // Refresh file count for the viewed lab result before closing
     if (viewingLabResult) {
       refreshFileCount(viewingLabResult.id);
@@ -368,9 +421,9 @@ const LabResults = () => {
     navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
       replace: true,
     });
-  };
+  }, [viewingLabResult, refreshFileCount, navigate, location.pathname]);
 
-  const handleLabResultUpdated = async () => {
+  const handleLabResultUpdated = useCallback(async () => {
     // If modal is open, fetch the updated lab result directly
     if (viewingLabResult) {
       try {
@@ -396,9 +449,9 @@ const LabResults = () => {
 
     // Refresh the lab results list
     await refreshData();
-  };
+  }, [viewingLabResult, refreshData]);
 
-  const handleDeleteLabResult = async labResultId => {
+  const handleDeleteLabResult = useCallback(async labResultId => {
     const success = await deleteItem(labResultId);
     // Note: deleteItem already updates local state, no need to refresh all data
     // The useMedicalData hook handles state updates automatically
@@ -415,9 +468,9 @@ const LabResults = () => {
         return updated;
       });
     }
-  };
+  }, [deleteItem]);
 
-  const handleSubmit = async e => {
+  const handleSubmit = useCallback(async e => {
     e.preventDefault();
 
     // Basic validation first
@@ -515,14 +568,30 @@ const LabResults = () => {
     } catch (error) {
       handleSubmissionFailure(error, 'form');
     }
-  };
+  }, [
+    formData,
+    currentPatient,
+    canSubmit,
+    editingLabResult,
+    updateItem,
+    createItem,
+    documentManagerMethods,
+    startSubmission,
+    setError,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    refreshFileCount,
+    needsRefreshAfterSubmissionRef
+  ]);
 
-  const handleInputChange = e => {
+  const handleInputChange = useCallback(e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     // Prevent closing during upload
     if (isBlocking) {
       return;
@@ -545,7 +614,7 @@ const LabResults = () => {
       notes: '',
       practitioner_id: '',
     });
-  };
+  }, [isBlocking, resetSubmission]);
 
   // File operations for view modal
   // Note: File operations now handled by DocumentManager component
