@@ -732,6 +732,7 @@ const Medication = () => {
           onEdit={handleEditMedication}
           navigate={navigate}
           onError={setError}
+          practitioners={practitioners}
         />
       </Stack>
     </Container>

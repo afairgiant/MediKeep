@@ -9,26 +9,24 @@ import {
   Grid,
   TextInput,
   Select,
-  Textarea,
-  NumberInput,
   Text,
   Title,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
   IconInfoCircle,
-  IconStethoscope,
-  IconNotes,
+  IconPill,
   IconFileText,
+  IconNotes,
 } from '@tabler/icons-react';
-import { visitFormFields } from '../../utils/medicalFormFields';
+import { medicationFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
 
-const MantineVisitForm = ({
+const MantineMedicationForm = ({
   isOpen,
   onClose,
   title,
@@ -36,15 +34,13 @@ const MantineVisitForm = ({
   onInputChange,
   onSubmit,
   practitioners = [],
-  conditionsOptions = [],
-  conditionsLoading = false,
-  editingVisit = null,
+  pharmacies = [],
+  editingMedication = null,
   isLoading = false,
-  statusMessage,
   children,
 }) => {
   // Tab state management
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form handlers
@@ -55,7 +51,7 @@ const MantineVisitForm = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('info');
+      setActiveTab('basic');
     }
     if (!isOpen) {
       setIsSubmitting(false);
@@ -68,10 +64,10 @@ const MantineVisitForm = ({
     label: `Dr. ${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`,
   }));
 
-  // Convert conditions to options
-  const conditionOptions = conditionsOptions.map(cond => ({
-    value: cond.id.toString(),
-    label: cond.diagnosis,
+  // Convert pharmacies to options
+  const pharmacyOptions = pharmacies.map(pharmacy => ({
+    value: String(pharmacy.id),
+    label: pharmacy.name || pharmacy.brand || 'Pharmacy',
   }));
 
   // Handle form submission
@@ -83,7 +79,7 @@ const MantineVisitForm = ({
       await onSubmit(e);
       setIsSubmitting(false);
     } catch (error) {
-      logger.error('Error in visit form submission:', error);
+      logger.error('Error in medication form submission:', error);
       setIsSubmitting(false);
     }
   };
@@ -91,7 +87,7 @@ const MantineVisitForm = ({
   // Render a single field
   const renderField = (field) => {
     if (field.type === 'divider') {
-      return null; // Skip dividers in tabbed layout
+      return null;
     }
 
     const commonProps = {
@@ -107,8 +103,8 @@ const MantineVisitForm = ({
     let options = field.options;
     if (field.dynamicOptions === 'practitioners') {
       options = practitionerOptions;
-    } else if (field.dynamicOptions === 'conditions') {
-      options = conditionOptions;
+    } else if (field.dynamicOptions === 'pharmacies') {
+      options = pharmacyOptions;
     }
 
     switch (field.type) {
@@ -119,6 +115,7 @@ const MantineVisitForm = ({
             value={formData[field.name] || ''}
             onChange={handleTextInputChange(field.name)}
             maxLength={field.maxLength}
+            minLength={field.minLength}
           />
         );
 
@@ -147,30 +144,6 @@ const MantineVisitForm = ({
               onInputChange({ target: { name: field.name, value: dateString } });
             }}
             valueFormat="YYYY-MM-DD"
-            maxDate={field.maxDate ? field.maxDate() : undefined}
-          />
-        );
-
-      case 'number':
-        return (
-          <NumberInput
-            {...commonProps}
-            value={formData[field.name] || ''}
-            onChange={(value) => onInputChange({ target: { name: field.name, value } })}
-            min={field.min}
-            max={field.max}
-            step={field.step}
-          />
-        );
-
-      case 'textarea':
-        return (
-          <Textarea
-            {...commonProps}
-            value={formData[field.name] || ''}
-            onChange={handleTextInputChange(field.name)}
-            minRows={field.minRows || 3}
-            maxRows={field.maxRows || 6}
           />
         );
 
@@ -206,15 +179,13 @@ const MantineVisitForm = ({
   };
 
   // Group fields by section for tabs
-  const infoFields = visitFormFields.filter(f =>
-    ['reason', 'date', 'practitioner_id', 'visit_type', 'priority', 'condition_id', 'chief_complaint', 'duration_minutes', 'location', 'tags'].includes(f.name)
+  const basicFields = medicationFormFields.filter(f =>
+    ['medication_name', 'medication_type', 'dosage', 'frequency', 'route', 'indication'].includes(f.name)
   );
 
-  const clinicalFields = visitFormFields.filter(f =>
-    ['diagnosis', 'treatment_plan', 'follow_up_instructions'].includes(f.name)
+  const detailsFields = medicationFormFields.filter(f =>
+    ['status', 'effective_period_start', 'effective_period_end', 'practitioner_id', 'pharmacy_id', 'tags'].includes(f.name)
   );
-
-  const notesField = visitFormFields.filter(f => f.name === 'notes');
 
   return (
     <Modal
@@ -231,20 +202,20 @@ const MantineVisitForm = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message="Saving visit..." />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message="Saving medication..." />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="info" leftSection={<IconInfoCircle size={16} />}>
-                Visit Info
+              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+                Basic Info
               </Tabs.Tab>
-              <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-                Clinical
+              <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
+                Details
               </Tabs.Tab>
-              {editingVisit && (
+              {editingMedication && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                   Documents
                 </Tabs.Tab>
@@ -254,11 +225,11 @@ const MantineVisitForm = ({
               </Tabs.Tab>
             </Tabs.List>
 
-            {/* Visit Info Tab */}
-            <Tabs.Panel value="info">
+            {/* Basic Info Tab */}
+            <Tabs.Panel value="basic">
               <Box mt="md">
                 <Grid>
-                  {infoFields.map(field => (
+                  {basicFields.map(field => (
                     <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
                       {renderField(field)}
                     </Grid.Col>
@@ -267,24 +238,28 @@ const MantineVisitForm = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Clinical Tab */}
-            <Tabs.Panel value="clinical">
+            {/* Details Tab */}
+            <Tabs.Panel value="details">
               <Box mt="md">
-                <Stack gap="md">
-                  {clinicalFields.map(field => renderField(field))}
-                </Stack>
+                <Grid>
+                  {detailsFields.map(field => (
+                    <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
+                      {renderField(field)}
+                    </Grid.Col>
+                  ))}
+                </Grid>
               </Box>
             </Tabs.Panel>
 
             {/* Documents Tab */}
-            {editingVisit && (
+            {editingMedication && (
               <Tabs.Panel value="documents">
                 <Box mt="md">
                   <Stack gap="md">
                     <Title order={4}>Attached Documents</Title>
                     <DocumentManagerWithProgress
-                      entityType="visit"
-                      entityId={editingVisit.id}
+                      entityType="medication"
+                      entityId={editingMedication.id}
                       mode="edit"
                       config={{
                         acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
@@ -292,7 +267,7 @@ const MantineVisitForm = ({
                         maxFiles: 10
                       }}
                       onError={(error) => {
-                        logger.error('Document manager error in visit form:', error);
+                        logger.error('Document manager error in medication form:', error);
                       }}
                       showProgressModal={true}
                     />
@@ -304,7 +279,9 @@ const MantineVisitForm = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                {notesField.map(field => renderField(field))}
+                <Text size="sm" c="dimmed">
+                  Additional notes and information about this medication can be added here in future updates.
+                </Text>
               </Box>
             </Tabs.Panel>
           </Tabs>
@@ -318,7 +295,7 @@ const MantineVisitForm = ({
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
-              {editingVisit ? 'Update Visit' : 'Add Visit'}
+              {editingMedication ? 'Update Medication' : 'Add Medication'}
             </Button>
           </Group>
         </Stack>
@@ -327,4 +304,4 @@ const MantineVisitForm = ({
   );
 };
 
-export default MantineVisitForm;
+export default MantineMedicationForm;

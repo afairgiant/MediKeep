@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   Stack,
@@ -11,7 +11,16 @@ import {
   Divider,
   Grid,
   Badge,
+  Tabs,
+  Box,
+  SimpleGrid,
 } from '@mantine/core';
+import {
+  IconInfoCircle,
+  IconStethoscope,
+  IconNotes,
+  IconFileText,
+} from '@tabler/icons-react';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
@@ -29,6 +38,16 @@ const VisitViewModal = ({
   isBlocking,
   onError
 }) => {
+  // Tab state management
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when modal opens with new visit
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, visit?.id]);
+
   const handleError = (error, context) => {
     logger.error('visit_view_modal_error', {
       message: `Error in VisitViewModal: ${context}`,
@@ -36,7 +55,7 @@ const VisitViewModal = ({
       error: error.message,
       component: 'VisitViewModal',
     });
-    
+
     if (onError) {
       onError(error);
     }
@@ -55,7 +74,7 @@ const VisitViewModal = ({
       failedCount,
       component: 'VisitViewModal',
     });
-    
+
     if (onFileUploadComplete) {
       onFileUploadComplete(success, completedCount, failedCount);
     }
@@ -120,33 +139,7 @@ const VisitViewModal = ({
       <Modal
         opened={isOpen}
         onClose={() => !isBlocking && onClose()}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              Visit Details
-            </Text>
-            <Group gap="xs">
-              {visit.visit_type && (
-                <Badge
-                  color={getVisitTypeColor(visit.visit_type)}
-                  variant="light"
-                  size="sm"
-                >
-                  {visit.visit_type}
-                </Badge>
-              )}
-              {visit.priority && (
-                <Badge
-                  color={getPriorityColor(visit.priority)}
-                  variant="filled"
-                  size="sm"
-                >
-                  {visit.priority}
-                </Badge>
-              )}
-            </Group>
-          </Group>
-        }
+        title={`Visit - ${formatDate(visit.date)}`}
         size="xl"
         centered
         zIndex={2000}
@@ -157,118 +150,152 @@ const VisitViewModal = ({
           }
         }}
       >
-        <Stack gap="md">
+        <Stack gap="lg">
           {/* Header Card */}
-          <Card withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
-            <Group justify="space-between" align="flex-start">
-              <Stack gap="xs" style={{ flex: 1 }}>
-                <Title order={3}>
+          <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+            <Group justify="space-between" align="center">
+              <div>
+                <Title order={3} mb="xs">
                   {visit.reason || 'General Visit'}
                 </Title>
-                <Text size="sm" c="dimmed">
-                  {formatDate(visit.date)}
-                </Text>
-              </Stack>
+                <Group gap="xs">
+                  {visit.visit_type && (
+                    <Badge
+                      color={getVisitTypeColor(visit.visit_type)}
+                      variant="light"
+                      size="sm"
+                    >
+                      {visit.visit_type}
+                    </Badge>
+                  )}
+                  {visit.priority && (
+                    <Badge
+                      color={getPriorityColor(visit.priority)}
+                      variant="filled"
+                      size="sm"
+                    >
+                      {visit.priority}
+                    </Badge>
+                  )}
+                </Group>
+              </div>
             </Group>
-          </Card>
+          </Paper>
 
-          {/* Visit Information Grid */}
-          <Grid>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Card withBorder p="md" h="100%">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    VISIT INFORMATION
-                  </Text>
-                  <Divider />
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Reason:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.reason ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.reason || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Visit Type:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.visit_type ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.visit_type || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Priority:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.priority ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.priority || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Location:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.location ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.location || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Duration:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.duration_minutes ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.duration_minutes
-                        ? `${visit.duration_minutes} minutes`
-                        : 'Not specified'}
-                    </Text>
-                  </Group>
+          {/* Tabbed Content */}
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+                Visit Info
+              </Tabs.Tab>
+              <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+                Clinical
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                Notes
+              </Tabs.Tab>
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                Documents
+              </Tabs.Tab>
+            </Tabs.List>
+
+            {/* Visit Info Tab */}
+            <Tabs.Panel value="overview">
+              <Box mt="md">
+                <Stack gap="lg">
+                  <div>
+                    <Title order={4} mb="sm">Visit Information</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Date</Text>
+                        <Text>{formatDate(visit.date)}</Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Reason</Text>
+                        <Text c={visit.reason ? 'inherit' : 'dimmed'}>
+                          {visit.reason || 'Not specified'}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Visit Type</Text>
+                        <Text c={visit.visit_type ? 'inherit' : 'dimmed'}>
+                          {visit.visit_type || 'Not specified'}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Priority</Text>
+                        <Text c={visit.priority ? 'inherit' : 'dimmed'}>
+                          {visit.priority || 'Not specified'}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Location</Text>
+                        <Text c={visit.location ? 'inherit' : 'dimmed'}>
+                          {visit.location || 'Not specified'}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Duration</Text>
+                        <Text c={visit.duration_minutes ? 'inherit' : 'dimmed'}>
+                          {visit.duration_minutes
+                            ? `${visit.duration_minutes} minutes`
+                            : 'Not specified'}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
+                  </div>
+
+                  {/* Tags Section */}
+                  {visit.tags && visit.tags.length > 0 && (
+                    <div>
+                      <Title order={4} mb="sm">Tags</Title>
+                      <Group gap="xs">
+                        {visit.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="light"
+                            color="blue"
+                            size="sm"
+                            radius="md"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </Group>
+                    </div>
+                  )}
                 </Stack>
-              </Card>
-            </Grid.Col>
+              </Box>
+            </Tabs.Panel>
 
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Card withBorder p="md" h="100%">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    CLINICAL DETAILS
-                  </Text>
-                  <Divider />
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Practitioner:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.practitioner_id ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.practitioner_id
-                        ? getPractitionerDisplay(visit.practitioner_id)
-                        : 'Not specified'}
-                    </Text>
-                  </Group>
+            {/* Clinical Details Tab */}
+            <Tabs.Panel value="clinical">
+              <Box mt="md">
+                <Stack gap="lg">
+                  <div>
+                    <Title order={4} mb="sm">Practitioner</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Doctor</Text>
+                        <Text c={visit.practitioner_id ? 'inherit' : 'dimmed'}>
+                          {visit.practitioner_id
+                            ? getPractitionerDisplay(visit.practitioner_id)
+                            : 'Not specified'}
+                        </Text>
+                      </Stack>
+                      {practitioner?.specialty && (
+                        <Stack gap="xs">
+                          <Text fw={500} size="sm" c="dimmed">Specialty</Text>
+                          <Text>{practitioner.specialty}</Text>
+                        </Stack>
+                      )}
+                    </SimpleGrid>
+                  </div>
+
                   {condition && (
-                    <Group>
-                      <Text size="sm" fw={500} w={80}>
-                        Condition:
-                      </Text>
+                    <div>
+                      <Title order={4} mb="sm">Related Condition</Title>
                       <Text
-                        size="sm"
                         c="blue"
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => navigateToEntity('condition', condition.id, navigate)}
@@ -276,154 +303,101 @@ const VisitViewModal = ({
                       >
                         {condition.diagnosis}
                       </Text>
-                    </Group>
+                    </div>
                   )}
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Practice:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={practitioner?.specialty ? 'inherit' : 'dimmed'}
-                    >
-                      {practitioner?.specialty || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Chief Complaint:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.chief_complaint ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.chief_complaint || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Diagnosis:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={visit.diagnosis ? 'inherit' : 'dimmed'}
-                    >
-                      {visit.diagnosis || 'Not specified'}
-                    </Text>
-                  </Group>
+
+                  <div>
+                    <Title order={4} mb="sm">Clinical Information</Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Chief Complaint</Text>
+                        <Text c={visit.chief_complaint ? 'inherit' : 'dimmed'}>
+                          {visit.chief_complaint || 'Not specified'}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Diagnosis</Text>
+                        <Text c={visit.diagnosis ? 'inherit' : 'dimmed'}>
+                          {visit.diagnosis || 'Not specified'}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
+                  </div>
                 </Stack>
-              </Card>
-            </Grid.Col>
-          </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Treatment Plan Section */}
-          {visit.treatment_plan && (
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  TREATMENT PLAN
-                </Text>
-                <Divider />
-                <Text
-                  size="sm"
-                  style={{ whiteSpace: 'pre-wrap' }}
-                  c={visit.treatment_plan ? 'inherit' : 'dimmed'}
-                >
-                  {visit.treatment_plan || 'No treatment plan available'}
-                </Text>
-              </Stack>
-            </Card>
-          )}
+            {/* Notes Tab */}
+            <Tabs.Panel value="notes">
+              <Box mt="md">
+                <Stack gap="lg">
+                  {/* Treatment Plan */}
+                  {visit.treatment_plan && (
+                    <div>
+                      <Title order={4} mb="sm">Treatment Plan</Title>
+                      <Paper withBorder p="sm" bg="gray.1">
+                        <Text style={{ whiteSpace: 'pre-wrap' }}>
+                          {visit.treatment_plan}
+                        </Text>
+                      </Paper>
+                    </div>
+                  )}
 
-          {/* Follow-up Instructions Section */}
-          {visit.follow_up_instructions && (
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  FOLLOW-UP INSTRUCTIONS
-                </Text>
-                <Divider />
-                <Text
-                  size="sm"
-                  style={{ whiteSpace: 'pre-wrap' }}
-                  c={visit.follow_up_instructions ? 'inherit' : 'dimmed'}
-                >
-                  {visit.follow_up_instructions || 'No follow-up instructions available'}
-                </Text>
-              </Stack>
-            </Card>
-          )}
+                  {/* Follow-up Instructions */}
+                  {visit.follow_up_instructions && (
+                    <div>
+                      <Title order={4} mb="sm">Follow-up Instructions</Title>
+                      <Paper withBorder p="sm" bg="gray.1">
+                        <Text style={{ whiteSpace: 'pre-wrap' }}>
+                          {visit.follow_up_instructions}
+                        </Text>
+                      </Paper>
+                    </div>
+                  )}
 
-          {/* Additional Notes Section */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                ADDITIONAL NOTES
-              </Text>
-              <Divider />
-              <Text 
-                size="sm" 
-                style={{ whiteSpace: 'pre-wrap' }}
-                c={visit.notes ? 'inherit' : 'dimmed'}
-              >
-                {visit.notes || 'No notes available'}
-              </Text>
-            </Stack>
-          </Card>
+                  {/* Additional Notes */}
+                  <div>
+                    <Title order={4} mb="sm">Additional Notes</Title>
+                    <Paper withBorder p="sm" bg="gray.1">
+                      <Text
+                        style={{ whiteSpace: 'pre-wrap' }}
+                        c={visit.notes ? 'inherit' : 'dimmed'}
+                      >
+                        {visit.notes || 'No notes available'}
+                      </Text>
+                    </Paper>
+                  </div>
+                </Stack>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Tags Section */}
-          {visit.tags && visit.tags.length > 0 && (
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  TAGS
-                </Text>
-                <Divider />
-                <Group gap="xs">
-                  {visit.tags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="light"
-                      color="blue"
-                      size="sm"
-                      radius="md"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </Group>
-              </Stack>
-            </Card>
-          )}
-
-          {/* Document Management Section */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                ATTACHED DOCUMENTS
-              </Text>
-              <Divider />
-              <DocumentManagerWithProgress
-                entityType="visit"
-                entityId={visit.id}
-                mode="view"
-                config={{
-                  acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                  maxSize: 10 * 1024 * 1024, // 10MB
-                  maxFiles: 10
-                }}
-                onUploadComplete={handleDocumentUploadComplete}
-                onError={handleDocumentError}
-                showProgressModal={true}
-              />
-            </Stack>
-          </Card>
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <Stack gap="md">
+                  <Title order={4}>Attached Documents</Title>
+                  <DocumentManagerWithProgress
+                    entityType="visit"
+                    entityId={visit.id}
+                    mode="view"
+                    config={{
+                      acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
+                      maxSize: 10 * 1024 * 1024, // 10MB
+                      maxFiles: 10
+                    }}
+                    onUploadComplete={handleDocumentUploadComplete}
+                    onError={handleDocumentError}
+                    showProgressModal={true}
+                  />
+                </Stack>
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
 
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button
-              variant="filled"
-              size="xs"
+              variant="light"
               onClick={() => {
                 onClose();
                 // Small delay to ensure view modal is closed before opening edit modal
@@ -434,7 +408,7 @@ const VisitViewModal = ({
             >
               Edit Visit
             </Button>
-            <Button variant="filled" size="xs" onClick={onClose}>
+            <Button variant="filled" onClick={onClose}>
               Close
             </Button>
           </Group>

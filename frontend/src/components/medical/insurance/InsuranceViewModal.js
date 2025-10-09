@@ -1,6 +1,6 @@
 import logger from '../../../services/logger';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   Title,
@@ -13,23 +13,37 @@ import {
   Divider,
   ActionIcon,
   Card,
+  Tabs,
+  Box,
+  SimpleGrid,
+  Paper,
 } from '@mantine/core';
-import { IconEdit, IconPrinter, IconStar } from '@tabler/icons-react';
+import { IconEdit, IconPrinter, IconStar, IconInfoCircle, IconShield, IconPhone, IconFileText } from '@tabler/icons-react';
 import { formatDate } from '../../../utils/helpers';
 import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatFieldLabel, formatFieldValue } from '../../../utils/fieldFormatters';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 
-const InsuranceViewModal = ({ 
-  isOpen, 
-  onClose, 
-  insurance, 
-  onEdit, 
-  onPrint, 
+const InsuranceViewModal = ({
+  isOpen,
+  onClose,
+  insurance,
+  onEdit,
+  onPrint,
   onSetPrimary,
   onFileUploadComplete
 }) => {
+  // Tab state management
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when modal opens with new insurance
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, insurance?.id]);
+
   if (!insurance) return null;
 
   // Get type-specific styling
@@ -55,45 +69,37 @@ const InsuranceViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      zIndex={2000}
+      title={`${insurance.company_name} - Insurance Details`}
+      size="xl"
       centered
+      zIndex={2000}
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
           overflowY: 'auto'
         }
       }}
-      title={
-        <Group position="apart" style={{ width: '100%' }}>
-          <Group>
-            <Title order={3}>Insurance Details</Title>
-            <StatusBadge status={insurance.status} />
-          </Group>
-        </Group>
-      }
-      size="lg"
-      styles={{
-        body: { padding: '1.5rem' },
-        header: { paddingBottom: '1rem' },
-      }}
     >
-      <Stack spacing="lg">
-        {/* Header Section */}
-        <Card withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
-          <Group position="apart" align="flex-start">
-            <Stack spacing={8}>
-              <Group>
-                <Title order={2} color={typeColor}>
+      <Stack gap="lg">
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Group mb="xs">
+                <Title order={3} color={typeColor}>
                   {insurance.company_name}
                 </Title>
-                <Badge 
-                  size="lg" 
-                  variant="light" 
+                <Badge
+                  size="lg"
+                  variant="light"
                   color={typeColor}
                   style={{ textTransform: 'capitalize' }}
                 >
                   {insurance.insurance_type} Insurance
                 </Badge>
+              </Group>
+              <Group gap="xs">
+                <StatusBadge status={insurance.status} />
                 {insurance.insurance_type === 'medical' && insurance.is_primary && (
                   <Badge size="sm" variant="filled" color="yellow" leftSection={<IconStar size={12} />}>
                     Primary
@@ -101,162 +107,264 @@ const InsuranceViewModal = ({
                 )}
               </Group>
               {insurance.plan_name && (
-                <Text size="sm" color="dimmed">
+                <Text size="sm" c="dimmed" mt="xs">
                   Plan: {insurance.plan_name}
                 </Text>
               )}
-              {insurance.employer_group && (
-                <Text size="sm" color="dimmed">
-                  Group: {insurance.employer_group}
-                </Text>
-              )}
-            </Stack>
+            </div>
           </Group>
-        </Card>
+        </Paper>
 
-        {/* Basic Information */}
-        <div>
-          <Title order={4} mb="sm">Member Information</Title>
-          <Grid>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Text size="sm" weight={500} color="dimmed">Member Name</Text>
-              <Text>{insurance.member_name}</Text>
-            </Grid.Col>
-            {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name ? (
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text size="sm" weight={500} color="dimmed">Policy Holder</Text>
-                <Text>{insurance.policy_holder_name}</Text>
-              </Grid.Col>
-            ) : (
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text size="sm" weight={500} color="dimmed">Policy Holder</Text>
-                <Text color="dimmed">Same as member</Text>
-              </Grid.Col>
-            )}
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Text size="sm" weight={500} color="dimmed">Member ID</Text>
-              <Text>{insurance.member_id}</Text>
-            </Grid.Col>
-            {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name && (
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text size="sm" weight={500} color="dimmed">Relationship</Text>
-                <Text style={{ textTransform: 'capitalize' }}>
-                  {insurance.relationship_to_holder || 'Self'}
-                </Text>
-              </Grid.Col>
-            )}
-            {insurance.group_number && (
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text size="sm" weight={500} color="dimmed">Group Number</Text>
-                <Text>{insurance.group_number}</Text>
-              </Grid.Col>
-            )}
-            {insurance.employer_group && (
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Text size="sm" weight={500} color="dimmed">Employer/Group Sponsor</Text>
-                <Text>{insurance.employer_group}</Text>
-              </Grid.Col>
-            )}
-          </Grid>
-        </div>
+        {/* Tabbed Content */}
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+              Overview
+            </Tabs.Tab>
+            <Tabs.Tab value="coverage" leftSection={<IconShield size={16} />}>
+              Coverage
+            </Tabs.Tab>
+            <Tabs.Tab value="contact" leftSection={<IconPhone size={16} />}>
+              Contact
+            </Tabs.Tab>
+            <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              Documents
+            </Tabs.Tab>
+          </Tabs.List>
 
-        {/* Coverage Period */}
-        <div>
-          <Title order={4} mb="sm">Coverage Period</Title>
-          <Grid>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Text size="sm" weight={500} color="dimmed">Effective Date</Text>
-              <Text>{formatDate(insurance.effective_date)}</Text>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Text size="sm" weight={500} color="dimmed">Expiration Date</Text>
-              <Text>
-                {insurance.expiration_date ? formatDate(insurance.expiration_date) : 'Ongoing'}
-              </Text>
-            </Grid.Col>
-          </Grid>
-        </div>
+          {/* Overview Tab */}
+          <Tabs.Panel value="overview">
+            <Box mt="md">
+              <Stack gap="lg">
+                {/* Member Information Section */}
+                <div>
+                  <Title order={4} mb="sm">Member Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Member Name</Text>
+                      <Text>{insurance.member_name}</Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Policy Holder</Text>
+                      <Text c={insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name ? 'inherit' : 'dimmed'}>
+                        {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name
+                          ? insurance.policy_holder_name
+                          : 'Same as member'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Member ID</Text>
+                      <Text>{insurance.member_id}</Text>
+                    </Stack>
+                    {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name && (
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Relationship</Text>
+                        <Text style={{ textTransform: 'capitalize' }}>
+                          {insurance.relationship_to_holder || 'Self'}
+                        </Text>
+                      </Stack>
+                    )}
+                    {insurance.group_number && (
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Group Number</Text>
+                        <Text>{insurance.group_number}</Text>
+                      </Stack>
+                    )}
+                    {insurance.employer_group && (
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Employer/Group Sponsor</Text>
+                        <Text>{insurance.employer_group}</Text>
+                      </Stack>
+                    )}
+                  </SimpleGrid>
+                </div>
 
-        {/* Coverage Details */}
-        {Object.keys(coverageDetails).length > 0 && (
-          <div>
-            <Title order={4} mb="sm">Coverage Details</Title>
-            <Grid>
-              {Object.entries(coverageDetails).map(([key, value]) => (
-                <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
-                  <Text size="sm" weight={500} color="dimmed">
-                    {formatFieldLabel(key)}
-                  </Text>
-                  <Text>{formatFieldValue(key, value)}</Text>
-                </Grid.Col>
-              ))}
-            </Grid>
-          </div>
-        )}
+                {/* Coverage Period Section */}
+                <div>
+                  <Title order={4} mb="sm">Coverage Period</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Effective Date</Text>
+                      <Text>{formatDate(insurance.effective_date)}</Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Expiration Date</Text>
+                      <Text c={insurance.expiration_date ? 'inherit' : 'dimmed'}>
+                        {insurance.expiration_date ? formatDate(insurance.expiration_date) : 'Ongoing'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
 
-        {/* Contact Information */}
-        {Object.keys(contactInfo).length > 0 && (
-          <div>
-            <Title order={4} mb="sm">Contact Information</Title>
-            <Grid>
-              {Object.entries(contactInfo).map(([key, value]) => (
-                <Grid.Col span={key === 'claims_address' || key === 'pharmacy_network_info' ? { base: 12, sm: 12 } : { base: 12, sm: 6 }} key={key}>
-                  <Text size="sm" weight={500} color="dimmed">
-                    {formatFieldLabel(key)}
-                  </Text>
-                  <Text style={key === 'website_url' ? { wordBreak: 'break-all' } : {}}>
-                    {isPhoneField(key) ? formatPhoneNumber(cleanPhoneNumber(value)) : value}
-                  </Text>
-                </Grid.Col>
-              ))}
-            </Grid>
-          </div>
-        )}
+                {/* Notes Section */}
+                {insurance.notes && (
+                  <div>
+                    <Title order={4} mb="sm">Notes</Title>
+                    <Paper withBorder p="sm" bg="gray.1">
+                      <Text style={{ whiteSpace: 'pre-wrap' }}>
+                        {insurance.notes}
+                      </Text>
+                    </Paper>
+                  </div>
+                )}
+              </Stack>
+            </Box>
+          </Tabs.Panel>
 
-        {/* Notes */}
-        {insurance.notes && (
-          <div>
-            <Title order={4} mb="sm">Notes</Title>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>{insurance.notes}</Text>
-          </div>
-        )}
+          {/* Coverage Tab */}
+          <Tabs.Panel value="coverage">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">Coverage Details</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Deductible</Text>
+                      <Text size="sm" c={coverageDetails.deductible ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.deductible || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Out of Pocket Max</Text>
+                      <Text size="sm" c={coverageDetails.out_of_pocket_max ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.out_of_pocket_max || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Copay</Text>
+                      <Text size="sm" c={coverageDetails.copay ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.copay || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Coinsurance</Text>
+                      <Text size="sm" c={coverageDetails.coinsurance ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.coinsurance || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Prescription Coverage</Text>
+                      <Text size="sm" c={coverageDetails.prescription_coverage ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.prescription_coverage || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Vision Coverage</Text>
+                      <Text size="sm" c={coverageDetails.vision_coverage ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.vision_coverage || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Dental Coverage</Text>
+                      <Text size="sm" c={coverageDetails.dental_coverage ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.dental_coverage || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Mental Health Coverage</Text>
+                      <Text size="sm" c={coverageDetails.mental_health_coverage ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.mental_health_coverage || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                      <Text fw={500} size="sm" c="dimmed">Additional Coverage Details</Text>
+                      <Text size="sm" c={coverageDetails.additional_details ? 'inherit' : 'dimmed'}>
+                        {coverageDetails.additional_details || 'Not specified'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
 
-        {/* Document Management */}
-        <div>
-          <Title order={4} mb="sm">Attached Documents</Title>
-          <DocumentManagerWithProgress
-            entityType="insurance"
-            entityId={insurance.id}
-            mode="view"
-            config={{
-              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-              maxSize: 10 * 1024 * 1024, // 10MB
-              maxFiles: 10
-            }}
-            onUploadComplete={(success, completedCount, failedCount) => {
-              if (onFileUploadComplete) {
-                onFileUploadComplete(success);
-              }
-            }}
-            onError={(error) => {
-              logger.error('Document manager error in insurance view:', error);
-            }}
-            showProgressModal={true}
-          />
-        </div>
+          {/* Contact Tab */}
+          <Tabs.Panel value="contact">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">Contact Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Customer Service Phone</Text>
+                      <Text size="sm" c={contactInfo.customer_service_phone ? 'inherit' : 'dimmed'}>
+                        {contactInfo.customer_service_phone ? formatPhoneNumber(cleanPhoneNumber(contactInfo.customer_service_phone)) : 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Claims Phone</Text>
+                      <Text size="sm" c={contactInfo.claims_phone ? 'inherit' : 'dimmed'}>
+                        {contactInfo.claims_phone ? formatPhoneNumber(cleanPhoneNumber(contactInfo.claims_phone)) : 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Website</Text>
+                      <Text size="sm" c={contactInfo.website_url ? 'inherit' : 'dimmed'} style={{ wordBreak: 'break-all' }}>
+                        {contactInfo.website_url || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Email</Text>
+                      <Text size="sm" c={contactInfo.email ? 'inherit' : 'dimmed'}>
+                        {contactInfo.email || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                      <Text fw={500} size="sm" c="dimmed">Claims Address</Text>
+                      <Text size="sm" c={contactInfo.claims_address ? 'inherit' : 'dimmed'}>
+                        {contactInfo.claims_address || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                      <Text fw={500} size="sm" c="dimmed">Pharmacy Network Info</Text>
+                      <Text size="sm" c={contactInfo.pharmacy_network_info ? 'inherit' : 'dimmed'}>
+                        {contactInfo.pharmacy_network_info || 'Not specified'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Documents Tab */}
+          <Tabs.Panel value="documents">
+            <Box mt="md">
+              <Stack gap="md">
+                <Title order={4}>Attached Documents</Title>
+                <DocumentManagerWithProgress
+                  entityType="insurance"
+                  entityId={insurance.id}
+                  mode="view"
+                  config={{
+                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
+                    maxSize: 10 * 1024 * 1024, // 10MB
+                    maxFiles: 10
+                  }}
+                  onUploadComplete={(success, completedCount, failedCount) => {
+                    if (onFileUploadComplete) {
+                      onFileUploadComplete(success);
+                    }
+                  }}
+                  onError={(error) => {
+                    logger.error('Document manager error in insurance view:', error);
+                  }}
+                  showProgressModal={true}
+                />
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+        </Tabs>
 
         {/* Action Buttons */}
-        <Divider />
-        <Group position="apart">
-          <Group>
-            <Button
-              variant="outline"
-              leftSection={<IconPrinter size={16} />}
-              onClick={() => onPrint && onPrint(insurance)}
-            >
-              Print Card
-            </Button>
-          </Group>
+        <Group justify="space-between" mt="md">
+          <Button
+            variant="outline"
+            leftSection={<IconPrinter size={16} />}
+            onClick={() => onPrint && onPrint(insurance)}
+          >
+            Print Card
+          </Button>
           <Group>
             <Button variant="outline" onClick={onClose}>
               Close

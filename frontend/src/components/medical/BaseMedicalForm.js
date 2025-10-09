@@ -187,7 +187,7 @@ const BaseMedicalForm = ({
         disabled={isFieldLoading}
         placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : baseProps.placeholder}
         limit={itemLimit}
-        withinPortal
+        comboboxProps={{ withinPortal: true, zIndex: 3000 }}
       />
     );
   }, [handleSelectChange, getDropdownHeight]);
@@ -351,7 +351,7 @@ const BaseMedicalForm = ({
             disabled={isFieldLoading}
             placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
             limit={50}
-            withinPortal
+            comboboxProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
 
@@ -399,7 +399,8 @@ const BaseMedicalForm = ({
           return (
             <Combobox
               store={combobox}
-              withinPortal
+              withinPortal={true}
+              zIndex={3000}
               position="bottom-start"
               onOptionSubmit={(val) => {
                 if (val === '$create') {
@@ -638,16 +639,15 @@ const BaseMedicalForm = ({
       size={modalSizeValue}
       centered
       styles={useMemo(() => ({
-        body: { 
-          padding: layoutConfig.container.padding || '1.5rem', 
+        body: {
+          padding: layoutConfig.container.padding || '1.5rem',
           paddingBottom: '2rem'
         },
-        header: { 
+        header: {
           paddingBottom: '1rem'
         }
       }), [layoutConfig.container.padding])}
       overflow="inside"
-      withinPortal
       lockScroll
       closeOnClickOutside
       trapFocus

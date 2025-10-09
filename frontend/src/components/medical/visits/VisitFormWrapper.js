@@ -69,27 +69,6 @@ const VisitFormWrapper = ({
       isLoading={isLoading}
       statusMessage={statusMessage}
     >
-      {/* File Management Section for Both Create and Edit Mode */}
-      <Paper withBorder p="md" mt="md">
-        <Title order={4} mb="md">
-          {editingItem ? 'Manage Files' : 'Add Files (Optional)'}
-        </Title>
-        <DocumentManagerWithProgress
-          entityType="visit"
-          entityId={editingItem?.id}
-          mode={editingItem ? 'edit' : 'create'}
-          config={{
-            acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-            maxSize: 10 * 1024 * 1024, // 10MB
-            maxFiles: 10
-          }}
-          onUploadPendingFiles={handleDocumentManagerRef}
-          showProgressModal={true}
-          onUploadComplete={handleDocumentUploadComplete}
-          onError={handleDocumentError}
-        />
-      </Paper>
-      
       {children}
     </MantineVisitForm>
   );

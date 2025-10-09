@@ -1,19 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
+  Tabs,
   Stack,
   Group,
   Text,
   Badge,
   Button,
-  Divider,
-  Grid,
-  Card,
+  Box,
+  SimpleGrid,
   Title,
 } from '@mantine/core';
-import { IconEdit } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconStethoscope,
+  IconNotes,
+  IconFileText,
+  IconEdit,
+} from '@tabler/icons-react';
 import { formatDate } from '../../../utils/helpers';
 import StatusBadge from '../StatusBadge';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 
 const ConditionViewModal = ({
   isOpen,
@@ -24,7 +31,17 @@ const ConditionViewModal = ({
   practitioners = [],
   onMedicationClick,
   onPractitionerClick,
+  onError,
 }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when modal opens or condition changes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, condition?.id]);
+
   if (!isOpen || !condition) return null;
 
   // Helper function to get medication name from ID
@@ -72,16 +89,6 @@ const ConditionViewModal = ({
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active': return 'green';
-      case 'inactive': return 'gray';
-      case 'resolved': return 'blue';
-      case 'chronic': return 'orange';
-      default: return 'gray';
-    }
-  };
-
   // Helper function to calculate condition duration
   const getConditionDuration = (onsetDate, endDate, status) => {
     if (!onsetDate) return null;
@@ -102,7 +109,6 @@ const ConditionViewModal = ({
       duration = `${years} year${years === 1 ? '' : 's'}`;
     }
 
-    // Add appropriate suffix based on condition status
     if (endDate || status === 'resolved' || status === 'inactive') {
       return `${duration} (ended)`;
     } else {
@@ -117,278 +123,233 @@ const ConditionViewModal = ({
       title={
         <Group>
           <Text fw={600} size="lg">
-            Condition Details
+            {condition.diagnosis || 'Condition Details'}
           </Text>
           <StatusBadge status={condition.status} />
         </Group>
       }
-      size="lg"
+      size="xl"
       centered
       zIndex={2000}
-      styles={{
-        body: {
-          maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
-      }}
     >
-      <Stack gap="md">
-        {/* Main condition info */}
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <Stack gap="xs" style={{ flex: 1 }}>
-                <Title order={3}>{condition.diagnosis}</Title>
-                <Text size="sm" c={condition.condition_name ? 'inherit' : 'dimmed'} fw={500}>
-                  {condition.condition_name || 'No condition name specified'}
-                </Text>
-                <Badge
-                  color={condition.severity ? getSeverityColor(condition.severity) : 'gray'}
-                  variant={condition.severity ? 'filled' : 'light'}
-                >
-                  {condition.severity || 'No severity specified'}
-                </Badge>
-              </Stack>
-            </Group>
-          </Stack>
-        </Card>
+      <Tabs value={activeTab} onChange={setActiveTab}>
+        <Tabs.List>
+          <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+            Overview
+          </Tabs.Tab>
+          <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+            Clinical Details
+          </Tabs.Tab>
+          <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+            Notes
+          </Tabs.Tab>
+          <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+            Documents
+          </Tabs.Tab>
+        </Tabs.List>
 
-        {/* Diagnosis and Timeline information */}
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Card withBorder p="md" h="100%">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  DIAGNOSIS INFORMATION
-                </Text>
-                <Divider />
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Diagnosis:
-                  </Text>
-                  <Text size="sm" c={condition.diagnosis ? 'inherit' : 'dimmed'}>
-                    {condition.diagnosis || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Severity:
-                  </Text>
-                  <Text size="sm" c={condition.severity ? 'inherit' : 'dimmed'}>
-                    {condition.severity || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Status:
-                  </Text>
-                  <Text size="sm" c={condition.status ? 'inherit' : 'dimmed'}>
-                    {condition.status || 'Not specified'}
-                  </Text>
-                </Group>
-              </Stack>
-            </Card>
-          </Grid.Col>
+        {/* Overview Tab */}
+        <Tabs.Panel value="overview">
+          <Box mt="md">
+            <Stack gap="lg">
+              {/* Basic Information */}
+              <div>
+                <Title order={4} mb="sm">Basic Information</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Diagnosis</Text>
+                    <Text size="sm" c={condition.diagnosis ? 'inherit' : 'dimmed'}>
+                      {condition.diagnosis || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Condition Name</Text>
+                    <Text size="sm" c={condition.condition_name ? 'inherit' : 'dimmed'}>
+                      {condition.condition_name || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Severity</Text>
+                    <Badge
+                      color={condition.severity ? getSeverityColor(condition.severity) : 'gray'}
+                      variant={condition.severity ? 'filled' : 'light'}
+                      size="sm"
+                    >
+                      {condition.severity || 'Not specified'}
+                    </Badge>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Status</Text>
+                    <StatusBadge status={condition.status} />
+                  </Stack>
+                </SimpleGrid>
+              </div>
 
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Card withBorder p="md" h="100%">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  TIMELINE
-                </Text>
-                <Divider />
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Onset Date:
-                  </Text>
-                  <Text size="sm" c={condition.onset_date ? 'inherit' : 'dimmed'}>
-                    {condition.onset_date
-                      ? formatDate(condition.onset_date)
-                      : 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    End Date:
-                  </Text>
-                  <Text size="sm" c={condition.end_date ? 'inherit' : 'dimmed'}>
-                    {condition.end_date
-                      ? formatDate(condition.end_date)
-                      : 'Not specified'}
-                  </Text>
-                </Group>
-                {condition.onset_date && (
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Duration:
+              {/* Timeline */}
+              <div>
+                <Title order={4} mb="sm">Timeline</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Onset Date</Text>
+                    <Text size="sm" c={condition.onset_date ? 'inherit' : 'dimmed'}>
+                      {condition.onset_date ? formatDate(condition.onset_date) : 'Not specified'}
                     </Text>
-                    <Text size="sm" c="inherit">
-                      {getConditionDuration(condition.onset_date, condition.end_date, condition.status)}
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">End Date</Text>
+                    <Text size="sm" c={condition.end_date ? 'inherit' : 'dimmed'}>
+                      {condition.end_date ? formatDate(condition.end_date) : 'Not specified'}
                     </Text>
+                  </Stack>
+                  {condition.onset_date && (
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Duration</Text>
+                      <Text size="sm">{getConditionDuration(condition.onset_date, condition.end_date, condition.status)}</Text>
+                    </Stack>
+                  )}
+                </SimpleGrid>
+              </div>
+
+              {/* Related Medication & Practitioner */}
+              <div>
+                <Title order={4} mb="sm">Related Information</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Related Medication</Text>
+                    {condition.medication_id ? (
+                      <Text
+                        size="sm"
+                        fw={600}
+                        style={{
+                          cursor: 'pointer',
+                          color: 'var(--mantine-color-blue-6)',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={() => handleMedicationClick(condition.medication_id)}
+                      >
+                        {condition.medication?.medication_name ||
+                          getMedicationName(condition.medication_id) ||
+                          `Medication #${condition.medication_id}`}
+                      </Text>
+                    ) : (
+                      <Text size="sm" c="dimmed">No medication linked</Text>
+                    )}
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Practitioner</Text>
+                    {condition.practitioner_id ? (
+                      <Text
+                        size="sm"
+                        fw={600}
+                        style={{
+                          cursor: 'pointer',
+                          color: 'var(--mantine-color-blue-6)',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={() => handlePractitionerClick(condition.practitioner_id)}
+                      >
+                        {condition.practitioner?.name ||
+                          getPractitionerName(condition.practitioner_id) ||
+                          `Practitioner #${condition.practitioner_id}`}
+                      </Text>
+                    ) : (
+                      <Text size="sm" c="dimmed">No practitioner assigned</Text>
+                    )}
+                  </Stack>
+                </SimpleGrid>
+              </div>
+
+              {/* Tags Section */}
+              {condition.tags && condition.tags.length > 0 && (
+                <div>
+                  <Title order={4} mb="sm">Tags</Title>
+                  <Group gap="xs">
+                    {condition.tags.map((tag, index) => (
+                      <Badge
+                        key={index}
+                        variant="light"
+                        color="blue"
+                        size="sm"
+                        radius="md"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
                   </Group>
-                )}
-              </Stack>
-            </Card>
-          </Grid.Col>
-        </Grid>
-
-        {/* Medical codes section */}
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Text fw={600} size="sm" c="dimmed">
-              MEDICAL CODES
-            </Text>
-            <Divider />
-            <Grid>
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    ICD-10:
-                  </Text>
-                  <Text size="sm" c={condition.icd10_code ? 'inherit' : 'dimmed'}>
-                    {condition.icd10_code || 'Not specified'}
-                  </Text>
-                </Group>
-              </Grid.Col>
-              <Grid.Col span={{ base: 12, sm: 6 }}>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    SNOMED:
-                  </Text>
-                  <Text size="sm" c={condition.snomed_code ? 'inherit' : 'dimmed'}>
-                    {condition.snomed_code || 'Not specified'}
-                  </Text>
-                </Group>
-              </Grid.Col>
-            </Grid>
-            <Group>
-              <Text size="sm" fw={500} w={80}>
-                Description:
-              </Text>
-              <Text size="sm" c={condition.code_description ? 'inherit' : 'dimmed'}>
-                {condition.code_description || 'Not specified'}
-              </Text>
-            </Group>
-          </Stack>
-        </Card>
-
-        {/* Related Medication section */}
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Text fw={600} size="sm" c="dimmed">
-              RELATED MEDICATION
-            </Text>
-            <Divider />
-            <Group>
-              <Text size="sm" fw={500} w={80}>
-                Medication:
-              </Text>
-              {condition.medication_id ? (
-                <Text
-                  size="sm"
-                  fw={600}
-                  style={{
-                    cursor: 'pointer',
-                    color: 'var(--mantine-color-blue-6)',
-                    textDecoration: 'underline',
-                  }}
-                  onClick={() => handleMedicationClick(condition.medication_id)}
-                >
-                  {condition.medication?.medication_name ||
-                    getMedicationName(condition.medication_id) ||
-                    `Medication #${condition.medication_id}`}
-                </Text>
-              ) : (
-                <Text size="sm" c="dimmed">
-                  No medication linked
-                </Text>
+                </div>
               )}
-            </Group>
-          </Stack>
-        </Card>
-
-        {/* Related Practitioner section */}
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Text fw={600} size="sm" c="dimmed">
-              PRACTITIONER
-            </Text>
-            <Divider />
-            <Group>
-              <Text size="sm" fw={500} w={80}>
-                Doctor:
-              </Text>
-              {condition.practitioner_id ? (
-                <Text
-                  size="sm"
-                  fw={600}
-                  style={{
-                    cursor: 'pointer',
-                    color: 'var(--mantine-color-blue-6)',
-                    textDecoration: 'underline',
-                  }}
-                  onClick={() => handlePractitionerClick(condition.practitioner_id)}
-                >
-                  {condition.practitioner?.name ||
-                    getPractitionerName(condition.practitioner_id) ||
-                    `Practitioner #${condition.practitioner_id}`}
-                </Text>
-              ) : (
-                <Text size="sm" c="dimmed">
-                  No practitioner assigned
-                </Text>
-              )}
-            </Group>
-          </Stack>
-        </Card>
-
-        {/* Notes section */}
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Text fw={600} size="sm" c="dimmed">
-              CLINICAL NOTES
-            </Text>
-            <Divider />
-            <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
-              {condition.notes || 'No clinical notes available'}
-            </Text>
-          </Stack>
-        </Card>
-
-        {condition.tags && condition.tags.length > 0 && (
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                TAGS
-              </Text>
-              <Divider />
-              <Group gap="xs">
-                {condition.tags.map((tag, index) => (
-                  <Badge
-                    key={index}
-                    variant="light"
-                    color="blue"
-                    size="sm"
-                    radius="md"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </Group>
             </Stack>
-          </Card>
-        )}
+          </Box>
+        </Tabs.Panel>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            Close
-          </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            Edit
-          </Button>
-        </Group>
-      </Stack>
+        {/* Clinical Details Tab */}
+        <Tabs.Panel value="clinical">
+          <Box mt="md">
+            <Stack gap="lg">
+              {/* Medical Codes */}
+              <div>
+                <Title order={4} mb="sm">Medical Codes</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">ICD-10 Code</Text>
+                    <Text size="sm" c={condition.icd10_code ? 'inherit' : 'dimmed'}>
+                      {condition.icd10_code || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">SNOMED Code</Text>
+                    <Text size="sm" c={condition.snomed_code ? 'inherit' : 'dimmed'}>
+                      {condition.snomed_code || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                    <Text fw={500} size="sm" c="dimmed">Code Description</Text>
+                    <Text size="sm" c={condition.code_description ? 'inherit' : 'dimmed'}>
+                      {condition.code_description || 'Not specified'}
+                    </Text>
+                  </Stack>
+                </SimpleGrid>
+              </div>
+            </Stack>
+          </Box>
+        </Tabs.Panel>
+
+        {/* Notes Tab */}
+        <Tabs.Panel value="notes">
+          <Box mt="md">
+            <Stack gap="lg">
+              {/* Clinical Notes */}
+              <div>
+                <Title order={4} mb="sm">Clinical Notes</Title>
+                <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
+                  {condition.notes || 'No clinical notes available'}
+                </Text>
+              </div>
+            </Stack>
+          </Box>
+        </Tabs.Panel>
+
+        {/* Documents Tab */}
+        <Tabs.Panel value="documents">
+          <Box mt="md">
+            <DocumentManagerWithProgress
+              entityType="condition"
+              entityId={condition.id}
+              onError={onError}
+            />
+          </Box>
+        </Tabs.Panel>
+      </Tabs>
+
+      {/* Action Buttons */}
+      <Group justify="flex-end" gap="sm" mt="lg">
+        <Button variant="default" onClick={onClose}>
+          Close
+        </Button>
+        <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+          Edit
+        </Button>
+      </Group>
     </Modal>
   );
 };

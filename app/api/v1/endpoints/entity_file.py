@@ -16,7 +16,7 @@ from app.api.activity_logging import log_create, log_delete, log_update
 from app.api.v1.endpoints.utils import handle_not_found, verify_patient_ownership
 from app.core.error_handling import NotFoundException, MedicalRecordsAPIException
 from app.core.logging_config import get_logger
-from app.crud import lab_result, insurance, encounter, procedure
+from app.crud import lab_result, insurance, encounter, procedure, medication, immunization, allergy, condition, treatment
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
@@ -53,6 +53,11 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
         "insurance": insurance.get,
         "encounter": encounter.get,
         "visit": encounter.get,  # Alternative name for encounter
+        "medication": medication.get,
+        "immunization": immunization.get,
+        "allergy": allergy.get,
+        "condition": condition.get,
+        "treatment": treatment.get,
     }
     crud_func = entity_map.get(entity_type)
     if not crud_func:

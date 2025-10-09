@@ -673,6 +673,11 @@ const Insurance = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingItem={editingInsurance}
+        onFileUploadComplete={(success) => {
+          if (success && editingInsurance) {
+            refreshFileCount(editingInsurance.id);
+          }
+        }}
       >
         {/* Form Loading Overlay */}
         <FormLoadingOverlay
@@ -681,32 +686,6 @@ const Insurance = () => {
           submessage={statusMessage?.message}
           type={statusMessage?.type || 'loading'}
         />
-        {/* File Management Section for Both Create and Edit Mode */}
-        <Paper withBorder p="md" mt="md">
-          <Title order={4} mb="md">
-            {editingInsurance ? 'Manage Files' : 'Add Files (Optional)'}
-          </Title>
-          <DocumentManagerWithProgress
-            entityType="insurance"
-            entityId={editingInsurance?.id}
-            mode={editingInsurance ? 'edit' : 'create'}
-            config={{
-              acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-              maxSize: 10 * 1024 * 1024, // 10MB
-              maxFiles: 10
-            }}
-            onUploadPendingFiles={setDocumentManagerMethods}
-            onError={(error) => {
-              logger.error('document_manager_error', {
-                message: `Document manager error in insurance ${editingInsurance ? 'edit' : 'create'}`,
-                insuranceId: editingInsurance?.id,
-                error: error,
-                component: 'Insurance',
-              });
-            }}
-            showProgressModal={true}
-          />
-        </Paper>
       </InsuranceFormWrapper>
 
       {/* View Modal */}

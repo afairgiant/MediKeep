@@ -2049,6 +2049,7 @@ export const insuranceFormFields = [
     minRows: 3,
     maxRows: 6,
   },
+  tagsFieldConfig,  // Add tags field to insurance form
 ];
 
 // Utility function to get field configuration by form type

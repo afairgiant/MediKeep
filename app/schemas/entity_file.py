@@ -12,6 +12,11 @@ class EntityType(str, Enum):
     ENCOUNTER = "encounter"  # Alternative name for visit
     PROCEDURE = "procedure"
     VITALS = "vitals"
+    MEDICATION = "medication"
+    IMMUNIZATION = "immunization"
+    ALLERGY = "allergy"
+    CONDITION = "condition"
+    TREATMENT = "treatment"
 
 
 class EntityFileBase(BaseModel):
