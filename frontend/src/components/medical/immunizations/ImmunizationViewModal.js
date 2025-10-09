@@ -1,19 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
+  Tabs,
   Stack,
   Group,
   Text,
   Badge,
   Button,
-  Divider,
-  Grid,
-  Card,
+  Box,
+  SimpleGrid,
   Title,
 } from '@mantine/core';
-import { IconEdit, IconX } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconNeedle,
+  IconNotes,
+  IconFileText,
+  IconEdit,
+} from '@tabler/icons-react';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
 
 const ImmunizationViewModal = ({
@@ -25,6 +32,15 @@ const ImmunizationViewModal = ({
   navigate,
   onError
 }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when modal opens or immunization changes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, immunization?.id]);
+
   if (!isOpen || !immunization) return null;
 
   const handleEdit = () => {
@@ -52,235 +68,206 @@ const ImmunizationViewModal = ({
       title={
         <Group>
           <Text fw={600} size="lg">
-            Immunization Details
+            {immunization.vaccine_name || 'Immunization Details'}
           </Text>
           {immunization.dose_number && (
             <Badge
               color={getDoseColor(immunization.dose_number)}
               variant="filled"
-              size="lg"
+              size="sm"
             >
               Dose {immunization.dose_number}
             </Badge>
           )}
         </Group>
       }
-      size="lg"
+      size="xl"
       centered
       zIndex={2000}
-      styles={{
-        body: {
-          maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
-      }}
     >
-      <Stack gap="md">
-        {/* Main immunization info */}
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <Stack gap="xs" style={{ flex: 1 }}>
-                <Title order={3}>{immunization.vaccine_name}</Title>
-                {immunization.vaccine_trade_name && (
-                  <Text size="sm" fw={500}>
-                    {immunization.vaccine_trade_name}
-                  </Text>
-                )}
-                {immunization.manufacturer && (
-                  <Text size="sm" c="dimmed">
-                    Manufactured by: {immunization.manufacturer}
-                  </Text>
-                )}
-              </Stack>
-            </Group>
-          </Stack>
-        </Card>
+      <Tabs value={activeTab} onChange={setActiveTab}>
+        <Tabs.List>
+          <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+            Overview
+          </Tabs.Tab>
+          <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
+            Administration
+          </Tabs.Tab>
+          <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+            Notes
+          </Tabs.Tab>
+          <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+            Documents
+          </Tabs.Tab>
+        </Tabs.List>
 
-        {/* Vaccine and Administration information */}
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Card withBorder p="md" h="100%">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  VACCINE INFORMATION
-                </Text>
-                <Divider />
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Vaccine:
-                  </Text>
-                  <Text size="sm" c={immunization.vaccine_name ? 'inherit' : 'dimmed'}>
-                    {immunization.vaccine_name || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Dose:
-                  </Text>
-                  <Text size="sm" c={immunization.dose_number ? 'inherit' : 'dimmed'}>
-                    {immunization.dose_number ? `#${immunization.dose_number}` : 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Lot Number:
-                  </Text>
-                  <Text size="sm" c={immunization.lot_number ? 'inherit' : 'dimmed'}>
-                    {immunization.lot_number || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    NDC:
-                  </Text>
-                  <Text size="sm" c={immunization.ndc_number ? 'inherit' : 'dimmed'}>
-                    {immunization.ndc_number || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Manufacturer:
-                  </Text>
-                  <Text size="sm" c={immunization.manufacturer ? 'inherit' : 'dimmed'}>
-                    {immunization.manufacturer || 'Not specified'}
-                  </Text>
-                </Group>
-              </Stack>
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Card withBorder p="md" h="100%">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  ADMINISTRATION
-                </Text>
-                <Divider />
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Date:
-                  </Text>
-                  <Text size="sm" c={immunization.date_administered ? 'inherit' : 'dimmed'}>
-                    {immunization.date_administered
-                      ? formatDate(immunization.date_administered)
-                      : 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Site:
-                  </Text>
-                  <Text size="sm" c={immunization.site ? 'inherit' : 'dimmed'}>
-                    {immunization.site || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Route:
-                  </Text>
-                  <Text size="sm" c={immunization.route ? 'inherit' : 'dimmed'}>
-                    {immunization.route || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Location:
-                  </Text>
-                  <Text size="sm" c={immunization.location ? 'inherit' : 'dimmed'}>
-                    {immunization.location || 'Not specified'}
-                  </Text>
-                </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    Practitioner:
-                  </Text>
-                  {immunization.practitioner_id ? (
-                    <Text
-                      size="sm"
-                      c="blue"
-                      style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                      onClick={() => navigateToEntity('practitioner', immunization.practitioner_id, navigate)}
-                    >
-                      {practitioner?.name || `ID: ${immunization.practitioner_id}`}
+        {/* Overview Tab */}
+        <Tabs.Panel value="overview">
+          <Box mt="md">
+            <Stack gap="lg">
+              {/* Vaccine Information */}
+              <div>
+                <Title order={4} mb="sm">Vaccine Information</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Vaccine Name</Text>
+                    <Text size="sm">{immunization.vaccine_name}</Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Trade Name</Text>
+                    <Text size="sm" c={immunization.vaccine_trade_name ? 'inherit' : 'dimmed'}>
+                      {immunization.vaccine_trade_name || 'Not specified'}
                     </Text>
-                  ) : (
-                    <Text size="sm" c="dimmed">Not specified</Text>
-                  )}
-                </Group>
-              </Stack>
-            </Card>
-          </Grid.Col>
-        </Grid>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Manufacturer</Text>
+                    <Text size="sm" c={immunization.manufacturer ? 'inherit' : 'dimmed'}>
+                      {immunization.manufacturer || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Dose Number</Text>
+                    <Badge
+                      color={getDoseColor(immunization.dose_number)}
+                      variant="filled"
+                      size="sm"
+                    >
+                      {immunization.dose_number ? `Dose #${immunization.dose_number}` : 'Not specified'}
+                    </Badge>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Lot Number</Text>
+                    <Text size="sm" c={immunization.lot_number ? 'inherit' : 'dimmed'}>
+                      {immunization.lot_number || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">NDC Number</Text>
+                    <Text size="sm" c={immunization.ndc_number ? 'inherit' : 'dimmed'}>
+                      {immunization.ndc_number || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Expiration Date</Text>
+                    <Text size="sm" c={immunization.expiration_date ? 'inherit' : 'dimmed'}>
+                      {immunization.expiration_date ? formatDate(immunization.expiration_date) : 'Not specified'}
+                    </Text>
+                  </Stack>
+                </SimpleGrid>
+              </div>
 
-        {/* Expiration date section */}
-        {immunization.expiration_date && (
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                EXPIRATION
-              </Text>
-              <Divider />
-              <Group>
-                <Text size="sm" fw={500} w={80}>
-                  Expires:
+              {/* Tags Section */}
+              {immunization.tags && immunization.tags.length > 0 && (
+                <div>
+                  <Title order={4} mb="sm">Tags</Title>
+                  <Group gap="xs">
+                    {immunization.tags.map((tag, index) => (
+                      <Badge
+                        key={index}
+                        variant="light"
+                        color="blue"
+                        size="sm"
+                        radius="md"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </Group>
+                </div>
+              )}
+            </Stack>
+          </Box>
+        </Tabs.Panel>
+
+        {/* Administration Tab */}
+        <Tabs.Panel value="administration">
+          <Box mt="md">
+            <Stack gap="lg">
+              <div>
+                <Title order={4} mb="sm">Administration Details</Title>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Date Administered</Text>
+                    <Text size="sm" c={immunization.date_administered ? 'inherit' : 'dimmed'}>
+                      {immunization.date_administered ? formatDate(immunization.date_administered) : 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Administration Site</Text>
+                    <Text size="sm" c={immunization.site ? 'inherit' : 'dimmed'}>
+                      {immunization.site || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Route</Text>
+                    <Text size="sm" c={immunization.route ? 'inherit' : 'dimmed'}>
+                      {immunization.route || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Location/Facility</Text>
+                    <Text size="sm" c={immunization.location ? 'inherit' : 'dimmed'}>
+                      {immunization.location || 'Not specified'}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">Practitioner</Text>
+                    {immunization.practitioner_id ? (
+                      <Text
+                        size="sm"
+                        fw={600}
+                        c="blue"
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => navigateToEntity('practitioner', immunization.practitioner_id, navigate)}
+                        title="View practitioner details"
+                      >
+                        {practitioner?.name || `Practitioner ID: ${immunization.practitioner_id}`}
+                      </Text>
+                    ) : (
+                      <Text size="sm" c="dimmed">Not specified</Text>
+                    )}
+                  </Stack>
+                </SimpleGrid>
+              </div>
+            </Stack>
+          </Box>
+        </Tabs.Panel>
+
+        {/* Notes Tab */}
+        <Tabs.Panel value="notes">
+          <Box mt="md">
+            <Stack gap="lg">
+              <div>
+                <Title order={4} mb="sm">Clinical Notes</Title>
+                <Text size="sm" c={immunization.notes ? 'inherit' : 'dimmed'}>
+                  {immunization.notes || 'No notes available'}
                 </Text>
-                <Text size="sm" c={immunization.expiration_date ? 'inherit' : 'dimmed'}>
-                  {immunization.expiration_date
-                    ? formatDate(immunization.expiration_date)
-                    : 'Not specified'}
-                </Text>
-              </Group>
+              </div>
             </Stack>
-          </Card>
-        )}
+          </Box>
+        </Tabs.Panel>
 
-        {/* Notes section */}
-        {immunization.notes && (
-          <>
-            <Divider />
-            <Stack gap="xs">
-              <Text size="sm" fw={500} c="dimmed">Notes</Text>
-              <Text size="sm">{immunization.notes}</Text>
-            </Stack>
-          </>
-        )}
+        {/* Documents Tab */}
+        <Tabs.Panel value="documents">
+          <Box mt="md">
+            <DocumentManagerWithProgress
+              entityType="immunization"
+              entityId={immunization.id}
+              onError={onError}
+            />
+          </Box>
+        </Tabs.Panel>
+      </Tabs>
 
-        {/* Tags section */}
-        {immunization.tags && immunization.tags.length > 0 && (
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                TAGS
-              </Text>
-              <Divider />
-              <Group gap="xs">
-                {immunization.tags.map((tag, index) => (
-                  <Badge
-                    key={index}
-                    variant="light"
-                    color="blue"
-                    size="sm"
-                    radius="md"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </Group>
-            </Stack>
-          </Card>
-        )}
-
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            Close
-          </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            Edit
-          </Button>
-        </Group>
-      </Stack>
+      {/* Action Buttons */}
+      <Group justify="flex-end" gap="sm" mt="lg">
+        <Button variant="default" onClick={onClose}>
+          Close
+        </Button>
+        <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+          Edit
+        </Button>
+      </Group>
     </Modal>
   );
 };

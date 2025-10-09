@@ -1,20 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
+  Tabs,
+  Box,
   Stack,
   Group,
   Button,
+  Grid,
   TextInput,
   Textarea,
   Select,
-  Alert,
+  Text,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconX } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconStethoscope,
+  IconFileText,
+  IconNotes,
+} from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import { TagInput } from '../../common/TagInput';
+
 const ConditionFormWrapper = ({
   isOpen,
   onClose,
@@ -22,34 +33,59 @@ const ConditionFormWrapper = ({
   formData,
   onInputChange,
   onSubmit,
-  editingCondition,
+  editingCondition = null,
   medications = [],
   practitioners = [],
-  isLoading,
+  isLoading = false,
   statusMessage,
 }) => {
+  // Tab state management
+  const [activeTab, setActiveTab] = useState('basic');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Use the standardized form handlers hook
-  const { 
+  const {
     handleTextInputChange,
     handleSelectChange,
     handleDateChange,
   } = useFormHandlers(onInputChange);
-  
+
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(e);
-  };
+  // Reset tab when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('basic');
+    }
+    if (!isOpen) {
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
-  const handleInputChange = (field, value) => {
-    onInputChange({
-      target: {
-        name: field,
-        value: value
-      }
-    });
+  // Convert medications to options
+  const medicationOptions = medications.map(med => ({
+    value: med.id.toString(),
+    label: med.medication_name || med.name || `Medication #${med.id}`,
+  }));
+
+  // Convert practitioners to options
+  const practitionerOptions = practitioners.map(prac => ({
+    value: prac.id.toString(),
+    label: prac.name || `Dr. ${prac.first_name || ''} ${prac.last_name || ''}`.trim() || `Practitioner #${prac.id}`,
+  }));
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await onSubmit(e);
+      setIsSubmitting(false);
+    } catch (error) {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -59,162 +95,244 @@ const ConditionFormWrapper = ({
       opened={isOpen}
       onClose={onClose}
       title={title}
-      size="lg"
+      size="xl"
+      centered
+      zIndex={2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isLoading} statusMessage={statusMessage} />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || "Saving condition..."} />
 
       <form onSubmit={handleSubmit}>
-        <Stack gap="md">
-          {/* Basic condition information */}
-          <TextInput
-            label="Condition Name (Optional)"
-            name="condition_name"
-            value={formData.condition_name || ''}
-            onChange={handleTextInputChange('condition_name')}
-            placeholder="Enter condition name"
-            description="Optional alternative name for the condition"
-          />
+        <Stack gap="lg">
+          {/* Tabbed Content */}
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+                Basic Info
+              </Tabs.Tab>
+              <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+                Clinical Details
+              </Tabs.Tab>
+              {editingCondition && (
+                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                  Documents
+                </Tabs.Tab>
+              )}
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                Notes
+              </Tabs.Tab>
+            </Tabs.List>
 
-          <TextInput
-            label="Diagnosis"
-            name="diagnosis"
-            value={formData.diagnosis || ''}
-            onChange={handleTextInputChange('diagnosis')}
-            required
-            placeholder="Enter diagnosis"
-          />
+            {/* Basic Info Tab */}
+            <Tabs.Panel value="basic">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Diagnosis"
+                      value={formData.diagnosis || ''}
+                      onChange={handleTextInputChange('diagnosis')}
+                      placeholder="Enter diagnosis"
+                      required
+                      description="Primary diagnosis or condition"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Condition Name"
+                      value={formData.condition_name || ''}
+                      onChange={handleTextInputChange('condition_name')}
+                      placeholder="Enter condition name"
+                      description="Optional alternative name"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Severity"
+                      value={formData.severity || null}
+                      data={[
+                        { value: 'mild', label: 'Mild' },
+                        { value: 'moderate', label: 'Moderate' },
+                        { value: 'severe', label: 'Severe' },
+                        { value: 'critical', label: 'Critical' },
+                      ]}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'severity', value: value || '' } });
+                      }}
+                      placeholder="Select severity"
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Status"
+                      value={formData.status || null}
+                      data={[
+                        { value: 'active', label: 'Active' },
+                        { value: 'inactive', label: 'Inactive' },
+                        { value: 'resolved', label: 'Resolved' },
+                        { value: 'chronic', label: 'Chronic' },
+                      ]}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'status', value: value || '' } });
+                      }}
+                      placeholder="Select status"
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label="Onset Date"
+                      value={parseDateInput(formData.onset_date)}
+                      onChange={handleDateChange('onset_date')}
+                      placeholder="Select onset date"
+                      description="When the condition started"
+                      clearable
+                      firstDayOfWeek={0}
+                      maxDate={today}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label="End Date"
+                      value={parseDateInput(formData.end_date)}
+                      onChange={handleDateChange('end_date')}
+                      placeholder="Select end date"
+                      description="When the condition ended (if applicable)"
+                      clearable
+                      firstDayOfWeek={0}
+                      minDate={parseDateInput(formData.onset_date) || undefined}
+                      maxDate={today}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Related Medication"
+                      value={formData.medication_id || null}
+                      data={medicationOptions}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'medication_id', value: value || '' } });
+                      }}
+                      placeholder="Select medication"
+                      description="Link this condition to a medication"
+                      searchable
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Practitioner"
+                      value={formData.practitioner_id || null}
+                      data={practitionerOptions}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
+                      }}
+                      placeholder="Select practitioner"
+                      description="Associated healthcare provider"
+                      searchable
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <Box>
+                      <Text size="sm" fw={500} mb="xs">
+                        Tags
+                      </Text>
+                      <Text size="xs" c="dimmed" mb="xs">
+                        Add tags to categorize and organize conditions
+                      </Text>
+                      <TagInput
+                        value={formData.tags || []}
+                        onChange={(tags) => {
+                          onInputChange({ target: { name: 'tags', value: tags } });
+                        }}
+                        placeholder="Add tags..."
+                      />
+                    </Box>
+                  </Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          <Select
-            label="Severity"
-            name="severity"
-            value={formData.severity || ''}
-            onChange={handleSelectChange('severity')}
-            data={[
-              { value: 'mild', label: 'Mild' },
-              { value: 'moderate', label: 'Moderate' },
-              { value: 'severe', label: 'Severe' },
-              { value: 'critical', label: 'Critical' },
-            ]}
-            placeholder="Select severity"
-            clearable
-          />
+            {/* Clinical Details Tab */}
+            <Tabs.Panel value="clinical">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="ICD-10 Code"
+                      value={formData.icd10_code || ''}
+                      onChange={handleTextInputChange('icd10_code')}
+                      placeholder="e.g., E11.9"
+                      description="International Classification of Diseases code"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="SNOMED Code"
+                      value={formData.snomed_code || ''}
+                      onChange={handleTextInputChange('snomed_code')}
+                      placeholder="e.g., 44054006"
+                      description="SNOMED CT code"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TextInput
+                      label="Code Description"
+                      value={formData.code_description || ''}
+                      onChange={handleTextInputChange('code_description')}
+                      placeholder="Description of the medical code"
+                      description="Human-readable description of the medical codes"
+                    />
+                  </Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          <Select
-            label="Status"
-            name="status"
-            value={formData.status || ''}
-            onChange={handleSelectChange('status')}
-            data={[
-              { value: 'active', label: 'Active' },
-              { value: 'inactive', label: 'Inactive' },
-              { value: 'resolved', label: 'Resolved' },
-              { value: 'chronic', label: 'Chronic' },
-            ]}
-            placeholder="Select status"
-          />
+            {/* Documents Tab (only when editing) */}
+            {editingCondition && (
+              <Tabs.Panel value="documents">
+                <Box mt="md">
+                  <DocumentManagerWithProgress
+                    entityType="condition"
+                    entityId={editingCondition.id}
+                    onError={(error) => {
+                      // Error handling can be passed up through onError prop if needed
+                    }}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
 
-          <Select
-            label="Related Medication (Optional)"
-            name="medication_id"
-            value={formData.medication_id || ''}
-            onChange={handleSelectChange('medication_id')}
-            data={medications.map(med => ({
-              value: med.id.toString(),
-              label: med.medication_name || med.name || `Medication #${med.id}`
-            }))}
-            placeholder="Select medication"
-            searchable
-            clearable
-            description="Link this condition to a specific medication"
-          />
-
-          <Select
-            label="Practitioner (Optional)"
-            name="practitioner_id"
-            value={formData.practitioner_id || ''}
-            onChange={handleSelectChange('practitioner_id')}
-            data={practitioners.map(prac => ({
-              value: prac.id.toString(),
-              label: prac.name || `Dr. ${prac.first_name || ''} ${prac.last_name || ''}`.trim() || `Practitioner #${prac.id}`
-            }))}
-            placeholder="Select practitioner"
-            searchable
-            clearable
-            description="Practitioner associated with this condition"
-          />
-
-          {/* Date fields */}
-          <Group grow>
-            <DateInput
-              label="Onset Date"
-              name="onset_date"
-              value={parseDateInput(formData.onset_date)}
-              onChange={handleDateChange('onset_date')}
-              placeholder="Select onset date"
-              clearable
-              firstDayOfWeek={0}
-              maxDate={today}
-            />
-
-            <DateInput
-              label="End Date"
-              name="end_date"
-              value={parseDateInput(formData.end_date)}
-              onChange={handleDateChange('end_date')}
-              placeholder="Select end date"
-              clearable
-              firstDayOfWeek={0}
-              minDate={parseDateInput(formData.onset_date) || undefined}
-              maxDate={today}
-            />
-          </Group>
-
-          {/* Medical codes */}
-          <Group grow>
-            <TextInput
-              label="ICD-10 Code"
-              name="icd10_code"
-              value={formData.icd10_code || ''}
-              onChange={handleTextInputChange('icd10_code')}
-              placeholder="Enter ICD-10 code"
-            />
-
-            <TextInput
-              label="SNOMED Code"
-              name="snomed_code"
-              value={formData.snomed_code || ''}
-              onChange={handleTextInputChange('snomed_code')}
-              placeholder="Enter SNOMED code"
-            />
-          </Group>
-
-          <TextInput
-            label="Code Description"
-            name="code_description"
-            value={formData.code_description || ''}
-            onChange={handleTextInputChange('code_description')}
-            placeholder="Enter code description"
-          />
-
-          <Textarea
-            label="Clinical Notes"
-            name="notes"
-            value={formData.notes || ''}
-            onChange={handleTextInputChange('notes')}
-            placeholder="Enter clinical notes"
-            rows={3}
-          />
-
+            {/* Notes Tab */}
+            <Tabs.Panel value="notes">
+              <Box mt="md">
+                <Textarea
+                  label="Clinical Notes"
+                  value={formData.notes || ''}
+                  onChange={handleTextInputChange('notes')}
+                  placeholder="Enter clinical notes, observations, or additional details"
+                  description="Additional information about this condition"
+                  rows={5}
+                  minRows={3}
+                  autosize
+                />
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading}>
+            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
               Cancel
             </Button>
             <SubmitButton
-              loading={isLoading}
+              loading={isLoading || isSubmitting}
               disabled={!formData.diagnosis?.trim()}
             >
               {editingCondition ? 'Update' : 'Create'} Condition

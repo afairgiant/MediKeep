@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
+  Tabs,
   Stack,
-  Card,
   Group,
   Text,
   Title,
   Badge,
-  Divider,
   Button,
-  Grid
+  Box,
+  SimpleGrid,
 } from '@mantine/core';
+import {
+  IconInfoCircle,
+  IconStethoscope,
+  IconNotes,
+  IconFileText,
+  IconEdit,
+} from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { formatDate } from '../../../utils/helpers';
@@ -22,11 +29,20 @@ const ProcedureViewModal = ({
   onClose,
   procedure,
   onEdit,
-  practitioners,
+  practitioners = [],
   navigate,
   onFileUploadComplete,
   onError
 }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when modal opens or procedure changes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, procedure?.id]);
+
   const handleError = (error, context) => {
     logger.error('procedure_view_modal_error', {
       message: `Error in ProcedureViewModal during ${context}`,
@@ -34,7 +50,7 @@ const ProcedureViewModal = ({
       error: error.message,
       component: 'ProcedureViewModal',
     });
-    
+
     if (onError) {
       onError(error);
     }
@@ -53,7 +69,7 @@ const ProcedureViewModal = ({
       failedCount,
       component: 'ProcedureViewModal',
     });
-    
+
     if (onFileUploadComplete) {
       onFileUploadComplete(success, completedCount, failedCount);
     }
@@ -68,7 +84,7 @@ const ProcedureViewModal = ({
     }
   };
 
-  if (!procedure) {
+  if (!isOpen || !procedure) {
     return null;
   }
 
@@ -82,271 +98,199 @@ const ProcedureViewModal = ({
         onClose={onClose}
         title={
           <Group>
-            <Text size="lg" fw={600}>
-              Procedure Details
+            <Text fw={600} size="lg">
+              {procedure.procedure_name || 'Procedure Details'}
             </Text>
             <StatusBadge status={procedure.status} />
           </Group>
         }
-        size="lg"
+        size="xl"
         centered
         zIndex={2000}
-        styles={{
-          body: {
-            maxHeight: 'calc(100vh - 200px)',
-            overflowY: 'auto'
-          }
-        }}
       >
-        <Stack gap="md">
-          {/* Header Card */}
-          <Card withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
-            <Stack gap="sm">
-              <Group justify="space-between" align="flex-start">
-                <Stack gap="xs" style={{ flex: 1 }}>
-                  <Title order={3}>{procedure.procedure_name}</Title>
-                  <Group gap="xs">
-                    {procedure.procedure_type && (
-                      <Badge variant="light" color="blue" size="lg">
-                        {procedure.procedure_type}
-                      </Badge>
-                    )}
-                    {procedure.procedure_code && (
-                      <Badge variant="light" color="teal" size="lg">
-                        {procedure.procedure_code}
-                      </Badge>
-                    )}
-                  </Group>
-                </Stack>
-              </Group>
-            </Stack>
-          </Card>
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+              Overview
+            </Tabs.Tab>
+            <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+              Clinical Details
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              Notes
+            </Tabs.Tab>
+            <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              Documents
+            </Tabs.Tab>
+          </Tabs.List>
 
-          {/* Information Sections */}
-          <Grid>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    PROCEDURE INFORMATION
-                  </Text>
-                  <Divider />
-                  <Stack gap="xs">
-                    <Group>
-                      <Text size="sm" fw={500} w={100}>
-                        Date:
+          {/* Overview Tab */}
+          <Tabs.Panel value="overview">
+            <Box mt="md">
+              <Stack gap="lg">
+                {/* Basic Information */}
+                <div>
+                  <Title order={4} mb="sm">Basic Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Procedure Name</Text>
+                      <Text size="sm">{procedure.procedure_name}</Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Procedure Type</Text>
+                      <Text size="sm" c={procedure.procedure_type ? 'inherit' : 'dimmed'}>
+                        {procedure.procedure_type || 'Not specified'}
                       </Text>
-                      <Text
-                        size="sm"
-                        c={procedure.date ? 'inherit' : 'dimmed'}
-                      >
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Procedure Code</Text>
+                      <Text size="sm" c={procedure.procedure_code ? 'inherit' : 'dimmed'}>
+                        {procedure.procedure_code || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Date</Text>
+                      <Text size="sm" c={procedure.date ? 'inherit' : 'dimmed'}>
                         {procedure.date ? formatDate(procedure.date) : 'Not specified'}
                       </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={100}>
-                        Setting:
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Status</Text>
+                      <StatusBadge status={procedure.status} />
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Setting</Text>
+                      <Text size="sm" c={procedure.procedure_setting ? 'inherit' : 'dimmed'}>
+                        {procedure.procedure_setting || 'Not specified'}
                       </Text>
-                      {procedure.procedure_setting ? (
-                        <Badge variant="light" color="cyan" size="sm">
-                          {procedure.procedure_setting}
-                        </Badge>
-                      ) : (
-                        <Text size="sm" c="dimmed">
-                          Not specified
-                        </Text>
-                      )}
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={100}>
-                        Duration:
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Duration</Text>
+                      <Text size="sm" c={procedure.procedure_duration ? 'inherit' : 'dimmed'}>
+                        {procedure.procedure_duration ? `${procedure.procedure_duration} minutes` : 'Not specified'}
                       </Text>
-                      <Text
-                        size="sm"
-                        c={procedure.procedure_duration ? 'inherit' : 'dimmed'}
-                      >
-                        {procedure.procedure_duration
-                          ? `${procedure.procedure_duration} minutes`
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={100}>
-                        Facility:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={procedure.facility ? 'inherit' : 'dimmed'}
-                      >
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Facility</Text>
+                      <Text size="sm" c={procedure.facility ? 'inherit' : 'dimmed'}>
                         {procedure.facility || 'Not specified'}
                       </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+
+                {/* Practitioner Information */}
+                <div>
+                  <Title order={4} mb="sm">Practitioner</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Doctor</Text>
+                      {procedure.practitioner_id ? (
+                        <Text
+                          size="sm"
+                          fw={600}
+                          c="blue"
+                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                          onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
+                          title="View practitioner details"
+                        >
+                          {practitioner?.name || `Practitioner ID: ${procedure.practitioner_id}`}
+                        </Text>
+                      ) : (
+                        <Text size="sm" c="dimmed">Not specified</Text>
+                      )}
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Specialty</Text>
+                      <Text size="sm" c={practitioner?.specialty ? 'inherit' : 'dimmed'}>
+                        {practitioner?.specialty || 'Not specified'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <Title order={4} mb="sm">Description</Title>
+                  <Text size="sm" c={procedure.description ? 'inherit' : 'dimmed'}>
+                    {procedure.description || 'No description available'}
+                  </Text>
+                </div>
+
+                {/* Tags Section */}
+                {procedure.tags && procedure.tags.length > 0 && (
+                  <div>
+                    <Title order={4} mb="sm">Tags</Title>
+                    <Group gap="xs">
+                      {procedure.tags.map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="light"
+                          color="blue"
+                          size="sm"
+                          radius="md"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
                     </Group>
-                  </Stack>
-                </Stack>
-              </Card>
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Card withBorder p="md">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    PRACTITIONER INFORMATION
-                  </Text>
-                  <Divider />
-                  <Stack gap="xs">
-                    <Group>
-                      <Text size="sm" fw={500} w={100}>
-                        Doctor:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={procedure.practitioner_id ? 'blue' : 'dimmed'}
-                        style={procedure.practitioner_id ? { cursor: 'pointer', textDecoration: 'underline' } : {}}
-                        onClick={procedure.practitioner_id ? () => navigateToEntity('practitioner', procedure.practitioner_id, navigate) : undefined}
-                        title={procedure.practitioner_id ? "View practitioner details" : undefined}
-                      >
-                        {procedure.practitioner_id
-                          ? practitioner?.name || `Practitioner ID: ${procedure.practitioner_id}`
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                    <Group>
-                      <Text size="sm" fw={500} w={100}>
-                        Specialty:
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={procedure.practitioner_id ? 'inherit' : 'dimmed'}
-                      >
-                        {procedure.practitioner_id
-                          ? practitioner?.specialty || 'Not specified'
-                          : 'Not specified'}
-                      </Text>
-                    </Group>
-                  </Stack>
-                </Stack>
-              </Card>
-            </Grid.Col>
-          </Grid>
-
-          {/* Description Section */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                PROCEDURE DESCRIPTION
-              </Text>
-              <Divider />
-              <Text
-                size="sm"
-                c={procedure.description ? 'inherit' : 'dimmed'}
-              >
-                {procedure.description || 'No description available'}
-              </Text>
-            </Stack>
-          </Card>
-
-          {/* Complications Section */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                COMPLICATIONS
-              </Text>
-              <Divider />
-              <Text
-                size="sm"
-                c={procedure.procedure_complications ? '#d63384' : 'dimmed'}
-              >
-                {procedure.procedure_complications || 'No complications reported'}
-              </Text>
-            </Stack>
-          </Card>
-
-          {/* Anesthesia Section */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                ANESTHESIA INFORMATION
-              </Text>
-              <Divider />
-              <Stack gap="xs">
-                <Group>
-                  <Text size="sm" fw={500} w={100}>
-                    Type:
-                  </Text>
-                  {procedure.anesthesia_type ? (
-                    <Badge variant="light" color="purple" size="sm">
-                      {procedure.anesthesia_type}
-                    </Badge>
-                  ) : (
-                    <Text size="sm" c="dimmed">
-                      Not specified
-                    </Text>
-                  )}
-                </Group>
-                <Group align="flex-start">
-                  <Text size="sm" fw={500} w={100}>
-                    Notes:
-                  </Text>
-                  <Text
-                    size="sm"
-                    style={{ flex: 1 }}
-                    c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}
-                  >
-                    {procedure.anesthesia_notes || 'No anesthesia notes available'}
-                  </Text>
-                </Group>
+                  </div>
+                )}
               </Stack>
-            </Stack>
-          </Card>
+            </Box>
+          </Tabs.Panel>
 
-          {/* Clinical Notes Section */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                CLINICAL NOTES
-              </Text>
-              <Divider />
-              <Text
-                size="sm"
-                c={procedure.notes ? 'inherit' : 'dimmed'}
-              >
-                {procedure.notes || 'No clinical notes available'}
-              </Text>
-            </Stack>
-          </Card>
+          {/* Clinical Details Tab */}
+          <Tabs.Panel value="clinical">
+            <Box mt="md">
+              <Stack gap="lg">
+                {/* Anesthesia Information */}
+                <div>
+                  <Title order={4} mb="sm">Anesthesia Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Anesthesia Type</Text>
+                      <Text size="sm" c={procedure.anesthesia_type ? 'inherit' : 'dimmed'}>
+                        {procedure.anesthesia_type || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                      <Text fw={500} size="sm" c="dimmed">Anesthesia Notes</Text>
+                      <Text size="sm" c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}>
+                        {procedure.anesthesia_notes || 'No anesthesia notes available'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
 
-          {/* Tags Section */}
-          {procedure.tags && procedure.tags.length > 0 && (
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  TAGS
-                </Text>
-                <Divider />
-                <Group gap="xs">
-                  {procedure.tags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="light"
-                      color="blue"
-                      size="sm"
-                      radius="md"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </Group>
+                {/* Complications */}
+                <div>
+                  <Title order={4} mb="sm">Complications</Title>
+                  <Text size="sm" c={procedure.procedure_complications ? '#d63384' : 'dimmed'}>
+                    {procedure.procedure_complications || 'No complications reported'}
+                  </Text>
+                </div>
               </Stack>
-            </Card>
-          )}
+            </Box>
+          </Tabs.Panel>
 
-          {/* Document Management */}
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                ATTACHED DOCUMENTS
-              </Text>
-              <Divider />
+          {/* Notes Tab */}
+          <Tabs.Panel value="notes">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">Clinical Notes</Title>
+                  <Text size="sm" c={procedure.notes ? 'inherit' : 'dimmed'}>
+                    {procedure.notes || 'No clinical notes available'}
+                  </Text>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Documents Tab */}
+          <Tabs.Panel value="documents">
+            <Box mt="md">
               <DocumentManagerWithProgress
                 entityType="procedure"
                 entityId={procedure.id}
@@ -360,23 +304,19 @@ const ProcedureViewModal = ({
                 onUploadComplete={handleDocumentUploadComplete}
                 onError={handleDocumentError}
               />
-            </Stack>
-          </Card>
+            </Box>
+          </Tabs.Panel>
+        </Tabs>
 
-          {/* Action Buttons */}
-          <Group justify="flex-end" mt="md">
-            <Button
-              variant="filled"
-              size="xs"
-              onClick={handleEditClick}
-            >
-              Edit Procedure
-            </Button>
-            <Button variant="filled" onClick={onClose}>
-              Close
-            </Button>
-          </Group>
-        </Stack>
+        {/* Action Buttons */}
+        <Group justify="flex-end" gap="sm" mt="lg">
+          <Button variant="default" onClick={onClose}>
+            Close
+          </Button>
+          <Button variant="filled" onClick={handleEditClick} leftSection={<IconEdit size={16} />}>
+            Edit
+          </Button>
+        </Group>
       </Modal>
     );
   } catch (error) {

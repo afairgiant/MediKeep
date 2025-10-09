@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, model_validator
 
 # Import enums for validation
 from ..models.enums import get_all_family_relationships
@@ -37,10 +37,18 @@ class FamilyMemberBase(BaseModel):
     @validator("gender")
     def validate_gender(cls, v):
         if v is not None:
-            valid_genders = ["male", "female", "other"]
-            if v.lower() not in valid_genders:
-                raise ValueError(f"Gender must be one of: {', '.join(valid_genders)}")
-            return v.lower()
+            # Accept both full names and single letter abbreviations
+            gender_mapping = {
+                "m": "male",
+                "f": "female",
+                "male": "male",
+                "female": "female",
+                "other": "other",
+            }
+            normalized = v.lower().strip()
+            if normalized not in gender_mapping:
+                raise ValueError(f"Gender must be one of: male, female, other (or M, F)")
+            return gender_mapping[normalized]
         return v
 
     @validator("death_year")
@@ -48,7 +56,9 @@ class FamilyMemberBase(BaseModel):
         if v:
             if "birth_year" in values and values["birth_year"] and v < values["birth_year"]:
                 raise ValueError("Death year cannot be before birth year")
-            if not values.get("is_deceased"):
+            # Only validate is_deceased flag if it's explicitly set to False
+            # (don't fail if is_deceased isn't in values yet due to field order)
+            if values.get("is_deceased") is False:
                 raise ValueError("Death year can only be set if family member is deceased")
         return v
 
@@ -84,10 +94,18 @@ class FamilyMemberUpdate(BaseModel):
     @validator("gender")
     def validate_gender(cls, v):
         if v is not None:
-            valid_genders = ["male", "female", "other"]
-            if v.lower() not in valid_genders:
-                raise ValueError(f"Gender must be one of: {', '.join(valid_genders)}")
-            return v.lower()
+            # Accept both full names and single letter abbreviations
+            gender_mapping = {
+                "m": "male",
+                "f": "female",
+                "male": "male",
+                "female": "female",
+                "other": "other",
+            }
+            normalized = v.lower().strip()
+            if normalized not in gender_mapping:
+                raise ValueError(f"Gender must be one of: male, female, other (or M, F)")
+            return gender_mapping[normalized]
         return v
 
     @validator("death_year")
@@ -105,6 +123,14 @@ class FamilyMemberResponse(FamilyMemberBase):
     created_at: datetime
     updated_at: datetime
     family_conditions: List["FamilyConditionResponse"] = []
+
+    @model_validator(mode='after')
+    def auto_correct_deceased_status(self):
+        """Auto-correct is_deceased if death_year is present but is_deceased is False."""
+        # If death_year exists but is_deceased is False, auto-correct it
+        if self.death_year and not self.is_deceased:
+            self.is_deceased = True
+        return self
 
     class Config:
         from_attributes = True

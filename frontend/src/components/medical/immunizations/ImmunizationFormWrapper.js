@@ -1,19 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
+  Tabs,
+  Box,
   Stack,
   Group,
   Button,
+  Grid,
   TextInput,
   Textarea,
   Select,
+  Text,
   NumberInput,
-  Alert,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconX } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconNeedle,
+  IconFileText,
+  IconNotes,
+} from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
+import { useFormHandlers } from '../../../hooks/useFormHandlers';
+import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 
 const ImmunizationFormWrapper = ({
@@ -23,23 +35,50 @@ const ImmunizationFormWrapper = ({
   formData,
   onInputChange,
   onSubmit,
-  editingImmunization,
+  editingImmunization = null,
   practitioners = [],
-  isLoading,
+  isLoading = false,
   statusMessage,
 }) => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(e);
-  };
+  // Tab state management
+  const [activeTab, setActiveTab] = useState('basic');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (field, value) => {
-    onInputChange({
-      target: {
-        name: field,
-        value: value
-      }
-    });
+  // Form handlers
+  const {
+    handleTextInputChange,
+  } = useFormHandlers(onInputChange);
+
+  // Get today's date for date picker constraints
+  const today = getTodayEndOfDay();
+
+  // Reset tab when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('basic');
+    }
+    if (!isOpen) {
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await onSubmit(e);
+      setIsSubmitting(false);
+    } catch (error) {
+      logger.error('immunization_form_wrapper_error', {
+        message: 'Error in ImmunizationFormWrapper',
+        immunizationId: editingImmunization?.id,
+        error: error.message,
+        component: 'ImmunizationFormWrapper',
+      });
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -54,195 +93,266 @@ const ImmunizationFormWrapper = ({
       opened={isOpen}
       onClose={onClose}
       title={title}
-      size="lg"
+      size="xl"
+      centered
+      zIndex={2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isLoading} statusMessage={statusMessage} />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || "Saving immunization..."} />
 
       <form onSubmit={handleSubmit}>
-        <Stack gap="md">
-          {/* Basic immunization information */}
-          <TextInput
-            label="Vaccine Name"
-            name="vaccine_name"
-            value={formData.vaccine_name || ''}
-            onChange={(e) => onInputChange(e)}
-            required
-            placeholder="e.g., Flu Shot, COVID-19, Tdap"
-            description="Common name for the vaccine"
-          />
+        <Stack gap="lg">
+          {/* Tabbed Content */}
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+                Basic Info
+              </Tabs.Tab>
+              <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
+                Administration
+              </Tabs.Tab>
+              {editingImmunization && (
+                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                  Documents
+                </Tabs.Tab>
+              )}
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                Notes
+              </Tabs.Tab>
+            </Tabs.List>
 
-          <TextInput
-            label="Formal/Trade Name (Optional)"
-            name="vaccine_trade_name"
-            value={formData.vaccine_trade_name || ''}
-            onChange={(e) => onInputChange(e)}
-            placeholder="e.g., Flublok TRIV 2025-2026 PFS"
-            description="Complete formal name from vaccine documentation"
-          />
+            {/* Basic Info Tab */}
+            <Tabs.Panel value="basic">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Vaccine Name"
+                      value={formData.vaccine_name || ''}
+                      onChange={handleTextInputChange('vaccine_name')}
+                      placeholder="e.g., Flu Shot, COVID-19, Tdap"
+                      required
+                      description="Common name for the vaccine"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Formal/Trade Name"
+                      value={formData.vaccine_trade_name || ''}
+                      onChange={handleTextInputChange('vaccine_trade_name')}
+                      placeholder="e.g., Flublok TRIV 2025-2026 PFS"
+                      description="Complete formal name from vaccine documentation"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Manufacturer"
+                      value={formData.manufacturer || ''}
+                      onChange={handleTextInputChange('manufacturer')}
+                      placeholder="Enter manufacturer"
+                      description="Vaccine manufacturer"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <NumberInput
+                      label="Dose Number"
+                      value={formData.dose_number || ''}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'dose_number', value: value || '' } });
+                      }}
+                      placeholder="Enter dose number"
+                      description="Which dose in the series"
+                      min={1}
+                      max={10}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Lot Number"
+                      value={formData.lot_number || ''}
+                      onChange={handleTextInputChange('lot_number')}
+                      placeholder="Enter lot number"
+                      description="Vaccine lot number"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="NDC Number"
+                      value={formData.ndc_number || ''}
+                      onChange={handleTextInputChange('ndc_number')}
+                      placeholder="e.g., 12345-6789-01"
+                      description="National Drug Code"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label="Expiration Date"
+                      value={parseDateInput(formData.expiration_date)}
+                      onChange={(value) => {
+                        const dateString = value ? value.toISOString().split('T')[0] : '';
+                        onInputChange({ target: { name: 'expiration_date', value: dateString } });
+                      }}
+                      placeholder="Select expiration date"
+                      description="When the vaccine expires"
+                      clearable
+                      firstDayOfWeek={0}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <Box>
+                      <Text size="sm" fw={500} mb="xs">
+                        Tags
+                      </Text>
+                      <Text size="xs" c="dimmed" mb="xs">
+                        Add tags to categorize and organize immunizations
+                      </Text>
+                      <TagInput
+                        value={formData.tags || []}
+                        onChange={(tags) => {
+                          onInputChange({ target: { name: 'tags', value: tags } });
+                        }}
+                        placeholder="Add tags..."
+                      />
+                    </Box>
+                  </Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          <DateInput
-            label="Date Administered"
-            name="date_administered"
-            value={formData.date_administered ? new Date(formData.date_administered) : null}
-            onChange={(value) => {
-              // Handle different value types from DateInput
-              let formattedDate = '';
-              if (value) {
-                try {
-                  // Ensure we have a Date object
-                  const dateObj = value instanceof Date ? value : new Date(value);
-                  if (!isNaN(dateObj.getTime())) {
-                    formattedDate = dateObj.toISOString().split('T')[0];
-                  }
-                } catch (error) {
-                  logger.warn('Date conversion error', { value, error: error.message });
-                }
-              }
-              handleInputChange('date_administered', formattedDate);
-            }}
-            placeholder="Select administration date"
-            required
-            withAsterisk
-          />
+            {/* Administration Tab */}
+            <Tabs.Panel value="administration">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label="Date Administered"
+                      value={parseDateInput(formData.date_administered)}
+                      onChange={(value) => {
+                        const dateString = value ? value.toISOString().split('T')[0] : '';
+                        onInputChange({ target: { name: 'date_administered', value: dateString } });
+                      }}
+                      placeholder="Select administration date"
+                      description="When the vaccine was administered"
+                      required
+                      clearable
+                      firstDayOfWeek={0}
+                      maxDate={today}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Administration Site"
+                      value={formData.site || null}
+                      data={[
+                        { value: 'left_arm', label: 'Left Arm' },
+                        { value: 'right_arm', label: 'Right Arm' },
+                        { value: 'left_thigh', label: 'Left Thigh' },
+                        { value: 'right_thigh', label: 'Right Thigh' },
+                        { value: 'left_deltoid', label: 'Left Deltoid' },
+                        { value: 'right_deltoid', label: 'Right Deltoid' },
+                        { value: 'oral', label: 'Oral' },
+                        { value: 'nasal', label: 'Nasal' },
+                      ]}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'site', value: value || '' } });
+                      }}
+                      placeholder="Select administration site"
+                      description="Where vaccine was administered"
+                      clearable
+                      searchable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Administration Route"
+                      value={formData.route || null}
+                      data={[
+                        { value: 'intramuscular', label: 'Intramuscular (IM)' },
+                        { value: 'subcutaneous', label: 'Subcutaneous (SC)' },
+                        { value: 'intradermal', label: 'Intradermal (ID)' },
+                        { value: 'oral', label: 'Oral' },
+                        { value: 'nasal', label: 'Nasal' },
+                        { value: 'intravenous', label: 'Intravenous (IV)' },
+                      ]}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'route', value: value || '' } });
+                      }}
+                      placeholder="Select administration route"
+                      description="Method of administration"
+                      clearable
+                      searchable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <TextInput
+                      label="Location/Facility"
+                      value={formData.location || ''}
+                      onChange={handleTextInputChange('location')}
+                      placeholder="e.g., CVS Pharmacy, Hospital, Clinic"
+                      description="Where vaccine was administered"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label="Practitioner"
+                      value={formData.practitioner_id ? formData.practitioner_id.toString() : null}
+                      data={practitionerOptions}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
+                      }}
+                      placeholder="Select administering practitioner"
+                      description="Healthcare provider who administered vaccine"
+                      clearable
+                      searchable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          <Group grow>
-            <NumberInput
-              label="Dose Number"
-              name="dose_number"
-              value={formData.dose_number || ''}
-              onChange={(value) => handleInputChange('dose_number', value)}
-              placeholder="Enter dose number"
-              min={1}
-              max={10}
-            />
+            {/* Documents Tab (only when editing) */}
+            {editingImmunization && (
+              <Tabs.Panel value="documents">
+                <Box mt="md">
+                  <DocumentManagerWithProgress
+                    entityType="immunization"
+                    entityId={editingImmunization.id}
+                    onError={(error) => {
+                      logger.error('Document upload error', { error });
+                    }}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
 
-            <TextInput
-              label="Lot Number"
-              name="lot_number"
-              value={formData.lot_number || ''}
-              onChange={(e) => onInputChange(e)}
-              placeholder="Enter lot number"
-            />
-          </Group>
-
-          <Group grow>
-            <TextInput
-              label="NDC Number"
-              name="ndc_number"
-              value={formData.ndc_number || ''}
-              onChange={(e) => onInputChange(e)}
-              placeholder="e.g., 12345-6789-01"
-            />
-
-            <TextInput
-              label="Manufacturer"
-              name="manufacturer"
-              value={formData.manufacturer || ''}
-              onChange={(e) => onInputChange(e)}
-              placeholder="Enter manufacturer"
-            />
-          </Group>
-
-          <Group grow>
-            <Select
-              label="Administration Site"
-              name="site"
-              value={formData.site || ''}
-              onChange={(value) => handleInputChange('site', value)}
-              data={[
-                { value: 'left_arm', label: 'Left Arm' },
-                { value: 'right_arm', label: 'Right Arm' },
-                { value: 'left_thigh', label: 'Left Thigh' },
-                { value: 'right_thigh', label: 'Right Thigh' },
-                { value: 'left_deltoid', label: 'Left Deltoid' },
-                { value: 'right_deltoid', label: 'Right Deltoid' },
-                { value: 'oral', label: 'Oral' },
-                { value: 'nasal', label: 'Nasal' },
-              ]}
-              placeholder="Select administration site"
-              clearable
-              searchable
-            />
-
-            <Select
-              label="Administration Route"
-              name="route"
-              value={formData.route || ''}
-              onChange={(value) => handleInputChange('route', value)}
-              data={[
-                { value: 'intramuscular', label: 'Intramuscular (IM)' },
-                { value: 'subcutaneous', label: 'Subcutaneous (SC)' },
-                { value: 'intradermal', label: 'Intradermal (ID)' },
-                { value: 'oral', label: 'Oral' },
-                { value: 'nasal', label: 'Nasal' },
-                { value: 'intravenous', label: 'Intravenous (IV)' },
-              ]}
-              placeholder="Select administration route"
-              clearable
-              searchable
-            />
-          </Group>
-
-          <DateInput
-            label="Expiration Date"
-            name="expiration_date"
-            value={formData.expiration_date ? new Date(formData.expiration_date) : null}
-            onChange={(value) => {
-              // Handle different value types from DateInput
-              let formattedDate = '';
-              if (value) {
-                try {
-                  // Ensure we have a Date object
-                  const dateObj = value instanceof Date ? value : new Date(value);
-                  if (!isNaN(dateObj.getTime())) {
-                    formattedDate = dateObj.toISOString().split('T')[0];
-                  }
-                } catch (error) {
-                  logger.warn('Date conversion error', { value, error: error.message });
-                }
-              }
-              handleInputChange('expiration_date', formattedDate);
-            }}
-            placeholder="Select expiration date"
-          />
-
-          <TextInput
-            label="Location"
-            name="location"
-            value={formData.location || ''}
-            onChange={(e) => onInputChange(e)}
-            placeholder="e.g., CVS Pharmacy, Hospital, Clinic, Health Department"
-          />
-
-          <Select
-            label="Practitioner"
-            name="practitioner_id"
-            value={formData.practitioner_id ? formData.practitioner_id.toString() : ''}
-            onChange={(value) => handleInputChange('practitioner_id', value)}
-            data={practitionerOptions}
-            placeholder="Select administering practitioner"
-            clearable
-            searchable
-          />
-
-          <Textarea
-            label="Notes"
-            name="notes"
-            value={formData.notes || ''}
-            onChange={(e) => onInputChange(e)}
-            placeholder="Enter any additional notes"
-            rows={3}
-          />
+            {/* Notes Tab */}
+            <Tabs.Panel value="notes">
+              <Box mt="md">
+                <Textarea
+                  label="Clinical Notes"
+                  value={formData.notes || ''}
+                  onChange={handleTextInputChange('notes')}
+                  placeholder="Enter clinical notes, reactions, or additional details"
+                  description="Additional information about this immunization"
+                  rows={5}
+                  minRows={3}
+                  autosize
+                />
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading}>
+            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
               Cancel
             </Button>
             <SubmitButton
-              loading={isLoading}
+              loading={isLoading || isSubmitting}
               disabled={!formData.vaccine_name?.trim() || !formData.date_administered}
             >
               {editingImmunization ? 'Update' : 'Create'} Immunization

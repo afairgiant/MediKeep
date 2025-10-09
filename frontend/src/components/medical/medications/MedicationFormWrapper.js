@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import MantineMedicalForm from '../MantineMedicalForm';
+import MantineMedicationForm from '../MantineMedicationForm';
 import logger from '../../../services/logger';
 
 const MedicationFormWrapper = memo(({
@@ -14,7 +14,7 @@ const MedicationFormWrapper = memo(({
   editingMedication,
 }) => {
   return (
-    <MantineMedicalForm
+    <MantineMedicationForm
       isOpen={isOpen}
       onClose={onClose}
       title={title}

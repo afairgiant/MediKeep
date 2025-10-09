@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   Badge,
   Button,
-  Card,
   Group,
   Stack,
   Text,
-  Grid,
   Title,
-  Divider,
+  Tabs,
+  Box,
+  SimpleGrid,
+  Paper,
 } from '@mantine/core';
+import {
+  IconInfoCircle,
+  IconPill,
+  IconNotes,
+  IconFileText,
+} from '@tabler/icons-react';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import logger from '../../../services/logger';
 
 const MedicationViewModal = ({
   isOpen,
@@ -22,27 +31,56 @@ const MedicationViewModal = ({
   onEdit,
   navigate,
   onError,
+  onFileUploadComplete,
+  practitioners = [],
 }) => {
+  // Tab state management
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Reset tab when modal opens with new medication
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, medication?.id]);
+
   const getMedicationPurpose = (medication) => {
     const indication = medication?.indication?.trim();
     return indication || 'No indication specified';
   };
 
+  const getPractitionerDisplay = (medication) => {
+    // Check if practitioner object exists
+    if (medication.practitioner) {
+      return `Dr. ${medication.practitioner.name}${medication.practitioner.specialty ? ` - ${medication.practitioner.specialty}` : ''}`;
+    }
+
+    // Check if prescribing_doctor string exists (legacy)
+    if (medication.prescribing_doctor) {
+      return medication.prescribing_doctor;
+    }
+
+    // Try to find practitioner by ID
+    if (medication.practitioner_id && practitioners.length > 0) {
+      const practitioner = practitioners.find(p => p.id === parseInt(medication.practitioner_id));
+      if (practitioner) {
+        return `Dr. ${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
+      }
+    }
+
+    return null;
+  };
+
+  if (!medication) return null;
+
+  const practitionerDisplay = getPractitionerDisplay(medication);
+
   return (
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Group>
-          <Text size="lg" fw={600}>
-            Medication Details
-          </Text>
-          {medication && (
-            <StatusBadge status={medication.status} />
-          )}
-        </Group>
-      }
-      size="lg"
+      title={`${medication.medication_name} - Details`}
+      size="xl"
       centered
       zIndex={2000}
       styles={{
@@ -52,221 +90,290 @@ const MedicationViewModal = ({
         }
       }}
     >
-      {medication && (
-        <Stack gap="md">
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Group justify="space-between" align="flex-start">
-                <Stack gap="xs" style={{ flex: 1 }}>
-                  <Title order={3}>{medication.medication_name}</Title>
-                  {medication.dosage && (
-                    <Badge variant="light" color="blue" size="lg">
-                      {medication.dosage}
-                    </Badge>
-                  )}
-                </Stack>
+      <Stack gap="lg">
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">
+                {medication.medication_name}
+              </Title>
+              <Group gap="xs">
+                <StatusBadge status={medication.status} />
+                {medication.dosage && (
+                  <Badge variant="light" color="blue" size="md">
+                    {medication.dosage}
+                  </Badge>
+                )}
+                {medication.medication_type && (
+                  <Badge variant="outline" color="gray" size="sm">
+                    {medication.medication_type}
+                  </Badge>
+                )}
               </Group>
-
-              <Stack gap="xs">
-                <Text fw={500} c="dimmed" size="sm">
-                  Purpose
-                </Text>
-                <Text>
-                  {getMedicationPurpose(medication)}
-                </Text>
-              </Stack>
-            </Stack>
-          </Card>
-
-          <Grid>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Card withBorder p="md" h="100%">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    DOSAGE & FREQUENCY
-                  </Text>
-                  <Divider />
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Dosage:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={medication.dosage ? 'inherit' : 'dimmed'}
-                    >
-                      {medication.dosage || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Frequency:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={medication.frequency ? 'inherit' : 'dimmed'}
-                    >
-                      {medication.frequency || 'Not specified'}
-                    </Text>
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Route:
-                    </Text>
-                    {medication.route ? (
-                      <Badge variant="light" color="cyan" size="sm">
-                        {medication.route}
-                      </Badge>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        Not specified
-                      </Text>
-                    )}
-                  </Group>
-                </Stack>
-              </Card>
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Card withBorder p="md" h="100%">
-                <Stack gap="sm">
-                  <Text fw={600} size="sm" c="dimmed">
-                    PRESCRIBER & PHARMACY
-                  </Text>
-                  <Divider />
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Prescriber:
-                    </Text>
-                    {medication.practitioner ? (
-                      <Text
-                        size="sm"
-                        c="blue"
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                        onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
-                        title="View practitioner details"
-                      >
-                        {medication.practitioner.name}
-                      </Text>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        Not specified
-                      </Text>
-                    )}
-                  </Group>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Pharmacy:
-                    </Text>
-                    {medication.pharmacy ? (
-                      <Text
-                        size="sm"
-                        c="blue"
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                        onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
-                        title="View pharmacy details"
-                      >
-                        {medication.pharmacy.name}
-                      </Text>
-                    ) : (
-                      <Text size="sm" c="dimmed">
-                        Not specified
-                      </Text>
-                    )}
-                  </Group>
-                </Stack>
-              </Card>
-            </Grid.Col>
-          </Grid>
-
-          <Card withBorder p="md">
-            <Stack gap="sm">
-              <Text fw={600} size="sm" c="dimmed">
-                EFFECTIVE PERIOD
-              </Text>
-              <Divider />
-              <Grid>
-                <Grid.Col span={{ base: 12, sm: 6 }}>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      Start Date:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={
-                        medication.effective_period_start
-                          ? 'inherit'
-                          : 'dimmed'
-                      }
-                    >
-                      {medication.effective_period_start
-                        ? formatDate(medication.effective_period_start)
-                        : 'Not specified'}
-                    </Text>
-                  </Group>
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, sm: 6 }}>
-                  <Group>
-                    <Text size="sm" fw={500} w={80}>
-                      End Date:
-                    </Text>
-                    <Text
-                      size="sm"
-                      c={
-                        medication.effective_period_end
-                          ? 'inherit'
-                          : 'dimmed'
-                      }
-                    >
-                      {medication.effective_period_end
-                        ? formatDate(medication.effective_period_end)
-                        : 'Not specified'}
-                    </Text>
-                  </Group>
-                </Grid.Col>
-              </Grid>
-            </Stack>
-          </Card>
-
-          {medication.tags && medication.tags.length > 0 && (
-            <Card withBorder p="md">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  TAGS
-                </Text>
-                <Divider />
-                <Group gap="xs">
-                  {medication.tags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="light"
-                      color="blue"
-                      size="sm"
-                      radius="md"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </Group>
-              </Stack>
-            </Card>
-          )}
-
-          <Group justify="flex-end" mt="md">
-            <Button
-              variant="light"
-              onClick={() => {
-                onClose();
-                onEdit(medication);
-              }}
-            >
-              Edit Medication
-            </Button>
-            <Button variant="filled" onClick={onClose}>
-              Close
-            </Button>
+            </div>
           </Group>
-        </Stack>
-      )}
+        </Paper>
+
+        {/* Tabbed Content */}
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+              Overview
+            </Tabs.Tab>
+            <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
+              Dosage & Refills
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              Notes
+            </Tabs.Tab>
+            <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              Documents
+            </Tabs.Tab>
+          </Tabs.List>
+
+          {/* Overview Tab */}
+          <Tabs.Panel value="overview">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">Basic Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Medication Name</Text>
+                      <Text size="sm">{medication.medication_name}</Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Purpose/Indication</Text>
+                      <Text size="sm" c={medication.indication ? 'inherit' : 'dimmed'}>
+                        {getMedicationPurpose(medication)}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Status</Text>
+                      <div>
+                        <StatusBadge status={medication.status} />
+                      </div>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Medication Type</Text>
+                      <Text size="sm" c={medication.medication_type ? 'inherit' : 'dimmed'}>
+                        {medication.medication_type || 'Not specified'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+
+                {/* Dates Section */}
+                <div>
+                  <Title order={4} mb="sm">Timeline</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Start Date</Text>
+                      <Text size="sm" c={medication.start_date ? 'inherit' : 'dimmed'}>
+                        {medication.start_date ? formatDate(medication.start_date) : 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">End Date</Text>
+                      <Text size="sm" c={medication.end_date ? 'inherit' : 'dimmed'}>
+                        {medication.end_date ? formatDate(medication.end_date) : 'Ongoing'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+
+                {/* Prescriber Section */}
+                <div>
+                  <Title order={4} mb="sm">Prescriber & Pharmacy</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Prescribing Doctor</Text>
+                      <Text size="sm" c={practitionerDisplay ? 'inherit' : 'dimmed'}>
+                        {practitionerDisplay || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Pharmacy</Text>
+                      <Text size="sm" c={medication.pharmacy ? 'inherit' : 'dimmed'}>
+                        {medication.pharmacy
+                          ? (typeof medication.pharmacy === 'object'
+                              ? medication.pharmacy.name || medication.pharmacy.brand || 'Pharmacy'
+                              : medication.pharmacy)
+                          : 'Not specified'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+
+                {/* Tags Section */}
+                {medication.tags && medication.tags.length > 0 && (
+                  <div>
+                    <Title order={4} mb="sm">Tags</Title>
+                    <Group gap="xs">
+                      {medication.tags.map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="light"
+                          color="blue"
+                          size="sm"
+                          radius="md"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </div>
+                )}
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Dosage & Refills Tab */}
+          <Tabs.Panel value="details">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">Dosage Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Dosage</Text>
+                      <Text size="sm" c={medication.dosage ? 'inherit' : 'dimmed'}>
+                        {medication.dosage || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Frequency</Text>
+                      <Text size="sm" c={medication.frequency ? 'inherit' : 'dimmed'}>
+                        {medication.frequency || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Route</Text>
+                      <Text size="sm" c={medication.route ? 'inherit' : 'dimmed'}>
+                        {medication.route || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Form</Text>
+                      <Text size="sm" c={medication.form ? 'inherit' : 'dimmed'}>
+                        {medication.form || 'Not specified'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+
+                {/* Refill Information - TODO: Enable when refill functionality is implemented */}
+                {/* <div>
+                  <Title order={4} mb="sm">Refill Information</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Quantity</Text>
+                      <Text c={medication.quantity ? 'inherit' : 'dimmed'}>
+                        {medication.quantity || 'Not specified'}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">Refills Remaining</Text>
+                      <Text c={medication.refills !== undefined ? 'inherit' : 'dimmed'}>
+                        {medication.refills !== undefined ? medication.refills : 'Not specified'}
+                      </Text>
+                    </Stack>
+                    {medication.last_refill_date && (
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">Last Refill Date</Text>
+                        <Text>{formatDate(medication.last_refill_date)}</Text>
+                      </Stack>
+                    )}
+                  </SimpleGrid>
+                </div> */}
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Notes Tab */}
+          <Tabs.Panel value="notes">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">Additional Notes</Title>
+                  <Paper withBorder p="sm" bg="gray.1">
+                    <Text
+                      size="sm"
+                      style={{ whiteSpace: 'pre-wrap' }}
+                      c={medication.notes ? 'inherit' : 'dimmed'}
+                    >
+                      {medication.notes || 'No notes available'}
+                    </Text>
+                  </Paper>
+                </div>
+
+                <div>
+                  <Title order={4} mb="sm">Side Effects</Title>
+                  <Paper withBorder p="sm" bg="gray.1">
+                    <Text
+                      size="sm"
+                      style={{ whiteSpace: 'pre-wrap' }}
+                      c={medication.side_effects ? 'inherit' : 'dimmed'}
+                    >
+                      {medication.side_effects || 'No side effects reported'}
+                    </Text>
+                  </Paper>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Documents Tab */}
+          <Tabs.Panel value="documents">
+            <Box mt="md">
+              <Stack gap="md">
+                <Title order={4}>Attached Documents</Title>
+                <DocumentManagerWithProgress
+                  entityType="medication"
+                  entityId={medication.id}
+                  mode="view"
+                  config={{
+                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
+                    maxSize: 10 * 1024 * 1024, // 10MB
+                    maxFiles: 10
+                  }}
+                  onUploadComplete={(success, completedCount, failedCount) => {
+                    if (onFileUploadComplete) {
+                      onFileUploadComplete(success, completedCount, failedCount);
+                    }
+                  }}
+                  onError={(error) => {
+                    logger.error('Document manager error in medication view:', error);
+                    if (onError) {
+                      onError(error);
+                    }
+                  }}
+                  showProgressModal={true}
+                />
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+        </Tabs>
+
+        {/* Action Buttons */}
+        <Group justify="flex-end" mt="md">
+          <Button
+            variant="light"
+            onClick={() => {
+              onClose();
+              setTimeout(() => {
+                onEdit(medication);
+              }, 100);
+            }}
+          >
+            Edit Medication
+          </Button>
+          <Button variant="filled" onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };
