@@ -599,7 +599,7 @@ const Medication = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No medications or suppliments found</Title>
+                    <Title order={3}>No medications or supplements found</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
                         ? 'Try adjusting your search or filter criteria.'
