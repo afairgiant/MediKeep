@@ -141,6 +141,33 @@ def _get_rotation_method() -> str:
         return "logrotate" if _is_logrotate_available() else "python"
 
 
+class ConsoleFormatterWithRequestID(logging.Formatter):
+    """
+    Custom console formatter that includes request ID for better debugging.
+
+    Format: timestamp level [logger] [req:request_id] message
+    Example: 2025-10-10 19:00:00 INFO [app.middleware] [req:a1b2c3d4] Request started
+
+    This formatter adds a request_id_display attribute to the record for
+    robust formatting without fragile string parsing, as suggested by Copilot AI.
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        # Extract request_id from record and create display attribute
+        request_id = getattr(record, LogFields.REQUEST_ID, None)
+
+        if request_id:
+            # Add a formatted display attribute that's used in the format string
+            # Format: "[req:xxx] " with trailing space
+            record.request_id_display = f"[req:{request_id}] "
+        else:
+            # Empty string if no request_id (most logs won't have it)
+            record.request_id_display = ""
+
+        # Format using the standard formatter (which now includes %(request_id_display)s)
+        return super().format(record)
+
+
 class MedicalRecordsJSONFormatter(logging.Formatter):
     """
     Custom JSON formatter for medical records system.
@@ -163,6 +190,7 @@ class MedicalRecordsJSONFormatter(logging.Formatter):
 
         # Add any extra fields from the record using standardized field names
         extra_fields = [
+            LogFields.REQUEST_ID,  # Request tracing ID from middleware
             LogFields.CATEGORY,
             LogFields.EVENT,
             LogFields.USER_ID,
@@ -275,8 +303,8 @@ class LoggingConfig:
         # Create formatters
         json_formatter = MedicalRecordsJSONFormatter()
 
-        # Enhanced console formatter for better readability in docker logs
-        console_formatter = logging.Formatter(CONSOLE_LOG_FORMAT)
+        # Enhanced console formatter with request ID support for docker logs
+        console_formatter = ConsoleFormatterWithRequestID(CONSOLE_LOG_FORMAT)
 
         # Set up console handler - always enabled, respects LOG_LEVEL
         console_handler = logging.StreamHandler()

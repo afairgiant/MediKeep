@@ -7,12 +7,14 @@ import logging
 import os
 from typing import Any, Dict
 
+from .logging_config import ConsoleFormatterWithRequestID
 from .logging_constants import CONSOLE_LOG_FORMAT, DEFAULT_LOG_LEVEL, validate_log_level
 
 
-class UvicornFormatter(logging.Formatter):
+class UvicornFormatter(ConsoleFormatterWithRequestID):
     """
     Custom formatter for Uvicorn logs to match our application logging format.
+    Inherits from ConsoleFormatterWithRequestID to support request_id_display.
     """
 
     def format(self, record: logging.LogRecord) -> str:
@@ -26,7 +28,7 @@ class UvicornFormatter(logging.Formatter):
                 f"medical_records.server.{record.name.replace('uvicorn.', '')}"
             )
 
-        # Use our standard console format
+        # Use parent's format method which adds request_id_display
         return super().format(record)
 
 
