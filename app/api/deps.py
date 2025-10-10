@@ -1,4 +1,4 @@
-from typing import Generator, Optional
+from typing import Generator, Optional, NamedTuple
 
 from fastapi import Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -22,6 +22,12 @@ security = HTTPBearer(auto_error=False)
 security_logger = get_logger(__name__, "security")
 
 
+class TokenValidationResult(NamedTuple):
+    """Result of JWT token validation containing decoded payload and username."""
+    payload: dict
+    username: str
+
+
 def get_db() -> Generator:
     """
     Get database session.
@@ -40,7 +46,7 @@ def _validate_and_decode_token(
     token: str,
     request: Request,
     auth_method: str = "header"
-) -> tuple[dict, str]:
+) -> TokenValidationResult:
     """
     Shared JWT token validation and decoding logic.
 
@@ -53,7 +59,9 @@ def _validate_and_decode_token(
         auth_method: Authentication method ("header" or "query_param") for logging
 
     Returns:
-        Tuple of (payload dict, username string)
+        TokenValidationResult containing:
+            - payload: Decoded JWT payload dictionary
+            - username: Extracted username from token subject claim
 
     Raises:
         UnauthorizedException: If token is invalid, expired, or malformed
@@ -129,7 +137,7 @@ def _validate_and_decode_token(
             f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
         )
 
-        return payload, username
+        return TokenValidationResult(payload=payload, username=username)
 
     except JWTError as e:
         security_logger.info(f"AUTH ({auth_method}): Token decode failed: {str(e)}")
@@ -194,7 +202,7 @@ def get_current_user(
         )
 
     # Validate and decode token using shared logic
-    payload, username = _validate_and_decode_token(
+    result = _validate_and_decode_token(
         credentials.credentials,
         request,
         auth_method="header"
@@ -202,33 +210,32 @@ def get_current_user(
 
     # Get user from database
     try:
-        db_user = user.get_by_username(db, username=username)
+        db_user = user.get_by_username(db, username=result.username)
         if db_user is None:
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
                 ip_address=client_ip,
                 user_agent=user_agent,
-                message=f"Token valid but user not found: {username}",
-                username=username,
+                message=f"Token valid but user not found: {result.username}",
+                username=result.username,
             )
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
                 headers={"WWW-Authenticate": "Bearer"}
             )
-
-    except UnauthorizedException:
-        # Re-raise authentication exceptions
-        raise
     except Exception as e:
+        # Don't catch UnauthorizedException - let it propagate naturally
+        if isinstance(e, UnauthorizedException):
+            raise
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
             ip_address=client_ip,
             user_agent=user_agent,
-            message=f"Database error during user lookup for {username}: {str(e)}",
-            username=username,
+            message=f"Database error during user lookup for {result.username}: {str(e)}",
+            username=result.username,
         )
         raise UnauthorizedException(
             message="Token validation failed",
@@ -244,8 +251,8 @@ def get_current_user(
         user_id=user_id,
         ip_address=client_ip,
         user_agent=user_agent,
-        message=f"Token successfully validated for user: {username}",
-        username=username,
+        message=f"Token successfully validated for user: {result.username}",
+        username=result.username,
     )
 
     return db_user
@@ -323,7 +330,7 @@ def get_current_user_flexible_auth(
         )
 
     # Validate and decode token using shared logic
-    payload, username = _validate_and_decode_token(
+    result = _validate_and_decode_token(
         jwt_token,
         request,
         auth_method=auth_method
@@ -331,33 +338,32 @@ def get_current_user_flexible_auth(
 
     # Get user from database
     try:
-        db_user = user.get_by_username(db, username=username)
+        db_user = user.get_by_username(db, username=result.username)
         if db_user is None:
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
                 ip_address=client_ip,
                 user_agent=user_agent,
-                message=f"Token valid but user not found: {username} (auth method: {auth_method})",
-                username=username,
+                message=f"Token valid but user not found: {result.username} (auth method: {auth_method})",
+                username=result.username,
             )
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
                 headers={"WWW-Authenticate": "Bearer"}
             )
-
-    except UnauthorizedException:
-        # Re-raise authentication exceptions
-        raise
     except Exception as e:
+        # Don't catch UnauthorizedException - let it propagate naturally
+        if isinstance(e, UnauthorizedException):
+            raise
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
             ip_address=client_ip,
             user_agent=user_agent,
-            message=f"Database error during user lookup for {username} (auth method: {auth_method}): {str(e)}",
-            username=username,
+            message=f"Database error during user lookup for {result.username} (auth method: {auth_method}): {str(e)}",
+            username=result.username,
         )
         raise UnauthorizedException(
             message="Token validation failed",
@@ -373,8 +379,8 @@ def get_current_user_flexible_auth(
         user_id=user_id,
         ip_address=client_ip,
         user_agent=user_agent,
-        message=f"Token successfully validated for user: {username} (auth method: {auth_method})",
-        username=username,
+        message=f"Token successfully validated for user: {result.username} (auth method: {auth_method})",
+        username=result.username,
     )
 
     return db_user
