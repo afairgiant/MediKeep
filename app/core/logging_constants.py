@@ -183,6 +183,7 @@ class LogFields:
     LOGGER = "logger"
     MESSAGE = "message"
     CORRELATION_ID = "correlation_id"
+    REQUEST_ID = "request_id"  # Request tracing ID (8-char UUID from middleware)
     CATEGORY = "category"
     EVENT = "event"
 

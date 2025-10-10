@@ -7,6 +7,7 @@ from app.core.logging_config import LoggingConfig, get_logger
 from app.core.logging_middleware import RequestLoggingMiddleware
 from app.core.middleware import TrailingSlashMiddleware
 from app.core.activity_middleware import ActivityTrackingMiddleware
+from app.core.request_id_middleware import RequestIDMiddleware
 from app.core.spa_routing import setup_spa_routing
 from app.core.startup import startup_event
 from app.core.static_files import setup_static_files
@@ -29,7 +30,9 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
 )
 
-# Add middleware stack
+# Add middleware stack (execution order is reverse of registration)
+# RequestIDMiddleware first - adds unique ID to all requests for tracing
+app.add_middleware(RequestIDMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(TrailingSlashMiddleware)

@@ -141,6 +141,32 @@ def _get_rotation_method() -> str:
         return "logrotate" if _is_logrotate_available() else "python"
 
 
+class ConsoleFormatterWithRequestID(logging.Formatter):
+    """
+    Custom console formatter that includes request ID for better debugging.
+
+    Format: timestamp level [logger] [req:request_id] message
+    Example: 2025-10-10 19:00:00 INFO [app.middleware] [req:a1b2c3d4] Request started
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        # Check if request_id exists in the record
+        request_id = getattr(record, LogFields.REQUEST_ID, None)
+
+        # Format the base message
+        formatted = super().format(record)
+
+        # If request_id exists, insert it after the logger name
+        if request_id:
+            # Split by '] ' to insert request_id after logger name
+            parts = formatted.split('] ', 1)
+            if len(parts) == 2:
+                # Insert [req:xxx] between logger and message
+                formatted = f"{parts[0]}] [req:{request_id}] {parts[1]}"
+
+        return formatted
+
+
 class MedicalRecordsJSONFormatter(logging.Formatter):
     """
     Custom JSON formatter for medical records system.
@@ -163,6 +189,7 @@ class MedicalRecordsJSONFormatter(logging.Formatter):
 
         # Add any extra fields from the record using standardized field names
         extra_fields = [
+            LogFields.REQUEST_ID,  # Request tracing ID from middleware
             LogFields.CATEGORY,
             LogFields.EVENT,
             LogFields.USER_ID,
@@ -275,8 +302,8 @@ class LoggingConfig:
         # Create formatters
         json_formatter = MedicalRecordsJSONFormatter()
 
-        # Enhanced console formatter for better readability in docker logs
-        console_formatter = logging.Formatter(CONSOLE_LOG_FORMAT)
+        # Enhanced console formatter with request ID support for docker logs
+        console_formatter = ConsoleFormatterWithRequestID(CONSOLE_LOG_FORMAT)
 
         # Set up console handler - always enabled, respects LOG_LEVEL
         console_handler = logging.StreamHandler()
