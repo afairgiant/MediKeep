@@ -70,7 +70,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
                 "request_id": request_id,
                 "method": request.method,
                 "path": str(request.url.path),
-                "client_ip": request.client.host if request.client else "unknown"
+                "client_ip": request.client.host if request.client and request.client.host else "unknown"
             }
         )
 

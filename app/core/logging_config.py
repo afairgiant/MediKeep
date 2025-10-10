@@ -147,24 +147,25 @@ class ConsoleFormatterWithRequestID(logging.Formatter):
 
     Format: timestamp level [logger] [req:request_id] message
     Example: 2025-10-10 19:00:00 INFO [app.middleware] [req:a1b2c3d4] Request started
+
+    This formatter adds a request_id_display attribute to the record for
+    robust formatting without fragile string parsing, as suggested by Copilot AI.
     """
 
     def format(self, record: logging.LogRecord) -> str:
-        # Check if request_id exists in the record
+        # Extract request_id from record and create display attribute
         request_id = getattr(record, LogFields.REQUEST_ID, None)
 
-        # Format the base message
-        formatted = super().format(record)
-
-        # If request_id exists, insert it after the logger name
         if request_id:
-            # Split by '] ' to insert request_id after logger name
-            parts = formatted.split('] ', 1)
-            if len(parts) == 2:
-                # Insert [req:xxx] between logger and message
-                formatted = f"{parts[0]}] [req:{request_id}] {parts[1]}"
+            # Add a formatted display attribute that's used in the format string
+            # Format: "[req:xxx] " with trailing space
+            record.request_id_display = f"[req:{request_id}] "
+        else:
+            # Empty string if no request_id (most logs won't have it)
+            record.request_id_display = ""
 
-        return formatted
+        # Format using the standard formatter (which now includes %(request_id_display)s)
+        return super().format(record)
 
 
 class MedicalRecordsJSONFormatter(logging.Formatter):
