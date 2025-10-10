@@ -1,4 +1,4 @@
-from typing import Generator, Optional
+from typing import Generator, Optional, NamedTuple
 
 from fastapi import Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -22,6 +22,12 @@ security = HTTPBearer(auto_error=False)
 security_logger = get_logger(__name__, "security")
 
 
+class TokenValidationResult(NamedTuple):
+    """Result of JWT token validation containing decoded payload and username."""
+    payload: dict
+    username: str
+
+
 def get_db() -> Generator:
     """
     Get database session.
@@ -36,13 +42,129 @@ def get_db() -> Generator:
         db.close()
 
 
+def _validate_and_decode_token(
+    token: str,
+    request: Request,
+    auth_method: str = "header"
+) -> TokenValidationResult:
+    """
+    Shared JWT token validation and decoding logic.
+
+    This function consolidates token validation to ensure consistent security
+    behavior across all authentication methods (header and query parameter).
+
+    Args:
+        token: JWT token string to validate
+        request: FastAPI request object for logging context
+        auth_method: Authentication method ("header" or "query_param") for logging
+
+    Returns:
+        TokenValidationResult containing:
+            - payload: Decoded JWT payload dictionary
+            - username: Extracted username from token subject claim
+
+    Raises:
+        UnauthorizedException: If token is invalid, expired, or malformed
+
+    Security Notes:
+        - Validates JWT format (3-part structure)
+        - Decodes using configured SECRET_KEY and ALGORITHM
+        - Logs all validation attempts for security monitoring
+        - Sanitizes all user-provided data before logging
+    """
+    # Extract client information for security logging
+    client_ip = get_client_ip(request)
+    user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
+
+    # Validate token format before attempting to decode
+    token_str = token.strip()
+    if not token_str:
+        security_logger.info(f"AUTH ({auth_method}): Empty token provided")
+        log_security_event(
+            security_logger,
+            event="token_empty",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message=f"Empty JWT token provided (auth method: {auth_method})",
+        )
+        raise UnauthorizedException(
+            message="Authentication failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    # Basic JWT format validation (should have 3 parts separated by dots)
+    token_parts = token_str.split('.')
+    if len(token_parts) != 3:
+        security_logger.info(f"AUTH ({auth_method}): Invalid token format - expected 3 parts, got {len(token_parts)}")
+        log_security_event(
+            security_logger,
+            event="token_invalid_format",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)} (auth method: {auth_method})",
+        )
+        raise UnauthorizedException(
+            message="Authentication failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    # Decode JWT token
+    try:
+        payload = jwt.decode(
+            token_str,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        username = payload.get("sub")
+        if username is None:
+            security_logger.info(f"AUTH ({auth_method}): Token missing subject claim")
+            log_security_event(
+                security_logger,
+                event="token_invalid_no_subject",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"JWT token missing subject claim (auth method: {auth_method})",
+            )
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        security_logger.info(
+            f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
+        )
+
+        return TokenValidationResult(payload=payload, username=username)
+
+    except JWTError as e:
+        security_logger.info(f"AUTH ({auth_method}): Token decode failed: {str(e)}")
+        log_security_event(
+            security_logger,
+            event="token_decode_failed",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            message=f"JWT token decode failed (auth method: {auth_method}): {str(e)}",
+        )
+        raise UnauthorizedException(
+            message="Token validation failed",
+            request=request,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
 def get_current_user(
     request: Request,
     db: Session = Depends(get_db),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> User:
     """
-    Get current authenticated user from JWT token.
+    Get current authenticated user from JWT token via Authorization header.
+
+    This is the standard authentication method for API requests. Validates the
+    JWT token from the Authorization header and returns the authenticated user.
 
     Args:
         request: FastAPI request object for extracting client info
@@ -54,6 +176,10 @@ def get_current_user(
 
     Raises:
         UnauthorizedException: If token is invalid or user not found
+
+    See Also:
+        get_current_user_flexible_auth: For endpoints requiring query parameter auth
+        _validate_and_decode_token: Shared token validation logic
     """
     # Extract client information for security logging
     client_ip = get_client_ip(request)
@@ -75,108 +201,41 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    # Standardized authentication error
+    # Validate and decode token using shared logic
+    result = _validate_and_decode_token(
+        credentials.credentials,
+        request,
+        auth_method="header"
+    )
 
+    # Get user from database
     try:
-        # Validate token format before attempting to decode
-        token_str = credentials.credentials.strip()
-        if not token_str:
-            security_logger.info("Empty token provided")
-            log_security_event(
-                security_logger,
-                event="token_empty",
-                ip_address=client_ip,
-                user_agent=user_agent,
-                message="Empty JWT token provided",
-            )
-            raise UnauthorizedException(
-                message="Authentication failed",
-                request=request,
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-            
-        # Basic JWT format validation (should have 3 parts separated by dots)
-        token_parts = token_str.split('.')
-        if len(token_parts) != 3:
-            security_logger.info(f"Invalid token format - expected 3 parts, got {len(token_parts)}")
-            log_security_event(
-                security_logger,
-                event="token_invalid_format",
-                ip_address=client_ip,
-                user_agent=user_agent,
-                message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)}",
-            )
-            raise UnauthorizedException(
-                message="Authentication failed",
-                request=request,
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-
-        # Decode JWT token
-        payload = jwt.decode(
-            token_str,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-        )
-        username = payload.get("sub")
-        if username is None:
-            security_logger.info("Token missing subject claim")
-            log_security_event(
-                security_logger,
-                event="token_invalid_no_subject",
-                ip_address=client_ip,
-                user_agent=user_agent,
-                message="JWT token missing subject claim",
-            )
-            raise UnauthorizedException(
-                message="Authentication failed",
-                request=request,
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-
-        security_logger.info("Token decoded successfully")
-
-    except JWTError as e:
-        security_logger.info(f"Token decode failed: {str(e)}")
-        log_security_event(
-            security_logger,
-            event="token_decode_failed",
-            ip_address=client_ip,
-            user_agent=user_agent,
-            message=f"JWT token decode failed: {str(e)}",
-        )
-        raise UnauthorizedException(
-            message="Token validation failed",
-            request=request,
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    # Get user from database (caching disabled to avoid session issues)
-    try:
-        db_user = user.get_by_username(db, username=username)
+        db_user = user.get_by_username(db, username=result.username)
         if db_user is None:
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
                 ip_address=client_ip,
                 user_agent=user_agent,
-                message=f"Token valid but user not found: {username}",
-                username=username,
+                message=f"Token valid but user not found: {result.username}",
+                username=result.username,
             )
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
                 headers={"WWW-Authenticate": "Bearer"}
             )
-
     except Exception as e:
+        # Don't catch UnauthorizedException - let it propagate naturally
+        if isinstance(e, UnauthorizedException):
+            raise
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
             ip_address=client_ip,
             user_agent=user_agent,
-            message=f"Database error during user lookup for {username}: {str(e)}",
-            username=username,
+            message=f"Database error during user lookup for {result.username}: {str(e)}",
+            username=result.username,
         )
         raise UnauthorizedException(
             message="Token validation failed",
@@ -192,8 +251,8 @@ def get_current_user(
         user_id=user_id,
         ip_address=client_ip,
         user_agent=user_agent,
-        message=f"Token successfully validated for user: {username}",
-        username=username,
+        message=f"Token successfully validated for user: {result.username}",
+        username=result.username,
     )
 
     return db_user
@@ -207,38 +266,46 @@ def get_current_user_flexible_auth(
 ) -> User:
     """
     Get current authenticated user with flexible authentication.
-    
+
     Supports both Authorization header and query parameter token authentication.
     This is primarily intended for file viewing endpoints where Authorization headers
-    may not be available (e.g., when opening files in new browser tabs).
-    
+    may not be available (e.g., when opening files in new browser tabs via window.open).
+
     SECURITY CONSIDERATIONS:
     - Query parameter tokens may be logged in server access logs
     - Query parameter tokens appear in browser history
-    - Authorization header is preferred when available
-    - This method should only be used for endpoints that require browser-native access
-    
+    - Authorization header is ALWAYS preferred when available
+    - This method should ONLY be used for endpoints that require browser-native access
+    - Currently used by: /api/v1/entity-files/files/{id}/view
+
     Args:
         request: FastAPI request object
         db: Database session
         credentials: JWT token from Authorization header (optional)
-        token: JWT token from query parameter (optional)
-        
+        token: JWT token from query parameter (optional, for file viewing)
+
     Returns:
         Current user object
-        
+
     Raises:
         UnauthorizedException: If no valid token is provided or token is invalid
+
+    See Also:
+        get_current_user: Standard auth for regular API endpoints
+        _validate_and_decode_token: Shared token validation logic
+
+    Example Usage:
+        # Frontend opens PDF in new tab
+        window.open(`/api/v1/entity-files/files/123/view?token=${userToken}`)
     """
     # Extract client information for security logging
     client_ip = get_client_ip(request)
     user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
-    # Standardized authentication error
-    
+
     # Try to get token from Authorization header first, then query parameter
     jwt_token = None
     auth_method = None
-    
+
     if credentials and credentials.credentials:
         jwt_token = credentials.credentials
         auth_method = "header"
@@ -261,116 +328,49 @@ def get_current_user_flexible_auth(
             request=request,
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
-    try:
-        # Validate token format before attempting to decode
-        token_str = jwt_token.strip()
-        if not token_str:
-            security_logger.info(f"AUTH ({auth_method}): Empty token provided")
-            log_security_event(
-                security_logger,
-                event="token_empty",
-                ip_address=client_ip,
-                user_agent=user_agent,
-                message=f"Empty JWT token provided (auth method: {auth_method})",
-            )
-            raise UnauthorizedException(
-                message="Authentication failed",
-                request=request,
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-            
-        # Basic JWT format validation (should have 3 parts separated by dots)
-        token_parts = token_str.split('.')
-        if len(token_parts) != 3:
-            security_logger.info(f"AUTH ({auth_method}): Invalid token format - expected 3 parts, got {len(token_parts)}")
-            log_security_event(
-                security_logger,
-                event="token_invalid_format",
-                ip_address=client_ip,
-                user_agent=user_agent,
-                message=f"Invalid JWT token format - expected 3 parts, got {len(token_parts)} (auth method: {auth_method})",
-            )
-            raise UnauthorizedException(
-                message="Authentication failed",
-                request=request,
-                headers={"WWW-Authenticate": "Bearer"}
-            )
 
-        # Decode JWT token using the same validation as get_current_user
-        payload = jwt.decode(
-            token_str,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-        )
-        username = payload.get("sub")
-        if username is None:
-            security_logger.info(f"AUTH ({auth_method}): Token missing subject claim")
-            log_security_event(
-                security_logger,
-                event="token_invalid_no_subject",
-                ip_address=client_ip,
-                user_agent=user_agent,
-                message=f"JWT token missing subject claim (auth method: {auth_method})",
-            )
-            raise UnauthorizedException(
-                message="Authentication failed",
-                request=request,
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-            
-        security_logger.info(
-            f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
-        )
-        
-    except JWTError as e:
-        security_logger.info(f"AUTH ({auth_method}): Token decode failed: {str(e)}")
-        log_security_event(
-            security_logger,
-            event="token_decode_failed",
-            ip_address=client_ip,
-            user_agent=user_agent,
-            message=f"JWT token decode failed (auth method: {auth_method}): {str(e)}",
-        )
-        raise UnauthorizedException(
-            message="Token validation failed",
-            request=request,
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    
-    # Get user from database (same logic as get_current_user)
+    # Validate and decode token using shared logic
+    result = _validate_and_decode_token(
+        jwt_token,
+        request,
+        auth_method=auth_method
+    )
+
+    # Get user from database
     try:
-        db_user = user.get_by_username(db, username=username)
+        db_user = user.get_by_username(db, username=result.username)
         if db_user is None:
             log_security_event(
                 security_logger,
                 event="token_user_not_found",
                 ip_address=client_ip,
                 user_agent=user_agent,
-                message=f"Token valid but user not found: {username} (auth method: {auth_method})",
-                username=username,
+                message=f"Token valid but user not found: {result.username} (auth method: {auth_method})",
+                username=result.username,
             )
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
                 headers={"WWW-Authenticate": "Bearer"}
             )
-            
     except Exception as e:
+        # Don't catch UnauthorizedException - let it propagate naturally
+        if isinstance(e, UnauthorizedException):
+            raise
         log_security_event(
             security_logger,
             event="token_user_lookup_error",
             ip_address=client_ip,
             user_agent=user_agent,
-            message=f"Database error during user lookup for {username} (auth method: {auth_method}): {str(e)}",
-            username=username,
+            message=f"Database error during user lookup for {result.username} (auth method: {auth_method}): {str(e)}",
+            username=result.username,
         )
         raise UnauthorizedException(
             message="Token validation failed",
             request=request,
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
+
     # Log successful token validation with auth method
     user_id = getattr(db_user, "id", None)
     log_security_event(
@@ -379,10 +379,10 @@ def get_current_user_flexible_auth(
         user_id=user_id,
         ip_address=client_ip,
         user_agent=user_agent,
-        message=f"Token successfully validated for user: {username} (auth method: {auth_method})",
-        username=username,
+        message=f"Token successfully validated for user: {result.username} (auth method: {auth_method})",
+        username=result.username,
     )
-    
+
     return db_user
 
 
