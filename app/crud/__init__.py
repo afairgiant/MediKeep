@@ -14,6 +14,7 @@ from .patient import patient
 from .pharmacy import pharmacy
 from .practitioner import practitioner
 from .procedure import procedure
+from .symptom import symptom_parent, symptom_occurrence
 from .treatment import treatment
 from .user import user
 from .vitals import vitals
@@ -34,6 +35,8 @@ __all__ = [
     "family_condition",
     "immunization",
     "procedure",
+    "symptom_parent",
+    "symptom_occurrence",
     "treatment",
     "allergy",
     "vitals",
