@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Paper,
   Timeline,
@@ -29,7 +29,7 @@ import {
  * Displays a timeline of symptom occurrences (episodes) with date range filtering
  * Uses the new two-level hierarchy API
  */
-const SymptomTimeline = ({ patientId }) => {
+const SymptomTimeline = ({ patientId, hidden }) => {
   const [timelineData, setTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
@@ -39,13 +39,7 @@ const SymptomTimeline = ({ patientId }) => {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewingSymptom, setViewingSymptom] = useState(null);
 
-  useEffect(() => {
-    if (patientId) {
-      fetchTimelineData();
-    }
-  }, [patientId, dateRange]);
-
-  const fetchTimelineData = async () => {
+  const fetchTimelineData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -106,7 +100,14 @@ const SymptomTimeline = ({ patientId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [patientId, dateRange]);
+
+  useEffect(() => {
+    // Only fetch data when component becomes visible
+    if (patientId && !hidden) {
+      fetchTimelineData();
+    }
+  }, [patientId, hidden, fetchTimelineData]);
 
   const handleTimelineClick = date => {
     setSelectedDate(date);
@@ -138,29 +139,37 @@ const SymptomTimeline = ({ patientId }) => {
     setModalOpen(true); // Reopen occurrences modal
   };
 
-  // Group timeline data by date
-  const groupedData = timelineData.reduce((acc, item) => {
-    const date = item.date;
-    if (!acc[date]) {
-      acc[date] = {
-        date,
-        occurrences: [],
-        maxSeverity: item.severity,
-      };
-    }
-    acc[date].occurrences.push(item);
+  // Memoize timeline grouping and sorting - expensive operation
+  const timelineEntries = useMemo(() => {
+    // Group timeline data by date
+    const groupedData = timelineData.reduce((acc, item) => {
+      const date = item.date;
+      if (!acc[date]) {
+        acc[date] = {
+          date,
+          occurrences: [],
+          maxSeverity: item.severity,
+        };
+      }
+      acc[date].occurrences.push(item);
 
-    // Track highest severity for the day
-    if (SYMPTOM_SEVERITY_ORDER[item.severity] > SYMPTOM_SEVERITY_ORDER[acc[date].maxSeverity]) {
-      acc[date].maxSeverity = item.severity;
-    }
+      // Track highest severity for the day
+      if (SYMPTOM_SEVERITY_ORDER[item.severity] > SYMPTOM_SEVERITY_ORDER[acc[date].maxSeverity]) {
+        acc[date].maxSeverity = item.severity;
+      }
 
-    return acc;
-  }, {});
+      return acc;
+    }, {});
 
-  const timelineEntries = Object.values(groupedData).sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
+    return Object.values(groupedData).sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+  }, [timelineData]);
+
+  // Don't render anything when hidden (keep state but save render cost)
+  if (hidden) {
+    return null;
+  }
 
   if (loading) {
     return (

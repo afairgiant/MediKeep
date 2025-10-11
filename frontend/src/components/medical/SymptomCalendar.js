@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Paper,
   Text,
@@ -30,28 +30,45 @@ import {
 } from '../../constants/symptomEnums';
 
 /**
+ * Pure helper function - outside component to prevent recreation
+ */
+const getDateKey = (year, month, day) => {
+  const date = new Date(year, month, day);
+  return date.toISOString().split('T')[0];
+};
+
+/**
+ * Pure helper function for severity color calculation
+ */
+const getSeverityColor = (occurrences) => {
+  if (!occurrences || occurrences.length === 0) return null;
+
+  const hasCritical = occurrences.some(o => o.severity === 'critical');
+  const hasSevere = occurrences.some(o => o.severity === 'severe');
+  const hasModerate = occurrences.some(o => o.severity === 'moderate');
+
+  if (hasCritical) return 'red';
+  if (hasSevere) return 'orange';
+  if (hasModerate) return 'yellow';
+  return 'green';
+};
+
+/**
  * SymptomCalendar Component
  * Displays a monthly calendar view of symptom occurrences (episodes)
  * Uses the new two-level hierarchy API
  */
-const SymptomCalendar = ({ patientId }) => {
+const SymptomCalendar = ({ patientId, hidden }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [occurrencesByDate, setOccurrencesByDate] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedOccurrences, setSelectedOccurrences] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewingSymptom, setViewingSymptom] = useState(null);
 
-  useEffect(() => {
-    if (patientId) {
-      fetchOccurrences();
-    }
-  }, [patientId, currentDate]);
-
-  const fetchOccurrences = async () => {
+  const fetchOccurrences = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -74,48 +91,7 @@ const SymptomCalendar = ({ patientId }) => {
         lastDay.toISOString().split('T')[0]
       );
 
-      // Group by date - handle duration-based symptoms
-      const grouped = {};
-      (data || []).forEach(occurrence => {
-        const startDate = occurrence.date;
-        const endDate = occurrence.resolved_date;
-
-        if (endDate) {
-          // Duration-based symptom - mark all dates in range
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          const current = new Date(start);
-
-          while (current <= end) {
-            const dateKey = current.toISOString().split('T')[0];
-            if (!grouped[dateKey]) {
-              grouped[dateKey] = [];
-            }
-            // Mark if this is the start, end, or middle of the duration
-            grouped[dateKey].push({
-              ...occurrence,
-              isDuration: true,
-              isStart: dateKey === startDate,
-              isEnd: dateKey === endDate,
-              isMid: dateKey !== startDate && dateKey !== endDate,
-            });
-            current.setDate(current.getDate() + 1);
-          }
-        } else {
-          // Point-in-time or ongoing symptom
-          if (!grouped[startDate]) {
-            grouped[startDate] = [];
-          }
-          grouped[startDate].push({
-            ...occurrence,
-            isDuration: false,
-            isOngoing: true, // Ongoing since no resolved_date
-          });
-        }
-      });
-
       setOccurrences(data || []);
-      setOccurrencesByDate(grouped);
 
       logger.info('symptom_calendar_fetch_success', {
         count: data?.length || 0,
@@ -127,11 +103,60 @@ const SymptomCalendar = ({ patientId }) => {
         component: 'SymptomCalendar',
       });
       setOccurrences([]);
-      setOccurrencesByDate({});
     } finally {
       setLoading(false);
     }
-  };
+  }, [patientId, currentDate]);
+
+  useEffect(() => {
+    // Only fetch data when component becomes visible
+    if (patientId && !hidden) {
+      fetchOccurrences();
+    }
+  }, [patientId, hidden, fetchOccurrences]);
+
+  // Memoize the expensive grouping calculation
+  const occurrencesByDate = useMemo(() => {
+    const grouped = {};
+    (occurrences || []).forEach(occurrence => {
+      const startDate = occurrence.date;
+      const endDate = occurrence.resolved_date;
+
+      if (endDate) {
+        // Duration-based symptom - mark all dates in range
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const current = new Date(start);
+
+        while (current <= end) {
+          const dateKey = current.toISOString().split('T')[0];
+          if (!grouped[dateKey]) {
+            grouped[dateKey] = [];
+          }
+          // Mark if this is the start, end, or middle of the duration
+          grouped[dateKey].push({
+            ...occurrence,
+            isDuration: true,
+            isStart: dateKey === startDate,
+            isEnd: dateKey === endDate,
+            isMid: dateKey !== startDate && dateKey !== endDate,
+          });
+          current.setDate(current.getDate() + 1);
+        }
+      } else {
+        // Point-in-time or ongoing symptom
+        if (!grouped[startDate]) {
+          grouped[startDate] = [];
+        }
+        grouped[startDate].push({
+          ...occurrence,
+          isDuration: false,
+          isOngoing: true, // Ongoing since no resolved_date
+        });
+      }
+    });
+    return grouped;
+  }, [occurrences]);
 
   const getDaysInMonth = date => {
     const year = date.getFullYear();
@@ -206,30 +231,60 @@ const SymptomCalendar = ({ patientId }) => {
     setModalOpen(true); // Reopen occurrences modal
   };
 
-  const getDateKey = day => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    return date.toISOString().split('T')[0];
-  };
-
-  const getSeverityColor = occurrences => {
-    if (!occurrences || occurrences.length === 0) return null;
-
-    const hasCritical = occurrences.some(o => o.severity === 'critical');
-    const hasSevere = occurrences.some(o => o.severity === 'severe');
-    const hasModerate = occurrences.some(o => o.severity === 'moderate');
-
-    if (hasCritical) return 'red';
-    if (hasSevere) return 'orange';
-    if (hasModerate) return 'yellow';
-    return 'green';
-  };
-
   const monthName = currentDate.toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
   });
   const days = getDaysInMonth(currentDate);
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Memoize all cell data calculations
+  const cellData = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    return days.map((day, index) => {
+      if (!day) {
+        return { isEmpty: true, index };
+      }
+
+      const dateKey = getDateKey(year, month, day);
+      const occurrencesOnDate = occurrencesByDate[dateKey] || [];
+      const hasOccurrences = occurrencesOnDate.length > 0;
+      const severityColor = getSeverityColor(occurrencesOnDate);
+
+      // Check if this day has duration-based symptoms
+      const hasDuration = occurrencesOnDate.some(o => o.isDuration);
+      const hasOngoing = occurrencesOnDate.some(o => o.isOngoing);
+      const isStart = occurrencesOnDate.some(o => o.isStart);
+      const isEnd = occurrencesOnDate.some(o => o.isEnd);
+      const isMid = occurrencesOnDate.some(o => o.isMid);
+
+      // Calculate unique symptom count
+      const uniqueSymptoms = new Set(
+        occurrencesOnDate.map(o => o.symptom_id)
+      ).size;
+
+      return {
+        day,
+        dateKey,
+        occurrencesOnDate,
+        hasOccurrences,
+        severityColor,
+        hasDuration,
+        hasOngoing,
+        isStart,
+        isEnd,
+        isMid,
+        uniqueSymptoms,
+      };
+    });
+  }, [days, occurrencesByDate, currentDate]);
+
+  // Don't render anything when hidden (keep state but save render cost)
+  if (hidden) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -268,27 +323,22 @@ const SymptomCalendar = ({ patientId }) => {
             </Box>
           ))}
 
-          {days.map((day, index) => {
-            if (!day) {
+          {cellData.map((cell, index) => {
+            if (cell.isEmpty) {
               return <Box key={`empty-${index}`} />;
             }
 
-            const dateKey = getDateKey(day);
-            const occurrencesOnDate = occurrencesByDate[dateKey] || [];
-            const hasOccurrences = occurrencesOnDate.length > 0;
-            const severityColor = getSeverityColor(occurrencesOnDate);
-
-            // Check if this day has duration-based symptoms
-            const hasDuration = occurrencesOnDate.some(o => o.isDuration);
-            const hasOngoing = occurrencesOnDate.some(o => o.isOngoing);
-            const isStart = occurrencesOnDate.some(o => o.isStart);
-            const isEnd = occurrencesOnDate.some(o => o.isEnd);
-            const isMid = occurrencesOnDate.some(o => o.isMid);
-
-            // Calculate unique symptom count (not duplicate occurrences across days)
-            const uniqueSymptoms = new Set(
-              occurrencesOnDate.map(o => o.symptom_id)
-            ).size;
+            const {
+              day,
+              hasOccurrences,
+              severityColor,
+              hasDuration,
+              hasOngoing,
+              isStart,
+              isEnd,
+              isMid,
+              uniqueSymptoms,
+            } = cell;
 
             return (
               <Box
