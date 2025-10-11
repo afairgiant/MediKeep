@@ -94,6 +94,41 @@ class CRUDSymptomParent(CRUDBase[Symptom, SymptomCreate, SymptomUpdate]):
         db.refresh(symptom)
         return symptom
 
+    def recalculate_occurrence_dates(
+        self,
+        db: Session,
+        *,
+        symptom_id: int
+    ) -> Optional[Symptom]:
+        """
+        Recalculate first_occurrence_date and last_occurrence_date from actual occurrences.
+        Useful after editing or deleting occurrences.
+        Returns None if symptom doesn't exist.
+        """
+        symptom = db.query(self.model).filter(self.model.id == symptom_id).first()
+        if not symptom:
+            return None
+
+        # Get min and max occurrence dates
+        date_stats = (
+            db.query(
+                func.min(SymptomOccurrence.occurrence_date).label("first"),
+                func.max(SymptomOccurrence.occurrence_date).label("last")
+            )
+            .filter(SymptomOccurrence.symptom_id == symptom_id)
+            .first()
+        )
+
+        if date_stats and date_stats.first:
+            # Update both dates from actual occurrences
+            symptom.first_occurrence_date = date_stats.first
+            symptom.last_occurrence_date = date_stats.last
+            symptom.updated_at = get_utc_now()
+            db.commit()
+            db.refresh(symptom)
+
+        return symptom
+
     def get_by_patient(
         self,
         db: Session,
@@ -106,6 +141,7 @@ class CRUDSymptomParent(CRUDBase[Symptom, SymptomCreate, SymptomUpdate]):
         """
         Get all symptom definitions for a patient.
         Optionally filter by status (active, resolved, monitoring).
+        Eagerly loads occurrences for accurate occurrence_count calculation.
         """
         query = db.query(self.model).filter(self.model.patient_id == patient_id)
 
@@ -114,6 +150,7 @@ class CRUDSymptomParent(CRUDBase[Symptom, SymptomCreate, SymptomUpdate]):
 
         return (
             query
+            .options(joinedload(Symptom.occurrences))
             .order_by(desc(self.model.last_occurrence_date))
             .offset(skip)
             .limit(limit)
@@ -169,6 +206,7 @@ class CRUDSymptomParent(CRUDBase[Symptom, SymptomCreate, SymptomUpdate]):
             db.query(self.model)
             .filter(self.model.patient_id == patient_id)
             .filter(self.model.symptom_name.ilike(f"%{escaped_term}%", escape='\\'))
+            .options(joinedload(Symptom.occurrences))
             .order_by(desc(self.model.last_occurrence_date))
             .offset(skip)
             .limit(limit)
@@ -287,6 +325,53 @@ class CRUDSymptomOccurrence(CRUDBase[SymptomOccurrence, SymptomOccurrenceCreate,
         db.commit()
         db.refresh(occurrence)
         return occurrence
+
+    def update(
+        self,
+        db: Session,
+        *,
+        db_obj: SymptomOccurrence,
+        obj_in: SymptomOccurrenceUpdate
+    ) -> SymptomOccurrence:
+        """
+        Update a symptom occurrence.
+        Recalculates parent symptom dates if occurrence_date changed.
+        """
+        # Use base class update
+        updated_occurrence = super().update(db=db, db_obj=db_obj, obj_in=obj_in)
+
+        # If occurrence_date changed, recalculate parent symptom dates
+        if obj_in.occurrence_date is not None:
+            symptom_parent.recalculate_occurrence_dates(
+                db=db, symptom_id=updated_occurrence.symptom_id
+            )
+
+        return updated_occurrence
+
+    def delete(
+        self,
+        db: Session,
+        *,
+        id: int
+    ) -> SymptomOccurrence:
+        """
+        Delete a symptom occurrence.
+        Recalculates parent symptom dates after deletion.
+        """
+        # Get occurrence first to know symptom_id
+        occurrence = self.get(db=db, id=id)
+        if not occurrence:
+            raise ValueError(f"Occurrence with id {id} not found.")
+
+        symptom_id = occurrence.symptom_id
+
+        # Use base class delete
+        deleted_occurrence = super().delete(db=db, id=id)
+
+        # Recalculate parent symptom dates
+        symptom_parent.recalculate_occurrence_dates(db=db, symptom_id=symptom_id)
+
+        return deleted_occurrence
 
     def get_by_symptom(
         self,

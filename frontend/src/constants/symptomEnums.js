@@ -151,3 +151,14 @@ export const getImpactLevelOptions = () => {
     label: IMPACT_LEVEL_LABELS[value],
   }));
 };
+
+/**
+ * Severity order for comparison (higher number = more severe)
+ * Used for determining maximum severity across multiple occurrences
+ */
+export const SYMPTOM_SEVERITY_ORDER = {
+  [SYMPTOM_SEVERITY.MILD]: 1,
+  [SYMPTOM_SEVERITY.MODERATE]: 2,
+  [SYMPTOM_SEVERITY.SEVERE]: 3,
+  [SYMPTOM_SEVERITY.CRITICAL]: 4,
+};

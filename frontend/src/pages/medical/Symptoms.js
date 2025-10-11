@@ -74,6 +74,7 @@ const Symptoms = () => {
   // Occurrence Form state
   const [showOccurrenceForm, setShowOccurrenceForm] = useState(false);
   const [selectedSymptomForOccurrence, setSelectedSymptomForOccurrence] = useState(null);
+  const [editingOccurrence, setEditingOccurrence] = useState(null);
   const [occurrenceFormData, setOccurrenceFormData] = useState({
     occurrence_date: '',
     time_of_day: '',
@@ -235,6 +236,7 @@ const Symptoms = () => {
   // Occurrence Handlers
   const handleLogEpisode = symptom => {
     setSelectedSymptomForOccurrence(symptom);
+    setEditingOccurrence(null);
     setOccurrenceFormData({
       occurrence_date: new Date().toISOString().split('T')[0],
       time_of_day: '',
@@ -249,6 +251,27 @@ const Symptoms = () => {
       resolved_date: '',
       resolution_notes: '',
       notes: '',
+    });
+    setShowOccurrenceForm(true);
+  };
+
+  const handleEditOccurrence = (symptom, occurrence) => {
+    setSelectedSymptomForOccurrence(symptom);
+    setEditingOccurrence(occurrence);
+    setOccurrenceFormData({
+      occurrence_date: occurrence.occurrence_date || '',
+      time_of_day: occurrence.time_of_day || '',
+      severity: occurrence.severity || 'moderate',
+      pain_scale: occurrence.pain_scale !== null ? occurrence.pain_scale.toString() : '',
+      duration: occurrence.duration || '',
+      location: occurrence.location || '',
+      impact_level: occurrence.impact_level || '',
+      triggers: occurrence.triggers || [],
+      relief_methods: occurrence.relief_methods || [],
+      associated_symptoms: occurrence.associated_symptoms || [],
+      resolved_date: occurrence.resolved_date || '',
+      resolution_notes: occurrence.resolution_notes || '',
+      notes: occurrence.notes || '',
     });
     setShowOccurrenceForm(true);
   };
@@ -271,26 +294,37 @@ const Symptoms = () => {
         ...occurrenceFormData,
         pain_scale:
           occurrenceFormData.pain_scale !== ''
-            ? parseInt(occurrenceFormData.pain_scale)
+            ? parseInt(occurrenceFormData.pain_scale, 10)
             : null,
         resolved_date: occurrenceFormData.resolved_date || null,
       };
 
-      await symptomApi.createOccurrence(selectedSymptomForOccurrence.id, submitData);
+      if (editingOccurrence) {
+        await symptomApi.updateOccurrence(
+          selectedSymptomForOccurrence.id,
+          editingOccurrence.id,
+          submitData
+        );
+        setSuccessMessage('Episode updated successfully');
+      } else {
+        await symptomApi.createOccurrence(selectedSymptomForOccurrence.id, submitData);
+        setSuccessMessage('Episode logged successfully');
+      }
 
-      setSuccessMessage('Episode logged successfully');
       setShowOccurrenceForm(false);
       setSelectedSymptomForOccurrence(null);
+      setEditingOccurrence(null);
       fetchSymptoms();
 
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       logger.error('occurrence_submit_error', {
         symptomId: selectedSymptomForOccurrence.id,
+        editing: !!editingOccurrence,
         error: err.message,
         component: 'Symptoms',
       });
-      setError(err.message || 'Failed to log episode');
+      setError(err.message || 'Failed to save episode');
     }
   };
 
@@ -554,6 +588,7 @@ const Symptoms = () => {
         onEdit={handleEditSymptom}
         onDelete={handleDeleteSymptom}
         onLogEpisode={handleLogEpisode}
+        onEditOccurrence={handleEditOccurrence}
         onRefresh={fetchSymptoms}
       />
 
@@ -577,12 +612,17 @@ const Symptoms = () => {
         onClose={() => {
           setShowOccurrenceForm(false);
           setSelectedSymptomForOccurrence(null);
+          setEditingOccurrence(null);
         }}
-        title={`Log Episode: ${selectedSymptomForOccurrence?.symptom_name}`}
+        title={
+          editingOccurrence
+            ? `Edit Episode: ${selectedSymptomForOccurrence?.symptom_name}`
+            : `Log Episode: ${selectedSymptomForOccurrence?.symptom_name}`
+        }
         formData={occurrenceFormData}
         onInputChange={handleOccurrenceInputChange}
         onSubmit={handleOccurrenceSubmit}
-        editingOccurrence={null}
+        editingOccurrence={editingOccurrence}
       />
     </Container>
   );

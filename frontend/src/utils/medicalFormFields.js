@@ -7,6 +7,10 @@ import {
   MEDICATION_TYPES,
   MEDICATION_TYPE_LABELS,
 } from '../constants/medicationTypes';
+import { getTimeOfDayOptions } from '../constants/symptomEnums';
+
+// Static date reference for maxDate validation (prevents creating new Date on each render)
+const TODAY = new Date();
 
 // Add tags field configuration that can be used across all forms
 const tagsFieldConfig = {
@@ -74,7 +78,7 @@ export const allergyFormFields = [
     placeholder: 'When did this allergy first occur',
     description: 'When this allergy was first discovered',
     gridColumn: 6,
-    maxDate: () => new Date(), // Can't be in the future
+    maxDate: TODAY, // Can't be in the future
   },
   {
     name: 'medication_id',
@@ -160,7 +164,7 @@ export const conditionFormFields = [
     description: 'When this condition was first diagnosed',
     gridColumn: 6,
 
-    maxDate: () => new Date(),
+    maxDate: TODAY,
   },
   {
     name: 'end_date',
@@ -169,7 +173,7 @@ export const conditionFormFields = [
     placeholder: 'When was this condition resolved',
     description: 'When this condition was resolved (optional)',
     gridColumn: 6,
-    maxDate: () => new Date(),
+    maxDate: TODAY,
   },
   {
     name: 'icd10_code',
@@ -900,7 +904,7 @@ export const visitFormFields = [
     required: true,
     description: 'When the visit occurred',
     gridColumn: 6,
-    maxDate: () => new Date(),
+    maxDate: TODAY,
   },
   {
     name: 'practitioner_id',
@@ -2081,7 +2085,7 @@ export const symptomParentFormFields = [
     required: true,
     description: 'When you first noticed this symptom',
     gridColumn: 6,
-    maxDate: () => new Date(),
+    maxDate: TODAY,
   },
   {
     name: 'status',
@@ -2147,7 +2151,7 @@ export const symptomOccurrenceFormFields = [
     required: true,
     description: 'Date of this specific episode',
     gridColumn: 6,
-    maxDate: () => new Date(),
+    maxDate: TODAY,
   },
   {
     name: 'time_of_day',
@@ -2157,12 +2161,7 @@ export const symptomOccurrenceFormFields = [
     description: 'When during the day did this occur',
     gridColumn: 6,
     clearable: true,
-    options: [
-      { value: 'morning', label: 'Morning' },
-      { value: 'afternoon', label: 'Afternoon' },
-      { value: 'evening', label: 'Evening' },
-      { value: 'night', label: 'Night' },
-    ],
+    options: getTimeOfDayOptions(),
   },
   {
     name: 'severity',
@@ -2273,7 +2272,7 @@ export const symptomOccurrenceFormFields = [
     placeholder: 'When did this episode resolve',
     description: 'Leave blank if still experiencing this episode',
     gridColumn: 6,
-    maxDate: () => new Date(),
+    maxDate: TODAY,
   },
   {
     name: 'resolution_notes',

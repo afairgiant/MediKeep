@@ -17,6 +17,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
 
@@ -984,6 +985,11 @@ class Symptom(Base):
         back_populates="symptom",
         cascade="all, delete-orphan"
     )
+
+    @hybrid_property
+    def occurrence_count(self):
+        """Calculate the count of occurrences for this symptom"""
+        return len(self.occurrences)
 
     # Indexes for performance
     __table_args__ = (

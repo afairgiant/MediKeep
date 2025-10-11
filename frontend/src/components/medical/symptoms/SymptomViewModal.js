@@ -22,6 +22,8 @@ import {
   IconFileText,
   IconClockHour4,
   IconNote,
+  IconEdit,
+  IconTrash,
 } from '@tabler/icons-react';
 import { formatDate } from '../../../utils/helpers';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -39,6 +41,7 @@ const SymptomViewModal = ({
   onEdit,
   onDelete,
   onLogEpisode,
+  onEditOccurrence,
   onRefresh,
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -70,17 +73,12 @@ const SymptomViewModal = ({
       });
 
       const data = await symptomApi.getOccurrences(symptom.id);
-      // Sort by occurrence_date descending (most recent first)
-      const sortedData = (data || []).sort((a, b) => {
-        const dateA = new Date(a.occurrence_date);
-        const dateB = new Date(b.occurrence_date);
-        return dateB - dateA;
-      });
-      setOccurrences(sortedData);
+      // Data is already sorted by backend (occurrence_date DESC)
+      setOccurrences(data || []);
 
       logger.info('symptom_view_fetch_occurrences_success', {
         symptomId: symptom.id,
-        count: sortedData.length,
+        count: data?.length || 0,
         component: 'SymptomViewModal',
       });
     } catch (err) {
@@ -438,14 +436,30 @@ const SymptomViewModal = ({
                             )}
                           </Stack>
 
-                          <Button
-                            size="xs"
-                            variant="light"
-                            color="red"
-                            onClick={() => handleDeleteOccurrence(occurrence.id)}
-                          >
-                            Delete
-                          </Button>
+                          <Group gap="xs">
+                            {onEditOccurrence && (
+                              <Button
+                                size="xs"
+                                variant="light"
+                                leftSection={<IconEdit size={14} />}
+                                onClick={() => {
+                                  onClose();
+                                  setTimeout(() => onEditOccurrence(symptom, occurrence), 100);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                            <Button
+                              size="xs"
+                              variant="light"
+                              color="red"
+                              leftSection={<IconTrash size={14} />}
+                              onClick={() => handleDeleteOccurrence(occurrence.id)}
+                            >
+                              Delete
+                            </Button>
+                          </Group>
                         </Group>
                       </Paper>
                     ))}

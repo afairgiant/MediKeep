@@ -21,6 +21,7 @@ import logger from '../../services/logger';
 import {
   SYMPTOM_SEVERITY_COLORS,
   SYMPTOM_STATUS_COLORS,
+  SYMPTOM_SEVERITY_ORDER,
 } from '../../constants/symptomEnums';
 
 /**
@@ -150,8 +151,7 @@ const SymptomTimeline = ({ patientId }) => {
     acc[date].occurrences.push(item);
 
     // Track highest severity for the day
-    const severityOrder = { mild: 1, moderate: 2, severe: 3, critical: 4 };
-    if (severityOrder[item.severity] > severityOrder[acc[date].maxSeverity]) {
+    if (SYMPTOM_SEVERITY_ORDER[item.severity] > SYMPTOM_SEVERITY_ORDER[acc[date].maxSeverity]) {
       acc[date].maxSeverity = item.severity;
     }
 
