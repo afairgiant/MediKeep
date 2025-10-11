@@ -158,6 +158,21 @@ class InsuranceStatus(Enum):
     PENDING = "pending"
 
 
+class SymptomSeverity(Enum):
+    """Severity levels for symptoms"""
+    MILD = "mild"
+    MODERATE = "moderate"
+    SEVERE = "severe"
+    CRITICAL = "critical"
+
+
+class SymptomStatus(Enum):
+    """Status values for symptoms"""
+    ACTIVE = "active"
+    RESOLVED = "resolved"
+    RECURRING = "recurring"
+
+
 # Helper functions to get status lists for validation
 def get_status_values(status_enum):
     """Get list of status values from enum"""
@@ -232,6 +247,16 @@ def get_all_insurance_types():
 def get_all_insurance_statuses():
     """Get all valid insurance status values"""
     return get_status_values(InsuranceStatus)
+
+
+def get_all_symptom_severities():
+    """Get all valid symptom severity values"""
+    return get_status_values(SymptomSeverity)
+
+
+def get_all_symptom_statuses():
+    """Get all valid symptom status values"""
+    return get_status_values(SymptomStatus)
 
 
 # Status mapping for data migration (old -> new)

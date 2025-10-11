@@ -2052,6 +2052,256 @@ export const insuranceFormFields = [
   tagsFieldConfig,  // Add tags field to insurance form
 ];
 
+// Symptom Parent Definition Form - For creating the symptom type/definition
+export const symptomParentFormFields = [
+  {
+    name: 'symptom_name',
+    type: 'text',
+    label: 'Symptom Name',
+    placeholder: 'e.g., Migraine Headache, Chronic Back Pain',
+    required: true,
+    description: 'Name of the symptom you want to track',
+    gridColumn: 8,
+    maxLength: 200,
+  },
+  {
+    name: 'category',
+    type: 'text',
+    label: 'Category',
+    placeholder: 'e.g., Pain, Digestive, Respiratory',
+    description: 'Optional category to organize symptoms',
+    gridColumn: 4,
+    maxLength: 100,
+  },
+  {
+    name: 'first_occurrence_date',
+    type: 'date',
+    label: 'First Occurrence Date',
+    placeholder: 'When did you first experience this',
+    required: true,
+    description: 'When you first noticed this symptom',
+    gridColumn: 6,
+    maxDate: () => new Date(),
+  },
+  {
+    name: 'status',
+    type: 'select',
+    label: 'Overall Status',
+    placeholder: 'Select status',
+    required: true,
+    description: 'Current overall status of this symptom',
+    gridColumn: 6,
+    options: [
+      {
+        value: 'active',
+        label: 'Active - Currently experiencing',
+      },
+      {
+        value: 'resolved',
+        label: 'Resolved - No longer experiencing',
+      },
+      {
+        value: 'recurring',
+        label: 'Recurring - Comes and goes',
+      },
+    ],
+  },
+  {
+    name: 'is_chronic',
+    type: 'checkbox',
+    label: 'Chronic Condition',
+    description: 'Check if this is an ongoing/long-term symptom',
+    gridColumn: 6,
+  },
+  {
+    name: 'typical_triggers',
+    type: 'custom',
+    component: 'TagInput',
+    label: 'Common Triggers',
+    placeholder: 'Add common triggers (stress, weather, foods, etc.)',
+    description: 'What typically triggers this symptom',
+    gridColumn: 12,
+    maxTags: 20,
+  },
+  {
+    name: 'general_notes',
+    type: 'textarea',
+    label: 'General Notes',
+    placeholder: 'Overall notes about this symptom...',
+    description: 'General information about patterns, history, or observations',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 6,
+    maxLength: 2000,
+  },
+  tagsFieldConfig,
+];
+
+// Symptom Occurrence Form - For logging individual episodes
+export const symptomOccurrenceFormFields = [
+  {
+    name: 'occurrence_date',
+    type: 'date',
+    label: 'Occurrence Date',
+    placeholder: 'When did this episode occur',
+    required: true,
+    description: 'Date of this specific episode',
+    gridColumn: 6,
+    maxDate: () => new Date(),
+  },
+  {
+    name: 'time_of_day',
+    type: 'select',
+    label: 'Time of Day',
+    placeholder: 'Select time of day',
+    description: 'When during the day did this occur',
+    gridColumn: 6,
+    clearable: true,
+    options: [
+      { value: 'morning', label: 'Morning' },
+      { value: 'afternoon', label: 'Afternoon' },
+      { value: 'evening', label: 'Evening' },
+      { value: 'night', label: 'Night' },
+    ],
+  },
+  {
+    name: 'severity',
+    type: 'select',
+    label: 'Severity',
+    placeholder: 'Select severity level',
+    required: true,
+    description: 'How severe was this episode',
+    gridColumn: 6,
+    options: [
+      {
+        value: 'mild',
+        label: 'Mild - Minor discomfort',
+      },
+      {
+        value: 'moderate',
+        label: 'Moderate - Noticeable impact',
+      },
+      {
+        value: 'severe',
+        label: 'Severe - Significant distress',
+      },
+      {
+        value: 'critical',
+        label: 'Critical - Emergency level',
+      },
+    ],
+  },
+  {
+    name: 'pain_scale',
+    type: 'number',
+    label: 'Pain Scale (0-10)',
+    placeholder: '0 = No pain, 10 = Worst pain',
+    description: 'Rate pain level from 0 (none) to 10 (worst possible)',
+    gridColumn: 6,
+    min: 0,
+    max: 10,
+    step: 1,
+  },
+  {
+    name: 'duration',
+    type: 'text',
+    label: 'Duration',
+    placeholder: 'e.g., 2 hours, 30 minutes, all day',
+    description: 'How long did this episode last',
+    gridColumn: 6,
+    maxLength: 100,
+  },
+  {
+    name: 'location',
+    type: 'text',
+    label: 'Location',
+    placeholder: 'e.g., Left temple, Lower back, Entire body',
+    description: 'Where on your body did you feel this',
+    gridColumn: 6,
+    maxLength: 200,
+  },
+  {
+    name: 'impact_level',
+    type: 'select',
+    label: 'Impact on Daily Life',
+    placeholder: 'Select impact level',
+    description: 'How much did this affect your daily activities',
+    gridColumn: 12,
+    clearable: true,
+    options: [
+      { value: 'no_impact', label: 'No Impact - Able to function normally' },
+      { value: 'mild', label: 'Mild - Slight difficulty with activities' },
+      { value: 'moderate', label: 'Moderate - Some activities limited' },
+      { value: 'severe', label: 'Severe - Most activities difficult' },
+      { value: 'debilitating', label: 'Debilitating - Unable to function' },
+    ],
+  },
+  {
+    name: 'triggers',
+    type: 'custom',
+    component: 'TagInput',
+    label: 'Triggers',
+    placeholder: 'What triggered this episode (stress, food, weather, etc.)',
+    description: 'Factors that may have caused or worsened this episode',
+    gridColumn: 12,
+    maxTags: 20,
+  },
+  {
+    name: 'relief_methods',
+    type: 'custom',
+    component: 'TagInput',
+    label: 'Relief Methods',
+    placeholder: 'What helped (medication, rest, ice, etc.)',
+    description: 'Things that provided relief for this episode',
+    gridColumn: 12,
+    maxTags: 20,
+  },
+  {
+    name: 'associated_symptoms',
+    type: 'custom',
+    component: 'TagInput',
+    label: 'Associated Symptoms',
+    placeholder: 'Other symptoms (nausea, dizziness, etc.)',
+    description: 'Other symptoms that occurred with this episode',
+    gridColumn: 12,
+    maxTags: 20,
+  },
+  {
+    name: 'resolved_date',
+    type: 'date',
+    label: 'Resolved Date',
+    placeholder: 'When did this episode resolve',
+    description: 'Leave blank if still experiencing this episode',
+    gridColumn: 6,
+    maxDate: () => new Date(),
+  },
+  {
+    name: 'resolution_notes',
+    type: 'textarea',
+    label: 'Resolution Notes',
+    placeholder: 'How was this episode resolved...',
+    description: 'Details about how this episode ended or was treated',
+    gridColumn: 12,
+    minRows: 2,
+    maxRows: 4,
+    maxLength: 2000,
+  },
+  {
+    name: 'notes',
+    type: 'textarea',
+    label: 'Additional Notes',
+    placeholder: 'Additional details about this episode...',
+    description: 'Any other relevant information about this occurrence',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 6,
+    maxLength: 2000,
+  },
+];
+
+// Keep old symptomFormFields for backward compatibility (deprecated)
+export const symptomFormFields = symptomParentFormFields;
+
 // Utility function to get field configuration by form type
 export const getFormFields = formType => {
   const fieldConfigs = {
@@ -2069,6 +2319,7 @@ export const getFormFields = formType => {
     familyMember: familyMemberFormFields,
     familyCondition: familyConditionFormFields,
     insurance: insuranceFormFields,
+    symptom: symptomFormFields,
   };
 
   return fieldConfigs[formType] || [];

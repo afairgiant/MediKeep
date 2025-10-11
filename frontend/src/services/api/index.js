@@ -20,6 +20,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.EMERGENCY_CONTACT]: 'emergency-contacts',
   [ENTITY_TYPES.PATIENT]: 'patients',
   [ENTITY_TYPES.FAMILY_MEMBER]: 'family-members',
+  [ENTITY_TYPES.SYMPTOM]: 'symptoms',
 };
 
 // Streamlined API service with proper logging integration
@@ -1727,6 +1728,13 @@ class ApiService {
     return this.deleteEntity(ENTITY_TYPES.ALLERGY, allergyId, signal);
   }
 
+  // Symptom methods - DEPRECATED
+  // Use symptomApi from './symptomApi' instead for two-level hierarchy support
+  // Old single-level symptom methods removed - see symptomApi for:
+  // - Parent symptom CRUD (symptom definitions)
+  // - Occurrence CRUD (individual episodes)
+  // - Timeline and stats methods
+
   // Treatment methods
   getTreatments(signal) {
     return this.getEntities(ENTITY_TYPES.TREATMENT, signal);
@@ -2258,3 +2266,6 @@ export default apiService;
 // V1 Patient Management Services
 export { default as patientApi } from './patientApi';
 export { default as patientSharingApi } from './patientSharingApi';
+
+// Medical Record Services
+export { default as symptomApi } from './symptomApi';
