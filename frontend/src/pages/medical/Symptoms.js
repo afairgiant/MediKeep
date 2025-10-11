@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
@@ -91,17 +91,9 @@ const Symptoms = () => {
     notes: '',
   });
 
-  // Fetch symptoms when patient changes
-  useEffect(() => {
-    if (currentPatient?.id) {
-      fetchSymptoms();
-    } else {
-      setSymptoms([]);
-      setLoading(false);
-    }
-  }, [currentPatient?.id]);
+  const fetchSymptoms = useCallback(async () => {
+    if (!currentPatient?.id) return;
 
-  const fetchSymptoms = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -130,7 +122,17 @@ const Symptoms = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPatient]);
+
+  // Fetch symptoms when patient changes
+  useEffect(() => {
+    if (currentPatient?.id) {
+      fetchSymptoms();
+    } else {
+      setSymptoms([]);
+      setLoading(false);
+    }
+  }, [currentPatient?.id, fetchSymptoms]);
 
   // Symptom Definition Handlers
   const handleAddSymptom = () => {
@@ -572,11 +574,11 @@ const Symptoms = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="timeline">
-          <SymptomTimeline patientId={currentPatient?.id} />
+          <SymptomTimeline patientId={currentPatient?.id} hidden={activeTab !== 'timeline'} />
         </Tabs.Panel>
 
         <Tabs.Panel value="calendar">
-          <SymptomCalendar patientId={currentPatient?.id} />
+          <SymptomCalendar patientId={currentPatient?.id} hidden={activeTab !== 'calendar'} />
         </Tabs.Panel>
       </Tabs>
 
