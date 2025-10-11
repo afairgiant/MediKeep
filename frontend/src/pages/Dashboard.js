@@ -366,6 +366,12 @@ const Dashboard = () => {
       link: '/vitals',
     },
     {
+      title: 'Symptoms',
+      icon: IconStethoscope,
+      color: 'blue',
+      link: '/symptoms',
+    },
+    {
       title: 'Conditions',
       icon: IconBrain,
       color: 'pink',

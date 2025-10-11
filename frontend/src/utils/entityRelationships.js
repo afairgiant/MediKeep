@@ -22,6 +22,7 @@ export const ENTITY_TYPES = {
   PRACTITIONER: 'practitioner',
   EMERGENCY_CONTACT: 'emergency_contact',
   FAMILY_MEMBER: 'family_member',
+  SYMPTOM: 'symptoms',
 };
 
 // Relationship types

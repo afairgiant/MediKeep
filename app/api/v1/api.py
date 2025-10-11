@@ -30,6 +30,7 @@ from app.api.v1.endpoints import (
     search,
     sso,
     standardized_tests,
+    symptom,
     system,
     tags,
     treatment,
@@ -92,6 +93,7 @@ api_router.include_router(procedure.router, prefix="/procedures", tags=["procedu
 api_router.include_router(treatment.router, prefix="/treatments", tags=["treatments"])
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])
 api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])
+api_router.include_router(symptom.router, prefix="/symptoms", tags=["symptoms"])
 
 # Healthcare provider endpoints
 api_router.include_router(

@@ -539,23 +539,53 @@ def verify_patient_record_access(
     record_patient_id: int,
     current_user_patient_id: int,
     record_type: str = "record",
+    db: Optional[Session] = None,
+    current_user: Optional[User] = None,
 ) -> None:
     """
-    Verify that a medical record belongs to the current user.
+    Verify that a medical record belongs to a patient accessible by the current user.
+
+    Supports multi-patient scenarios where a user can have multiple patients.
+    Checks if the record's patient is owned by or shared with the current user.
 
     Args:
         record_patient_id: Patient ID from the medical record
-        current_user_patient_id: Patient ID of the current user
+        current_user_patient_id: Patient ID of the current user (for backward compatibility)
         record_type: Type of record for error message (e.g., "medication", "allergy")
+        db: Database session (optional, required for multi-patient access checking)
+        current_user: Current user object (optional, required for multi-patient access checking)
 
     Raises:
-        NotFoundException: If record doesn't belong to current user
+        NotFoundException: If record doesn't belong to user or user doesn't have access
     """
-    if record_patient_id != current_user_patient_id:
-        raise NotFoundException(
-            message=f"{record_type.title()} not found",
-            request=None
-        )
+    # If db and current_user are provided, use proper multi-patient access checking
+    if db is not None and current_user is not None:
+        from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
+
+        # Get the patient record
+        patient_record = db.query(Patient).filter(Patient.id == record_patient_id).first()
+        if not patient_record:
+            raise NotFoundException(
+                message=f"{record_type.title()} not found",
+                request=None
+            )
+
+        # Check if user has access to this patient (covers ownership + sharing)
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, patient_record, permission='view'):
+            raise NotFoundException(
+                message=f"{record_type.title()} not found",
+                request=None
+            )
+    else:
+        # Fallback to simple equality check for backward compatibility
+        # This handles single-patient scenarios
+        if record_patient_id != current_user_patient_id:
+            raise NotFoundException(
+                message=f"{record_type.title()} not found",
+                request=None
+            )
 
 
 def verify_patient_access(

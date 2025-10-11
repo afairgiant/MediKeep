@@ -52,6 +52,7 @@ import Procedures from './pages/medical/Procedures';
 import Conditions from './pages/medical/Conditions';
 import Visits from './pages/medical/Visits';
 import Vitals from './pages/medical/Vitals';
+import Symptoms from './pages/medical/Symptoms';
 import Practitioners from './pages/medical/Practitioners';
 import Pharmacies from './pages/medical/Pharmacies';
 import EmergencyContacts from './pages/medical/EmergencyContacts';
@@ -418,6 +419,15 @@ function App() {
                         />
                         {/* Generated entity routes */}
                         {generateEntityRoutes()}
+                        {/* Symptom Diary Route */}
+                        <Route
+                          path="/symptoms"
+                          element={
+                            <ProtectedRoute>
+                              <Symptoms />
+                            </ProtectedRoute>
+                          }
+                        />
                         <Route
                           path="/reports/builder"
                           element={

@@ -57,6 +57,12 @@ export const NAVIGATION_SECTIONS = {
         icon: '❤️',
         id: 'vitals',
       },
+      {
+        name: 'Symptoms',
+        path: buildEntityUrl(ENTITY_TYPES.SYMPTOM),
+        icon: '🤒',
+        id: 'symptoms',
+      },
     ],
   },
   careAndTreatment: {

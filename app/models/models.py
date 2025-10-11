@@ -17,6 +17,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
 
@@ -210,6 +211,9 @@ class Patient(Base):
     vitals = orm_relationship(
         "Vitals", back_populates="patient", cascade="all, delete-orphan"
     )
+    symptoms = orm_relationship(
+        "Symptom", back_populates="patient", cascade="all, delete-orphan"
+    )
     emergency_contacts = orm_relationship(
         "EmergencyContact", back_populates="patient", cascade="all, delete-orphan"
     )
@@ -308,6 +312,11 @@ class Medication(Base):
     # Many-to-Many relationship with conditions through junction table
     condition_relationships = orm_relationship(
         "ConditionMedication", back_populates="medication", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with symptoms through junction table
+    symptom_relationships = orm_relationship(
+        "SymptomMedication", back_populates="medication", cascade="all, delete-orphan"
     )
 
     # Indexes for performance
@@ -677,6 +686,11 @@ class Condition(Base):
         "ConditionMedication", back_populates="condition", cascade="all, delete-orphan"
     )
 
+    # Many-to-Many relationship with symptoms through junction table
+    symptom_relationships = orm_relationship(
+        "SymptomCondition", back_populates="condition", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (
         Index("idx_conditions_patient_id", "patient_id"),
@@ -827,6 +841,11 @@ class Treatment(Base):
     practitioner = orm_relationship("Practitioner", back_populates="treatments")
     condition = orm_relationship("Condition", back_populates="treatments")
 
+    # Many-to-Many relationship with symptoms through junction table
+    symptom_relationships = orm_relationship(
+        "SymptomTreatment", back_populates="treatment", cascade="all, delete-orphan"
+    )
+
 
 class Allergy(Base):
     __tablename__ = "allergies"
@@ -905,6 +924,244 @@ class Vitals(Base):
 
     # Indexes for performance
     __table_args__ = (Index("idx_vitals_patient_id", "patient_id"),)
+
+
+class Symptom(Base):
+    """
+    Parent symptom definition/type (e.g., "Migraine", "Back Pain").
+    Stores general information about the symptom.
+    Individual episodes are tracked in SymptomOccurrence table.
+    """
+    __tablename__ = "symptoms"
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+
+    # Core symptom definition
+    symptom_name = Column(String(200), nullable=False)
+    category = Column(String(100), nullable=True)  # e.g., "Neurological", "Gastrointestinal"
+
+    # Overall status
+    status = Column(String(50), nullable=False, default="active")  # active, resolved, chronic
+    is_chronic = Column(Boolean, default=False, nullable=False)
+
+    # Occurrence tracking
+    first_occurrence_date = Column(Date, nullable=False)
+    last_occurrence_date = Column(Date, nullable=True)
+
+    # General information
+    typical_triggers = Column(JSONB, nullable=True, default=list)  # Common triggers
+    general_notes = Column(Text, nullable=True)
+    tags = Column(JSONB, nullable=True, default=list)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="symptoms")
+
+    # One-to-Many relationship with occurrences
+    occurrences = orm_relationship(
+        "SymptomOccurrence",
+        back_populates="symptom",
+        cascade="all, delete-orphan",
+        order_by="SymptomOccurrence.occurrence_date.desc()"
+    )
+
+    # Many-to-Many relationships through junction tables
+    condition_relationships = orm_relationship(
+        "SymptomCondition",
+        back_populates="symptom",
+        cascade="all, delete-orphan"
+    )
+    medication_relationships = orm_relationship(
+        "SymptomMedication",
+        back_populates="symptom",
+        cascade="all, delete-orphan"
+    )
+    treatment_relationships = orm_relationship(
+        "SymptomTreatment",
+        back_populates="symptom",
+        cascade="all, delete-orphan"
+    )
+
+    @hybrid_property
+    def occurrence_count(self):
+        """Calculate the count of occurrences for this symptom"""
+        return len(self.occurrences)
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_symptoms_patient_id", "patient_id"),
+        Index("idx_symptoms_patient_name", "patient_id", "symptom_name"),
+        Index("idx_symptoms_status", "status"),
+        Index("idx_symptoms_is_chronic", "is_chronic"),
+    )
+
+
+class SymptomOccurrence(Base):
+    """
+    Individual episode/occurrence of a symptom.
+    Tracks when the symptom happened and specific details about that episode.
+    """
+    __tablename__ = "symptom_occurrences"
+
+    id = Column(Integer, primary_key=True)
+    symptom_id = Column(Integer, ForeignKey("symptoms.id"), nullable=False)
+
+    # Occurrence details
+    occurrence_date = Column(Date, nullable=False)
+    severity = Column(String(50), nullable=False)  # mild, moderate, severe, critical
+    pain_scale = Column(Integer, nullable=True)  # 0-10 scale
+
+    # Duration and timing
+    duration = Column(String(100), nullable=True)  # "30 minutes", "2 hours", "all day"
+    time_of_day = Column(String(50), nullable=True)  # morning, afternoon, evening, night
+
+    # Context
+    location = Column(String(200), nullable=True)  # Body part/area affected
+    triggers = Column(JSONB, nullable=True, default=list)  # Specific triggers for this occurrence
+    relief_methods = Column(JSONB, nullable=True, default=list)  # What helped
+    associated_symptoms = Column(JSONB, nullable=True, default=list)  # Other symptoms present
+
+    # Impact
+    impact_level = Column(String(50), nullable=True)  # no_impact, mild, moderate, severe, debilitating
+
+    # Resolution
+    resolved_date = Column(Date, nullable=True)
+    resolution_notes = Column(Text, nullable=True)
+
+    # Notes for this specific occurrence
+    notes = Column(Text, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    symptom = orm_relationship("Symptom", back_populates="occurrences")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_symptom_occ_symptom_id", "symptom_id"),
+        Index("idx_symptom_occ_date", "occurrence_date"),
+        Index("idx_symptom_occ_severity", "severity"),
+        Index("idx_symptom_occ_symptom_date", "symptom_id", "occurrence_date"),
+    )
+
+
+class SymptomCondition(Base):
+    """
+    Junction table for many-to-many relationship between symptoms and conditions.
+    Allows one symptom to be related to multiple conditions with optional context.
+    Links to parent Symptom (not individual occurrences).
+    """
+
+    __tablename__ = "symptom_conditions"
+
+    id = Column(Integer, primary_key=True)
+    symptom_id = Column(Integer, ForeignKey("symptoms.id"), nullable=False)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
+
+    # Optional context about how this symptom relates to this condition
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Symptom of diabetes complications"
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    symptom = orm_relationship("Symptom", back_populates="condition_relationships")
+    condition = orm_relationship("Condition", back_populates="symptom_relationships")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_symptom_condition_symptom_id", "symptom_id"),
+        Index("idx_symptom_condition_condition_id", "condition_id"),
+        UniqueConstraint("symptom_id", "condition_id", name="uq_symptom_condition"),
+    )
+
+
+class SymptomMedication(Base):
+    """
+    Junction table for many-to-many relationship between symptoms and medications.
+    Allows tracking whether medication helps, causes, or is related to a symptom.
+    Links to parent Symptom (not individual occurrences).
+    """
+
+    __tablename__ = "symptom_medications"
+
+    id = Column(Integer, primary_key=True)
+    symptom_id = Column(Integer, ForeignKey("symptoms.id"), nullable=False)
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=False)
+
+    # Relationship type: how medication relates to symptom
+    relationship_type = Column(
+        String, nullable=False, default="related_to"
+    )  # side_effect, helped_by, related_to
+
+    # Optional context about the relationship
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Headache started after beginning this medication"
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    symptom = orm_relationship("Symptom", back_populates="medication_relationships")
+    medication = orm_relationship("Medication", back_populates="symptom_relationships")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_symptom_medication_symptom_id", "symptom_id"),
+        Index("idx_symptom_medication_medication_id", "medication_id"),
+        UniqueConstraint("symptom_id", "medication_id", name="uq_symptom_medication"),
+    )
+
+
+class SymptomTreatment(Base):
+    """
+    Junction table for many-to-many relationship between symptoms and treatments.
+    Allows tracking which symptoms are addressed by which treatments.
+    Links to parent Symptom (not individual occurrences).
+    """
+
+    __tablename__ = "symptom_treatments"
+
+    id = Column(Integer, primary_key=True)
+    symptom_id = Column(Integer, ForeignKey("symptoms.id"), nullable=False)
+    treatment_id = Column(Integer, ForeignKey("treatments.id"), nullable=False)
+
+    # Optional context about how this treatment relates to this symptom
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Physical therapy helps reduce back pain"
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_symptom_treatment_symptom_id", "symptom_id"),
+        Index("idx_symptom_treatment_treatment_id", "treatment_id"),
+        UniqueConstraint("symptom_id", "treatment_id", name="uq_symptom_treatment"),
+    )
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    symptom = orm_relationship("Symptom", back_populates="treatment_relationships")
+    treatment = orm_relationship("Treatment", back_populates="symptom_relationships")
 
 
 class Pharmacy(Base):

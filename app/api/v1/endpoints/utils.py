@@ -62,22 +62,34 @@ def create_success_response(entity_name: str) -> dict[str, str]:
 
 
 def verify_patient_ownership(
-    obj: Any, current_user_patient_id: int, entity_name: str
+    obj: Any,
+    current_user_patient_id: int,
+    entity_name: str,
+    db: Optional[Session] = None,
+    current_user: Optional[Any] = None,
 ) -> None:
     """
-    Verify that a medical record belongs to the current user.
+    Verify that a medical record belongs to a patient accessible by the current user.
+
+    Supports multi-patient scenarios where users can have multiple patients.
 
     Args:
         obj: The database object to check
-        current_user_patient_id: Current user's patient ID
+        current_user_patient_id: Current user's patient ID (for backward compatibility)
         entity_name: Name of the entity type for error messages
+        db: Database session (optional, for multi-patient access checking)
+        current_user: Current user object (optional, for multi-patient access checking)
 
     Raises:
-        HTTPException: 404 if object doesn't belong to user
+        HTTPException: 404 if object doesn't belong to user or user doesn't have access
     """
     patient_id = getattr(obj, "patient_id", None)
     deps.verify_patient_record_access(
-        patient_id, current_user_patient_id, entity_name.lower()
+        record_patient_id=patient_id,
+        current_user_patient_id=current_user_patient_id,
+        record_type=entity_name.lower(),
+        db=db,
+        current_user=current_user,
     )
 
 
