@@ -657,6 +657,7 @@ def get_accessible_patient_id(
 # Export all dependencies and exceptions for convenient importing
 # This allows other modules to import everything from one place:
 # from app.api.deps import get_db, NotFoundException, ForbiddenException
+# Note: handle_database_errors remains in app.core.error_handling and is not re-exported here by design.
 __all__ = [
     # Database dependencies
     "get_db",
