@@ -286,8 +286,7 @@ class SymptomApiService extends BaseApiService {
       if (filters.skip !== undefined) params.skip = String(filters.skip);
       if (filters.limit !== undefined) params.limit = String(filters.limit);
 
-      const url = this.buildUrl('/', params);
-      const response = await this.get(url, { signal });
+      const response = await this.get('/', { params, signal });
 
       logger.info('symptom_api_get_all_success', {
         count: response?.length || 0,
@@ -478,8 +477,7 @@ class SymptomApiService extends BaseApiService {
         limit: String(limit),
       };
 
-      const url = this.buildUrl(`/${symptomId}/occurrences`, params);
-      const response = await this.get(url, { signal });
+      const response = await this.get(`/${symptomId}/occurrences`, { params, signal });
 
       logger.info('symptom_api_get_occurrences_success', {
         symptomId,
@@ -620,8 +618,7 @@ class SymptomApiService extends BaseApiService {
       const params: Record<string, string> = {};
       if (patientId !== undefined) params.patient_id = String(patientId);
 
-      const url = this.buildUrl('/stats', params);
-      const response = await this.get(url, { signal });
+      const response = await this.get('/stats', { params, signal });
 
       logger.info('symptom_api_get_stats_success', {
         totalSymptoms: response?.total_symptoms,
@@ -662,8 +659,7 @@ class SymptomApiService extends BaseApiService {
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
-      const url = this.buildUrl('/timeline', params);
-      const response = await this.get(url, { signal });
+      const response = await this.get('/timeline', { params, signal });
 
       logger.info('symptom_api_get_timeline_success', {
         patientId,
@@ -1001,21 +997,6 @@ class SymptomApiService extends BaseApiService {
     }
   }
 
-  // ============================================================================
-  // Helper Methods
-  // ============================================================================
-
-  /**
-   * Helper method to build URL with query parameters
-   */
-  private buildUrl(path: string, params: Record<string, string>): string {
-    const queryString = Object.entries(params)
-      .filter(([_, value]) => value !== undefined && value !== null && value !== '')
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join('&');
-
-    return queryString ? `${path}?${queryString}` : path;
-  }
 }
 
 // Export singleton instance

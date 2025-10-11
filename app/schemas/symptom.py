@@ -188,10 +188,10 @@ class SymptomOccurrenceBase(BaseModel):
 
     @validator("resolved_date")
     def validate_resolved_date(cls, v, values):
-        if v:
+        if v is not None:
             # Only validate if occurrence_date is present in values
             occurrence_date = values.get("occurrence_date")
-            if occurrence_date and v < occurrence_date:
+            if occurrence_date is not None and v < occurrence_date:
                 raise ValueError("Resolved date must be after occurrence date")
         return v
 

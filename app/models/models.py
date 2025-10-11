@@ -213,9 +213,6 @@ class Patient(Base):
     symptoms = orm_relationship(
         "Symptom", back_populates="patient", cascade="all, delete-orphan"
     )
-    symptom_entries = orm_relationship(
-        "SymptomEntry", back_populates="patient", cascade="all, delete-orphan"
-    )
     emergency_contacts = orm_relationship(
         "EmergencyContact", back_populates="patient", cascade="all, delete-orphan"
     )
@@ -1045,51 +1042,6 @@ class SymptomOccurrence(Base):
         Index("idx_symptom_occ_date", "occurrence_date"),
         Index("idx_symptom_occ_severity", "severity"),
         Index("idx_symptom_occ_symptom_date", "symptom_id", "occurrence_date"),
-    )
-
-
-class SymptomEntry(Base):
-    """
-    Track patient symptoms over time with severity, status, and optional details.
-    Supports linking to conditions, medications, and treatments (via junction tables in Phase 2).
-    """
-    __tablename__ = "symptom_entries"
-
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
-
-    # Core symptom information
-    symptom_name = Column(String(200), nullable=False)  # e.g., "Headache", "Nausea"
-    recorded_date = Column(Date, nullable=False)  # When symptom occurred
-    severity = Column(String, nullable=False)  # Use SymptomSeverity enum: mild, moderate, severe, critical
-    status = Column(String, default="active", nullable=False)  # Use SymptomStatus enum: active, resolved, recurring
-
-    # Optional detailed information
-    description = Column(Text, nullable=True)  # User's notes about the symptom
-    pain_scale = Column(Integer, nullable=True)  # 0-10 pain scale (if applicable)
-    resolved_date = Column(Date, nullable=True)  # When symptom was resolved
-
-    # Tagging system (consistent with other entities)
-    tags = Column(JSONB, nullable=True, default=list)
-
-    # Audit fields
-    created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(
-        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
-    )
-
-    # Table Relationships
-    patient = orm_relationship("Patient", back_populates="symptom_entries")
-
-    # Note: Junction table relationships moved to Symptom model (two-level hierarchy)
-    # Legacy SymptomEntry records are not linked to junction tables
-
-    # Indexes for performance
-    __table_args__ = (
-        Index("idx_symptom_entries_patient_id", "patient_id"),
-        Index("idx_symptom_entries_patient_date", "patient_id", "recorded_date"),
-        Index("idx_symptom_entries_severity", "severity"),
-        Index("idx_symptom_entries_status", "status"),
     )
 
 

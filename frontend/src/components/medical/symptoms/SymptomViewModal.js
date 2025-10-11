@@ -117,11 +117,12 @@ const SymptomViewModal = ({
 
   // Calculate occurrence statistics from actual occurrence dates
   const totalOccurrences = occurrences.length;
-  const firstOccurrenceDate = occurrences.length > 0
-    ? occurrences[occurrences.length - 1]?.occurrence_date  // Last item (oldest)
+  const occurrenceDates = occurrences.map(o => new Date(o.occurrence_date));
+  const firstOccurrenceDate = occurrenceDates.length > 0
+    ? new Date(Math.min(...occurrenceDates))
     : null;
-  const lastOccurrenceDate = occurrences.length > 0
-    ? occurrences[0]?.occurrence_date  // First item (most recent)
+  const lastOccurrenceDate = occurrenceDates.length > 0
+    ? new Date(Math.max(...occurrenceDates))
     : null;
 
   return (

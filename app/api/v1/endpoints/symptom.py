@@ -141,7 +141,6 @@ def read_symptom_timeline(
             target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
 
         # Parse dates if provided
-        from datetime import datetime
         start_dt = datetime.fromisoformat(start_date) if start_date else None
         end_dt = datetime.fromisoformat(end_date) if end_date else None
 

@@ -2299,9 +2299,6 @@ export const symptomOccurrenceFormFields = [
   },
 ];
 
-// Keep old symptomFormFields for backward compatibility (deprecated)
-export const symptomFormFields = symptomParentFormFields;
-
 // Utility function to get field configuration by form type
 export const getFormFields = formType => {
   const fieldConfigs = {
@@ -2319,7 +2316,6 @@ export const getFormFields = formType => {
     familyMember: familyMemberFormFields,
     familyCondition: familyConditionFormFields,
     insurance: insuranceFormFields,
-    symptom: symptomFormFields,
   };
 
   return fieldConfigs[formType] || [];

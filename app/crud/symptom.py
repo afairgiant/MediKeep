@@ -269,16 +269,19 @@ class CRUDSymptomOccurrence(CRUDBase[SymptomOccurrence, SymptomOccurrenceCreate,
         Automatically updates the parent symptom's last_occurrence_date.
         Uses single transaction to avoid race conditions.
         """
+        # Check if parent symptom exists
+        symptom = db.query(Symptom).filter(Symptom.id == obj_in.symptom_id).first()
+        if not symptom:
+            raise ValueError(f"Parent Symptom with id {obj_in.symptom_id} not found.")
+
         # Create occurrence object without committing yet
         occurrence_dict = obj_in.model_dump()
         occurrence = self.model(**occurrence_dict)
         db.add(occurrence)
 
         # Update parent symptom in same transaction
-        symptom = db.query(Symptom).filter(Symptom.id == obj_in.symptom_id).first()
-        if symptom:
-            symptom.last_occurrence_date = obj_in.occurrence_date
-            symptom.updated_at = get_utc_now()
+        symptom.last_occurrence_date = obj_in.occurrence_date
+        symptom.updated_at = get_utc_now()
 
         # Single commit for both operations (fixes race condition)
         db.commit()

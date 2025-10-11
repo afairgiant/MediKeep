@@ -455,7 +455,7 @@ const Symptoms = () => {
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">
-                          {symptom.occurrence_count || 0} episode{symptom.occurrence_count !== 1 ? 's' : ''}
+                          {symptom.occurrence_count || 0} episode{symptom.occurrence_count === 1 ? '' : 's'}
                         </Text>
                       </Group>
 
