@@ -8,7 +8,17 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.logging_config import get_logger, log_security_event
-from app.core.error_handling import UnauthorizedException, ForbiddenException, NotFoundException, MedicalRecordsAPIException
+from app.core.error_handling import (
+    MedicalRecordsAPIException,
+    ValidationException,
+    UnauthorizedException,
+    ForbiddenException,
+    NotFoundException,
+    ConflictException,
+    DatabaseException,
+    BusinessLogicException,
+    ServiceUnavailableException,
+)
 from app.api.v1.endpoints.system import get_client_ip
 from app.core.logging_constants import sanitize_log_input
 from app.crud.user import user
@@ -642,3 +652,36 @@ def get_accessible_patient_id(
     else:
         # Fall back to user's own patient ID
         return get_current_user_patient_id(db, current_user.id)
+
+
+# Export all dependencies and exceptions for convenient importing
+# This allows other modules to import everything from one place:
+# from app.api.deps import get_db, NotFoundException, ForbiddenException
+# Note: handle_database_errors remains in app.core.error_handling and is not re-exported here by design.
+__all__ = [
+    # Database dependencies
+    "get_db",
+    # Authentication dependencies
+    "get_current_user",
+    "get_current_user_flexible_auth",
+    "get_current_user_id",
+    "get_current_user_id_flexible_auth",
+    "get_current_admin_user",
+    # Patient access dependencies
+    "get_current_user_patient_id",
+    "verify_patient_record_access",
+    "verify_patient_access",
+    "get_accessible_patient_id",
+    # Token validation (internal)
+    "TokenValidationResult",
+    # Exception classes (re-exported from error_handling)
+    "MedicalRecordsAPIException",
+    "ValidationException",
+    "UnauthorizedException",
+    "ForbiddenException",
+    "NotFoundException",
+    "ConflictException",
+    "DatabaseException",
+    "BusinessLogicException",
+    "ServiceUnavailableException",
+]
