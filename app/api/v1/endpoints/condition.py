@@ -4,12 +4,8 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.error_handling import (
-    NotFoundException,
-    ForbiddenException,
-    BusinessLogicException,
-    handle_database_errors
-)
+from app.api.deps import NotFoundException, ForbiddenException, BusinessLogicException
+from app.core.error_handling import handle_database_errors
 from app.models.models import User
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
