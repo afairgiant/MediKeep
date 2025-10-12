@@ -23,6 +23,7 @@ class SymptomBase(BaseModel):
     tags: Optional[List[str]] = None
 
     @validator("symptom_name")
+    @classmethod
     def validate_symptom_name(cls, v):
         if not v or not v.strip():
             raise ValueError("Symptom name is required")
@@ -31,12 +32,14 @@ class SymptomBase(BaseModel):
         return v.strip()
 
     @validator("category")
+    @classmethod
     def validate_category(cls, v):
         if v and len(v.strip()) > 100:
             raise ValueError("Category must be less than 100 characters")
         return v.strip() if v else None
 
     @validator("status")
+    @classmethod
     def validate_status(cls, v):
         valid_statuses = [s.value for s in SymptomStatus]
         if v not in valid_statuses:
@@ -44,12 +47,14 @@ class SymptomBase(BaseModel):
         return v
 
     @validator("general_notes")
+    @classmethod
     def validate_general_notes(cls, v):
         if v and len(v.strip()) > 2000:
             raise ValueError("General notes must be less than 2000 characters")
         return v.strip() if v else None
 
     @validator("typical_triggers", "tags")
+    @classmethod
     def validate_list_fields(cls, v):
         if v is not None:
             cleaned = list(set([item.strip() for item in v if item and item.strip()]))
@@ -69,6 +74,7 @@ class SymptomCreate(SymptomBase):
     first_occurrence_date: date
 
     @validator("first_occurrence_date")
+    @classmethod
     def validate_first_occurrence_date(cls, v):
         if v and v > date.today():
             raise ValueError("First occurrence date cannot be in the future")
@@ -84,14 +90,52 @@ class SymptomUpdate(BaseModel):
     is_chronic: Optional[bool] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
-    tags: Optional[List[str]] = None
+    tags: Optional[str] = None
 
-    # Use same validators as SymptomBase
-    _validate_symptom_name = validator("symptom_name", allow_reuse=True)(SymptomBase.validate_symptom_name)
-    _validate_category = validator("category", allow_reuse=True)(SymptomBase.validate_category)
-    _validate_status = validator("status", allow_reuse=True)(SymptomBase.validate_status)
-    _validate_general_notes = validator("general_notes", allow_reuse=True)(SymptomBase.validate_general_notes)
-    _validate_lists = validator("typical_triggers", "tags", allow_reuse=True)(SymptomBase.validate_list_fields)
+    @validator("symptom_name")
+    @classmethod
+    def validate_symptom_name(cls, v):
+        if v is not None and v.strip():
+            if len(v.strip()) > 200:
+                raise ValueError("Symptom name must be less than 200 characters")
+            return v.strip()
+        return v
+
+    @validator("category")
+    @classmethod
+    def validate_category(cls, v):
+        if v and len(v.strip()) > 100:
+            raise ValueError("Category must be less than 100 characters")
+        return v.strip() if v else None
+
+    @validator("status")
+    @classmethod
+    def validate_status(cls, v):
+        if v is not None:
+            valid_statuses = [s.value for s in SymptomStatus]
+            if v not in valid_statuses:
+                raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
+        return v
+
+    @validator("general_notes")
+    @classmethod
+    def validate_general_notes(cls, v):
+        if v and len(v.strip()) > 2000:
+            raise ValueError("General notes must be less than 2000 characters")
+        return v.strip() if v else None
+
+    @validator("typical_triggers", "tags")
+    @classmethod
+    def validate_list_fields(cls, v):
+        if v is not None:
+            cleaned = list(set([item.strip() for item in v if item and item.strip()]))
+            if len(cleaned) > 20:
+                raise ValueError("Maximum 20 items allowed")
+            for item in cleaned:
+                if len(item) > 100:
+                    raise ValueError("Each item must be less than 100 characters")
+            return cleaned
+        return v
 
 
 class SymptomResponse(SymptomBase):
@@ -106,7 +150,7 @@ class SymptomResponse(SymptomBase):
     occurrence_count: Optional[int] = 0  # Can be populated by CRUD
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class SymptomOccurrenceBase(BaseModel):
@@ -127,12 +171,14 @@ class SymptomOccurrenceBase(BaseModel):
     notes: Optional[str] = None
 
     @validator("occurrence_date")
+    @classmethod
     def validate_occurrence_date(cls, v):
         if v and v > date.today():
             raise ValueError("Occurrence date cannot be in the future")
         return v
 
     @validator("severity")
+    @classmethod
     def validate_severity(cls, v):
         valid_severities = [s.value for s in SymptomSeverity]
         if v not in valid_severities:
@@ -140,6 +186,7 @@ class SymptomOccurrenceBase(BaseModel):
         return v
 
     @validator("pain_scale")
+    @classmethod
     def validate_pain_scale(cls, v):
         if v is not None:
             if v < 0 or v > 10:
@@ -147,12 +194,14 @@ class SymptomOccurrenceBase(BaseModel):
         return v
 
     @validator("duration")
+    @classmethod
     def validate_duration(cls, v):
         if v and len(v.strip()) > 100:
             raise ValueError("Duration must be less than 100 characters")
         return v.strip() if v else None
 
     @validator("time_of_day")
+    @classmethod
     def validate_time_of_day(cls, v):
         if v:
             valid_times = ["morning", "afternoon", "evening", "night"]
@@ -161,12 +210,14 @@ class SymptomOccurrenceBase(BaseModel):
         return v.lower() if v else None
 
     @validator("location")
+    @classmethod
     def validate_location(cls, v):
         if v and len(v.strip()) > 200:
             raise ValueError("Location must be less than 200 characters")
         return v.strip() if v else None
 
     @validator("impact_level")
+    @classmethod
     def validate_impact_level(cls, v):
         if v:
             valid_impacts = ["no_impact", "mild", "moderate", "severe", "debilitating"]
@@ -175,6 +226,7 @@ class SymptomOccurrenceBase(BaseModel):
         return v
 
     @validator("triggers", "relief_methods", "associated_symptoms")
+    @classmethod
     def validate_list_fields(cls, v):
         if v is not None:
             cleaned = list(set([item.strip() for item in v if item and item.strip()]))
@@ -187,6 +239,7 @@ class SymptomOccurrenceBase(BaseModel):
         return []
 
     @validator("resolved_date")
+    @classmethod
     def validate_resolved_date(cls, v, values):
         if v is not None:
             # Only validate if occurrence_date is present in values
@@ -196,6 +249,7 @@ class SymptomOccurrenceBase(BaseModel):
         return v
 
     @validator("resolution_notes", "notes")
+    @classmethod
     def validate_text_fields(cls, v):
         if v and len(v.strip()) > 2000:
             raise ValueError("Text fields must be less than 2000 characters")
@@ -229,17 +283,91 @@ class SymptomOccurrenceUpdate(BaseModel):
     resolution_notes: Optional[str] = None
     notes: Optional[str] = None
 
-    # Reuse validators from base
-    _validate_occurrence_date = validator("occurrence_date", allow_reuse=True)(SymptomOccurrenceBase.validate_occurrence_date)
-    _validate_severity = validator("severity", allow_reuse=True)(SymptomOccurrenceBase.validate_severity)
-    _validate_pain_scale = validator("pain_scale", allow_reuse=True)(SymptomOccurrenceBase.validate_pain_scale)
-    _validate_duration = validator("duration", allow_reuse=True)(SymptomOccurrenceBase.validate_duration)
-    _validate_time_of_day = validator("time_of_day", allow_reuse=True)(SymptomOccurrenceBase.validate_time_of_day)
-    _validate_location = validator("location", allow_reuse=True)(SymptomOccurrenceBase.validate_location)
-    _validate_impact_level = validator("impact_level", allow_reuse=True)(SymptomOccurrenceBase.validate_impact_level)
-    _validate_lists = validator("triggers", "relief_methods", "associated_symptoms", allow_reuse=True)(SymptomOccurrenceBase.validate_list_fields)
-    _validate_resolved_date = validator("resolved_date", allow_reuse=True)(SymptomOccurrenceBase.validate_resolved_date)
-    _validate_text_fields = validator("resolution_notes", "notes", allow_reuse=True)(SymptomOccurrenceBase.validate_text_fields)
+    @validator("occurrence_date")
+    @classmethod
+    def validate_occurrence_date(cls, v):
+        if v and v > date.today():
+            raise ValueError("Occurrence date cannot be in the future")
+        return v
+
+    @validator("severity")
+    @classmethod
+    def validate_severity(cls, v):
+        if v is not None:
+            valid_severities = [s.value for s in SymptomSeverity]
+            if v not in valid_severities:
+                raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
+        return v
+
+    @validator("pain_scale")
+    @classmethod
+    def validate_pain_scale(cls, v):
+        if v is not None:
+            if v < 0 or v > 10:
+                raise ValueError("Pain scale must be between 0-10")
+        return v
+
+    @validator("duration")
+    @classmethod
+    def validate_duration(cls, v):
+        if v and len(v.strip()) > 100:
+            raise ValueError("Duration must be less than 100 characters")
+        return v.strip() if v else None
+
+    @validator("time_of_day")
+    @classmethod
+    def validate_time_of_day(cls, v):
+        if v:
+            valid_times = ["morning", "afternoon", "evening", "night"]
+            if v.lower() not in valid_times:
+                raise ValueError(f"Time of day must be one of: {', '.join(valid_times)}")
+            return v.lower()
+        return v
+
+    @validator("location")
+    @classmethod
+    def validate_location(cls, v):
+        if v and len(v.strip()) > 200:
+            raise ValueError("Location must be less than 200 characters")
+        return v.strip() if v else None
+
+    @validator("impact_level")
+    @classmethod
+    def validate_impact_level(cls, v):
+        if v:
+            valid_impacts = ["no_impact", "mild", "moderate", "severe", "debilitating"]
+            if v not in valid_impacts:
+                raise ValueError(f"Impact level must be one of: {', '.join(valid_impacts)}")
+        return v
+
+    @validator("triggers", "relief_methods", "associated_symptoms")
+    @classmethod
+    def validate_list_fields(cls, v):
+        if v is not None:
+            cleaned = list(set([item.strip() for item in v if item and item.strip()]))
+            if len(cleaned) > 20:
+                raise ValueError("Maximum 20 items allowed")
+            for item in cleaned:
+                if len(item) > 100:
+                    raise ValueError("Each item must be less than 100 characters")
+            return cleaned
+        return v
+
+    @validator("resolved_date")
+    @classmethod
+    def validate_resolved_date(cls, v, values):
+        if v is not None:
+            occurrence_date = values.get("occurrence_date")
+            if occurrence_date is not None and v < occurrence_date:
+                raise ValueError("Resolved date must be after occurrence date")
+        return v
+
+    @validator("resolution_notes", "notes")
+    @classmethod
+    def validate_text_fields(cls, v):
+        if v and len(v.strip()) > 2000:
+            raise ValueError("Text fields must be less than 2000 characters")
+        return v.strip() if v else None
 
 
 class SymptomOccurrenceResponse(SymptomOccurrenceBase):
@@ -251,7 +379,7 @@ class SymptomOccurrenceResponse(SymptomOccurrenceBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 # ============================================================================
@@ -267,6 +395,7 @@ class SymptomConditionBase(BaseModel):
     relevance_note: Optional[str] = None
 
     @validator("relevance_note")
+    @classmethod
     def validate_relevance_note(cls, v):
         """Validate relevance note length"""
         if v and len(v.strip()) > 500:
@@ -286,6 +415,7 @@ class SymptomConditionUpdate(BaseModel):
     relevance_note: Optional[str] = None
 
     @validator("relevance_note")
+    @classmethod
     def validate_relevance_note(cls, v):
         """Validate relevance note length"""
         if v and len(v.strip()) > 500:
@@ -301,7 +431,7 @@ class SymptomConditionResponse(SymptomConditionBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class SymptomMedicationBase(BaseModel):
@@ -313,6 +443,7 @@ class SymptomMedicationBase(BaseModel):
     relevance_note: Optional[str] = None
 
     @validator("relationship_type")
+    @classmethod
     def validate_relationship_type(cls, v):
         """Validate relationship type"""
         valid_types = ["side_effect", "helped_by", "related_to"]
@@ -323,6 +454,7 @@ class SymptomMedicationBase(BaseModel):
         return v
 
     @validator("relevance_note")
+    @classmethod
     def validate_relevance_note(cls, v):
         """Validate relevance note length"""
         if v and len(v.strip()) > 500:
@@ -343,6 +475,7 @@ class SymptomMedicationUpdate(BaseModel):
     relevance_note: Optional[str] = None
 
     @validator("relationship_type")
+    @classmethod
     def validate_relationship_type(cls, v):
         """Validate relationship type"""
         if v is not None:
@@ -354,6 +487,7 @@ class SymptomMedicationUpdate(BaseModel):
         return v
 
     @validator("relevance_note")
+    @classmethod
     def validate_relevance_note(cls, v):
         """Validate relevance note length"""
         if v and len(v.strip()) > 500:
@@ -369,7 +503,7 @@ class SymptomMedicationResponse(SymptomMedicationBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class SymptomTreatmentBase(BaseModel):
@@ -380,6 +514,7 @@ class SymptomTreatmentBase(BaseModel):
     relevance_note: Optional[str] = None
 
     @validator("relevance_note")
+    @classmethod
     def validate_relevance_note(cls, v):
         """Validate relevance note length"""
         if v and len(v.strip()) > 500:
@@ -399,6 +534,7 @@ class SymptomTreatmentUpdate(BaseModel):
     relevance_note: Optional[str] = None
 
     @validator("relevance_note")
+    @classmethod
     def validate_relevance_note(cls, v):
         """Validate relevance note length"""
         if v and len(v.strip()) > 500:
@@ -414,4 +550,4 @@ class SymptomTreatmentResponse(SymptomTreatmentBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
