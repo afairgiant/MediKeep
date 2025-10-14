@@ -9,8 +9,22 @@ logger = get_logger(__name__, "app")
 
 
 class TagService:
-    """Universal tag management across all entities"""
-    
+    """Universal tag management across all entities
+
+    WARNING: This service uses PostgreSQL-specific JSON functions and is NOT
+    compatible with SQLite. For SQLite support, see docs/SQLITE_COMPATIBILITY.md
+
+    PostgreSQL-specific features used:
+    - json_array_elements_text() for expanding JSON arrays
+    - @> operator for containment checking
+    - json_agg() for JSON aggregation
+
+    For SQLite compatibility, these methods need to be rewritten using:
+    - json_each() / json_tree() for array expansion
+    - json_extract() for containment checks
+    - json_group_array() for aggregation
+    """
+
     ENTITY_TABLES = {
         "lab_result": "lab_results",
         "medication": "medications", 
@@ -65,7 +79,7 @@ class TagService:
                 
                 usage_subqueries.append(f"""
                     SELECT tag, COUNT(*) as usage_count, :{param_key} as entity_type
-                    FROM "{table_name}", jsonb_array_elements_text(tags) as tag
+                    FROM "{table_name}", json_array_elements_text(tags) as tag
                     WHERE tags IS NOT NULL
                     GROUP BY tag
                 """)
@@ -260,15 +274,15 @@ class TagService:
                 query = f"""
                     UPDATE "{table_name}"
                     SET tags = (
-                        SELECT jsonb_agg(
-                            CASE 
+                        SELECT json_agg(
+                            CASE
                                 WHEN tag_element = :old_tag THEN :new_tag
                                 ELSE tag_element
                             END
                         )
-                        FROM jsonb_array_elements_text(tags) AS tag_element
+                        FROM json_array_elements_text(tags) AS tag_element
                     )
-                    WHERE tags @> :old_tag_json
+                    WHERE tags::text LIKE '%' || :old_tag || '%'
                 """
                 
                 result = db.execute(
@@ -322,11 +336,11 @@ class TagService:
                 query = f"""
                     UPDATE "{table_name}"
                     SET tags = (
-                        SELECT jsonb_agg(tag_element)
-                        FROM jsonb_array_elements_text(tags) AS tag_element
+                        SELECT json_agg(tag_element)
+                        FROM json_array_elements_text(tags) AS tag_element
                         WHERE tag_element != :tag
                     )
-                    WHERE tags @> :tag_json
+                    WHERE tags::text LIKE '%' || :tag || '%'
                 """
                 
                 result = db.execute(
@@ -376,17 +390,17 @@ class TagService:
                 query = f"""
                     UPDATE "{table_name}"
                     SET tags = (
-                        SELECT jsonb_agg(DISTINCT tag_element ORDER BY tag_element)
+                        SELECT json_agg(DISTINCT tag_element ORDER BY tag_element)
                         FROM (
-                            SELECT 
-                                CASE 
+                            SELECT
+                                CASE
                                     WHEN tag_element = :old_tag THEN :new_tag
                                     ELSE tag_element
                                 END AS tag_element
-                            FROM jsonb_array_elements_text(tags) AS tag_element
+                            FROM json_array_elements_text(tags) AS tag_element
                         ) AS updated_tags
                     )
-                    WHERE tags @> :old_tag_json
+                    WHERE tags::text LIKE '%' || :old_tag || '%'
                 """
                 
                 result = db.execute(
@@ -497,7 +511,7 @@ class TagService:
                     FROM "{table_name}" r
                     JOIN patients p ON r.patient_id = p.id
                     JOIN users u ON p.user_id = u.id,
-                    jsonb_array_elements_text(r.tags) as tag
+                    json_array_elements_text(r.tags) as tag
                     WHERE r.tags IS NOT NULL AND u.id = :user_id
                 """)
             

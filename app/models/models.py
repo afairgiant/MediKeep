@@ -16,7 +16,7 @@ from sqlalchemy import (
     column,
     func,
 )
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, declarative_base
 from sqlalchemy.orm import relationship as orm_relationship
@@ -301,7 +301,7 @@ class Medication(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="medications")
@@ -376,7 +376,7 @@ class Encounter(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="encounters")
@@ -420,7 +420,7 @@ class LabResult(Base):
     updated_at = Column(DateTime, nullable=True)
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="lab_results")
@@ -666,7 +666,7 @@ class Condition(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="conditions")
@@ -729,7 +729,7 @@ class Immunization(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="immunizations")
@@ -786,7 +786,7 @@ class Procedure(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="procedures")
@@ -834,7 +834,7 @@ class Treatment(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="treatments")
@@ -871,7 +871,7 @@ class Allergy(Base):
     )
 
     # Tagging system
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="allergies")
@@ -950,9 +950,9 @@ class Symptom(Base):
     last_occurrence_date = Column(Date, nullable=True)
 
     # General information
-    typical_triggers = Column(JSONB, nullable=True, default=list)  # Common triggers
+    typical_triggers = Column(JSON, nullable=True, default=list)  # Common triggers
     general_notes = Column(Text, nullable=True)
-    tags = Column(JSONB, nullable=True, default=list)
+    tags = Column(JSON, nullable=True, default=list)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
@@ -1021,9 +1021,9 @@ class SymptomOccurrence(Base):
 
     # Context
     location = Column(String(200), nullable=True)  # Body part/area affected
-    triggers = Column(JSONB, nullable=True, default=list)  # Specific triggers for this occurrence
-    relief_methods = Column(JSONB, nullable=True, default=list)  # What helped
-    associated_symptoms = Column(JSONB, nullable=True, default=list)  # Other symptoms present
+    triggers = Column(JSON, nullable=True, default=list)  # Specific triggers for this occurrence
+    relief_methods = Column(JSON, nullable=True, default=list)  # What helped
+    associated_symptoms = Column(JSON, nullable=True, default=list)  # Other symptoms present
 
     # Impact
     impact_level = Column(String(50), nullable=True)  # no_impact, mild, moderate, severe, debilitating
@@ -1601,10 +1601,10 @@ class ReportTemplate(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
 
-    # Report configuration stored as JSONB
-    selected_records = Column(JSONB, nullable=False)  # Record selections and filters
+    # Report configuration stored as JSON
+    selected_records = Column(JSON, nullable=False)  # Record selections and filters
     report_settings = Column(
-        JSONB, nullable=False, default={}
+        JSON, nullable=False, default={}
     )  # UI preferences, sorting, grouping
 
     # Sharing and visibility
