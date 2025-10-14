@@ -11,18 +11,13 @@ logger = get_logger(__name__, "app")
 class TagService:
     """Universal tag management across all entities
 
-    WARNING: This service uses PostgreSQL-specific JSON functions and is NOT
-    compatible with SQLite. For SQLite support, see docs/SQLITE_COMPATIBILITY.md
-
-    PostgreSQL-specific features used:
+    This service uses standard JSON functions compatible with both PostgreSQL and SQLite:
     - json_array_elements_text() for expanding JSON arrays
-    - @> operator for containment checking
     - json_agg() for JSON aggregation
+    - Standard SQL text operations for filtering
 
-    For SQLite compatibility, these methods need to be rewritten using:
-    - json_each() / json_tree() for array expansion
-    - json_extract() for containment checks
-    - json_group_array() for aggregation
+    Note: The @> containment operator was removed for SQLite compatibility.
+    Tag matching now uses json_array_elements_text() with WHERE clauses.
     """
 
     ENTITY_TABLES = {
@@ -262,15 +257,16 @@ class TagService:
     
     def rename_tag_across_entities(self, db: Session, *, old_tag: str, new_tag: str) -> int:
         """Rename a tag across all entity types"""
-        
+
         total_updated = 0
-        
+
         for table_name in self.ENTITY_TABLES.values():
             try:
                 # Validate table name for security
                 self._validate_table_name(table_name)
-                
+
                 # Update records that contain the old tag
+                # Use EXISTS subquery for precise tag matching
                 query = f"""
                     UPDATE "{table_name}"
                     SET tags = (
@@ -282,28 +278,30 @@ class TagService:
                         )
                         FROM json_array_elements_text(tags) AS tag_element
                     )
-                    WHERE tags::text LIKE '%' || :old_tag || '%'
+                    WHERE EXISTS (
+                        SELECT 1 FROM json_array_elements_text(tags) AS tag_element
+                        WHERE tag_element = :old_tag
+                    )
                 """
-                
+
                 result = db.execute(
                     text(query),
                     {
                         "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "old_tag_json": f'["{old_tag}"]'
+                        "new_tag": new_tag
                     }
                 )
-                
+
                 updated_count = result.rowcount
                 total_updated += updated_count
-                
+
                 logger.debug(f"Updated {updated_count} records in {table_name}", extra={
                     "table": table_name,
                     "old_tag": old_tag,
                     "new_tag": new_tag,
                     "updated_count": updated_count
                 })
-                
+
             except Exception as e:
                 logger.error(f"Failed to rename tag in {table_name}", extra={
                     "table": table_name,
@@ -311,28 +309,29 @@ class TagService:
                     "new_tag": new_tag,
                     "error": str(e)
                 })
-        
+
         db.commit()
-        
+
         logger.info("Completed tag rename across entities", extra={
             "old_tag": old_tag,
             "new_tag": new_tag,
             "total_updated": total_updated
         })
-        
+
         return total_updated
     
     def delete_tag_across_entities(self, db: Session, *, tag: str) -> int:
         """Delete a tag from all entity types"""
-        
+
         total_updated = 0
-        
+
         for table_name in self.ENTITY_TABLES.values():
             try:
                 # Validate table name for security
                 self._validate_table_name(table_name)
-                
+
                 # Remove the tag from records that contain it
+                # Use EXISTS subquery for precise tag matching
                 query = f"""
                     UPDATE "{table_name}"
                     SET tags = (
@@ -340,53 +339,56 @@ class TagService:
                         FROM json_array_elements_text(tags) AS tag_element
                         WHERE tag_element != :tag
                     )
-                    WHERE tags::text LIKE '%' || :tag || '%'
+                    WHERE EXISTS (
+                        SELECT 1 FROM json_array_elements_text(tags) AS tag_element
+                        WHERE tag_element = :tag
+                    )
                 """
-                
+
                 result = db.execute(
                     text(query),
                     {
-                        "tag": tag,
-                        "tag_json": f'["{tag}"]'
+                        "tag": tag
                     }
                 )
-                
+
                 updated_count = result.rowcount
                 total_updated += updated_count
-                
+
                 logger.debug(f"Removed tag from {updated_count} records in {table_name}", extra={
                     "table": table_name,
                     "tag": tag,
                     "updated_count": updated_count
                 })
-                
+
             except Exception as e:
                 logger.error(f"Failed to delete tag from {table_name}", extra={
                     "table": table_name,
                     "tag": tag,
                     "error": str(e)
                 })
-        
+
         db.commit()
-        
+
         logger.info("Completed tag deletion across entities", extra={
             "tag": tag,
             "total_updated": total_updated
         })
-        
+
         return total_updated
     
     def replace_tag_across_entities(self, db: Session, *, old_tag: str, new_tag: str) -> int:
         """Replace one tag with another across all entity types"""
-        
+
         total_updated = 0
-        
+
         for table_name in self.ENTITY_TABLES.values():
             try:
                 # Validate table name for security
                 self._validate_table_name(table_name)
-                
+
                 # Replace old tag with new tag, avoiding duplicates
+                # Use EXISTS subquery for precise tag matching
                 query = f"""
                     UPDATE "{table_name}"
                     SET tags = (
@@ -400,28 +402,30 @@ class TagService:
                             FROM json_array_elements_text(tags) AS tag_element
                         ) AS updated_tags
                     )
-                    WHERE tags::text LIKE '%' || :old_tag || '%'
+                    WHERE EXISTS (
+                        SELECT 1 FROM json_array_elements_text(tags) AS tag_element
+                        WHERE tag_element = :old_tag
+                    )
                 """
-                
+
                 result = db.execute(
                     text(query),
                     {
                         "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "old_tag_json": f'["{old_tag}"]'
+                        "new_tag": new_tag
                     }
                 )
-                
+
                 updated_count = result.rowcount
                 total_updated += updated_count
-                
+
                 logger.debug(f"Replaced tag in {updated_count} records in {table_name}", extra={
                     "table": table_name,
                     "old_tag": old_tag,
                     "new_tag": new_tag,
                     "updated_count": updated_count
                 })
-                
+
             except Exception as e:
                 logger.error(f"Failed to replace tag in {table_name}", extra={
                     "table": table_name,
@@ -429,15 +433,15 @@ class TagService:
                     "new_tag": new_tag,
                     "error": str(e)
                 })
-        
+
         db.commit()
-        
+
         logger.info("Completed tag replacement across entities", extra={
             "old_tag": old_tag,
             "new_tag": new_tag,
             "total_updated": total_updated
         })
-        
+
         return total_updated
     
     def create_tag(self, db: Session, *, tag: str, user_id: int) -> bool:
