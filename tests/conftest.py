@@ -33,7 +33,7 @@ def test_db_engine():
     """Create a test database engine using SQLite in memory."""
     # Use SQLite in-memory database for tests
     SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-    
+
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
         connect_args={
@@ -42,12 +42,21 @@ def test_db_engine():
         poolclass=StaticPool,
         echo=False,  # Set to True for SQL debugging
     )
-    
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
-    
+
+    # Create all tables EXCEPT those with PostgreSQL ARRAY columns
+    # These tables are incompatible with SQLite:
+    # - standardized_tests (common_names: ARRAY)
+    # - report_generation_audit (categories_included: ARRAY)
+    tables_to_create = [
+        table for table in Base.metadata.sorted_tables
+        if table.name not in ['standardized_tests', 'report_generation_audit']
+    ]
+
+    for table in tables_to_create:
+        table.create(bind=engine, checkfirst=True)
+
     yield engine
-    
+
     # Cleanup
     Base.metadata.drop_all(bind=engine)
 
@@ -254,12 +263,15 @@ def setup_test_environment():
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
     os.environ["LOG_LEVEL"] = "WARNING"  # Reduce log noise in tests
-    
+    os.environ["SKIP_MIGRATIONS"] = "true"  # Skip Alembic migrations for SQLite tests
+
     yield
-    
+
     # Cleanup
     if "TESTING" in os.environ:
         del os.environ["TESTING"]
+    if "SKIP_MIGRATIONS" in os.environ:
+        del os.environ["SKIP_MIGRATIONS"]
 
 
 # File handling fixtures

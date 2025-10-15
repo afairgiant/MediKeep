@@ -8,8 +8,18 @@ import requests
 import pytest
 from typing import Generator
 
-import docker
-from docker.models.containers import Container
+# Skip all tests in this module if docker is not installed
+pytest.importorskip("docker")
+
+try:
+    import docker
+    from docker.models.containers import Container
+    DOCKER_AVAILABLE = True
+except ImportError:
+    DOCKER_AVAILABLE = False
+
+
+pytestmark = pytest.mark.skipif(not DOCKER_AVAILABLE, reason="docker module not installed")
 
 
 class TestContainerBuild:
