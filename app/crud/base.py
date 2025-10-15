@@ -450,9 +450,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         Raises:
             TypeError: If input type is not supported
         """
-        # Handle plain dictionaries
+        # Handle plain dictionaries - return copy to prevent mutation
         if isinstance(obj_in, dict):
-            return obj_in
+            return obj_in.copy()
 
         # Handle Pydantic v2 models (check for callable model_dump)
         model_dump_attr = getattr(obj_in, "model_dump", None)
@@ -468,8 +468,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         if isinstance(obj_in, Mapping):
             return dict(obj_in)
 
-        # Handle dataclasses
+        # Handle dataclasses (only instances, not classes)
         if is_dataclass(obj_in):
+            if isinstance(obj_in, type):
+                raise TypeError(
+                    f"Cannot normalize dataclass class '{obj_in.__name__}'; expected an instance."
+                )
             return asdict(obj_in)
 
         # Unsupported type - raise clear error
