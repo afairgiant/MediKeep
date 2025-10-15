@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from collections.abc import Mapping
+from dataclasses import is_dataclass, asdict
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, asc, desc, or_, text
@@ -429,6 +431,57 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
         return converted_data
 
+    def _normalize_input(
+        self, obj_in: Any, *, exclude_unset: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Normalize different input types to dictionary format.
+
+        Handles Pydantic v1/v2 models, dicts, Mappings, and dataclasses.
+        Keeps native Python types (date, datetime, etc.) for SQLAlchemy compatibility.
+
+        Args:
+            obj_in: Input object to normalize (Pydantic model, dict, Mapping, or dataclass)
+            exclude_unset: For Pydantic models, exclude unset fields (useful for updates)
+
+        Returns:
+            Dictionary with native Python types preserved
+
+        Raises:
+            TypeError: If input type is not supported
+        """
+        # Handle plain dictionaries - return copy to prevent mutation
+        if isinstance(obj_in, dict):
+            return obj_in.copy()
+
+        # Handle Pydantic v2 models (check for callable model_dump)
+        model_dump_attr = getattr(obj_in, "model_dump", None)
+        if callable(model_dump_attr):
+            return model_dump_attr(exclude_unset=exclude_unset)  # type: ignore
+
+        # Handle Pydantic v1 models (check for callable dict)
+        dict_attr = getattr(obj_in, "dict", None)
+        if callable(dict_attr):
+            return dict_attr(exclude_unset=exclude_unset)  # type: ignore
+
+        # Handle Mapping types (but not strings, which are technically Iterable)
+        if isinstance(obj_in, Mapping):
+            return dict(obj_in)
+
+        # Handle dataclasses (only instances, not classes)
+        if is_dataclass(obj_in):
+            if isinstance(obj_in, type):
+                raise TypeError(
+                    f"Cannot normalize dataclass class '{obj_in.__name__}'; expected an instance."
+                )
+            return asdict(obj_in)
+
+        # Unsupported type - raise clear error
+        raise TypeError(
+            f"Unsupported input type: {type(obj_in).__name__}. "
+            f"Expected dict, Pydantic model, Mapping, or dataclass."
+        )
+
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
         """Get a single record by ID."""
         try:
@@ -467,19 +520,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """Create a new record with simplified error handling."""
-        # Handle different input types with proper JSON serialization
-        if isinstance(obj_in, dict):
-            # Plain dictionary - use jsonable_encoder for robust serialization
-            obj_in_data = jsonable_encoder(obj_in)
-        elif hasattr(obj_in, "model_dump"):
-            # Pydantic v2 model
-            obj_in_data = jsonable_encoder(obj_in.model_dump())  # type: ignore
-        elif hasattr(obj_in, "dict"):
-            # Pydantic v1 model
-            obj_in_data = jsonable_encoder(obj_in.dict())  # type: ignore
-        else:
-            # Fallback for other types
-            obj_in_data = jsonable_encoder(obj_in)
+        # Normalize input to dictionary, keeping Python types for SQLAlchemy
+        obj_in_data = self._normalize_input(obj_in)
 
         self.logger.info(f"Creating new {self.model_name} record")
 
@@ -611,21 +653,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
     ) -> ModelType:
         """Update an existing record."""
         record_id = str(db_obj.id)  # type: ignore
-        obj_data = jsonable_encoder(db_obj)
 
-        # Handle different input types with proper JSON serialization
-        if isinstance(obj_in, dict):
-            # Plain dictionary - use jsonable_encoder for robust serialization
-            update_data = jsonable_encoder(obj_in)
-        elif hasattr(obj_in, "model_dump"):
-            # Pydantic v2 model
-            update_data = jsonable_encoder(obj_in.model_dump(exclude_unset=True))  # type: ignore
-        elif hasattr(obj_in, "dict"):
-            # Pydantic v1 model
-            update_data = jsonable_encoder(obj_in.dict(exclude_unset=True))  # type: ignore
-        else:
-            # Fallback for other types
-            update_data = jsonable_encoder(obj_in)
+        # Normalize input to dictionary, keeping Python types for SQLAlchemy
+        # For Pydantic models, exclude_unset=True prevents overwriting existing values with None
+        update_data = self._normalize_input(obj_in, exclude_unset=True)
 
         self.logger.info(f"Updating {self.model_name} record {record_id}")
 
