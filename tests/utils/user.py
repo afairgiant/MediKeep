@@ -40,6 +40,8 @@ def create_random_user(db: Session) -> dict:
     )
 
     user = user_crud.create(db=db, obj_in=user_in)
+    db.flush()  # Flush to make user visible in current transaction
+    db.refresh(user)  # Refresh to get updated values
     return {
         "user": user,
         "password": password,
@@ -61,7 +63,8 @@ def create_user_authentication_headers(*, client: TestClient, username: str, pas
 
 def create_user_token_headers(user_id: int) -> Dict[str, str]:
     """Create authentication headers with a token for a specific user ID."""
-    access_token = create_access_token(subject=user_id)
+    # Production API expects data dict with 'sub' key
+    access_token = create_access_token(data={"sub": str(user_id)})
     headers = {"Authorization": f"Bearer {access_token}"}
     return headers
 
@@ -83,6 +86,8 @@ def create_admin_user(db: Session) -> dict:
     )
 
     user = user_crud.create(db=db, obj_in=user_in)
+    db.flush()  # Flush to make user visible in current transaction
+    db.refresh(user)  # Refresh to get updated values
     return {
         "user": user,
         "password": password,
