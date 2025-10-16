@@ -7,6 +7,9 @@ from app.api import deps
 from app.core.error_handling import (
     handle_database_errors
 )
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_not_found,
@@ -17,6 +20,9 @@ from app.models.activity_log import EntityType
 from app.schemas.pharmacy import Pharmacy, PharmacyCreate, PharmacyUpdate
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=Pharmacy)
@@ -51,6 +57,16 @@ def read_pharmacies(
     """Retrieve pharmacies."""
     with handle_database_errors(request=request):
         pharmacies = pharmacy.get_multi(db, skip=skip, limit=limit)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Pharmacy",
+            count=len(pharmacies)
+        )
+
         return pharmacies
 
 
@@ -66,6 +82,16 @@ def read_pharmacy(
     with handle_database_errors(request=request):
         pharmacy_obj = pharmacy.get(db=db, id=id)
         handle_not_found(pharmacy_obj, "Pharmacy", request)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Pharmacy",
+            record_id=id
+        )
+
         return pharmacy_obj
 
 

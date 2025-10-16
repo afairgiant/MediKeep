@@ -11,7 +11,7 @@ import re
 import traceback
 from typing import Dict, Any
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -41,9 +41,25 @@ from app.services.paperless_auth import create_paperless_auth
 from app.crud.user_preferences import user_preferences
 from app.services.credential_encryption import credential_encryption, SecurityError
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+    log_data_access,
+    log_validation_error,
+    log_external_service,
+    log_debug
+)
+from app.core.logging_constants import LogFields
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+
+class MockRequest:
+    """Mock Request object for logging when FastAPI Request is not available."""
+    def __init__(self, ip: str = "unknown"):
+        self.client = type('obj', (object,), {'host': ip})()
 
 
 def get_preferred_auth_method(user_prefs) -> str:
@@ -73,7 +89,15 @@ def _update_entity_file_from_task_result(db: Session, task_uuid: str, task_resul
         ).first()
         
         if not entity_file:
-            logger.warning(f"No EntityFile found for task UUID {task_uuid}")
+            mock_req = MockRequest()
+            logger.warning(
+                f"No EntityFile found for task UUID {task_uuid}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "entity_file_not_found",
+                    "task_uuid": task_uuid
+                }
+            )
             return
         
         # Update sync_status based on task result
@@ -86,26 +110,61 @@ def _update_entity_file_from_task_result(db: Session, task_uuid: str, task_resul
             # For Paperless failures, we should delete the database record since the document
             # was never successfully stored in Paperless and the user should not see it
             # in their file list (it creates confusion)
-            
+
             # Only delete if this was supposed to be a Paperless file
             if entity_file.storage_backend == "paperless":
-                logger.info(f"Deleting EntityFile {entity_file.id} (paperless) due to task failure: {task_result.get('error_type', 'unknown')}")
-                
+                logger.info(
+                    f"Deleting EntityFile {entity_file.id} (paperless) due to task failure",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "entity_file_deleted",
+                        "entity_file_id": entity_file.id,
+                        "task_uuid": task_uuid,
+                        "error_type": task_result.get('error_type', 'unknown'),
+                        "storage_backend": "paperless"
+                    }
+                )
+
                 # Delete the database record and any local file copy
                 file_path = entity_file.file_path
                 db.delete(entity_file)
                 db.commit()
-                
+
                 # Also delete the physical file if it exists locally
                 if file_path:
                     try:
                         if os.path.exists(file_path):
                             os.remove(file_path)
-                            logger.info(f"Deleted local file: {file_path}")
+                            logger.info(
+                                f"Deleted local file: {file_path}",
+                                extra={
+                                    LogFields.CATEGORY: "app",
+                                    LogFields.EVENT: "local_file_deleted",
+                                    LogFields.FILE: file_path,
+                                    "entity_file_id": entity_file.id
+                                }
+                            )
                     except Exception as e:
-                        logger.warning(f"Could not delete local file {file_path}: {str(e)}")
-                
-                logger.info(f"EntityFile {entity_file.id} deleted for failed Paperless task {task_uuid}")
+                        logger.warning(
+                            f"Could not delete local file {file_path}",
+                            extra={
+                                LogFields.CATEGORY: "app",
+                                LogFields.EVENT: "file_deletion_failed",
+                                LogFields.FILE: file_path,
+                                LogFields.ERROR: str(e),
+                                "entity_file_id": entity_file.id
+                            }
+                        )
+
+                logger.info(
+                    f"EntityFile {entity_file.id} deleted for failed Paperless task",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "paperless_task_cleanup_complete",
+                        "entity_file_id": entity_file.id,
+                        "task_uuid": task_uuid
+                    }
+                )
                 return  # Exit early since we deleted the record
             else:
                 # For non-Paperless files, just mark as failed (shouldn't happen for task monitoring)
@@ -117,11 +176,28 @@ def _update_entity_file_from_task_result(db: Session, task_uuid: str, task_resul
         
         # Commit changes
         db.commit()
-        
-        logger.info(f"Updated EntityFile {entity_file.id} sync_status to {entity_file.sync_status} for task {task_uuid}")
-        
+
+        logger.info(
+            f"Updated EntityFile {entity_file.id} sync_status to {entity_file.sync_status}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "entity_file_updated",
+                "entity_file_id": entity_file.id,
+                "task_uuid": task_uuid,
+                "sync_status": entity_file.sync_status
+            }
+        )
+
     except Exception as e:
-        logger.error(f"Failed to update EntityFile for task {task_uuid}: {str(e)}")
+        logger.error(
+            f"Failed to update EntityFile for task {task_uuid}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "entity_file_update_failed",
+                LogFields.ERROR: str(e),
+                "task_uuid": task_uuid
+            }
+        )
         db.rollback()
 
 
@@ -151,10 +227,12 @@ def create_sanitized_error_response(
     logger.error(
         f"Internal error during {operation} for user {user_id}",
         extra={
-            "user_id": user_id,
-            "operation": operation,
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "internal_error",
+            LogFields.USER_ID: user_id,
+            LogFields.OPERATION: operation,
+            LogFields.ERROR: str(internal_error),
             "error_type": type(internal_error).__name__,
-            "error_message": str(internal_error),
             "stack_trace": traceback.format_exc(),
             **log_context
         }
@@ -171,28 +249,37 @@ def create_sanitized_error_response(
 async def test_paperless_connection(
     connection_data: PaperlessConnectionData,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None
 ) -> Dict[str, Any]:
     """
     Test connection to paperless-ngx instance.
-    
+
     Args:
         connection_data: Paperless connection details (URL, username, and password)
         current_user: Current authenticated user
         db: Database session
-        
+        request: FastAPI request object
+
     Returns:
         Connection test results
-        
+
     Raises:
         HTTPException: If connection test fails
     """
     try:
-        logger.info(f"Testing paperless connection for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "paperless_url": connection_data.paperless_url,
-            "endpoint": "test_paperless_connection"
-        })
+        if not request:
+            request = MockRequest()
+
+        log_external_service(
+            logger,
+            service="paperless",
+            operation="connection_test",
+            success=False,  # Will update on success
+            user_id=current_user.id,
+            paperless_url=connection_data.paperless_url,
+            endpoint="test_paperless_connection"
+        )
         
         # Determine authentication method and credentials
         use_saved_credentials = (not connection_data.paperless_api_token and 
@@ -204,7 +291,7 @@ async def test_paperless_connection(
         encrypted_password = None
         
         if use_saved_credentials:
-            logger.info("Using saved credentials for connection test")
+            log_debug(logger, "Using saved credentials for connection test", user_id=current_user.id)
             # Get user preferences with saved credentials
             user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
             
@@ -270,33 +357,45 @@ async def test_paperless_connection(
             result["used_saved_credentials"] = use_saved_credentials
             logger.debug(f"Final result with auth method: {result}")
             
-            logger.info(f"Paperless connection test successful for user {current_user.id}", extra={
-                "user_id": current_user.id,
-                "auth_method": result["auth_method"],
-                "server_version": result.get("server_version"),
-                "api_version": result.get("api_version"),
-                "used_saved_credentials": use_saved_credentials
-            })
-            
+            log_external_service(
+                logger,
+                service="paperless",
+                operation="connection_test",
+                success=True,
+                user_id=current_user.id,
+                auth_method=result["auth_method"],
+                server_version=result.get("server_version"),
+                api_version=result.get("api_version"),
+                used_saved_credentials=use_saved_credentials,
+                paperless_url=connection_data.paperless_url
+            )
+
             return result
-            
+
     except PaperlessAuthenticationError as e:
-        logger.warning(f"Paperless authentication failed for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "error": str(e),
-            "paperless_url": connection_data.paperless_url
-        })
+        log_security_event(
+            logger,
+            "paperless_auth_failed",
+            request,
+            f"Paperless authentication failed for user {current_user.id}",
+            user_id=current_user.id,
+            paperless_url=connection_data.paperless_url
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication failed. Please check your credentials."
         )
-        
+
     except PaperlessConnectionError as e:
-        logger.warning(f"Paperless connection failed for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "error": str(e),
-            "paperless_url": connection_data.paperless_url
-        })
+        log_external_service(
+            logger,
+            service="paperless",
+            operation="connection_test",
+            success=False,
+            error=str(e),
+            user_id=current_user.id,
+            paperless_url=connection_data.paperless_url
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unable to connect to the Paperless server. Please check the URL and network connectivity."
@@ -334,13 +433,18 @@ async def test_paperless_connection(
         
     except Exception as e:
         # Log the exception with more detail for debugging
-        logger.error(f"Unexpected error in paperless connection test", extra={
-            "user_id": current_user.id,
-            "paperless_url": connection_data.paperless_url,
-            "error_type": type(e).__name__,
-            "error_message": str(e),
-            "stack_trace": traceback.format_exc()
-        })
+        logger.error(
+            "Unexpected error in paperless connection test",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "paperless_connection_error",
+                LogFields.USER_ID: current_user.id,
+                LogFields.ERROR: str(e),
+                "paperless_url": connection_data.paperless_url,
+                "error_type": type(e).__name__,
+                "stack_trace": traceback.format_exc()
+            }
+        )
         raise create_sanitized_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             public_message="An internal error occurred during connection test",
@@ -354,18 +458,22 @@ async def test_paperless_connection(
 @router.get("/storage-stats", response_model=Dict[str, Any])
 async def get_storage_usage_stats(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None
 ) -> Dict[str, Any]:
     """
     Get storage usage statistics for local and paperless backends.
-    
+
     Args:
         current_user: Current authenticated user
         db: Database session
-        
+        request: FastAPI request object
+
     Returns:
         Storage usage statistics
     """
+    if not request:
+        request = MockRequest()
     try:
         # Query local file statistics
         from app.models.models import EntityFile
@@ -390,12 +498,16 @@ async def get_storage_usage_stats(
             "size": sum(f.file_size or 0 for f in paperless_files)
         }
         
-        logger.info(f"Storage stats retrieved for user {current_user.id}", extra={
-            "user_id": current_user.id,
-            "local_files": local_stats["count"],
-            "paperless_files": paperless_stats["count"]
-        })
-        
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "storage_stats_retrieved",
+            message=f"Storage stats retrieved for user {current_user.id}",
+            local_files=local_stats["count"],
+            paperless_files=paperless_stats["count"]
+        )
+
         return {
             "local": local_stats,
             "paperless": paperless_stats

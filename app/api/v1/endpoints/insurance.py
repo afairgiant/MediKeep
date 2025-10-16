@@ -9,6 +9,9 @@ from app.core.error_handling import (
     BusinessLogicException,
     handle_database_errors
 )
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -28,6 +31,9 @@ from app.schemas.insurance import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=Insurance)
@@ -63,9 +69,10 @@ def get_insurances(
     status: Optional[str] = Query(None, description="Filter by status"),
     active_only: bool = Query(False, description="Show only active insurances"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get insurance records for the current patient."""
-    
+
     with handle_database_errors(request=request):
         # Apply filters based on query parameters
         if active_only:
@@ -86,7 +93,19 @@ def get_insurances(
             )
 
         # Apply pagination
-        return insurances[skip : skip + limit]
+        paginated_insurances = insurances[skip : skip + limit]
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Insurance",
+            patient_id=target_patient_id,
+            count=len(paginated_insurances)
+        )
+
+        return paginated_insurances
 
 
 @router.get("/{insurance_id}", response_model=Insurance)
@@ -105,6 +124,16 @@ def get_insurance(
         # Verify patient ownership using current user's patient record
         verify_patient_ownership(
             insurance_obj, current_user.patient_record.id, "insurance"
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "Insurance",
+            record_id=insurance_id,
+            patient_id=current_user.patient_record.id
         )
 
         return insurance_obj
@@ -236,13 +265,26 @@ def get_expiring_insurances(
     db: Session = Depends(deps.get_db),
     days: int = Query(30, ge=1, le=365, description="Days ahead to check for expiration"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get insurance records expiring within specified days."""
 
     with handle_database_errors(request=request):
-        return insurance.get_expiring_soon(
+        expiring_insurances = insurance.get_expiring_soon(
             db=db, patient_id=target_patient_id, days=days
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Insurance",
+            patient_id=target_patient_id,
+            count=len(expiring_insurances)
+        )
+
+        return expiring_insurances
 
 
 @router.get("/search", response_model=List[Insurance])
@@ -252,10 +294,23 @@ def search_insurances(
     db: Session = Depends(deps.get_db),
     company: str = Query(..., min_length=1, description="Company name to search for"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Search insurance records by company name."""
 
     with handle_database_errors(request=request):
-        return insurance.search_by_company(
+        search_results = insurance.search_by_company(
             db=db, patient_id=target_patient_id, company_name=company
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Insurance",
+            patient_id=target_patient_id,
+            count=len(search_results)
+        )
+
+        return search_results

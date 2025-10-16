@@ -11,13 +11,18 @@ import zipfile
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.core.config import settings
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import (
+    log_endpoint_error,
+    log_security_event,
+    log_validation_error
+)
 from app.models.models import User
 from app.services.restore_service import RestoreService
 
@@ -61,6 +66,7 @@ class UploadBackupResponse(BaseModel):
 
 @router.post("/upload", response_model=UploadBackupResponse)
 async def upload_backup_file(
+    request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
@@ -95,8 +101,15 @@ async def upload_backup_file(
                 temp_file, current_user.username
             )
 
-            logger.info(
-                f"Admin {current_user.username} uploaded backup file: {file.filename}"
+            log_security_event(
+                logger,
+                "backup_file_uploaded",
+                request,
+                f"Backup file uploaded: {file.filename}",
+                user_id=current_user.id,
+                username=current_user.username,
+                filename=file.filename,
+                backup_id=backup_record.id
             )
 
             return UploadBackupResponse(
@@ -116,7 +129,13 @@ async def upload_backup_file(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to upload backup file: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to upload backup file",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=500, detail=f"Failed to upload backup file: {str(e)}"
         )
@@ -125,6 +144,7 @@ async def upload_backup_file(
 @router.post("/preview/{backup_id}", response_model=RestorePreviewResponse)
 async def preview_restore(
     backup_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ) -> RestorePreviewResponse:
@@ -135,17 +155,36 @@ async def preview_restore(
         restore_service = RestoreService(db)
         preview_data = await restore_service.preview_restore(backup_id)
 
-        logger.info(
-            f"Admin {current_user.username} previewed restore for backup {backup_id}"
+        log_security_event(
+            logger,
+            "restore_previewed",
+            request,
+            f"Restore preview requested",
+            user_id=current_user.id,
+            username=current_user.username,
+            backup_id=backup_id
         )
 
         return RestorePreviewResponse(**preview_data)
 
     except ValueError as e:
-        logger.warning(f"Invalid restore preview request: {str(e)}")
+        log_validation_error(
+            logger,
+            request,
+            str(e),
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        logger.error(f"Failed to preview restore: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to preview restore",
+            e,
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(
             status_code=500, detail=f"Failed to preview restore: {str(e)}"
         )
@@ -154,7 +193,8 @@ async def preview_restore(
 @router.post("/execute/{backup_id}", response_model=RestoreExecuteResponse)
 async def execute_restore(
     backup_id: int,
-    request: RestoreExecuteRequest,
+    restore_request: RestoreExecuteRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ) -> RestoreExecuteResponse:
@@ -165,21 +205,43 @@ async def execute_restore(
     try:
         # Extract user info before restore to prevent session issues
         username = current_user.username
+        user_id = current_user.id
 
         restore_service = RestoreService(db)
         result = await restore_service.execute_restore(
-            backup_id, request.confirmation_token
+            backup_id, restore_request.confirmation_token
         )
 
-        logger.info(f"Admin {username} executed restore for backup {backup_id}")
+        log_security_event(
+            logger,
+            "restore_executed",
+            request,
+            f"Restore executed for backup {backup_id}",
+            user_id=user_id,
+            username=username,
+            backup_id=backup_id
+        )
 
         return RestoreExecuteResponse(**result)
 
     except ValueError as e:
-        logger.warning(f"Invalid restore request: {str(e)}")
+        log_validation_error(
+            logger,
+            request,
+            str(e),
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Failed to execute restore: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to execute restore",
+            e,
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(
             status_code=500, detail=f"Failed to execute restore: {str(e)}"
         )
@@ -188,6 +250,7 @@ async def execute_restore(
 @router.get("/confirmation-token/{backup_id}")
 async def get_confirmation_token(
     backup_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ) -> dict:
@@ -199,8 +262,14 @@ async def get_confirmation_token(
         restore_service = RestoreService(db)
         token = restore_service.generate_confirmation_token(backup_id)
 
-        logger.info(
-            f"Admin {current_user.username} requested confirmation token for backup {backup_id}"
+        log_security_event(
+            logger,
+            "confirmation_token_requested",
+            request,
+            f"Confirmation token requested for restore operation",
+            user_id=current_user.id,
+            username=current_user.username,
+            backup_id=backup_id
         )
 
         return {
@@ -211,7 +280,14 @@ async def get_confirmation_token(
         }
 
     except Exception as e:
-        logger.error(f"Failed to generate confirmation token: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to generate confirmation token",
+            e,
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(
             status_code=500, detail=f"Failed to generate confirmation token: {str(e)}"
         )

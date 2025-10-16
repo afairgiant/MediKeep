@@ -6,6 +6,14 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.deps import NotFoundException, ForbiddenException, BusinessLogicException
 from app.core.error_handling import handle_database_errors
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_data_access,
+    log_security_event,
+)
 from app.models.models import User
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
@@ -30,6 +38,9 @@ from app.schemas.condition import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=ConditionResponse)
@@ -63,6 +74,7 @@ def read_conditions(
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Retrieve conditions for the current user or specified patient (Phase 1 support)."""
     with handle_database_errors(request=request):
@@ -88,6 +100,17 @@ def read_conditions(
             conditions = condition.get_by_patient(
                 db, patient_id=target_patient_id, skip=skip, limit=limit
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Condition",
+            patient_id=target_patient_id,
+            count=len(conditions)
+        )
+
         return conditions
 
 
@@ -97,6 +120,7 @@ def get_conditions_for_dropdown(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
     active_only: bool = Query(False, description="Only return active conditions"),
 ) -> Any:
     """Get conditions formatted for dropdown selection in forms."""
@@ -108,6 +132,16 @@ def get_conditions_for_dropdown(
         else:
             conditions = condition.get_by_patient(db, patient_id=current_user_patient_id)
 
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Condition",
+            patient_id=current_user_patient_id,
+            count=len(conditions)
+        )
+
         return conditions
 
 
@@ -118,30 +152,58 @@ def get_condition_medications(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ):
     """Simple endpoint to get medications for a condition."""
     with handle_database_errors(request=request):
         # Verify condition exists and belongs to the current user
         db_condition = condition.get(db, id=condition_id)
         if not db_condition:
+            log_security_event(
+                logger,
+                "condition_not_found",
+                request,
+                f"Condition with ID {condition_id} not found",
+                user_id=current_user_id
+            )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
                 request=request
             )
-        
+
         # Verify condition belongs to current user
         if db_condition.patient_id != current_user_patient_id:
+            log_security_event(
+                logger,
+                "unauthorized_condition_access",
+                request,
+                f"User attempted to access condition {condition_id} without permission",
+                user_id=current_user_id,
+                condition_id=condition_id
+            )
             raise NotFoundException(
                 resource="Condition",
                 message="Condition not found",
                 request=request
             )
-            
+
         relationships = condition_medication.get_by_condition(db, condition_id=condition_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "ConditionMedication",
+            record_id=condition_id,
+            patient_id=current_user_patient_id,
+            count=len(relationships)
+        )
+
         return [{
-            "id": rel.id, 
-            "medication_id": rel.medication_id, 
+            "id": rel.id,
+            "medication_id": rel.medication_id,
             "condition_id": rel.condition_id,
             "relevance_note": rel.relevance_note,
             "created_at": rel.created_at,
@@ -157,42 +219,74 @@ def create_condition_medication(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Create a new condition medication relationship."""
     with handle_database_errors(request=request):
         # Verify condition exists and belongs to the current user
         db_condition = condition.get(db, id=condition_id)
         if not db_condition:
+            log_security_event(
+                logger,
+                "condition_not_found",
+                request,
+                f"Condition with ID {condition_id} not found",
+                user_id=current_user_id
+            )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
                 request=request
             )
-        
+
         # Verify condition belongs to current user
         if db_condition.patient_id != current_user_patient_id:
+            log_security_event(
+                logger,
+                "unauthorized_condition_access",
+                request,
+                f"User attempted to access condition {condition_id} without permission",
+                user_id=current_user_id,
+                condition_id=condition_id
+            )
             raise NotFoundException(
                 resource="Condition",
                 message="Condition not found",
                 request=request
             )
-        
+
         # Verify medication exists and belongs to the same patient
         db_medication = medication_crud.get(db, id=medication_in.medication_id)
         if not db_medication:
+            log_security_event(
+                logger,
+                "medication_not_found",
+                request,
+                f"Medication with ID {medication_in.medication_id} not found",
+                user_id=current_user_id
+            )
             raise NotFoundException(
                 resource="Medication",
                 message=f"Medication with ID {medication_in.medication_id} not found",
                 request=request
             )
-        
+
         # Ensure medication belongs to the same patient as the condition
         if db_medication.patient_id != current_user_patient_id:
+            log_security_event(
+                logger,
+                "cross_patient_medication_link",
+                request,
+                f"User attempted to link medication {medication_in.medication_id} from different patient",
+                user_id=current_user_id,
+                medication_id=medication_in.medication_id,
+                condition_id=condition_id
+            )
             raise BusinessLogicException(
                 message="Cannot link medication that doesn't belong to the same patient",
                 request=request
             )
-        
+
         # Check if relationship already exists
         existing = condition_medication.get_by_condition_and_medication(
             db, condition_id=condition_id, medication_id=medication_in.medication_id
@@ -202,12 +296,25 @@ def create_condition_medication(
                 message="Relationship between this condition and medication already exists",
                 request=request
             )
-        
+
         # Set condition_id and create relationship
         medication_in.condition_id = condition_id
-        
+
         # Create the relationship
         relationship = condition_medication.create(db, obj_in=medication_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "ConditionMedication",
+            record_id=relationship.id,
+            patient_id=current_user_patient_id,
+            condition_id=condition_id,
+            medication_id=medication_in.medication_id
+        )
+
         return relationship
 
 
@@ -226,49 +333,100 @@ def update_condition_medication(
         # Verify condition exists and user has access to it
         db_condition = condition.get(db, id=condition_id)
         if not db_condition:
+            log_security_event(
+                logger,
+                "condition_not_found",
+                request,
+                f"Condition with ID {condition_id} not found",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
                 request=request
             )
-        
+
         # Verify access using multi-patient system
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
-        
+
         patient_record = db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
         if not patient_record:
+            log_security_event(
+                logger,
+                "patient_not_found",
+                request,
+                f"Patient {db_condition.patient_id} not found for condition {condition_id}",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Patient",
                 message="Patient not found",
                 request=request
             )
-            
+
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "edit"):
+            log_security_event(
+                logger,
+                "unauthorized_condition_edit",
+                request,
+                f"User denied edit access to condition {condition_id}",
+                user_id=current_user.id,
+                patient_id=patient_record.id,
+                condition_id=condition_id
+            )
             raise ForbiddenException(
                 message="Access denied to this condition",
                 request=request
             )
-        
+
         # Get the relationship
         relationship = condition_medication.get(db, id=relationship_id)
         if not relationship:
+            log_security_event(
+                logger,
+                "condition_medication_not_found",
+                request,
+                f"Condition medication relationship {relationship_id} not found",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Condition medication relationship",
                 message=f"Relationship with ID {relationship_id} not found",
                 request=request
             )
-        
+
         # Verify the relationship belongs to the specified condition
         if relationship.condition_id != condition_id:
+            log_security_event(
+                logger,
+                "condition_medication_mismatch",
+                request,
+                f"Relationship {relationship_id} does not belong to condition {condition_id}",
+                user_id=current_user.id,
+                relationship_id=relationship_id,
+                condition_id=condition_id
+            )
             raise BusinessLogicException(
                 message="Relationship does not belong to the specified condition",
                 request=request
             )
-        
+
         # Update the relationship
         updated_relationship = condition_medication.update(db, db_obj=relationship, obj_in=medication_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "update",
+            "ConditionMedication",
+            record_id=relationship_id,
+            patient_id=patient_record.id,
+            condition_id=condition_id
+        )
+
         return updated_relationship
 
 
@@ -286,49 +444,100 @@ def delete_condition_medication(
         # Verify condition exists and user has access to it
         db_condition = condition.get(db, id=condition_id)
         if not db_condition:
+            log_security_event(
+                logger,
+                "condition_not_found",
+                request,
+                f"Condition with ID {condition_id} not found",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
                 request=request
             )
-        
+
         # Verify access using multi-patient system
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
-        
+
         patient_record = db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
         if not patient_record:
+            log_security_event(
+                logger,
+                "patient_not_found",
+                request,
+                f"Patient {db_condition.patient_id} not found for condition {condition_id}",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Patient",
                 message="Patient not found",
                 request=request
             )
-            
+
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "edit"):
+            log_security_event(
+                logger,
+                "unauthorized_condition_delete",
+                request,
+                f"User denied delete access to condition {condition_id}",
+                user_id=current_user.id,
+                patient_id=patient_record.id,
+                condition_id=condition_id
+            )
             raise ForbiddenException(
                 message="Access denied to this condition",
                 request=request
             )
-        
+
         # Get the relationship
         relationship = condition_medication.get(db, id=relationship_id)
         if not relationship:
+            log_security_event(
+                logger,
+                "condition_medication_not_found",
+                request,
+                f"Condition medication relationship {relationship_id} not found",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Condition medication relationship",
                 message=f"Relationship with ID {relationship_id} not found",
                 request=request
             )
-        
+
         # Verify the relationship belongs to the specified condition
         if relationship.condition_id != condition_id:
+            log_security_event(
+                logger,
+                "condition_medication_mismatch",
+                request,
+                f"Relationship {relationship_id} does not belong to condition {condition_id}",
+                user_id=current_user.id,
+                relationship_id=relationship_id,
+                condition_id=condition_id
+            )
             raise BusinessLogicException(
                 message="Relationship does not belong to the specified condition",
                 request=request
             )
-        
+
         # Delete the relationship
         condition_medication.delete(db, id=relationship_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "delete",
+            "ConditionMedication",
+            record_id=relationship_id,
+            patient_id=patient_record.id,
+            condition_id=condition_id
+        )
+
         return {"message": "Condition medication relationship deleted successfully"}
 
 
@@ -341,6 +550,7 @@ def read_condition(
     db: Session = Depends(deps.get_db),
     condition_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get condition by ID with related information - only allows access to user's own conditions."""
     with handle_database_errors(request=request):
@@ -352,6 +562,17 @@ def read_condition(
         )
         handle_not_found(condition_obj, "Condition")
         verify_patient_ownership(condition_obj, current_user_patient_id, "condition")
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Condition",
+            record_id=condition_id,
+            patient_id=current_user_patient_id
+        )
+
         return condition_obj
 
 
@@ -403,10 +624,22 @@ def get_active_conditions(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all active conditions for a patient."""
     with handle_database_errors(request=request):
         conditions = condition.get_active_conditions(db, patient_id=patient_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Condition",
+            patient_id=patient_id,
+            count=len(conditions)
+        )
+
         return conditions
 
 
@@ -418,6 +651,7 @@ def get_patient_conditions(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
 ) -> Any:
@@ -426,6 +660,17 @@ def get_patient_conditions(
         conditions = condition.get_by_patient(
             db, patient_id=patient_id, skip=skip, limit=limit
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Condition",
+            patient_id=patient_id,
+            count=len(conditions)
+        )
+
         return conditions
 
 
@@ -444,34 +689,57 @@ def get_medication_conditions(
         # Verify medication exists and user has access to it
         db_medication = medication_crud.get(db, id=medication_id)
         if not db_medication:
+            log_security_event(
+                logger,
+                "medication_not_found",
+                request,
+                f"Medication with ID {medication_id} not found",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Medication",
                 message=f"Medication with ID {medication_id} not found",
                 request=request
             )
-        
+
         # Verify access using multi-patient system
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
-        
+
         patient_record = db.query(Patient).filter(Patient.id == db_medication.patient_id).first()
         if not patient_record:
+            log_security_event(
+                logger,
+                "patient_not_found",
+                request,
+                f"Patient {db_medication.patient_id} not found for medication {medication_id}",
+                user_id=current_user.id
+            )
             raise NotFoundException(
                 resource="Patient",
                 message="Patient not found",
                 request=request
             )
-            
+
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "view"):
+            log_security_event(
+                logger,
+                "unauthorized_medication_access",
+                request,
+                f"User denied view access to medication {medication_id}",
+                user_id=current_user.id,
+                patient_id=patient_record.id,
+                medication_id=medication_id
+            )
             raise ForbiddenException(
                 message="Access denied to this medication",
                 request=request
             )
-        
+
         # Get condition relationships
         relationships = condition_medication.get_by_medication(db, medication_id=medication_id)
-        
+
         # Enhance with condition details
         enhanced_relationships = []
         for rel in relationships:
@@ -479,7 +747,7 @@ def get_medication_conditions(
             # Verify the condition belongs to the same patient as the medication
             if condition_obj and condition_obj.patient_id != db_medication.patient_id:
                 condition_obj = None  # Don't include conditions from other patients
-                
+
             enhanced_relationships.append({
                 "id": rel.id,
                 "condition_id": rel.condition_id,
@@ -494,5 +762,16 @@ def get_medication_conditions(
                     "severity": condition_obj.severity,
                 } if condition_obj else None
             })
-        
+
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "ConditionMedication",
+            patient_id=patient_record.id,
+            medication_id=medication_id,
+            count=len(relationships)
+        )
+
         return enhanced_relationships

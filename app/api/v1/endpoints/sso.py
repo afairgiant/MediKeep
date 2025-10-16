@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.api import deps
@@ -7,6 +7,7 @@ from app.auth.sso.exceptions import *
 from app.core.config import settings
 from app.core.security import create_access_token
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_security_event, log_endpoint_error
 
 logger = get_logger(__name__, "sso")
 router = APIRouter(prefix="/auth/sso", tags=["sso"])
@@ -27,7 +28,7 @@ class GitHubLinkRequest(BaseModel):
     password: str
 
 @router.get("/config")
-async def get_sso_config():
+async def get_sso_config(request: Request):
     """Check if SSO is enabled and get configuration info for frontend"""
     try:
         return {
@@ -36,7 +37,9 @@ async def get_sso_config():
             "registration_enabled": settings.ALLOW_USER_REGISTRATION,
         }
     except Exception as e:
-        logger.error(f"Error getting SSO config: {str(e)}")
+        log_endpoint_error(
+            logger, request, "Error getting SSO config", e
+        )
         return {
             "enabled": False,
             "provider_type": None,
@@ -45,6 +48,7 @@ async def get_sso_config():
 
 @router.post("/initiate")
 async def initiate_sso_login(
+    request: Request,
     return_url: str = Query(None, description="URL to return to after SSO"),
     db: Session = Depends(deps.get_db)
 ):
@@ -53,14 +57,21 @@ async def initiate_sso_login(
         result = await sso_service.get_authorization_url(return_url)
         return result
     except SSOConfigurationError as e:
-        logger.warning(f"SSO configuration error: {str(e)}")
+        log_security_event(
+            logger, "sso_config_error", request,
+            "SSO configuration error",
+            error=str(e)
+        )
         raise HTTPException(status_code=400, detail="SSO configuration error")
     except Exception as e:
-        logger.error(f"Failed to initiate SSO: {str(e)}")
+        log_endpoint_error(
+            logger, request, "Failed to initiate SSO", e
+        )
         raise HTTPException(status_code=500, detail="Failed to start SSO authentication")
 
 @router.post("/callback")
 async def sso_callback(
+    req: Request,
     request: SSOCallbackRequest,
     db: Session = Depends(deps.get_db)
 ):
@@ -110,7 +121,11 @@ async def sso_callback(
         }
         
     except SSORegistrationBlockedError as e:
-        logger.warning(f"SSO registration blocked: {str(e)}")
+        log_security_event(
+            logger, "sso_registration_blocked", req,
+            "SSO registration blocked",
+            error=str(e)
+        )
         raise HTTPException(
             status_code=403,
             detail={
@@ -119,7 +134,11 @@ async def sso_callback(
             }
         )
     except SSOAuthenticationError as e:
-        logger.error(f"SSO authentication failed: {str(e)}")
+        log_security_event(
+            logger, "sso_authentication_failed", req,
+            "SSO authentication failed",
+            error=str(e)
+        )
         raise HTTPException(
             status_code=400,
             detail={
@@ -128,7 +147,9 @@ async def sso_callback(
             }
         )
     except Exception as e:
-        logger.error(f"Unexpected error in SSO callback: {str(e)}")
+        log_endpoint_error(
+            logger, req, "Unexpected error in SSO callback", e
+        )
         raise HTTPException(
             status_code=500,
             detail="SSO authentication failed"
@@ -136,6 +157,7 @@ async def sso_callback(
 
 @router.post("/resolve-conflict")
 async def resolve_account_conflict(
+    req: Request,
     request: SSOConflictRequest,
     db: Session = Depends(deps.get_db)
 ):
@@ -169,7 +191,11 @@ async def resolve_account_conflict(
         }
         
     except SSOAuthenticationError as e:
-        logger.error(f"SSO conflict resolution failed: {str(e)}")
+        log_security_event(
+            logger, "sso_conflict_resolution_failed", req,
+            "SSO conflict resolution failed",
+            error=str(e)
+        )
         raise HTTPException(
             status_code=400,
             detail={
@@ -178,7 +204,9 @@ async def resolve_account_conflict(
             }
         )
     except Exception as e:
-        logger.error(f"Unexpected error in SSO conflict resolution: {str(e)}")
+        log_endpoint_error(
+            logger, req, "Unexpected error in SSO conflict resolution", e
+        )
         raise HTTPException(
             status_code=500,
             detail="SSO conflict resolution failed"
@@ -186,6 +214,7 @@ async def resolve_account_conflict(
 
 @router.post("/resolve-github-link")
 async def resolve_github_manual_link(
+    req: Request,
     request: GitHubLinkRequest,
     db: Session = Depends(deps.get_db)
 ):
@@ -219,7 +248,12 @@ async def resolve_github_manual_link(
         }
         
     except SSOAuthenticationError as e:
-        logger.error(f"GitHub manual linking failed: {str(e)}")
+        log_security_event(
+            logger, "github_linking_failed", req,
+            "GitHub manual linking failed",
+            error=str(e),
+            username=request.username
+        )
         raise HTTPException(
             status_code=400,
             detail={
@@ -228,14 +262,17 @@ async def resolve_github_manual_link(
             }
         )
     except Exception as e:
-        logger.error(f"Unexpected error in GitHub manual linking: {str(e)}")
+        log_endpoint_error(
+            logger, req, "Unexpected error in GitHub manual linking", e,
+            username=request.username
+        )
         raise HTTPException(
             status_code=500,
             detail="GitHub manual linking failed"
         )
 
 @router.post("/test-connection")
-async def test_sso_connection():
+async def test_sso_connection(request: Request):
     """Test SSO provider connection (for admin use)"""
     try:
         result = sso_service.test_connection()
@@ -244,5 +281,7 @@ async def test_sso_connection():
         else:
             return {"success": False, "message": result["message"]}
     except Exception as e:
-        logger.error(f"SSO connection test failed: {str(e)}")
+        log_endpoint_error(
+            logger, request, "SSO connection test failed", e
+        )
         return {"success": False, "message": "Connection test failed"}

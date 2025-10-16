@@ -5,12 +5,21 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
+from app.core.logging_config import get_logger
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+    log_data_access,
+    log_validation_error
+)
+from app.core.logging_constants import LogFields
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType
@@ -22,6 +31,7 @@ from app.schemas.lab_result_file import (
     LabResultFileUpdate,
 )
 
+logger = get_logger(__name__)
 router = APIRouter()
 
 # Configuration
@@ -93,19 +103,44 @@ async def upload_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
+    request: Request
 ) -> LabResultFile:
     """
     Upload a file and create a lab result file entry.
     """
+    log_endpoint_access(
+        logger,
+        request,
+        current_user_id,
+        "lab_result_file_upload_started",
+        message=f"Starting file upload for lab result {lab_result_id}",
+        lab_result_id=lab_result_id,
+        filename=file.filename
+    )
+
     # Verify lab result exists
     lab_result_obj = lab_result.get(db=db, id=lab_result_id)
     if not lab_result_obj:
+        log_validation_error(
+            logger,
+            request,
+            f"Lab result {lab_result_id} not found",
+            user_id=current_user_id,
+            lab_result_id=lab_result_id
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
         )
 
     # Validate file
     if not file.filename:
+        log_validation_error(
+            logger,
+            request,
+            "No filename provided",
+            user_id=current_user_id,
+            lab_result_id=lab_result_id
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided"
         )
@@ -113,6 +148,14 @@ async def upload_file(
     # Check file extension
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in ALLOWED_EXTENSIONS:
+        log_validation_error(
+            logger,
+            request,
+            f"Invalid file extension: {file_extension}",
+            user_id=current_user_id,
+            lab_result_id=lab_result_id,
+            file_extension=file_extension
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}",
@@ -121,6 +164,15 @@ async def upload_file(
     # Check file size
     file_content = await file.read()
     if len(file_content) > MAX_FILE_SIZE:
+        log_validation_error(
+            logger,
+            request,
+            f"File too large: {len(file_content)} bytes",
+            user_id=current_user_id,
+            lab_result_id=lab_result_id,
+            file_size=len(file_content),
+            max_size=MAX_FILE_SIZE
+        )
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024 * 1024)}MB",
@@ -137,7 +189,29 @@ async def upload_file(
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(file_content)
+
+        logger.info(
+            f"File saved successfully: {unique_filename}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "file_saved",
+                LogFields.USER_ID: current_user_id,
+                LogFields.FILE: file_path,
+                "lab_result_id": lab_result_id,
+                "file_size": len(file_content),
+                "filename": file.filename
+            }
+        )
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            f"Error saving file: {file.filename}",
+            e,
+            user_id=current_user_id,
+            lab_result_id=lab_result_id,
+            file_path=file_path
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error saving file: {str(e)}",
@@ -164,6 +238,17 @@ async def upload_file(
         entity_type=EntityType.LAB_RESULT_FILE,
         entity_obj=file_obj,
         user_id=current_user_id,
+    )
+
+    log_endpoint_access(
+        logger,
+        request,
+        current_user_id,
+        "lab_result_file_uploaded",
+        message=f"File uploaded successfully: {file.filename}",
+        lab_result_id=lab_result_id,
+        file_id=file_obj.id,
+        file_size=len(file_content)
     )
 
     return file_obj
@@ -275,15 +360,25 @@ def delete_lab_result_file(
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    request: Request
 ):
     """
     Delete a lab result file.
     """
     file_obj = lab_result_file.get(db=db, id=file_id)
     if not file_obj:
+        log_validation_error(
+            logger,
+            request,
+            f"Lab result file {file_id} not found",
+            user_id=current_user_id,
+            file_id=file_id
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
-        )  # Log the deletion activity BEFORE deleting using centralized logging
+        )
+
+    # Log the deletion activity BEFORE deleting using centralized logging
     log_delete(
         db=db,
         entity_type=EntityType.LAB_RESULT_FILE,
@@ -296,12 +391,41 @@ def delete_lab_result_file(
         file_path = getattr(file_obj, "file_path", None)
         if file_path and os.path.exists(file_path):
             os.remove(file_path)
+            logger.info(
+                f"Physical file deleted: {file_path}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "physical_file_deleted",
+                    LogFields.USER_ID: current_user_id,
+                    LogFields.FILE: file_path,
+                    "file_id": file_id
+                }
+            )
     except Exception as e:
         # Log error but continue with database deletion
-        print(f"Error deleting physical file: {str(e)}")
+        logger.error(
+            f"Error deleting physical file: {file_path}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "file_deletion_error",
+                LogFields.USER_ID: current_user_id,
+                LogFields.ERROR: str(e),
+                LogFields.FILE: file_path,
+                "file_id": file_id
+            }
+        )
 
     # Delete from database
     lab_result_file.delete(db=db, id=file_id)
+
+    log_endpoint_access(
+        logger,
+        request,
+        current_user_id,
+        "lab_result_file_deleted",
+        message=f"Lab result file {file_id} deleted successfully",
+        file_id=file_id
+    )
 
     return {"message": "Lab result file deleted successfully"}
 

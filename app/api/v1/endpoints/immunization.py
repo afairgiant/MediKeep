@@ -7,6 +7,9 @@ from app.api import deps
 from app.core.error_handling import (
     handle_database_errors
 )
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -24,6 +27,9 @@ from app.schemas.immunization import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=ImmunizationResponse)
@@ -57,9 +63,10 @@ def read_immunizations(
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Retrieve immunizations for the current user or accessible patient."""
-    
+
     # Filter immunizations by the target patient_id
     with handle_database_errors(request=request):
         if tags:
@@ -76,7 +83,7 @@ def read_immunizations(
                     **filters
                 )
                 immunizations = [
-                    imm for imm in all_immunizations 
+                    imm for imm in all_immunizations
                     if vaccine_name.lower() in getattr(imm, "vaccine_name", "").lower()
                 ]
                 # Apply pagination after filtering
@@ -98,6 +105,17 @@ def read_immunizations(
             immunizations = immunization.get_by_patient(
                 db, patient_id=target_patient_id, skip=skip, limit=limit
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Immunization",
+            patient_id=target_patient_id,
+            count=len(immunizations)
+        )
+
         return immunizations
 
 
@@ -108,6 +126,7 @@ def read_immunization(
     db: Session = Depends(deps.get_db),
     immunization_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get immunization by ID with related information - only allows access to user's own immunizations."""
     with handle_database_errors(request=request):
@@ -116,6 +135,17 @@ def read_immunization(
         )
         handle_not_found(immunization_obj, "Immunization", request)
         verify_patient_ownership(immunization_obj, current_user_patient_id, "immunization")
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Immunization",
+            record_id=immunization_id,
+            patient_id=current_user_patient_id
+        )
+
         return immunization_obj
 
 
@@ -168,12 +198,25 @@ def get_recent_immunizations(
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=365, ge=1, le=3650),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get recent immunizations for a patient within specified days."""
     with handle_database_errors(request=request):
         immunizations = immunization.get_recent_immunizations(
             db, patient_id=patient_id, days=days
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Immunization",
+            patient_id=patient_id,
+            count=len(immunizations),
+            days=days
+        )
+
         return immunizations
 
 
@@ -185,6 +228,7 @@ def check_booster_due(
     patient_id: int = Depends(deps.verify_patient_access),
     vaccine_name: str,
     months_interval: int = Query(default=12, ge=1, le=120),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Check if a patient is due for a booster shot."""
     with handle_database_errors(request=request):
@@ -194,6 +238,18 @@ def check_booster_due(
             vaccine_name=vaccine_name,
             months_interval=months_interval,
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Immunization",
+            patient_id=patient_id,
+            vaccine_name=vaccine_name,
+            booster_due=is_due
+        )
+
         return {
             "patient_id": patient_id,
             "vaccine_name": vaccine_name,
@@ -211,10 +267,22 @@ def get_patient_immunizations(
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all immunizations for a specific patient."""
     with handle_database_errors(request=request):
         immunizations = immunization.get_by_patient(
             db, patient_id=patient_id, skip=skip, limit=limit
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Immunization",
+            patient_id=patient_id,
+            count=len(immunizations)
+        )
+
         return immunizations

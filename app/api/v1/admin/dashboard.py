@@ -21,6 +21,8 @@ from app.core.datetime_utils import (
     get_application_uptime_seconds,
     get_application_uptime_string,
 )
+from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_endpoint_error
 from app.models.activity_log import ActivityLog, get_utc_now
 from app.models.models import (
     Allergy,
@@ -36,6 +38,8 @@ from app.models.models import (
     User,
     Vitals,
 )
+
+logger = get_logger(__name__, "app")
 
 router = APIRouter()
 
@@ -85,6 +89,7 @@ class SystemHealth(BaseModel):
 
 @router.get("/stats", response_model=DashboardStats)
 def get_dashboard_stats(
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -142,17 +147,25 @@ def get_dashboard_stats(
 
     except Exception as e:
         import traceback
+        traceback_str = traceback.format_exc()
 
-        error_detail = f"Error fetching dashboard stats: {str(e)}\nTraceback: {traceback.format_exc()}"
-        print(f"DASHBOARD STATS ERROR: {error_detail}")  # This will show in server logs
+        log_endpoint_error(
+            logger,
+            request,
+            "Error fetching dashboard stats",
+            e,
+            user_id=current_user.id,
+            traceback=traceback_str
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=error_detail,
+            detail=f"Error fetching dashboard stats: {str(e)}",
         )
 
 
 @router.get("/recent-activity", response_model=List[RecentActivity])
 def get_recent_activity(
+    request: Request,
     limit: int = 20,
     action_filter: Optional[
         str
@@ -229,6 +242,13 @@ def get_recent_activity(
         return recent_activities
 
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Error fetching recent activity",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching recent activity: {str(e)}",
@@ -237,6 +257,7 @@ def get_recent_activity(
 
 @router.get("/system-health", response_model=SystemHealth)
 def get_system_health(
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -262,9 +283,8 @@ def get_system_health(
         except Exception as e:
             database_status = "error"
             database_connection_test = False
-            print(
-                f"Database connection test failed: {e}"
-            )  # Calculate total records across all models with error handling
+            logger.error(f"Database connection test failed: {str(e)}")
+        # Calculate total records across all models with error handling
         total_records = (
             safe_count(db.query(User))
             + safe_count(db.query(Patient))
@@ -282,7 +302,7 @@ def get_system_health(
         try:
             system_uptime = get_application_uptime_string()
         except Exception as e:
-            print(f"Error calculating uptime: {e}")
+            logger.error(f"Error calculating uptime: {str(e)}")
             system_uptime = "Unable to determine"
 
         # Get disk usage for database file (if SQLite)
@@ -330,7 +350,7 @@ def get_system_health(
                 last_backup = datetime.fromtimestamp(latest_backup_time)
 
         except Exception as e:
-            print(f"Error checking backup files: {e}")
+            logger.error(f"Error checking backup files: {str(e)}")
             # Leave last_backup as None to indicate no backup found
 
         return SystemHealth(
@@ -344,6 +364,13 @@ def get_system_health(
         )
 
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Error fetching system health",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching system health: {str(e)}",
@@ -352,7 +379,7 @@ def get_system_health(
 
 @router.get("/system-metrics")
 def get_system_metrics(
-    request: Request,  # Add request parameter to detect SSL
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -596,11 +623,18 @@ def get_system_metrics(
                 size_mb = round(total_size / (1024 * 1024), 2)
                 metrics["storage"]["upload_directory_size"] = f"{size_mb} MB"
         except Exception as e:
-            print(f"Error getting storage metrics: {e}")
+            logger.error(f"Error getting storage metrics: {str(e)}")
 
         return metrics
 
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Error fetching system metrics",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching system metrics: {str(e)}",
@@ -737,6 +771,7 @@ def get_storage_health(
 
 @router.get("/analytics-data")
 def get_analytics_data(
+    request: Request,
     days: int = 7,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
@@ -778,7 +813,7 @@ def get_analytics_data(
                 daily_activity[date] = count
 
         except Exception as e:
-            print(f"Error querying activity logs: {e}")
+            logger.error(f"Error querying activity logs: {str(e)}")
 
         # Create week labels and data arrays
         week_labels = []
@@ -809,7 +844,7 @@ def get_analytics_data(
                 model_activity[entity_type or "unknown"] = count
 
         except Exception as e:
-            print(f"Error querying model activity: {e}")
+            logger.error(f"Error querying model activity: {str(e)}")
 
         # Get hourly activity for today
         today = datetime.utcnow().date()
@@ -834,7 +869,7 @@ def get_analytics_data(
             hourly_activity = hourly_data
 
         except Exception as e:
-            print(f"Error querying hourly activity: {e}")
+            logger.error(f"Error querying hourly activity: {str(e)}")
             hourly_activity = [0] * 24
 
         return {
@@ -856,7 +891,7 @@ def get_analytics_data(
         }
 
     except Exception as e:
-        print(f"Error generating analytics data: {e}")
+        logger.error(f"Error generating analytics data: {str(e)}")
         # Return fallback data if there's an error
         return {
             "weekly_activity": {

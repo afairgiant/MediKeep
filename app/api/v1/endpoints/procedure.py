@@ -7,6 +7,9 @@ from app.api import deps
 from app.core.error_handling import (
     handle_database_errors
 )
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -24,6 +27,9 @@ from app.schemas.procedure import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=ProcedureResponse)
@@ -59,11 +65,12 @@ def read_procedures(
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Retrieve procedures for the current user or accessible patient.
     """
-    
+
     # Filter procedures by the target patient_id
     with handle_database_errors(request=request):
         if tags:
@@ -97,6 +104,17 @@ def read_procedures(
             procedures = procedure.get_by_patient(
                 db, patient_id=target_patient_id, skip=skip, limit=limit
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Procedure",
+            patient_id=target_patient_id,
+            count=len(procedures)
+        )
+
         return procedures
 
 
@@ -107,6 +125,7 @@ def read_procedure(
     db: Session = Depends(deps.get_db),
     procedure_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get procedure by ID with related information - only allows access to user's own procedures.
@@ -117,6 +136,17 @@ def read_procedure(
         )
         handle_not_found(procedure_obj, "Procedure", request)
         verify_patient_ownership(procedure_obj, current_user_patient_id, "procedure")
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Procedure",
+            record_id=procedure_id,
+            patient_id=current_user_patient_id
+        )
+
         return procedure_obj
 
 
@@ -179,6 +209,18 @@ def get_scheduled_procedures(
     """
     with handle_database_errors(request=request):
         procedures = procedure.get_scheduled(db, patient_id=patient_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Procedure",
+            patient_id=patient_id,
+            count=len(procedures),
+            status="scheduled"
+        )
+
         return procedures
 
 
@@ -189,12 +231,25 @@ def get_recent_procedures(
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     days: int = Query(default=90, ge=1, le=365),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get recent procedures for a patient within specified days.
     """
     with handle_database_errors(request=request):
         procedures = procedure.get_recent(db, patient_id=patient_id, days=days)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Procedure",
+            patient_id=patient_id,
+            count=len(procedures),
+            days=days
+        )
+
         return procedures
 
 
@@ -208,6 +263,7 @@ def get_patient_procedures(
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all procedures for a specific patient.
@@ -216,4 +272,15 @@ def get_patient_procedures(
         procedures = procedure.get_by_patient(
             db, patient_id=patient_id, skip=skip, limit=limit
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Procedure",
+            patient_id=patient_id,
+            count=len(procedures)
+        )
+
         return procedures

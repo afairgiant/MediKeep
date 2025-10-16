@@ -2,7 +2,7 @@
 API endpoints for invitation management
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from sqlalchemy import exc as sa
 from typing import List, Optional
@@ -20,6 +20,12 @@ from app.schemas.invitations import (
     InvitationSummary
 )
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+    log_validation_error,
+)
 from datetime import datetime
 
 logger = get_logger(__name__, "app")
@@ -28,12 +34,20 @@ router = APIRouter()
 
 @router.get("/pending", response_model=List[InvitationResponse])
 def get_pending_invitations(
+    request: Request,
     invitation_type: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get pending invitations for current user"""
     try:
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "pending_invitations_accessed",
+            invitation_type=invitation_type
+        )
         service = InvitationService(db)
         invitations = service.get_pending_invitations(current_user, invitation_type)
         
@@ -61,10 +75,18 @@ def get_pending_invitations(
                 } if invitation.sent_by else None
             }
             response_invitations.append(invitation_dict)
-        
+
+
         return response_invitations
     except Exception as e:
-        logger.error(f"Error fetching pending invitations: {e}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to fetch pending invitations",
+            e,
+            user_id=current_user.id,
+            invitation_type=invitation_type,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch pending invitations"
@@ -73,12 +95,20 @@ def get_pending_invitations(
 
 @router.get("/sent", response_model=List[InvitationResponse])
 def get_sent_invitations(
+    request: Request,
     invitation_type: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get invitations sent by current user"""
     try:
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "sent_invitations_accessed",
+            invitation_type=invitation_type
+        )
         service = InvitationService(db)
         invitations = service.get_sent_invitations(current_user, invitation_type)
         
@@ -106,10 +136,18 @@ def get_sent_invitations(
                 } if invitation.sent_to else None
             }
             response_invitations.append(invitation_dict)
-        
+
+
         return response_invitations
     except Exception as e:
-        logger.error(f"Error fetching sent invitations: {e}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to fetch sent invitations",
+            e,
+            user_id=current_user.id,
+            invitation_type=invitation_type,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch sent invitations"
@@ -120,11 +158,20 @@ def get_sent_invitations(
 def respond_to_invitation(
     invitation_id: int,
     response_data: InvitationResponseRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Respond to an invitation (accept/reject)"""
     try:
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "invitation_response_submitted",
+            invitation_id=invitation_id,
+            response=response_data.response
+        )
         # If it's a family history share being accepted, use the specialized method
         if response_data.response == 'accepted':
             # Get the invitation first to check its type
@@ -187,10 +234,14 @@ def respond_to_invitation(
                             detail=f"Unable to accept family history sharing: {error_msg}"
                         )
                 except Exception as e:
-                    logger.error(f"Unexpected error accepting family history invitation {invitation_id}: {e}")
-                    logger.error(f"Exception type: {type(e).__name__}")
-                    import traceback
-                    logger.error(f"Full traceback: {traceback.format_exc()}")
+                    log_endpoint_error(
+                        logger,
+                        request,
+                        "Unexpected error accepting family history invitation",
+                        e,
+                        user_id=current_user.id,
+                        invitation_id=invitation_id,
+                    )
                     raise HTTPException(
                         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                         detail="An unexpected error occurred while accepting the family history sharing invitation. Please try again or contact support."
@@ -221,7 +272,14 @@ def respond_to_invitation(
                                 detail="Database constraint violation during bulk acceptance"
                             )
 
-                        logger.info(f"Created {len(shares)} patient shares from bulk invitation {invitation.id}")
+                        log_endpoint_access(
+                            logger,
+                            request,
+                            current_user.id,
+                            "bulk_patient_shares_created",
+                            invitation_id=invitation.id,
+                            share_count=len(shares)
+                        )
 
                         return {
                             "message": f"Successfully accepted patient share for {len(shares)} patients",
@@ -268,7 +326,14 @@ def respond_to_invitation(
                             detail=f"Unable to accept patient share: {error_msg}"
                         )
                 except Exception as e:
-                    logger.error(f"Unexpected error accepting patient share invitation {invitation_id}: {e}")
+                    log_endpoint_error(
+                        logger,
+                        request,
+                        "Unexpected error accepting patient share invitation",
+                        e,
+                        user_id=current_user.id,
+                        invitation_id=invitation_id,
+                    )
                     raise HTTPException(
                         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                         detail="An unexpected error occurred while accepting the patient share invitation"
@@ -316,11 +381,15 @@ def respond_to_invitation(
         # Re-raise HTTP exceptions (these are already properly formatted)
         raise
     except Exception as e:
-        logger.error(f"Error responding to invitation {invitation_id}: {e}")
-        logger.error(f"Exception type: {type(e).__name__}")
-        logger.error(f"Response data: {response_data}")
-        import traceback
-        logger.error(f"Full traceback: {traceback.format_exc()}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Error responding to invitation",
+            e,
+            user_id=current_user.id,
+            invitation_id=invitation_id,
+            response=response_data.response,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while responding to the invitation. Please try again or contact support."
@@ -330,6 +399,7 @@ def respond_to_invitation(
 @router.delete("/{invitation_id}")
 def cancel_invitation(
     invitation_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -337,19 +407,42 @@ def cancel_invitation(
     try:
         service = InvitationService(db)
         invitation = service.cancel_invitation(current_user, invitation_id)
-        
+
+        log_security_event(
+            logger,
+            "invitation_cancelled",
+            request,
+            "Invitation cancelled successfully",
+            user_id=current_user.id,
+            invitation_id=invitation_id,
+        )
+
         return {
             "message": "Invitation cancelled successfully",
             "invitation_id": invitation.id,
             "status": invitation.status
         }
     except ValueError as e:
+        log_validation_error(
+            logger,
+            request,
+            str(e),
+            user_id=current_user.id,
+            invitation_id=invitation_id,
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Error cancelling invitation: {e}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to cancel invitation",
+            e,
+            user_id=current_user.id,
+            invitation_id=invitation_id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to cancel invitation"
@@ -359,26 +452,33 @@ def cancel_invitation(
 @router.post("/{invitation_id}/revoke")
 def revoke_invitation(
     invitation_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Revoke an accepted invitation (specifically for family history shares)"""
     try:
-        logger.info("Invitation revoke request received", extra={
-            "invitation_id": invitation_id,
-            "user_id": current_user.id,
-            "component": "invitations"
-        })
-        
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "invitation_revoke_requested",
+            invitation_id=invitation_id
+        )
+
         # Get the invitation first
         invitation_service = InvitationService(db)
         invitation = invitation_service.get_invitation_by_id(invitation_id)
-        
+
         if not invitation:
-            logger.warning("Invitation not found for revoke request", extra={
-                "invitation_id": invitation_id,
-                "component": "invitations"
-            })
+            log_security_event(
+                logger,
+                "invitation_not_found",
+                request,
+                "Invitation not found for revoke request",
+                user_id=current_user.id,
+                invitation_id=invitation_id,
+            )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Invitation not found"
@@ -386,12 +486,15 @@ def revoke_invitation(
 
         # Verify the user owns this invitation
         if invitation.sent_by_user_id != current_user.id:
-            logger.warning("Unauthorized revoke attempt", extra={
-                "invitation_id": invitation_id,
-                "invitation_owner_id": invitation.sent_by_user_id,
-                "requesting_user_id": current_user.id,
-                "component": "invitations"
-            })
+            log_security_event(
+                logger,
+                "unauthorized_revoke_attempt",
+                request,
+                "Unauthorized invitation revoke attempt",
+                user_id=current_user.id,
+                invitation_id=invitation_id,
+                invitation_owner_id=invitation.sent_by_user_id,
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to revoke this invitation"
@@ -419,14 +522,21 @@ def revoke_invitation(
                         try:
                             # Don't update invitation status in individual revocations
                             share = family_service.revoke_family_history_share(
-                                current_user, 
-                                family_member_id, 
+                                current_user,
+                                family_member_id,
                                 shared_with_user_id,
                                 update_invitation_status=False
                             )
                             revoked_shares.append(share)
                         except Exception as e:
-                            logger.warning(f"Failed to revoke share for family member {family_member_id}: {e}")
+                            log_endpoint_error(
+                                logger,
+                                request,
+                                f"Failed to revoke share for family member {family_member_id}",
+                                e,
+                                user_id=current_user.id,
+                                family_member_id=family_member_id,
+                            )
                 
                 # After all shares are revoked, update the invitation status
                 if revoked_shares:
@@ -471,12 +581,26 @@ def revoke_invitation(
     except HTTPException:
         raise
     except ValueError as e:
+        log_validation_error(
+            logger,
+            request,
+            str(e),
+            user_id=current_user.id,
+            invitation_id=invitation_id,
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Error revoking invitation: {e}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to revoke invitation",
+            e,
+            user_id=current_user.id,
+            invitation_id=invitation_id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to revoke invitation"
@@ -485,6 +609,7 @@ def revoke_invitation(
 
 @router.post("/cleanup")
 def cleanup_expired_invitations(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -493,13 +618,27 @@ def cleanup_expired_invitations(
         # Could be restricted to admin users only in the future
         service = InvitationService(db)
         expired_count = service.expire_old_invitations()
-        
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "expired_invitations_cleaned",
+            expired_count=expired_count
+        )
+
         return {
             "message": f"Expired {expired_count} old invitations",
             "expired_count": expired_count
         }
     except Exception as e:
-        logger.error(f"Error cleaning up expired invitations: {e}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to cleanup expired invitations",
+            e,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to cleanup expired invitations"
@@ -508,22 +647,29 @@ def cleanup_expired_invitations(
 
 @router.get("/summary")
 def get_invitation_summary(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get invitation summary for current user"""
     try:
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "invitation_summary_accessed"
+        )
         service = InvitationService(db)
-        
+
         pending_invitations = service.get_pending_invitations(current_user)
         sent_invitations = service.get_sent_invitations(current_user)
-        
+
         # Count by status
         pending_count = len(pending_invitations)
         sent_pending = len([inv for inv in sent_invitations if inv.status == 'pending'])
         sent_accepted = len([inv for inv in sent_invitations if inv.status == 'accepted'])
         sent_rejected = len([inv for inv in sent_invitations if inv.status == 'rejected'])
-        
+
         return {
             "pending_received": pending_count,
             "sent_pending": sent_pending,
@@ -533,7 +679,13 @@ def get_invitation_summary(
             "total_sent": len(sent_invitations)
         }
     except Exception as e:
-        logger.error(f"Error fetching invitation summary: {e}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to fetch invitation summary",
+            e,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch invitation summary"

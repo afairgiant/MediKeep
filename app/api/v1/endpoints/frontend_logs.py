@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
 
 router = APIRouter()
 
@@ -82,16 +83,16 @@ def log_frontend_event(
 
     # Prepare log data with additional context
     log_context = {
-        "category": "frontend",
+        LogFields.CATEGORY: "frontend",
         "frontend_category": log_data.category,
-        "ip": user_ip,
+        LogFields.IP: user_ip,
         "frontend_timestamp": log_data.timestamp,
         "user_agent": log_data.user_agent
         or request.headers.get("user-agent", "unknown"),
         "url": log_data.url,
         "component": log_data.component,
         "action": log_data.action,
-        "user_id": log_data.user_id,
+        LogFields.USER_ID: log_data.user_id,
         "session_id": log_data.session_id,
     }
 
@@ -165,17 +166,17 @@ def log_frontend_error(
     )
 
     error_context = {
-        "category": "frontend",
+        LogFields.CATEGORY: "frontend",
         "frontend_category": "error",
-        "event": "frontend_error",
+        LogFields.EVENT: "frontend_error",
         "error_type": error_data.error_type,
         "component_name": error_data.component_name,
-        "ip": user_ip,
+        LogFields.IP: user_ip,
         "url": error_data.url,
         "frontend_timestamp": error_data.timestamp,
         "user_agent": error_data.user_agent
         or request.headers.get("user-agent", "unknown"),
-        "user_id": error_data.user_id,
+        LogFields.USER_ID: error_data.user_id,
     }
 
     # Add stack trace if available
@@ -214,16 +215,16 @@ def log_user_action(
     )
 
     action_context = {
-        "category": "frontend",
+        LogFields.CATEGORY: "frontend",
         "frontend_category": "user_action",
-        "event": "user_action",
+        LogFields.EVENT: "user_action",
         "action": action_data.action,
         "component": action_data.component,
-        "ip": user_ip,
+        LogFields.IP: user_ip,
         "url": action_data.url,
         "frontend_timestamp": action_data.timestamp,
         "user_agent": request.headers.get("user-agent", "unknown"),
-        "user_id": current_user_id,  # Use authenticated user ID
+        LogFields.USER_ID: current_user_id,  # Use authenticated user ID
     }
 
     # Add additional details if provided

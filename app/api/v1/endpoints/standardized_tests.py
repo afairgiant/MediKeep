@@ -2,12 +2,13 @@
 API endpoints for standardized test search and autocomplete
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from app.api import deps
 from app.crud import standardized_test
 from app.models.models import StandardizedTest
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_endpoint_access, log_data_access
 from pydantic import BaseModel
 
 logger = get_logger(__name__, "app")
@@ -45,6 +46,7 @@ class TestSearchResponse(BaseModel):
 
 @router.get("/search", response_model=TestSearchResponse)
 def search_standardized_tests(
+    request: Request,
     query: str = Query(None, description="Search query"),
     category: Optional[str] = Query(None, description="Filter by category"),
     limit: int = Query(200, ge=1, le=1000, description="Maximum results"),
@@ -61,11 +63,12 @@ def search_standardized_tests(
     """
     tests = standardized_test.search_tests(db, query or "", category, limit)
 
-    logger.info("Test search performed", extra={
-        "query": query,
-        "category": category,
-        "results_count": len(tests)
-    })
+    log_data_access(
+        logger, request, 0, "read", "StandardizedTest",
+        count=len(tests),
+        query=query,
+        category=category
+    )
 
     return {
         "tests": tests,
@@ -75,6 +78,7 @@ def search_standardized_tests(
 
 @router.get("/autocomplete", response_model=List[AutocompleteOption])
 def get_test_autocomplete(
+    request: Request,
     query: str = Query("", description="Autocomplete query"),
     category: Optional[str] = Query(None, description="Filter by category"),
     limit: int = Query(50, ge=1, le=200, description="Maximum results"),
@@ -88,11 +92,12 @@ def get_test_autocomplete(
     """
     options = standardized_test.get_autocomplete_options(db, query, category, limit)
 
-    logger.debug("Autocomplete request", extra={
-        "query": query,
-        "category": category,
-        "results_count": len(options)
-    })
+    log_endpoint_access(
+        logger, request, 0, "test_autocomplete_requested",
+        query=query,
+        category=category,
+        results_count=len(options)
+    )
 
     return options
 
@@ -180,6 +185,7 @@ class BatchMatchResponse(BaseModel):
 
 @router.post("/batch-match", response_model=BatchMatchResponse)
 def batch_match_tests(
+    req: Request,
     request: BatchMatchRequest,
     db: Session = Depends(deps.get_db)
 ):
@@ -208,13 +214,10 @@ def batch_match_tests(
             matched_test=StandardizedTestResponse.from_orm(matched) if matched else None
         ))
 
-    logger.info(
-        f"Batch matched {len(request.test_names)} tests",
-        extra={
-            "component": "standardized_tests_batch_match",
-            "total_tests": len(request.test_names),
-            "matched": sum(1 for r in results if r.matched_test is not None)
-        }
+    log_data_access(
+        logger, req, 0, "read", "StandardizedTestBatch",
+        count=len(request.test_names),
+        matched_count=sum(1 for r in results if r.matched_test is not None)
     )
 
     return BatchMatchResponse(results=results)

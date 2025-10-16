@@ -6,9 +6,12 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.deps import NotFoundException
 from app.core.error_handling import handle_database_errors
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
-    handle_update_with_logging,  
+    handle_update_with_logging,
     handle_delete_with_logging,
     handle_not_found
 )
@@ -24,6 +27,9 @@ from app.schemas.emergency_contact import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=EmergencyContactResponse)
@@ -53,12 +59,14 @@ def create_emergency_contact(
 
 @router.get("/", response_model=List[EmergencyContactResponse])
 def read_emergency_contacts(
+    request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     is_active: Optional[bool] = Query(None),
     is_primary: Optional[bool] = Query(None),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Retrieve emergency contacts for the current user or accessible patient."""
 
@@ -80,6 +88,16 @@ def read_emergency_contacts(
     # Apply pagination
     contacts = query.offset(skip).limit(limit).all()
 
+    log_data_access(
+        logger,
+        request,
+        current_user_id,
+        "read",
+        "EmergencyContact",
+        patient_id=target_patient_id,
+        count=len(contacts)
+    )
+
     return contacts
 
 
@@ -89,6 +107,7 @@ def read_emergency_contact(
     request: Request,
     db: Session = Depends(deps.get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get emergency contact by ID with related information - only allows access to user's own contacts."""
     with handle_database_errors(request=request):
@@ -104,7 +123,7 @@ def read_emergency_contact(
 
         if not contact_obj:
             raise NotFoundException(
-                resource="Emergency Contact", 
+                resource="Emergency Contact",
                 message="Emergency Contact not found",
                 request=request
             )
@@ -113,6 +132,17 @@ def read_emergency_contact(
         deps.verify_patient_record_access(
             getattr(contact_obj, "patient_id"), target_patient_id, "emergency contact"
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "EmergencyContact",
+            record_id=emergency_contact_id,
+            patient_id=target_patient_id
+        )
+
         return contact_obj
 
 
@@ -166,6 +196,7 @@ def get_primary_emergency_contact(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get the primary emergency contact for a patient."""
     with handle_database_errors(request=request):
@@ -176,6 +207,17 @@ def get_primary_emergency_contact(
                 message="Primary Emergency Contact not found",
                 request=request
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "EmergencyContact",
+            record_id=getattr(primary_contact, "id", None),
+            patient_id=patient_id
+        )
+
         return primary_contact
 
 

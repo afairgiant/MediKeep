@@ -17,6 +17,9 @@ from app.core.error_handling import (
     BusinessLogicException,
     handle_database_errors
 )
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.crud.medication import medication
 from app.models.activity_log import EntityType
 from app.models.models import User
@@ -28,6 +31,9 @@ from app.schemas.medication import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=MedicationResponseWithNested)
@@ -69,9 +75,10 @@ def read_medications(
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Retrieve medications for the current user or specified patient (Phase 1 support)."""
-    
+
     with handle_database_errors(request=request):
         if tags:
             # Use tag filtering with patient constraint
@@ -109,6 +116,16 @@ def read_medications(
                 if name.lower() in getattr(med, "medication_name", "").lower()
             ]
 
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Medication",
+            patient_id=target_patient_id,
+            count=len(medications)
+        )
+
         return medications
 
 
@@ -119,6 +136,7 @@ def read_medication(
     db: Session = Depends(deps.get_db),
     medication_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get medication by ID - only allows access to user's own medications."""
     with handle_database_errors(request=request):
@@ -127,6 +145,17 @@ def read_medication(
         )
         handle_not_found(medication_obj, "Medication", request)
         verify_patient_ownership(medication_obj, current_user_patient_id, "medication")
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Medication",
+            record_id=medication_id,
+            patient_id=current_user_patient_id
+        )
+
         return medication_obj
 
 
@@ -186,6 +215,7 @@ def read_patient_medications(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     active_only: bool = Query(False),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all medications for a specific patient."""
     with handle_database_errors(request=request):
@@ -199,4 +229,15 @@ def read_patient_medications(
                 limit=limit,
                 load_relations=["practitioner", "pharmacy", "condition"],
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Medication",
+            patient_id=patient_id,
+            count=len(medications)
+        )
+
         return medications
