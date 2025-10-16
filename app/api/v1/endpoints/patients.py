@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, File, Upl
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
@@ -660,6 +660,7 @@ def get_user_recent_activity(
 
         activity_logs = (
             db.query(ActivityLog)
+            .options(joinedload(ActivityLog.user), joinedload(ActivityLog.patient))
             .filter(ActivityLog.entity_type.in_(medical_entity_types), main_filter)
             .order_by(desc(ActivityLog.timestamp))
             .limit(limit)
