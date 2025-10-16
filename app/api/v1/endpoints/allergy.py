@@ -13,6 +13,9 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.crud.allergy import allergy
 from app.models.activity_log import EntityType
 from app.schemas.allergy import (
@@ -23,6 +26,9 @@ from app.schemas.allergy import (
 )
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=AllergyResponse)
@@ -58,11 +64,12 @@ def read_allergies(
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Retrieve allergies for the current user or accessible patient.
     """
-    
+
     # Filter allergies by the target patient_id
     with handle_database_errors(request=request):
         if tags:
@@ -81,7 +88,7 @@ def read_allergies(
             # Apply allergen filter manually if both tags and allergen are specified
             if allergen:
                 allergies = [
-                    allrg for allrg in allergies 
+                    allrg for allrg in allergies
                     if allergen.lower() in getattr(allrg, "allergen", "").lower()
                 ]
         elif severity:
@@ -96,6 +103,17 @@ def read_allergies(
             allergies = allergy.get_by_patient(
                 db, patient_id=target_patient_id, skip=skip, limit=limit
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Allergy",
+            patient_id=target_patient_id,
+            count=len(allergies)
+        )
+
         return allergies
 
 
@@ -106,6 +124,7 @@ def read_allergy(
     db: Session = Depends(deps.get_db),
     allergy_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get allergy by ID with related information - only allows access to user's own allergies.
@@ -117,6 +136,17 @@ def read_allergy(
         )
         handle_not_found(allergy_obj, "Allergy", request)
         verify_patient_ownership(allergy_obj, current_user_patient_id, "allergy")
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Allergy",
+            record_id=allergy_id,
+            patient_id=current_user_patient_id
+        )
+
         return allergy_obj
 
 
@@ -172,12 +202,24 @@ def get_active_allergies(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all active allergies for a patient.
     """
     with handle_database_errors(request=request):
         allergies = allergy.get_active_allergies(db, patient_id=patient_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Allergy",
+            patient_id=patient_id,
+            count=len(allergies)
+        )
+
         return allergies
 
 
@@ -187,12 +229,24 @@ def get_critical_allergies(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get critical (severe and life-threatening) allergies for a patient.
     """
     with handle_database_errors(request=request):
         allergies = allergy.get_critical_allergies(db, patient_id=patient_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Allergy",
+            patient_id=patient_id,
+            count=len(allergies)
+        )
+
         return allergies
 
 
@@ -203,6 +257,7 @@ def check_allergen_conflict(
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     allergen: str,
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Check if a patient has any active allergies to a specific allergen.
@@ -211,6 +266,18 @@ def check_allergen_conflict(
         has_allergy = allergy.check_allergen_conflict(
             db, patient_id=patient_id, allergen=allergen
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Allergy",
+            patient_id=patient_id,
+            allergen=allergen,
+            has_conflict=has_allergy
+        )
+
         return {"patient_id": patient_id, "allergen": allergen, "has_allergy": has_allergy}
 
 
@@ -222,6 +289,7 @@ def get_patient_allergies(
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """
     Get all allergies for a specific patient.
@@ -230,4 +298,15 @@ def get_patient_allergies(
         allergies = allergy.get_by_patient(
             db, patient_id=patient_id, skip=skip, limit=limit
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Allergy",
+            patient_id=patient_id,
+            count=len(allergies)
+        )
+
         return allergies

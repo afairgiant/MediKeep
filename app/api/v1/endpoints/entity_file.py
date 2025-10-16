@@ -6,7 +6,7 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 import os
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -16,6 +16,14 @@ from app.api.activity_logging import log_create, log_delete, log_update
 from app.api.v1.endpoints.utils import handle_not_found, verify_patient_ownership
 from app.core.error_handling import NotFoundException, MedicalRecordsAPIException
 from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_data_access,
+    log_security_event,
+    log_debug,
+)
 from app.crud import lab_result, insurance, encounter, procedure, medication, immunization, allergy, condition, treatment, symptom_parent
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
@@ -67,19 +75,43 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
     try:
         entity = crud_func(db, id=entity_id)
         if not entity:
-            logger.debug(f"Entity not found: {entity_type} with ID {entity_id}")
+            log_debug(
+                logger,
+                f"Entity not found: {entity_type} with ID {entity_id}",
+                entity_type=entity_type,
+                entity_id=entity_id
+            )
             return None
         return entity
     except SQLAlchemyError as e:
         # Database errors should be logged and re-raised
-        logger.error(f"Database error looking up {entity_type} {entity_id}: {str(e)}")
+        logger.error(
+            f"Database error looking up {entity_type} {entity_id}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "database_error",
+                LogFields.ERROR: str(e),
+                "entity_type": entity_type,
+                "entity_id": entity_id
+            }
+        )
         raise HTTPException(
             status_code=500,
             detail="Database error occurred while accessing entity"
         )
     except Exception as e:
         # Unexpected errors should be logged with full details
-        logger.error(f"Unexpected error looking up {entity_type} {entity_id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error looking up {entity_type} {entity_id}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "unexpected_error",
+                LogFields.ERROR: str(e),
+                "entity_type": entity_type,
+                "entity_id": entity_id
+            },
+            exc_info=True
+        )
         raise HTTPException(
             status_code=500,
             detail="An unexpected error occurred while accessing entity"
@@ -104,9 +136,14 @@ def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
     if content.startswith(b'%PDF-'):
         base_name = os.path.splitext(filename)[0]
         corrected_filename = f"{base_name}.pdf"
-        logger.debug(f"Paperless file conversion detected: {filename} -> {corrected_filename}")
+        log_debug(
+            logger,
+            f"Paperless file conversion detected: {filename} -> {corrected_filename}",
+            original_filename=filename,
+            corrected_filename=corrected_filename
+        )
         return corrected_filename
-    
+
     # Return original filename if no conversion detected
     return filename
 
@@ -114,6 +151,7 @@ def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
 @router.get("/{entity_type}/{entity_id}/files", response_model=List[EntityFileResponse])
 def get_entity_files(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     entity_type: str,
     entity_id: int,
@@ -151,7 +189,15 @@ def get_entity_files(
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
-        logger.error(f"Unexpected error in get_entity_files: {str(e)}", exc_info=True)
+        log_endpoint_error(
+            logger,
+            request,
+            "Unexpected error retrieving entity files",
+            e,
+            user_id=current_user.id,
+            entity_type=entity_type,
+            entity_id=entity_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve files: {str(e)}",
@@ -165,6 +211,7 @@ def get_entity_files(
 )
 async def create_pending_file_record(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     entity_type: str,
     entity_id: int,
@@ -199,17 +246,18 @@ async def create_pending_file_record(
         parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
         handle_not_found(parent_entity, entity_type)
         verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
-        
-        logger.info(
-            f"Creating pending file record for {entity_type} {entity_id}",
-            extra={
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "file_name": file_name,
-                "file_size": file_size,
-                "storage_backend": storage_backend,
-                "current_user_id": current_user_id,
-            },
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "pending_file_record_created",
+            message=f"Creating pending file record for {entity_type} {entity_id}",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            file_name=file_name,
+            file_size=file_size,
+            storage_backend=storage_backend
         )
 
         # Create pending file record
@@ -245,15 +293,15 @@ async def create_pending_file_record(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        log_endpoint_error(
+            logger,
+            request,
             f"Failed to create pending file record for {entity_type} {entity_id}",
-            extra={
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "file_name": file_name,
-                "error": str(e),
-                "current_user_id": current_user_id,
-            },
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            file_name=file_name
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -267,6 +315,7 @@ async def create_pending_file_record(
 )
 async def update_file_upload_status(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     file_id: int,
     actual_file_path: str = Form(...),
@@ -296,15 +345,16 @@ async def update_file_upload_status(
         parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
         handle_not_found(parent_entity, file_record.entity_type)
         verify_patient_ownership(parent_entity, current_user_patient_id, file_record.entity_type)
-        
-        logger.info(
-            f"Updating file {file_id} status to {sync_status}",
-            extra={
-                "file_id": file_id,
-                "sync_status": sync_status,
-                "actual_file_path": actual_file_path,
-                "current_user_id": current_user_id,
-            },
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "file_status_updated",
+            message=f"Updating file {file_id} status to {sync_status}",
+            file_id=file_id,
+            sync_status=sync_status,
+            actual_file_path=actual_file_path
         )
 
         result = await file_service.update_file_upload_status(
@@ -334,14 +384,14 @@ async def update_file_upload_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        log_endpoint_error(
+            logger,
+            request,
             f"Failed to update file {file_id} status",
-            extra={
-                "file_id": file_id,
-                "sync_status": sync_status,
-                "error": str(e),
-                "current_user_id": current_user_id,
-            },
+            e,
+            user_id=current_user_id,
+            file_id=file_id,
+            sync_status=sync_status
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -356,6 +406,7 @@ async def update_file_upload_status(
 )
 async def upload_entity_file(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     entity_type: str,
     entity_id: int,
@@ -381,18 +432,18 @@ async def upload_entity_file(
         Created entity file details
     """
     try:
-        # Debug logging to see what storage_backend was received
-        logger.info(
-            f"File upload request for {entity_type} {entity_id}",
-            extra={
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "storage_backend": storage_backend,
-                "file_name": file.filename,
-                "current_user_id": current_user_id,
-            },
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "file_upload_requested",
+            message=f"File upload request for {entity_type} {entity_id}",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            storage_backend=storage_backend,
+            file_name=file.filename
         )
-        
+
         # Get the parent entity (lab-result, procedure, etc.) and verify access
         parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
         if not parent_entity:
@@ -437,14 +488,27 @@ async def upload_entity_file(
                 )
         except Exception as log_error:
             # Don't fail the request if logging fails
-            print(f"Failed to log file creation: {log_error}")
+            logger.error(f"Failed to log file creation: {log_error}", extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "logging_failure",
+                LogFields.ERROR: str(log_error)
+            })
 
         return result
 
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
-        logger.error(f"Unexpected error in upload_entity_file: {str(e)}", exc_info=True)
+        log_endpoint_error(
+            logger,
+            request,
+            "Unexpected error uploading entity file",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            file_name=file.filename if file else None
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload file: {str(e)}",
@@ -454,6 +518,7 @@ async def upload_entity_file(
 @router.get("/files/{file_id}/download")
 async def download_file(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user: User = Depends(deps.get_current_user),
@@ -490,12 +555,14 @@ async def download_file(
         if isinstance(file_info, bytes):
             # Paperless file - fix filename if content was converted
             corrected_filename = fix_filename_for_paperless_content(filename, file_info)
-            logger.debug("Processing Paperless download", extra={
-                "original_filename": filename,
-                "corrected_filename": corrected_filename,
-                "content_size": len(file_info),
-                "component": "entity_file"
-            })
+            log_debug(
+                logger,
+                "Processing Paperless download",
+                original_filename=filename,
+                corrected_filename=corrected_filename,
+                content_size=len(file_info),
+                file_id=file_id
+            )
 
             # Paperless file - return as StreamingResponse with proper binary handling
             from fastapi.responses import Response
@@ -507,18 +574,23 @@ async def download_file(
                 guessed_type, _ = mimetypes.guess_type(corrected_filename)
                 if guessed_type:
                     content_type = guessed_type
-                    logger.debug("Guessed content type from filename", extra={
-                        "filename": corrected_filename,
-                        "content_type": content_type,
-                        "component": "entity_file"
-                    })
+                    log_debug(
+                        logger,
+                        "Guessed content type from filename",
+                        filename=corrected_filename,
+                        content_type=content_type,
+                        file_id=file_id
+                    )
 
             # Override content type for PDF files to ensure proper handling
             if corrected_filename.endswith('.pdf'):
                 content_type = 'application/pdf'
-                logger.debug("Forced content type for PDF file", extra={
-                    "component": "entity_file"
-                })
+                log_debug(
+                    logger,
+                    "Forced content type for PDF file",
+                    file_id=file_id,
+                    filename=corrected_filename
+                )
 
             # Set proper headers for binary content
             headers = {
@@ -550,6 +622,7 @@ async def download_file(
 @router.get("/files/{file_id}/view")
 async def view_file(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user_id: int = Depends(deps.get_current_user_id_flexible_auth),
@@ -573,7 +646,14 @@ async def view_file(
         - With query token: GET /api/v1/entity-files/files/123/view?token=<jwt_token>
     """
     try:
-        logger.info(f"Viewing file {file_id} for user {current_user_id}")
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "file_view_requested",
+            message=f"Viewing file {file_id}",
+            file_id=file_id
+        )
 
         # Get current user object for multi-patient access verification
         from app.crud.user import user
@@ -603,12 +683,14 @@ async def view_file(
         if isinstance(file_info, bytes):
             # Paperless file - fix filename if content was converted
             corrected_filename = fix_filename_for_paperless_content(filename, file_info)
-            logger.debug("Processing Paperless file view", extra={
-                "original_filename": filename,
-                "corrected_filename": corrected_filename,
-                "content_size": len(file_info),
-                "component": "entity_file"
-            })
+            log_debug(
+                logger,
+                "Processing Paperless file view",
+                original_filename=filename,
+                corrected_filename=corrected_filename,
+                content_size=len(file_info),
+                file_id=file_id
+            )
 
             # Paperless file - return as StreamingResponse with proper binary handling
             from fastapi.responses import Response
@@ -620,18 +702,23 @@ async def view_file(
                 guessed_type, _ = mimetypes.guess_type(corrected_filename)
                 if guessed_type:
                     content_type = guessed_type
-                    logger.debug("Guessed content type for view", extra={
-                        "filename": corrected_filename,
-                        "content_type": content_type,
-                        "component": "entity_file"
-                    })
+                    log_debug(
+                        logger,
+                        "Guessed content type for view",
+                        filename=corrected_filename,
+                        content_type=content_type,
+                        file_id=file_id
+                    )
 
             # Override content type for PDF files to ensure proper handling
             if corrected_filename.endswith('.pdf'):
                 content_type = 'application/pdf'
-                logger.debug("Forced content type for PDF view", extra={
-                    "component": "entity_file"
-                })
+                log_debug(
+                    logger,
+                    "Forced content type for PDF view",
+                    file_id=file_id,
+                    filename=corrected_filename
+                )
 
             # Set secure headers for inline file viewing with proper binary handling
             headers = {
@@ -665,7 +752,14 @@ async def view_file(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to view file {file_id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            f"Failed to view file {file_id}",
+            e,
+            user_id=current_user_id,
+            file_id=file_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to view file: {str(e)}",
@@ -675,6 +769,7 @@ async def view_file(
 @router.delete("/files/{file_id}", response_model=FileOperationResult)
 async def delete_file(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -716,7 +811,11 @@ async def delete_file(
             )
         except Exception as log_error:
             # Don't fail the request if logging fails
-            print(f"Failed to log file deletion: {log_error}")
+            logger.error(f"Failed to log file deletion: {log_error}", extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "logging_failure",
+                LogFields.ERROR: str(log_error)
+            })
 
         return result
 
@@ -732,6 +831,7 @@ async def delete_file(
 @router.put("/files/{file_id}/metadata", response_model=EntityFileResponse)
 def update_file_metadata(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     file_id: int,
     description: Optional[str] = Form(None),
@@ -782,7 +882,11 @@ def update_file_metadata(
                 )
         except Exception as log_error:
             # Don't fail the request if logging fails
-            print(f"Failed to log file update: {log_error}")
+            logger.error(f"Failed to log file update: {log_error}", extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "logging_failure",
+                LogFields.ERROR: str(log_error)
+            })
 
         return result
 
@@ -798,8 +902,9 @@ def update_file_metadata(
 @router.post("/files/batch-counts", response_model=List[FileBatchCountResponse])
 def get_batch_file_counts(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
-    request: FileBatchCountRequest,
+    batch_request: FileBatchCountRequest,
     current_user: User = Depends(deps.get_current_user),
 ) -> List[FileBatchCountResponse]:
     """
@@ -813,21 +918,20 @@ def get_batch_file_counts(
     """
     try:
         # Verify user has access to all requested entities
-        entity_type = request.entity_type.value
+        entity_type = batch_request.entity_type.value
         authorized_entity_ids = []
         skipped_count = 0
         not_found_count = 0
-        
-        logger.debug(
-            f"Processing batch file count request for {len(request.entity_ids)} entities",
-            extra={
-                "user_id": current_user.id,
-                "entity_type": entity_type,
-                "requested_count": len(request.entity_ids)
-            }
+
+        log_debug(
+            logger,
+            f"Processing batch file count request for {len(batch_request.entity_ids)} entities",
+            user_id=current_user.id,
+            entity_type=entity_type,
+            requested_count=len(batch_request.entity_ids)
         )
-        
-        for entity_id in request.entity_ids:
+
+        for entity_id in batch_request.entity_ids:
             try:
                 parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
                 if parent_entity:
@@ -837,38 +941,35 @@ def get_batch_file_counts(
                         deps.verify_patient_access(entity_patient_id, db, current_user)
                     
                     authorized_entity_ids.append(entity_id)
-                    logger.debug(
+                    log_debug(
+                        logger,
                         f"User {current_user.id} authorized for {entity_type} {entity_id}",
-                        extra={
-                            "user_id": current_user.id,
-                            "entity_type": entity_type,
-                            "entity_id": entity_id,
-                            "patient_id": entity_patient_id
-                        }
+                        user_id=current_user.id,
+                        entity_type=entity_type,
+                        entity_id=entity_id,
+                        patient_id=entity_patient_id
                     )
                 else:
                     not_found_count += 1
-                    logger.debug(
+                    log_debug(
+                        logger,
                         f"Entity not found during batch count: {entity_type} {entity_id}",
-                        extra={
-                            "user_id": current_user.id,
-                            "entity_type": entity_type,
-                            "entity_id": entity_id,
-                            "reason": "not_found"
-                        }
+                        user_id=current_user.id,
+                        entity_type=entity_type,
+                        entity_id=entity_id,
+                        reason="not_found"
                     )
             except (HTTPException, NotFoundException, MedicalRecordsAPIException) as e:
                 # Log when entities are skipped due to authorization
                 skipped_count += 1
-                logger.debug(
-                    f"User {current_user.id} not authorized for {entity_type} {entity_id}: {str(e)}",
-                    extra={
-                        "user_id": current_user.id,
-                        "entity_type": entity_type,
-                        "entity_id": entity_id,
-                        "reason": "access_denied",
-                        "error": str(e)
-                    }
+                log_debug(
+                    logger,
+                    f"User {current_user.id} not authorized for {entity_type} {entity_id}",
+                    user_id=current_user.id,
+                    entity_type=entity_type,
+                    entity_id=entity_id,
+                    reason="access_denied",
+                    error=str(e)
                 )
                 continue
 
@@ -876,18 +977,19 @@ def get_batch_file_counts(
         file_counts = file_service.get_files_count_batch(
             db=db, entity_type=entity_type, entity_ids=authorized_entity_ids
         )
-        
+
         # Log summary of batch processing
-        logger.info(
-            f"Batch file count completed for user {current_user.id}",
-            extra={
-                "user_id": current_user.id,
-                "entity_type": entity_type,
-                "requested_count": len(request.entity_ids),
-                "authorized_count": len(authorized_entity_ids),
-                "skipped_count": skipped_count,
-                "not_found_count": not_found_count
-            }
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "batch_file_count_completed",
+            message=f"Batch file count completed for user {current_user.id}",
+            entity_type=entity_type,
+            requested_count=len(batch_request.entity_ids),
+            authorized_count=len(authorized_entity_ids),
+            skipped_count=skipped_count,
+            not_found_count=not_found_count
         )
 
         # Convert to response format
@@ -908,6 +1010,7 @@ def get_batch_file_counts(
 @router.get("/files/{file_id}", response_model=EntityFileResponse)
 def get_file_details(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user: User = Depends(deps.get_current_user),
@@ -949,28 +1052,46 @@ def get_file_details(
 @router.post("/sync/paperless")
 async def check_paperless_sync_status(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Dict[int, bool]:
     """
     Check sync status for all Paperless documents.
-    
+
     Returns:
         Dictionary mapping file_id to existence status (True = exists, False = missing)
     """
-    logger.error(f"🔍 SYNC ENDPOINT - Starting paperless sync check for user {current_user_id}")
+    log_endpoint_access(
+        logger,
+        request,
+        current_user_id,
+        "paperless_sync_check_started",
+        message=f"Starting paperless sync check for user {current_user_id}"
+    )
     try:
         sync_status = await file_service.check_paperless_sync_status(db, current_user_id)
-        
-        logger.info(
-            f"Checked paperless sync status for user {current_user_id}: {len(sync_status)} files checked"
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "paperless_sync_check_completed",
+            message=f"Checked paperless sync status for user {current_user_id}",
+            files_checked=len(sync_status)
         )
-        
+
         return sync_status
 
     except Exception as e:
-        logger.error(f"Failed to check paperless sync status: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to check paperless sync status",
+            e,
+            user_id=current_user_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to check paperless sync status: {str(e)}",
@@ -980,27 +1101,39 @@ async def check_paperless_sync_status(
 @router.post("/processing/update")
 async def update_processing_files(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Dict[str, str]:
     """
     Update files with 'processing' status by checking their task completion.
-    
+
     Returns:
         Dictionary mapping file_id to new status
     """
     try:
         status_updates = await file_service.update_processing_files(db, current_user_id)
-        
-        logger.info(
-            f"Updated processing files for user {current_user_id}: {len(status_updates)} files updated"
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "processing_files_updated",
+            message=f"Updated processing files for user {current_user_id}",
+            files_updated=len(status_updates)
         )
-        
+
         return status_updates
 
     except Exception as e:
-        logger.error(f"Failed to update processing files: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to update processing files",
+            e,
+            user_id=current_user_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update processing files: {str(e)}",
@@ -1010,6 +1143,7 @@ async def update_processing_files(
 @router.post("/{entity_type}/{entity_id}/cleanup")
 async def cleanup_entity_files_on_deletion(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     entity_type: str,
     entity_id: int,
@@ -1033,46 +1167,45 @@ async def cleanup_entity_files_on_deletion(
         Dictionary with cleanup statistics
     """
     try:
-        logger.debug(
+        log_debug(
+            logger,
             "Starting entity file cleanup",
-            extra={
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "preserve_paperless": preserve_paperless,
-                "user_id": current_user_id
-            }
+            entity_type=entity_type,
+            entity_id=entity_id,
+            preserve_paperless=preserve_paperless,
+            user_id=current_user_id
         )
-        
+
         cleanup_stats = file_service.cleanup_entity_files_on_deletion(
             db=db,
             entity_type=entity_type,
             entity_id=entity_id,
             preserve_paperless=preserve_paperless
         )
-        
-        logger.info(
-            "Entity file cleanup completed",
-            extra={
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "user_id": current_user_id,
-                "cleanup_stats": cleanup_stats,
-                "files_deleted": cleanup_stats.get("files_deleted", 0),
-                "paperless_preserved": cleanup_stats.get("paperless_preserved", 0)
-            }
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "entity_file_cleanup_completed",
+            message="Entity file cleanup completed",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            files_deleted=cleanup_stats.get("files_deleted", 0),
+            paperless_preserved=cleanup_stats.get("paperless_preserved", 0)
         )
-        
+
         return cleanup_stats
 
     except Exception as e:
-        logger.error(
+        log_endpoint_error(
+            logger,
+            request,
             "Failed to cleanup entity files",
-            extra={
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "user_id": current_user_id,
-                "error": str(e)
-            }
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            entity_id=entity_id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

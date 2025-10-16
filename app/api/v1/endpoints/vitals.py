@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.deps import BusinessLogicException, NotFoundException
 from app.core.error_handling import handle_database_errors
+from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -19,6 +22,9 @@ from app.models.activity_log import EntityType
 from app.schemas.vitals import VitalsCreate, VitalsResponse, VitalsStats, VitalsUpdate
 
 router = APIRouter()
+
+# Initialize logger
+logger = get_logger(__name__, "app")
 
 
 @router.post("/", response_model=VitalsResponse)
@@ -49,13 +55,25 @@ def read_vitals(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Retrieve vitals readings for the current user or specified patient (Phase 1 support)."""
-    
+
     with handle_database_errors(request=request):
         vitals_list = vitals.get_by_patient(
             db=db, patient_id=target_patient_id, skip=skip, limit=limit
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=target_patient_id,
+            count=len(vitals_list)
+        )
+
         return vitals_list
 
 
@@ -68,15 +86,26 @@ def read_current_user_vitals_stats(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals statistics for the current user or specified patient (Phase 1 support)."""
-    
+
     with handle_database_errors(request=request):
         # Phase 1 support: Use patient_id if provided, otherwise fall back to user's own patient
         if patient_id is not None:
             target_patient_id = patient_id
         else:
             target_patient_id = deps.get_current_user_patient_id(db, current_user_id)
-        
+
         stats = vitals.get_vitals_stats(db=db, patient_id=target_patient_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=target_patient_id,
+            operation_type="stats"
+        )
+
         return stats
 
 
@@ -87,6 +116,7 @@ def read_vitals_by_id(
     db: Session = Depends(deps.get_db),
     vitals_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals reading by ID with related information - only allows access to user's own vitals."""
     with handle_database_errors(request=request):
@@ -95,6 +125,17 @@ def read_vitals_by_id(
         )
         handle_not_found(vitals_obj, "Vitals reading", request)
         verify_patient_ownership(vitals_obj, current_user_patient_id, "vitals")
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            record_id=vitals_id,
+            patient_id=current_user_patient_id
+        )
+
         return vitals_obj
 
 
@@ -153,6 +194,7 @@ def read_patient_vitals(
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose",
     ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all vitals readings for a specific patient."""
     with handle_database_errors(request=request):
@@ -172,6 +214,18 @@ def read_patient_vitals(
                 db=db, patient_id=patient_id, skip=skip, limit=limit
             )
 
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=patient_id,
+            count=len(vitals_list),
+            vital_type=vital_type,
+            days=days
+        )
+
         return vitals_list
 
 
@@ -181,6 +235,7 @@ def read_patient_latest_vitals(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get the most recent vitals reading for a patient."""
     with handle_database_errors(request=request):
@@ -191,6 +246,18 @@ def read_patient_latest_vitals(
                 message="No vitals readings found for this patient",
                 request=request
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=patient_id,
+            record_id=latest_vitals.id,
+            operation_type="latest"
+        )
+
         return latest_vitals
 
 
@@ -200,10 +267,22 @@ def read_patient_vitals_stats(
     request: Request,
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals statistics for a patient."""
     with handle_database_errors(request=request):
         stats = vitals.get_vitals_stats(db=db, patient_id=patient_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=patient_id,
+            operation_type="stats"
+        )
+
         return stats
 
 
@@ -217,6 +296,7 @@ def read_patient_vitals_date_range(
     end_date: datetime = Query(..., description="End date for the range"),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals readings for a patient within a specific date range."""
     with handle_database_errors(request=request):
@@ -228,6 +308,19 @@ def read_patient_vitals_date_range(
             skip=skip,
             limit=limit,
         )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=patient_id,
+            count=len(vitals_list),
+            start_date=str(start_date),
+            end_date=str(end_date)
+        )
+
         return vitals_list
 
 

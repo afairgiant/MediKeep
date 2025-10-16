@@ -10,6 +10,13 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_data_access,
+    log_security_event
+)
 from app.crud.patient import patient
 from app.models.activity_log import ActivityLog
 from app.models.activity_log import EntityType as ActivityEntityType
@@ -66,33 +73,18 @@ def get_my_patient_record(
     - birth_date
     - gender
     - address"""
-    user_ip = request.client.host if request.client else "unknown"
-
     patient_record = patient.get_by_user_id(db, user_id=user_id)
     if not patient_record:
-        logger.warning(
-            f"Patient record not found for user {user_id}",
-            extra={
-                "category": "app",
-                "event": "patient_record_not_found",
-                "user_id": user_id,
-                "ip": user_ip,
-            },
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_not_found",
+            message="Patient record not found"
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
 
-    # Log successful patient record access
-    patient_id = getattr(patient_record, "id", 0)
-
-    logger.info(
-        f"User {user_id} accessed their patient record",
-        extra={
-            "category": "app",
-            "event": "patient_record_accessed",
-            "user_id": user_id,
-            "patient_id": patient_id,
-            "ip": user_ip,
-        },
+    # Log successful access using helper
+    log_endpoint_access(
+        logger, request, user_id, "patient_record_accessed",
+        patient_id=patient_record.id
     )
 
     return patient_record
@@ -116,19 +108,13 @@ def create_my_patient_record(
     - gender
     - address
     """
-    user_ip = (
-        request.client.host if request.client else "unknown"
-    )  # Check if user already has a patient record
+    # Check if user already has a patient record
     existing_patient = patient.get_by_user_id(db, user_id=user_id)
     if existing_patient:
-        logger.warning(
+        log_security_event(
+            logger, "duplicate_patient_record_attempt", request,
             f"Attempt to create duplicate patient record for user {user_id}",
-            extra={
-                "category": "app",
-                "event": "duplicate_patient_record_attempt",
-                "user_id": user_id,
-                "ip": user_ip,
-            },
+            user_id=user_id
         )
         raise HTTPException(status_code=400, detail="Patient record already exists")
 
@@ -137,33 +123,20 @@ def create_my_patient_record(
         new_patient = patient.create_for_user(
             db, user_id=user_id, patient_data=patient_in
         )
-        patient_id = getattr(new_patient, "id", None)
 
-        # Log successful patient record creation
-        logger.info(
-            f"Patient record created successfully for user {user_id}",
-            extra={
-                "category": "app",
-                "event": "patient_record_created",
-                "user_id": user_id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-            },
+        # Log successful patient record creation using helper
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_created",
+            patient_id=new_patient.id
         )
 
         return new_patient
 
     except Exception as e:
-        # Log failed patient record creation
-        logger.error(
-            f"Failed to create patient record for user {user_id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_record_creation_failed",
-                "user_id": user_id,
-                "ip": user_ip,
-                "error": str(e),
-            },
+        # Log failed patient record creation using helper
+        log_endpoint_error(
+            logger, request, "Failed to create patient record",
+            e, user_id=user_id
         )
         raise
 
@@ -186,19 +159,12 @@ def update_my_patient_record(
     - gender
     - address
     """
-    user_ip = (
-        request.client.host if request.client else "unknown"
-    )  # Get existing patient record for audit
+    # Get existing patient record for audit
     existing_patient = patient.get_by_user_id(db, user_id=user_id)
     if not existing_patient:
-        logger.warning(
-            f"Patient record not found for update by user {user_id}",
-            extra={
-                "category": "app",
-                "event": "patient_record_update_not_found",
-                "user_id": user_id,
-                "ip": user_ip,
-            },
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_update_not_found",
+            message=f"Patient record not found for update by user {user_id}"
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
 
@@ -206,61 +172,39 @@ def update_my_patient_record(
 
     try:
         # Log update attempt without sensitive data
-        logger.info(
-            "Patient record update attempt",
-            extra={
-                "category": "app",
-                "event": "patient_record_update_attempt",
-                "user_id": user_id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-            }
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_update_attempt",
+            patient_id=patient_id
         )
-        
+
         updated_patient = patient.update_for_user(
             db, user_id=user_id, patient_data=patient_in
         )
 
         if not updated_patient:
-            logger.error(
-                "Patient record update returned None",
-                extra={
-                    "category": "app",
-                    "event": "patient_record_update_none_result",
-                    "user_id": user_id,
-                    "patient_id": patient_id,
-                    "ip": user_ip,
-                }
+            log_endpoint_error(
+                logger, request, "Patient record update returned None",
+                Exception("Update returned None"),
+                user_id=user_id,
+                patient_id=patient_id
             )
             raise HTTPException(status_code=500, detail="Failed to update patient record")
 
         # Log successful patient record update
-        logger.info(
-            f"Patient record updated successfully for user {user_id}",
-            extra={
-                "category": "app",
-                "event": "patient_record_updated",
-                "user_id": user_id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-                "updated_data": updated_patient.id,  # Just log the ID to confirm it exists
-            },
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_updated",
+            patient_id=patient_id,
+            message=f"Patient record updated successfully for user {user_id}",
+            updated_id=updated_patient.id
         )
 
         return updated_patient
 
     except Exception as e:
         # Log failed patient record update
-        logger.error(
-            f"Failed to update patient record for user {user_id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_record_update_failed",
-                "user_id": user_id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-                "error": str(e),
-            },
+        log_endpoint_error(
+            logger, request, f"Failed to update patient record for user {user_id}",
+            e, user_id=user_id, patient_id=patient_id
         )
         raise
 
@@ -278,19 +222,12 @@ def delete_my_patient_record(
     - medications, encounters, lab_results
     - immunizations, conditions, procedures, treatments
     """
-    user_ip = (
-        request.client.host if request.client else "unknown"
-    )  # Get existing patient record for audit
+    # Get existing patient record for audit
     existing_patient = patient.get_by_user_id(db, user_id=user_id)
     if not existing_patient:
-        logger.warning(
-            f"Patient record not found for deletion by user {user_id}",
-            extra={
-                "category": "app",
-                "event": "patient_record_delete_not_found",
-                "user_id": user_id,
-                "ip": user_ip,
-            },
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_delete_not_found",
+            message=f"Patient record not found for deletion by user {user_id}"
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
 
@@ -300,15 +237,10 @@ def delete_my_patient_record(
         patient.delete_for_user(db, user_id=user_id)
 
         # Log successful patient record deletion
-        logger.info(
-            f"Patient record deleted successfully for user {user_id}",
-            extra={
-                "category": "app",
-                "event": "patient_record_deleted",
-                "user_id": user_id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-            },
+        log_endpoint_access(
+            logger, request, user_id, "patient_record_deleted",
+            patient_id=patient_id,
+            message=f"Patient record deleted successfully for user {user_id}"
         )
 
         return {
@@ -317,16 +249,9 @@ def delete_my_patient_record(
 
     except Exception as e:
         # Log failed patient record deletion
-        logger.error(
-            f"Failed to delete patient record for user {user_id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "patient_record_deletion_failed",
-                "user_id": user_id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-                "error": str(e),
-            },
+        log_endpoint_error(
+            logger, request, f"Failed to delete patient record for user {user_id}",
+            e, user_id=user_id, patient_id=patient_id
         )
         # Re-raise with more specific error message for the user
         raise HTTPException(
@@ -383,13 +308,15 @@ def create_patient_medication(
         db=db, obj_in=MedicationCreate(**medication_data)
     )
 
+    # Note: Request object not available in this endpoint, using structured logging
     logger.info(
         "Medication created for patient",
         extra={
-            "category": "app",
-            "event": "medication_created",
-            "patient_id": patient_id,
-            "medication_id": medication_obj.id,
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "medication_created",
+            LogFields.PATIENT_ID: patient_id,
+            LogFields.RECORD_ID: medication_obj.id,
+            LogFields.USER_ID: current_user_id
         }
     )
     return medication_obj
@@ -507,8 +434,6 @@ def get_my_recent_activity(
 
     Each activity includes a brief description and timestamp.
     """
-    user_ip = request.client.host if request.client else "unknown"
-
     try:
         # Query the activity log for the user's recent activities
         activities = (
@@ -520,36 +445,26 @@ def get_my_recent_activity(
         )
 
         # Log successful activity retrieval
-        logger.info(
-            f"User {user_id} retrieved their recent activity",
-            extra={
-                "category": "app",
-                "event": "recent_activity_retrieved",
-                "user_id": user_id,
-                "ip": user_ip,
-                "activity_count": len(activities),
-            },
+        log_endpoint_access(
+            logger, request, user_id, "recent_activity_retrieved",
+            message=f"User {user_id} retrieved their recent activity",
+            activity_count=len(activities)
         )
 
         return activities
 
     except Exception as e:
         # Log failed activity retrieval
-        logger.error(
-            f"Failed to retrieve recent activity for user {user_id}: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "recent_activity_retrieval_failed",
-                "user_id": user_id,
-                "ip": user_ip,
-                "error": str(e),
-            },
+        log_endpoint_error(
+            logger, request, f"Failed to retrieve recent activity for user {user_id}",
+            e, user_id=user_id
         )
         raise
 
 
 @router.get("/me/dashboard-stats", response_model=PatientDashboardStats)
 async def get_my_dashboard_stats(
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
     patient_id: Optional[int] = Query(
@@ -641,8 +556,9 @@ async def get_my_dashboard_stats(
         )
 
     except Exception as e:
-        logger.error(
-            f"Error fetching dashboard stats for user {current_user.id}: {str(e)}"
+        log_endpoint_error(
+            logger, request, "Error fetching dashboard stats",
+            e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=500, detail="Error fetching dashboard statistics"
@@ -651,6 +567,7 @@ async def get_my_dashboard_stats(
 
 @router.get("/recent-activity/", response_model=List[UserRecentActivity])
 def get_user_recent_activity(
+    request: Request,
     limit: int = Query(default=10, le=50),
     patient_id: int = Query(None, description="Filter by specific patient ID"),
     db: Session = Depends(deps.get_db),
@@ -833,13 +750,17 @@ def get_user_recent_activity(
         return recent_activities
 
     except Exception as e:
-        logger.error(f"Error fetching user recent activity: {str(e)}")
+        log_endpoint_error(
+            logger, request, "Error fetching user recent activity",
+            e, user_id=current_user_id
+        )
         raise HTTPException(status_code=500, detail="Error fetching recent activity")
 
 
 # Patient Photo Endpoints
 @router.post("/{patient_id}/photo", response_model=PatientPhotoResponse)
 async def upload_patient_photo(
+    request: Request,
     patient_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(deps.get_db),
@@ -853,11 +774,11 @@ async def upload_patient_photo(
     - Automatically replaces existing photo
     - Processes image (resize, rotate, convert to JPEG)
     """
-    logger.info("Patient photo upload request", extra={
-        "patient_id": patient_id,
-        "user_id": current_user.id,
-        "file_name": file.filename
-    })
+    log_endpoint_access(
+        logger, request, current_user.id, "patient_photo_upload_request",
+        patient_id=patient_id,
+        file_name=file.filename
+    )
 
     # Verify patient ownership
     patient_obj = patient.get(db, id=patient_id)
@@ -890,23 +811,24 @@ async def upload_patient_photo(
             user_id=current_user.id
         )
 
-        logger.info("Patient photo uploaded successfully", extra={
-            "patient_id": patient_id,
-            "photo_id": photo.id
-        })
+        log_endpoint_access(
+            logger, request, current_user.id, "patient_photo_uploaded",
+            patient_id=patient_id,
+            photo_id=photo.id
+        )
 
         return photo
 
     except HTTPException:
         raise
     except Exception as e:
-        import traceback
-        error_msg = f"Failed to upload patient photo: {type(e).__name__}: {str(e)}"
-        full_traceback = traceback.format_exc()
-
-        logger.error(error_msg)
-        logger.error(f"Photo upload error details - Patient ID: {patient_id}, File: {file.filename if file else 'unknown'}")
-        logger.error(f"Full traceback: {full_traceback}")
+        log_endpoint_error(
+            logger, request, "Failed to upload patient photo",
+            e,
+            user_id=current_user.id,
+            patient_id=patient_id,
+            file_name=file.filename if file else "unknown"
+        )
 
         raise HTTPException(
             status_code=500,
@@ -982,6 +904,7 @@ async def get_patient_photo_info(
 
 @router.delete("/{patient_id}/photo", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_patient_photo(
+    request: Request,
     patient_id: int,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)
@@ -990,10 +913,10 @@ async def delete_patient_photo(
     Delete a patient's photo.
     Removes both the file and database record.
     """
-    logger.info("Patient photo delete request", extra={
-        "patient_id": patient_id,
-        "user_id": current_user.id
-    })
+    log_endpoint_access(
+        logger, request, current_user.id, "patient_photo_delete_request",
+        patient_id=patient_id
+    )
 
     # Verify patient ownership (only owner can delete)
     patient_obj = patient.get(db, id=patient_id)
@@ -1025,18 +948,20 @@ async def delete_patient_photo(
             user_id=current_user.id
         )
 
-        logger.info("Patient photo deleted successfully", extra={
-            "patient_id": patient_id
-        })
+        log_endpoint_access(
+            logger, request, current_user.id, "patient_photo_deleted",
+            patient_id=patient_id
+        )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Failed to delete patient photo", extra={
-            "patient_id": patient_id,
-            "error": str(e),
-            "error_type": type(e).__name__
-        })
+        log_endpoint_error(
+            logger, request, "Failed to delete patient photo",
+            e,
+            user_id=current_user.id,
+            patient_id=patient_id
+        )
         raise HTTPException(
             status_code=500,
             detail="Failed to delete photo. Please try again."

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.activity_logging import log_delete
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_endpoint_error, log_security_event
 from app.crud.patient import patient
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
@@ -98,16 +99,14 @@ def delete_current_user_account(
         db.commit()
 
         # Log successful account deletion
-        logger.info(
+        log_security_event(
+            logger,
+            "account_self_deletion",
+            request,
             f"User account deleted successfully: {username}",
-            extra={
-                "category": "security",
-                "event": "account_self_deletion",
-                "user_id": user_id,
-                "username": username,
-                "ip": user_ip,
-                "deletion_stats": deletion_result,
-            },
+            user_id=user_id,
+            username=username,
+            deletion_stats=deletion_result
         )
 
         return {
@@ -120,13 +119,13 @@ def delete_current_user_account(
     except ValueError as e:
         # Validation errors from the service (last user/admin)
         db.rollback()
-        logger.warning(
+        log_security_event(
+            logger,
+            "account_deletion_validation_failed",
+            request,
             f"User deletion validation failed: {str(e)}",
-            extra={
-                "user_id": user_id,
-                "ip": user_ip,
-                "error": str(e),
-            },
+            user_id=user_id,
+            error=str(e)
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -140,15 +139,12 @@ def delete_current_user_account(
         db.rollback()
 
         # Log failed deletion
-        logger.error(
+        log_endpoint_error(
+            logger,
+            request,
             f"Failed to delete user account: {str(e)}",
-            extra={
-                "category": "app",
-                "event": "account_deletion_failed",
-                "user_id": user_id,
-                "ip": user_ip,
-                "error": str(e),
-            },
+            e,
+            user_id=user_id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -159,6 +155,7 @@ def delete_current_user_account(
 @router.get("/me/preferences", response_model=UserPreferences)
 def get_current_user_preferences(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: UserModel = Depends(deps.get_current_user),
 ) -> Any:
@@ -169,7 +166,13 @@ def get_current_user_preferences(
         )
         return preferences
     except Exception as e:
-        logger.error(f"Error getting preferences for user {current_user.id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            f"Error getting preferences for user {current_user.id}",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get user preferences",
@@ -179,6 +182,7 @@ def get_current_user_preferences(
 @router.put("/me/preferences", response_model=UserPreferences)
 def update_current_user_preferences(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     preferences_in: UserPreferencesUpdate,
     current_user: UserModel = Depends(deps.get_current_user),
@@ -195,7 +199,13 @@ def update_current_user_preferences(
             )
         return updated_preferences
     except Exception as e:
-        logger.error(f"Error updating preferences for user {current_user.id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            f"Error updating preferences for user {current_user.id}",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update user preferences",

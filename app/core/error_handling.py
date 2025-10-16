@@ -34,6 +34,8 @@ from starlette.status import (
 from api_exception import APIException, register_exception_handlers
 from app.core.response_models import ExceptionCode, ExceptionStatus, ResponseModel
 from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import log_endpoint_error, log_security_event
 
 # Initialize logger for error handling
 logger = get_logger(__name__, "app")
@@ -79,34 +81,66 @@ class MedicalRecordsAPIException(APIException):
     
     def _log_enhanced_exception(self, request: Optional[Request] = None, context: Optional[Dict[str, Any]] = None):
         """
-        Enhanced logging with request context and structured data.
+        Enhanced logging with request context and structured data using LogFields constants.
         """
+        # Build extra context with LogFields constants (without EVENT - helpers set this)
         extra_data = {
-            "category": "app",
-            "event": "api_exception",
             "error_code": self.error_code,
             "http_status": self.http_status_code,
             "status": self.status.value if hasattr(self.status, 'value') else str(self.status)
         }
-        
-        if request:
-            extra_data.update({
-                "ip": request.client.host if request.client else "unknown",
-                "method": request.method,
-                "url_path": str(request.url.path),
-                "user_agent": request.headers.get("user-agent", "unknown")
-            })
-        
+
         if context:
             extra_data.update(context)
-        
-        # Use appropriate log level based on HTTP status
+
+        # Use appropriate logging based on HTTP status and severity
         if self.http_status_code >= 500:
-            logger.error(f"Server Error: {self.message}", extra=extra_data)
+            # Server errors - use endpoint_error helper if request available
+            if request:
+                log_endpoint_error(logger, request, f"Server Error: {self.message}",
+                                 error=self.error_code, **extra_data)
+            else:
+                logger.error(f"Server Error: {self.message}", extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "api_exception",
+                    **extra_data
+                })
+        elif self.http_status_code in (401, 403):
+            # Authentication/authorization errors - use security_event helper
+            if request:
+                log_security_event(logger, "authentication_error", request, f"Auth Error: {self.message}", **extra_data)
+            else:
+                logger.warning(f"Auth Error: {self.message}", extra={
+                    LogFields.CATEGORY: "security",
+                    LogFields.EVENT: "authentication_error",
+                    **extra_data
+                })
         elif self.http_status_code >= 400:
-            logger.warning(f"Client Error: {self.message}", extra=extra_data)
+            # Client errors - use endpoint_error helper if request available
+            if request:
+                log_endpoint_error(logger, request, f"Client Error: {self.message}",
+                                 error=self.error_code, **extra_data)
+            else:
+                logger.warning(f"Client Error: {self.message}", extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "api_exception",
+                    **extra_data
+                })
         else:
-            logger.info(f"Exception: {self.message}", extra=extra_data)
+            # Informational - use structured logging
+            if request:
+                logger.info(f"Exception: {self.message}", extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "api_exception",
+                    LogFields.IP: request.client.host if request.client else "unknown",
+                    **extra_data
+                })
+            else:
+                logger.info(f"Exception: {self.message}", extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "api_exception",
+                    **extra_data
+                })
 
 
 # Custom exception classes for different error categories

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func, Text
 from app.api import deps
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_endpoint_access, log_data_access
 from app.models.models import (
     Medication, Condition, LabResult, Procedure,
     Immunization, Treatment, Encounter, Allergy, Vitals
@@ -113,14 +114,15 @@ def search_patient_records(
     Search across all medical record types for a specific patient.
     Consolidates multiple API calls into a single efficient search.
     """
-    logger.info("Search request received", extra={
-        "query": q,
-        "patient_id": target_patient_id,
-        "types": types,
-        "types_count": len(types) if types else 0,
-        "skip": skip,
-        "limit": limit
-    })
+    log_endpoint_access(
+        logger, request, target_patient_id, "search_request_received",
+        patient_id=target_patient_id,
+        query=q,
+        types=types,
+        types_count=len(types) if types else 0,
+        skip=skip,
+        limit=limit
+    )
 
     query_lower = q.lower()
     results = {}
@@ -509,13 +511,14 @@ def search_patient_records(
         for result in results.values()
     )
 
-    logger.info("Search completed", extra={
-        "query": q,
-        "patient_id": target_patient_id,
-        "total_results": total_count,
-        "types_searched": list(results.keys()),
-        "results_by_type": {k: v.count for k, v in results.items()}
-    })
+    log_data_access(
+        logger, request, target_patient_id, "read", "SearchResults",
+        patient_id=target_patient_id,
+        count=total_count,
+        query=q,
+        types_searched=list(results.keys()),
+        results_by_type={k: v.count for k, v in results.items()}
+    )
 
     return SearchResponse(
         query=q,

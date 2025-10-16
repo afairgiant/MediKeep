@@ -45,6 +45,7 @@ from app.schemas.lab_test_component import (
     LabResultBasicForTrend,
 )
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_data_access, log_endpoint_error, log_validation_error
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
@@ -209,14 +210,10 @@ def create_lab_test_components_bulk(
             created_components = lab_test_component.bulk_create(db, obj_in=bulk_data)
 
             # Log the bulk creation
-            logger.info(
-                f"Bulk created {len(created_components)} test components for lab result {lab_result_id}",
-                extra={
-                    "user_id": current_user.id,
-                    "lab_result_id": lab_result_id,
-                    "component_count": len(created_components),
-                    "component": "lab_test_component"
-                }
+            log_data_access(
+                logger, request, current_user.id, "create", "LabTestComponent",
+                count=len(created_components),
+                lab_result_id=lab_result_id
             )
 
             return LabTestComponentBulkResponse(
@@ -227,27 +224,19 @@ def create_lab_test_components_bulk(
 
         except ValueError as e:
             # Handle validation errors
-            logger.warning(
-                f"Validation error in bulk create for lab result {lab_result_id}: {str(e)}",
-                extra={
-                    "user_id": current_user.id,
-                    "lab_result_id": lab_result_id,
-                    "error": str(e),
-                    "component": "lab_test_component"
-                }
+            log_validation_error(
+                logger, request, str(e),
+                user_id=current_user.id,
+                lab_result_id=lab_result_id
             )
             raise BusinessLogicException(f"Validation error: {str(e)}")
 
         except IntegrityError as e:
             # Handle database constraint violations
-            logger.error(
-                f"Database constraint violation in bulk create for lab result {lab_result_id}",
-                extra={
-                    "user_id": current_user.id,
-                    "lab_result_id": lab_result_id,
-                    "error": str(e),
-                    "component": "lab_test_component"
-                }
+            log_endpoint_error(
+                logger, request, "Database constraint violation in bulk create",
+                e, user_id=current_user.id,
+                lab_result_id=lab_result_id
             )
             db.rollback()
             raise BusinessLogicException("Data integrity error. Please check your input data.")
@@ -258,15 +247,11 @@ def create_lab_test_components_bulk(
 
         except Exception as e:
             # Handle unexpected errors
-            logger.error(
-                f"Unexpected error in bulk create for lab result {lab_result_id}: {str(e)}",
-                extra={
-                    "user_id": current_user.id,
-                    "lab_result_id": lab_result_id,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                    "component": "lab_test_component"
-                }
+            log_endpoint_error(
+                logger, request, "Unexpected error in bulk create",
+                e, user_id=current_user.id,
+                lab_result_id=lab_result_id,
+                error_type=type(e).__name__
             )
             db.rollback()
             raise BusinessLogicException("An unexpected error occurred. Please try again later.")
@@ -585,30 +570,23 @@ def get_lab_test_component_trends(
             primary_unit = components[0].unit
             units_found = set(c.unit for c in components if c.unit)
             if len(units_found) > 1:
-                logger.warning(
-                    f"Unit mismatch detected in trend data for {test_name}",
-                    extra={
-                        "user_id": current_user.id,
-                        "patient_id": patient_id,
-                        "test_name": test_name,
-                        "primary_unit": primary_unit,
-                        "all_units": list(units_found),
-                        "component": "lab_test_component_trends"
-                    }
+                log_validation_error(
+                    logger, request, f"Unit mismatch detected in trend data for {test_name}",
+                    user_id=current_user.id,
+                    patient_id=patient_id,
+                    test_name=test_name,
+                    primary_unit=primary_unit,
+                    all_units=list(units_found)
                 )
 
         # Log the request
-        logger.info(
-            f"Trend data requested for patient {patient_id}, test: {test_name}",
-            extra={
-                "user_id": current_user.id,
-                "patient_id": patient_id,
-                "test_name": test_name,
-                "date_from": str(date_from) if date_from else None,
-                "date_to": str(date_to) if date_to else None,
-                "data_point_count": len(components),
-                "component": "lab_test_component_trends"
-            }
+        log_data_access(
+            logger, request, current_user.id, "read", "LabTestComponentTrends",
+            patient_id=patient_id,
+            count=len(components),
+            test_name=test_name,
+            date_from=str(date_from) if date_from else None,
+            date_to=str(date_to) if date_to else None
         )
 
         # Return empty response if no components found

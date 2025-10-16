@@ -7,7 +7,7 @@ Phase 1 implementation: Basic manual backup functionality.
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -15,6 +15,11 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin_user, get_db
 from app.core.config import settings
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event
+)
 from app.models.models import User
 from app.services.backup_service import BackupService
 
@@ -55,7 +60,8 @@ class RetentionSettingsUpdate(BaseModel):
 
 @router.post("/create-database", response_model=BackupResponse)
 async def create_database_backup(
-    request: BackupCreateRequest,
+    backup_request: BackupCreateRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -67,11 +73,18 @@ async def create_database_backup(
     try:
         backup_service = BackupService(db)
         backup_result = await backup_service.create_database_backup(
-            description=request.description
+            description=backup_request.description
         )
 
-        logger.info(
-            f"Database backup created by admin user {current_user.id}: {backup_result['filename']}"
+        log_security_event(
+            logger,
+            "database_backup_created",
+            request,
+            f"Database backup created: {backup_result['filename']}",
+            user_id=current_user.id,
+            backup_id=backup_result["id"],
+            filename=backup_result["filename"],
+            size_bytes=backup_result["size_bytes"]
         )
 
         return BackupResponse(
@@ -81,11 +94,17 @@ async def create_database_backup(
             size_bytes=backup_result["size_bytes"],
             status=backup_result["status"],
             created_at=backup_result["created_at"],
-            description=request.description,
+            description=backup_request.description,
         )
 
     except Exception as e:
-        logger.error(f"Failed to create database backup: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to create database backup",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create database backup: {str(e)}",
@@ -94,7 +113,8 @@ async def create_database_backup(
 
 @router.post("/create-files", response_model=BackupResponse)
 async def create_files_backup(
-    request: BackupCreateRequest,
+    backup_request: BackupCreateRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -106,11 +126,18 @@ async def create_files_backup(
     try:
         backup_service = BackupService(db)
         backup_result = await backup_service.create_files_backup(
-            description=request.description
+            description=backup_request.description
         )
 
-        logger.info(
-            f"Files backup created by admin user {current_user.id}: {backup_result['filename']}"
+        log_security_event(
+            logger,
+            "files_backup_created",
+            request,
+            f"Files backup created: {backup_result['filename']}",
+            user_id=current_user.id,
+            backup_id=backup_result["id"],
+            filename=backup_result["filename"],
+            size_bytes=backup_result["size_bytes"]
         )
 
         return BackupResponse(
@@ -120,11 +147,17 @@ async def create_files_backup(
             size_bytes=backup_result["size_bytes"],
             status=backup_result["status"],
             created_at=backup_result["created_at"],
-            description=request.description,
+            description=backup_request.description,
         )
 
     except Exception as e:
-        logger.error(f"Failed to create files backup: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to create files backup",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create files backup: {str(e)}",
@@ -133,7 +166,8 @@ async def create_files_backup(
 
 @router.post("/create-full", response_model=BackupResponse)
 async def create_full_backup(
-    request: BackupCreateRequest,
+    backup_request: BackupCreateRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -145,11 +179,18 @@ async def create_full_backup(
     try:
         backup_service = BackupService(db)
         backup_result = await backup_service.create_full_backup(
-            description=request.description
+            description=backup_request.description
         )
 
-        logger.info(
-            f"Full backup created by admin user {current_user.id}: {backup_result['filename']}"
+        log_security_event(
+            logger,
+            "full_backup_created",
+            request,
+            f"Full backup created: {backup_result['filename']}",
+            user_id=current_user.id,
+            backup_id=backup_result["id"],
+            filename=backup_result["filename"],
+            size_bytes=backup_result["size_bytes"]
         )
 
         return BackupResponse(
@@ -159,11 +200,17 @@ async def create_full_backup(
             size_bytes=backup_result["size_bytes"],
             status=backup_result["status"],
             created_at=backup_result["created_at"],
-            description=request.description,
+            description=backup_request.description,
         )
 
     except Exception as e:
-        logger.error(f"Failed to create full backup: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to create full backup",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create full backup: {str(e)}",
@@ -172,6 +219,7 @@ async def create_full_backup(
 
 @router.get("/")
 async def list_backups(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -187,7 +235,13 @@ async def list_backups(
         return {"backups": backups, "total": len(backups)}
 
     except Exception as e:
-        logger.error(f"Failed to list backups: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to list backups",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to list backups: {str(e)}",
@@ -197,6 +251,7 @@ async def list_backups(
 @router.get("/{backup_id}/download")
 async def download_backup(
     backup_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -227,7 +282,15 @@ async def download_backup(
                 detail="Backup file does not exist",
             )
 
-        logger.info(f"Backup {backup_id} downloaded by admin user {current_user.id}")
+        log_security_event(
+            logger,
+            "backup_downloaded",
+            request,
+            f"Backup downloaded: {backup['filename']}",
+            user_id=current_user.id,
+            backup_id=backup_id,
+            filename=backup["filename"]
+        )
 
         return FileResponse(
             path=backup["file_path"],
@@ -238,7 +301,14 @@ async def download_backup(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to download backup {backup_id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            f"Failed to download backup {backup_id}",
+            e,
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to download backup: {str(e)}",
@@ -248,6 +318,7 @@ async def download_backup(
 @router.post("/{backup_id}/verify")
 async def verify_backup(
     backup_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -260,14 +331,26 @@ async def verify_backup(
         backup_service = BackupService(db)
         verification_result = await backup_service.verify_backup(backup_id)
 
-        logger.info(
-            f"Backup {backup_id} verification requested by admin user {current_user.id}"
+        log_security_event(
+            logger,
+            "backup_verified",
+            request,
+            f"Backup verification requested",
+            user_id=current_user.id,
+            backup_id=backup_id
         )
 
         return verification_result
 
     except Exception as e:
-        logger.error(f"Failed to verify backup {backup_id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            f"Failed to verify backup {backup_id}",
+            e,
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal error occurred while verifying the backup.",
@@ -277,6 +360,7 @@ async def verify_backup(
 @router.delete("/{backup_id}")
 async def delete_backup(
     backup_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -289,14 +373,28 @@ async def delete_backup(
         backup_service = BackupService(db)
         deletion_result = await backup_service.delete_backup(backup_id)
 
-        logger.info(f"Backup {backup_id} deleted by admin user {current_user.id}")
+        log_security_event(
+            logger,
+            "backup_deleted",
+            request,
+            f"Backup deleted",
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
 
         return deletion_result
 
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception as e:
-        logger.error(f"Failed to delete backup {backup_id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            f"Failed to delete backup {backup_id}",
+            e,
+            user_id=current_user.id,
+            backup_id=backup_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete backup: {str(e)}",
@@ -305,6 +403,7 @@ async def delete_backup(
 
 @router.post("/cleanup")
 async def cleanup_old_backups(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -317,12 +416,24 @@ async def cleanup_old_backups(
         backup_service = BackupService(db)
         cleanup_result = await backup_service.cleanup_old_backups()
 
-        logger.info(f"Backup cleanup triggered by admin user {current_user.id}")
+        log_security_event(
+            logger,
+            "backup_cleanup_triggered",
+            request,
+            "Backup cleanup triggered",
+            user_id=current_user.id
+        )
 
         return cleanup_result
 
     except Exception as e:
-        logger.error(f"Failed to cleanup backups: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to cleanup backups",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup backups: {str(e)}",
@@ -331,6 +442,7 @@ async def cleanup_old_backups(
 
 @router.post("/cleanup-orphaned")
 async def cleanup_orphaned_files(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -343,12 +455,24 @@ async def cleanup_orphaned_files(
         backup_service = BackupService(db)
         cleanup_result = await backup_service.cleanup_orphaned_files()
 
-        logger.info(f"Orphaned file cleanup triggered by admin user {current_user.id}")
+        log_security_event(
+            logger,
+            "orphaned_cleanup_triggered",
+            request,
+            "Orphaned file cleanup triggered",
+            user_id=current_user.id
+        )
 
         return cleanup_result
 
     except Exception as e:
-        logger.error(f"Failed to cleanup orphaned files: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to cleanup orphaned files",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup orphaned files: {str(e)}",
@@ -357,6 +481,7 @@ async def cleanup_orphaned_files(
 
 @router.post("/cleanup-all")
 async def cleanup_all_old_data(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -369,12 +494,24 @@ async def cleanup_all_old_data(
         backup_service = BackupService(db)
         cleanup_result = await backup_service.cleanup_all_old_data()
 
-        logger.info(f"Complete cleanup triggered by admin user {current_user.id}")
+        log_security_event(
+            logger,
+            "complete_cleanup_triggered",
+            request,
+            "Complete cleanup triggered",
+            user_id=current_user.id
+        )
 
         return cleanup_result
 
     except Exception as e:
-        logger.error(f"Failed to cleanup old data: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to cleanup old data",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup old data: {str(e)}",
@@ -398,6 +535,7 @@ async def get_retention_settings(
 @router.post("/settings/retention")
 async def update_retention_settings(
     settings_update: RetentionSettingsUpdate,
+    request: Request,
     current_user: User = Depends(get_current_admin_user),
 ):
     """Update admin settings including retention and user management."""
@@ -465,12 +603,24 @@ async def update_retention_settings(
         if settings_update.allow_user_registration is not None:
             settings.ALLOW_USER_REGISTRATION = settings_update.allow_user_registration
             updated_settings["allow_user_registration"] = settings_update.allow_user_registration
-            logger.info(
-                f"User registration {'enabled' if settings_update.allow_user_registration else 'disabled'} by admin {current_user.username}"
+            log_security_event(
+                logger,
+                "user_registration_toggled",
+                request,
+                f"User registration {'enabled' if settings_update.allow_user_registration else 'disabled'}",
+                user_id=current_user.id,
+                username=current_user.username,
+                registration_enabled=settings_update.allow_user_registration
             )
 
-        logger.info(
-            f"Admin {current_user.username} updated settings: {updated_settings}"
+        log_security_event(
+            logger,
+            "settings_updated",
+            request,
+            "Admin settings updated",
+            user_id=current_user.id,
+            username=current_user.username,
+            updated_settings=str(updated_settings)
         )
 
         return {
@@ -488,7 +638,13 @@ async def update_retention_settings(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to update settings: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to update settings",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=500, detail=f"Failed to update settings: {str(e)}"
         )
@@ -496,6 +652,7 @@ async def update_retention_settings(
 
 @router.get("/retention/stats")
 async def get_retention_stats(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -510,7 +667,13 @@ async def get_retention_stats(
         }
 
     except Exception as e:
-        logger.error(f"Failed to get retention stats: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to get retention stats",
+            e,
+            user_id=current_user.id
+        )
         raise HTTPException(
             status_code=500, detail=f"Failed to get retention stats: {str(e)}"
         )

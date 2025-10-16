@@ -12,13 +12,15 @@ from datetime import date, datetime
 from enum import Enum
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_endpoint_access, log_endpoint_error, log_data_access
+from app.core.logging_constants import LogFields
 from app.services.export_service import ExportService
 
 logger = get_logger(__name__, "app")
@@ -58,6 +60,7 @@ class BulkExportRequest(BaseModel):
 
 @router.get("/data")
 async def export_patient_data(
+    request: Request,
     format: ExportFormat = Query(ExportFormat.JSON, description="Export format"),
     scope: ExportScope = Query(ExportScope.ALL, description="Data scope to export"),
     start_date: Optional[date] = Query(
@@ -86,8 +89,13 @@ async def export_patient_data(
     - **include_patient_info**: Whether to include patient information in export"""
 
     try:
-        logger.info(
-            f"Export request by user {current_user_id}: format={format.value}, scope={scope.value}"
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "export_data_requested",
+            format_type=format.value,
+            scope=scope.value
         )
 
         export_service = ExportService(db)
@@ -128,7 +136,15 @@ async def export_patient_data(
                     export_data, default=json_serializer, indent=2, ensure_ascii=False
                 )
             except Exception as json_error:
-                logger.error(f"JSON serialization error: {json_error}")
+                log_endpoint_error(
+                    logger,
+                    request,
+                    "JSON serialization failed during export",
+                    json_error,
+                    user_id=current_user_id,
+                    scope=scope.value,
+                    format_type=format.value
+                )
                 raise HTTPException(
                     status_code=500,
                     detail=f"JSON serialization failed: {str(json_error)}",
@@ -182,10 +198,25 @@ async def export_patient_data(
                                         file_path, f"lab_files/{safe_filename}"
                                     )
                                 else:
-                                    logger.warning(f"File not found: {file_path}")
+                                    logger.warning(
+                                        "Lab result file not found during export",
+                                        extra={
+                                            LogFields.CATEGORY: "app",
+                                            LogFields.EVENT: "export_file_not_found",
+                                            LogFields.USER_ID: current_user_id,
+                                            "file_path": file_path
+                                        }
+                                    )
                             except Exception as file_error:
                                 logger.error(
-                                    f"Failed to add file {file_info['file_name']} to ZIP: {file_error}"
+                                    f"Failed to add lab file to export ZIP: {file_info['file_name']}",
+                                    extra={
+                                        LogFields.CATEGORY: "app",
+                                        LogFields.EVENT: "export_file_add_failed",
+                                        LogFields.USER_ID: current_user_id,
+                                        LogFields.ERROR: str(file_error),
+                                        "file_name": file_info['file_name']
+                                    }
                                 )
                                 continue
 
@@ -195,8 +226,14 @@ async def export_patient_data(
                     )
 
                     zip_content = zip_buffer.getvalue()
-                    logger.info(
-                        f"Generated ZIP export: {zip_filename}, size: {len(zip_content)} bytes"
+                    log_endpoint_access(
+                        logger,
+                        request,
+                        current_user_id,
+                        "export_zip_generated",
+                        message=f"Generated ZIP export with files",
+                        filename=zip_filename,
+                        size_bytes=len(zip_content)
                     )
 
                     return Response(
@@ -252,12 +289,21 @@ async def export_patient_data(
             )
 
     except Exception as e:
-        logger.error(f"Export failed for user {current_user_id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            request,
+            "Patient data export failed",
+            e,
+            user_id=current_user_id,
+            format_type=format.value,
+            scope=scope.value
+        )
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 
 @router.get("/summary")
 async def get_export_summary(
+    request: Request,
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
@@ -276,8 +322,12 @@ async def get_export_summary(
         }
 
     except Exception as e:
-        logger.error(
-            f"Failed to generate export summary for user {current_user_id}: {str(e)}"
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to generate export summary",
+            e,
+            user_id=current_user_id
         )
         raise HTTPException(status_code=500, detail="Failed to generate export summary")
 
@@ -377,6 +427,7 @@ async def get_supported_formats():
 
 @router.post("/bulk")
 async def create_bulk_export(
+    http_request: Request,
     request: BulkExportRequest,
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
@@ -386,8 +437,13 @@ async def create_bulk_export(
     Each scope is exported as a separate file within the ZIP.
     """
     try:
-        logger.info(
-            f"Bulk export request by user {current_user_id}: {len(request.scopes)} scopes, format: {request.format.value}"
+        log_endpoint_access(
+            logger,
+            http_request,
+            current_user_id,
+            "bulk_export_requested",
+            scope_count=len(request.scopes),
+            format_type=request.format.value
         )
 
         export_service = ExportService(db)
@@ -441,7 +497,14 @@ async def create_bulk_export(
                     else:
                         # PDF not supported in bulk for complexity reasons
                         logger.warning(
-                            f"PDF format not supported in bulk export for scope {scope}"
+                            "PDF format not supported in bulk export",
+                            extra={
+                                LogFields.CATEGORY: "app",
+                                LogFields.EVENT: "bulk_export_unsupported_format",
+                                LogFields.USER_ID: current_user_id,
+                                "scope": scope,
+                                "format": request.format.value
+                            }
                         )
                         continue
 
@@ -458,7 +521,14 @@ async def create_bulk_export(
 
                 except Exception as e:
                     logger.warning(
-                        f"Failed to export {scope} for user {current_user_id}: {str(e)}"
+                        f"Failed to export scope in bulk export: {scope}",
+                        extra={
+                            LogFields.CATEGORY: "app",
+                            LogFields.EVENT: "bulk_export_scope_failed",
+                            LogFields.USER_ID: current_user_id,
+                            LogFields.ERROR: str(e),
+                            "scope": scope
+                        }
                     )
                     continue
 
@@ -476,8 +546,14 @@ async def create_bulk_export(
         def generate():
             yield zip_buffer.getvalue()
 
-        logger.info(
-            f"Bulk export completed: {exported_count} files in ZIP for user {current_user_id}"
+        log_endpoint_access(
+            logger,
+            http_request,
+            current_user_id,
+            "bulk_export_completed",
+            message=f"Bulk export completed successfully",
+            exported_count=exported_count,
+            filename=zip_filename
         )
 
         return StreamingResponse(
@@ -487,5 +563,12 @@ async def create_bulk_export(
         )
 
     except Exception as e:
-        logger.error(f"Bulk export failed for user {current_user_id}: {str(e)}")
+        log_endpoint_error(
+            logger,
+            http_request,
+            "Bulk export failed",
+            e,
+            user_id=current_user_id,
+            scope_count=len(request.scopes)
+        )
         raise HTTPException(status_code=500, detail=f"Bulk export failed: {str(e)}")

@@ -15,10 +15,12 @@ from fastapi import APIRouter, HTTPException, Request, status
 
 from app.core.config import settings
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_security_event
 from app.core.logging_constants import (
     CATEGORIES,
     DEFAULT_LOG_LEVEL,
     VALID_LOG_LEVELS,
+    LogFields,
     get_log_level_numeric,
     sanitize_log_input,
     validate_log_level,
@@ -145,16 +147,14 @@ def get_log_level(request: Request) -> Dict[str, Any]:
             reset_datetime = datetime.fromtimestamp(reset_time)
 
             # Log rate limit violation for security monitoring
-            security_logger.warning(
+            log_security_event(
+                security_logger,
+                "rate_limit_exceeded",
+                request,
                 f"Rate limit exceeded for log level endpoint from {client_ip}",
-                extra={
-                    "category": "security",
-                    "event": "rate_limit_exceeded",
-                    "endpoint": "/api/v1/system/log-level",
-                    "ip": client_ip,
-                    "remaining_requests": remaining_requests,
-                    "reset_time": reset_datetime.isoformat(),
-                },
+                endpoint="/api/v1/system/log-level",
+                remaining_requests=remaining_requests,
+                reset_time=reset_datetime.isoformat()
             )
 
             raise HTTPException(
@@ -168,13 +168,13 @@ def get_log_level(request: Request) -> Dict[str, Any]:
                 },
             )
 
-        # Log successful access attempt for security monitoring
-        security_logger.info(
+        # Log successful access attempt for app monitoring
+        app_logger.info(
             f"Log level endpoint accessed from {client_ip}",
             extra={
-                "category": "app",
-                "event": "log_level_endpoint_access",
-                "ip": client_ip,
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "log_level_endpoint_access",
+                LogFields.IP: client_ip,
                 "user_agent": sanitize_log_input(
                     request.headers.get("user-agent", "unknown")
                 ),
@@ -189,8 +189,8 @@ def get_log_level(request: Request) -> Dict[str, Any]:
             app_logger.warning(
                 f"Invalid LOG_LEVEL '{current_level}' detected, falling back to {DEFAULT_LOG_LEVEL}",
                 extra={
-                    "category": "app",
-                    "event": "invalid_log_level_fallback",
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "invalid_log_level_fallback",
                     "invalid_level": current_level,
                     "fallback_level": DEFAULT_LOG_LEVEL,
                 },
@@ -230,9 +230,9 @@ def get_log_level(request: Request) -> Dict[str, Any]:
         app_logger.debug(
             f"Log level configuration returned to {client_ip}",
             extra={
-                "category": "app",
-                "event": "log_level_config_returned",
-                "ip": client_ip,
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "log_level_config_returned",
+                LogFields.IP: client_ip,
                 "current_level": current_level,
                 "requests_remaining": remaining_requests,
             },
@@ -248,10 +248,10 @@ def get_log_level(request: Request) -> Dict[str, Any]:
         app_logger.error(
             f"Log level endpoint error for {client_ip}: {e}",
             extra={
-                "category": "app",
-                "event": "log_level_endpoint_error",
-                "ip": client_ip,
-                "error": sanitize_log_input(str(e)),
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "log_level_endpoint_error",
+                LogFields.IP: client_ip,
+                LogFields.ERROR: sanitize_log_input(str(e)),
                 "error_type": type(e).__name__,
             },
         )
@@ -304,9 +304,9 @@ def system_health() -> Dict[str, Any]:
         app_logger.error(
             f"System health check failed: {e}",
             extra={
-                "category": "app",
-                "event": "health_check_failed",
-                "error": sanitize_log_input(str(e)),
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "health_check_failed",
+                LogFields.ERROR: sanitize_log_input(str(e)),
             },
         )
 

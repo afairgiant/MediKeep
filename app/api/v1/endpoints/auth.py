@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.deps import UnauthorizedException, ConflictException, BusinessLogicException
 from app.core.config import settings
-from app.core.logging_config import get_logger, log_security_event
+from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_endpoint_access, log_endpoint_error, log_security_event
 from app.core.security import create_access_token, verify_password
 from app.core.error_handling import handle_database_errors
 from app.crud.patient import patient
@@ -49,14 +50,12 @@ def register(
     """
     # Check if registration is enabled
     if not settings.ALLOW_USER_REGISTRATION:
-        logger.warning(
+        log_security_event(
+            logger,
+            "registration_blocked",
+            request,
             f"Registration attempt blocked - registration disabled. Username: {user_in.username}",
-            extra={
-                "category": "security",
-                "event": "registration_blocked",
-                "username": user_in.username,
-                "ip": request.client.host if request.client else "unknown",
-            },
+            username=user_in.username,
         )
         raise UnauthorizedException(
             message="New user registration is currently disabled. Please contact an administrator.",
@@ -67,14 +66,12 @@ def register(
     user_agent = request.headers.get("user-agent", "unknown")
 
     # Log registration attempt using security audit system
-    logger.info(
+    log_security_event(
+        logger,
+        "user_registration_attempt",
+        request,
         f"User registration attempt for username: {user_in.username}",
-        extra={
-            "category": "security",
-            "event": "user_registration_attempt",
-            "username": user_in.username,
-            "ip": user_ip,
-        },
+        username=user_in.username,
     )
 
     # Check if username already exists
@@ -150,44 +147,39 @@ def register(
             db.refresh(new_user)
 
             # Log successful patient creation and activation
-            logger.info(
-                "Patient record created and set as active for new user",
-                extra={
-                    "category": "app",
-                    "event": "patient_creation_success",
-                    "user_id": user_id,
-                    "username": user_in.username,
-                    "patient_id": created_patient.id,
-                },
+            log_endpoint_access(
+                logger,
+                request,
+                user_id,
+                "patient_creation_success",
+                message="Patient record created and set as active for new user",
+                username=user_in.username,
+                patient_id=created_patient.id,
             )
         except Exception as active_patient_error:
             # Patient was created successfully, but setting as active failed
             # This is not critical - user can set active patient later
-            logger.warning(
+            log_endpoint_error(
+                logger,
+                request,
                 "Patient created but failed to set as active during registration",
-                extra={
-                    "category": "app",
-                    "event": "active_patient_set_failed",
-                    "user_id": user_id,
-                    "username": user_in.username,
-                    "patient_id": created_patient.id,
-                    "error": str(active_patient_error),
-                },
+                active_patient_error,
+                user_id=user_id,
+                username=user_in.username,
+                patient_id=created_patient.id,
             )
             # Continue - patient exists, just not set as active
 
     except Exception as e:
         # If patient creation fails, we should still return the user
         # but log the error for debugging
-        logger.error(
+        log_endpoint_error(
+            logger,
+            request,
             f"Failed to create patient record for user {user_id}: {e}",
-            extra={
-                "category": "app",
-                "event": "patient_creation_failed",
-                "user_id": user_id,
-                "username": user_in.username,
-                "error": str(e),
-            },
+            e,
+            user_id=user_id,
+            username=user_in.username,
         )
         # For new user registration failures, we may want to consider rolling back
         # the user creation as well, but for now we'll just continue without a patient
@@ -195,19 +187,17 @@ def register(
     return new_user
 
 
-def log_successful_login(user_id: int, username: str, ip: str):
+def log_successful_login(user_id: int, username: str, request: Request):
     """
     Logs a successful login event.
     """
-    logger.info(
-        f"Login successful for username: {username}",
-        extra={
-            "category": "app",
-            "event": "login_success",
-            "user_id": user_id,
-            "username": username,
-            "ip": ip,
-        },
+    log_endpoint_access(
+        logger,
+        request,
+        user_id,
+        "login_success",
+        message=f"Login successful for username: {username}",
+        username=username,
     )
 
 
@@ -227,14 +217,12 @@ def login(
     )
 
     # Log login attempt
-    logger.info(
+    log_security_event(
+        logger,
+        "login_attempt",
+        request,
         f"Login attempt for username: {form_data.username}",
-        extra={
-            "category": "app",
-            "event": "login_attempt",
-            "username": form_data.username,
-            "ip": user_ip,
-        },
+        username=form_data.username,
     )
 
     # Authenticate user
@@ -244,14 +232,12 @@ def login(
 
     if not db_user:
         # Log failed login attempt
-        logger.info(
+        log_security_event(
+            logger,
+            "login_failed",
+            request,
             f"Failed login attempt for username: {form_data.username}",
-            extra={
-                "category": "app",
-                "event": "login_failed",
-                "username": form_data.username,
-                "ip": user_ip,
-            },
+            username=form_data.username,
         )
 
         raise UnauthorizedException(
@@ -282,27 +268,24 @@ def login(
                 db.commit()
                 db.refresh(db_user)
 
-                logger.info(
-                    "Auto-setting active patient during login",
-                    extra={
-                        "category": "app",
-                        "event": "active_patient_auto_set",
-                        "user_id": db_user.id,
-                        "patient_id": available_patient.id,
-                        "is_self_record": available_patient.is_self_record,
-                    },
+                log_endpoint_access(
+                    logger,
+                    request,
+                    db_user.id,
+                    "active_patient_auto_set",
+                    message="Auto-setting active patient during login",
+                    patient_id=available_patient.id,
+                    is_self_record=available_patient.is_self_record,
                 )
             except Exception as e:
                 db.rollback()
-                logger.warning(
+                log_endpoint_error(
+                    logger,
+                    request,
                     "Failed to set active patient during login",
-                    extra={
-                        "category": "app",
-                        "event": "active_patient_auto_set_failed",
-                        "user_id": db_user.id,
-                        "patient_id": available_patient.id,
-                        "error": str(e),
-                    },
+                    e,
+                    user_id=db_user.id,
+                    patient_id=available_patient.id,
                 )
                 # Continue login without active patient - user can set it later
 
@@ -324,7 +307,7 @@ def login(
     )
 
     # Log successful login
-    log_successful_login(getattr(db_user, "id", 0), form_data.username, user_ip)
+    log_successful_login(getattr(db_user, "id", 0), form_data.username, request)
 
     # Get user's timeout preference
     from app.crud.user_preferences import user_preferences
@@ -360,30 +343,26 @@ def change_password(
     """
     user_ip = request.client.host if request.client else "unknown"
 
-    logger.info(
+    log_security_event(
+        logger,
+        "password_change_attempt",
+        request,
         f"Password change attempt for user: {current_user.username}",
-        extra={
-            "category": "security",
-            "event": "password_change_attempt",
-            "user_id": current_user.id,
-            "username": current_user.username,
-            "ip": user_ip,
-        },
+        user_id=current_user.id,
+        username=current_user.username,
     )
 
     # Verify current password
     if not verify_password(
         password_data.currentPassword, str(current_user.password_hash)
     ):
-        logger.warning(
+        log_security_event(
+            logger,
+            "password_change_failed_verification",
+            request,
             f"Failed password change attempt - incorrect current password for user: {current_user.username}",
-            extra={
-                "category": "security",
-                "event": "password_change_failed_verification",
-                "user_id": current_user.id,
-                "username": current_user.username,
-                "ip": user_ip,
-            },
+            user_id=current_user.id,
+            username=current_user.username,
         )
         raise UnauthorizedException(
             message="Current password is incorrect",
@@ -402,15 +381,13 @@ def change_password(
         db, user_obj=current_user, new_password=password_data.newPassword
     )
 
-    logger.info(
+    log_security_event(
+        logger,
+        "password_change_success",
+        request,
         f"Password changed successfully for user: {current_user.username}",
-        extra={
-            "category": "security",
-            "event": "password_change_success",
-            "user_id": current_user.id,
-            "username": current_user.username,
-            "ip": user_ip,
-        },
+        user_id=current_user.id,
+        username=current_user.username,
     )
 
     return {"message": "Password changed successfully"}

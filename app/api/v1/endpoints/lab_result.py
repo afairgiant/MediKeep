@@ -53,6 +53,14 @@ from app.schemas.lab_result import (
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
 from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
+from app.core.logging_helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+    log_data_access,
+    log_validation_error,
+)
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
@@ -272,8 +280,17 @@ def delete_lab_result(
         
         deleted_local_files = file_cleanup_stats.get("files_deleted", 0)
         preserved_paperless_files = file_cleanup_stats.get("files_preserved", 0)
-        
-        logger.info(f"EntityFile cleanup completed: {deleted_local_files} local files deleted, {preserved_paperless_files} Paperless files preserved")
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "lab_result_file_cleanup",
+            message=f"EntityFile cleanup completed: {deleted_local_files} local files deleted, {preserved_paperless_files} Paperless files preserved",
+            lab_result_id=lab_result_id,
+            files_deleted=deleted_local_files,
+            files_preserved=preserved_paperless_files
+        )
 
         # Delete the lab result
         lab_result.delete(db, id=lab_result_id)
@@ -896,16 +913,16 @@ async def parse_lab_pdf_with_ocr(
         import hashlib
         filename_hash = hashlib.sha256(file.filename.encode()).hexdigest()[:16]
 
-        logger.info(
-            "Starting PDF OCR extraction",
-            extra={
-                "component": "lab_result_ocr_endpoint",
-                "lab_result_id": lab_result_id,
-                "filename_hash": filename_hash,
-                "file_size": len(file_bytes),
-                "user_id": current_user.id,
-                "patient_id": db_lab_result.patient_id
-            }
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "lab_result_pdf_ocr_extraction_started",
+            message="Starting PDF OCR extraction",
+            patient_id=db_lab_result.patient_id,
+            lab_result_id=lab_result_id,
+            filename_hash=filename_hash,
+            file_size=len(file_bytes)
         )
 
         result = pdf_extraction_service.extract_text(

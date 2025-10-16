@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.logging_config import get_logger
+from app.core.logging_helpers import log_data_access, log_endpoint_access
 from app.core.error_handling import (
     NotFoundException,
     ForbiddenException,
@@ -196,16 +197,11 @@ def create_patient(
             is_self_record=patient_in.is_self_record
         )
         
-        logger.info(
-            f"User {current_user.id} created patient {patient.id}",
-            extra={
-                "category": "app",
-                "event": "patient_created",
-                "user_id": current_user.id,
-                "patient_id": patient.id,
-                "is_self_record": patient_in.is_self_record,
-                "ip": user_ip,
-            }
+        log_data_access(
+            logger, request, current_user.id, "create", "Patient",
+            record_id=patient.id,
+            patient_id=patient.id,
+            is_self_record=patient_in.is_self_record
         )
         
         return PatientResponse.model_validate(patient)
@@ -302,16 +298,10 @@ def update_patient(
     user_ip = request.client.host if request.client else "unknown"
     
     # Log the incoming request without sensitive data
-    logger.debug(
-        f"Patient update request for patient {patient_id}",
-        extra={
-            "category": "app",
-            "event": "patient_update_request",
-            "user_id": current_user.id,
-            "patient_id": patient_id,
-            "fields_provided": list(patient_in.dict(exclude_unset=True).keys()),
-            "ip": user_ip,
-        }
+    log_endpoint_access(
+        logger, request, current_user.id, "patient_update_request",
+        patient_id=patient_id,
+        fields_provided=list(patient_in.dict(exclude_unset=True).keys())
     )
     
     with handle_database_errors(request=request):
@@ -340,28 +330,18 @@ def update_patient(
         
         # Log fields being updated without sensitive values
         if patient_data:
-            logger.debug(
-                f"Updating patient {patient_id} fields",
-                extra={
-                    "category": "app",
-                    "event": "patient_update_data_filtered",
-                    "user_id": current_user.id,
-                    "patient_id": patient_id,
-                    "fields_updated": list(patient_data.keys()),
-                }
+            log_endpoint_access(
+                logger, request, current_user.id, "patient_update_data_filtered",
+                patient_id=patient_id,
+                fields_updated=list(patient_data.keys())
             )
         
         patient = service.update_patient(current_user, patient_id, patient_data)
         
-        logger.info(
-            f"User {current_user.id} updated patient {patient_id}",
-            extra={
-                "category": "app",
-                "event": "patient_updated",
-                "user_id": current_user.id,
-                "patient_id": patient_id,
-                "ip": user_ip,
-            }
+        log_data_access(
+            logger, request, current_user.id, "update", "Patient",
+            record_id=patient_id,
+            patient_id=patient_id
         )
         
         return PatientResponse.model_validate(patient)
@@ -405,15 +385,10 @@ def delete_patient(
         success = service.delete_patient(current_user, patient_id)
         
         if success:
-            logger.info(
-                f"User {current_user.id} deleted patient {patient_id}",
-                extra={
-                    "category": "app",
-                    "event": "patient_deleted",
-                    "user_id": current_user.id,
-                    "patient_id": patient_id,
-                    "ip": user_ip,
-                }
+            log_data_access(
+                logger, request, current_user.id, "delete", "Patient",
+                record_id=patient_id,
+                patient_id=patient_id
             )
             
             return {"message": "Patient record and all associated medical records deleted successfully"}
@@ -492,15 +467,9 @@ def switch_active_patient(
         
         patient = service.switch_active_patient(current_user, switch_request.patient_id)
         
-        logger.info(
-            f"User {current_user.id} switched to patient {switch_request.patient_id}",
-            extra={
-                "category": "app",
-                "event": "patient_switched",
-                "user_id": current_user.id,
-                "patient_id": switch_request.patient_id,
-                "ip": user_ip,
-            }
+        log_endpoint_access(
+            logger, request, current_user.id, "patient_switched",
+            patient_id=switch_request.patient_id
         )
         
         return PatientResponse.model_validate(patient)
