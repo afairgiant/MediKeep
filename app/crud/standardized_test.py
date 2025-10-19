@@ -3,12 +3,11 @@ CRUD operations for standardized tests
 """
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, case
-from sqlalchemy.dialects.postgresql import array
-from sqlalchemy import cast, ARRAY, String, any_
+from sqlalchemy import or_, func, case, and_, String
 from sqlalchemy.sql import text
 from app.models.models import StandardizedTest
 from app.core.logging_config import get_logger
+from app.core.logging_constants import LogFields
 
 logger = get_logger(__name__, "app")
 
@@ -71,44 +70,52 @@ def search_tests(
     conditions.append(func.lower(StandardizedTest.test_name) == search_term)
     conditions.append(func.lower(StandardizedTest.short_name) == search_term)
 
-    # 2. Search in common_names array (case-insensitive)
-    # Use text() with bound parameters for PostgreSQL-specific array operations
-    # This is safe from SQL injection because bindparams() properly escapes values
-    # SQLAlchemy doesn't have native support for unnest() with case-insensitive array matching
+    # 2. Search in common_names JSON array (case-insensitive, works with both PostgreSQL and SQLite)
+    # Convert JSON array to text and search within it
+    # This works because JSON arrays are stored as: ["name1", "name2"]
+    # We search for the quoted value within the JSON structure
     conditions.append(
-        text(":search_val = ANY(SELECT LOWER(unnest(common_names)))").bindparams(search_val=search_term)
+        func.lower(func.cast(StandardizedTest.common_names, String)).contains(f'"{search_term}"')
     )
 
     # 3. Starts with query
     conditions.append(func.lower(StandardizedTest.test_name).startswith(search_term))
     conditions.append(func.lower(StandardizedTest.short_name).startswith(search_term))
 
-    # 4. Contains query
+    # 4. Contains query (works on both databases)
     conditions.append(func.lower(StandardizedTest.test_name).contains(search_term))
     conditions.append(func.lower(StandardizedTest.short_name).contains(search_term))
 
-    # 5. Full-text search on test_name
-    # Using PostgreSQL ts_vector for better performance
-    ts_query = func.plainto_tsquery('english', query)
-    conditions.append(
-        func.to_tsvector('english', StandardizedTest.test_name).op('@@')(ts_query)
-    )
+    # 5. Word-based matching for multi-word queries (cross-database compatible)
+    # Split search term and check if all words are present
+    if ' ' in search_term:
+        words = search_term.split()
+        word_conditions = []
+        for word in words:
+            word_conditions.append(
+                or_(
+                    func.lower(StandardizedTest.test_name).contains(word),
+                    func.lower(StandardizedTest.short_name).contains(word)
+                )
+            )
+        if word_conditions:
+            conditions.append(and_(*word_conditions))
 
     # Combine conditions with OR
     q = q.filter(or_(*conditions))
 
     # Order by relevance: exact matches first, then partial matches
-    # Using CASE to create a relevance score
+    # Using CASE to create a relevance score (cross-database compatible)
     relevance_score = case(
         # Highest priority: exact match on test_name or short_name
         (func.lower(StandardizedTest.test_name) == search_term, 1),
         (func.lower(StandardizedTest.short_name) == search_term, 1),
-        # High priority: exact match in common_names array
-        (text(":search_val = ANY(SELECT LOWER(unnest(common_names)))").bindparams(search_val=search_term), 2),
+        # High priority: exact match in common_names JSON array
+        (func.lower(func.cast(StandardizedTest.common_names, String)).contains(f'"{search_term}"'), 2),
         # Medium priority: starts with query
         (func.lower(StandardizedTest.test_name).startswith(search_term), 3),
         (func.lower(StandardizedTest.short_name).startswith(search_term), 3),
-        # Low priority: contains query or full-text match
+        # Low priority: contains query or word-based match
         else_=4
     )
 
@@ -170,8 +177,12 @@ def create_test(db: Session, test_data: dict) -> StandardizedTest:
     db.commit()
     db.refresh(test)
     logger.info(f"Created standardized test: {test.test_name}", extra={
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: "standardized_test_created",
+        LogFields.MODEL: "StandardizedTest",
+        LogFields.RECORD_ID: test.id,
         "loinc_code": test.loinc_code,
-        "category": test.category
+        "test_category": test.category
     })
     return test
 
@@ -186,7 +197,12 @@ def bulk_create_tests(db: Session, tests_data: List[dict]) -> int:
     db.bulk_save_objects(tests)
     db.commit()
 
-    logger.info(f"Bulk created {len(tests)} standardized tests")
+    logger.info(f"Bulk created {len(tests)} standardized tests", extra={
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: "standardized_tests_bulk_created",
+        LogFields.MODEL: "StandardizedTest",
+        "count": len(tests)
+    })
     return len(tests)
 
 
@@ -202,7 +218,10 @@ def update_test(db: Session, test_id: int, updates: dict) -> Optional[Standardiz
     db.commit()
     db.refresh(test)
     logger.info(f"Updated standardized test: {test.test_name}", extra={
-        "test_id": test_id
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: "standardized_test_updated",
+        LogFields.MODEL: "StandardizedTest",
+        LogFields.RECORD_ID: test_id
     })
     return test
 
@@ -213,10 +232,14 @@ def delete_test(db: Session, test_id: int) -> bool:
     if not test:
         return False
 
+    test_name = test.test_name  # Save before deletion
     db.delete(test)
     db.commit()
-    logger.info(f"Deleted standardized test: {test.test_name}", extra={
-        "test_id": test_id
+    logger.info(f"Deleted standardized test: {test_name}", extra={
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: "standardized_test_deleted",
+        LogFields.MODEL: "StandardizedTest",
+        LogFields.RECORD_ID: test_id
     })
     return True
 
@@ -237,5 +260,10 @@ def clear_all_tests(db: Session) -> int:
     count = db.query(StandardizedTest).count()
     db.query(StandardizedTest).delete()
     db.commit()
-    logger.warning(f"Cleared all {count} standardized tests from database")
+    logger.warning(f"Cleared all {count} standardized tests from database", extra={
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: "standardized_tests_cleared",
+        LogFields.MODEL: "StandardizedTest",
+        "count": count
+    })
     return count
