@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.crud.base import CRUDBase
 from app.models.models import UserPreferences
 from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate

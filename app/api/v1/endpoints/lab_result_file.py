@@ -11,15 +11,15 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import (
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
     log_data_access,
     log_validation_error
 )
-from app.core.logging_constants import LogFields
+from app.core.logging.constants import LogFields
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType

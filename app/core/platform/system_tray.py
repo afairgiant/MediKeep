@@ -19,7 +19,7 @@ try:
 except ImportError:
     TRAY_AVAILABLE = False
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.core.config import settings
 
 logger = get_logger(__name__, "app")
@@ -71,7 +71,7 @@ class MediKeepTrayApp:
 
     def show_logs_folder(self, icon=None, item=None):
         """Open the logs folder in Windows Explorer."""
-        from app.core.windows_config import get_logs_path
+        from app.core.platform.windows_config import get_logs_path
         logs_path = get_logs_path()
         if logs_path and os.path.exists(logs_path):
             os.startfile(logs_path)
@@ -81,7 +81,7 @@ class MediKeepTrayApp:
 
     def show_data_folder(self, icon=None, item=None):
         """Open the data folder in Windows Explorer."""
-        from app.core.windows_config import get_windows_appdata_path
+        from app.core.platform.windows_config import get_windows_appdata_path
         data_path = get_windows_appdata_path()
         if data_path and os.path.exists(data_path):
             os.startfile(data_path)
@@ -96,7 +96,7 @@ class MediKeepTrayApp:
         Uses the shutdown manager to coordinate cleanup of all components.
         If graceful shutdown fails, forces termination to ensure no orphaned processes.
         """
-        from app.core.shutdown_manager import shutdown_application
+        from app.core.utils.shutdown_manager import shutdown_application
 
         logger.info("Shutdown requested from system tray")
         self.server_running = False

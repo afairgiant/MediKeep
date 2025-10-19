@@ -20,7 +20,7 @@ from app.exceptions.patient_sharing import (
     InvalidPermissionLevelError,
     ShareNotFoundError,
 )
-from app.core.datetime_utils import get_utc_now
+from app.core.utils.datetime_utils import get_utc_now
 
 
 class TestCustomExceptions:

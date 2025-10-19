@@ -19,8 +19,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
-from app.core.security import SecurityValidator
+from app.core.logging.config import get_logger
+from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
 from app.services.backup_service import BackupService
 

@@ -16,13 +16,13 @@ from sqlalchemy.sql import func
 
 from app.api import deps
 from app.core.config import settings
-from app.core.datetime_utils import (
+from app.core.utils.datetime_utils import (
     get_application_startup_time,
     get_application_uptime_seconds,
     get_application_uptime_string,
 )
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_endpoint_error
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_error
 from app.models.activity_log import ActivityLog, get_utc_now
 from app.models.models import (
     Allergy,
@@ -481,7 +481,7 @@ def get_system_metrics(
         try:
             from jose import jwt
 
-            from app.core.security import create_access_token
+            from app.core.utils.security import create_access_token
 
             # Test token creation and verification
             test_token = create_access_token(data={"sub": "health_check"})

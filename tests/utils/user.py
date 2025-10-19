@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.user import user as user_crud
 from app.schemas.user import UserCreate
-from app.core.security import create_access_token
+from app.core.utils.security import create_access_token
 
 
 def random_lower_string() -> str:

@@ -24,7 +24,7 @@ from reportlab.platypus import (
 )
 from reportlab.platypus.tableofcontents import TableOfContents
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

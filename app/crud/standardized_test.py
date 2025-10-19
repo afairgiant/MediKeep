@@ -5,8 +5,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func, case, and_, String
 from app.models.models import StandardizedTest
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 
 logger = get_logger(__name__, "app")
 

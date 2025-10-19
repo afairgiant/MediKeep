@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional, Tuple
 from enum import Enum
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.services.paperless_service import (
     PaperlessServiceBase,
     PaperlessUploadError,

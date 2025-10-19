@@ -15,8 +15,8 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import safe_log_activity
-from app.core.datetime_utils import convert_date_fields, convert_datetime_fields
-from app.core.logging_config import get_logger
+from app.core.utils.datetime_utils import convert_date_fields, convert_datetime_fields
+from app.core.logging.config import get_logger
 from app.crud import (
     allergy,
     condition,

@@ -16,7 +16,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

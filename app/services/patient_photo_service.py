@@ -15,7 +15,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.models.models import PatientPhoto, Patient
 from app.schemas.patient_photo import PatientPhotoCreate, PatientPhotoResponse
 

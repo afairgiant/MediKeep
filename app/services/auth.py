@@ -3,7 +3,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.crud.patient import patient
 from app.crud.user import user
 from app.models.models import User

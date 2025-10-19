@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.core.data_migrations import migrate_lab_result_files_to_entity_files, run_startup_data_migrations
+from app.core.database.migrations import migrate_lab_result_files_to_entity_files, run_startup_data_migrations
 from app.models.models import LabResultFile, EntityFile
 
 

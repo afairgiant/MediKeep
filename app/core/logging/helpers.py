@@ -5,7 +5,7 @@ This module makes it easy to follow logging standards without boilerplate.
 Encourages proper structured logging with LogFields constants.
 
 Usage:
-    from app.core.logging_helpers import log_endpoint_access, log_endpoint_error
+    from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 
     log_endpoint_access(logger, request, user_id, "patient_record_accessed", patient_id=123)
     log_endpoint_error(logger, request, "Failed to fetch records", error, user_id=user_id)
@@ -15,7 +15,7 @@ import logging
 from typing import Optional, Any, Dict
 from fastapi import Request
 
-from app.core.logging_constants import LogFields
+from app.core.logging.constants import LogFields
 
 
 def log_endpoint_access(

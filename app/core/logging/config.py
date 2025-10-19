@@ -16,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .logging_constants import (
+from .constants import (
     CATEGORIES,
     CONSOLE_LOG_FORMAT,
     CONTAINER_APP_PATH,
@@ -127,7 +127,7 @@ def _parse_size_string(size_str: str) -> int:
 
 def _get_rotation_method() -> str:
     """Determine which log rotation method to use."""
-    from .config import settings
+    from app.core.config import settings
     
     method = settings.LOG_ROTATION_METHOD.lower()
     
@@ -223,7 +223,7 @@ class LoggingConfig:
     def __init__(self):
         # Determine log directory: Windows EXE -> AppData, Container -> /app/logs, Dev -> ./logs
         try:
-            from app.core.windows_config import is_windows_exe, get_logs_path
+            from app.core.platform.windows_config import is_windows_exe, get_logs_path
             if is_windows_exe():
                 # Windows EXE mode - use AppData path
                 default_log_dir = str(get_logs_path())
@@ -361,7 +361,7 @@ class LoggingConfig:
         self, category: str, formatter: logging.Formatter, level: int
     ):
         """Set up a file handler for a specific log category with hybrid rotation support."""
-        from .config import settings
+        from app.core.config import settings
 
         log_file = self.log_dir / f"{category}.log"
         rotation_method = _get_rotation_method()

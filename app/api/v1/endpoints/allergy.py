@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.deps import NotFoundException, ForbiddenException, BusinessLogicException
-from app.core.error_handling import handle_database_errors
+from app.core.http.error_handling import handle_database_errors
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -13,9 +13,9 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.logging_helpers import log_data_access
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import log_data_access
 from app.crud.allergy import allergy
 from app.models.activity_log import EntityType
 from app.schemas.allergy import (

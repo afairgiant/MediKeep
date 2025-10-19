@@ -33,7 +33,7 @@ sys.path.insert(0, str(project_root))
 
 try:
     from app.core.config import settings
-    from app.core.database import SessionLocal
+    from app.core.database.database import SessionLocal
     from app.crud.user import user
     from app.services.auth import AuthService
 except ImportError as e:

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from app.api import deps
-from app.core.error_handling import (
+from app.core.http.error_handling import (
     NotFoundException,
     ForbiddenException,
     BusinessLogicException,
@@ -27,7 +27,7 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     validate_search_input,
 )
-from app.core.database import get_db
+from app.core.database.database import get_db
 from app.crud.lab_result import lab_result
 from app.crud.lab_test_component import lab_test_component
 from app.models.activity_log import EntityType
@@ -44,8 +44,8 @@ from app.schemas.lab_test_component import (
     LabTestComponentTrendStatistics,
     LabResultBasicForTrend,
 )
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_data_access, log_endpoint_error, log_validation_error
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access, log_endpoint_error, log_validation_error
 
 router = APIRouter()
 logger = get_logger(__name__, "app")

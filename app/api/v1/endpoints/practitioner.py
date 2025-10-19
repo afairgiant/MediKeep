@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.error_handling import (
+from app.core.http.error_handling import (
     handle_database_errors
 )
 from app.api.v1.endpoints.utils import (

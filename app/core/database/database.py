@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import Settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.models.models import Base
 
 # Initialize logger
@@ -25,7 +25,7 @@ class DatabaseConfig:
         """Get database URL from settings configuration or Windows path"""
         # Check if running as Windows EXE (uses SQLite in AppData)
         try:
-            from app.core.windows_config import is_windows_exe, get_database_path
+            from app.core.platform.windows_config import is_windows_exe, get_database_path
 
             if is_windows_exe():
                 db_path = get_database_path()
@@ -263,7 +263,7 @@ def database_migrations() -> bool:
 
         # Check if running as Windows EXE
         try:
-            from app.core.windows_config import is_windows_exe
+            from app.core.platform.windows_config import is_windows_exe
             is_exe = is_windows_exe()
         except ImportError:
             is_exe = False
@@ -286,9 +286,10 @@ def database_migrations() -> bool:
         else:
             # Development mode: Use subprocess
             import subprocess
+            from pathlib import Path
 
-            # Get project root directory (go up 3 levels from app/core/database.py)
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            # Get project root directory (go up 3 parent directories from app/core/database/database.py)
+            project_root = Path(__file__).parents[3]
 
             # Use the current Python executable (from virtual environment)
             python_executable = sys.executable

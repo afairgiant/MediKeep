@@ -6,7 +6,7 @@ Better handling of LabCorp's actual table format from pdfplumber extraction.
 import re
 from typing import List, Optional
 from .base_parser import BaseLabParser, LabTestResult
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

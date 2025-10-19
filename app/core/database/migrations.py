@@ -5,9 +5,9 @@ Data migration utilities for transitioning to the generic document management sy
 import os
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.core.database.database import get_db
 from app.models.models import LabResultFile, EntityFile, get_utc_now
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "migration")
 

@@ -14,7 +14,7 @@ from typing import Dict, Any
 # Add the app directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "app"))
 
-from app.core.database import engine, db_config
+from app.core.database.database import engine, db_config
 
 
 def check_database_type() -> Dict[str, Any]:

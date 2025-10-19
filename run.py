@@ -18,9 +18,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "app"))
 if __name__ == "__main__":
     # Import and configure custom Uvicorn logging
     from app.core.config import settings
-    from app.core.logging_config import get_logger
-    from app.core.uvicorn_logging import get_uvicorn_log_config
-    from app.core.windows_config import is_windows_exe
+    from app.core.logging.config import get_logger
+    from app.core.logging.uvicorn_logging import get_uvicorn_log_config
+    from app.core.platform.windows_config import is_windows_exe
 
     # Get log level from environment variable for consistency
     log_level = os.getenv("LOG_LEVEL", "INFO").lower()
@@ -55,8 +55,8 @@ if __name__ == "__main__":
         import threading
         import time
         import webbrowser
-        from app.core.shutdown_manager import get_shutdown_manager, shutdown_application
-        from app.core.system_tray import is_tray_available, run_with_tray
+        from app.core.utils.shutdown_manager import get_shutdown_manager, shutdown_application
+        from app.core.platform.system_tray import is_tray_available, run_with_tray
 
         logger.info("Starting MediKeep in Windows EXE mode")
         logger.info(f"Data directory: {os.getenv('APPDATA')}\\Roaming\\MediKeep")
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
         def run_server():
             """Run the uvicorn server in a separate thread."""
-            nonlocal server_instance
+            global server_instance
             logger.info("Starting FastAPI server on http://127.0.0.1:8000")
 
             # Create uvicorn config

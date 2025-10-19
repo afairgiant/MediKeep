@@ -10,14 +10,14 @@ from pydantic import BaseModel, Field, validator
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import (
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
     log_validation_error,
 )
-from app.core.logging_constants import LogFields
+from app.core.logging.constants import LogFields
 from app.services.patient_sharing import PatientSharingService
 from app.services.patient_access import PatientAccessService
 from app.models.models import User, PatientShare

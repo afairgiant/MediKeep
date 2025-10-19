@@ -8,7 +8,7 @@ without the complexity of multiple inheritance patterns.
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 import aiohttp
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__)
 

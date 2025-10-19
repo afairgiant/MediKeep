@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from app.auth.sso.providers import create_sso_provider
 from app.auth.sso.exceptions import *
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.crud.user import user as user_crud
 from sqlalchemy.orm import Session
 
@@ -403,7 +403,7 @@ class SSOService:
     
     def resolve_github_manual_link(self, temp_token: str, username: str, password: str, db: Session) -> Dict:
         """Resolve GitHub manual linking by verifying user credentials"""
-        from app.core.security import verify_password
+        from app.core.utils.security import verify_password
         
         # Retrieve GitHub linking data
         github_key = f"github_manual_link_{temp_token}"

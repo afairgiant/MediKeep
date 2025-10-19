@@ -11,7 +11,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response as StarletteResponse
 
-from app.core.logging_config import (
+from app.core.logging.config import (
     get_logger,
     set_correlation_id,
     log_security_event,

@@ -7,8 +7,8 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
-from app.core.logging_config import get_logger
+from app.core.database.database import get_db
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "sequence_monitor")
 

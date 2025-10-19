@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.deps import UnauthorizedException, ConflictException, BusinessLogicException
 from app.core.config import settings
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_endpoint_access, log_endpoint_error, log_security_event
-from app.core.security import create_access_token, verify_password
-from app.core.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
+from app.core.utils.security import create_access_token, verify_password
+from app.core.http.error_handling import handle_database_errors
 from app.crud.patient import patient
 from app.crud.user import user
 from app.models.models import User as DBUser, Patient

@@ -20,7 +20,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from app.core.database import SessionLocal
+    from app.core.database.database import SessionLocal
     from app.services.backup_service import BackupService
     from app.services.restore_service import RestoreService
 except ImportError as e:

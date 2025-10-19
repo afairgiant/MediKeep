@@ -23,7 +23,7 @@ from app.crud.user import user as user_crud
 from app.crud.patient import patient as patient_crud
 from app.schemas.user import UserCreate
 from app.schemas.patient import PatientCreate
-from app.core.security import create_access_token
+from app.core.utils.security import create_access_token
 from tests.utils.user import create_random_user, create_user_authentication_headers
 
 
@@ -314,7 +314,7 @@ def test_recipient(db_session: Session) -> User:
 def test_invitation(db_session: Session, test_user: User, test_recipient: User, test_patient: Patient):
     """Create a pending patient share invitation."""
     from app.models.models import Invitation
-    from app.core.datetime_utils import get_utc_now
+    from app.core.utils.datetime_utils import get_utc_now
     from datetime import timedelta
 
     invitation = Invitation(

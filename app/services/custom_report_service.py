@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.models.models import (
     Allergy, Condition, EmergencyContact, Encounter, FamilyCondition, FamilyMember, Immunization,
     LabResult, Medication, Patient, Pharmacy, Practitioner, Procedure,

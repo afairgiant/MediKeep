@@ -10,8 +10,8 @@ from sqlalchemy import or_, cast
 import sqlalchemy as sa
 
 from app.models.models import User, Patient, PatientShare, Invitation
-from app.core.datetime_utils import get_utc_now
-from app.core.logging_config import get_logger
+from app.core.utils.datetime_utils import get_utc_now
+from app.core.logging.config import get_logger
 from app.services.invitation_service import InvitationService
 from app.exceptions.patient_sharing import (
     PatientNotFoundError,

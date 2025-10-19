@@ -6,9 +6,9 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import SessionLocal
-from app.core.logging_config import get_logger, log_security_event
-from app.core.error_handling import (
+from app.core.database.database import SessionLocal
+from app.core.logging.config import get_logger, log_security_event
+from app.core.http.error_handling import (
     MedicalRecordsAPIException,
     ValidationException,
     UnauthorizedException,
@@ -20,7 +20,7 @@ from app.core.error_handling import (
     ServiceUnavailableException,
 )
 from app.api.v1.endpoints.system import get_client_ip
-from app.core.logging_constants import sanitize_log_input
+from app.core.logging.constants import sanitize_log_input
 from app.crud.user import user
 from app.models.models import User
 

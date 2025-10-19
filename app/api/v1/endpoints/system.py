@@ -14,9 +14,9 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, Request, status
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_security_event
-from app.core.logging_constants import (
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_security_event
+from app.core.logging.constants import (
     CATEGORIES,
     DEFAULT_LOG_LEVEL,
     VALID_LOG_LEVELS,

@@ -36,7 +36,7 @@ sys.path.insert(0, str(project_root))
 
 try:
     from app.core.config import settings
-    from app.core.database import SessionLocal
+    from app.core.database.database import SessionLocal
     from app.services.backup_service import BackupService
 except ImportError as e:
     print(f"Error importing app modules: {e}", file=sys.stderr)

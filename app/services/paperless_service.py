@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 import aiohttp
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.services.credential_encryption import credential_encryption
 
 logger = get_logger(__name__)

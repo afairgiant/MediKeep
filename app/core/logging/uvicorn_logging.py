@@ -7,8 +7,8 @@ import logging
 import os
 from typing import Any, Dict
 
-from .logging_config import ConsoleFormatterWithRequestID
-from .logging_constants import CONSOLE_LOG_FORMAT, DEFAULT_LOG_LEVEL, validate_log_level
+from .config import ConsoleFormatterWithRequestID
+from .constants import CONSOLE_LOG_FORMAT, DEFAULT_LOG_LEVEL, validate_log_level
 
 
 class UvicornFormatter(ConsoleFormatterWithRequestID):

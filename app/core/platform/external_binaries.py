@@ -8,9 +8,9 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.windows_config import is_windows_exe
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.platform.windows_config import is_windows_exe
 
 logger = get_logger(__name__, "app")
 

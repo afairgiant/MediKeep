@@ -12,8 +12,8 @@ from typing import Any, Dict, Optional
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 
 router = APIRouter()
 

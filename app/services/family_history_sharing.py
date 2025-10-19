@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app.models.models import User, FamilyMember, FamilyCondition, FamilyHistoryShare, Patient, Invitation
 from app.services.invitation_service import InvitationService
-from app.core.datetime_utils import get_utc_now
+from app.core.utils.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

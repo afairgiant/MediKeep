@@ -9,7 +9,7 @@ import os
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 
-from app.core.data_migrations import migrate_lab_result_files_to_entity_files
+from app.core.database.migrations import migrate_lab_result_files_to_entity_files
 
 
 class TestMigrationLogic:
