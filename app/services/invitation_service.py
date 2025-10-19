@@ -6,9 +6,9 @@ from typing import List, Dict, Optional, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app.models.models import User, Invitation
-from app.core.datetime_utils import get_utc_now
+from app.core.utils.datetime_utils import get_utc_now
 from datetime import datetime, timedelta, timezone
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 import json
 import hashlib
 

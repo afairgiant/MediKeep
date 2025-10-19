@@ -8,9 +8,9 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DatabaseError
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
-from app.core.datetime_utils import get_timezone_info
-from app.core.logging_config import get_logger
-from app.core.error_handling import (
+from app.core.utils.datetime_utils import get_timezone_info
+from app.core.logging.config import get_logger
+from app.core.http.error_handling import (
     NotFoundException,
     handle_database_errors,
     DatabaseException

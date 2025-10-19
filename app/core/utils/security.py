@@ -8,7 +8,7 @@ from jose import jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

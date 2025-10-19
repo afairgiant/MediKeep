@@ -8,8 +8,8 @@ from sqlalchemy import and_, asc, desc, or_, text
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError, DataError, OperationalError
 
-from app.core.logging_config import get_logger
-from app.core.logging_constants import (
+from app.core.logging.config import get_logger
+from app.core.logging.constants import (
     LogFields,
     format_log_message,
     get_log_category,
@@ -408,7 +408,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
 
     def _convert_timezone_fields(self, obj_data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert timezone fields from user input to UTC."""
-        from app.core.datetime_utils import to_utc
+        from app.core.utils.datetime_utils import to_utc
 
         converted_data = obj_data.copy()
         for field in self.timezone_fields:

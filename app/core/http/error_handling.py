@@ -32,10 +32,10 @@ from starlette.status import (
 )
 
 from api_exception import APIException, register_exception_handlers
-from app.core.response_models import ExceptionCode, ExceptionStatus, ResponseModel
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.logging_helpers import log_endpoint_error, log_security_event
+from app.core.http.response_models import ExceptionCode, ExceptionStatus, ResponseModel
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import log_endpoint_error, log_security_event
 
 # Initialize logger for error handling
 logger = get_logger(__name__, "app")

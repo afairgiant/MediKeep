@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.core.database import get_db
+from app.core.database.database import get_db
 from app.models.models import User
 from app.api.deps import get_current_user
 from app.services.family_history_sharing import FamilyHistoryService
@@ -18,15 +18,15 @@ from app.schemas.family_history_sharing import (
     BulkInviteResponse,
     BulkInviteResult
 )
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import (
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
     log_validation_error,
     log_data_access,
 )
-from app.core.logging_constants import LogFields
+from app.core.logging.constants import LogFields
 
 logger = get_logger(__name__, "app")
 router = APIRouter()

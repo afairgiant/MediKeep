@@ -5,9 +5,9 @@ from app.api import deps
 from app.services.sso_service import SSOService
 from app.auth.sso.exceptions import *
 from app.core.config import settings
-from app.core.security import create_access_token
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_security_event, log_endpoint_error
+from app.core.utils.security import create_access_token
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_security_event, log_endpoint_error
 
 logger = get_logger(__name__, "sso")
 router = APIRouter(prefix="/auth/sso", tags=["sso"])

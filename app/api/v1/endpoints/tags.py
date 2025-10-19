@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
-from app.core.database import get_db
+from app.core.database.database import get_db
 from app.services.tag_service import tag_service
 from app.api import deps
 from app.models.models import User
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_endpoint_access, log_data_access
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_access, log_data_access
 
 logger = get_logger(__name__, "app")
 

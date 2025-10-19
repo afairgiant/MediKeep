@@ -90,7 +90,7 @@ class TestPatientEndpoints:
 
     def test_create_current_patient_success(self, client: TestClient, db_session: Session):
         """Test creating a patient record when none exists."""
-        from app.core.security import create_access_token
+        from app.core.utils.security import create_access_token
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
 
@@ -226,7 +226,7 @@ class TestPatientEndpoints:
             patient_data={"first_name": "User2", "last_name": "Patient", "birth_date": "1991-01-01", "gender": "F"}
         )
 
-        from app.core.security import create_access_token
+        from app.core.utils.security import create_access_token
 
         # User 1 should only see their own data
         user1_token = create_access_token(subject=user1_data["user"].id)

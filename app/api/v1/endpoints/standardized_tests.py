@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.crud import standardized_test
 from app.models.models import StandardizedTest
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_endpoint_access, log_data_access
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_access, log_data_access
 from pydantic import BaseModel
 
 logger = get_logger(__name__, "app")

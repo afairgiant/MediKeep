@@ -11,15 +11,15 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.core.error_handling import (
+from app.core.http.error_handling import (
     NotFoundException,
     ForbiddenException,
     BusinessLogicException,
     handle_database_errors
 )
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.logging_helpers import log_data_access
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import log_data_access
 from app.crud.medication import medication
 from app.models.activity_log import EntityType
 from app.models.models import User

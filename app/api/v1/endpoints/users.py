@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_delete
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_endpoint_error, log_security_event
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_error, log_security_event
 from app.crud.patient import patient
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences

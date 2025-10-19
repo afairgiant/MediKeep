@@ -20,8 +20,8 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
-from app.core.security import SecurityValidator
+from app.core.logging.config import get_logger
+from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
 from app.services.file_management_service import file_management_service
 

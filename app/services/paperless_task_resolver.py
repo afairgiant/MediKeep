@@ -7,7 +7,7 @@ Replaces the complex task resolution logic with a single, clear method.
 import re
 from typing import Optional, Tuple
 import aiohttp
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
 
 logger = get_logger(__name__)

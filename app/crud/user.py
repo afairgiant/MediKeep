@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash, verify_password
+from app.core.utils.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.models import User
 from app.schemas.user import UserCreate, UserUpdate
@@ -364,7 +364,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         
         # Generate a random password hash for SSO users (they won't use it)
         import secrets
-        from app.core.security import get_password_hash
+        from app.core.utils.security import get_password_hash
         random_password = secrets.token_urlsafe(32)
         hashed_password = get_password_hash(random_password)
         

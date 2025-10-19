@@ -14,10 +14,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.api.v1.endpoints.utils import handle_not_found, verify_patient_ownership
-from app.core.error_handling import NotFoundException, MedicalRecordsAPIException
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.logging_helpers import (
+from app.core.http.error_handling import NotFoundException, MedicalRecordsAPIException
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_data_access,

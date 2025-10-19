@@ -14,9 +14,9 @@ from pdf2image import convert_from_bytes
 from PIL import Image
 import pytesseract
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.services.lab_parsers import lab_parser_registry
-from app.core.external_binaries import (
+from app.core.platform.external_binaries import (
     get_poppler_path,
     get_tesseract_path,
     configure_environment_for_binaries

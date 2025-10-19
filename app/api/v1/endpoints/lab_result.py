@@ -17,7 +17,7 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.error_handling import (
+from app.core.http.error_handling import (
     NotFoundException,
     ForbiddenException,
     BusinessLogicException,
@@ -32,7 +32,7 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
 )
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database.database import get_db
 from app.crud.condition import condition as condition_crud
 from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
@@ -52,9 +52,9 @@ from app.schemas.lab_result import (
     PDFExtractionResponse,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.logging_helpers import (
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
@@ -253,7 +253,7 @@ def delete_lab_result(
         handle_not_found(db_lab_result, "Lab result", request)
         # Log the deletion activity BEFORE deleting
         from app.api.activity_logging import log_delete
-        from app.core.logging_config import get_logger
+        from app.core.logging.config import get_logger
         
         logger = get_logger(__name__)
 

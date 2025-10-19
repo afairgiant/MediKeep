@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models.models import User, Patient, PatientShare, Invitation
-from app.core.security import create_access_token
+from app.core.utils.security import create_access_token
 
 
 class TestSendPatientShareInvitationEndpoint:

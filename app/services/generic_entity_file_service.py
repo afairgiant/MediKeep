@@ -13,7 +13,7 @@ from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.models.models import EntityFile, User, UserPreferences, get_utc_now
 from app.schemas.entity_file import (
     EntityFileCreate,

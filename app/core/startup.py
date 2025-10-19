@@ -1,16 +1,16 @@
 import os
 
 from app.core.config import settings
-from app.core.database import (
+from app.core.database.database import (
     check_database_connection,
     check_sequences_on_startup,
     create_default_user,
     database_migrations,
 )
-from app.core.datetime_utils import set_application_startup_time
-from app.core.logging_config import get_logger
-from app.core.activity_tracker import initialize_activity_tracking
-from app.core.data_migrations import run_startup_data_migrations
+from app.core.utils.datetime_utils import set_application_startup_time
+from app.core.logging.config import get_logger
+from app.core.utils.activity_tracker import initialize_activity_tracking
+from app.core.database.migrations import run_startup_data_migrations
 
 logger = get_logger(__name__, "app")
 
@@ -30,7 +30,7 @@ async def startup_event():
     )
 
     # Initialize and validate timezone configuration
-    from app.core.datetime_utils import get_facility_timezone
+    from app.core.utils.datetime_utils import get_facility_timezone
 
     try:
         tz = get_facility_timezone()
@@ -99,8 +99,8 @@ async def startup_event():
 
     # Initialize standardized tests from LOINC
     try:
-        from app.core.test_initialization import ensure_tests_initialized
-        from app.core.database import SessionLocal
+        from app.core.utils.test_initialization import ensure_tests_initialized
+        from app.core.database.database import SessionLocal
 
         db = SessionLocal()
         try:

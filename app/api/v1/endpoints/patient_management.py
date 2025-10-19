@@ -10,9 +10,9 @@ from pydantic import BaseModel, Field, validator, root_validator
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_data_access, log_endpoint_access
-from app.core.error_handling import (
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access, log_endpoint_access
+from app.core.http.error_handling import (
     NotFoundException,
     ForbiddenException,
     BusinessLogicException,

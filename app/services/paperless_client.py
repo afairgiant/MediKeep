@@ -9,7 +9,7 @@ from typing import Optional, Tuple, BinaryIO
 import aiohttp
 from pathlib import Path
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
 from app.services.paperless_task_resolver import PaperlessTaskResolver
 

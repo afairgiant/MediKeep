@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.core.constants import is_admin_role, get_admin_roles_filter
 from app.models.models import (
     User, Patient, UserPreferences, PatientShare,

@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
 from app.models.models import User, Patient, PatientShare
-from app.core.datetime_utils import get_utc_now
-from app.core.logging_config import get_logger
+from app.core.utils.datetime_utils import get_utc_now
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

@@ -17,7 +17,7 @@ def _get_logger():
     """Lazy load logger to avoid circular import."""
     global _logger
     if _logger is None:
-        from app.core.logging_config import get_logger
+        from app.core.logging.config import get_logger
         _logger = get_logger(__name__, "app")
     return _logger
 

@@ -11,8 +11,8 @@ from typing import Any, Dict, Optional, Union
 from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 
-from app.core.logging_config import get_logger
-from app.core.logging_constants import sanitize_log_input
+from app.core.logging.config import get_logger
+from app.core.logging.constants import sanitize_log_input
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
 

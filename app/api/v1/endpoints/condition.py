@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.deps import NotFoundException, ForbiddenException, BusinessLogicException
-from app.core.error_handling import handle_database_errors
-from app.core.logging_config import get_logger
-from app.core.logging_constants import LogFields
-from app.core.logging_helpers import (
+from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_data_access,

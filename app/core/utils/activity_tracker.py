@@ -12,7 +12,7 @@ from sqlalchemy import event
 from datetime import datetime
 
 from app.models.activity_log import ActivityLog, EntityType, ActionType, ActivityPriority
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 # Context variables for tracking user context across requests
 current_user_id_var: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar(
@@ -385,7 +385,7 @@ class ActivityTracker:
             try:
                 # Get a new session to save the activity log
                 # This prevents issues with the current transaction
-                from app.core.database import SessionLocal
+                from app.core.database.database import SessionLocal
                 with SessionLocal() as db:
                     db.add(activity)
                     db.commit()

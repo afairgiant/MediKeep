@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import exc as sa
 from typing import List, Optional
 
-from app.core.database import get_db
+from app.core.database.database import get_db
 from app.models.models import User, PatientShare
 from app.api.deps import get_current_user
 from app.services.invitation_service import InvitationService
@@ -19,8 +19,8 @@ from app.schemas.invitations import (
     InvitationResponseRequest,
     InvitationSummary
 )
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import (
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,

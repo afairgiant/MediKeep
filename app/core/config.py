@@ -16,7 +16,7 @@ def _get_windows_path_helper(path_type: str):
     Imports windows_config only when needed to get Windows-specific paths.
     """
     try:
-        from app.core.windows_config import (
+        from app.core.platform.windows_config import (
             get_backups_path,
             get_logs_path,
             get_uploads_path,

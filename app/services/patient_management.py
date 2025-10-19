@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from app.models.models import User, Patient
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.services.patient_access import PatientAccessService
-from app.core.activity_tracker import activity_tracking_disabled_var
+from app.core.utils.activity_tracker import activity_tracking_disabled_var
 
 logger = get_logger(__name__, "app")
 

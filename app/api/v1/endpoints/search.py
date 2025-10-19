@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func, Text
 from app.api import deps
-from app.core.logging_config import get_logger
-from app.core.logging_helpers import log_endpoint_access, log_data_access
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_access, log_data_access
 from app.models.models import (
     Medication, Condition, LabResult, Procedure,
     Immunization, Treatment, Encounter, Allergy, Vitals

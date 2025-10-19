@@ -11,7 +11,7 @@ from datetime import date, datetime, timezone
 from typing import Any, Optional, Union
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 

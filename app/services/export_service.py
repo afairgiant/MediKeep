@@ -18,7 +18,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.logging_config import get_logger
+from app.core.logging.config import get_logger
 from app.models.models import (
     Allergy,
     Condition,
