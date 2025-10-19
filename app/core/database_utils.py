@@ -27,11 +27,12 @@ def json_array_contains_lower(column: ColumnElement, search_value: str) -> Colum
     """
     Check if a JSON array column contains a value (case-insensitive).
 
-    Works with both PostgreSQL and SQLite:
-    - SQLite: Casts JSON to text and searches for quoted value
-    - PostgreSQL: Same approach (works but doesn't use indexes optimally)
+    Uses text-based matching that works on both PostgreSQL and SQLite.
+    Note: This approach works correctly but may not use specialized indexes.
 
-    Note: For PostgreSQL index support, use the dialect-aware version in search queries.
+    For production optimization:
+    - PostgreSQL: Create a functional GIN index on LOWER(jsonb_array_elements_text(column))
+    - SQLite: Use a generated column for searchable text
 
     Args:
         column: The JSON array column to search
@@ -45,7 +46,7 @@ def json_array_contains_lower(column: ColumnElement, search_value: str) -> Colum
     """
     # Convert JSON array to text and check if it contains the search value
     # Format: column might be ["CBC", "Complete Blood Count"]
-    # We search for the quoted value within the JSON structure
+    # We search for the quoted value within the JSON structure (both sides lowercased)
     return func.lower(func.cast(column, String)).contains(
         f'"{search_value.lower()}"'
     )
@@ -55,19 +56,21 @@ def create_text_search_condition(column: ColumnElement, search_term: str) -> Col
     """
     Create a text search condition that works across databases.
 
-    PostgreSQL: Uses full-text search (to_tsvector)
-    SQLite: Falls back to LIKE-based search
+    Uses word-based LIKE matching (works on both PostgreSQL and SQLite).
+    This is simpler than full-text search but provides cross-database compatibility.
+
+    For production optimization with PostgreSQL, consider using to_tsvector/to_tsquery
+    with a GIN index for better full-text search performance.
 
     Args:
         column: The text column to search
-        search_term: The search term
+        search_term: The search term (will be split on whitespace)
 
     Returns:
-        SQLAlchemy condition
+        SQLAlchemy condition (all words must match using AND logic)
     """
-    # For now, we'll use a simple approach that works on both:
-    # Word boundary matching using LIKE
-    # This is less powerful than PostgreSQL's full-text search but works everywhere
+    # Word-based matching using contains()
+    # Works on both databases but doesn't use specialized text search indexes
 
     # Split search term into words and search for each
     words = search_term.strip().split()
@@ -75,7 +78,7 @@ def create_text_search_condition(column: ColumnElement, search_term: str) -> Col
     if not words:
         return true()  # Dialect-neutral always-true condition
 
-    # Create conditions for each word
+    # Create conditions for each word (case-insensitive)
     conditions = []
     for word in words:
         conditions.append(func.lower(column).contains(word.lower()))

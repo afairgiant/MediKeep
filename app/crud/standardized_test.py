@@ -17,19 +17,22 @@ def _get_json_array_search_condition(db: Session, column, search_term: str):
     """
     Helper to create dialect-aware JSON array search condition.
 
-    PostgreSQL: Uses jsonb_array_elements_text for GIN index support
-    SQLite: Uses text casting approach
-    """
-    dialect = get_database_type(db)
+    Both implementations use text-based matching that works but may not leverage indexes optimally.
+    For production optimization, consider:
+    - PostgreSQL: Creating a functional GIN index on LOWER(jsonb_array_elements_text(column))
+    - SQLite: Adding a generated column for searchable text
 
-    if dialect == 'postgresql':
-        # Use PostgreSQL-specific function that can leverage GIN indexes
-        return text(":search_val = ANY(SELECT LOWER(jsonb_array_elements_text(common_names)))").bindparams(
-            search_val=search_term.lower()
-        )
-    else:
-        # SQLite fallback: cast JSON to text and search
-        return func.lower(func.cast(column, String)).contains(f'"{search_term}"')
+    Args:
+        db: Database session
+        column: The JSON array column to search
+        search_term: Search value (will be lowercased)
+
+    Returns:
+        SQLAlchemy condition for filtering
+    """
+    # Both dialects use the same approach: cast JSON to text and search
+    # This is simple, works everywhere, but doesn't use specialized indexes
+    return func.lower(func.cast(column, String)).contains(f'"{search_term.lower()}"')
 
 
 def get_test_by_id(db: Session, test_id: int) -> Optional[StandardizedTest]:
