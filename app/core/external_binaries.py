@@ -34,13 +34,20 @@ def get_poppler_path() -> Optional[Path]:
                     pdfinfo.exe
     """
     if is_windows_exe():
-        # PyInstaller bundles everything in _MEIPASS or adjacent _internal
+        # PyInstaller onedir mode: binaries in _internal directory next to EXE
         if hasattr(sys, '_MEIPASS'):
-            # Running from temporary extraction directory
+            # Running from temporary extraction directory (onefile mode or debug)
             base_path = Path(sys._MEIPASS)
         else:
-            # Running from installed location with _internal directory
-            base_path = Path(sys.executable).parent
+            # Running from installed location (onedir mode)
+            # Check for _internal directory first (PyInstaller standard structure)
+            exe_dir = Path(sys.executable).parent
+            internal_dir = exe_dir / "_internal"
+            if internal_dir.exists():
+                base_path = internal_dir
+            else:
+                # Fallback: binaries next to EXE (older structure)
+                base_path = exe_dir
 
         poppler_bin = base_path / "poppler" / "bin"
 
@@ -86,11 +93,20 @@ def get_tesseract_path() -> Optional[Path]:
                     osd.traineddata
     """
     if is_windows_exe():
-        # PyInstaller bundles everything in _MEIPASS or adjacent _internal
+        # PyInstaller onedir mode: binaries in _internal directory next to EXE
         if hasattr(sys, '_MEIPASS'):
+            # Running from temporary extraction directory (onefile mode or debug)
             base_path = Path(sys._MEIPASS)
         else:
-            base_path = Path(sys.executable).parent
+            # Running from installed location (onedir mode)
+            # Check for _internal directory first (PyInstaller standard structure)
+            exe_dir = Path(sys.executable).parent
+            internal_dir = exe_dir / "_internal"
+            if internal_dir.exists():
+                base_path = internal_dir
+            else:
+                # Fallback: binaries next to EXE (older structure)
+                base_path = exe_dir
 
         tesseract_exe = base_path / "tesseract" / "tesseract.exe"
 

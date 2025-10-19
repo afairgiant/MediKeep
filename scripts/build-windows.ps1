@@ -4,7 +4,9 @@
 param(
     [switch]$Clean = $false,
     [switch]$SkipTests = $false,
-    [switch]$SkipFrontend = $false
+    [switch]$SkipFrontend = $false,
+    [string]$PopplerPath = "C:\Program Files\poppler\Library\bin",
+    [string]$TesseractPath = "C:\Program Files\Tesseract-OCR"
 )
 
 Write-Host "========================================" -ForegroundColor Cyan
@@ -19,9 +21,20 @@ $BuildDir = Join-Path $ProjectRoot "build"
 $OutputDir = Join-Path $DistDir "MediKeep"
 $InternalDir = Join-Path $OutputDir "_internal"
 
-# External binaries paths (you need to download these separately)
-$PopplerSource = "C:\Program Files\poppler\Library\bin"  # Adjust to your poppler installation
-$TesseractSource = "C:\Program Files\Tesseract-OCR"      # Adjust to your tesseract installation
+# External binaries paths - use parameters or environment variables with fallback
+$PopplerSource = if ($env:POPPLER_PATH) { $env:POPPLER_PATH } else { $PopplerPath }
+$TesseractSource = if ($env:TESSERACT_PATH) { $env:TESSERACT_PATH } else { $TesseractPath }
+
+# Validate virtual environment exists
+$PythonExe = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
+if (-not (Test-Path $PythonExe)) {
+    Write-Host "ERROR: Virtual environment not found at .venv\" -ForegroundColor Red
+    Write-Host "Please create a virtual environment first:" -ForegroundColor Yellow
+    Write-Host "  python -m venv .venv" -ForegroundColor Gray
+    Write-Host "  .venv\Scripts\activate" -ForegroundColor Gray
+    Write-Host "  pip install -r requirements.txt" -ForegroundColor Gray
+    exit 1
+}
 
 # Step 1: Clean previous builds
 if ($Clean) {
@@ -43,7 +56,7 @@ Write-Host ""
 # Step 2: Run tests
 if (-not $SkipTests) {
     Write-Host "[2/7] Running tests..." -ForegroundColor Yellow
-    & .venv\Scripts\python.exe -m pytest tests/ -v --tb=short
+    & $PythonExe -m pytest tests/ -v --tb=short
     if ($LASTEXITCODE -ne 0) {
         Write-Host "  Tests failed! Build aborted." -ForegroundColor Red
         exit 1
