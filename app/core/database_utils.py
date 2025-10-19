@@ -4,8 +4,7 @@ Database utility functions for cross-database compatibility.
 Provides helper functions that work with both PostgreSQL and SQLite,
 abstracting away database-specific operations.
 """
-from typing import Any
-from sqlalchemy import func, or_
+from sqlalchemy import func, String, and_, true
 from sqlalchemy.sql import ColumnElement
 from sqlalchemy.orm import Session
 
@@ -28,7 +27,11 @@ def json_array_contains_lower(column: ColumnElement, search_value: str) -> Colum
     """
     Check if a JSON array column contains a value (case-insensitive).
 
-    Works with both PostgreSQL and SQLite by using JSON functions available in both.
+    Works with both PostgreSQL and SQLite:
+    - SQLite: Casts JSON to text and searches for quoted value
+    - PostgreSQL: Same approach (works but doesn't use indexes optimally)
+
+    Note: For PostgreSQL index support, use the dialect-aware version in search queries.
 
     Args:
         column: The JSON array column to search
@@ -38,20 +41,11 @@ def json_array_contains_lower(column: ColumnElement, search_value: str) -> Colum
         SQLAlchemy condition that can be used in filter()
 
     Example:
-        # PostgreSQL: Uses json_array_elements_text
-        # SQLite: Uses json_each
         filter(json_array_contains_lower(Test.common_names, 'cbc'))
     """
-    # This works for both databases:
-    # - PostgreSQL: json_array_elements_text unnests the JSON array
-    # - SQLite: json_each with .value extracts array elements
-    # We use a subquery that checks if any array element matches (case-insensitive)
-
-    # For simplicity and cross-database compatibility, we use a LIKE-based approach
     # Convert JSON array to text and check if it contains the search value
     # Format: column might be ["CBC", "Complete Blood Count"]
-    # We search for the value within the JSON structure
-
+    # We search for the quoted value within the JSON structure
     return func.lower(func.cast(column, String)).contains(
         f'"{search_value.lower()}"'
     )
@@ -79,7 +73,7 @@ def create_text_search_condition(column: ColumnElement, search_term: str) -> Col
     words = search_term.strip().split()
 
     if not words:
-        return column.ilike('%')  # Match anything if no search term
+        return true()  # Dialect-neutral always-true condition
 
     # Create conditions for each word
     conditions = []
@@ -91,15 +85,3 @@ def create_text_search_condition(column: ColumnElement, search_term: str) -> Col
         return conditions[0]
 
     return and_(*conditions)
-
-
-def String():
-    """Import String from sqlalchemy for type casting."""
-    from sqlalchemy import String as SQLAString
-    return SQLAString
-
-
-def and_(*clauses):
-    """Import and_ from sqlalchemy."""
-    from sqlalchemy import and_ as sqla_and
-    return sqla_and(*clauses)

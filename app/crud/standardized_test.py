@@ -8,8 +8,28 @@ from sqlalchemy.sql import text
 from app.models.models import StandardizedTest
 from app.core.logging_config import get_logger
 from app.core.logging_constants import LogFields
+from app.core.database_utils import get_database_type
 
 logger = get_logger(__name__, "app")
+
+
+def _get_json_array_search_condition(db: Session, column, search_term: str):
+    """
+    Helper to create dialect-aware JSON array search condition.
+
+    PostgreSQL: Uses jsonb_array_elements_text for GIN index support
+    SQLite: Uses text casting approach
+    """
+    dialect = get_database_type(db)
+
+    if dialect == 'postgresql':
+        # Use PostgreSQL-specific function that can leverage GIN indexes
+        return text(":search_val = ANY(SELECT LOWER(jsonb_array_elements_text(common_names)))").bindparams(
+            search_val=search_term.lower()
+        )
+    else:
+        # SQLite fallback: cast JSON to text and search
+        return func.lower(func.cast(column, String)).contains(f'"{search_term}"')
 
 
 def get_test_by_id(db: Session, test_id: int) -> Optional[StandardizedTest]:
@@ -70,12 +90,11 @@ def search_tests(
     conditions.append(func.lower(StandardizedTest.test_name) == search_term)
     conditions.append(func.lower(StandardizedTest.short_name) == search_term)
 
-    # 2. Search in common_names JSON array (case-insensitive, works with both PostgreSQL and SQLite)
-    # Convert JSON array to text and search within it
-    # This works because JSON arrays are stored as: ["name1", "name2"]
-    # We search for the quoted value within the JSON structure
+    # 2. Search in common_names JSON array (dialect-aware for optimal indexing)
+    # PostgreSQL: Uses jsonb_array_elements_text (GIN index compatible)
+    # SQLite: Uses text casting
     conditions.append(
-        func.lower(func.cast(StandardizedTest.common_names, String)).contains(f'"{search_term}"')
+        _get_json_array_search_condition(db, StandardizedTest.common_names, search_term)
     )
 
     # 3. Starts with query
@@ -105,13 +124,13 @@ def search_tests(
     q = q.filter(or_(*conditions))
 
     # Order by relevance: exact matches first, then partial matches
-    # Using CASE to create a relevance score (cross-database compatible)
+    # Using CASE to create a relevance score (dialect-aware)
     relevance_score = case(
         # Highest priority: exact match on test_name or short_name
         (func.lower(StandardizedTest.test_name) == search_term, 1),
         (func.lower(StandardizedTest.short_name) == search_term, 1),
-        # High priority: exact match in common_names JSON array
-        (func.lower(func.cast(StandardizedTest.common_names, String)).contains(f'"{search_term}"'), 2),
+        # High priority: exact match in common_names JSON array (dialect-aware)
+        (_get_json_array_search_condition(db, StandardizedTest.common_names, search_term), 2),
         # Medium priority: starts with query
         (func.lower(StandardizedTest.test_name).startswith(search_term), 3),
         (func.lower(StandardizedTest.short_name).startswith(search_term), 3),
