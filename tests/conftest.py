@@ -43,17 +43,9 @@ def test_db_engine():
         echo=False,  # Set to True for SQL debugging
     )
 
-    # Create all tables EXCEPT those with PostgreSQL ARRAY columns
-    # These tables are incompatible with SQLite:
-    # - standardized_tests (common_names: ARRAY)
-    # - report_generation_audit (categories_included: ARRAY)
-    tables_to_create = [
-        table for table in Base.metadata.sorted_tables
-        if table.name not in ['standardized_tests', 'report_generation_audit']
-    ]
-
-    for table in tables_to_create:
-        table.create(bind=engine, checkfirst=True)
+    # Create all tables - now compatible with both PostgreSQL and SQLite
+    # ARRAY columns have been converted to JSON for cross-database compatibility
+    Base.metadata.create_all(bind=engine)
 
     yield engine
 
