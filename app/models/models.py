@@ -1662,7 +1662,7 @@ class ReportGenerationAudit(Base):
     report_type = Column(
         String(50), nullable=False
     )  # 'custom_report', 'full_export', etc.
-    categories_included = Column(ARRAY(Text), nullable=True)  # Array of category names
+    categories_included = Column(JSON, nullable=True)  # Array of category names (stored as JSON for SQLite compatibility)
     total_records = Column(Integer, nullable=True)
 
     # Performance metrics
@@ -1754,7 +1754,7 @@ class StandardizedTest(Base):
     short_name = Column(String(100), nullable=True, index=True)
     default_unit = Column(String(50), nullable=True)
     category = Column(String(50), nullable=True, index=True)
-    common_names = Column(ARRAY(String), nullable=True)
+    common_names = Column(JSON, nullable=True)  # Alternative test names (stored as JSON for SQLite compatibility)
     is_common = Column(Boolean, default=False, nullable=False, index=True)
     system = Column(String(100), nullable=True)
     loinc_class = Column(String(100), nullable=True)
