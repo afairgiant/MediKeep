@@ -22,7 +22,23 @@ class DatabaseConfig:
         self.engine_kwargs = self._get_engine_kwargs()
 
     def _get_database_url(self) -> str:
-        """Get database URL from settings configuration"""
+        """Get database URL from settings configuration or Windows path"""
+        # Check if running as Windows EXE (uses SQLite in AppData)
+        try:
+            from app.core.windows_config import is_windows_exe, get_database_path
+
+            if is_windows_exe():
+                db_path = get_database_path()
+                database_url = f"sqlite:///{db_path}"
+                logger.info(
+                    f"Using Windows EXE SQLite database: {db_path}",
+                    extra={"category": "app", "event": "database_url_windows_exe"},
+                )
+                return database_url
+        except ImportError:
+            pass
+
+        # Fall back to settings DATABASE_URL for development/production
         if not settings.DATABASE_URL:
             raise ValueError(
                 "DATABASE_URL is not set in the settings. Please configure it."
@@ -177,12 +193,29 @@ def create_default_user():
             AuthService.create_user(
                 db, username="admin", password=default_password, is_superuser=True
             )
-            print("✅ Fresh installation detected - Default admin user created")
-            print("   Username: admin")
-            print("   🔐 Please change the default password after first login!")
+            logger.info(
+                "Fresh installation detected - Default admin user created",
+                extra={
+                    "category": "app",
+                    "event": "default_admin_created",
+                    "username": "admin"
+                }
+            )
+            logger.warning(
+                "IMPORTANT: Default admin password in use - Please change after first login!",
+                extra={
+                    "category": "security",
+                    "event": "default_password_warning"
+                }
+            )
         else:
-            print(
-                f"Admin users already exist ({admin_count} found) - skipping default user creation"
+            logger.info(
+                f"Admin users already exist ({admin_count} found) - skipping default user creation",
+                extra={
+                    "category": "app",
+                    "event": "admin_users_exist",
+                    "admin_count": admin_count
+                }
             )
     finally:
         db.close()
@@ -224,43 +257,69 @@ async def check_sequences_on_startup() -> None:
 def database_migrations() -> bool:
     """Run database migrations using Alembic"""
     try:
-        import subprocess
         import sys
 
         logger.info("🔄 Running database migrations...")
 
-        # Get project root directory (go up 3 levels from app/core/database.py)
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        # Check if running as Windows EXE
+        try:
+            from app.core.windows_config import is_windows_exe
+            is_exe = is_windows_exe()
+        except ImportError:
+            is_exe = False
 
-        # Use the current Python executable (from virtual environment)
-        python_executable = sys.executable
+        if is_exe:
+            # Windows EXE mode: Skip Alembic and use create_all()
+            # This is simpler and more reliable for frozen applications
+            logger.info("Windows EXE mode: Using SQLAlchemy create_all() instead of Alembic")
+            try:
+                # Create all tables if they don't exist
+                Base.metadata.create_all(bind=engine)
+                logger.info("✅ Database tables created/verified successfully")
+                return True
 
-        result = subprocess.run(
-            [
-                python_executable,
-                "-m",
-                "alembic",
-                "-c",
-                "alembic/alembic.ini",
-                "upgrade",
-                "head",
-            ],
-            cwd=project_root,  # Project root
-            capture_output=True,
-            text=True,
-        )
-
-        if result.returncode == 0:
-            logger.info("✅ Database migrations completed successfully")
-            if result.stdout:
-                logger.debug(f"Migration output: {result.stdout}")
-            return True
+            except Exception as e:
+                logger.error(f"❌ Failed to create database tables: {e}")
+                import traceback
+                logger.error(f"Full traceback: {traceback.format_exc()}")
+                return False
         else:
-            logger.error(f"❌ Migration failed with return code {result.returncode}")
-            logger.error(f"Migration stderr: {result.stderr}")
-            if result.stdout:
-                logger.error(f"Migration stdout: {result.stdout}")
-            return False
+            # Development mode: Use subprocess
+            import subprocess
+
+            # Get project root directory (go up 3 levels from app/core/database.py)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+            # Use the current Python executable (from virtual environment)
+            python_executable = sys.executable
+
+            result = subprocess.run(
+                [
+                    python_executable,
+                    "-m",
+                    "alembic",
+                    "-c",
+                    "alembic/alembic.ini",
+                    "upgrade",
+                    "head",
+                ],
+                cwd=project_root,  # Project root
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode == 0:
+                logger.info("✅ Database migrations completed successfully")
+                if result.stdout:
+                    logger.debug(f"Migration output: {result.stdout}")
+                return True
+            else:
+                logger.error(f"❌ Migration failed with return code {result.returncode}")
+                logger.error(f"Migration stderr: {result.stderr}")
+                if result.stdout:
+                    logger.error(f"Migration stdout: {result.stdout}")
+                return False
+
     except FileNotFoundError as e:
         logger.error(f"❌ Alembic not found. Make sure it's installed. Error: {e}")
         return False

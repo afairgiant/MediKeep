@@ -100,7 +100,7 @@ async def startup_event():
     # Initialize standardized tests from LOINC
     try:
         from app.core.test_initialization import ensure_tests_initialized
-        from app.database import SessionLocal
+        from app.core.database import SessionLocal
 
         db = SessionLocal()
         try:

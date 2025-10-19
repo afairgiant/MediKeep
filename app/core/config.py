@@ -8,6 +8,37 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
+def _get_windows_path_helper(path_type: str):
+    """
+    Lazy import helper to avoid circular dependencies.
+
+    Imports windows_config only when needed to get Windows-specific paths.
+    """
+    try:
+        from app.core.windows_config import (
+            get_backups_path,
+            get_logs_path,
+            get_uploads_path,
+            is_windows_exe,
+        )
+
+        if not is_windows_exe():
+            return None
+
+        if path_type == "uploads":
+            return get_uploads_path()
+        elif path_type == "logs":
+            return str(get_logs_path())
+        elif path_type == "backups":
+            return get_backups_path()
+        else:
+            return None
+    except ImportError:
+        # If windows_config can't be imported, fall back to default paths
+        return None
+
+
 DB_USER = os.getenv("DB_USER", "")
 DB_PASS = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -17,11 +48,11 @@ DB_NAME = os.getenv("DB_NAME", "")
 
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
-    VERSION: str = "0.36.1"
+    VERSION: str = "0.37.0"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
-    )  # Enable debug by default in development    
+    )  # Enable debug by default in development
     # Database Configuration
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
@@ -62,11 +93,17 @@ class Settings:  # App Info
     )  # 8 hours
 
     # File Storage
-    UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", "./uploads"))
+    # Use Windows AppData paths when running as EXE, otherwise use default paths
+    UPLOAD_DIR: Path = _get_windows_path_helper("uploads") or Path(
+        os.getenv("UPLOAD_DIR", "./uploads")
+    )
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024)))  # 10MB
 
     # Backup Configuration
-    BACKUP_DIR: Path = Path(os.getenv("BACKUP_DIR", "./backups"))
+    # Note: Backups not supported in Windows EXE mode (SQLite-only, no PostgreSQL backups)
+    BACKUP_DIR: Path = _get_windows_path_helper("backups") or Path(
+        os.getenv("BACKUP_DIR", "./backups")
+    )
     BACKUP_RETENTION_DAYS: int = int(
         os.getenv("BACKUP_RETENTION_DAYS", "7")
     )  # Keep it simple initially
@@ -80,7 +117,12 @@ class Settings:  # App Info
     )  # Warning threshold for too many backups
 
     # Trash directory settings
-    TRASH_DIR: Path = Path(os.getenv("TRASH_DIR", "./uploads/trash"))
+    _windows_uploads = _get_windows_path_helper("uploads")
+    TRASH_DIR: Path = (
+        (_windows_uploads / "trash")
+        if _windows_uploads
+        else Path(os.getenv("TRASH_DIR", "./uploads/trash"))
+    )
     TRASH_RETENTION_DAYS: int = int(
         os.getenv("TRASH_RETENTION_DAYS", "30")
     )  # Keep deleted files for 30 days
@@ -135,7 +177,7 @@ class Settings:  # App Info
 
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
+    LOG_DIR: str = _get_windows_path_helper("logs") or os.getenv("LOG_DIR", "./logs")
     LOG_RETENTION_DAYS: int = int(os.getenv("LOG_RETENTION_DAYS", "180"))
     ENABLE_DEBUG_LOGS: bool = os.getenv("DEBUG", "False").lower() == "true"
 

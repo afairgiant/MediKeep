@@ -350,9 +350,6 @@ def create_enhanced_validation_error_handler():
             }
         )
 
-        # DEBUG: Print validation errors to console
-        print(f"DEBUG VALIDATION ERRORS: {exc.errors()}")
-        
         # Create user-friendly error messages (same logic as original)
         detailed_errors = []
         for error in exc.errors():
