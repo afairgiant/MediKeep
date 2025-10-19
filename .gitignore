@@ -46,6 +46,8 @@ yarn.lock
 *.swo
 *.bak
 *.tmp
+*_debug.txt
+nul
 .vscode/
 .idea/
 *.iml
@@ -132,3 +134,12 @@ frontend/coverage
 .claude/
 .claude/settings.local.json
 CLAUDE.md
+
+# PyInstaller
+build/
+dist/
+*.spec.bak
+*.log
+
+# Runtime directories
+/temp/

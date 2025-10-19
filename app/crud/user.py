@@ -30,12 +30,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Example:
             user = user_crud.get_by_username(db, username="john_doe")
         """
-        users = self.query(
-            db=db,
-            filters={"username": username.lower()},
-            limit=1,
+        # Use direct query for better SQLite compatibility
+        return (
+            db.query(self.model)
+            .filter(self.model.username == username.lower())
+            .first()
         )
-        return users[0] if users else None
 
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         """

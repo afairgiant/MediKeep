@@ -16,6 +16,11 @@ import pytesseract
 
 from app.core.logging_config import get_logger
 from app.services.lab_parsers import lab_parser_registry
+from app.core.external_binaries import (
+    get_poppler_path,
+    get_tesseract_path,
+    configure_environment_for_binaries
+)
 
 logger = get_logger(__name__, "app")
 
@@ -102,6 +107,9 @@ class PDFTextExtractionService:
     _tesseract_available_cache: Optional[bool] = None
 
     def __init__(self):
+        # Configure bundled binaries for Windows EXE
+        configure_environment_for_binaries()
+
         # Check Tesseract availability on initialization (cached at class level)
         self.ocr_available = self._check_tesseract_availability()
 
@@ -110,6 +118,7 @@ class PDFTextExtractionService:
         Check if Tesseract OCR is available on the system.
 
         In production (Docker container), Tesseract should always be available.
+        In Windows EXE, uses bundled Tesseract binaries.
         In development, this provides graceful degradation if not installed.
 
         Uses class-level caching to avoid repeated system calls.
@@ -122,6 +131,15 @@ class PDFTextExtractionService:
             return PDFTextExtractionService._tesseract_available_cache
 
         try:
+            # Configure Tesseract path for Windows EXE if needed
+            tesseract_exe = get_tesseract_path()
+            if tesseract_exe:
+                pytesseract.pytesseract.tesseract_cmd = str(tesseract_exe)
+                logger.info(f"Using bundled Tesseract: {tesseract_exe}", extra={
+                    "component": "PDFTextExtractionService",
+                    "tesseract_path": str(tesseract_exe)
+                })
+
             version = pytesseract.get_tesseract_version()
             logger.info(
                 "Tesseract OCR is available and ready for PDF text extraction",
@@ -312,13 +330,17 @@ class PDFTextExtractionService:
         text_parts = []
         page_count = 0
 
+        # Get Poppler path for Windows EXE
+        poppler_path = get_poppler_path()
+
         # Process pages one at a time to reduce memory usage
         # First, get the page count without loading all images
         images = convert_from_bytes(
             pdf_bytes,
             dpi=OCR_DPI,  # Configured for accuracy vs performance balance
             fmt='jpeg',
-            thread_count=OCR_THREAD_COUNT  # Optimized for container resources
+            thread_count=OCR_THREAD_COUNT,  # Optimized for container resources
+            poppler_path=str(poppler_path) if poppler_path else None
         )
         page_count = len(images)
 

@@ -137,7 +137,9 @@ def _get_rotation_method() -> str:
     elif method in ["logrotate", "python"]:
         return method
     else:
-        print(f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'")
+        # Use stderr for warnings during logging setup to avoid circular dependency
+        import sys
+        sys.stderr.write(f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'\n")
         return "logrotate" if _is_logrotate_available() else "python"
 
 
@@ -219,18 +221,45 @@ class LoggingConfig:
     """
 
     def __init__(self):
-        # Standardized log directory using constants: container vs local development
-        default_log_dir = (
-            CONTAINER_LOG_DIR
-            if Path(CONTAINER_APP_PATH).exists()
-            else LOCAL_DEV_LOG_DIR
-        )
-        self.log_dir = Path(os.getenv("LOG_DIR", default_log_dir))
+        # Determine log directory: Windows EXE -> AppData, Container -> /app/logs, Dev -> ./logs
+        try:
+            from app.core.windows_config import is_windows_exe, get_logs_path
+            if is_windows_exe():
+                # Windows EXE mode - use AppData path
+                default_log_dir = str(get_logs_path())
+            elif Path(CONTAINER_APP_PATH).exists():
+                # Container mode
+                default_log_dir = CONTAINER_LOG_DIR
+            else:
+                # Local development
+                default_log_dir = LOCAL_DEV_LOG_DIR
+        except Exception as e:
+            # Fallback if windows_config not available or fails
+            # Write debug info to help troubleshoot
+            with open("logging_debug.txt", "w") as f:
+                f.write(f"Failed to import windows_config: {e}\n")
+                f.write(f"Exception type: {type(e).__name__}\n")
+            default_log_dir = (
+                CONTAINER_LOG_DIR
+                if Path(CONTAINER_APP_PATH).exists()
+                else LOCAL_DEV_LOG_DIR
+            )
+
+        # For Windows EXE, ALWAYS use the AppData path and ignore LOG_DIR env var
+        # For non-EXE (dev/docker), allow LOG_DIR override
+        import sys
+        if getattr(sys, 'frozen', False):
+            # Windows EXE mode - use default_log_dir directly, ignore LOG_DIR
+            self.log_dir = Path(default_log_dir)
+        else:
+            # Dev/Docker mode - allow LOG_DIR env var override
+            self.log_dir = Path(os.getenv("LOG_DIR", default_log_dir))
+
         self.debug_mode = os.getenv("DEBUG", "False").lower() == "true"
         self.retention_days = int(os.getenv("LOG_RETENTION_DAYS", "180"))
 
         # Ensure log directory exists
-        self.log_dir.mkdir(exist_ok=True)
+        self.log_dir.mkdir(exist_ok=True, parents=True)
 
         # Configure root logger with error handling
         try:
@@ -351,8 +380,9 @@ class LoggingConfig:
             try:
                 max_bytes = _parse_size_string(settings.LOG_ROTATION_SIZE)
             except ValueError as e:
-                # Log warning through print since logging might not be fully set up
-                print(f"WARNING: Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log")
+                # Use stderr for warnings during logging setup to avoid circular dependency
+                import sys
+                sys.stderr.write(f"WARNING: Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log\n")
                 max_bytes = 5 * 1024 * 1024  # 5MB default
             
 
@@ -415,7 +445,7 @@ def log_security_event(
     **kwargs,
 ):
     """
-    Log security events with standardized format.
+    Log security events with standardized format using LogFields constants.
 
     Args:
         logger: Logger instance
@@ -426,10 +456,10 @@ def log_security_event(
         **kwargs: Additional context data
     """
     extra_data = {
-        "category": "security",
-        "event": event,
-        "user_id": user_id,
-        "ip": ip_address,
+        LogFields.CATEGORY: "security",
+        LogFields.EVENT: event,
+        LogFields.USER_ID: user_id,
+        LogFields.IP: ip_address,
         **kwargs,
     }
 
@@ -445,7 +475,7 @@ def log_performance_event(
     **kwargs,
 ):
     """
-    Log performance events when operations exceed thresholds.
+    Log performance events when operations exceed thresholds using LogFields constants.
 
     Args:
         logger: Logger instance
@@ -457,10 +487,10 @@ def log_performance_event(
     """
     if duration_ms > threshold_ms:
         extra_data = {
-            "category": "app",
-            "event": f"performance_{event}",
-            "duration": duration_ms,
-            "threshold": threshold_ms,
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: f"performance_{event}",
+            LogFields.DURATION: duration_ms,
+            "threshold": threshold_ms,  # threshold is not in LogFields constants
             **kwargs,
         }
 

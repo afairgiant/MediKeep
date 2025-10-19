@@ -30,6 +30,21 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
         "static",  # Current directory fallback
     ]
 
+    # Windows EXE: Check for bundled frontend
+    try:
+        import sys
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            # Running as PyInstaller bundle
+            exe_frontend_build = os.path.join(sys._MEIPASS, 'frontend', 'build')
+            static_dirs.insert(0, exe_frontend_build)  # Highest priority
+            logger.info(f"Windows EXE mode: Checking frontend path: {exe_frontend_build}")
+            logger.info(f"sys._MEIPASS = {sys._MEIPASS}")
+            logger.info(f"Frontend path exists: {os.path.exists(exe_frontend_build)}")
+            if os.path.exists(exe_frontend_build):
+                logger.info(f"Frontend directory contents: {os.listdir(exe_frontend_build)}")
+    except Exception as e:
+        logger.error(f"Error checking Windows EXE frontend: {e}")
+
     static_dir = None
     for dir_path in static_dirs:
         if os.path.exists(dir_path):
@@ -102,6 +117,23 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             if os.path.exists(offline_path):
                 return FileResponse(offline_path, media_type="text/html")
             return {"error": "offline.html not found"}
+
+        # Catch-all route for React Router (must be last)
+        @app.get("/{full_path:path}")
+        async def serve_react_app(full_path: str):
+            """
+            Serve React app for all other routes (client-side routing).
+            This must be the last route to avoid conflicts with API routes.
+            """
+            # If path starts with /api, let it fall through to API routes
+            if full_path.startswith("api/"):
+                return {"error": "API endpoint not found"}
+
+            # Serve index.html for all other paths (React Router handles routing)
+            index_path = os.path.join(html_dir, "index.html")
+            if os.path.exists(index_path):
+                return FileResponse(index_path)
+            return {"error": "React app index.html not found"}
 
     else:
         logger.warning("No static directory found - React app will not be served")
