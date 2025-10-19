@@ -286,9 +286,10 @@ def database_migrations() -> bool:
         else:
             # Development mode: Use subprocess
             import subprocess
+            from pathlib import Path
 
-            # Get project root directory (go up 4 levels from app/core/database/database.py)
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            # Get project root directory (go up 3 parent directories from app/core/database/database.py)
+            project_root = Path(__file__).parents[3]
 
             # Use the current Python executable (from virtual environment)
             python_executable = sys.executable
