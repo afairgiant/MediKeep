@@ -31,16 +31,18 @@ def upgrade() -> None:
 
     # Convert standardized_tests.common_names: ARRAY(String) → JSON
     # Alternative test names like ['CBC', 'Blood Count', 'Hemogram']
+    # Use array_to_json() to properly convert PostgreSQL arrays to JSON
     op.alter_column('standardized_tests', 'common_names',
                    type_=sa.JSON,
-                   postgresql_using='common_names::json',
+                   postgresql_using='array_to_json(common_names)',
                    existing_nullable=True)
 
     # Convert report_generation_audit.categories_included: ARRAY(Text) → JSON
     # Category list like ['medications', 'lab_results', 'conditions']
+    # Use array_to_json() to properly convert PostgreSQL arrays to JSON
     op.alter_column('report_generation_audit', 'categories_included',
                    type_=sa.JSON,
-                   postgresql_using='categories_included::json',
+                   postgresql_using='array_to_json(categories_included)',
                    existing_nullable=True)
 
 
@@ -48,13 +50,15 @@ def downgrade() -> None:
     """Revert JSON columns back to PostgreSQL ARRAY (for rollback)"""
 
     # Revert standardized_tests.common_names: JSON → ARRAY(String)
+    # Convert JSON array to PostgreSQL text array using array() constructor
     op.alter_column('standardized_tests', 'common_names',
                    type_=postgresql.ARRAY(sa.String()),
-                   postgresql_using='common_names::text[]',
+                   postgresql_using='ARRAY(SELECT json_array_elements_text(common_names))',
                    existing_nullable=True)
 
     # Revert report_generation_audit.categories_included: JSON → ARRAY(Text)
+    # Convert JSON array to PostgreSQL text array using array() constructor
     op.alter_column('report_generation_audit', 'categories_included',
                    type_=postgresql.ARRAY(sa.Text()),
-                   postgresql_using='categories_included::text[]',
+                   postgresql_using='ARRAY(SELECT json_array_elements_text(categories_included))',
                    existing_nullable=True)
