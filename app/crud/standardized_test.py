@@ -4,34 +4,31 @@ CRUD operations for standardized tests
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func, case, and_, String
-from sqlalchemy.sql import text
 from app.models.models import StandardizedTest
 from app.core.logging_config import get_logger
 from app.core.logging_constants import LogFields
-from app.core.database_utils import get_database_type
 
 logger = get_logger(__name__, "app")
 
 
-def _get_json_array_search_condition(db: Session, column, search_term: str):
+def _get_json_array_search_condition(column, search_term: str):
     """
-    Helper to create dialect-aware JSON array search condition.
+    Helper to create JSON array search condition.
 
-    Both implementations use text-based matching that works but may not leverage indexes optimally.
+    Uses text-based matching that works on both PostgreSQL and SQLite.
     For production optimization, consider:
     - PostgreSQL: Creating a functional GIN index on LOWER(jsonb_array_elements_text(column))
     - SQLite: Adding a generated column for searchable text
 
     Args:
-        db: Database session
         column: The JSON array column to search
         search_term: Search value (will be lowercased)
 
     Returns:
         SQLAlchemy condition for filtering
     """
-    # Both dialects use the same approach: cast JSON to text and search
-    # This is simple, works everywhere, but doesn't use specialized indexes
+    # Cast JSON to text and search for quoted value (case-insensitive)
+    # Works on both databases but doesn't use specialized indexes
     return func.lower(func.cast(column, String)).contains(f'"{search_term.lower()}"')
 
 
@@ -93,31 +90,29 @@ def search_tests(
     conditions.append(func.lower(StandardizedTest.test_name) == search_term)
     conditions.append(func.lower(StandardizedTest.short_name) == search_term)
 
-    # 2. Search in common_names JSON array (dialect-aware for optimal indexing)
-    # PostgreSQL: Uses jsonb_array_elements_text (GIN index compatible)
-    # SQLite: Uses text casting
+    # 2. Search in common_names JSON array (cross-database compatible)
     conditions.append(
-        _get_json_array_search_condition(db, StandardizedTest.common_names, search_term)
+        _get_json_array_search_condition(StandardizedTest.common_names, search_term)
     )
 
-    # 3. Starts with query
-    conditions.append(func.lower(StandardizedTest.test_name).startswith(search_term))
-    conditions.append(func.lower(StandardizedTest.short_name).startswith(search_term))
+    # 3. Starts with query (with LIKE escaping)
+    conditions.append(func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True))
+    conditions.append(func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True))
 
-    # 4. Contains query (works on both databases)
-    conditions.append(func.lower(StandardizedTest.test_name).contains(search_term))
-    conditions.append(func.lower(StandardizedTest.short_name).contains(search_term))
+    # 4. Contains query (with LIKE escaping for literal matching)
+    conditions.append(func.lower(StandardizedTest.test_name).contains(search_term, autoescape=True))
+    conditions.append(func.lower(StandardizedTest.short_name).contains(search_term, autoescape=True))
 
     # 5. Word-based matching for multi-word queries (cross-database compatible)
-    # Split search term and check if all words are present
+    # Split search term and check if all words are present (with LIKE escaping)
     if ' ' in search_term:
         words = search_term.split()
         word_conditions = []
         for word in words:
             word_conditions.append(
                 or_(
-                    func.lower(StandardizedTest.test_name).contains(word),
-                    func.lower(StandardizedTest.short_name).contains(word)
+                    func.lower(StandardizedTest.test_name).contains(word, autoescape=True),
+                    func.lower(StandardizedTest.short_name).contains(word, autoescape=True)
                 )
             )
         if word_conditions:
@@ -133,10 +128,10 @@ def search_tests(
         (func.lower(StandardizedTest.test_name) == search_term, 1),
         (func.lower(StandardizedTest.short_name) == search_term, 1),
         # High priority: exact match in common_names JSON array (dialect-aware)
-        (_get_json_array_search_condition(db, StandardizedTest.common_names, search_term), 2),
+        (_get_json_array_search_condition(StandardizedTest.common_names, search_term), 2),
         # Medium priority: starts with query
-        (func.lower(StandardizedTest.test_name).startswith(search_term), 3),
-        (func.lower(StandardizedTest.short_name).startswith(search_term), 3),
+        (func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True), 3),
+        (func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True), 3),
         # Low priority: contains query or word-based match
         else_=4
     )

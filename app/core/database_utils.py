@@ -11,45 +11,16 @@ from sqlalchemy.orm import Session
 
 def get_database_type(db: Session) -> str:
     """
-    Detect the database type (postgresql or sqlite).
+    Detect the database dialect name.
 
     Args:
         db: Database session
 
     Returns:
-        'postgresql' or 'sqlite'
+        Dialect name (e.g., 'postgresql', 'sqlite', 'mysql', etc.)
     """
     dialect_name = db.bind.dialect.name
     return dialect_name
-
-
-def json_array_contains_lower(column: ColumnElement, search_value: str) -> ColumnElement:
-    """
-    Check if a JSON array column contains a value (case-insensitive).
-
-    Uses text-based matching that works on both PostgreSQL and SQLite.
-    Note: This approach works correctly but may not use specialized indexes.
-
-    For production optimization:
-    - PostgreSQL: Create a functional GIN index on LOWER(jsonb_array_elements_text(column))
-    - SQLite: Use a generated column for searchable text
-
-    Args:
-        column: The JSON array column to search
-        search_value: The value to search for (will be lowercased)
-
-    Returns:
-        SQLAlchemy condition that can be used in filter()
-
-    Example:
-        filter(json_array_contains_lower(Test.common_names, 'cbc'))
-    """
-    # Convert JSON array to text and check if it contains the search value
-    # Format: column might be ["CBC", "Complete Blood Count"]
-    # We search for the quoted value within the JSON structure (both sides lowercased)
-    return func.lower(func.cast(column, String)).contains(
-        f'"{search_value.lower()}"'
-    )
 
 
 def create_text_search_condition(column: ColumnElement, search_term: str) -> ColumnElement:
@@ -78,10 +49,10 @@ def create_text_search_condition(column: ColumnElement, search_term: str) -> Col
     if not words:
         return true()  # Dialect-neutral always-true condition
 
-    # Create conditions for each word (case-insensitive)
+    # Create conditions for each word (case-insensitive with LIKE escaping)
     conditions = []
     for word in words:
-        conditions.append(func.lower(column).contains(word.lower()))
+        conditions.append(func.lower(column).contains(word.lower(), autoescape=True))
 
     # All words must match (AND logic)
     if len(conditions) == 1:
