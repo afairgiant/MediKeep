@@ -292,6 +292,7 @@ const PatientForm = ({
                 }
                 disabled={loading}
                 maxDate={new Date()}
+                popoverProps={{ withinPortal: true, zIndex: 3000 }}
               />
               <Select
                 label="Gender"

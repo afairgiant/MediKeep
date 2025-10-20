@@ -222,6 +222,7 @@ const MantinePatientForm = ({
             disabled={saving}
             description="Patient's date of birth"
             maxDate={new Date()} // Can't be in the future
+            popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         </Grid.Col>
         <Grid.Col span={6}>

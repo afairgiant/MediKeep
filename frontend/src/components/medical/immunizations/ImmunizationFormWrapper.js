@@ -189,14 +189,25 @@ const ImmunizationFormWrapper = ({
                     <DateInput
                       label="Expiration Date"
                       value={parseDateInput(formData.expiration_date)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'expiration_date', value: dateString } });
+                      onChange={(date) => {
+                        let formattedDate = '';
+                        if (date) {
+                          if (typeof date === 'string') {
+                            formattedDate = date;
+                          } else if (date instanceof Date && !isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            formattedDate = `${year}-${month}-${day}`;
+                          }
+                        }
+                        onInputChange({ target: { name: 'expiration_date', value: formattedDate } });
                       }}
                       placeholder="Select expiration date"
                       description="When the vaccine expires"
                       clearable
                       firstDayOfWeek={0}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
@@ -228,9 +239,19 @@ const ImmunizationFormWrapper = ({
                     <DateInput
                       label="Date Administered"
                       value={parseDateInput(formData.date_administered)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'date_administered', value: dateString } });
+                      onChange={(date) => {
+                        let formattedDate = '';
+                        if (date) {
+                          if (typeof date === 'string') {
+                            formattedDate = date;
+                          } else if (date instanceof Date && !isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            formattedDate = `${year}-${month}-${day}`;
+                          }
+                        }
+                        onInputChange({ target: { name: 'date_administered', value: formattedDate } });
                       }}
                       placeholder="Select administration date"
                       description="When the vaccine was administered"
@@ -238,6 +259,7 @@ const ImmunizationFormWrapper = ({
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

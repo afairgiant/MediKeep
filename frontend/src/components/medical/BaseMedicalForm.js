@@ -273,6 +273,7 @@ const BaseMedicalForm = ({
         clearable
         maxDate={dynamicMaxDate}
         minDate={dynamicMinDate}
+        popoverProps={{ withinPortal: true, zIndex: 3000 }}
       />
     );
   }, [handleDateChange, formData]);

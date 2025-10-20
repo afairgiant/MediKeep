@@ -240,30 +240,52 @@ const TreatmentFormWrapper = ({
                     <DateInput
                       label="Start Date"
                       value={parseDateInput(formData.start_date)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'start_date', value: dateString } });
+                      onChange={(date) => {
+                        let formattedDate = '';
+                        if (date) {
+                          if (typeof date === 'string') {
+                            formattedDate = date;
+                          } else if (date instanceof Date && !isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            formattedDate = `${year}-${month}-${day}`;
+                          }
+                        }
+                        onInputChange({ target: { name: 'start_date', value: formattedDate } });
                       }}
                       placeholder="Select start date"
                       description="When treatment begins"
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
                       label="End Date"
                       value={parseDateInput(formData.end_date)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'end_date', value: dateString } });
+                      onChange={(date) => {
+                        let formattedDate = '';
+                        if (date) {
+                          if (typeof date === 'string') {
+                            formattedDate = date;
+                          } else if (date instanceof Date && !isNaN(date.getTime())) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            formattedDate = `${year}-${month}-${day}`;
+                          }
+                        }
+                        onInputChange({ target: { name: 'end_date', value: formattedDate } });
                       }}
                       placeholder="Select end date"
                       description="When treatment ends (if applicable)"
                       clearable
                       firstDayOfWeek={0}
                       minDate={parseDateInput(formData.start_date) || undefined}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

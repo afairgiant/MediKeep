@@ -142,12 +142,23 @@ const MantineVisitForm = ({
           <DateInput
             {...commonProps}
             value={formData[field.name] ? new Date(formData[field.name]) : null}
-            onChange={(value) => {
-              const dateString = value ? value.toISOString().split('T')[0] : '';
-              onInputChange({ target: { name: field.name, value: dateString } });
+            onChange={(date) => {
+              let formattedDate = '';
+              if (date) {
+                if (typeof date === 'string') {
+                  formattedDate = date;
+                } else if (date instanceof Date && !isNaN(date.getTime())) {
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  formattedDate = `${year}-${month}-${day}`;
+                }
+              }
+              onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
             valueFormat="YYYY-MM-DD"
             maxDate={field.maxDate ? field.maxDate() : undefined}
+            popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
 

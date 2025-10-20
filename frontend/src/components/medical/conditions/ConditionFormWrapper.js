@@ -193,6 +193,7 @@ const ConditionFormWrapper = ({
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -206,6 +207,7 @@ const ConditionFormWrapper = ({
                       firstDayOfWeek={0}
                       minDate={parseDateInput(formData.onset_date) || undefined}
                       maxDate={today}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

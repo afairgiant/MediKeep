@@ -588,6 +588,7 @@ const VitalsForm = ({
           required={config.required}
           error={error}
           maxDate={new Date()}
+          popoverProps={{ withinPortal: true, zIndex: 3000 }}
         />
       );
     }
