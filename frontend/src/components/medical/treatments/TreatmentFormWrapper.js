@@ -22,7 +22,7 @@ import {
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
+import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
@@ -240,30 +240,32 @@ const TreatmentFormWrapper = ({
                     <DateInput
                       label="Start Date"
                       value={parseDateInput(formData.start_date)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'start_date', value: dateString } });
+                      onChange={(date) => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({ target: { name: 'start_date', value: formattedDate } });
                       }}
                       placeholder="Select start date"
                       description="When treatment begins"
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
                       label="End Date"
                       value={parseDateInput(formData.end_date)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'end_date', value: dateString } });
+                      onChange={(date) => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({ target: { name: 'end_date', value: formattedDate } });
                       }}
                       placeholder="Select end date"
                       description="When treatment ends (if applicable)"
                       clearable
                       firstDayOfWeek={0}
                       minDate={parseDateInput(formData.start_date) || undefined}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

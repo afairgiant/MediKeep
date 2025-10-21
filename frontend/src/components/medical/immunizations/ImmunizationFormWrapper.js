@@ -23,7 +23,7 @@ import {
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
+import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
@@ -189,14 +189,15 @@ const ImmunizationFormWrapper = ({
                     <DateInput
                       label="Expiration Date"
                       value={parseDateInput(formData.expiration_date)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'expiration_date', value: dateString } });
+                      onChange={(date) => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({ target: { name: 'expiration_date', value: formattedDate } });
                       }}
                       placeholder="Select expiration date"
                       description="When the vaccine expires"
                       clearable
                       firstDayOfWeek={0}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
@@ -228,9 +229,9 @@ const ImmunizationFormWrapper = ({
                     <DateInput
                       label="Date Administered"
                       value={parseDateInput(formData.date_administered)}
-                      onChange={(value) => {
-                        const dateString = value ? value.toISOString().split('T')[0] : '';
-                        onInputChange({ target: { name: 'date_administered', value: dateString } });
+                      onChange={(date) => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({ target: { name: 'date_administered', value: formattedDate } });
                       }}
                       placeholder="Select administration date"
                       description="When the vaccine was administered"
@@ -238,6 +239,7 @@ const ImmunizationFormWrapper = ({
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

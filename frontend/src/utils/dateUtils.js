@@ -57,9 +57,35 @@ export const formatDateForAPI = (dateValue) => {
 };
 
 /**
+ * Format a date value for DateInput onChange handlers
+ * Handles both Date objects and strings, returns empty string for invalid/null values
+ *
+ * @param {string|Date|null} date - The date value from DateInput onChange
+ * @returns {string} - Formatted date string (YYYY-MM-DD) or empty string
+ */
+export const formatDateInputChange = (date) => {
+  if (!date) return '';
+
+  // If it's already a YYYY-MM-DD string, return as is
+  if (typeof date === 'string') {
+    return date;
+  }
+
+  // If it's a Date object, format it
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  return '';
+};
+
+/**
  * Get today's date as a Date object set to end of day
  * Useful for date picker max constraints
- * 
+ *
  * @returns {Date} - Today's date at 23:59:59.999
  */
 export const getTodayEndOfDay = () => {

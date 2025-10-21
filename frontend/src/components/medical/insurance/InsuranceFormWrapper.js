@@ -26,6 +26,7 @@ import {
 } from '@tabler/icons-react';
 import { getFormFields } from '../../../utils/medicalFormFields';
 import { formatPhoneInput, cleanPhoneNumber, isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
+import { formatDateInputChange } from '../../../utils/dateUtils';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -413,12 +414,12 @@ const InsuranceFormWrapper = ({
           <DateInput
             {...commonProps}
             value={formData[field.name] ? new Date(formData[field.name]) : null}
-            onChange={(value) => {
-              // Format date as YYYY-MM-DD string for consistency
-              const dateString = value ? value.toISOString().split('T')[0] : '';
-              onInputChange({ target: { name: field.name, value: dateString } });
+            onChange={(date) => {
+              const formattedDate = formatDateInputChange(date);
+              onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
             valueFormat="YYYY-MM-DD"
+            popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
 

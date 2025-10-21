@@ -23,6 +23,7 @@ import {
 } from '@tabler/icons-react';
 import { visitFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
+import { formatDateInputChange } from '../../utils/dateUtils';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -142,12 +143,13 @@ const MantineVisitForm = ({
           <DateInput
             {...commonProps}
             value={formData[field.name] ? new Date(formData[field.name]) : null}
-            onChange={(value) => {
-              const dateString = value ? value.toISOString().split('T')[0] : '';
-              onInputChange({ target: { name: field.name, value: dateString } });
+            onChange={(date) => {
+              const formattedDate = formatDateInputChange(date);
+              onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
             valueFormat="YYYY-MM-DD"
-            maxDate={field.maxDate ? field.maxDate() : undefined}
+            maxDate={field.maxDate && typeof field.maxDate === 'function' ? field.maxDate() : field.maxDate}
+            popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
 
