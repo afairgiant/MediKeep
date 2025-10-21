@@ -21,6 +21,7 @@ import {
 } from '@tabler/icons-react';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
+import { formatDateInputChange } from '../../utils/dateUtils';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -140,17 +141,7 @@ const MantineMedicationForm = ({
             {...commonProps}
             value={formData[field.name] ? new Date(formData[field.name]) : null}
             onChange={(date) => {
-              let formattedDate = '';
-              if (date) {
-                if (typeof date === 'string') {
-                  formattedDate = date;
-                } else if (date instanceof Date && !isNaN(date.getTime())) {
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                  const day = String(date.getDate()).padStart(2, '0');
-                  formattedDate = `${year}-${month}-${day}`;
-                }
-              }
+              const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
             valueFormat="YYYY-MM-DD"

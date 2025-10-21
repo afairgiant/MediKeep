@@ -23,7 +23,7 @@ import {
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
+import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
@@ -191,17 +191,7 @@ const ProcedureFormWrapper = ({
                       label="Procedure Date"
                       value={parseDateInput(formData.date)}
                       onChange={(date) => {
-                        let formattedDate = '';
-                        if (date) {
-                          if (typeof date === 'string') {
-                            formattedDate = date;
-                          } else if (date instanceof Date && !isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            formattedDate = `${year}-${month}-${day}`;
-                          }
-                        }
+                        const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'date', value: formattedDate } });
                       }}
                       placeholder="Select procedure date"

@@ -22,7 +22,7 @@ import {
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
+import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
@@ -241,17 +241,7 @@ const TreatmentFormWrapper = ({
                       label="Start Date"
                       value={parseDateInput(formData.start_date)}
                       onChange={(date) => {
-                        let formattedDate = '';
-                        if (date) {
-                          if (typeof date === 'string') {
-                            formattedDate = date;
-                          } else if (date instanceof Date && !isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            formattedDate = `${year}-${month}-${day}`;
-                          }
-                        }
+                        const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'start_date', value: formattedDate } });
                       }}
                       placeholder="Select start date"
@@ -267,17 +257,7 @@ const TreatmentFormWrapper = ({
                       label="End Date"
                       value={parseDateInput(formData.end_date)}
                       onChange={(date) => {
-                        let formattedDate = '';
-                        if (date) {
-                          if (typeof date === 'string') {
-                            formattedDate = date;
-                          } else if (date instanceof Date && !isNaN(date.getTime())) {
-                            const year = date.getFullYear();
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const day = String(date.getDate()).padStart(2, '0');
-                            formattedDate = `${year}-${month}-${day}`;
-                          }
-                        }
+                        const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'end_date', value: formattedDate } });
                       }}
                       placeholder="Select end date"

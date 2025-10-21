@@ -26,6 +26,7 @@ import {
 } from '@tabler/icons-react';
 import { getFormFields } from '../../../utils/medicalFormFields';
 import { formatPhoneInput, cleanPhoneNumber, isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
+import { formatDateInputChange } from '../../../utils/dateUtils';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -414,19 +415,7 @@ const InsuranceFormWrapper = ({
             {...commonProps}
             value={formData[field.name] ? new Date(formData[field.name]) : null}
             onChange={(date) => {
-              let formattedDate = '';
-              if (date) {
-                if (typeof date === 'string') {
-                  // Already a string in YYYY-MM-DD format
-                  formattedDate = date;
-                } else if (date instanceof Date && !isNaN(date.getTime())) {
-                  // Date object - format it
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                  const day = String(date.getDate()).padStart(2, '0');
-                  formattedDate = `${year}-${month}-${day}`;
-                }
-              }
+              const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
             valueFormat="YYYY-MM-DD"
