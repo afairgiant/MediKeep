@@ -63,6 +63,14 @@
     ]
   },
   "proxy": "http://localhost:8000",
+  "overrides": {
+    "i18next": {
+      "typescript": "$typescript"
+    },
+    "react-i18next": {
+      "typescript": "$typescript"
+    }
+  },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.14.202",
