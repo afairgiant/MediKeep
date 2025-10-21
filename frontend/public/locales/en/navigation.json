@@ -2,15 +2,47 @@
   "menu": {
     "dashboard": "Dashboard",
     "patients": "Patients",
-    "medical": "Medical Records",
+    "medicalRecords": "Medical Records",
     "settings": "Settings",
     "reports": "Reports",
-    "admin": "Administration",
-    "logout": "Logout"
+    "administration": "Administration",
+    "logout": "Logout",
+    "profile": "Profile",
+    "help": "Help"
   },
   "pages": {
     "dashboard": "Dashboard",
-    "profile": "Profile",
-    "settings": "Settings"
+    "patientList": "Patient List",
+    "patientDetails": "Patient Details",
+    "medicalHistory": "Medical History",
+    "settings": "Settings",
+    "userProfile": "User Profile",
+    "preferences": "Preferences",
+    "reports": "Reports",
+    "help": "Help & Support"
+  },
+  "sections": {
+    "overview": "Overview",
+    "personalInfo": "Personal Information",
+    "medicalInfo": "Medical Information",
+    "documents": "Documents",
+    "timeline": "Timeline",
+    "familyHistory": "Family History",
+    "emergencyContacts": "Emergency Contacts",
+    "insurance": "Insurance",
+    "preferences": "Preferences"
+  },
+  "medicalRecords": {
+    "allergies": "Allergies",
+    "conditions": "Conditions",
+    "medications": "Medications",
+    "labResults": "Lab Results",
+    "immunizations": "Immunizations",
+    "procedures": "Procedures",
+    "visits": "Visits",
+    "treatments": "Treatments",
+    "symptoms": "Symptoms",
+    "practitioners": "Practitioners",
+    "pharmacies": "Pharmacies"
   }
 }
