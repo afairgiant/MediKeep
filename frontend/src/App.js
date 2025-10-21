@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,6 +8,9 @@ import {
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Import i18n configuration (initialized in index.js)
+import './i18n';
 
 // Mantine
 import { MantineProvider } from '@mantine/core';
@@ -352,6 +355,7 @@ function App() {
   }, []);
   return (
     <ErrorBoundary componentName="App">
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
       <Router>
         <AuthProvider>
           <UserPreferencesProvider>
@@ -610,6 +614,7 @@ function App() {
           </UserPreferencesProvider>
         </AuthProvider>
       </Router>
+      </Suspense>
     </ErrorBoundary>
   );
 }
