@@ -5,6 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import logger from './services/logger';
 
+// Initialize i18n
+import './i18n';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <App />

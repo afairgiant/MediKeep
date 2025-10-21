@@ -1,0 +1,26 @@
+{
+  "upload": {
+    "failed": "Failed to upload file. Please try again.",
+    "tooLarge": "File size exceeds the maximum limit.",
+    "invalidType": "File type not supported.",
+    "connectionError": "Connection error. Please check your network and try again."
+  },
+  "form": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidDate": "Please enter a valid date",
+    "invalidPhone": "Please enter a valid phone number",
+    "submissionFailed": "Failed to save form. Please check your input and try again."
+  },
+  "network": {
+    "unavailable": "Network unavailable. Please check your connection.",
+    "timeout": "Request timed out. Please try again.",
+    "serverError": "Server error occurred. Please try again later."
+  },
+  "general": {
+    "unknownError": "An unexpected error occurred. Please try again.",
+    "permissionDenied": "You do not have permission to perform this action.",
+    "notFound": "The requested item could not be found.",
+    "sessionExpired": "Your session has expired. Please log in again."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "medical": "Medical Records",
+    "settings": "Settings",
+    "reports": "Reports",
+    "admin": "Administration",
+    "logout": "Logout"
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings"
+  }
+}

@@ -1502,6 +1502,9 @@ class UserPreferences(Base):
     # Session timeout in minutes (default 30 minutes)
     session_timeout_minutes = Column(Integer, default=30, nullable=False)
 
+    # Language preference (ISO 639-1 code, e.g., 'en', 'es', 'fr')
+    language = Column(String(10), default="en", nullable=False)
+
     # Paperless-ngx integration fields
     paperless_enabled = Column(Boolean, default=False, nullable=False)
     paperless_url = Column(String(500), nullable=True)

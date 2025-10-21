@@ -1,0 +1,10 @@
+{
+  "common": {
+    "patientRecord": "Patient Record",
+    "medicalHistory": "Medical History",
+    "notes": "Notes",
+    "tags": "Tags",
+    "addTags": "Add tags to organize and find this record",
+    "tagsDescription": "Add tags to help organize and search for this record later"
+  }
+}
