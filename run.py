@@ -11,6 +11,10 @@ import os
 import sys
 
 import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add the app directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "app"))
@@ -168,5 +172,6 @@ if __name__ == "__main__":
             reload_dirs=["app"],
             log_level=log_level,
             log_config=get_uvicorn_log_config(),
+            access_log=True,  # Enable access logging to see HTTP requests
             **ssl_kwargs,
         )
