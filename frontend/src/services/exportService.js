@@ -7,7 +7,15 @@ export const exportService = {
    */
   async getSummary() {
     try {
+      logger.debug('Fetching export summary', {
+        category: 'export_service',
+        endpoint: '/export/summary'
+      });
       const response = await apiClient.get('/export/summary');
+      logger.debug('Export summary received', {
+        category: 'export_service',
+        hasData: !!response.data
+      });
       return response.data;
     } catch (error) {
       logger.error('Failed to get export summary', {

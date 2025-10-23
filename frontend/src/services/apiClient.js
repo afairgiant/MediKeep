@@ -73,6 +73,7 @@ class APIClient {
   // Auth interceptor - adds token to requests
   async authInterceptor(config) {
     const token = await authService.getToken();
+
     if (token && await authService.isTokenValid(token)) {
       config.headers = {
         ...config.headers,
