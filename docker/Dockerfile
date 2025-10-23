@@ -3,9 +3,9 @@
 # Stage 1: Build React frontend
 FROM node:20-alpine AS frontend-build
 
-# Set NODE_ENV for optimization
-ENV NODE_ENV=production
-ENV REACT_APP_API_URL=/api/v1
+# DON'T set NODE_ENV=production yet - we need devDependencies (vite, rollup, esbuild) to build!
+# We'll set it after npm install but before the final image
+ENV VITE_API_URL=/api/v1
 ENV CI=true
 ENV GENERATE_SOURCEMAP=false
 
@@ -14,13 +14,15 @@ WORKDIR /frontend
 # Copy package files first for better layer caching
 COPY frontend/package.json frontend/package-lock.json* ./
 
-# Install dependencies with cache mount for faster builds
-# Force fresh install without cache to ensure types are installed
-RUN npm install --silent --no-audit --no-fund --force && \
-    npm list @types/react-window || npm install --save-dev @types/react-window --force
+# Install ALL dependencies (including devDependencies - we need vite/rollup/esbuild to build!)
+# Use npm ci for reproducible builds
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --include=optional --silent --no-audit --no-fund
 
-# Copy frontend source excluding test files
+# Copy frontend source (node_modules is already ignored by .dockerignore)
 COPY frontend/ ./
+
+# Clean up test files
 RUN find . -name "*.test.js" -o -name "*.test.jsx" -o -name "*.spec.js" -o -name "*.spec.jsx" | xargs rm -f && \
     rm -rf src/__tests__ src/**/__tests__
 

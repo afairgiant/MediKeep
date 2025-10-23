@@ -28,8 +28,10 @@ venv/
 .env.local
 .env.*.local
 
-# Node.js
+# Node.js (CRITICAL: Prevent copying platform-specific binaries)
 node_modules/
+**/node_modules/
+frontend/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

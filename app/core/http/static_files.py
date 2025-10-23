@@ -55,19 +55,23 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
     html_dir = None
 
     if static_dir:
-        # Check for nested static directory (common in React builds)
-        nested_static = os.path.join(static_dir, "static")
-        if os.path.exists(nested_static):
-            # Mount the nested static directory for assets
-            app.mount("/static", StaticFiles(directory=nested_static), name="static")
-            logger.info(f"Serving static assets from: {nested_static}")
-            # Use parent directory for index.html
-            html_dir = static_dir
-        else:
-            # Mount the static directory directly
-            app.mount("/static", StaticFiles(directory=static_dir), name="static")
-            logger.info(f"Serving static files from: {static_dir}")
-            html_dir = static_dir
+        # Mount the entire build directory at root level for Vite compatibility
+        # Vite generates index.html with references like /assets/xxx.js
+        assets_dir = os.path.join(static_dir, "assets")
+        if os.path.exists(assets_dir):
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+            logger.info(f"Serving Vite assets from: {assets_dir}")
+
+        # Mount locales directory for i18n
+        locales_dir = os.path.join(static_dir, "locales")
+        if os.path.exists(locales_dir):
+            app.mount("/locales", StaticFiles(directory=locales_dir), name="locales")
+            logger.info(f"Serving i18n locales from: {locales_dir}")
+
+        # Also mount at /static for backward compatibility
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+        logger.info(f"Serving static files from: {static_dir}")
+        html_dir = static_dir
 
 
         @app.get("/")

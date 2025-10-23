@@ -1,6 +1,7 @@
 import { rest } from 'msw';
+import { getApiUrl } from '../../config/env';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE = getApiUrl();
 
 export const handlers = [
   // Authentication endpoints

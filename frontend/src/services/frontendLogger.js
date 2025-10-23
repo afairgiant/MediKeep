@@ -12,14 +12,11 @@
  * - Dual output format (console + backend)
  * - Network resilience with caching and retry logic
  */
+import { getApiUrl } from '../config/env';
 
 class FrontendLogger {
   constructor() {
-    this.baseURL =
-      process.env.REACT_APP_API_URL ||
-      (process.env.NODE_ENV === 'production'
-        ? '/api/v1'
-        : 'http://localhost:8000/api/v1');
+    this.baseURL = getApiUrl();
     this.sessionId = this.generateSessionId();
     this.userId = null;
     this.patientId = null;

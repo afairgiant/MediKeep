@@ -2,6 +2,7 @@ import logger from '../logger';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
 import { extractErrorMessage } from '../../utils/errorUtils';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
+import { getApiUrl, isDevelopment } from '../../config/env';
 
 // Map entity types to their API endpoint paths
 const ENTITY_TO_API_PATH = {
@@ -27,9 +28,9 @@ const ENTITY_TO_API_PATH = {
 class ApiService {
   constructor() {
     // Use environment variable for configurable API URL
-    // Docker and production set REACT_APP_API_URL=/api/v1 for relative paths
-    // Development uses REACT_APP_API_URL=http://localhost:8000/api/v1
-    let baseURL = process.env.REACT_APP_API_URL || '/api/v1';
+    // Docker and production set VITE_API_URL=/api/v1 for relative paths
+    // Development uses VITE_API_URL=http://localhost:8000/api/v1
+    let baseURL = getApiUrl();
 
     // Auto-detect protocol mismatch and adjust for local development
     if (
@@ -50,7 +51,7 @@ class ApiService {
     this.baseURL = baseURL;
     // Fallback URLs for better Docker compatibility
     // Use same environment variable for fallback, defaulting to relative path
-    this.fallbackURL = process.env.NODE_ENV === 'development'
+    this.fallbackURL = isDevelopment()
       ? baseURL  // In development, use same URL for fallback
       : '/api/v1'; // In production, use relative path
   }
@@ -1077,7 +1078,7 @@ class ApiService {
 
       // Construct view URL with authentication token
       // Use the base URL from environment variable, removing /api/v1 suffix if present
-      const envBaseUrl = process.env.REACT_APP_API_URL || '/api/v1';
+      const envBaseUrl = getApiUrl();
       const baseUrl = envBaseUrl.endsWith('/api/v1')
         ? envBaseUrl.slice(0, -7)
         : envBaseUrl;

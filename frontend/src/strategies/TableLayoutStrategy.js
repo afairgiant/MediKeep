@@ -2,6 +2,7 @@ import LayoutStrategy from './LayoutStrategy';
 import { RESPONSIVE_VALUES, getDeviceType } from '../config/responsive.config';
 import { getColumnKey } from '../utils/columnHelpers';
 import logger from '../services/logger';
+import { env } from '../config/env';
 
 /**
  * TableLayoutStrategy
@@ -941,7 +942,7 @@ export class TableLayoutStrategy extends LayoutStrategy {
    * @param {Object} result - Calculated result
    */
   debug(breakpoint, context, result) {
-    if (process.env.NODE_ENV === 'development') {
+    if (env.DEV) {
       logger.debug('table_layout_calculation', 'Medical table layout calculated', {
         component: 'TableLayoutStrategy',
         breakpoint,

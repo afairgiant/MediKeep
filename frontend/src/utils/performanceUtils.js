@@ -1,6 +1,7 @@
 /**
  * Performance utilities for measuring and optimizing React components
  */
+import { env } from '../config/env';
 
 /**
  * Simple performance timer for measuring component render times
@@ -13,7 +14,7 @@ export class PerformanceTimer {
 
   start() {
     this.startTime = performance.now();
-    if (process.env.NODE_ENV === 'development') {
+    if (env.DEV) {
       console.time(this.label);
     }
   }
@@ -21,7 +22,7 @@ export class PerformanceTimer {
   end() {
     if (this.startTime) {
       const duration = performance.now() - this.startTime;
-      if (process.env.NODE_ENV === 'development') {
+      if (env.DEV) {
         console.timeEnd(this.label);
         if (duration > 16) { // Flag renders taking longer than a frame (16.67ms)
           console.warn(`⚠️ Slow render detected: ${this.label} took ${duration.toFixed(2)}ms`);
@@ -38,7 +39,7 @@ export class PerformanceTimer {
  * Hook to measure component render performance
  */
 export const useRenderPerformance = (componentName) => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (!env.DEV) {
     return () => {}; // No-op in production
   }
 
@@ -71,7 +72,7 @@ export const useRenderPerformance = (componentName) => {
  * Utility to measure DOM operations performance
  */
 export const measureDOMOperation = (label, operation) => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (!env.DEV) {
     return operation();
   }
 
@@ -92,7 +93,7 @@ export const measureDOMOperation = (label, operation) => {
  * Memory usage tracker for development
  */
 export const logMemoryUsage = (label) => {
-  if (process.env.NODE_ENV !== 'development' || !performance.memory) {
+  if (!env.DEV || !performance.memory) {
     return;
   }
 

@@ -7,10 +7,11 @@ import { toast } from 'react-toastify';
 import logger from './logger';
 import { createRaceSafeWrapper } from '../utils/throttleUtils';
 import secureActivityLogger from '../utils/secureActivityLogger';
+import { getApiUrl } from '../config/env';
 
 class APIClient {
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || '/api/v1';
+    this.baseURL = getApiUrl();
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };

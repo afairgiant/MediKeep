@@ -1,13 +1,14 @@
 /**
  * LayoutStrategy - Base class for responsive layout strategies
- * 
+ *
  * Provides a consistent interface for different layout calculation strategies.
  * Each strategy can define how components should behave at different breakpoints.
- * 
+ *
  * This follows the Strategy pattern to allow different layout behaviors
  * for different component types (grids, forms, tables, etc.)
  */
 import logger from '../services/logger';
+import { env } from '../config/env';
 export class LayoutStrategy {
   /**
    * Constructor
@@ -167,7 +168,7 @@ export class LayoutStrategy {
    * @param {Object} result - Calculated result
    */
   debug(breakpoint, context, result) {
-    if (process.env.NODE_ENV === 'development') {
+    if (env.DEV) {
       logger.debug('layout_calculation', `Layout calculation for ${this.config.name}`, {
         component: `${this.config.name}LayoutStrategy`,
         breakpoint,
