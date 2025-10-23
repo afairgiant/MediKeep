@@ -1,0 +1,68 @@
+{
+  "upload": {
+    "failed": "Echec du téléversement. Veuillez réessayer.",
+    "connectionError": "Erreur de connexion. Veuillez vérifier votre réseau et réessayer.",
+    "fileTooLarge": "La taille du fichier dépasse la limite maximale.",
+    "invalidFileType": "Format de fichier non supporté.",
+    "fileProcessingFailed": "Echec du traitement du fichier. Veuillez essayer un fichier différent.",
+    "duplicateFile": "Ce ficheir a déjà été téléversé.",
+    "batchUploadFailed": "Echec du téléversement de certains fichiers. Veuillez consulter les erreurs des fichiers individuels.",
+    "partialUploadSuccess": "Téléversemen complété avec des erreurs. Veuillez vérifier les fichiers en échec.",
+    "allUploadsFailed": "Echec de tous les téléversements. Veuillez vérifier votre réseau et réessayer."
+  },
+  "paperless": {
+    "unavailable": "Le service de gestion des documents est actuellement indisponible.",
+    "notEnabled": "L'intégration à Paperless n'est pas activée. Veuillez l'activer dans les paramètres.",
+    "configIncomplete": "La configuration de Paperless est incomplète. Veuillez vérifier vos paramètres.",
+    "uploadFailed": "Echec du téléversement vers le système de gestion de document Paperless.",
+    "connectionFailed": "Impossible de se connecter au service Paperless. Veuillez vérifier la configuration.",
+    "authFailed": "Echec de l'authentification auprès du service Paperless. Veuillez vérifier les identifiants.",
+    "duplicateDocument": "Ce document existe déjà dans Paperless. Les documents indentiques ne peuvent pas être téléversés plusieurs fois.",
+    "taskFailed": "Echec du téléversement du document vers Paperless. Veuillez réessayer ou contacter le support.",
+    "taskTimeout": "Expiration de la durée de traitement du document. Celui-ci est peut-être encore en cours de traitement dans Paperless."
+  },
+  "form": {
+    "submissionFailed": "Echec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer.",
+    "requiredFieldMissing": "Veuillez remplir tous les champs requis.",
+    "invalidDate": "Veuillez saisir une date valide.",
+    "invalidEmail": "Veuillez saisir une adresse email valide.",
+    "invalidPhone": "Veuillez saisir un numéro de téléphone valide.",
+    "patientNotSelected": "Veuillez sélectionner un patientNotSelected.",
+    "entityNotFound": "L'objet demandé ne peut pas être trouvé."
+  },
+  "file": {
+    "deleteFailed": "Echec de la suppression du fichier.",
+    "downloadFailed": "Echec du téléchargement du fichier. Veuillez réessayer.",
+    "viewFailed": "Echec de l'ouverture du fichier pour le visionner. Veuillez réessayer.",
+    "notFound": "Fichier non trouvé."
+  },
+  "network": {
+    "unavailable": "Réseau indisponible. Veuillez vérifier votre connexion.",
+    "timeout": "Requête expirée. Veuillez réessayer.",
+    "serverError": "Une erreur s'est produite sur le serveur. Veuillez réessayer plus tard.",
+    "connectionError": "Erreur de connexion. Veuillez vérifier votre réseau et réessayer."
+  },
+  "general": {
+    "unknownError": "Une erreur est survenue. Veuillez réessayer.",
+    "permissionDenied": "Vous n'avez pas la permission pour réaliser cette action.",
+    "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "rateLimitExceeded": "Requêtes trop nombreuses. Veuillez attendre un instant et réessayer.",
+    "maintenanceMode": "Le système est actuellement en cours de maintenance. Veuillez réessayer plus tard.",
+    "storageFull": "Capacité maximale de stockage atteinte. Veuillez libérer de la place et réessayer.",
+    "validationError": "Veuillez vérifier votre saisie et réessayer."
+  },
+  "success": {
+    "uploadSuccess": "Fichier téléversé avec succès.",
+    "uploadMultipleSuccess": "Tous les fichiers ont été téléversés avec succès.",
+    "formSaved": "Formulaire sauvegardé avec succès.",
+    "fileDeleted": "Fichier supprimé avec succès.",
+    "paperlessSyncSuccess": "Syncronisation réussie avec le système de gestion de document Paperless.",
+    "batchUploadSuccess": "Tous les fichiers ont été téléversés avec succès."
+  },
+  "warnings": {
+    "partialSuccess": "Opération complétée avec des alertes.",
+    "slowConnection": "Le téléversement prend plus de temps que d'habitude en raison d'une connexion lente.",
+    "largeFileWarning": "Fichier lourd détecté. Le téléversement peut prendre plusieurs minutes.",
+    "duplicateWarning": "Ce fichier semble être un doublon."
+  }
+}
