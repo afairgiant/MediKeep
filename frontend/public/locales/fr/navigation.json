@@ -1,0 +1,48 @@
+{
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "patients": "Patients",
+    "medicalRecords": "Dossiers médicaux",
+    "settings": "Paramètres",
+    "reports": "Rapports",
+    "administration": "Administration",
+    "logout": "Déconnexion",
+    "profile": "Profil",
+    "help": "Aide"
+  },
+  "pages": {
+    "dashboard": "Tableau de bord",
+    "patientList": "Liste des patients",
+    "patientDetails": "Détails du patient",
+    "medicalHistory": "Historique médical",
+    "settings": "Paramètres",
+    "userProfile": "Profil utilisateur",
+    "preferences": "Préférences",
+    "reports": "Rapports",
+    "help": "Aide & Support"
+  },
+  "sections": {
+    "overview": "Vue d'ensemble",
+    "personalInfo": "Informations personnelles",
+    "medicalInfo": "Informations médicales",
+    "documents": "Documents",
+    "timeline": "Chronologie",
+    "familyHistory": "Historique familial",
+    "emergencyContacts": "Contacts d'urgence",
+    "insurance": "Assurance",
+    "preferences": "Préférences"
+  },
+  "medicalRecords": {
+    "allergies": "Allergies",
+    "conditions": "Conditions",
+    "medications": "Médicaments",
+    "labResults": "Résultats d'analyse",
+    "immunizations": "Immunisations",
+    "procedures": "Procédures",
+    "visits": "Visites",
+    "treatments": "Traitements",
+    "symptoms": "Symptômes",
+    "practitioners": "Praticiens",
+    "pharmacies": "Pharmacies"
+  }
+}
