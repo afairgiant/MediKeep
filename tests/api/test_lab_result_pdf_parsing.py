@@ -33,12 +33,16 @@ class TestLabResultPDFParsing:
         patient = patient_crud.create_for_user(
             db_session, user_id=user_data["user"].id, patient_data=patient_data
         )
+        # Set as active patient for multi-patient system
+        user_data["user"].active_patient_id = patient.id
+        db_session.commit()
+        db_session.refresh(user_data["user"])
         return {**user_data, "patient": patient}
 
     @pytest.fixture
     def authenticated_headers(self, user_with_patient):
         """Create authentication headers."""
-        return create_user_token_headers(user_with_patient["user"].id)
+        return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
     def lab_result_id(self, client: TestClient, authenticated_headers):
@@ -427,10 +431,10 @@ class TestLabResultPDFParsing:
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
         )
-        headers1 = create_user_token_headers(user1_data["user"].id)
+        headers1 = create_user_token_headers(user1_data["user"].username)
 
         user2_data = create_random_user(db_session)
-        headers2 = create_user_token_headers(user2_data["user"].id)
+        headers2 = create_user_token_headers(user2_data["user"].username)
 
         # User1 creates lab result
         lab_result_data = {
