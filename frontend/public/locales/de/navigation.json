@@ -1,0 +1,48 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "patients": "Patienten",
+    "medicalRecords": "Krankenakten",
+    "settings": "Einstellungen",
+    "reports": "Berichte",
+    "administration": "Verwaltung",
+    "logout": "Abmelden",
+    "profile": "Profil",
+    "help": "Hilfe"
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "patientList": "Patientenliste",
+    "patientDetails": "Patientendetails",
+    "medicalHistory": "Krankengeschichte",
+    "settings": "Einstellungen",
+    "userProfile": "Benutzerprofil",
+    "preferences": "Einstellungen",
+    "reports": "Berichte",
+    "help": "Hilfe & Support"
+  },
+  "sections": {
+    "overview": "Übersicht",
+    "personalInfo": "Persönliche Informationen",
+    "medicalInfo": "Medizinische Informationen",
+    "documents": "Dokumente",
+    "timeline": "Zeitachse",
+    "familyHistory": "Familien Historie",
+    "emergencyContacts": "Notfallkontakte",
+    "insurance": "Versicherung",
+    "preferences": "Einstellungen"
+  },
+  "medicalRecords": {
+    "allergies": "Allergien",
+    "conditions": "Erkrankungen",
+    "medications": "Medikamente",
+    "labResults": "Laborergebnisse",
+    "immunizations": "Impfungen",
+    "procedures": "Eingriffe",
+    "visits": "Besuche",
+    "treatments": "Behandlungen",
+    "symptoms": "Symptome",
+    "practitioners": "Ärzte",
+    "pharmacies": "Apotheken"
+  }
+}
