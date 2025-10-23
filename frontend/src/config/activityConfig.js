@@ -3,6 +3,7 @@
  * Centralized configuration for session timeout and activity tracking
  */
 import logger from '../services/logger';
+import { env as viteEnv } from './env';
 
 
 /**
@@ -32,7 +33,7 @@ export const ACTIVITY_CONFIG = {
   
   // Security settings
   LOG_SENSITIVE_DATA: false,
-  LOG_ACTIVITY_DETAILS: process.env.NODE_ENV === 'development',
+  LOG_ACTIVITY_DETAILS: viteEnv.DEV,
   
   // Event types to track
   TRACKED_EVENTS: {
@@ -82,7 +83,7 @@ export const validateActivityConfig = () => {
  * Get environment-specific configuration overrides
  */
 export const getEnvironmentConfig = () => {
-  const env = process.env.NODE_ENV;
+  const envMode = viteEnv.MODE;
   
   const overrides = {
     test: {
@@ -101,7 +102,7 @@ export const getEnvironmentConfig = () => {
     }
   };
   
-  return overrides[env] || {};
+  return overrides[envMode] || {};
 };
 
 /**
@@ -117,7 +118,7 @@ export const getActivityConfig = () => {
   };
   
   // Validate the final configuration
-  if (process.env.NODE_ENV !== 'test') {
+  if (viteEnv.MODE !== 'test') {
     validateActivityConfig();
   }
   

@@ -1,4 +1,5 @@
 import LayoutStrategy from './LayoutStrategy';
+import { env } from '../config/env';
 import { RESPONSIVE_VALUES } from '../config/responsive.config';
 import logger from '../services/logger';
 
@@ -983,7 +984,7 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
    * @param {Object} result - Calculated result
    */
   debug(breakpoint, context, result) {
-    if (process.env.NODE_ENV === 'development') {
+    if (env.DEV) {
       logger.debug('medical_form_layout_calculation', 'Medical form layout calculated', {
         component: 'MedicalFormLayoutStrategy',
         breakpoint,

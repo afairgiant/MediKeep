@@ -1,11 +1,12 @@
+import { vi } from 'vitest';
 import { apiService } from './index';
 import { server } from '../../test-utils/mocks/server';
 import { rest } from 'msw';
 
 // Mock frontend logger
-jest.mock('../frontendLogger', () => ({
-  logError: jest.fn(),
-  logInfo: jest.fn(),
+vi.mock('../frontendLogger', () => ({
+  logError: vi.fn(),
+  logInfo: vi.fn(),
 }));
 
 describe('API Service', () => {

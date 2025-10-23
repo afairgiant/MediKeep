@@ -1,10 +1,9 @@
 // Base API service with common functionality
 import logger from '../logger';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
-const API_BASE_URL =
-  process.env.NODE_ENV === 'production'
-    ? process.env.REACT_APP_API_URL || '/api/v1' // Use relative URLs in production
-    : 'http://localhost:8000/api/v1';
+import { getApiUrl } from '../../config/env';
+
+const API_BASE_URL = getApiUrl();
 
 class BaseApiService {
   constructor(basePath = '') {

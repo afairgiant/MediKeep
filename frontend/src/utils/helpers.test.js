@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import {
   formatDate,
   formatDateTime,
@@ -18,9 +19,9 @@ import {
 } from './helpers';
 
 // Mock timezone service
-jest.mock('../services/timezoneService', () => ({
+vi.mock('../services/timezoneService', () => ({
   timezoneService: {
-    formatDateTime: jest.fn((date, options = {}) => {
+    formatDateTime: vi.fn((date, options = {}) => {
       if (!date || date === null || date === undefined) {
         return 'Invalid Date';
       }
@@ -39,7 +40,7 @@ jest.mock('../services/timezoneService', () => ({
         return 'Invalid Date';
       }
     }),
-    getCurrentFacilityTime: jest.fn(() => '2023-12-01T10:30'),
+    getCurrentFacilityTime: vi.fn(() => '2023-12-01T10:30'),
   },
 }));
 
@@ -48,7 +49,7 @@ const { timezoneService } = require('../services/timezoneService');
 
 describe('Date and Time Utilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('formatDate', () => {
@@ -161,10 +162,10 @@ describe('Date and Time Utilities', () => {
 
 describe('Utility Functions', () => {
   describe('debounce', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     test('delays function execution', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
 
       debouncedFn('test');
@@ -175,7 +176,7 @@ describe('Utility Functions', () => {
     });
 
     test('cancels previous calls when called multiple times', () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
 
       debouncedFn('first');

@@ -3,6 +3,7 @@
  * Centralized throttling logic with error handling and safety measures
  */
 import logger from '../services/logger';
+import { env } from '../config/env';
 
 
 /**
@@ -52,7 +53,7 @@ export function createSafeThrottle(func, delay, options = {}) {
   const throttledFunction = function(...args) {
     // Prevent execution if throttle has been destroyed
     if (isDestroyed) {
-      if (process.env.NODE_ENV === 'development') {
+      if (env.DEV) {
         logger.warn(`Attempted to call destroyed throttle: ${debugName}`);
       }
       return;
@@ -206,7 +207,7 @@ export function createRetryWrapper(func, maxRetries = 3, baseDelay = 1000, debug
         const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
         
-        if (process.env.NODE_ENV === 'development') {
+        if (env.DEV) {
           logger.warn(`${debugName} retry ${attempt + 1}/${maxRetries} after error:`, error.message);
         }
       }

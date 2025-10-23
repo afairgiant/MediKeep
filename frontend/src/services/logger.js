@@ -3,14 +3,11 @@
  *
  * Streamlined logging with focus on reliability and simplicity
  */
+import { getApiUrl, isDevelopment } from '../config/env';
 
 class Logger {
   constructor() {
-    this.baseURL =
-      process.env.REACT_APP_API_URL ||
-      (process.env.NODE_ENV === 'production'
-        ? '/api/v1'
-        : 'http://localhost:8000/api/v1');
+    this.baseURL = getApiUrl();
     this.sessionId = this.generateSessionId();
     this.queue = [];
     this.isOnline = navigator.onLine;
@@ -109,7 +106,7 @@ class Logger {
   }
 
   debug(message, data = {}) {
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopment()) {
       this.log('debug', message, data);
     }
   }

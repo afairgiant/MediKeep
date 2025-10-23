@@ -4,6 +4,7 @@
  */
 
 import logger from '../logger';
+import { env } from '../../config/env';
 import { isAdminRole } from '../../utils/authUtils';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
@@ -11,11 +12,11 @@ class SimpleAuthService {
   constructor() {
     // Try to use the proxy first, fallback to direct backend
     this.baseURL =
-      process.env.NODE_ENV === 'development'
+      env.DEV
         ? '/api/v1' // Use proxy in development
         : '/api/v1'; // Use relative path in production
     this.directBackendURL =
-      process.env.NODE_ENV === 'production'
+      env.PROD
         ? '/api/v1'
         : 'http://localhost:8000/api/v1'; // Fallback for development
     this.tokenKey = 'token';

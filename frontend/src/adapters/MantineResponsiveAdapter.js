@@ -1,4 +1,5 @@
 import { BREAKPOINTS } from '../config/responsive.config';
+import { env } from '../config/env';
 
 /**
  * MantineResponsiveAdapter
@@ -356,7 +357,7 @@ export class MantineResponsiveAdapter {
    * @param {Object} transformedProps - Transformed props
    */
   static debug(componentName, breakpoint, originalConfig, transformedProps) {
-    if (process.env.NODE_ENV === 'development') {
+    if (env.DEV) {
       // Debug information available through browser dev tools
       // Use: MantineResponsiveAdapter.debug('ComponentName', 'xs', config, props)
       return {

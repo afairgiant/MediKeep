@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 /**
  * Tests for FamilyHistoryApi service
  * Tests all family history sharing API operations including error handling
@@ -6,17 +8,17 @@ import familyHistoryApi from '../familyHistoryApi';
 import { apiService } from '../index';
 
 // Mock the apiService
-jest.mock('../index', () => ({
+vi.mock('../index', () => ({
   apiService: {
-    get: jest.fn(),
-    post: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 describe('FamilyHistoryApi Service', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getOrganizedHistory', () => {

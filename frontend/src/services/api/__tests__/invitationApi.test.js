@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 /**
  * Tests for InvitationApi service
  * Tests all invitation-related API operations including error handling
@@ -6,17 +8,17 @@ import invitationApi from '../invitationApi';
 import { apiService } from '../index';
 
 // Mock the apiService
-jest.mock('../index', () => ({
+vi.mock('../index', () => ({
   apiService: {
-    get: jest.fn(),
-    post: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 describe('InvitationApi Service', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getPendingInvitations', () => {

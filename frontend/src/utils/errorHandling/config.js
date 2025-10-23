@@ -4,6 +4,7 @@
  */
 
 import { errorMappings, getErrorMapping } from './errorMappings';
+import { env } from '../../config/env';
 
 /**
  * Default error handling configuration
@@ -108,8 +109,8 @@ export const validateErrorConfig = (config) => {
  * Environment-specific configuration
  */
 export const getEnvironmentConfig = () => {
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
+    const isDevelopment = env.DEV;
+
     return {
         ...DEFAULT_CONFIG,
         logging: {
