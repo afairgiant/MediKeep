@@ -41,7 +41,9 @@ class CRUDSymptomParent(CRUDBase[Symptom, SymptomCreate, SymptomUpdate]):
     """
 
     def __init__(self):
-        super().__init__(Symptom, timezone_fields=["first_occurrence_date", "last_occurrence_date"])
+        # Note: first_occurrence_date and last_occurrence_date are Date fields, not DateTime
+        # Date fields don't need timezone conversion (they're date-only)
+        super().__init__(Symptom, timezone_fields=[])
 
     def get_with_occurrences(
         self,
@@ -294,7 +296,9 @@ class CRUDSymptomOccurrence(CRUDBase[SymptomOccurrence, SymptomOccurrenceCreate,
     """
 
     def __init__(self):
-        super().__init__(SymptomOccurrence, timezone_fields=["occurrence_date", "resolved_date"])
+        # Note: occurrence_date and resolved_date are Date fields, not DateTime
+        # Date fields don't need timezone conversion (they're date-only)
+        super().__init__(SymptomOccurrence, timezone_fields=[])
 
     def create(
         self,
