@@ -94,6 +94,11 @@ const ExportPage = () => {
         setError(
           'Your session has expired. Please refresh the page or log in again to access export features.'
         );
+      } else if (error.status === 400 && error.message?.includes('No active patient')) {
+        // Handle missing active patient error
+        setError(
+          'No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.'
+        );
       } else {
         setError(
           `Failed to load export data: ${error.message || 'Please try again.'}`
@@ -139,7 +144,18 @@ const ExportPage = () => {
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
-      setError(`Export failed: ${error.message}`);
+      if (error.status === 400 && error.message?.includes('No active patient')) {
+        setError('No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.');
+      } else if (error.status === 422) {
+        setError('Please check your export settings. Make sure you have selected a valid data type and format.');
+      } else if (error.status === 404) {
+        setError('No data found for the selected export criteria. Try selecting a different data type or date range.');
+      } else if (error.data && error.data.detail) {
+        // Use the detailed error message from the backend if available
+        setError(`Export failed: ${error.data.detail}`);
+      } else {
+        setError(`Export failed: ${error.message || 'Please try again.'}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -172,7 +188,18 @@ const ExportPage = () => {
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
-      setError(`Bulk export failed: ${error.message}`);
+      if (error.status === 400 && error.message?.includes('No active patient')) {
+        setError('No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.');
+      } else if (error.status === 422) {
+        setError('Please check your bulk export settings. Make sure you have selected at least one data type and a valid format.');
+      } else if (error.status === 404) {
+        setError('No data found for the selected export criteria. Try selecting different data types or adjusting the date range.');
+      } else if (error.data && error.data.detail) {
+        // Use the detailed error message from the backend if available
+        setError(`Bulk export failed: ${error.data.detail}`);
+      } else {
+        setError(`Bulk export failed: ${error.message || 'Please try again.'}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -249,6 +276,24 @@ const ExportPage = () => {
                     onClick={() => window.location.reload()}
                   >
                     Refresh Page
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="light"
+                    onClick={() => loadInitialData()}
+                  >
+                    Retry
+                  </Button>
+                </Group>
+              )}
+              {error.includes('No patient profile is currently selected') && (
+                <Group gap="xs">
+                  <Button
+                    size="xs"
+                    variant="light"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    Go to Dashboard
                   </Button>
                   <Button
                     size="xs"

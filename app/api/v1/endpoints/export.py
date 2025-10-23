@@ -288,6 +288,19 @@ async def export_patient_data(
                 headers={"Content-Disposition": f'attachment; filename="{filename}"'},
             )
 
+    except ValueError as e:
+        # Handle specific validation errors (user not found, no active patient)
+        error_message = str(e)
+        log_endpoint_error(
+            logger,
+            request,
+            f"Export validation error: {error_message}",
+            e,
+            user_id=current_user_id,
+            format_type=format.value,
+            scope=scope.value
+        )
+        raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -315,12 +328,31 @@ async def get_export_summary(
         export_service = ExportService(db)
         summary = await export_service.get_export_summary(current_user_id)
 
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "export_summary_retrieved",
+            record_count=len(summary.get('counts', {}))
+        )
+
         return {
             "status": "success",
             "data": summary,
             "generated_at": datetime.now().isoformat(),
         }
 
+    except ValueError as e:
+        # Handle specific validation errors (user not found, no active patient)
+        error_message = str(e)
+        log_endpoint_error(
+            logger,
+            request,
+            f"Export summary validation error: {error_message}",
+            e,
+            user_id=current_user_id
+        )
+        raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -329,7 +361,7 @@ async def get_export_summary(
             e,
             user_id=current_user_id
         )
-        raise HTTPException(status_code=500, detail="Failed to generate export summary")
+        raise HTTPException(status_code=500, detail=f"Failed to generate export summary: {str(e)}")
 
 
 @router.get("/formats")
