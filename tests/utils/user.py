@@ -40,7 +40,7 @@ def create_random_user(db: Session) -> dict:
     )
 
     user = user_crud.create(db=db, obj_in=user_in)
-    db.flush()  # Flush to make user visible in current transaction
+    db.commit()  # Commit to make user visible across all queries
     db.refresh(user)  # Refresh to get updated values
     return {
         "user": user,
@@ -61,10 +61,10 @@ def create_user_authentication_headers(*, client: TestClient, username: str, pas
     return headers
 
 
-def create_user_token_headers(user_id: int) -> Dict[str, str]:
-    """Create authentication headers with a token for a specific user ID."""
-    # Production API expects data dict with 'sub' key
-    access_token = create_access_token(data={"sub": str(user_id)})
+def create_user_token_headers(username: str) -> Dict[str, str]:
+    """Create authentication headers with a token for a specific username."""
+    # Production API expects data dict with 'sub' key containing username
+    access_token = create_access_token(data={"sub": username})
     headers = {"Authorization": f"Bearer {access_token}"}
     return headers
 
@@ -86,7 +86,7 @@ def create_admin_user(db: Session) -> dict:
     )
 
     user = user_crud.create(db=db, obj_in=user_in)
-    db.flush()  # Flush to make user visible in current transaction
+    db.commit()  # Commit to make user visible across all queries
     db.refresh(user)  # Refresh to get updated values
     return {
         "user": user,
@@ -105,24 +105,32 @@ def authenticate_user(client: TestClient, username: str, password: str) -> dict:
 
 
 def create_test_user_with_patient(db: Session) -> dict:
-    """Create a test user with associated patient record."""
+    """Create a test user with associated patient record and set as active patient."""
     from app.crud.patient import patient as patient_crud
-    
+    from app.schemas.patient import PatientCreate
+    from datetime import date
+
     user_data = create_random_user(db)
     user = user_data["user"]
-    
+
     # Create patient record
+    patient_data = PatientCreate(
+        first_name="Test",
+        last_name="Patient",
+        birth_date=date(1990, 1, 1),
+        gender="M",
+        address="123 Test Street"
+    )
     patient = patient_crud.create_for_user(
         db=db,
         user_id=user.id,
-        patient_data={
-            "first_name": "Test",
-            "last_name": "Patient", 
-            "birth_date": "1990-01-01",
-            "gender": "M",
-            "address": "123 Test Street"
-        }
+        patient_data=patient_data
     )
-    
+
+    # CRITICAL: Set as active patient for multi-patient system
+    user.active_patient_id = patient.id
+    db.commit()
+    db.refresh(user)
+
     user_data["patient"] = patient
     return user_data

@@ -38,7 +38,12 @@ class TestConditionAPI:
         patient = patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
         )
-        
+
+        # Set as active patient for multi-patient system
+        test_user.active_patient_id = patient.id
+        db_session.commit()
+        db_session.refresh(test_user)
+
         return {"patient": patient, "practitioner": practitioner}
 
     def test_create_condition(self, authenticated_client: TestClient, test_patient_with_practitioner):
@@ -61,7 +66,7 @@ class TestConditionAPI:
         
         response = authenticated_client.post("/api/v1/conditions/", json=condition_data)
         
-        assert response.status_code == 201
+        assert response.status_code == 200
         data = response.json()
         assert data["diagnosis"] == "Essential Hypertension"
         assert data["status"] == "active"
@@ -94,16 +99,16 @@ class TestConditionAPI:
         created_conditions = []
         for condition_data in conditions_data:
             response = authenticated_client.post("/api/v1/conditions/", json=condition_data)
-            assert response.status_code == 201
+            assert response.status_code == 200
             created_conditions.append(response.json())
         
-        # Get conditions for patient
-        response = authenticated_client.get(f"/api/v1/conditions/patient/{patient.id}")
-        
+        # Get conditions for patient (correct endpoint is /patients/{id}/conditions/)
+        response = authenticated_client.get(f"/api/v1/patients/{patient.id}/conditions/")
+
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
-        
+
         # Verify conditions
         diagnoses = {condition["diagnosis"] for condition in data}
         assert diagnoses == {"Diabetes Type 2", "Common Cold"}
@@ -131,11 +136,11 @@ class TestConditionAPI:
         
         for condition_data in conditions_data:
             response = authenticated_client.post("/api/v1/conditions/", json=condition_data)
-            assert response.status_code == 201
+            assert response.status_code == 200
         
-        # Get active conditions only
-        response = authenticated_client.get(f"/api/v1/conditions/patient/{patient.id}?status=active")
-        
+        # Get active conditions only (use /active endpoint)
+        response = authenticated_client.get(f"/api/v1/conditions/patient/{patient.id}/active")
+
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
@@ -157,7 +162,7 @@ class TestConditionAPI:
         }
         
         response = authenticated_client.post("/api/v1/conditions/", json=condition_data)
-        assert response.status_code == 201
+        assert response.status_code == 200
         condition = response.json()
         
         # Update condition
@@ -192,7 +197,7 @@ class TestConditionAPI:
         }
         
         response = authenticated_client.post("/api/v1/conditions/", json=condition_data)
-        assert response.status_code == 201
+        assert response.status_code == 200
         condition = response.json()
         
         # Delete condition
@@ -220,7 +225,7 @@ class TestConditionAPI:
         }
         
         response = authenticated_client.post("/api/v1/conditions/", json=condition_data)
-        assert response.status_code == 201
+        assert response.status_code == 200
         condition = response.json()
         
         # Get condition by ID
@@ -259,9 +264,9 @@ class TestConditionAPI:
     def test_unauthorized_access(self, client: TestClient, test_patient_with_practitioner):
         """Test unauthorized access to condition endpoints."""
         patient = test_patient_with_practitioner["patient"]
-        
-        # Test without authentication
-        response = client.get(f"/api/v1/conditions/patient/{patient.id}")
+
+        # Test without authentication (use correct endpoint)
+        response = client.get(f"/api/v1/patients/{patient.id}/conditions/")
         assert response.status_code == 401
         
         # Test creating condition without auth

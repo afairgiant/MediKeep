@@ -18,7 +18,7 @@ class TestStandardizedTestsAPI:
     def authenticated_headers(self, db_session: Session):
         """Create authentication headers."""
         user_data = create_random_user(db_session)
-        return create_user_token_headers(user_data["user"].id)
+        return create_user_token_headers(user_data["user"].username)
 
     @pytest.fixture
     def sample_tests(self, db_session: Session):
