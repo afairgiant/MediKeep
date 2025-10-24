@@ -120,20 +120,73 @@
 	},
 	"allergies": {
 		"title": "Allergien",
+		"addNew": "Neue Allergie hinzufügen",
+		"addTitle": "Neue Allergie hinzufügen",
+		"editTitle": "Allergie bearbeiten",
+		"tabs": {
+			"basicInfo": "Grundinformationen",
+			"reactionDetails": "Reaktionsdetails",
+			"documents": "Dokumente",
+			"notes": "Notizen"
+		},
+		"messages": {
+			"loading": "Allergien werden geladen...",
+			"saving": "Allergie wird gespeichert..."
+		},
+		"emptyState": {
+			"title": "Keine Allergien gefunden",
+			"noData": "Klicken Sie auf \"Neue Allergie hinzufügen\", um zu beginnen.",
+			"filtered": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen."
+		},
 		"allergen": {
 			"label": "Allergen",
-			"placeholder": "z. B. Penicillin, Erdnüsse, Latex",
-			"description": "Welche Substanz die allergische Reaktion auslöst"
+			"placeholder": "Allergennamen eingeben",
+			"description": "Name des Allergens"
+		},
+		"allergyType": {
+			"label": "Allergie-Typ",
+			"placeholder": "Allergie-Typ auswählen",
+			"description": "Kategorie der Allergie",
+			"options": {
+				"food": "Nahrungsmittel",
+				"medication": "Medikament",
+				"environmental": "Umwelt",
+				"insect": "Insekt",
+				"other": "Andere"
+			}
+		},
+		"severity": {
+			"description": "Schweregrad der allergischen Reaktion"
+		},
+		"status": {
+			"description": "Aktueller Allergiestatus"
+		},
+		"onsetDate": {
+			"label": "Erstauftreten",
+			"placeholder": "Datum des Erstauftretens auswählen",
+			"description": "Wann die Allergie erstmals festgestellt wurde"
+		},
+		"relatedMedication": {
+			"label": "Verwandtes Medikament",
+			"placeholder": "Medikament auswählen",
+			"description": "Medikament, das diese Allergie verursacht"
+		},
+		"reactionType": {
+			"label": "Reaktionstyp",
+			"placeholder": "Reaktionstyp auswählen",
+			"description": "Art der allergischen Reaktion",
+			"options": {
+				"skin": "Hautreaktion",
+				"respiratory": "Atemwege",
+				"gastrointestinal": "Magen-Darm",
+				"anaphylaxis": "Anaphylaxie",
+				"other": "Andere"
+			}
 		},
 		"reaction": {
 			"label": "Reaktion",
-			"placeholder": "z. B. Hautausschlag, Anaphylaxie, Schwellung",
-			"description": "Was passiert bei Exposition gegenüber diesem Allergen"
-		},
-		"relatedMedication": {
-			"label": "Verwandtes Medikament (optional)",
-			"placeholder": "Wähle ein Medikament, mit dem diese Allergie zusammenhängt",
-			"description": "Verknüpfe diese Allergie mit einem bestimmten Medikament, falls zutreffend"
+			"placeholder": "Beschreiben Sie die allergische Reaktion",
+			"description": "Symptome und Details der Reaktion"
 		}
 	},
 	"conditions": {

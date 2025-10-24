@@ -1,6 +1,7 @@
 {
   "menu": {
     "dashboard": "Tableau de bord",
+    "backToDashboard": "Retour au tableau de bord",
     "patients": "Patients",
     "medicalRecords": "Dossiers médicaux",
     "settings": "Paramètres",

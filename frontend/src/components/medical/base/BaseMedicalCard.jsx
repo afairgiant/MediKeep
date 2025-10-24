@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Stack, Group, Text, Badge, Button, Divider } from '@mantine/core';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
@@ -20,6 +21,7 @@ const BaseMedicalCard = ({
   children,
   onError
 }) => {
+  const { t } = useTranslation('common');
   const handleError = (error, action) => {
     logger.error('base_medical_card_error', {
       message: `Error in BaseMedicalCard during ${action}`,
@@ -122,7 +124,7 @@ const BaseMedicalCard = ({
             <Stack gap="xs">
               <Divider />
               <Stack gap="xs">
-                <Text size="sm" fw={500} c="dimmed">Notes</Text>
+                <Text size="sm" fw={500} c="dimmed">{t('labels.notes', 'Notes')}</Text>
                 <Text size="sm">{notes}</Text>
               </Stack>
             </Stack>
@@ -134,13 +136,13 @@ const BaseMedicalCard = ({
           <Divider />
           <Group justify="flex-end" gap="xs" pt="sm">
             <Button variant="filled" size="xs" onClick={safeOnView}>
-              View
+              {t('buttons.view')}
             </Button>
             <Button variant="filled" size="xs" onClick={safeOnEdit}>
-              Edit
+              {t('buttons.edit')}
             </Button>
             <Button variant="filled" color="red" size="xs" onClick={safeOnDelete}>
-              Delete
+              {t('buttons.delete')}
             </Button>
           </Group>
         </Stack>
@@ -153,7 +155,7 @@ const BaseMedicalCard = ({
       <Card withBorder shadow="sm" radius="md" h="100%">
         <Stack align="center" justify="center" h="100%">
           <Text c="red" size="sm" ta="center">
-            Unable to display this item. Please try refreshing the page.
+            {t('messages.displayError', 'Unable to display this item. Please try refreshing the page.')}
           </Text>
         </Stack>
       </Card>

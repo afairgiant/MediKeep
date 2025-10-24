@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { NavigationWrapper } from '../navigation';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
+import LanguageSwitcher from '../shared/LanguageSwitcher';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import './PageHeader.css';
 

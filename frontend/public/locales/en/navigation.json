@@ -1,6 +1,7 @@
 {
   "menu": {
     "dashboard": "Dashboard",
+    "backToDashboard": "Back to Dashboard",
     "patients": "Patients",
     "medicalRecords": "Medical Records",
     "settings": "Settings",

@@ -5,6 +5,7 @@ import { IconChevronDown } from '@tabler/icons-react';
 import { getNavigationSections, VIEWPORT_CONFIGS } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
+import LanguageSwitcher from '../shared/LanguageSwitcher';
 import './DesktopNavigation.css';
 
 const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
@@ -121,14 +122,21 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
             >
               Settings
             </Menu.Item>
-            
+
+            <Menu.Item closeMenuOnClick={false}>
+              <div className="theme-toggle-menu-item">
+                <span>Language</span>
+                <LanguageSwitcher size="xs" />
+              </div>
+            </Menu.Item>
+
             <Menu.Item>
               <div className="theme-toggle-menu-item">
                 <span>Theme</span>
                 <ThemeToggle />
               </div>
             </Menu.Item>
-            
+
             <Menu.Item
               onClick={onLogout}
               color="red"

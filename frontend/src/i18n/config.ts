@@ -15,6 +15,14 @@ i18n
     ns: ['common', 'medical', 'errors', 'navigation'],
     defaultNS: 'common',
 
+    // Return key if translation is missing in development, fallback to English in production
+    saveMissing: false,
+    missingKeyHandler: (lngs, ns, key) => {
+      if (isDevelopment()) {
+        console.warn(`Missing translation key: ${ns}:${key} for language: ${lngs[0]}`);
+      }
+    },
+
     interpolation: {
       escapeValue: false,
     },

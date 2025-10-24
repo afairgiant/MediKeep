@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ThemeToggle from '../ui/ThemeToggle';
+import LanguageSwitcher from '../shared/LanguageSwitcher';
 import './Header.css';
 
 /**
@@ -13,8 +15,10 @@ const Header = ({
   actions = null,
   subtitle = null,
   showThemeToggle = true,
+  showLanguageSwitcher = true,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('navigation');
 
   const handleBack = () => {
     navigate(backPath);
@@ -25,7 +29,7 @@ const Header = ({
       <div className="header-left">
         {showBackButton && (
           <button className="back-button" onClick={handleBack} type="button">
-            ← Back to Dashboard
+            ← {t('menu.backToDashboard')}
           </button>
         )}
         <div className="header-title-section">
@@ -36,11 +40,12 @@ const Header = ({
 
       <div className="header-actions">
         {actions}
+        {showLanguageSwitcher && <LanguageSwitcher compact />}
         <button
           className="settings-button"
           onClick={() => navigate('/settings')}
           type="button"
-          title="Settings"
+          title={t('menu.settings')}
         >
           ⚙️
         </button>

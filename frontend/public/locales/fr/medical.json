@@ -36,6 +36,7 @@
       },
       "status": {
         "label": "Statut",
+        "placeholder": "Sélectionnez le statut",
         "description": "Statut actuel"
       },
       "severity": {
@@ -120,20 +121,73 @@
   },
   "allergies": {
     "title": "Allergies",
+    "addNew": "Ajouter une nouvelle allergie",
+    "addTitle": "Ajouter une nouvelle allergie",
+    "editTitle": "Modifier l'allergie",
+    "tabs": {
+      "basicInfo": "Informations de base",
+      "reactionDetails": "Détails de la réaction",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "messages": {
+      "loading": "Chargement des allergies...",
+      "saving": "Enregistrement de l'allergie..."
+    },
+    "emptyState": {
+      "title": "Aucune allergie trouvée",
+      "noData": "Cliquez sur \"Ajouter une nouvelle allergie\" pour commencer.",
+      "filtered": "Essayez d'ajuster vos critères de recherche ou de filtrage."
+    },
     "allergen": {
       "label": "Allergène",
-      "placeholder": "ex : Pénicilline, cacahuètes, latex",
-      "description": "Quelle substance cause la réaction allergique"
+      "placeholder": "Entrez le nom de l'allergène",
+      "description": "Nom de l'allergène"
     },
-    "reaction": {
-      "label": "Réaction",
-      "placeholder": "ex : eczéma, choc anaphylactique, gonflements",
-      "description": "Ce qui se produit en cas d'exposition à l'allergène"
+    "allergyType": {
+      "label": "Type d'allergie",
+      "placeholder": "Sélectionnez le type d'allergie",
+      "description": "Catégorie d'allergie",
+      "options": {
+        "food": "Alimentaire",
+        "medication": "Médicament",
+        "environmental": "Environnementale",
+        "insect": "Insecte",
+        "other": "Autre"
+      }
+    },
+    "severity": {
+      "description": "Sévérité de la réaction allergique"
+    },
+    "status": {
+      "description": "Statut actuel de l'allergie"
+    },
+    "onsetDate": {
+      "label": "Date de survenue",
+      "placeholder": "Sélectionnez la date de survenue",
+      "description": "Quand l'allergie a été identifiée pour la première fois"
     },
     "relatedMedication": {
-      "label": "Médicament lié (optionnel)",
-      "placeholder": "Sélectionnez un médicament se rapportant à cette allergie",
-      "description": "Connectez cette allergie à un médicament spécifique si applicable"
+      "label": "Médicament lié",
+      "placeholder": "Sélectionnez un médicament",
+      "description": "Médicament qui cause cette allergie"
+    },
+    "reactionType": {
+      "label": "Type de réaction",
+      "placeholder": "Sélectionnez le type de réaction",
+      "description": "Type de réaction allergique",
+      "options": {
+        "skin": "Réaction cutanée",
+        "respiratory": "Respiratoire",
+        "gastrointestinal": "Gastro-intestinale",
+        "anaphylaxis": "Anaphylaxie",
+        "other": "Autre"
+      }
+    },
+    "reaction": {
+      "label": "Description de la réaction",
+      "placeholder": "Décrivez la réaction allergique",
+      "description": "Symptômes et détails de la réaction"
     }
   },
   "conditions": {

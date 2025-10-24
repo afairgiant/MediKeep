@@ -13,6 +13,11 @@ const MantineAllergyForm = ({
   medicationsOptions = [],
   medicationsLoading = false,
 }) => {
+  // TEST: Alert when component renders
+  if (isOpen) {
+    alert('MantineAllergyForm is rendering! Title: ' + title);
+  }
+
   // Convert medications to Mantine format for dynamic options
   const medicationSelectOptions = medicationsLoading 
     ? [] 

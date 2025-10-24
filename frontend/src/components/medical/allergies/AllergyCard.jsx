@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge, Text, Group } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import {
   IconAlertTriangle,
   IconExclamationCircle,
@@ -21,6 +22,8 @@ const AllergyCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
   const handleError = (error) => {
     logger.error('allergy_card_error', {
       message: 'Error in AllergyCard',
@@ -98,14 +101,14 @@ const AllergyCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Reaction',
+        label: t('allergies.reaction.label'),
         value: allergy.reaction,
-        render: (value) => value || 'Not specified'
+        render: (value) => value || tCommon('labels.unknown', 'Not specified')
       },
       {
-        label: 'Onset Date',
+        label: t('allergies.onsetDate.label'),
         value: allergy.onset_date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : tCommon('labels.unknown', 'Not specified')
       }
     ].filter(field => field.value); // Only show fields with values
 
@@ -126,7 +129,7 @@ const AllergyCard = ({
     const customContent = medication ? (
       <Group justify="space-between" mb="xs">
         <Text size="sm" c="dimmed">
-          Related Medication:
+          {t('allergies.relatedMedication.label')}:
         </Text>
         <Text
           size="sm"
@@ -134,7 +137,7 @@ const AllergyCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => navigateToEntity('medication', medication.id, navigate)}
-          title="View medication details"
+          title={t('allergies.viewMedication', 'View medication details')}
         >
           {medication.medication_name}
         </Text>
@@ -144,7 +147,7 @@ const AllergyCard = ({
     return (
       <BaseMedicalCard
         title={titleContent}
-        subtitle="Medical Allergy"
+        subtitle={t('allergies.cardSubtitle', 'Medical Allergy')}
         status={allergy.status}
         badges={badges}
         fields={fields}

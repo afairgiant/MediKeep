@@ -22,10 +22,13 @@ import {
   IconMoon,
   IconMenu2,
   IconChevronDown,
+  IconLanguage,
 } from '@tabler/icons-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import LayoutPageHeader from '../layout/PageHeader';
+import LanguageSwitcher from '../shared/LanguageSwitcher';
 
 const PageHeader = ({
   useMantine = false,
@@ -314,6 +317,15 @@ const PageHeader = ({
                         onClick={() => navigate('/settings')}
                       >
                         Settings
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconLanguage size="1rem" />}
+                        closeMenuOnClick={false}
+                      >
+                        <Group gap="xs">
+                          <Text size="sm">Language:</Text>
+                          <LanguageSwitcher size="xs" />
+                        </Group>
                       </Menu.Item>
                       <Menu.Item
                         leftSection={

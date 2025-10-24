@@ -120,20 +120,73 @@
   },
   "allergies": {
     "title": "Allergies",
+    "addNew": "Add New Allergy",
+    "addTitle": "Add New Allergy",
+    "editTitle": "Edit Allergy",
+    "tabs": {
+      "basicInfo": "Basic Info",
+      "reactionDetails": "Reaction Details",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "messages": {
+      "loading": "Loading allergies...",
+      "saving": "Saving allergy..."
+    },
+    "emptyState": {
+      "title": "No allergies found",
+      "noData": "Click \"Add New Allergy\" to get started.",
+      "filtered": "Try adjusting your search or filter criteria."
+    },
     "allergen": {
       "label": "Allergen",
-      "placeholder": "e.g., Penicillin, Peanuts, Latex",
-      "description": "What substance causes the allergic reaction"
+      "placeholder": "Enter allergen name",
+      "description": "Name of the allergen"
     },
-    "reaction": {
-      "label": "Reaction",
-      "placeholder": "e.g., Rash, Anaphylaxis, Swelling",
-      "description": "What happens when exposed to this allergen"
+    "allergyType": {
+      "label": "Allergy Type",
+      "placeholder": "Select allergy type",
+      "description": "Category of allergy",
+      "options": {
+        "food": "Food",
+        "medication": "Medication",
+        "environmental": "Environmental",
+        "insect": "Insect",
+        "other": "Other"
+      }
+    },
+    "severity": {
+      "description": "Severity of allergic reaction"
+    },
+    "status": {
+      "description": "Current allergy status"
+    },
+    "onsetDate": {
+      "label": "Onset Date",
+      "placeholder": "Select onset date",
+      "description": "When allergy was first identified"
     },
     "relatedMedication": {
-      "label": "Related Medication (Optional)",
-      "placeholder": "Select a medication this allergy is related to",
-      "description": "Link this allergy to a specific medication if applicable"
+      "label": "Related Medication",
+      "placeholder": "Select medication",
+      "description": "Medication that causes this allergy"
+    },
+    "reactionType": {
+      "label": "Reaction Type",
+      "placeholder": "Select reaction type",
+      "description": "Type of allergic reaction",
+      "options": {
+        "skin": "Skin Reaction",
+        "respiratory": "Respiratory",
+        "gastrointestinal": "Gastrointestinal",
+        "anaphylaxis": "Anaphylaxis",
+        "other": "Other"
+      }
+    },
+    "reaction": {
+      "label": "Reaction Description",
+      "placeholder": "Describe the allergic reaction",
+      "description": "Symptoms and details of the reaction"
     }
   },
   "conditions": {
