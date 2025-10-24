@@ -107,6 +107,7 @@ function authReducer(state, action) {
       return {
         ...state,
         sessionTimeoutMinutes: action.payload,
+        lastActivity: Date.now(), // Reset activity timer when timeout changes
       };
 
     default:
