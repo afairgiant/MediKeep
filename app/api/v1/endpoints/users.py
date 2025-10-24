@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -5,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_delete
+from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_error, log_security_event
+from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
+from app.core.utils.security import create_access_token
 from app.crud.patient import patient
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
@@ -195,10 +198,6 @@ def update_current_user_preferences(
     """
     try:
         # Get current preferences to check if session timeout changed
-        from datetime import timedelta
-        from app.core.utils.security import create_access_token
-        from app.core.config import settings
-
         current_preferences = user_preferences.get_or_create_by_user_id(
             db, user_id=int(current_user.id)
         )
@@ -254,7 +253,6 @@ def update_current_user_preferences(
                 expires_delta=access_token_expires,
             )
 
-            from app.core.logging.helpers import log_endpoint_access
             log_endpoint_access(
                 logger,
                 request,

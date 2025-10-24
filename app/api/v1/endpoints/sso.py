@@ -1,13 +1,17 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+
 from app.api import deps
-from app.services.sso_service import SSOService
 from app.auth.sso.exceptions import *
 from app.core.config import settings
-from app.core.utils.security import create_access_token
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_security_event, log_endpoint_error
+from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
+from app.core.utils.security import create_access_token
+from app.crud.user_preferences import user_preferences
+from app.services.sso_service import SSOService
 
 logger = get_logger(__name__, "sso")
 router = APIRouter(prefix="/auth/sso", tags=["sso"])
@@ -96,8 +100,6 @@ async def sso_callback(
             return result
 
         # Get user's timeout preference BEFORE creating the token
-        from datetime import timedelta
-        from app.crud.user_preferences import user_preferences
         preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
         session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -116,7 +118,6 @@ async def sso_callback(
         )
 
         # Log token creation for SSO
-        from app.core.logging.helpers import log_endpoint_access
         log_endpoint_access(
             logger,
             req,
@@ -189,8 +190,6 @@ async def resolve_account_conflict(
         result = sso_service.resolve_account_conflict(request.temp_token, request.action, request.preference, db)
 
         # Get user's timeout preference BEFORE creating the token
-        from datetime import timedelta
-        from app.crud.user_preferences import user_preferences
         preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
         session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -209,7 +208,6 @@ async def resolve_account_conflict(
         )
 
         # Log token creation
-        from app.core.logging.helpers import log_endpoint_access
         log_endpoint_access(
             logger,
             req,
@@ -268,8 +266,6 @@ async def resolve_github_manual_link(
         result = sso_service.resolve_github_manual_link(request.temp_token, request.username, request.password, db)
 
         # Get user's timeout preference BEFORE creating the token
-        from datetime import timedelta
-        from app.crud.user_preferences import user_preferences
         preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
         session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -288,7 +284,6 @@ async def resolve_github_manual_link(
         )
 
         # Log token creation
-        from app.core.logging.helpers import log_endpoint_access
         log_endpoint_access(
             logger,
             req,
