@@ -292,8 +292,14 @@ def login(
     # Get full name, use username as fallback if not set
     full_name = getattr(db_user, "full_name", None) or db_user.username
 
+    # Get user's timeout preference BEFORE creating the token
+    from app.crud.user_preferences import user_preferences
+    preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
+    session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+
     # Create access token with user role and additional info
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    # Use user's session timeout preference for token expiration
+    access_token_expires = timedelta(minutes=session_timeout_minutes)
     access_token = create_access_token(
         data={
             "sub": db_user.username,
@@ -306,13 +312,18 @@ def login(
         expires_delta=access_token_expires,
     )
 
-    # Log successful login
+    # Log successful login with token expiration details
     log_successful_login(getattr(db_user, "id", 0), form_data.username, request)
-
-    # Get user's timeout preference
-    from app.crud.user_preferences import user_preferences
-    preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
-    session_timeout_minutes = preferences.session_timeout_minutes if preferences else 30
+    log_endpoint_access(
+        logger,
+        request,
+        db_user.id,
+        "token_created",
+        message=f"JWT token created with {session_timeout_minutes} minute expiration",
+        username=form_data.username,
+        session_timeout_minutes=session_timeout_minutes,
+        used_user_preference=bool(preferences and preferences.session_timeout_minutes),
+    )
 
     return {
         "access_token": access_token, 

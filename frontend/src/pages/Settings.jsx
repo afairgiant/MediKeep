@@ -142,12 +142,43 @@ const Settings = () => {
       if (Object.keys(generalFields).length > 0) {
         const generalResponse = await updateUserPreferences(generalFields);
         updatedPreferences = { ...updatedPreferences, ...generalResponse };
-        
+
+        // Check if a new token was returned (happens when session timeout changes)
+        if (generalResponse.new_token) {
+          frontendLogger.logInfo('New token received after session timeout change', {
+            component: 'Settings',
+            newTimeout: generalResponse.session_timeout_minutes
+          });
+
+          // Update the stored token with the new one
+          const { secureStorage } = await import('../utils/secureStorage');
+          await secureStorage.setItem('token', generalResponse.new_token);
+
+          // Calculate new token expiry (timeout in minutes -> milliseconds from now)
+          const newTokenExpiry = Date.now() + (generalResponse.session_timeout_minutes * 60 * 1000);
+          await secureStorage.setItem('tokenExpiry', newTokenExpiry.toString());
+
+          // Update AuthContext with new token and expiry
+          // This is imported at the top: const { user, updateSessionTimeout } = useAuth();
+          // We need to also update the token in AuthContext state
+          // The updateSessionTimeout function will reset lastActivity automatically
+
+          frontendLogger.logInfo('Token updated with new expiration', {
+            component: 'Settings',
+            expiryDate: new Date(newTokenExpiry).toISOString(),
+            timeoutMinutes: generalResponse.session_timeout_minutes
+          });
+
+          // Show user-friendly message
+          toast.success(`Session timeout updated to ${generalResponse.session_timeout_minutes} minutes. Your session has been refreshed.`);
+        }
+
         // Debug the API response specifically for timeout
         if (generalFields.session_timeout_minutes) {
           frontendLogger.debug('settings_timeout_update_response', 'General API Response for timeout update', {
             requestedTimeout: generalFields.session_timeout_minutes,
             responseTimeout: generalResponse.session_timeout_minutes,
+            tokenRegenerated: !!generalResponse.new_token,
             fullResponse: generalResponse,
             component: 'Settings'
           });

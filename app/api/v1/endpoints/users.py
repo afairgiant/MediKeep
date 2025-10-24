@@ -179,7 +179,7 @@ def get_current_user_preferences(
         )
 
 
-@router.put("/me/preferences", response_model=UserPreferences)
+@router.put("/me/preferences")
 def update_current_user_preferences(
     *,
     request: Request,
@@ -187,8 +187,24 @@ def update_current_user_preferences(
     preferences_in: UserPreferencesUpdate,
     current_user: UserModel = Depends(deps.get_current_user),
 ) -> Any:
-    """Update current user's preferences."""
+    """
+    Update current user's preferences.
+
+    If session_timeout_minutes is changed, a new JWT token with the updated
+    expiration time will be generated and returned.
+    """
     try:
+        # Get current preferences to check if session timeout changed
+        from datetime import timedelta
+        from app.core.utils.security import create_access_token
+        from app.core.config import settings
+
+        current_preferences = user_preferences.get_or_create_by_user_id(
+            db, user_id=int(current_user.id)
+        )
+        old_timeout = current_preferences.session_timeout_minutes if current_preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+
+        # Update preferences
         updated_preferences = user_preferences.update_by_user_id(
             db, user_id=int(current_user.id), obj_in=preferences_in
         )
@@ -197,7 +213,65 @@ def update_current_user_preferences(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to update user preferences",
             )
-        return updated_preferences
+
+        # Check if session timeout was changed
+        new_timeout = updated_preferences.session_timeout_minutes
+        timeout_changed = (preferences_in.session_timeout_minutes is not None and
+                          new_timeout != old_timeout)
+
+        response_data = {
+            "id": updated_preferences.id,
+            "user_id": updated_preferences.user_id,
+            "unit_system": updated_preferences.unit_system,
+            "session_timeout_minutes": updated_preferences.session_timeout_minutes,
+            "language": updated_preferences.language,
+            "paperless_enabled": updated_preferences.paperless_enabled,
+            "paperless_url": updated_preferences.paperless_url,
+            "paperless_auto_sync": updated_preferences.paperless_auto_sync,
+            "paperless_sync_tags": updated_preferences.paperless_sync_tags,
+            "paperless_has_token": bool(updated_preferences.paperless_api_token_encrypted),
+            "paperless_has_credentials": bool(
+                updated_preferences.paperless_username_encrypted and
+                updated_preferences.paperless_password_encrypted
+            ),
+            "default_storage_backend": updated_preferences.default_storage_backend,
+            "created_at": updated_preferences.created_at,
+            "updated_at": updated_preferences.updated_at,
+        }
+
+        # If session timeout changed, generate a new token with updated expiration
+        if timeout_changed:
+            access_token_expires = timedelta(minutes=new_timeout)
+            new_token = create_access_token(
+                data={
+                    "sub": current_user.username,
+                    "role": (
+                        current_user.role if current_user.role in ["admin", "user", "guest"] else "user"
+                    ),
+                    "user_id": current_user.id,
+                    "full_name": getattr(current_user, "full_name", None) or current_user.username,
+                },
+                expires_delta=access_token_expires,
+            )
+
+            from app.core.logging.helpers import log_endpoint_access
+            log_endpoint_access(
+                logger,
+                request,
+                current_user.id,
+                "session_timeout_updated_token_regenerated",
+                message=f"Session timeout changed from {old_timeout} to {new_timeout} minutes, new token generated",
+                username=current_user.username,
+                old_timeout=old_timeout,
+                new_timeout=new_timeout,
+            )
+
+            # Return preferences with new token
+            response_data["new_token"] = new_token
+            response_data["token_type"] = "bearer"
+
+        return response_data
+
     except Exception as e:
         log_endpoint_error(
             logger,

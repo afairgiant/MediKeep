@@ -94,8 +94,16 @@ async def sso_callback(
         if result.get("github_manual_link"):
             # Return GitHub manual linking data for frontend to handle
             return result
-        
+
+        # Get user's timeout preference BEFORE creating the token
+        from datetime import timedelta
+        from app.crud.user_preferences import user_preferences
+        preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
+        session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+
         # Create JWT token for the user (matching regular auth format)
+        # Use user's session timeout preference for token expiration
+        access_token_expires = timedelta(minutes=session_timeout_minutes)
         access_token = create_access_token(
             data={
                 "sub": result["user"].username,
@@ -103,9 +111,23 @@ async def sso_callback(
                     result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
                 ),
                 "user_id": result["user"].id,
-            }
+            },
+            expires_delta=access_token_expires,
         )
-        
+
+        # Log token creation for SSO
+        from app.core.logging.helpers import log_endpoint_access
+        log_endpoint_access(
+            logger,
+            req,
+            result["user"].id,
+            "sso_token_created",
+            message=f"SSO JWT token created with {session_timeout_minutes} minute expiration",
+            username=result["user"].username,
+            session_timeout_minutes=session_timeout_minutes,
+            used_user_preference=bool(preferences and preferences.session_timeout_minutes),
+        )
+
         return {
             "access_token": access_token,
             "token_type": "bearer",
@@ -117,7 +139,8 @@ async def sso_callback(
                 "role": result["user"].role,
                 "auth_method": result["user"].auth_method,
             },
-            "is_new_user": result["is_new_user"]
+            "is_new_user": result["is_new_user"],
+            "session_timeout_minutes": session_timeout_minutes
         }
         
     except SSORegistrationBlockedError as e:
@@ -164,8 +187,16 @@ async def resolve_account_conflict(
     """Resolve SSO account conflict based on user's choice"""
     try:
         result = sso_service.resolve_account_conflict(request.temp_token, request.action, request.preference, db)
-        
+
+        # Get user's timeout preference BEFORE creating the token
+        from datetime import timedelta
+        from app.crud.user_preferences import user_preferences
+        preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
+        session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+
         # Create JWT token for the user
+        # Use user's session timeout preference for token expiration
+        access_token_expires = timedelta(minutes=session_timeout_minutes)
         access_token = create_access_token(
             data={
                 "sub": result["user"].username,
@@ -173,9 +204,22 @@ async def resolve_account_conflict(
                     result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
                 ),
                 "user_id": result["user"].id,
-            }
+            },
+            expires_delta=access_token_expires,
         )
-        
+
+        # Log token creation
+        from app.core.logging.helpers import log_endpoint_access
+        log_endpoint_access(
+            logger,
+            req,
+            result["user"].id,
+            "sso_conflict_resolved_token_created",
+            message=f"SSO conflict resolved, JWT token created with {session_timeout_minutes} minute expiration",
+            username=result["user"].username,
+            session_timeout_minutes=session_timeout_minutes,
+        )
+
         return {
             "access_token": access_token,
             "token_type": "bearer",
@@ -187,7 +231,8 @@ async def resolve_account_conflict(
                 "role": result["user"].role,
                 "auth_method": result["user"].auth_method,
             },
-            "is_new_user": result["is_new_user"]
+            "is_new_user": result["is_new_user"],
+            "session_timeout_minutes": session_timeout_minutes
         }
         
     except SSOAuthenticationError as e:
@@ -221,8 +266,16 @@ async def resolve_github_manual_link(
     """Resolve GitHub manual linking by verifying user credentials"""
     try:
         result = sso_service.resolve_github_manual_link(request.temp_token, request.username, request.password, db)
-        
+
+        # Get user's timeout preference BEFORE creating the token
+        from datetime import timedelta
+        from app.crud.user_preferences import user_preferences
+        preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
+        session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+
         # Create JWT token for the user
+        # Use user's session timeout preference for token expiration
+        access_token_expires = timedelta(minutes=session_timeout_minutes)
         access_token = create_access_token(
             data={
                 "sub": result["user"].username,
@@ -230,7 +283,20 @@ async def resolve_github_manual_link(
                     result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
                 ),
                 "user_id": result["user"].id,
-            }
+            },
+            expires_delta=access_token_expires,
+        )
+
+        # Log token creation
+        from app.core.logging.helpers import log_endpoint_access
+        log_endpoint_access(
+            logger,
+            req,
+            result["user"].id,
+            "github_manual_link_token_created",
+            message=f"GitHub manual link resolved, JWT token created with {session_timeout_minutes} minute expiration",
+            username=result["user"].username,
+            session_timeout_minutes=session_timeout_minutes,
         )
         
         return {
@@ -244,7 +310,8 @@ async def resolve_github_manual_link(
                 "role": result["user"].role,
                 "auth_method": result["user"].auth_method,
             },
-            "is_new_user": result["is_new_user"]
+            "is_new_user": result["is_new_user"],
+            "session_timeout_minutes": session_timeout_minutes
         }
         
     except SSOAuthenticationError as e:
