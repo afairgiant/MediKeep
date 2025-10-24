@@ -296,9 +296,20 @@ export const getModelDisplayName = modelName => {
 /**
  * Gets a human-readable display name for an action
  * @param {string} action - The action name
+ * @param {Function} t - Optional translation function from useTranslation
  * @returns {string} - The display name
  */
-export const getActionDisplayName = action => {
+export const getActionDisplayName = (action, t = null) => {
+  const actionKey = action?.toLowerCase();
+
+  // If translation function provided, use it with fallback
+  if (t && actionKey) {
+    const translationKey = `activity.actions.${actionKey}`;
+    const fallback = action.charAt(0).toUpperCase() + action.slice(1);
+    return t(translationKey, fallback);
+  }
+
+  // Fallback to English display names when no translation function
   const displayNames = {
     created: 'Created',
     updated: 'Updated',
@@ -312,7 +323,7 @@ export const getActionDisplayName = action => {
     viewed: 'Viewed',
   };
 
-  return displayNames[action?.toLowerCase()] || action || 'Modified';
+  return displayNames[actionKey] || action || 'Modified';
 };
 
 /**

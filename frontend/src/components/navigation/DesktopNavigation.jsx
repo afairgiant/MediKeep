@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Menu, Button } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
 import { getNavigationSections, VIEWPORT_CONFIGS } from '../../config/navigation.config';
@@ -11,6 +12,7 @@ import './DesktopNavigation.css';
 const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('navigation');
   const { viewport, width } = useViewport();
   
   // Get navigation sections based on viewport (desktop or laptop)
@@ -59,12 +61,12 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
                   rightSection={<IconChevronDown size={14} />}
                   size={isCompact ? 'sm' : 'md'}
                 >
-                  {section.title}
+                  {t(section.titleKey, section.title || section.titleKey)}
                 </Button>
               </Menu.Target>
-              
+
               <Menu.Dropdown className="desktop-nav-dropdown">
-                <Menu.Label>{section.title}</Menu.Label>
+                <Menu.Label>{t(section.titleKey, section.title || section.titleKey)}</Menu.Label>
                 {section.items.map((item) => (
                   <Menu.Item
                     key={item.id}
@@ -74,7 +76,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
                     onClick={() => handleNavigation(item.path)}
                     className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
                   >
-                    {item.name}
+                    {t(item.nameKey, item.name || item.nameKey)}
                   </Menu.Item>
                 ))}
               </Menu.Dropdown>
@@ -112,27 +114,27 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
               rightSection={<IconChevronDown size={14} />}
               size={isCompact ? 'sm' : 'md'}
             >
-              Account
+              {t('menu.profile', 'Account')}
             </Button>
           </Menu.Target>
-          
+
           <Menu.Dropdown className="desktop-nav-dropdown account-dropdown">
             <Menu.Item
               onClick={() => navigate('/settings')}
             >
-              Settings
+              {t('menu.settings', 'Settings')}
             </Menu.Item>
 
             <Menu.Item closeMenuOnClick={false}>
               <div className="theme-toggle-menu-item">
-                <span>Language</span>
+                <span>{t('sidebarNav.items.language', 'Language')}</span>
                 <LanguageSwitcher size="xs" />
               </div>
             </Menu.Item>
 
             <Menu.Item>
               <div className="theme-toggle-menu-item">
-                <span>Theme</span>
+                <span>{t('sidebarNav.items.theme', 'Theme')}</span>
                 <ThemeToggle />
               </div>
             </Menu.Item>
@@ -141,7 +143,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
               onClick={onLogout}
               color="red"
             >
-              Logout
+              {t('menu.logout', 'Logout')}
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>

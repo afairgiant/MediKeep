@@ -104,5 +104,54 @@
     "next": "Next",
     "first": "First",
     "last": "Last"
+  },
+  "patientSelector": {
+    "title": "Patient Selector",
+    "badges": {
+      "self": "Self",
+      "shared": "Shared"
+    },
+    "labels": {
+      "currentlyViewing": "Currently viewing:",
+      "switchTo": "Switch to another patient:",
+      "switching": "Switching patient...",
+      "patientActions": "Patient Actions",
+      "born": "Born"
+    },
+    "tooltips": {
+      "expand": "Expand patient selector",
+      "minimize": "Minimize to one line",
+      "switchPatient": "Switch patient",
+      "refresh": "Refresh patients",
+      "addNew": "Add new patient"
+    },
+    "buttons": {
+      "retry": "Retry",
+      "addNew": "Add New Patient",
+      "editPatient": "Edit Patient",
+      "sharePatient": "Share Patient",
+      "deletePatient": "Delete Patient",
+      "removeAccess": "Remove Access"
+    },
+    "placeholders": {
+      "loading": "Loading...",
+      "select": "Select a patient to switch to..."
+    },
+    "stats": {
+      "owned": "Owned",
+      "shared": "Shared",
+      "total": "Total"
+    },
+    "errors": {
+      "loadFailed": "Failed to load patients",
+      "noPatients": "No patients found"
+    },
+    "messages": {
+      "noAccess": "You don't have access to any patients yet. Create a new patient to get started."
+    },
+    "modals": {
+      "createTitle": "Create New Patient",
+      "editTitle": "Edit Patient"
+    }
   }
 }

@@ -45,5 +45,122 @@
     "symptoms": "Symptome",
     "practitioners": "Ärzte",
     "pharmacies": "Apotheken"
+  },
+  "dashboard": {
+    "title": "MediKeep Dashboard",
+    "subtitle": "Verwalten Sie Ihre Gesundheitsinformationen sicher",
+    "hello": "Hallo",
+    "loading": "Ihr medizinisches Dashboard wird geladen...",
+    "sections": {
+      "coreMedical": "Kern-Medizininformationen",
+      "treatments": "Behandlungen und Eingriffe",
+      "healthMonitoring": "Gesundheitsüberwachung",
+      "prevention": "Prävention & Historie",
+      "additionalResources": "Zusätzliche Ressourcen",
+      "recentActivity": "Letzte Aktivitäten"
+    },
+    "stats": {
+      "totalRecords": "Gesamtanzahl Einträge",
+      "activeMedications": "Aktive Medikamente",
+      "labResults": "Laborergebnisse",
+      "procedures": "Eingriffe"
+    },
+    "modules": {
+      "patientInfo": "Patienteninformationen",
+      "medications": "Medikamente",
+      "labResults": "Laborergebnisse",
+      "treatments": "Behandlungen",
+      "procedures": "Eingriffe",
+      "vitalSigns": "Vitalzeichen",
+      "symptoms": "Symptome",
+      "conditions": "Erkrankungen",
+      "allergies": "Allergien",
+      "immunizations": "Impfungen",
+      "visitHistory": "Besuchsverlauf",
+      "familyHistory": "Familiengeschichte",
+      "insurance": "Versicherung",
+      "emergencyContacts": "Notfallkontakte",
+      "exportRecords": "Daten exportieren",
+      "practitioners": "Ärzte",
+      "pharmacies": "Apotheken",
+      "adminDashboard": "Admin-Dashboard"
+    },
+    "activity": {
+      "noActivity": "Keine aktuellen Aktivitäten",
+      "noActivityDescription": "Ihre Krankenaktenaktivitäten werden hier angezeigt",
+      "lastUpdated": "Zuletzt aktualisiert"
+    },
+    "search": {
+      "placeholder": "Krankenakten durchsuchen..."
+    }
+  },
+  "invitations": {
+    "title": "Einladungen",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "from": "Von",
+    "viewAll": "Alle {{count}} Einladungen anzeigen",
+    "noPending": "Keine ausstehenden Einladungen",
+    "noPendingDescription": "Neue Freigabeeinladungen werden hier angezeigt",
+    "manageAll": "Alle Einladungen verwalten",
+    "sharePatient": "Patient teilen",
+    "confirmTitle": "Einladungsannahme bestätigen",
+    "confirmQuestion": "Möchten Sie diese Einladung wirklich annehmen?",
+    "confirmDescription": "Durch die Annahme erhalten Sie Zugriff auf die freigegebenen medizinischen Informationen.",
+    "acceptButton": "Einladung annehmen",
+    "types": {
+      "familyHistory": "Familiengeschichte",
+      "patientRecord": "Patientenakte"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "deleted": "Gelöscht",
+      "added": "Hinzugefügt",
+      "modified": "Geändert",
+      "removed": "Entfernt",
+      "completed": "Abgeschlossen",
+      "cancelled": "Abgebrochen",
+      "scheduled": "Geplant",
+      "viewed": "Angesehen"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Krankenakten",
+      "careAndTreatment": "Pflege & Behandlung",
+      "misc": "Sonstiges",
+      "tools": "Werkzeuge",
+      "administration": "Verwaltung"
+    },
+    "items": {
+      "patientInfo": "Patienteninformationen",
+      "medications": "Medikamente",
+      "labResults": "Laborergebnisse",
+      "conditions": "Erkrankungen",
+      "allergies": "Allergien",
+      "vitalSigns": "Vitalzeichen",
+      "symptoms": "Symptome",
+      "treatments": "Behandlungen",
+      "procedures": "Eingriffe",
+      "immunizations": "Impfungen",
+      "visitHistory": "Besuchsverlauf",
+      "familyHistory": "Familiengeschichte",
+      "practitioners": "Ärzte",
+      "pharmacies": "Apotheken",
+      "insurance": "Versicherung",
+      "emergencyContacts": "Notfallkontakte",
+      "tagManagement": "Tag-Verwaltung",
+      "customReports": "Benutzerdefinierte Berichte",
+      "exportRecords": "Daten exportieren",
+      "settings": "Einstellungen",
+      "adminDashboard": "Admin-Dashboard",
+      "dataModels": "Datenmodelle",
+      "backupManagement": "Backup-Verwaltung",
+      "systemHealth": "Systemzustand",
+      "language": "Sprache",
+      "theme": "Design"
+    }
   }
 }

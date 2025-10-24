@@ -104,5 +104,54 @@
     "next": "Weiter",
     "first": "Erste",
     "last": "Letzte"
+  },
+  "patientSelector": {
+    "title": "Patientenauswahl",
+    "badges": {
+      "self": "Selbst",
+      "shared": "Geteilt"
+    },
+    "labels": {
+      "currentlyViewing": "Derzeit angezeigt:",
+      "switchTo": "Zu anderem Patienten wechseln:",
+      "switching": "Patient wird gewechselt...",
+      "patientActions": "Patientenaktionen",
+      "born": "Geboren"
+    },
+    "tooltips": {
+      "expand": "Patientenauswahl erweitern",
+      "minimize": "Auf eine Zeile minimieren",
+      "switchPatient": "Patient wechseln",
+      "refresh": "Patienten aktualisieren",
+      "addNew": "Neuen Patienten hinzufügen"
+    },
+    "buttons": {
+      "retry": "Erneut versuchen",
+      "addNew": "Neuen Patienten hinzufügen",
+      "editPatient": "Patient bearbeiten",
+      "sharePatient": "Patient teilen",
+      "deletePatient": "Patient löschen",
+      "removeAccess": "Zugriff entfernen"
+    },
+    "placeholders": {
+      "loading": "Wird geladen...",
+      "select": "Wählen Sie einen Patienten aus, zu dem gewechselt werden soll..."
+    },
+    "stats": {
+      "owned": "Eigene",
+      "shared": "Geteilt",
+      "total": "Gesamt"
+    },
+    "errors": {
+      "loadFailed": "Patienten konnten nicht geladen werden",
+      "noPatients": "Keine Patienten gefunden"
+    },
+    "messages": {
+      "noAccess": "Sie haben noch keinen Zugriff auf Patienten. Erstellen Sie einen neuen Patienten, um zu beginnen."
+    },
+    "modals": {
+      "createTitle": "Neuen Patienten erstellen",
+      "editTitle": "Patient bearbeiten"
+    }
   }
 }

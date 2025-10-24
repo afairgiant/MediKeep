@@ -104,5 +104,54 @@
     "next": "Suivant",
     "first": "Premier",
     "last": "Dernier"
+  },
+  "patientSelector": {
+    "title": "Sélecteur de patient",
+    "badges": {
+      "self": "Moi-même",
+      "shared": "Partagé"
+    },
+    "labels": {
+      "currentlyViewing": "Actuellement affiché :",
+      "switchTo": "Passer à un autre patient :",
+      "switching": "Changement de patient...",
+      "patientActions": "Actions du patient",
+      "born": "Né(e)"
+    },
+    "tooltips": {
+      "expand": "Développer le sélecteur de patient",
+      "minimize": "Réduire à une ligne",
+      "switchPatient": "Changer de patient",
+      "refresh": "Actualiser les patients",
+      "addNew": "Ajouter un nouveau patient"
+    },
+    "buttons": {
+      "retry": "Réessayer",
+      "addNew": "Ajouter un nouveau patient",
+      "editPatient": "Modifier le patient",
+      "sharePatient": "Partager le patient",
+      "deletePatient": "Supprimer le patient",
+      "removeAccess": "Retirer l'accès"
+    },
+    "placeholders": {
+      "loading": "Chargement...",
+      "select": "Sélectionnez un patient vers lequel basculer..."
+    },
+    "stats": {
+      "owned": "Possédés",
+      "shared": "Partagés",
+      "total": "Total"
+    },
+    "errors": {
+      "loadFailed": "Échec du chargement des patients",
+      "noPatients": "Aucun patient trouvé"
+    },
+    "messages": {
+      "noAccess": "Vous n'avez accès à aucun patient pour le moment. Créez un nouveau patient pour commencer."
+    },
+    "modals": {
+      "createTitle": "Créer un nouveau patient",
+      "editTitle": "Modifier le patient"
+    }
   }
 }
