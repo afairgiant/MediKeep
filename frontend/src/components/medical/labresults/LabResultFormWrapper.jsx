@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Paper, Title } from '@mantine/core';
 import MantineLabResultForm from '../MantineLabResultForm';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -24,6 +25,7 @@ const LabResultFormWrapper = ({
   onError,
   children
 }) => {
+  const { t } = useTranslation('common');
   const handleDocumentManagerRef = (methods) => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
@@ -78,7 +80,7 @@ const LabResultFormWrapper = ({
       {/* File Management Section for Both Create and Edit Mode */}
       <Paper withBorder p="md" mt="md">
         <Title order={4} mb="md">
-          {editingItem ? 'Manage Files' : 'Add Files (Optional)'}
+          {editingItem ? t('labResults.form.manageFiles', 'Manage Files') : t('labResults.form.addFilesOptional', 'Add Files (Optional)')}
         </Title>
         <DocumentManagerWithProgress
           entityType="lab-result"

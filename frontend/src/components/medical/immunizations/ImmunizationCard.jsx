@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge, Text, Group } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
@@ -14,6 +15,8 @@ const ImmunizationCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('immunization_card_error', {
       message: 'Error in ImmunizationCard',
@@ -55,9 +58,9 @@ const ImmunizationCard = ({
     const badges = [];
     
     if (immunization.dose_number) {
-      badges.push({ 
-        label: `Dose ${immunization.dose_number}`, 
-        color: getDoseColor(immunization.dose_number) 
+      badges.push({
+        label: t('immunizations.card.dose', 'Dose {{number}}', { number: immunization.dose_number }),
+        color: getDoseColor(immunization.dose_number)
       });
     }
 
@@ -80,45 +83,45 @@ const ImmunizationCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Date Administered',
+        label: t('immunizations.card.dateAdministered', 'Date Administered'),
         value: immunization.date_administered,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('immunizations.card.notSpecified', 'Not specified')
       },
       immunization.lot_number && {
-        label: 'Lot Number',
+        label: t('immunizations.card.lotNumber', 'Lot Number'),
         value: immunization.lot_number,
         render: (value) => value
       },
       immunization.ndc_number && {
-        label: 'NDC Number',
+        label: t('immunizations.card.ndcNumber', 'NDC Number'),
         value: immunization.ndc_number,
         render: (value) => value
       },
       immunization.site && {
-        label: 'Injection Site',
+        label: t('immunizations.card.injectionSite', 'Injection Site'),
         value: immunization.site,
         render: (value) => value
       },
       immunization.route && {
-        label: 'Route',
+        label: t('immunizations.card.route', 'Route'),
         value: immunization.route,
         render: (value) => value
       },
       immunization.location && {
-        label: 'Location',
+        label: t('immunizations.card.location', 'Location'),
         value: immunization.location,
         render: (value) => value
       },
       immunization.expiration_date && {
-        label: 'Expiration Date',
+        label: t('immunizations.card.expirationDate', 'Expiration Date'),
         value: immunization.expiration_date,
         render: (value) => formatDate(value)
       },
       immunization.practitioner_id && {
-        label: 'Practitioner',
+        label: t('immunizations.card.practitioner', 'Practitioner'),
         value: immunization.practitioner_id,
         render: (value) => {
-          if (!value) return 'Not specified';
+          if (!value) return t('immunizations.card.notSpecified', 'Not specified');
           const practitioner = practitioners.find(p => p.id === value);
           return (
             <Text
@@ -126,8 +129,9 @@ const ImmunizationCard = ({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
+              title={t('immunizations.card.viewPractitioner', 'View practitioner details')}
             >
-              {practitioner?.name || `ID: ${value}`}
+              {practitioner?.name || t('immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
             </Text>
           );
         }

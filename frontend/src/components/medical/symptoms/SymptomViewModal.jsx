@@ -25,6 +25,7 @@ import {
   IconEdit,
   IconTrash,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../../utils/helpers';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
@@ -44,6 +45,7 @@ const SymptomViewModal = ({
   onEditOccurrence,
   onRefresh,
 }) => {
+  const { t } = useTranslation('common');
   const [activeTab, setActiveTab] = useState('overview');
   const [occurrences, setOccurrences] = useState([]);
   const [loadingOccurrences, setLoadingOccurrences] = useState(false);
@@ -93,7 +95,7 @@ const SymptomViewModal = ({
   };
 
   const handleDeleteOccurrence = async occurrenceId => {
-    if (!window.confirm('Are you sure you want to delete this episode?')) {
+    if (!window.confirm(t('symptoms.viewModal.confirmDeleteEpisode', 'Are you sure you want to delete this episode?'))) {
       return;
     }
 
@@ -127,7 +129,7 @@ const SymptomViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={`${symptom.symptom_name} - Details`}
+      title={t('symptoms.viewModal.title', '{{name}} - Details', { name: symptom.symptom_name })}
       size="xl"
       centered
       zIndex={2000}
@@ -157,7 +159,7 @@ const SymptomViewModal = ({
                 </Badge>
                 {symptom.is_chronic && (
                   <Badge color="violet" size="md" variant="light">
-                    Chronic
+                    {t('symptoms.chronic', 'Chronic')}
                   </Badge>
                 )}
                 {symptom.category && (
@@ -174,16 +176,16 @@ const SymptomViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              Overview
+              {t('symptoms.viewModal.tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="occurrences" leftSection={<IconClockHour4 size={16} />}>
-              Episodes ({occurrences.length})
+              {t('symptoms.viewModal.tabs.episodes', 'Episodes ({{count}})', { count: occurrences.length })}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              Notes
+              {t('symptoms.viewModal.tabs.notes', 'Notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              Documents
+              {t('symptoms.viewModal.tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -193,24 +195,24 @@ const SymptomViewModal = ({
               <Stack gap="lg">
                 <div>
                   <Title order={4} mb="sm">
-                    Basic Information
+                    {t('symptoms.viewModal.basicInfo', 'Basic Information')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        Symptom Name
+                        {t('symptoms.viewModal.symptomName', 'Symptom Name')}
                       </Text>
                       <Text size="sm">{symptom.symptom_name}</Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        Category
+                        {t('symptoms.category', 'Category')}
                       </Text>
-                      <Text size="sm">{symptom.category || 'Not specified'}</Text>
+                      <Text size="sm">{symptom.category || t('symptoms.viewModal.notSpecified', 'Not specified')}</Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        Status
+                        {t('labels.status', 'Status')}
                       </Text>
                       <div>
                         <Badge
@@ -224,7 +226,7 @@ const SymptomViewModal = ({
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        Type
+                        {t('symptoms.viewModal.type', 'Type')}
                       </Text>
                       <div>
                         <Badge
@@ -232,7 +234,7 @@ const SymptomViewModal = ({
                           size="md"
                           variant="light"
                         >
-                          {symptom.is_chronic ? 'Chronic' : 'Acute'}
+                          {symptom.is_chronic ? t('symptoms.chronic', 'Chronic') : t('symptoms.viewModal.acute', 'Acute')}
                         </Badge>
                       </div>
                     </Stack>
@@ -242,35 +244,35 @@ const SymptomViewModal = ({
                 {/* Timeline Section */}
                 <div>
                   <Title order={4} mb="sm">
-                    Timeline
+                    {t('symptoms.viewModal.timeline', 'Timeline')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        First Occurrence
+                        {t('symptoms.first', 'First Occurrence')}
                       </Text>
                       <Text size="sm">
                         {firstOccurrenceDate
                           ? formatDate(firstOccurrenceDate)
-                          : 'No episodes logged'}
+                          : t('symptoms.viewModal.noEpisodesLogged', 'No episodes logged')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        Last Occurrence
+                        {t('symptoms.last', 'Last Occurrence')}
                       </Text>
                       <Text size="sm" c={lastOccurrenceDate ? 'inherit' : 'dimmed'}>
                         {lastOccurrenceDate
                           ? formatDate(lastOccurrenceDate)
-                          : 'No episodes logged'}
+                          : t('symptoms.viewModal.noEpisodesLogged', 'No episodes logged')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        Total Episodes
+                        {t('symptoms.viewModal.totalEpisodes', 'Total Episodes')}
                       </Text>
                       <Text size="sm" fw={500} c="blue">
-                        {totalOccurrences} episode{totalOccurrences !== 1 ? 's' : ''}
+                        {totalOccurrences} {totalOccurrences === 1 ? t('symptoms.episode', 'episode') : t('symptoms.episodes', 'episodes')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -280,7 +282,7 @@ const SymptomViewModal = ({
                 {symptom.typical_triggers && symptom.typical_triggers.length > 0 && (
                   <div>
                     <Title order={4} mb="sm">
-                      Common Triggers
+                      {t('symptoms.commonTriggers', 'Common Triggers')}
                     </Title>
                     <Group gap="xs">
                       {symptom.typical_triggers.map((trigger, index) => (
@@ -296,7 +298,7 @@ const SymptomViewModal = ({
                 {symptom.tags && symptom.tags.length > 0 && (
                   <div>
                     <Title order={4} mb="sm">
-                      Tags
+                      {t('labels.tags', 'Tags')}
                     </Title>
                     <Group gap="xs">
                       {symptom.tags.map((tag, index) => (
@@ -316,7 +318,7 @@ const SymptomViewModal = ({
             <Box mt="md">
               <Stack gap="md">
                 <Group justify="space-between">
-                  <Title order={4}>Episode History</Title>
+                  <Title order={4}>{t('symptoms.viewModal.episodeHistory', 'Episode History')}</Title>
                   {onLogEpisode && (
                     <Button
                       size="xs"
@@ -326,7 +328,7 @@ const SymptomViewModal = ({
                         setTimeout(() => onLogEpisode(symptom), 100);
                       }}
                     >
-                      Log New Episode
+                      {t('symptoms.viewModal.logNewEpisode', 'Log New Episode')}
                     </Button>
                   )}
                 </Group>
@@ -340,7 +342,7 @@ const SymptomViewModal = ({
                     <Stack align="center" gap="md">
                       <IconStethoscope size={48} stroke={1.5} color="gray" />
                       <Text size="sm" c="dimmed">
-                        No episodes logged yet
+                        {t('symptoms.viewModal.noEpisodesYet', 'No episodes logged yet')}
                       </Text>
                       {onLogEpisode && (
                         <Button
@@ -351,7 +353,7 @@ const SymptomViewModal = ({
                             setTimeout(() => onLogEpisode(symptom), 100);
                           }}
                         >
-                          Log First Episode
+                          {t('symptoms.viewModal.logFirstEpisode', 'Log First Episode')}
                         </Button>
                       )}
                     </Stack>
@@ -374,39 +376,39 @@ const SymptomViewModal = ({
                               </Badge>
                               {occurrence.pain_scale !== null && (
                                 <Badge color="red" variant="outline" size="sm">
-                                  Pain: {occurrence.pain_scale}/10
+                                  {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}/10
                                 </Badge>
                               )}
                             </Group>
 
                             {occurrence.time_of_day && (
                               <Text size="xs" c="dimmed">
-                                Time: {occurrence.time_of_day}
+                                {t('symptoms.viewModal.time', 'Time')}: {occurrence.time_of_day}
                               </Text>
                             )}
 
                             {occurrence.duration && (
                               <Text size="xs" c="dimmed">
-                                Duration: {occurrence.duration}
+                                {t('symptoms.calendar.duration', 'Duration')}: {occurrence.duration}
                               </Text>
                             )}
 
                             {occurrence.location && (
                               <Text size="xs" c="dimmed">
-                                Location: {occurrence.location}
+                                {t('symptoms.calendar.location', 'Location')}: {occurrence.location}
                               </Text>
                             )}
 
                             {occurrence.impact_level && (
                               <Text size="xs" c="dimmed">
-                                Impact: {occurrence.impact_level.replace('_', ' ')}
+                                {t('symptoms.viewModal.impact', 'Impact')}: {occurrence.impact_level.replace('_', ' ')}
                               </Text>
                             )}
 
                             {occurrence.triggers && occurrence.triggers.length > 0 && (
                               <Group gap="xs">
                                 <Text size="xs" c="dimmed">
-                                  Triggers:
+                                  {t('symptoms.viewModal.triggers', 'Triggers')}:
                                 </Text>
                                 {occurrence.triggers.map((trigger, idx) => (
                                   <Badge key={idx} size="xs" variant="dot">
@@ -419,7 +421,7 @@ const SymptomViewModal = ({
                             {occurrence.relief_methods && occurrence.relief_methods.length > 0 && (
                               <Group gap="xs">
                                 <Text size="xs" c="dimmed">
-                                  Relief:
+                                  {t('symptoms.viewModal.relief', 'Relief')}:
                                 </Text>
                                 {occurrence.relief_methods.map((method, idx) => (
                                   <Badge key={idx} size="xs" color="green" variant="dot">
@@ -447,7 +449,7 @@ const SymptomViewModal = ({
                                   setTimeout(() => onEditOccurrence(symptom, occurrence), 100);
                                 }}
                               >
-                                Edit
+                                {t('buttons.edit', 'Edit')}
                               </Button>
                             )}
                             <Button
@@ -457,7 +459,7 @@ const SymptomViewModal = ({
                               leftSection={<IconTrash size={14} />}
                               onClick={() => handleDeleteOccurrence(occurrence.id)}
                             >
-                              Delete
+                              {t('buttons.delete', 'Delete')}
                             </Button>
                           </Group>
                         </Group>
@@ -475,7 +477,7 @@ const SymptomViewModal = ({
               <Stack gap="lg">
                 <div>
                   <Title order={4} mb="sm">
-                    General Notes
+                    {t('symptoms.viewModal.generalNotes', 'General Notes')}
                   </Title>
                   <Paper withBorder p="md" bg="gray.1">
                     <Text
@@ -483,7 +485,7 @@ const SymptomViewModal = ({
                       style={{ whiteSpace: 'pre-wrap' }}
                       c={symptom.general_notes ? 'inherit' : 'dimmed'}
                     >
-                      {symptom.general_notes || 'No notes provided'}
+                      {symptom.general_notes || t('symptoms.viewModal.noNotesProvided', 'No notes provided')}
                     </Text>
                   </Paper>
                 </div>
@@ -495,7 +497,7 @@ const SymptomViewModal = ({
           <Tabs.Panel value="documents">
             <Box mt="md">
               <Stack gap="md">
-                <Title order={4}>Attached Documents</Title>
+                <Title order={4}>{t('symptoms.viewModal.attachedDocuments', 'Attached Documents')}</Title>
                 <DocumentManagerWithProgress
                   entityType="symptom"
                   entityId={symptom.id}
@@ -528,7 +530,7 @@ const SymptomViewModal = ({
                 }, 100);
               }}
             >
-              Delete Symptom
+              {t('symptoms.viewModal.deleteSymptom', 'Delete Symptom')}
             </Button>
           )}
           {onEdit && (
@@ -541,7 +543,7 @@ const SymptomViewModal = ({
                 }, 100);
               }}
             >
-              Edit Symptom
+              {t('symptoms.viewModal.editSymptom', 'Edit Symptom')}
             </Button>
           )}
           {onLogEpisode && (
@@ -554,11 +556,11 @@ const SymptomViewModal = ({
                 setTimeout(() => onLogEpisode(symptom), 100);
               }}
             >
-              Log Episode
+              {t('symptoms.logEpisode', 'Log Episode')}
             </Button>
           )}
           <Button variant="filled" onClick={onClose}>
-            Close
+            {t('buttons.close', 'Close')}
           </Button>
         </Group>
       </Stack>

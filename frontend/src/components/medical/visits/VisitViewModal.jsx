@@ -21,6 +21,7 @@ import {
   IconNotes,
   IconFileText,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
@@ -38,6 +39,8 @@ const VisitViewModal = ({
   isBlocking,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -81,7 +84,7 @@ const VisitViewModal = ({
   };
 
   const getPractitionerDisplay = (practitionerId) => {
-    if (!practitionerId) return 'No practitioner assigned';
+    if (!practitionerId) return t('visits.viewModal.noPractitionerAssigned', 'No practitioner assigned');
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(practitionerId)
@@ -89,7 +92,7 @@ const VisitViewModal = ({
     if (practitioner) {
       return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
     }
-    return `Practitioner ID: ${practitionerId}`;
+    return t('visits.viewModal.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
   };
 
   const getConditionDetails = (conditionId) => {
@@ -139,7 +142,7 @@ const VisitViewModal = ({
       <Modal
         opened={isOpen}
         onClose={() => !isBlocking && onClose()}
-        title={`Visit - ${formatDate(visit.date)}`}
+        title={t('visits.viewModal.title', 'Visit - {{date}}', { date: formatDate(visit.date) })}
         size="xl"
         centered
         zIndex={2000}
@@ -156,7 +159,7 @@ const VisitViewModal = ({
             <Group justify="space-between" align="center">
               <div>
                 <Title order={3} mb="xs">
-                  {visit.reason || 'General Visit'}
+                  {visit.reason || t('visits.viewModal.generalVisit', 'General Visit')}
                 </Title>
                 <Group gap="xs">
                   {visit.visit_type && (
@@ -186,16 +189,16 @@ const VisitViewModal = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-                Visit Info
+                {t('visits.viewModal.tabs.visitInfo', 'Visit Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-                Clinical
+                {t('visits.viewModal.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                Notes
+                {t('visits.viewModal.tabs.notes', 'Notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                Documents
+                {t('visits.viewModal.tabs.documents', 'Documents')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -204,42 +207,42 @@ const VisitViewModal = ({
               <Box mt="md">
                 <Stack gap="lg">
                   <div>
-                    <Title order={4} mb="sm">Visit Information</Title>
+                    <Title order={4} mb="sm">{t('visits.viewModal.visitInformation', 'Visit Information')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Date</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('labels.date', 'Date')}</Text>
                         <Text>{formatDate(visit.date)}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Reason</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.reason', 'Reason')}</Text>
                         <Text c={visit.reason ? 'inherit' : 'dimmed'}>
-                          {visit.reason || 'Not specified'}
+                          {visit.reason || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Visit Type</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.visitType', 'Visit Type')}</Text>
                         <Text c={visit.visit_type ? 'inherit' : 'dimmed'}>
-                          {visit.visit_type || 'Not specified'}
+                          {visit.visit_type || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Priority</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.priority', 'Priority')}</Text>
                         <Text c={visit.priority ? 'inherit' : 'dimmed'}>
-                          {visit.priority || 'Not specified'}
+                          {visit.priority || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Location</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.location', 'Location')}</Text>
                         <Text c={visit.location ? 'inherit' : 'dimmed'}>
-                          {visit.location || 'Not specified'}
+                          {visit.location || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Duration</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.duration', 'Duration')}</Text>
                         <Text c={visit.duration_minutes ? 'inherit' : 'dimmed'}>
                           {visit.duration_minutes
-                            ? `${visit.duration_minutes} minutes`
-                            : 'Not specified'}
+                            ? t('visits.viewModal.durationMinutes', '{{minutes}} minutes', { minutes: visit.duration_minutes })
+                            : t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -248,7 +251,7 @@ const VisitViewModal = ({
                   {/* Tags Section */}
                   {visit.tags && visit.tags.length > 0 && (
                     <div>
-                      <Title order={4} mb="sm">Tags</Title>
+                      <Title order={4} mb="sm">{t('labels.tags', 'Tags')}</Title>
                       <Group gap="xs">
                         {visit.tags.map((tag, index) => (
                           <Badge
@@ -273,19 +276,19 @@ const VisitViewModal = ({
               <Box mt="md">
                 <Stack gap="lg">
                   <div>
-                    <Title order={4} mb="sm">Practitioner</Title>
+                    <Title order={4} mb="sm">{t('labels.practitioner', 'Practitioner')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Doctor</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.doctor', 'Doctor')}</Text>
                         <Text c={visit.practitioner_id ? 'inherit' : 'dimmed'}>
                           {visit.practitioner_id
                             ? getPractitionerDisplay(visit.practitioner_id)
-                            : 'Not specified'}
+                            : t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       {practitioner?.specialty && (
                         <Stack gap="xs">
-                          <Text fw={500} size="sm" c="dimmed">Specialty</Text>
+                          <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.specialty', 'Specialty')}</Text>
                           <Text>{practitioner.specialty}</Text>
                         </Stack>
                       )}
@@ -294,12 +297,12 @@ const VisitViewModal = ({
 
                   {condition && (
                     <div>
-                      <Title order={4} mb="sm">Related Condition</Title>
+                      <Title order={4} mb="sm">{t('visits.viewModal.relatedCondition', 'Related Condition')}</Title>
                       <Text
                         c="blue"
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => navigateToEntity('condition', condition.id, navigate)}
-                        title="View condition details"
+                        title={t('visits.viewModal.viewCondition', 'View condition details')}
                       >
                         {condition.diagnosis}
                       </Text>
@@ -307,18 +310,18 @@ const VisitViewModal = ({
                   )}
 
                   <div>
-                    <Title order={4} mb="sm">Clinical Information</Title>
+                    <Title order={4} mb="sm">{t('visits.viewModal.clinicalInformation', 'Clinical Information')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Chief Complaint</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.chiefComplaint', 'Chief Complaint')}</Text>
                         <Text c={visit.chief_complaint ? 'inherit' : 'dimmed'}>
-                          {visit.chief_complaint || 'Not specified'}
+                          {visit.chief_complaint || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">Diagnosis</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.diagnosis', 'Diagnosis')}</Text>
                         <Text c={visit.diagnosis ? 'inherit' : 'dimmed'}>
-                          {visit.diagnosis || 'Not specified'}
+                          {visit.diagnosis || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -334,7 +337,7 @@ const VisitViewModal = ({
                   {/* Treatment Plan */}
                   {visit.treatment_plan && (
                     <div>
-                      <Title order={4} mb="sm">Treatment Plan</Title>
+                      <Title order={4} mb="sm">{t('visits.viewModal.treatmentPlan', 'Treatment Plan')}</Title>
                       <Paper withBorder p="sm" bg="gray.1">
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
                           {visit.treatment_plan}
@@ -346,7 +349,7 @@ const VisitViewModal = ({
                   {/* Follow-up Instructions */}
                   {visit.follow_up_instructions && (
                     <div>
-                      <Title order={4} mb="sm">Follow-up Instructions</Title>
+                      <Title order={4} mb="sm">{t('visits.viewModal.followUpInstructions', 'Follow-up Instructions')}</Title>
                       <Paper withBorder p="sm" bg="gray.1">
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
                           {visit.follow_up_instructions}
@@ -357,13 +360,13 @@ const VisitViewModal = ({
 
                   {/* Additional Notes */}
                   <div>
-                    <Title order={4} mb="sm">Additional Notes</Title>
+                    <Title order={4} mb="sm">{t('visits.viewModal.additionalNotes', 'Additional Notes')}</Title>
                     <Paper withBorder p="sm" bg="gray.1">
                       <Text
                         style={{ whiteSpace: 'pre-wrap' }}
                         c={visit.notes ? 'inherit' : 'dimmed'}
                       >
-                        {visit.notes || 'No notes available'}
+                        {visit.notes || t('visits.viewModal.noNotesAvailable', 'No notes available')}
                       </Text>
                     </Paper>
                   </div>
@@ -375,7 +378,7 @@ const VisitViewModal = ({
             <Tabs.Panel value="documents">
               <Box mt="md">
                 <Stack gap="md">
-                  <Title order={4}>Attached Documents</Title>
+                  <Title order={4}>{t('visits.viewModal.attachedDocuments', 'Attached Documents')}</Title>
                   <DocumentManagerWithProgress
                     entityType="visit"
                     entityId={visit.id}
@@ -406,10 +409,10 @@ const VisitViewModal = ({
                 }, 100);
               }}
             >
-              Edit Visit
+              {t('visits.viewModal.editVisit', 'Edit Visit')}
             </Button>
             <Button variant="filled" onClick={onClose}>
-              Close
+              {t('buttons.close', 'Close')}
             </Button>
           </Group>
         </Stack>

@@ -6,6 +6,7 @@ import logger from '../../services/logger';
 
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
@@ -63,256 +64,6 @@ import {
   convertForStorage,
 } from '../../utils/unitConversion';
 
-// Function to get form field configurations based on unit system
-const getFormFields = unitSystem => ({
-  basic: {
-    title: 'Basic Information',
-    icon: IconCalendar,
-    fields: ['recorded_date'],
-  },
-  bloodPressure: {
-    title: 'Blood Pressure',
-    icon: IconHeart,
-    fields: ['systolic_bp', 'diastolic_bp'],
-    description: 'Measured in mmHg',
-  },
-  physical: {
-    title: 'Physical Measurements',
-    icon: IconWeight,
-    fields: ['weight'],
-    description: `Weight in ${unitLabels[unitSystem].weightLong}`,
-  },
-  vitals: {
-    title: 'Vital Signs',
-    icon: IconActivity,
-    fields: [
-      'heart_rate',
-      'temperature',
-      'respiratory_rate',
-      'oxygen_saturation',
-    ],
-    description: 'Core physiological measurements',
-  },
-  additional: {
-    title: 'Additional Measurements',
-    icon: IconDropletFilled,
-    fields: ['blood_glucose', 'pain_scale'],
-    description: 'Supplementary health indicators',
-  },
-  metadata: {
-    title: 'Recording Information',
-    icon: IconMapPin,
-    fields: ['location', 'device_used'],
-    description: 'Context about the measurements',
-  },
-  notes: {
-    title: 'Additional Information',
-    icon: IconNotes,
-    fields: ['notes'],
-  },
-});
-
-// Function to get field configurations based on unit system
-const getFieldConfigs = unitSystem => {
-  const ranges = validationRanges[unitSystem];
-  const labels = unitLabels[unitSystem];
-
-  return {
-    recorded_date: {
-      label: 'Measurement Date & Time',
-      type: 'datetime',
-      required: true,
-      icon: IconCalendar,
-      validation: {
-        required: 'Measurement date and time is required',
-        custom: value => {
-          const result = validateDateTime(value, 'Recorded Date');
-          return result.isValid ? null : result.error;
-        },
-      },
-    },
-    systolic_bp: {
-      label: 'Systolic BP',
-      type: 'number',
-      unit: 'mmHg',
-      placeholder: '120',
-      icon: IconHeart,
-      min: 50,
-      max: 300,
-      step: 1,
-      validation: {
-        min: { value: 50, message: 'Systolic BP must be at least 50 mmHg' },
-        max: { value: 300, message: 'Systolic BP cannot exceed 300 mmHg' },
-      },
-    },
-    diastolic_bp: {
-      label: 'Diastolic BP',
-      type: 'number',
-      unit: 'mmHg',
-      placeholder: '80',
-      icon: IconHeart,
-      min: 30,
-      max: 200,
-      step: 1,
-      validation: {
-        min: { value: 30, message: 'Diastolic BP must be at least 30 mmHg' },
-        max: { value: 200, message: 'Diastolic BP cannot exceed 200 mmHg' },
-      },
-    },
-    heart_rate: {
-      label: 'Heart Rate',
-      type: 'number',
-      unit: 'BPM',
-      placeholder: '72',
-      icon: IconActivity,
-      min: 30,
-      max: 250,
-      step: 1,
-      validation: {
-        min: { value: 30, message: 'Heart rate must be at least 30 BPM' },
-        max: { value: 250, message: 'Heart rate cannot exceed 250 BPM' },
-      },
-    },
-    temperature: {
-      label: 'Temperature',
-      type: 'number',
-      unit: labels.temperature,
-      placeholder: unitSystem === 'imperial' ? '98.6' : '37.0',
-      icon: IconThermometer,
-      min: ranges.temperature.min,
-      max: ranges.temperature.max,
-      step: 0.1,
-      validation: {
-        min: {
-          value: ranges.temperature.min,
-          message: `Temperature must be at least ${ranges.temperature.min}${labels.temperature}`,
-        },
-        max: {
-          value: ranges.temperature.max,
-          message: `Temperature cannot exceed ${ranges.temperature.max}${labels.temperature}`,
-        },
-      },
-    },
-    weight: {
-      label: 'Weight',
-      type: 'number',
-      unit: labels.weight,
-      placeholder: unitSystem === 'imperial' ? '150' : '68',
-      icon: IconWeight,
-      min: ranges.weight.min,
-      max: ranges.weight.max,
-      step: 0.1,
-      validation: {
-        min: {
-          value: ranges.weight.min,
-          message: `Weight must be at least ${ranges.weight.min} ${labels.weight}`,
-        },
-        max: {
-          value: ranges.weight.max,
-          message: `Weight cannot exceed ${ranges.weight.max} ${labels.weight}`,
-        },
-      },
-    },
-    respiratory_rate: {
-      label: 'Respiratory Rate',
-      type: 'number',
-      unit: '/min',
-      placeholder: '16',
-      icon: IconLungs,
-      min: 5,
-      max: 100,
-      step: 1,
-      validation: {
-        min: { value: 5, message: 'Respiratory rate must be at least 5/min' },
-        max: { value: 100, message: 'Respiratory rate cannot exceed 100/min' },
-      },
-    },
-    oxygen_saturation: {
-      label: 'Oxygen Saturation',
-      type: 'number',
-      unit: '%',
-      placeholder: '98',
-      icon: IconDroplet,
-      min: 50,
-      max: 100,
-      step: 1,
-      validation: {
-        min: { value: 50, message: 'Oxygen saturation must be at least 50%' },
-        max: { value: 100, message: 'Oxygen saturation cannot exceed 100%' },
-      },
-    },
-
-    blood_glucose: {
-      label: 'Blood Glucose',
-      type: 'number',
-      unit: 'mg/dL',
-      placeholder: '100',
-      icon: IconDropletFilled,
-      min: 20,
-      max: 800,
-      step: 1,
-      validation: {
-        min: { value: 20, message: 'Blood glucose must be at least 20 mg/dL' },
-        max: { value: 800, message: 'Blood glucose cannot exceed 800 mg/dL' },
-      },
-    },
-    pain_scale: {
-      label: 'Pain Scale',
-      type: 'number',
-      unit: '(0-10)',
-      placeholder: '0',
-      icon: IconMoodSad,
-      min: 0,
-      max: 10,
-      step: 1,
-      validation: {
-        min: { value: 0, message: 'Pain scale must be at least 0' },
-        max: { value: 10, message: 'Pain scale cannot exceed 10' },
-      },
-    },
-    location: {
-      label: 'Measurement Location',
-      type: 'select',
-      placeholder: 'Where were these readings taken?',
-      icon: IconMapPin,
-      options: [
-        { value: 'home', label: 'Home' },
-        { value: 'clinic', label: 'Clinic' },
-        { value: 'hospital', label: 'Hospital' },
-        { value: 'urgent_care', label: 'Urgent Care' },
-        { value: 'pharmacy', label: 'Pharmacy' },
-        { value: 'ambulatory', label: 'Ambulatory Care' },
-        { value: 'other', label: 'Other' },
-      ],
-    },
-    device_used: {
-      label: 'Device/Equipment Used',
-      type: 'text',
-      placeholder: 'e.g., Digital BP monitor, Thermometer model...',
-      icon: IconDevices,
-      validation: {
-        maxLength: {
-          value: 100,
-          message: 'Device name cannot exceed 100 characters',
-        },
-      },
-    },
-    notes: {
-      label: 'Notes',
-      type: 'textarea',
-      placeholder: 'Additional notes about the vital signs measurement...',
-      icon: IconNotes,
-      rows: 3,
-      validation: {
-        maxLength: {
-          value: 1000,
-          message: 'Notes cannot exceed 1000 characters',
-        },
-      },
-    },
-  };
-};
-
 const VitalsForm = ({
   vitals = null,
   patientId,
@@ -325,16 +76,259 @@ const VitalsForm = ({
   error,
   clearError,
 }) => {
+  const { t } = useTranslation('common');
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
 
   // Generate dynamic configs based on user's unit system
-  const FORM_FIELDS = useMemo(() => getFormFields(unitSystem), [unitSystem]);
-  const FIELD_CONFIGS = useMemo(
-    () => getFieldConfigs(unitSystem),
-    [unitSystem]
-  );
+  const FORM_FIELDS = useMemo(() => ({
+    basic: {
+      title: t('vitals.form.sections.basicInfo', 'Basic Information'),
+      icon: IconCalendar,
+      fields: ['recorded_date'],
+    },
+    bloodPressure: {
+      title: t('vitals.stats.bloodPressure', 'Blood Pressure'),
+      icon: IconHeart,
+      fields: ['systolic_bp', 'diastolic_bp'],
+      description: t('vitals.form.bloodPressureDesc', 'Measured in mmHg'),
+    },
+    physical: {
+      title: t('vitals.form.sections.physicalMeasurements', 'Physical Measurements'),
+      icon: IconWeight,
+      fields: ['weight'],
+      description: t('vitals.form.weightDesc', 'Weight in {{unit}}', { unit: unitLabels[unitSystem].weightLong }),
+    },
+    vitals: {
+      title: t('vitals.modal.vitalSigns', 'Vital Signs'),
+      icon: IconActivity,
+      fields: [
+        'heart_rate',
+        'temperature',
+        'respiratory_rate',
+        'oxygen_saturation',
+      ],
+      description: t('vitals.form.vitalSignsDesc', 'Core physiological measurements'),
+    },
+    additional: {
+      title: t('vitals.modal.additionalMeasurements', 'Additional Measurements'),
+      icon: IconDropletFilled,
+      fields: ['blood_glucose', 'pain_scale'],
+      description: t('vitals.form.additionalMeasurementsDesc', 'Supplementary health indicators'),
+    },
+    metadata: {
+      title: t('vitals.form.sections.recordingInfo', 'Recording Information'),
+      icon: IconMapPin,
+      fields: ['location', 'device_used'],
+      description: t('vitals.form.contextDesc', 'Context about the measurements'),
+    },
+    notes: {
+      title: t('vitals.form.sections.additionalInfo', 'Additional Information'),
+      icon: IconNotes,
+      fields: ['notes'],
+    },
+  }), [unitSystem, t]);
+
+  const FIELD_CONFIGS = useMemo(() => {
+    const ranges = validationRanges[unitSystem];
+    const labels = unitLabels[unitSystem];
+
+    return {
+      recorded_date: {
+        label: t('vitals.form.recordedDateTime', 'Measurement Date & Time'),
+        type: 'datetime',
+        required: true,
+        icon: IconCalendar,
+        validation: {
+          required: t('vitals.form.validation.dateRequired', 'Measurement date and time is required'),
+          custom: value => {
+            const result = validateDateTime(value, 'Recorded Date');
+            return result.isValid ? null : result.error;
+          },
+        },
+      },
+      systolic_bp: {
+        label: t('vitals.form.systolicBP', 'Systolic BP'),
+        type: 'number',
+        unit: t('vitals.units.mmHg', 'mmHg'),
+        placeholder: '120',
+        icon: IconHeart,
+        min: 50,
+        max: 300,
+        step: 1,
+        validation: {
+          min: { value: 50, message: t('vitals.form.validation.systolicMin', 'Systolic BP must be at least 50 mmHg') },
+          max: { value: 300, message: t('vitals.form.validation.systolicMax', 'Systolic BP cannot exceed 300 mmHg') },
+        },
+      },
+      diastolic_bp: {
+        label: t('vitals.form.diastolicBP', 'Diastolic BP'),
+        type: 'number',
+        unit: t('vitals.units.mmHg', 'mmHg'),
+        placeholder: '80',
+        icon: IconHeart,
+        min: 30,
+        max: 200,
+        step: 1,
+        validation: {
+          min: { value: 30, message: t('vitals.form.validation.diastolicMin', 'Diastolic BP must be at least 30 mmHg') },
+          max: { value: 200, message: t('vitals.form.validation.diastolicMax', 'Diastolic BP cannot exceed 200 mmHg') },
+        },
+      },
+      heart_rate: {
+        label: t('vitals.stats.heartRate', 'Heart Rate'),
+        type: 'number',
+        unit: t('vitals.units.bpm', 'BPM'),
+        placeholder: '72',
+        icon: IconActivity,
+        min: 30,
+        max: 250,
+        step: 1,
+        validation: {
+          min: { value: 30, message: t('vitals.form.validation.heartRateMin', 'Heart rate must be at least 30 BPM') },
+          max: { value: 250, message: t('vitals.form.validation.heartRateMax', 'Heart rate cannot exceed 250 BPM') },
+        },
+      },
+      temperature: {
+        label: t('vitals.stats.temperature', 'Temperature'),
+        type: 'number',
+        unit: labels.temperature,
+        placeholder: unitSystem === 'imperial' ? '98.6' : '37.0',
+        icon: IconThermometer,
+        min: ranges.temperature.min,
+        max: ranges.temperature.max,
+        step: 0.1,
+        validation: {
+          min: {
+            value: ranges.temperature.min,
+            message: t('vitals.form.validation.temperatureMin', 'Temperature must be at least {{min}}{{unit}}', { min: ranges.temperature.min, unit: labels.temperature }),
+          },
+          max: {
+            value: ranges.temperature.max,
+            message: t('vitals.form.validation.temperatureMax', 'Temperature cannot exceed {{max}}{{unit}}', { max: ranges.temperature.max, unit: labels.temperature }),
+          },
+        },
+      },
+      weight: {
+        label: t('vitals.stats.weight', 'Weight'),
+        type: 'number',
+        unit: labels.weight,
+        placeholder: unitSystem === 'imperial' ? '150' : '68',
+        icon: IconWeight,
+        min: ranges.weight.min,
+        max: ranges.weight.max,
+        step: 0.1,
+        validation: {
+          min: {
+            value: ranges.weight.min,
+            message: t('vitals.form.validation.weightMin', 'Weight must be at least {{min}} {{unit}}', { min: ranges.weight.min, unit: labels.weight }),
+          },
+          max: {
+            value: ranges.weight.max,
+            message: t('vitals.form.validation.weightMax', 'Weight cannot exceed {{max}} {{unit}}', { max: ranges.weight.max, unit: labels.weight }),
+          },
+        },
+      },
+      respiratory_rate: {
+        label: t('vitals.modal.respiratoryRate', 'Respiratory Rate'),
+        type: 'number',
+        unit: t('vitals.units.perMin', '/min'),
+        placeholder: '16',
+        icon: IconLungs,
+        min: 5,
+        max: 100,
+        step: 1,
+        validation: {
+          min: { value: 5, message: t('vitals.form.validation.respiratoryRateMin', 'Respiratory rate must be at least 5/min') },
+          max: { value: 100, message: t('vitals.form.validation.respiratoryRateMax', 'Respiratory rate cannot exceed 100/min') },
+        },
+      },
+      oxygen_saturation: {
+        label: t('vitals.card.oxygenSaturation', 'Oxygen Saturation'),
+        type: 'number',
+        unit: '%',
+        placeholder: '98',
+        icon: IconDroplet,
+        min: 50,
+        max: 100,
+        step: 1,
+        validation: {
+          min: { value: 50, message: t('vitals.form.validation.oxygenMin', 'Oxygen saturation must be at least 50%') },
+          max: { value: 100, message: t('vitals.form.validation.oxygenMax', 'Oxygen saturation cannot exceed 100%') },
+        },
+      },
+
+      blood_glucose: {
+        label: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
+        type: 'number',
+        unit: t('vitals.units.mgdl', 'mg/dL'),
+        placeholder: '100',
+        icon: IconDropletFilled,
+        min: 20,
+        max: 800,
+        step: 1,
+        validation: {
+          min: { value: 20, message: t('vitals.form.validation.bloodGlucoseMin', 'Blood glucose must be at least 20 mg/dL') },
+          max: { value: 800, message: t('vitals.form.validation.bloodGlucoseMax', 'Blood glucose cannot exceed 800 mg/dL') },
+        },
+      },
+      pain_scale: {
+        label: t('vitals.modal.painScale', 'Pain Scale'),
+        type: 'number',
+        unit: t('vitals.form.painScaleUnit', '(0-10)'),
+        placeholder: '0',
+        icon: IconMoodSad,
+        min: 0,
+        max: 10,
+        step: 1,
+        validation: {
+          min: { value: 0, message: t('vitals.form.validation.painScaleMin', 'Pain scale must be at least 0') },
+          max: { value: 10, message: t('vitals.form.validation.painScaleMax', 'Pain scale cannot exceed 10') },
+        },
+      },
+      location: {
+        label: t('vitals.form.measurementLocation', 'Measurement Location'),
+        type: 'select',
+        placeholder: t('vitals.form.locationPlaceholder', 'Where were these readings taken?'),
+        icon: IconMapPin,
+        options: [
+          { value: 'home', label: t('vitals.form.locations.home', 'Home') },
+          { value: 'clinic', label: t('vitals.form.locations.clinic', 'Clinic') },
+          { value: 'hospital', label: t('vitals.form.locations.hospital', 'Hospital') },
+          { value: 'urgent_care', label: t('vitals.form.locations.urgentCare', 'Urgent Care') },
+          { value: 'pharmacy', label: t('vitals.form.locations.pharmacy', 'Pharmacy') },
+          { value: 'ambulatory', label: t('vitals.form.locations.ambulatory', 'Ambulatory Care') },
+          { value: 'other', label: t('vitals.form.locations.other', 'Other') },
+        ],
+      },
+      device_used: {
+        label: t('vitals.form.deviceUsed', 'Device/Equipment Used'),
+        type: 'text',
+        placeholder: t('vitals.form.devicePlaceholder', 'e.g., Digital BP monitor, Thermometer model...'),
+        icon: IconDevices,
+        validation: {
+          maxLength: {
+            value: 100,
+            message: t('vitals.form.validation.deviceMaxLength', 'Device name cannot exceed 100 characters'),
+          },
+        },
+      },
+      notes: {
+        label: t('common.fields.notes.label', 'Notes'),
+        type: 'textarea',
+        placeholder: t('vitals.form.notesPlaceholder', 'Additional notes about the vital signs measurement...'),
+        icon: IconNotes,
+        rows: 3,
+        validation: {
+          maxLength: {
+            value: 1000,
+            message: t('vitals.form.validation.notesMaxLength', 'Notes cannot exceed 1000 characters'),
+          },
+        },
+      },
+    };
+  }, [unitSystem, t]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -581,7 +575,7 @@ const VitalsForm = ({
         <DateInput
           key={fieldName}
           label={config.label}
-          placeholder="Select date"
+          placeholder={t('vitals.form.selectDate', 'Select date')}
           value={value}
           onChange={val => handleInputChange(fieldName, val)}
           leftSection={<IconComponent size={16} />}
@@ -598,7 +592,7 @@ const VitalsForm = ({
         <DateTimePicker
           key={fieldName}
           label={config.label}
-          placeholder="Select date and time"
+          placeholder={t('vitals.form.selectDateTime', 'Select date and time')}
           value={value}
           onChange={val => handleInputChange(fieldName, val)}
           leftSection={<IconComponent size={16} />}
@@ -690,9 +684,9 @@ const VitalsForm = ({
           variant="light"
           color="blue"
           icon={<IconInfoCircle size={16} />}
-          title="Timezone Information"
+          title={t('vitals.form.timezoneInfo', 'Timezone Information')}
         >
-          Times shown in {facilityTimezone}
+          {t('vitals.form.timesShownIn', 'Times shown in {{timezone}}', { timezone: facilityTimezone })}
         </Alert>
       )}
 
@@ -702,7 +696,7 @@ const VitalsForm = ({
           variant="light"
           color="orange"
           icon={<IconAlertTriangle size={16} />}
-          title="Health Alerts"
+          title={t('vitals.form.healthAlerts', 'Health Alerts')}
         >
           <Stack gap="xs">
             {warnings.map((warning, index) => (
@@ -763,18 +757,18 @@ const VitalsForm = ({
               variant="light"
               color="green"
               icon={<IconUser size={16} />}
-              title="Patient Information"
+              title={t('vitals.form.patientInfo', 'Patient Information')}
             >
-              Patient Height: {patientHeight} inches (from profile)
+              {t('vitals.form.patientHeight', 'Patient Height: {{height}} inches (from profile)', { height: patientHeight })}
             </Alert>
           ) : (
             <Alert
               variant="light"
               color="orange"
               icon={<IconAlertTriangle size={16} />}
-              title="Missing Patient Information"
+              title={t('vitals.form.missingPatientInfo', 'Missing Patient Information')}
             >
-              Height not set in patient profile - BMI calculation unavailable
+              {t('vitals.form.heightNotSet', 'Height not set in patient profile - BMI calculation unavailable')}
             </Alert>
           )}
 
@@ -791,12 +785,12 @@ const VitalsForm = ({
                   >
                     <IconTrendingUp size={18} />
                   </ActionIcon>
-                  <Title order={4}>Calculated Values</Title>
+                  <Title order={4}>{t('vitals.form.calculatedValues', 'Calculated Values')}</Title>
                 </Group>
 
                 <Card shadow="xs" p="sm" radius="md" withBorder>
                   <Group justify="space-between">
-                    <Text fw={500}>BMI</Text>
+                    <Text fw={500}>{t('vitals.stats.bmi', 'BMI')}</Text>
                     <Badge size="lg" variant="light" color="blue">
                       {calculatedBMI}
                     </Badge>
@@ -814,7 +808,7 @@ const VitalsForm = ({
               onClick={onCancel}
               disabled={isLoading}
             >
-              Cancel
+              {t('buttons.cancel', 'Cancel')}
             </Button>
 
             <Button
@@ -828,7 +822,7 @@ const VitalsForm = ({
               }
               loading={isLoading}
             >
-              {isEdit ? 'Update Vitals' : 'Save Vitals'}
+              {isEdit ? t('vitals.form.updateVitals', 'Update Vitals') : t('vitals.form.saveVitals', 'Save Vitals')}
             </Button>
           </Group>
         </Stack>

@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   Stack,
@@ -33,6 +34,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
   onClose,
   onSubmit
 }) => {
+  const { t } = useTranslation('common');
   const [formData, setFormData] = useState<Partial<LabTestComponent>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -216,7 +218,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
       title={
         <Group gap="xs">
           <IconEdit size={20} />
-          <Text fw={600}>Edit Test Component</Text>
+          <Text fw={600}>{t('testComponents.editModal.title', 'Edit Test Component')}</Text>
         </Group>
       }
       size="lg"
@@ -226,18 +228,18 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
       <Box style={{ position: 'relative' }}>
         <FormLoadingOverlay
           visible={isSubmitting}
-          message="Updating test component..."
+          message={t('testComponents.editModal.updating', 'Updating test component...')}
         />
 
         <Stack gap="md">
           <Alert icon={<IconAlertCircle size={16} />} color="blue">
-            Editing: <strong>{component.test_name}</strong>
+            {t('testComponents.editModal.editing', 'Editing')}: <strong>{component.test_name}</strong>
           </Alert>
 
           {/* Test Name */}
           <TextInput
-            label="Test Name"
-            placeholder="e.g., Hemoglobin"
+            label={t('testComponents.editModal.fields.testName', 'Test Name')}
+            placeholder={t('testComponents.editModal.placeholders.testName', 'e.g., Hemoglobin')}
             required
             value={formData.test_name || ''}
             onChange={(e) => setFormData(prev => ({ ...prev, test_name: e.target.value }))}
@@ -246,14 +248,14 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
           {/* Abbreviation and Test Code */}
           <Group grow>
             <TextInput
-              label="Abbreviation"
-              placeholder="e.g., HGB"
+              label={t('testComponents.editModal.fields.abbreviation', 'Abbreviation')}
+              placeholder={t('testComponents.editModal.placeholders.abbreviation', 'e.g., HGB')}
               value={formData.abbreviation || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, abbreviation: e.target.value }))}
             />
             <TextInput
-              label="Test Code"
-              placeholder="e.g., 718-7"
+              label={t('testComponents.editModal.fields.testCode', 'Test Code')}
+              placeholder={t('testComponents.editModal.placeholders.testCode', 'e.g., 718-7')}
               value={formData.test_code || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, test_code: e.target.value }))}
             />
@@ -262,16 +264,16 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
           {/* Value and Unit */}
           <Group grow>
             <NumberInput
-              label="Value"
-              placeholder="Enter test value"
+              label={t('testComponents.editModal.fields.value', 'Value')}
+              placeholder={t('testComponents.editModal.placeholders.value', 'Enter test value')}
               required
               value={formData.value}
               onChange={(value) => setFormData(prev => ({ ...prev, value: value as number }))}
               decimalScale={2}
             />
             <TextInput
-              label="Unit"
-              placeholder="e.g., g/dL"
+              label={t('testComponents.editModal.fields.unit', 'Unit')}
+              placeholder={t('testComponents.editModal.placeholders.unit', 'e.g., g/dL')}
               required
               value={formData.unit || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
@@ -280,26 +282,26 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {/* Reference Range */}
           <Stack gap="xs">
-            <Text size="sm" fw={500}>Reference Range</Text>
+            <Text size="sm" fw={500}>{t('testComponents.editModal.fields.referenceRange', 'Reference Range')}</Text>
             <Group grow>
               <NumberInput
-                label="Minimum"
-                placeholder="Min value"
+                label={t('testComponents.editModal.fields.minimum', 'Minimum')}
+                placeholder={t('testComponents.editModal.placeholders.minValue', 'Min value')}
                 value={formData.ref_range_min ?? undefined}
                 onChange={(value) => setFormData(prev => ({ ...prev, ref_range_min: value === '' ? undefined : value as number }))}
                 decimalScale={2}
               />
               <NumberInput
-                label="Maximum"
-                placeholder="Max value"
+                label={t('testComponents.editModal.fields.maximum', 'Maximum')}
+                placeholder={t('testComponents.editModal.placeholders.maxValue', 'Max value')}
                 value={formData.ref_range_max ?? undefined}
                 onChange={(value) => setFormData(prev => ({ ...prev, ref_range_max: value === '' ? undefined : value as number }))}
                 decimalScale={2}
               />
             </Group>
             <TextInput
-              label="Range Text (alternative)"
-              placeholder="e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'"
+              label={t('testComponents.editModal.fields.rangeText', 'Range Text (alternative)')}
+              placeholder={t('testComponents.editModal.placeholders.rangeText', "e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'")}
               value={formData.ref_range_text || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, ref_range_text: e.target.value }))}
             />
@@ -308,11 +310,11 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
           {/* Status (Auto-calculated) and Category */}
           <Group grow>
             <TextInput
-              label="Status (Auto-calculated)"
+              label={t('testComponents.editModal.fields.status', 'Status (Auto-calculated)')}
               value={
                 formData.status
                   ? formData.status.charAt(0).toUpperCase() + formData.status.slice(1)
-                  : 'Not determined'
+                  : t('testComponents.editModal.notDetermined', 'Not determined')
               }
               readOnly
               styles={{
@@ -330,23 +332,23 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               }}
             />
             <Select
-              label="Category"
-              placeholder="Select category"
+              label={t('testComponents.editModal.fields.category', 'Category')}
+              placeholder={t('testComponents.editModal.placeholders.category', 'Select category')}
               clearable
               searchable
               comboboxProps={{ zIndex: 3001 }}
               data={[
-                { value: 'chemistry', label: 'Blood Chemistry & Metabolic' },
-                { value: 'hematology', label: 'Blood Counts & Cells' },
-                { value: 'lipids', label: 'Cholesterol & Lipids' },
-                { value: 'endocrinology', label: 'Hormones & Thyroid' },
-                { value: 'immunology', label: 'Immune System & Antibodies' },
-                { value: 'microbiology', label: 'Infections & Cultures' },
-                { value: 'toxicology', label: 'Drug & Toxin Screening' },
-                { value: 'genetics', label: 'Genetic Testing' },
-                { value: 'molecular', label: 'Molecular & DNA Tests' },
-                { value: 'pathology', label: 'Tissue & Biopsy Analysis' },
-                { value: 'other', label: 'Other Tests' },
+                { value: 'chemistry', label: t('testComponents.categories.chemistry', 'Blood Chemistry & Metabolic') },
+                { value: 'hematology', label: t('testComponents.categories.hematology', 'Blood Counts & Cells') },
+                { value: 'lipids', label: t('testComponents.categories.lipids', 'Cholesterol & Lipids') },
+                { value: 'endocrinology', label: t('testComponents.categories.endocrinology', 'Hormones & Thyroid') },
+                { value: 'immunology', label: t('testComponents.categories.immunology', 'Immune System & Antibodies') },
+                { value: 'microbiology', label: t('testComponents.categories.microbiology', 'Infections & Cultures') },
+                { value: 'toxicology', label: t('testComponents.categories.toxicology', 'Drug & Toxin Screening') },
+                { value: 'genetics', label: t('testComponents.categories.genetics', 'Genetic Testing') },
+                { value: 'molecular', label: t('testComponents.categories.molecular', 'Molecular & DNA Tests') },
+                { value: 'pathology', label: t('testComponents.categories.pathology', 'Tissue & Biopsy Analysis') },
+                { value: 'other', label: t('testComponents.categories.other', 'Other Tests') },
               ]}
               value={formData.category ?? null}
               onChange={(value) => setFormData(prev => ({
@@ -358,8 +360,8 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {/* Notes */}
           <Textarea
-            label="Notes"
-            placeholder="Additional notes about this test result"
+            label={t('labels.notes', 'Notes')}
+            placeholder={t('testComponents.editModal.placeholders.notes', 'Additional notes about this test result')}
             rows={3}
             value={formData.notes || ''}
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
@@ -372,14 +374,14 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              Cancel
+              {t('buttons.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !formData.test_name || !formData.unit || formData.value === undefined}
               loading={isSubmitting}
             >
-              Save Changes
+              {t('buttons.saveChanges', 'Save Changes')}
             </Button>
           </Group>
         </Stack>

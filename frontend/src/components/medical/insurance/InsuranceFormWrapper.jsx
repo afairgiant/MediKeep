@@ -32,6 +32,8 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
+import { useTranslation } from 'react-i18next';
+import { translateFieldConfig } from '../../../utils/formFieldTranslations';
 
 const InsuranceFormWrapper = ({
   isOpen,
@@ -44,6 +46,9 @@ const InsuranceFormWrapper = ({
   children,
   onFileUploadComplete,
 }) => {
+  const { t } = useTranslation('common');
+  const { t: tMedical } = useTranslation('medical');
+
   // Get insurance form fields
   const fields = getFormFields('insurance');
 
@@ -361,14 +366,17 @@ const InsuranceFormWrapper = ({
       return null; // Skip dividers in tabbed layout
     }
 
+    // Translate field configuration
+    const translatedField = translateFieldConfig(field, tMedical);
+
     const commonProps = {
-      key: field.name,
-      label: field.label,
-      placeholder: field.placeholder,
-      required: field.required,
-      description: field.description,
-      value: formData[field.name] || '',
-      error: fieldErrors[field.name],
+      key: translatedField.name,
+      label: translatedField.label,
+      placeholder: translatedField.placeholder,
+      required: translatedField.required,
+      description: translatedField.description,
+      value: formData[translatedField.name] || '',
+      error: fieldErrors[translatedField.name],
     };
 
     switch (field.type) {
@@ -392,13 +400,13 @@ const InsuranceFormWrapper = ({
         return (
           <Select
             key={field.name}
-            label={field.label}
-            placeholder={field.placeholder}
+            label={translatedField.label}
+            placeholder={translatedField.placeholder}
             required={field.required}
-            description={field.description}
+            description={translatedField.description}
             value={formData[field.name] || null}
             error={fieldErrors[field.name]}
-            data={field.options || []}
+            data={translatedField.options || []}
             onChange={(value) => {
               // Create a synthetic event for consistency
               onInputChange({ target: { name: field.name, value: value || '' } });
@@ -448,8 +456,8 @@ const InsuranceFormWrapper = ({
         return (
           <Checkbox
             key={field.name}
-            label={field.label}
-            description={field.description}
+            label={translatedField.label}
+            description={translatedField.description}
             checked={formData[field.name] || false}
             onChange={(e) => onInputChange({ target: { name: field.name, value: e.currentTarget.checked } })}
           />
@@ -460,12 +468,12 @@ const InsuranceFormWrapper = ({
           return (
             <Box key={field.name}>
               <Text size="sm" fw={500} mb="xs">
-                {field.label}
+                {translatedField.label}
                 {field.required && <span style={{ color: 'red' }}> *</span>}
               </Text>
-              {field.description && (
+              {translatedField.description && (
                 <Text size="xs" c="dimmed" mb="xs">
-                  {field.description}
+                  {translatedField.description}
                 </Text>
               )}
               <TagInput
@@ -473,7 +481,7 @@ const InsuranceFormWrapper = ({
                 onChange={(tags) => {
                   onInputChange({ target: { name: field.name, value: tags } });
                 }}
-                placeholder={field.placeholder}
+                placeholder={translatedField.placeholder}
                 maxTags={field.maxTags}
               />
             </Box>
@@ -503,7 +511,7 @@ const InsuranceFormWrapper = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting} message="Saving insurance..." />
+      <FormLoadingOverlay visible={isSubmitting} message={t('insurance.form.saving', 'Saving insurance...')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -511,26 +519,26 @@ const InsuranceFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                Basic Info
+                {t('insurance.form.tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="member" leftSection={<IconUser size={16} />}>
-                Member
+                {t('insurance.form.tabs.member', 'Member')}
               </Tabs.Tab>
               <Tabs.Tab value="coverage" leftSection={<IconShield size={16} />}>
-                Coverage
+                {t('insurance.form.tabs.coverage', 'Coverage')}
               </Tabs.Tab>
               {contactFields.length > 0 && (
                 <Tabs.Tab value="contact" leftSection={<IconPhone size={16} />}>
-                  Contact
+                  {t('insurance.form.tabs.contact', 'Contact')}
                 </Tabs.Tab>
               )}
               {editingItem && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  Documents
+                  {t('insurance.form.tabs.documents', 'Documents')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconFileText size={16} />}>
-                Notes
+                {t('insurance.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -565,7 +573,7 @@ const InsuranceFormWrapper = ({
               <Box mt="md">
                 <Stack gap="md">
                   <div>
-                    <Text fw={600} size="sm" mb="sm">Coverage Period & Status</Text>
+                    <Text fw={600} size="sm" mb="sm">{t('insurance.form.coveragePeriodStatus', 'Coverage Period & Status')}</Text>
                     <Grid>
                       {coverageFields.filter(f => ['effective_date', 'expiration_date', 'status', 'is_primary'].includes(f.name)).map(field => (
                         <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
@@ -578,7 +586,7 @@ const InsuranceFormWrapper = ({
                   {coverageFields.filter(f => !['effective_date', 'expiration_date', 'status', 'is_primary'].includes(f.name)).length > 0 && (
                     <div>
                       <Divider mt="md" mb="md" />
-                      <Text fw={600} size="sm" mb="sm">Coverage Details</Text>
+                      <Text fw={600} size="sm" mb="sm">{t('insurance.viewModal.coverageDetails', 'Coverage Details')}</Text>
                       <Grid>
                         {coverageFields.filter(f => !['effective_date', 'expiration_date', 'status', 'is_primary'].includes(f.name)).map(field => (
                           <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
@@ -612,7 +620,7 @@ const InsuranceFormWrapper = ({
               <Tabs.Panel value="documents">
                 <Box mt="md">
                   <Stack gap="md">
-                    <Title order={4}>Attached Documents</Title>
+                    <Title order={4}>{t('insurance.viewModal.attachedDocuments', 'Attached Documents')}</Title>
                     <DocumentManagerWithProgress
                       entityType="insurance"
                       entityId={editingItem.id}
@@ -651,10 +659,10 @@ const InsuranceFormWrapper = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
+              {t('buttons.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {editingItem ? 'Update Insurance' : 'Add Insurance'}
+              {editingItem ? t('insurance.form.updateInsurance', 'Update Insurance') : t('insurance.form.addInsurance', 'Add Insurance')}
             </Button>
           </Group>
         </Stack>

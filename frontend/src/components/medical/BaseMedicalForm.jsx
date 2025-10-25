@@ -288,10 +288,6 @@ const BaseMedicalForm = ({
   // Main renderField function now uses smaller callbacks - much simpler with fewer dependencies
   const renderField = useCallback((fieldConfig) => {
     // Translate field configuration (labels, placeholders, descriptions, options)
-    if (fieldConfig.name === 'allergen') {
-      alert(`TRANSLATION TEST:\nOriginal: ${fieldConfig.label}\nLanguage: ${i18n.language}\nTranslation of 'Notes': ${t('common.labels.notes')}`);
-    }
-
     const translatedFieldConfig = translateFieldConfig(fieldConfig, t);
 
     const {

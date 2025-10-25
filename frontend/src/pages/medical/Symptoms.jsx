@@ -1,6 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
@@ -38,6 +39,7 @@ import { SymptomViewModal } from '../../components/medical/symptoms';
 import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
 
 const Symptoms = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const { navigateToView, closeView } = useViewNavigation();
@@ -369,7 +371,7 @@ const Symptoms = () => {
   if (loading && symptoms.length === 0) {
     return (
       <Container size="xl">
-        <PageHeader title="Symptoms" icon="🩺" />
+        <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
         <Center style={{ minHeight: 400 }}>
           <Loader size="lg" />
         </Center>
@@ -381,9 +383,9 @@ const Symptoms = () => {
   if (!currentPatient) {
     return (
       <Container size="xl">
-        <PageHeader title="Symptoms" icon="🩺" />
-        <Alert title="No Patient Selected" color="blue">
-          Please select or create a patient to track symptoms.
+        <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
+        <Alert title={t('symptoms.noPatientSelected', 'No Patient Selected')} color="blue">
+          {t('symptoms.selectPatientPrompt', 'Please select or create a patient to track symptoms.')}
         </Alert>
       </Container>
     );
@@ -391,12 +393,12 @@ const Symptoms = () => {
 
   return (
     <Container size="xl">
-      <PageHeader title="Symptoms" icon="🩺" />
+      <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
 
       {/* Success/Error Messages */}
       {error && (
         <Alert
-          title="Error"
+          title={t('labels.error', 'Error')}
           color="red"
           onClose={() => setError(null)}
           withCloseButton
@@ -406,7 +408,7 @@ const Symptoms = () => {
         </Alert>
       )}
       {successMessage && (
-        <Alert title="Success" color="green" mb="md">
+        <Alert title={t('labels.success', 'Success')} color="green" mb="md">
           {successMessage}
         </Alert>
       )}
@@ -414,7 +416,7 @@ const Symptoms = () => {
       {/* Add Symptom Button */}
       <Group mb="md">
         <Button leftSection={<IconPlus size={16} />} onClick={handleAddSymptom}>
-          Add Symptom
+          {t('symptoms.addSymptom', 'Add Symptom')}
         </Button>
       </Group>
 
@@ -422,13 +424,13 @@ const Symptoms = () => {
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List mb="md">
           <Tabs.Tab value="list" leftSection={<IconList size={16} />}>
-            List
+            {t('symptoms.tabs.list', 'List')}
           </Tabs.Tab>
           <Tabs.Tab value="timeline" leftSection={<IconTimeline size={16} />}>
-            Timeline
+            {t('symptoms.tabs.timeline', 'Timeline')}
           </Tabs.Tab>
           <Tabs.Tab value="calendar" leftSection={<IconCalendar size={16} />}>
-            Calendar
+            {t('symptoms.tabs.calendar', 'Calendar')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -439,10 +441,10 @@ const Symptoms = () => {
               <Stack align="center" gap="md">
                 <IconStethoscope size={48} stroke={1.5} color="gray" />
                 <Text size="lg" c="dimmed">
-                  No symptoms recorded yet
+                  {t('symptoms.noRecords', 'No symptoms recorded yet')}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  Click "Add Symptom" to start tracking a new symptom
+                  {t('symptoms.noRecordsPrompt', 'Click "Add Symptom" to start tracking a new symptom')}
                 </Text>
               </Stack>
             </Paper>
@@ -470,28 +472,28 @@ const Symptoms = () => {
                         </Badge>
                         {symptom.is_chronic && (
                           <Badge color="violet" variant="light">
-                            Chronic
+                            {t('symptoms.chronic', 'Chronic')}
                           </Badge>
                         )}
                       </Group>
 
                       {symptom.category && (
                         <Text size="sm" c="dimmed">
-                          Category: {symptom.category}
+                          {t('symptoms.category', 'Category')}: {symptom.category}
                         </Text>
                       )}
 
                       <Group gap="md">
                         <Text size="sm" c="dimmed">
-                          First: {new Date(symptom.first_occurrence_date).toLocaleDateString()}
+                          {t('symptoms.first', 'First')}: {new Date(symptom.first_occurrence_date).toLocaleDateString()}
                         </Text>
                         {symptom.last_occurrence_date && (
                           <Text size="sm" c="dimmed">
-                            Last: {new Date(symptom.last_occurrence_date).toLocaleDateString()}
+                            {t('symptoms.last', 'Last')}: {new Date(symptom.last_occurrence_date).toLocaleDateString()}
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">
-                          {symptom.occurrence_count || 0} episode{symptom.occurrence_count === 1 ? '' : 's'}
+                          {symptom.occurrence_count || 0} {symptom.occurrence_count === 1 ? t('symptoms.episode', 'episode') : t('symptoms.episodes', 'episodes')}
                         </Text>
                       </Group>
 
@@ -504,7 +506,7 @@ const Symptoms = () => {
                       {symptom.typical_triggers && symptom.typical_triggers.length > 0 && (
                         <Group gap="xs">
                           <Text size="xs" c="dimmed">
-                            Common Triggers:
+                            {t('symptoms.commonTriggers', 'Common Triggers')}:
                           </Text>
                           {symptom.typical_triggers.slice(0, 3).map((trigger, index) => (
                             <Badge key={index} size="sm" variant="outline">
@@ -513,7 +515,7 @@ const Symptoms = () => {
                           ))}
                           {symptom.typical_triggers.length > 3 && (
                             <Text size="xs" c="dimmed">
-                              +{symptom.typical_triggers.length - 3} more
+                              {t('symptoms.moreCount', '+{{count}} more', { count: symptom.typical_triggers.length - 3 })}
                             </Text>
                           )}
                         </Group>
@@ -538,7 +540,7 @@ const Symptoms = () => {
                         leftSection={<IconNote size={14} />}
                         onClick={() => handleLogEpisode(symptom)}
                       >
-                        Log Episode
+                        {t('symptoms.logEpisode', 'Log Episode')}
                       </Button>
                       <Button
                         size="xs"
@@ -546,7 +548,7 @@ const Symptoms = () => {
                         leftSection={<IconEye size={14} />}
                         onClick={() => handleViewSymptom(symptom)}
                       >
-                        View
+                        {t('buttons.view', 'View')}
                       </Button>
                       <Button
                         size="xs"
@@ -554,7 +556,7 @@ const Symptoms = () => {
                         leftSection={<IconEdit size={14} />}
                         onClick={() => handleEditSymptom(symptom)}
                       >
-                        Edit
+                        {t('buttons.edit', 'Edit')}
                       </Button>
                       <Button
                         size="xs"
@@ -563,7 +565,7 @@ const Symptoms = () => {
                         leftSection={<IconTrash size={14} />}
                         onClick={() => handleDeleteSymptom(symptom.id)}
                       >
-                        Delete
+                        {t('buttons.delete', 'Delete')}
                       </Button>
                     </Group>
                   </Group>

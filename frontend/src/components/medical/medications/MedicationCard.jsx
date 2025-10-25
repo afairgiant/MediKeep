@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Badge,
   Button,
@@ -11,7 +12,7 @@ import {
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
-import { MEDICATION_TYPE_LABELS } from '../../../constants/medicationTypes';
+import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 
 const MedicationCard = ({
   medication,
@@ -21,9 +22,27 @@ const MedicationCard = ({
   navigate,
   onError,
 }) => {
+  const { t } = useTranslation('common');
+
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
-    return indication || 'No indication specified';
+    return indication || t('medications.fields.noIndication', 'No indication specified');
+  };
+
+  const getMedicationTypeLabel = (type) => {
+    const typeKey = `medications.types.${type}`;
+    switch(type) {
+      case MEDICATION_TYPES.PRESCRIPTION:
+        return t(typeKey, 'Prescription');
+      case MEDICATION_TYPES.OTC:
+        return t(typeKey, 'Over-the-Counter');
+      case MEDICATION_TYPES.SUPPLEMENT:
+        return t(typeKey, 'Supplement/Vitamin');
+      case MEDICATION_TYPES.HERBAL:
+        return t(typeKey, 'Herbal/Natural');
+      default:
+        return type;
+    }
   };
 
   // Check if medication is inactive/stopped/finished/completed/on-hold
@@ -59,7 +78,7 @@ const MedicationCard = ({
               )}
               {medication.medication_type && medication.medication_type !== 'prescription' && (
                 <Badge variant="light" color="grape" size="sm">
-                  {MEDICATION_TYPE_LABELS[medication.medication_type]}
+                  {getMedicationTypeLabel(medication.medication_type)}
                 </Badge>
               )}
             </Group>
@@ -83,7 +102,7 @@ const MedicationCard = ({
           {medication.frequency && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                Frequency:
+                {t('medications.fields.frequency', 'Frequency')}:
               </Text>
               <Text size="sm">{medication.frequency}</Text>
             </Group>
@@ -91,7 +110,7 @@ const MedicationCard = ({
           {medication.route && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                Route:
+                {t('medications.fields.route', 'Route')}:
               </Text>
               <Badge variant="light" color="cyan" size="sm">
                 {medication.route}
@@ -100,7 +119,7 @@ const MedicationCard = ({
           )}
           <Group align="flex-start">
             <Text size="sm" fw={500} c="dimmed" w={120}>
-              Purpose:
+              {t('medications.fields.purpose', 'Purpose')}:
             </Text>
             <Text size="sm" style={{ flex: 1 }}>
               {getMedicationPurpose(medication)}
@@ -109,14 +128,14 @@ const MedicationCard = ({
           {medication.practitioner && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                Prescriber:
+                {t('medications.fields.prescriber', 'Prescriber')}:
               </Text>
-              <Text 
-                size="sm" 
+              <Text
+                size="sm"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
-                title="View practitioner details"
+                title={t('medications.fields.viewPractitioner', 'View practitioner details')}
               >
                 {medication.practitioner.name}
               </Text>
@@ -125,14 +144,14 @@ const MedicationCard = ({
           {medication.pharmacy && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                Pharmacy:
+                {t('medications.fields.pharmacy', 'Pharmacy')}:
               </Text>
-              <Text 
-                size="sm" 
+              <Text
+                size="sm"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
-                title="View pharmacy details"
+                title={t('medications.fields.viewPharmacy', 'View pharmacy details')}
               >
                 {medication.pharmacy.name}
               </Text>
@@ -141,7 +160,7 @@ const MedicationCard = ({
           {medication.effective_period_start && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                Start Date:
+                {t('medications.fields.startDate', 'Start Date')}:
               </Text>
               <Text size="sm">
                 {formatDate(medication.effective_period_start)}
@@ -151,7 +170,7 @@ const MedicationCard = ({
           {medication.effective_period_end && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                End Date:
+                {t('medications.fields.endDate', 'End Date')}:
               </Text>
               <Text size="sm">
                 {formatDate(medication.effective_period_end)}
@@ -169,14 +188,14 @@ const MedicationCard = ({
             size="xs"
             onClick={() => onView(medication)}
           >
-            View
+            {t('buttons.view', 'View')}
           </Button>
           <Button
             variant="filled"
             size="xs"
             onClick={() => onEdit(medication)}
           >
-            Edit
+            {t('buttons.edit', 'Edit')}
           </Button>
           <Button
             variant="filled"
@@ -184,7 +203,7 @@ const MedicationCard = ({
             size="xs"
             onClick={() => onDelete(medication.id)}
           >
-            Delete
+            {t('buttons.delete', 'Delete')}
           </Button>
         </Group>
       </Stack>

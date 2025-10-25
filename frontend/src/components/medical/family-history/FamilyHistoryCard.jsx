@@ -24,6 +24,7 @@ import {
 } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useMantineColorScheme } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import logger from '../../../services/logger';
 
 // Style constants for consistency
@@ -59,6 +60,7 @@ const FamilyHistoryCard = ({
   onBulkToggle,
   onError
 }) => {
+  const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
 
   const handleError = (error, action) => {
@@ -254,53 +256,53 @@ const FamilyHistoryCard = ({
 
     if (member.is_shared) {
       badges.push({
-        label: bulkSelectionMode ? 'Not Selectable' : 'Shared',
+        label: bulkSelectionMode ? t('familyHistory.card.notSelectable', 'Not Selectable') : t('familyHistory.card.shared', 'Shared'),
         color: bulkSelectionMode ? 'gray' : 'blue'
       });
     }
 
     if (isSelected) {
       badges.push({
-        label: 'Selected',
+        label: t('familyHistory.card.selected', 'Selected'),
         color: 'green'
       });
     }
 
     // Generate fields for BaseMedicalCard
     const fields = [];
-    
+
     if (age) {
       fields.push({
-        label: 'Age',
-        value: `${age} years${member.is_deceased ? ' (Deceased)' : ''}`
+        label: t('familyHistory.card.age', 'Age'),
+        value: `${age} ${t('familyHistory.card.years', 'years')}${member.is_deceased ? ' (' + t('familyHistory.card.deceased', 'Deceased') + ')' : ''}`
       });
     }
 
     if (member.gender) {
       fields.push({
-        label: 'Gender',
+        label: t('familyHistory.card.gender', 'Gender'),
         value: member.gender
       });
     }
 
     if (member.birth_year) {
       fields.push({
-        label: 'Birth Year',
+        label: t('familyHistory.card.birthYear', 'Birth Year'),
         value: member.birth_year
       });
     }
 
     if (member.is_deceased && member.death_year) {
       fields.push({
-        label: 'Death Year',
+        label: t('familyHistory.card.deathYear', 'Death Year'),
         value: member.death_year
       });
     }
 
     if (member.is_shared && member.shared_by) {
       fields.push({
-        label: 'Shared By',
-        value: member.shared_by.name || 'Unknown'
+        label: t('familyHistory.card.sharedBy', 'Shared By'),
+        value: member.shared_by.name || t('familyHistory.table.unknown', 'Unknown')
       });
     }
 
@@ -313,7 +315,7 @@ const FamilyHistoryCard = ({
             size="sm"
             color={conditionCount > 0 ? 'blue' : 'gray'}
           >
-            {conditionCount} Condition{conditionCount !== 1 ? 's' : ''}
+            {t('familyHistory.card.conditionCount', '{{count}} Condition(s)', { count: conditionCount })}
           </Badge>
           {isExpanded ? (
             <IconChevronUp size={16} />
@@ -325,7 +327,7 @@ const FamilyHistoryCard = ({
         <Collapse in={isExpanded}>
           <Divider mb="md" />
           <Group justify="space-between" mb="md">
-            <Text fw={500}>Medical Conditions</Text>
+            <Text fw={500}>{t('familyHistory.card.medicalConditions', 'Medical Conditions')}</Text>
             {!member.is_shared && (
               <Button
                 size="xs"
@@ -333,7 +335,7 @@ const FamilyHistoryCard = ({
                 leftSection={<IconStethoscope size={14} />}
                 onClick={handleAddConditionClick}
               >
-                Add Condition
+                {t('familyHistory.card.addCondition', 'Add Condition')}
               </Button>
             )}
           </Group>
@@ -341,7 +343,7 @@ const FamilyHistoryCard = ({
           {conditionCount === 0 ? (
             <Box style={{ textAlign: 'center', padding: '1rem 0' }}>
               <Text size="sm" c="dimmed">
-                No medical conditions recorded
+                {t('familyHistory.card.noConditionsRecorded', 'No medical conditions recorded')}
               </Text>
             </Box>
           ) : (
@@ -379,7 +381,7 @@ const FamilyHistoryCard = ({
 
                       {condition.diagnosis_age && (
                         <Text size="xs" c="dimmed">
-                          Diagnosed at age {condition.diagnosis_age}
+                          {t('familyHistory.card.diagnosedAtAge', 'Diagnosed at age {{age}}', { age: condition.diagnosis_age })}
                         </Text>
                       )}
 
@@ -397,7 +399,7 @@ const FamilyHistoryCard = ({
                           variant="filled"
                           onClick={(e) => handleEditConditionClick(e, condition)}
                         >
-                          Edit
+                          {t('buttons.edit', 'Edit')}
                         </Button>
                         <Button
                           size="xs"
@@ -405,7 +407,7 @@ const FamilyHistoryCard = ({
                           color="red"
                           onClick={(e) => handleDeleteConditionClick(e, condition.id)}
                         >
-                          Delete
+                          {t('buttons.delete', 'Delete')}
                         </Button>
                       </Group>
                     )}
@@ -434,7 +436,7 @@ const FamilyHistoryCard = ({
                   leftSection={<IconShare size={14} />}
                   onClick={handleShareClick}
                 >
-                  Share
+                  {t('buttons.share', 'Share')}
                 </Menu.Item>
               </>
             )}
@@ -444,7 +446,7 @@ const FamilyHistoryCard = ({
                 color="orange"
                 disabled
               >
-                Cannot Edit Shared Member
+                {t('familyHistory.card.cannotEditSharedMember', 'Cannot Edit Shared Member')}
               </Menu.Item>
             )}
           </Menu.Dropdown>
@@ -479,7 +481,7 @@ const FamilyHistoryCard = ({
       >
         <BaseMedicalCard
           title={member.name}
-          subtitle="Family Member"
+          subtitle={t('familyHistory.card.subtitle', 'Family Member')}
           badges={badges}
           fields={fields}
           notes={member.notes}

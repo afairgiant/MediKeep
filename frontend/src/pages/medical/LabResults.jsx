@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -42,6 +43,7 @@ import {
 } from '@mantine/core';
 
 const LabResults = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -625,9 +627,9 @@ const LabResults = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading lab results...</Text>
+            <Text>{t('labResults.loading', 'Loading lab results...')}</Text>
             <Text size="sm" c="dimmed">
-              If this takes too long, please refresh the page
+              {t('labResults.loadingHint', 'If this takes too long, please refresh the page')}
             </Text>
           </Stack>
         </Center>
@@ -638,14 +640,14 @@ const LabResults = () => {
   return (
     <>
       <Container size="xl" py="md">
-        <PageHeader title="Lab Results" icon="🧪" />
+        <PageHeader title={t('labResults.title', 'Lab Results')} icon="🧪" />
 
         <Stack gap="lg">
           {error && (
             <Alert
               variant="light"
               color="red"
-              title="Error"
+              title={t('labResults.error', 'Error')}
               withCloseButton
               onClose={clearError}
             >
@@ -653,14 +655,14 @@ const LabResults = () => {
             </Alert>
           )}
           {successMessage && (
-            <Alert variant="light" color="green" title="Success">
+            <Alert variant="light" color="green" title={t('labResults.success', 'Success')}>
               {successMessage}
             </Alert>
           )}
 
           <Group justify="space-between" align="center">
             <Button variant="filled" onClick={handleAddLabResult}>
-              + Add New Lab Result
+              {t('labResults.addNew', '+ Add New Lab Result')}
             </Button>
 
             <ViewToggle
@@ -698,16 +700,16 @@ const LabResults = () => {
               <Stack align="center" gap="md">
                 <Text size="3rem">🧪</Text>
                 <Text size="xl" fw={600}>
-                  No Lab Results Found
+                  {t('labResults.noResults', 'No Lab Results Found')}
                 </Text>
                 <Text ta="center" c="dimmed">
                   {dataManagement.hasActiveFilters
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Start by adding your first lab result.'}
+                    ? t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                    : t('labResults.startAdding', 'Start by adding your first lab result.')}
                 </Text>
                 {!dataManagement.hasActiveFilters && (
                   <Button variant="filled" onClick={handleAddLabResult}>
-                    Add Your First Lab Result
+                    {t('labResults.addFirst', 'Add Your First Lab Result')}
                   </Button>
                 )}
               </Stack>
@@ -734,18 +736,18 @@ const LabResults = () => {
               <ResponsiveTable
                 data={filteredLabResults}
               columns={[
-                  { header: 'Test Name', accessor: 'test_name', priority: 'high', width: 200 },
-                  { header: 'Category', accessor: 'test_category', priority: 'low', width: 150 },
-                  { header: 'Type', accessor: 'test_type', priority: 'low', width: 120 },
-                  { header: 'Facility', accessor: 'facility', priority: 'low', width: 150 },
-                  { header: 'Status', accessor: 'status', priority: 'high', width: 120 },
-                  { header: 'Ordering Practitioner', accessor: 'practitioner_id', priority: 'low', width: 150 },
-                  { header: 'Ordered Date', accessor: 'ordered_date', priority: 'low', width: 120 },
-                  { header: 'Completed Date', accessor: 'completed_date', priority: 'low', width: 120 },
-                  { header: 'Files', accessor: 'files', priority: 'low', width: 150 }
+                  { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
+                  { header: t('labResults.table.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
+                  { header: t('labResults.table.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
+                  { header: t('labResults.table.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
+                  { header: t('labels.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
+                  { header: t('labResults.table.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
+                  { header: t('labResults.table.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
+                  { header: t('labResults.table.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
+                  { header: t('labResults.table.files', 'Files'), accessor: 'files', priority: 'low', width: 150 }
                 ]}
               patientData={currentPatient}
-              tableName="Lab Results"
+              tableName={t('labResults.title', 'Lab Results')}
               onView={handleViewLabResult}
               onEdit={handleEditLabResult}
               onDelete={handleDeleteLabResult}
@@ -781,7 +783,7 @@ const LabResults = () => {
         <LabResultFormWrapper
           isOpen={showModal}
           onClose={() => !isBlocking && handleCloseModal()}
-          title={editingLabResult ? 'Edit Lab Result' : 'Add New Lab Result'}
+          title={editingLabResult ? t('labResults.editTitle', 'Edit Lab Result') : t('labResults.addTitle', 'Add New Lab Result')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}

@@ -6,6 +6,7 @@ import logger from '../../services/logger';
 
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import {
   Table,
@@ -75,6 +76,7 @@ const VitalsList = ({
   showActions = true,
   limit = 10,
 }) => {
+  const { t } = useTranslation('common');
   const { unitSystem } = useUserPreferences();
   // Use passed data if available, otherwise load internally
   const [internalVitals, setInternalVitals] = useState([]);
@@ -488,7 +490,7 @@ const VitalsList = ({
       <Center py="xl">
         <Stack align="center" gap="md">
           <Loader size="lg" />
-          <Text>Loading vitals...</Text>
+          <Text>{t('vitals.loading', 'Loading vitals...')}</Text>
         </Stack>
       </Center>
     );
@@ -500,7 +502,7 @@ const VitalsList = ({
         variant="light"
         color="red"
         icon={<IconAlertTriangle size={16} />}
-        title="Error Loading Vitals"
+        title={t('vitals.table.errorLoading', 'Error Loading Vitals')}
       >
         <Group justify="space-between" align="center">
           <Text size="sm">{currentError}</Text>
@@ -510,7 +512,7 @@ const VitalsList = ({
             leftSection={<IconRefresh size={14} />}
             onClick={loadVitals}
           >
-            Try Again
+            {t('buttons.tryAgain', 'Try Again')}
           </Button>
         </Group>
       </Alert>
@@ -527,9 +529,9 @@ const VitalsList = ({
             color="var(--mantine-color-gray-5)"
           />
           <Stack align="center" gap="xs">
-            <Text fw={500}>No vitals records found</Text>
+            <Text fw={500}>{t('vitals.table.noRecords', 'No vitals records found')}</Text>
             <Text c="dimmed" ta="center" size="sm">
-              Vital signs will appear here once recorded
+              {t('vitals.table.noRecordsDesc', 'Vital signs will appear here once recorded')}
             </Text>
           </Stack>
         </Stack>
@@ -682,12 +684,12 @@ const VitalsList = ({
                     sorted="recorded_date"
                     onSort={() => handleSort('recorded_date')}
                   >
-                    Date
+                    {t('vitals.table.date', 'Date')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
                   <ThComponent sorted="bp" onSort={() => handleSort('bp')}>
-                    Blood Pressure
+                    {t('vitals.stats.bloodPressure', 'Blood Pressure')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -695,7 +697,7 @@ const VitalsList = ({
                     sorted="heart_rate"
                     onSort={() => handleSort('heart_rate')}
                   >
-                    Heart Rate
+                    {t('vitals.stats.heartRate', 'Heart Rate')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -703,7 +705,7 @@ const VitalsList = ({
                     sorted="temperature"
                     onSort={() => handleSort('temperature')}
                   >
-                    Temperature
+                    {t('vitals.stats.temperature', 'Temperature')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -711,12 +713,12 @@ const VitalsList = ({
                     sorted="weight"
                     onSort={() => handleSort('weight')}
                   >
-                    Weight
+                    {t('vitals.stats.weight', 'Weight')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
                   <ThComponent sorted="bmi" onSort={() => handleSort('bmi')}>
-                    BMI
+                    {t('vitals.stats.bmi', 'BMI')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -724,13 +726,13 @@ const VitalsList = ({
                     sorted="oxygen_saturation"
                     onSort={() => handleSort('oxygen_saturation')}
                   >
-                    O2 Sat
+                    {t('vitals.table.oxygenSat', 'O2 Sat')}
                   </ThComponent>
                 </Table.Th>
                 {showActions && (
                   <Table.Th>
                     <Text fw={500} size="sm">
-                      Actions
+                      {t('labels.actions', 'Actions')}
                     </Text>
                   </Table.Th>
                 )}

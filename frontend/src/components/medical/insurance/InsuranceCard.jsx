@@ -17,16 +17,18 @@ import { notifications } from '@mantine/notifications';
 import logger from '../../../services/logger';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
+import { useTranslation } from 'react-i18next';
 
-const InsuranceCard = ({ 
-  insurance, 
-  onEdit, 
-  onDelete, 
-  onSetPrimary, 
-  onView, 
-  fileCount = 0, 
-  fileCountLoading = false 
+const InsuranceCard = ({
+  insurance,
+  onEdit,
+  onDelete,
+  onSetPrimary,
+  onView,
+  fileCount = 0,
+  fileCountLoading = false
 }) => {
+  const { t } = useTranslation('common');
 
   // Get type-specific styling
   const getTypeColor = (type) => {
@@ -89,18 +91,18 @@ const InsuranceCard = ({
   // Format field labels for display
   const formatFieldLabel = (fieldName) => {
     const labelMap = {
-      'deductible_individual': 'Deductible',
-      'copay_primary_care': 'PCP Copay',
-      'copay_specialist': 'Specialist Copay',
-      'annual_maximum': 'Annual Max',
-      'preventive_coverage': 'Preventive',
-      'basic_coverage': 'Basic',
-      'exam_copay': 'Exam Copay',
-      'frame_allowance': 'Frame Allowance',
-      'bin_number': 'BIN',
-      'pcn_number': 'PCN',
+      'deductible_individual': t('insurance.card.deductible', 'Deductible'),
+      'copay_primary_care': t('insurance.card.pcpCopay', 'PCP Copay'),
+      'copay_specialist': t('insurance.card.specialistCopay', 'Specialist Copay'),
+      'annual_maximum': t('insurance.card.annualMax', 'Annual Max'),
+      'preventive_coverage': t('insurance.card.preventive', 'Preventive'),
+      'basic_coverage': t('insurance.card.basic', 'Basic'),
+      'exam_copay': t('insurance.card.examCopay', 'Exam Copay'),
+      'frame_allowance': t('insurance.card.frameAllowance', 'Frame Allowance'),
+      'bin_number': t('insurance.card.bin', 'BIN'),
+      'pcn_number': t('insurance.card.pcn', 'PCN'),
     };
-    
+
     return labelMap[fieldName] || fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
@@ -132,13 +134,13 @@ const InsuranceCard = ({
                 {insurance.insurance_type}
               </Badge>
               {insurance.insurance_type === 'medical' && insurance.is_primary && (
-                <Badge 
-                  variant="filled" 
-                  color="yellow" 
+                <Badge
+                  variant="filled"
+                  color="yellow"
                   size="sm"
                   leftSection={<IconStarFilled size={12} />}
                 >
-                  Primary
+                  {t('insurance.card.primary', 'Primary')}
                 </Badge>
               )}
               <FileCountBadge
@@ -159,14 +161,14 @@ const InsuranceCard = ({
           {/* Member Information */}
           <Group>
             <Text size="sm" fw={500} c="dimmed" w={100}>
-              Member:
+              {t('insurance.card.member', 'Member')}:
             </Text>
             <Text size="sm">{insurance.member_name}</Text>
           </Group>
-          
+
           <Group>
             <Text size="sm" fw={500} c="dimmed" w={100}>
-              Member ID:
+              {t('insurance.card.memberId', 'Member ID')}:
             </Text>
             <Text size="sm">{insurance.member_id}</Text>
           </Group>
@@ -174,7 +176,7 @@ const InsuranceCard = ({
           {insurance.group_number && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={100}>
-                Group:
+                {t('insurance.card.group', 'Group')}:
               </Text>
               <Text size="sm">{insurance.group_number}</Text>
             </Group>
@@ -183,7 +185,7 @@ const InsuranceCard = ({
           {insurance.plan_name && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={100}>
-                Plan:
+                {t('insurance.card.plan', 'Plan')}:
               </Text>
               <Text size="sm">{insurance.plan_name}</Text>
             </Group>
@@ -192,7 +194,7 @@ const InsuranceCard = ({
           {/* Coverage Period */}
           <Group>
             <Text size="sm" fw={500} c="dimmed" w={100}>
-              Effective:
+              {t('insurance.card.effective', 'Effective')}:
             </Text>
             <Text size="sm">{formatDate(insurance.effective_date)}</Text>
           </Group>
@@ -200,7 +202,7 @@ const InsuranceCard = ({
           {insurance.expiration_date && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={100}>
-                Expires:
+                {t('insurance.card.expires', 'Expires')}:
               </Text>
               <Text size="sm">{formatDate(insurance.expiration_date)}</Text>
             </Group>
@@ -222,7 +224,7 @@ const InsuranceCard = ({
           {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={100}>
-                Holder:
+                {t('insurance.card.holder', 'Holder')}:
               </Text>
               <Text size="sm">
                 {insurance.policy_holder_name} ({insurance.relationship_to_holder || 'Self'})
@@ -241,14 +243,14 @@ const InsuranceCard = ({
             size="xs"
             onClick={() => onView(insurance)}
           >
-            View
+            {t('buttons.view', 'View')}
           </Button>
           <Button
             variant="filled"
             size="xs"
             onClick={() => onEdit(insurance)}
           >
-            Edit
+            {t('buttons.edit', 'Edit')}
           </Button>
           <Button
             variant="filled"
@@ -256,7 +258,7 @@ const InsuranceCard = ({
             size="xs"
             onClick={() => onDelete(insurance)}
           >
-            Delete
+            {t('buttons.delete', 'Delete')}
           </Button>
         </Group>
       </Stack>

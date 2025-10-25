@@ -15,6 +15,7 @@ import {
   Divider,
 } from '@mantine/core';
 import { IconStethoscope, IconEye } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { symptomApi } from '../../services/api/symptomApi';
 import { SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
@@ -30,6 +31,7 @@ import {
  * Uses the new two-level hierarchy API
  */
 const SymptomTimeline = ({ patientId, hidden }) => {
+  const { t } = useTranslation('common');
   const [timelineData, setTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
@@ -184,16 +186,16 @@ const SymptomTimeline = ({ patientId, hidden }) => {
   return (
     <Paper p="md" withBorder>
       <Group justify="space-between" mb="md">
-        <Title order={3}>Symptom Timeline</Title>
+        <Title order={3}>{t('symptoms.timeline.title', 'Symptom Timeline')}</Title>
         <Select
           value={dateRange}
           onChange={setDateRange}
           data={[
-            { value: 'all', label: 'All Dates' },
-            { value: 'week', label: 'Last Week' },
-            { value: 'month', label: 'Last Month' },
-            { value: '3months', label: 'Last 3 Months' },
-            { value: 'year', label: 'Last Year' },
+            { value: 'all', label: t('symptoms.timeline.filters.allDates', 'All Dates') },
+            { value: 'week', label: t('symptoms.timeline.filters.lastWeek', 'Last Week') },
+            { value: 'month', label: t('symptoms.timeline.filters.lastMonth', 'Last Month') },
+            { value: '3months', label: t('symptoms.timeline.filters.last3Months', 'Last 3 Months') },
+            { value: 'year', label: t('symptoms.timeline.filters.lastYear', 'Last Year') },
           ]}
           style={{ width: 150 }}
         />
@@ -203,7 +205,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
         <Center p="xl">
           <Stack align="center">
             <IconStethoscope size={48} stroke={1.5} color="gray" />
-            <Text c="dimmed">No symptom episodes recorded in this period</Text>
+            <Text c="dimmed">{t('symptoms.timeline.noEpisodes', 'No symptom episodes recorded in this period')}</Text>
           </Stack>
         </Center>
       ) : (

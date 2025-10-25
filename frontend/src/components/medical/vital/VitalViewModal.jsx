@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   Stack,
@@ -46,6 +47,8 @@ const VitalViewModal = ({
   practitioners = [],
   navigate,
 }) => {
+  const { t } = useTranslation('common');
+
   if (!isOpen || !vital) return null;
 
   const handleEdit = () => {
@@ -57,112 +60,112 @@ const VitalViewModal = ({
 
   // Helper functions from VitalsList
   const getBPDisplay = (systolic, diastolic) => {
-    if (!systolic || !diastolic) return 'N/A';
+    if (!systolic || !diastolic) return t('labels.notAvailable', 'N/A');
     return `${systolic}/${diastolic}`;
   };
 
   const getBMIDisplay = (weight, height) => {
-    if (!weight || !height) return 'N/A';
+    if (!weight || !height) return t('labels.notAvailable', 'N/A');
     // BMI calculation using imperial units: weight(lbs) / (height(inches))^2 * 703
     const bmi = (weight / (height * height)) * BMI_IMPERIAL_CONVERSION_FACTOR;
-    return bmi ? bmi.toFixed(1) : 'N/A';
+    return bmi ? bmi.toFixed(1) : t('labels.notAvailable', 'N/A');
   };
 
   // Vital sections configuration from VitalsList
   const vitalSections = [
     {
-      title: 'Basic Information',
+      title: t('vitals.modal.basicInfo', 'Basic Information'),
       icon: IconCalendar,
       items: [
         {
-          label: 'Recorded Date',
+          label: t('vitals.modal.recordedDate', 'Recorded Date'),
           value: formatDateTime(vital.recorded_date),
           icon: IconCalendar,
         },
         {
-          label: 'Location',
-          value: vital.location || 'Not specified',
+          label: t('vitals.card.location', 'Location'),
+          value: vital.location || t('labels.notSpecified', 'Not specified'),
           icon: IconMapPin,
         },
         {
-          label: 'Device Used',
-          value: vital.device_used || 'Not specified',
+          label: t('vitals.modal.deviceUsed', 'Device Used'),
+          value: vital.device_used || t('labels.notSpecified', 'Not specified'),
           icon: IconDevices,
         },
       ],
     },
     {
-      title: 'Vital Signs',
+      title: t('vitals.modal.vitalSigns', 'Vital Signs'),
       icon: IconHeart,
       items: [
         {
-          label: 'Blood Pressure',
+          label: t('vitals.stats.bloodPressure', 'Blood Pressure'),
           value: getBPDisplay(vital.systolic_bp, vital.diastolic_bp),
           icon: IconHeart,
-          unit: 'mmHg',
+          unit: t('vitals.units.mmHg', 'mmHg'),
         },
         {
-          label: 'Heart Rate',
-          value: vital.heart_rate || 'N/A',
+          label: t('vitals.stats.heartRate', 'Heart Rate'),
+          value: vital.heart_rate || t('labels.notAvailable', 'N/A'),
           icon: IconActivity,
-          unit: vital.heart_rate ? 'BPM' : '',
+          unit: vital.heart_rate ? t('vitals.units.bpm', 'BPM') : '',
         },
         {
-          label: 'Temperature',
-          value: vital.temperature || 'N/A',
+          label: t('vitals.stats.temperature', 'Temperature'),
+          value: vital.temperature || t('labels.notAvailable', 'N/A'),
           icon: IconThermometer,
-          unit: vital.temperature ? '°F' : '',
+          unit: vital.temperature ? t('vitals.units.fahrenheit', '°F') : '',
         },
         {
-          label: 'Respiratory Rate',
-          value: vital.respiratory_rate || 'N/A',
+          label: t('vitals.modal.respiratoryRate', 'Respiratory Rate'),
+          value: vital.respiratory_rate || t('labels.notAvailable', 'N/A'),
           icon: IconLungs,
-          unit: vital.respiratory_rate ? '/min' : '',
+          unit: vital.respiratory_rate ? t('vitals.units.perMin', '/min') : '',
         },
         {
-          label: 'Oxygen Saturation',
-          value: vital.oxygen_saturation || 'N/A',
+          label: t('vitals.card.oxygenSaturation', 'Oxygen Saturation'),
+          value: vital.oxygen_saturation || t('labels.notAvailable', 'N/A'),
           icon: IconDroplet,
           unit: vital.oxygen_saturation ? '%' : '',
         },
       ],
     },
     {
-      title: 'Physical Measurements',
+      title: t('vitals.modal.physicalMeasurements', 'Physical Measurements'),
       icon: IconWeight,
       items: [
         {
-          label: 'Weight',
-          value: vital.weight || 'N/A',
+          label: t('vitals.stats.weight', 'Weight'),
+          value: vital.weight || t('labels.notAvailable', 'N/A'),
           icon: IconWeight,
-          unit: vital.weight ? 'lbs' : '',
+          unit: vital.weight ? t('vitals.units.lbs', 'lbs') : '',
         },
         {
-          label: 'Height',
-          value: vital.height || 'N/A',
+          label: t('vitals.modal.height', 'Height'),
+          value: vital.height || t('labels.notAvailable', 'N/A'),
           icon: IconTrendingUp,
-          unit: vital.height ? 'inches' : '',
+          unit: vital.height ? t('vitals.units.inches', 'inches') : '',
         },
         {
-          label: 'BMI',
+          label: t('vitals.stats.bmi', 'BMI'),
           value: getBMIDisplay(vital.weight, vital.height),
           icon: IconTrendingUp,
         },
       ],
     },
     {
-      title: 'Additional Measurements',
+      title: t('vitals.modal.additionalMeasurements', 'Additional Measurements'),
       icon: IconDroplet,
       items: [
         {
-          label: 'Blood Glucose',
-          value: vital.blood_glucose || 'N/A',
+          label: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
+          value: vital.blood_glucose || t('labels.notAvailable', 'N/A'),
           icon: IconDroplet,
-          unit: vital.blood_glucose ? 'mg/dL' : '',
+          unit: vital.blood_glucose ? t('vitals.units.mgdl', 'mg/dL') : '',
         },
         {
-          label: 'Pain Scale',
-          value: vital.pain_scale !== null ? `${vital.pain_scale}/10` : 'N/A',
+          label: t('vitals.modal.painScale', 'Pain Scale'),
+          value: vital.pain_scale !== null ? `${vital.pain_scale}/10` : t('labels.notAvailable', 'N/A'),
           icon: IconMoodSad,
         },
       ],
@@ -176,7 +179,7 @@ const VitalViewModal = ({
       title={
         <Group>
           <Text fw={600} size="lg">
-            Vital Signs Details
+            {t('vitals.modal.title', 'Vital Signs Details')}
           </Text>
           {vital.status && <StatusBadge status={vital.status} />}
         </Group>
@@ -247,7 +250,7 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconNotes size={18} />
               </ActionIcon>
-              <Title order={4}>Notes</Title>
+              <Title order={4}>{t('vitals.modal.notes', 'Notes')}</Title>
             </Group>
             <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
               {vital.notes}
@@ -262,7 +265,7 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconUser size={18} />
               </ActionIcon>
-              <Title order={4}>Recorded By</Title>
+              <Title order={4}>{t('vitals.modal.recordedBy', 'Recorded By')}</Title>
             </Group>
             <Card shadow="xs" p="sm" radius="md" withBorder>
               {practitioner ? (
@@ -282,7 +285,7 @@ const VitalViewModal = ({
                 </>
               ) : (
                 <Text size="sm" c="dimmed">
-                  Practitioner ID: {vital.practitioner_id}
+                  {t('vitals.modal.practitionerId', 'Practitioner ID')}: {vital.practitioner_id}
                 </Text>
               )}
             </Card>
@@ -292,10 +295,10 @@ const VitalViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            Close
+            {t('buttons.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            Edit
+            {t('buttons.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

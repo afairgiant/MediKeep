@@ -2,6 +2,7 @@ import logger from '../services/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Paper,
@@ -43,6 +44,7 @@ import { exportService } from '../services/exportService';
 
 const ExportPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('common');
 
   // State management
   const [summary, setSummary] = useState(null);
@@ -91,17 +93,13 @@ const ExportPage = () => {
           setTimeout(() => loadInitialData(retryCount + 1), 1000);
           return;
         }
-        setError(
-          'Your session has expired. Please refresh the page or log in again to access export features.'
-        );
+        setError(t('exportPage.errors.sessionExpired'));
       } else if (error.status === 400 && error.message?.includes('No active patient')) {
         // Handle missing active patient error
-        setError(
-          'No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.'
-        );
+        setError(t('exportPage.errors.noActivePatient'));
       } else {
         setError(
-          `Failed to load export data: ${error.message || 'Please try again.'}`
+          t('exportPage.errors.loadFailed', { message: error.message || t('labels.pleaseTryAgain', 'Please try again.') })
         );
       }
       logger.error('Export data loading failed:', error);
@@ -118,7 +116,7 @@ const ExportPage = () => {
       // Validate parameters
       const validation = exportService.validateExportParams(exportConfig);
       if (!validation.isValid) {
-        setError(validation.errors.join(', '));
+        setError(t('exportPage.errors.validationFailed', { errors: validation.errors.join(', ') }));
         return;
       }
 
@@ -138,23 +136,23 @@ const ExportPage = () => {
 
       await exportService.downloadExport(params);
       setSuccess(
-        `Export completed successfully! Your ${exportConfig.format.toUpperCase()} file has been downloaded.`
+        t('exportPage.success.exportComplete', { format: exportConfig.format.toUpperCase() })
       );
 
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
       if (error.status === 400 && error.message?.includes('No active patient')) {
-        setError('No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.');
+        setError(t('exportPage.errors.noActivePatient'));
       } else if (error.status === 422) {
-        setError('Please check your export settings. Make sure you have selected a valid data type and format.');
+        setError(t('exportPage.errors.invalidSettings'));
       } else if (error.status === 404) {
-        setError('No data found for the selected export criteria. Try selecting a different data type or date range.');
+        setError(t('exportPage.errors.noDataFound'));
       } else if (error.data && error.data.detail) {
         // Use the detailed error message from the backend if available
-        setError(`Export failed: ${error.data.detail}`);
+        setError(t('exportPage.errors.exportFailed', { message: error.data.detail }));
       } else {
-        setError(`Export failed: ${error.message || 'Please try again.'}`);
+        setError(t('exportPage.errors.exportFailed', { message: error.message || t('labels.pleaseTryAgain', 'Please try again.') }));
       }
     } finally {
       setLoading(false);
@@ -168,7 +166,7 @@ const ExportPage = () => {
 
       const scopes = selectedScopes.filter(scope => scope !== 'all');
       if (scopes.length === 0) {
-        setError('Please select at least one data type for bulk export');
+        setError(t('exportPage.errors.noDataType'));
         return;
       }
 
@@ -182,23 +180,23 @@ const ExportPage = () => {
 
       await exportService.downloadBulkExport(requestData);
       setSuccess(
-        `Bulk export completed successfully! Your ZIP file containing ${scopes.length} data types has been downloaded.`
+        t('exportPage.success.bulkExportComplete', { count: scopes.length })
       );
 
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
       if (error.status === 400 && error.message?.includes('No active patient')) {
-        setError('No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.');
+        setError(t('exportPage.errors.noActivePatient'));
       } else if (error.status === 422) {
-        setError('Please check your bulk export settings. Make sure you have selected at least one data type and a valid format.');
+        setError(t('exportPage.errors.bulkInvalidSettings'));
       } else if (error.status === 404) {
-        setError('No data found for the selected export criteria. Try selecting different data types or adjusting the date range.');
+        setError(t('exportPage.errors.bulkNoDataFound'));
       } else if (error.data && error.data.detail) {
         // Use the detailed error message from the backend if available
-        setError(`Bulk export failed: ${error.data.detail}`);
+        setError(t('exportPage.errors.bulkExportFailed', { message: error.data.detail }));
       } else {
-        setError(`Bulk export failed: ${error.message || 'Please try again.'}`);
+        setError(t('exportPage.errors.bulkExportFailed', { message: error.message || t('labels.pleaseTryAgain', 'Please try again.') }));
       }
     } finally {
       setLoading(false);
@@ -226,6 +224,13 @@ const ExportPage = () => {
     return summary.counts[scopeValue] || 0;
   };
 
+  // Translate scope labels from backend
+  const translateScopeLabel = (scopeValue) => {
+    // Try to get translation, fallback to original label if translation doesn't exist
+    const translationKey = `exportPage.scopes.${scopeValue}`;
+    return t(translationKey);
+  };
+
   const clearAlerts = () => {
     setError(null);
     setSuccess(null);
@@ -238,7 +243,7 @@ const ExportPage = () => {
           <Stack align="center" gap="md">
             <Loader size="lg" />
             <Text size="lg" c="dimmed">
-              Loading export options...
+              {t('exportPage.loading')}
             </Text>
           </Stack>
         </Center>
@@ -248,19 +253,18 @@ const ExportPage = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Export Health Records" icon="📤" />
+      <PageHeader title={t('exportPage.title')} icon={t('exportPage.icon')} />
 
       <Stack gap="lg">
         <Text size="lg" c="dimmed">
-          Download your medical data in various formats for backup or sharing
-          with healthcare providers
+          {t('exportPage.description')}
         </Text>
 
         {/* Alerts */}
         {error && (
           <Alert
             icon={<IconAlertTriangle size={16} />}
-            title="Error"
+            title={t('labels.error', 'Error')}
             color="red"
             variant="light"
             onClose={clearAlerts}
@@ -275,14 +279,14 @@ const ExportPage = () => {
                     variant="light"
                     onClick={() => window.location.reload()}
                   >
-                    Refresh Page
+                    {t('exportPage.buttons.refreshPage')}
                   </Button>
                   <Button
                     size="xs"
                     variant="light"
                     onClick={() => loadInitialData()}
                   >
-                    Retry
+                    {t('exportPage.buttons.retry')}
                   </Button>
                 </Group>
               )}
@@ -293,14 +297,14 @@ const ExportPage = () => {
                     variant="light"
                     onClick={() => navigate('/dashboard')}
                   >
-                    Go to Dashboard
+                    {t('exportPage.buttons.goToDashboard')}
                   </Button>
                   <Button
                     size="xs"
                     variant="light"
                     onClick={() => loadInitialData()}
                   >
-                    Retry
+                    {t('exportPage.buttons.retry')}
                   </Button>
                 </Group>
               )}
@@ -311,7 +315,7 @@ const ExportPage = () => {
         {success && (
           <Alert
             icon={<IconCheck size={16} />}
-            title="Success"
+            title={t('labels.success', 'Success')}
             color="green"
             variant="light"
             onClose={clearAlerts}
@@ -326,7 +330,7 @@ const ExportPage = () => {
           <Group justify="space-between" mb={{ base: 'xs', sm: 'lg' }}>
             <Group gap="xs">
               <IconChartBar size={20} />
-              <Title order={{ base: 3, sm: 2 }}>Available Data</Title>
+              <Title order={{ base: 3, sm: 2 }}>{t('exportPage.availableData.title')}</Title>
             </Group>
             <ActionIcon
               variant="subtle"
@@ -354,12 +358,12 @@ const ExportPage = () => {
                       </Text>
                     }
                   >
-                    {scope.label}
+                    {translateScopeLabel(scope.value)}
                   </Badge>
                 ))}
               {!summaryExpanded && formats.scopes?.filter(scope => scope.value !== 'all').length > 3 && (
                 <Text size="xs" c="dimmed">
-                  +{formats.scopes.filter(scope => scope.value !== 'all').length - 3} more
+                  {t('exportPage.availableData.moreItems', { count: formats.scopes.filter(scope => scope.value !== 'all').length - 3 })}
                 </Text>
               )}
             </Group>
@@ -382,7 +386,7 @@ const ExportPage = () => {
                             {getRecordCount(scope.value)}
                           </Text>
                           <Text size="sm" ta="center" c="dimmed">
-                            {scope.label}
+                            {translateScopeLabel(scope.value)}
                           </Text>
                         </Stack>
                       </Card>
@@ -405,7 +409,7 @@ const ExportPage = () => {
                         </Text>
                       }
                     >
-                      {scope.label}
+                      {translateScopeLabel(scope.value)}
                     </Badge>
                   ))}
               </Group>
@@ -417,7 +421,7 @@ const ExportPage = () => {
         <Paper shadow="sm" p="xl" radius="md" withBorder>
           <Group mb="lg">
             <IconSettings size={20} />
-            <Title order={2}>Export Mode</Title>
+            <Title order={2}>{t('exportPage.exportMode.title')}</Title>
           </Group>
           <Group gap="xs" mb="md">
             <Button
@@ -425,20 +429,20 @@ const ExportPage = () => {
               onClick={() => setBulkMode(false)}
               leftSection={<IconDownload size={16} />}
             >
-              Single Export
+              {t('exportPage.exportMode.singleExport')}
             </Button>
             <Button
               variant={bulkMode ? 'filled' : 'outline'}
               onClick={() => setBulkMode(true)}
               leftSection={<IconArchive size={16} />}
             >
-              Bulk Export
+              {t('exportPage.exportMode.bulkExport')}
             </Button>
           </Group>
           <Text size="sm" c="dimmed">
             {!bulkMode
-              ? 'Export a single data type in your chosen format'
-              : 'Export multiple data types together in a ZIP file'}
+              ? t('exportPage.exportMode.singleDescription')
+              : t('exportPage.exportMode.bulkDescription')}
           </Text>
         </Paper>
 
@@ -446,14 +450,14 @@ const ExportPage = () => {
         <Paper shadow="sm" p="xl" radius="md" withBorder>
           <Group mb="lg">
             <IconSettings size={20} />
-            <Title order={2}>Export Configuration</Title>
+            <Title order={2}>{t('exportPage.configuration.title')}</Title>
           </Group>
 
           <Stack gap="lg">
             {/* Format Selection */}
             <Select
-              label="Export Format"
-              placeholder="Select format"
+              label={t('exportPage.configuration.format.label')}
+              placeholder={t('exportPage.configuration.format.placeholder')}
               value={exportConfig.format}
               onChange={value =>
                 setExportConfig(prev => ({ ...prev, format: value }))
@@ -469,8 +473,8 @@ const ExportPage = () => {
             {/* Scope Selection */}
             {!bulkMode ? (
               <Select
-                label="Data to Export"
-                placeholder="Select data type"
+                label={t('exportPage.configuration.dataToExport.label')}
+                placeholder={t('exportPage.configuration.dataToExport.placeholder')}
                 value={exportConfig.scope}
                 onChange={value =>
                   setExportConfig(prev => ({ ...prev, scope: value }))
@@ -480,14 +484,14 @@ const ExportPage = () => {
                     ?.filter(scope => scope.value !== 'all')
                     .map(scope => ({
                       value: scope.value,
-                      label: `${scope.label} (${getRecordCount(scope.value)} records)`,
+                      label: `${translateScopeLabel(scope.value)} (${getRecordCount(scope.value)} records)`,
                     })) || []
                 }
               />
             ) : (
               <Box>
                 <Text fw={500} size="sm" mb="xs">
-                  Select Data Types for Bulk Export
+                  {t('exportPage.configuration.bulkSelection.label')}
                 </Text>
                 <Stack gap="xs">
                   {formats.scopes
@@ -495,7 +499,7 @@ const ExportPage = () => {
                     .map(scope => (
                       <Checkbox
                         key={scope.value}
-                        label={`${scope.label} (${getRecordCount(scope.value)})`}
+                        label={`${translateScopeLabel(scope.value)} (${getRecordCount(scope.value)})`}
                         checked={selectedScopes.includes(scope.value)}
                         onChange={() => handleScopeToggle(scope.value)}
                       />
@@ -508,7 +512,7 @@ const ExportPage = () => {
             <Group grow>
               <TextInput
                 type="date"
-                label="Start Date (Optional)"
+                label={t('exportPage.configuration.dateRange.startDate')}
                 value={exportConfig.startDate}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -519,7 +523,7 @@ const ExportPage = () => {
               />
               <TextInput
                 type="date"
-                label="End Date (Optional)"
+                label={t('exportPage.configuration.dateRange.endDate')}
                 value={exportConfig.endDate}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -533,7 +537,7 @@ const ExportPage = () => {
             {/* Include Files Option (PDF only) */}
             {exportConfig.format === 'pdf' && !bulkMode && (
               <Checkbox
-                label="Include file attachments (creates ZIP file)"
+                label={t('exportPage.configuration.includeFiles')}
                 checked={exportConfig.includeFiles}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -547,8 +551,8 @@ const ExportPage = () => {
             {/* Include Patient Info Option (PDF only) */}
             {exportConfig.format === 'pdf' && !bulkMode && (
               <Checkbox
-                label="Include patient information (name, demographics, etc.)"
-                description="Uncheck to exclude personal patient details for privacy"
+                label={t('exportPage.configuration.includePatientInfo.label')}
+                description={t('exportPage.configuration.includePatientInfo.description')}
                 checked={exportConfig.includePatientInfo}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -572,8 +576,8 @@ const ExportPage = () => {
                   loading={loading}
                 >
                   {loading
-                    ? 'Exporting...'
-                    : `Export ${exportConfig.scope} as ${exportConfig.format.toUpperCase()}`}
+                    ? t('exportPage.buttons.exporting')
+                    : t('exportPage.buttons.exportAs', { scope: exportConfig.scope, format: exportConfig.format.toUpperCase() })}
                 </Button>
               ) : (
                 <Button
@@ -586,8 +590,8 @@ const ExportPage = () => {
                   loading={loading}
                 >
                   {loading
-                    ? 'Creating ZIP...'
-                    : `Bulk Export ${selectedScopes.length} types as ZIP`}
+                    ? t('exportPage.buttons.creatingZip')
+                    : t('exportPage.buttons.bulkExport', { count: selectedScopes.length })}
                 </Button>
               )}
             </Group>
@@ -598,52 +602,47 @@ const ExportPage = () => {
         <Paper shadow="sm" p="xl" radius="md" withBorder variant="outline">
           <Group mb="lg">
             <IconInfoCircle size={20} />
-            <Title order={2}>Export Information</Title>
+            <Title order={2}>{t('exportPage.information.title')}</Title>
           </Group>
           <Stack gap="md">
             <Box>
               <Text fw={500} mb="xs">
-                JSON Format:
+                {t('exportPage.information.json.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                Machine-readable structured data format, ideal for importing
-                into other systems or applications.
+                {t('exportPage.information.json.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                CSV Format:
+                {t('exportPage.information.csv.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                Comma-separated values suitable for spreadsheet applications
-                like Excel or Google Sheets.
+                {t('exportPage.information.csv.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                PDF Format:
+                {t('exportPage.information.pdf.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                Human-readable document format perfect for printing or sharing
-                with healthcare providers.
+                {t('exportPage.information.pdf.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                Bulk Export:
+                {t('exportPage.information.bulk.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                Creates a ZIP file containing multiple data types in your chosen
-                format for comprehensive data backup.
+                {t('exportPage.information.bulk.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                File Attachments:
+                {t('exportPage.information.fileAttachments.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                When available for PDF exports, lab result files can be included
-                in a ZIP archive.
+                {t('exportPage.information.fileAttachments.description')}
               </Text>
             </Box>
             <Divider />

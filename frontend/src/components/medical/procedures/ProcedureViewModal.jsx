@@ -18,6 +18,7 @@ import {
   IconFileText,
   IconEdit,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { formatDate } from '../../../utils/helpers';
@@ -34,6 +35,7 @@ const ProcedureViewModal = ({
   onFileUploadComplete,
   onError
 }) => {
+  const { t } = useTranslation('common');
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or procedure changes
@@ -99,7 +101,7 @@ const ProcedureViewModal = ({
         title={
           <Group>
             <Text fw={600} size="lg">
-              {procedure.procedure_name || 'Procedure Details'}
+              {procedure.procedure_name || t('procedures.viewModal.title', 'Procedure Details')}
             </Text>
             <StatusBadge status={procedure.status} />
           </Group>
@@ -111,16 +113,16 @@ const ProcedureViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              Overview
+              {t('procedures.viewModal.tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-              Clinical Details
+              {t('procedures.viewModal.tabs.clinical', 'Clinical Details')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              Notes
+              {t('procedures.viewModal.tabs.notes', 'Notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              Documents
+              {t('procedures.viewModal.tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -130,50 +132,50 @@ const ProcedureViewModal = ({
               <Stack gap="lg">
                 {/* Basic Information */}
                 <div>
-                  <Title order={4} mb="sm">Basic Information</Title>
+                  <Title order={4} mb="sm">{t('procedures.viewModal.basicInfo', 'Basic Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Procedure Name</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.procedureName', 'Procedure Name')}</Text>
                       <Text size="sm">{procedure.procedure_name}</Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Procedure Type</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.procedureType', 'Procedure Type')}</Text>
                       <Text size="sm" c={procedure.procedure_type ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_type || 'Not specified'}
+                        {procedure.procedure_type || t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Procedure Code</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.procedureCode', 'Procedure Code')}</Text>
                       <Text size="sm" c={procedure.procedure_code ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_code || 'Not specified'}
+                        {procedure.procedure_code || t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Date</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.date', 'Date')}</Text>
                       <Text size="sm" c={procedure.date ? 'inherit' : 'dimmed'}>
-                        {procedure.date ? formatDate(procedure.date) : 'Not specified'}
+                        {procedure.date ? formatDate(procedure.date) : t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Status</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.status', 'Status')}</Text>
                       <StatusBadge status={procedure.status} />
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Setting</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.setting', 'Setting')}</Text>
                       <Text size="sm" c={procedure.procedure_setting ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_setting || 'Not specified'}
+                        {procedure.procedure_setting || t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Duration</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.duration', 'Duration')}</Text>
                       <Text size="sm" c={procedure.procedure_duration ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_duration ? `${procedure.procedure_duration} minutes` : 'Not specified'}
+                        {procedure.procedure_duration ? t('procedures.viewModal.durationMinutes', '{{minutes}} minutes', { minutes: procedure.procedure_duration }) : t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Facility</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.facility', 'Facility')}</Text>
                       <Text size="sm" c={procedure.facility ? 'inherit' : 'dimmed'}>
-                        {procedure.facility || 'Not specified'}
+                        {procedure.facility || t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -181,10 +183,10 @@ const ProcedureViewModal = ({
 
                 {/* Practitioner Information */}
                 <div>
-                  <Title order={4} mb="sm">Practitioner</Title>
+                  <Title order={4} mb="sm">{t('procedures.viewModal.practitioner', 'Practitioner')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Doctor</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.doctor', 'Doctor')}</Text>
                       {procedure.practitioner_id ? (
                         <Text
                           size="sm"
@@ -192,18 +194,18 @@ const ProcedureViewModal = ({
                           c="blue"
                           style={{ cursor: 'pointer', textDecoration: 'underline' }}
                           onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
-                          title="View practitioner details"
+                          title={t('procedures.viewModal.viewPractitioner', 'View practitioner details')}
                         >
-                          {practitioner?.name || `Practitioner ID: ${procedure.practitioner_id}`}
+                          {practitioner?.name || t('procedures.viewModal.practitionerId', 'Practitioner ID: {{id}}', { id: procedure.practitioner_id })}
                         </Text>
                       ) : (
-                        <Text size="sm" c="dimmed">Not specified</Text>
+                        <Text size="sm" c="dimmed">{t('procedures.viewModal.notSpecified', 'Not specified')}</Text>
                       )}
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Specialty</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.specialty', 'Specialty')}</Text>
                       <Text size="sm" c={practitioner?.specialty ? 'inherit' : 'dimmed'}>
-                        {practitioner?.specialty || 'Not specified'}
+                        {practitioner?.specialty || t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -211,16 +213,16 @@ const ProcedureViewModal = ({
 
                 {/* Description */}
                 <div>
-                  <Title order={4} mb="sm">Description</Title>
+                  <Title order={4} mb="sm">{t('procedures.viewModal.description', 'Description')}</Title>
                   <Text size="sm" c={procedure.description ? 'inherit' : 'dimmed'}>
-                    {procedure.description || 'No description available'}
+                    {procedure.description || t('procedures.viewModal.noDescription', 'No description available')}
                   </Text>
                 </div>
 
                 {/* Tags Section */}
                 {procedure.tags && procedure.tags.length > 0 && (
                   <div>
-                    <Title order={4} mb="sm">Tags</Title>
+                    <Title order={4} mb="sm">{t('procedures.viewModal.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {procedure.tags.map((tag, index) => (
                         <Badge
@@ -246,18 +248,18 @@ const ProcedureViewModal = ({
               <Stack gap="lg">
                 {/* Anesthesia Information */}
                 <div>
-                  <Title order={4} mb="sm">Anesthesia Information</Title>
+                  <Title order={4} mb="sm">{t('procedures.viewModal.anesthesiaInfo', 'Anesthesia Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Anesthesia Type</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.anesthesiaType', 'Anesthesia Type')}</Text>
                       <Text size="sm" c={procedure.anesthesia_type ? 'inherit' : 'dimmed'}>
-                        {procedure.anesthesia_type || 'Not specified'}
+                        {procedure.anesthesia_type || t('procedures.viewModal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                      <Text fw={500} size="sm" c="dimmed">Anesthesia Notes</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.anesthesiaNotes', 'Anesthesia Notes')}</Text>
                       <Text size="sm" c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}>
-                        {procedure.anesthesia_notes || 'No anesthesia notes available'}
+                        {procedure.anesthesia_notes || t('procedures.viewModal.noAnesthesiaNotes', 'No anesthesia notes available')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -265,9 +267,9 @@ const ProcedureViewModal = ({
 
                 {/* Complications */}
                 <div>
-                  <Title order={4} mb="sm">Complications</Title>
+                  <Title order={4} mb="sm">{t('procedures.viewModal.complications', 'Complications')}</Title>
                   <Text size="sm" c={procedure.procedure_complications ? '#d63384' : 'dimmed'}>
-                    {procedure.procedure_complications || 'No complications reported'}
+                    {procedure.procedure_complications || t('procedures.viewModal.noComplications', 'No complications reported')}
                   </Text>
                 </div>
               </Stack>
@@ -279,9 +281,9 @@ const ProcedureViewModal = ({
             <Box mt="md">
               <Stack gap="lg">
                 <div>
-                  <Title order={4} mb="sm">Clinical Notes</Title>
+                  <Title order={4} mb="sm">{t('procedures.viewModal.clinicalNotes', 'Clinical Notes')}</Title>
                   <Text size="sm" c={procedure.notes ? 'inherit' : 'dimmed'}>
-                    {procedure.notes || 'No clinical notes available'}
+                    {procedure.notes || t('procedures.viewModal.noClinicalNotes', 'No clinical notes available')}
                   </Text>
                 </div>
               </Stack>
@@ -311,10 +313,10 @@ const ProcedureViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm" mt="lg">
           <Button variant="default" onClick={onClose}>
-            Close
+            {t('procedures.viewModal.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEditClick} leftSection={<IconEdit size={16} />}>
-            Edit
+            {t('procedures.viewModal.edit', 'Edit')}
           </Button>
         </Group>
       </Modal>

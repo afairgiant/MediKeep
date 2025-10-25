@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Stack,
   Group,
@@ -63,6 +64,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   onError,
   onLabResultUpdated
 }) => {
+  const { t } = useTranslation('common');
   const [activeTab, setActiveTab] = useState<string>('display');
   const [components, setComponents] = useState<LabTestComponent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,8 +210,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       setComponents(prev => prev.filter(c => c.id !== component.id));
 
       notifications.show({
-        title: 'Component Deleted',
-        message: `${component.test_name} has been deleted`,
+        title: t('testComponents.notifications.componentDeleted', 'Component Deleted'),
+        message: t('testComponents.notifications.hasBeenDeleted', '{{name}} has been deleted', { name: component.test_name }),
         color: 'green'
       });
 
@@ -306,10 +308,10 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       <Group justify="space-between" align="center">
         <Group gap="xs">
           <IconFlask size={20} />
-          <Title order={4}>Test Components</Title>
+          <Title order={4}>{t('testComponents.title', 'Test Components')}</Title>
           {components.length > 0 && (
             <Badge variant="light" color="blue">
-              {components.length} test{components.length !== 1 ? 's' : ''}
+              {t('testComponents.testCount', '{{count}} test', { count: components.length })}
             </Badge>
           )}
         </Group>
@@ -321,14 +323,14 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               variant="filled"
               onClick={() => setShowAddModal(true)}
             >
-              Add Tests
+              {t('testComponents.addTests', 'Add Tests')}
             </Button>
           )}
           <ActionIcon
             variant="subtle"
             onClick={handleRefresh}
             loading={refreshing}
-            title="Refresh components"
+            title={t('testComponents.refreshComponents', 'Refresh components')}
           >
             <IconRefresh size={16} />
           </ActionIcon>
@@ -339,7 +341,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       {error && (
         <Alert
           icon={<IconAlertCircle size={16} />}
-          title="Error loading test components"
+          title={t('testComponents.errorLoading', 'Error loading test components')}
           color="red"
           onClose={() => setError(null)}
         >
@@ -355,14 +357,14 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             leftSection={getTabIcon('display')}
             rightSection={getTabBadge('display')}
           >
-            Test Results
+            {t('testComponents.tabs.testResults', 'Test Results')}
           </Tabs.Tab>
 
           <Tabs.Tab
             value="stats"
             leftSection={getTabIcon('stats')}
           >
-            Statistics
+            {t('testComponents.tabs.statistics', 'Statistics')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -417,13 +419,12 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
                 }}
                 variant="filled"
               >
-                Add Test Components
+                {t('testComponents.addTestComponents', 'Add Test Components')}
               </Button>
             </Group>
 
             <Text size="xs" c="dimmed" ta="center" maw={500}>
-              Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges.
-              Bulk import allows you to copy/paste results from lab reports for automatic parsing.
+              {t('testComponents.emptyState.description', 'Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing.')}
             </Text>
           </Stack>
         </Paper>
@@ -434,9 +435,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         <Paper withBorder p="xl" radius="md" bg="gray.0">
           <Stack align="center" gap="md">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
-            <Title order={3} c="dimmed">No test components</Title>
+            <Title order={3} c="dimmed">{t('testComponents.noComponents', 'No test components')}</Title>
             <Text size="sm" c="dimmed" ta="center">
-              This lab result doesn't have any individual test components added yet.
+              {t('testComponents.noComponentsDescription', "This lab result doesn't have any individual test components added yet.")}
             </Text>
           </Stack>
         </Paper>
@@ -460,7 +461,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         title={
           <Group gap="xs">
             <IconPlus size={20} />
-            <Text fw={600}>Add Test Components</Text>
+            <Text fw={600}>{t('testComponents.addTestComponents', 'Add Test Components')}</Text>
           </Group>
         }
         size="calc(100vw - 40px)"

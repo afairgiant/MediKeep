@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Group,
   TextInput,
@@ -62,6 +63,7 @@ const MantineFilters = ({
     showSearch = true,
   } = config;
 
+  const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchWidth, setSearchWidth] = useState('150px');
@@ -180,21 +182,21 @@ const MantineFilters = ({
             }}>
               <Group gap="xs" align="center" style={{ flexWrap: 'nowrap' }}>
                 <Text size="md" fw={500} style={{ whiteSpace: 'nowrap' }}>
-                  Filters & Search
+                  {t('filters.title', 'Filters & Search')}
                 </Text>
                 {hasActiveFilters && (
                   <Badge color="blue" variant="light" size="sm">
-                    Active
+                    {t('filters.active', 'Active')}
                   </Badge>
                 )}
               </Group>
-              <Text size="xs" c="dimmed" style={{ 
+              <Text size="xs" c="dimmed" style={{
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
               }}>
-                {filteredCount} of {totalCount} items
-                {filterCount > 0 ? ` • ${filterCount} more filters` : ''}
+                {t('filters.itemCount', '{{filtered}} of {{total}} items', { filtered: filteredCount, total: totalCount })}
+                {filterCount > 0 ? ` • ${t('filters.moreFilters', '{{count}} more filters', { count: filterCount })}` : ''}
               </Text>
             </div>
 
@@ -244,7 +246,7 @@ const MantineFilters = ({
                 compact
                 style={{ flexShrink: 0 }}
               >
-                Clear
+                {t('filters.clear', 'Clear')}
               </Button>
             )}
           </div>

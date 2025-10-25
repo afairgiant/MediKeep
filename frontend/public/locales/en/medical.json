@@ -677,10 +677,40 @@
       "oneTime": "One time only",
       "continuous": "Continuous/ongoing"
     },
+    "relatedCondition": {
+      "label": "Related Condition",
+      "placeholder": "Select condition (optional)",
+      "description": "Link this treatment to a specific medical condition"
+    },
+    "practitioner": {
+      "label": "Practitioner",
+      "placeholder": "Select practitioner (optional)",
+      "description": "Assign a practitioner to this treatment"
+    },
+    "startDate": {
+      "label": "Start Date",
+      "placeholder": "Select start date",
+      "description": "When treatment begins/began"
+    },
+    "endDate": {
+      "label": "End Date",
+      "placeholder": "Select end date (if known)",
+      "description": "Expected or actual completion date"
+    },
+    "frequency": {
+      "label": "Frequency",
+      "placeholder": "Select frequency",
+      "description": "How often treatment occurs"
+    },
     "treatmentDescription": {
       "label": "Treatment Description",
       "placeholder": "Detailed description of the treatment plan...",
       "description": "Comprehensive details about the treatment approach"
+    },
+    "notes": {
+      "label": "Additional Notes",
+      "placeholder": "Progress notes, side effects, adjustments, outcomes...",
+      "description": "Progress updates, observations, or important notes"
     }
   },
   "familyMembers": {
@@ -830,6 +860,21 @@
         "label": "Common Triggers",
         "placeholder": "Add common triggers (stress, weather, foods, etc.)",
         "description": "What typically triggers this symptom"
+      },
+      "status": {
+        "label": "Overall Status",
+        "placeholder": "Select status",
+        "description": "Current overall status of this symptom"
+      },
+      "statusOptions": {
+        "active": "Active - Currently experiencing",
+        "resolved": "Resolved - No longer experiencing",
+        "recurring": "Recurring - Comes and goes"
+      },
+      "generalNotes": {
+        "label": "General Notes",
+        "placeholder": "Overall notes about this symptom...",
+        "description": "General information about patterns, history, or observations"
       }
     },
     "occurrence": {
@@ -847,6 +892,21 @@
         "label": "Pain Scale (0-10)",
         "placeholder": "0 = No pain, 10 = Worst pain",
         "description": "Rate pain level from 0 (none) to 10 (worst possible)"
+      },
+      "duration": {
+        "label": "Duration",
+        "placeholder": "e.g., 2 hours, 30 minutes, all day",
+        "description": "How long did this episode last"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "e.g., Left temple, Lower back, Entire body",
+        "description": "Where on your body did you feel this"
+      },
+      "impactLevel": {
+        "label": "Impact on Daily Life",
+        "placeholder": "Select impact level",
+        "description": "How much did this affect your daily activities"
       },
       "impactLevelOptions": {
         "noImpact": "No Impact - Able to function normally",
@@ -879,6 +939,539 @@
         "label": "Resolution Notes",
         "placeholder": "How was this episode resolved...",
         "description": "Details about how this episode ended or was treated"
+      },
+      "additionalNotes": {
+        "label": "Additional Notes",
+        "placeholder": "Additional details about this episode...",
+        "description": "Any other relevant information about this occurrence"
+      }
+    }
+  },
+  "familyHistory": {
+    "form": {
+      "member": {
+        "name": {
+          "label": "Full Name",
+          "placeholder": "Enter family member name",
+          "description": "Full name of the family member"
+        },
+        "relationship": {
+          "label": "Relationship",
+          "placeholder": "Select relationship",
+          "description": "Relationship to you"
+        },
+        "gender": {
+          "label": "Gender",
+          "placeholder": "Select gender",
+          "description": "Gender of family member"
+        },
+        "birthYear": {
+          "label": "Birth Year",
+          "placeholder": "e.g., 1965",
+          "description": "Year family member was born"
+        },
+        "deceased": {
+          "label": "Deceased",
+          "description": "Check if family member is deceased"
+        },
+        "deathYear": {
+          "label": "Death Year",
+          "placeholder": "e.g., 2020",
+          "description": "Year family member passed away"
+        },
+        "notes": {
+          "placeholder": "Additional information about family member...",
+          "description": "Any additional notes or important information"
+        },
+        "relationshipOptions": {
+          "father": "Father",
+          "mother": "Mother",
+          "brother": "Brother",
+          "sister": "Sister",
+          "paternalGrandfather": "Paternal Grandfather",
+          "paternalGrandmother": "Paternal Grandmother",
+          "maternalGrandfather": "Maternal Grandfather",
+          "maternalGrandmother": "Maternal Grandmother",
+          "uncle": "Uncle",
+          "aunt": "Aunt",
+          "cousin": "Cousin",
+          "other": "Other"
+        },
+        "genderOptions": {
+          "male": "Male",
+          "female": "Female"
+        }
+      },
+      "condition": {
+        "conditionName": {
+          "label": "Condition Name",
+          "placeholder": "e.g., Diabetes, Heart Disease, Cancer",
+          "description": "Name of the medical condition"
+        },
+        "conditionType": {
+          "label": "Condition Type",
+          "placeholder": "Select condition type",
+          "description": "Category of medical condition"
+        },
+        "severity": {
+          "label": "Severity",
+          "placeholder": "Select severity level",
+          "description": "How severe the condition was/is"
+        },
+        "diagnosisAge": {
+          "label": "Diagnosis Age",
+          "placeholder": "e.g., 45",
+          "description": "Age at diagnosis"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status",
+          "description": "Current status of the condition"
+        },
+        "icd10Code": {
+          "label": "ICD-10 Code",
+          "placeholder": "e.g., E11.9",
+          "description": "Medical diagnosis code (if known)"
+        },
+        "notes": {
+          "placeholder": "Additional details about the condition...",
+          "description": "Treatment details, outcomes, or other relevant information"
+        },
+        "typeOptions": {
+          "cardiovascular": "Cardiovascular - Heart & blood vessels",
+          "diabetes": "Diabetes - Blood sugar disorders",
+          "cancer": "Cancer - Malignant conditions",
+          "mentalHealth": "Mental Health - Psychological conditions",
+          "neurological": "Neurological - Brain & nervous system",
+          "autoimmune": "Autoimmune - Immune system disorders",
+          "genetic": "Genetic - Hereditary conditions",
+          "respiratory": "Respiratory - Lung & breathing conditions",
+          "endocrine": "Endocrine - Hormone disorders",
+          "other": "Other - Specify in notes"
+        },
+        "severityOptions": {
+          "mild": "💛 Mild - Minor impact",
+          "moderate": "⚡ Moderate - Noticeable impact",
+          "severe": "⚠️ Severe - Significant impact",
+          "critical": "🚨 Critical - Life-threatening"
+        },
+        "statusOptions": {
+          "active": "Active - Ongoing condition",
+          "resolved": "Resolved - No longer present",
+          "chronic": "Chronic - Long-term condition"
+        }
+      }
+    }
+  },
+  "practitioners": {
+    "form": {
+      "name": {
+        "label": "Full Name",
+        "placeholder": "Dr. Jane Smith",
+        "description": "Doctor's full name including title"
+      },
+      "specialty": {
+        "label": "Medical Specialty",
+        "placeholder": "Search specialties or type custom...",
+        "description": "Select from list or type a custom specialty"
+      },
+      "practice": {
+        "label": "Practice/Hospital",
+        "placeholder": "City General Hospital",
+        "description": "Workplace or medical facility"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "(555) 123-4567",
+        "description": "Primary contact number"
+      },
+      "website": {
+        "label": "Website",
+        "placeholder": "https://www.example.com",
+        "description": "Professional website or practice page"
+      },
+      "rating": {
+        "label": "Rating"
+      }
+    }
+  },
+  "pharmacies": {
+    "form": {
+      "brand": {
+        "label": "Pharmacy Brand",
+        "placeholder": "Select pharmacy chain or type",
+        "description": "Major pharmacy chain or independent type"
+      },
+      "name": {
+        "label": "Pharmacy Name",
+        "placeholder": "CVS Pharmacy - Main Street",
+        "description": "Specific name or location identifier"
+      },
+      "locationDivider": "Location Information",
+      "streetAddress": {
+        "label": "Street Address",
+        "placeholder": "123 Main Street",
+        "description": "Physical street address"
+      },
+      "city": {
+        "label": "City",
+        "placeholder": "San Francisco",
+        "description": "City location"
+      },
+      "storeNumber": {
+        "label": "Store Number",
+        "placeholder": "e.g., 1234, #5678, Store A",
+        "description": "Internal store identifier"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "(555) 123-4567",
+        "description": "Primary pharmacy phone number"
+      }
+    }
+  },
+  "emergencyContacts": {
+    "form": {
+      "name": {
+        "label": "Full Name",
+        "placeholder": "e.g., John Smith",
+        "description": "Full name of the emergency contact"
+      },
+      "relationship": {
+        "label": "Relationship",
+        "placeholder": "Select relationship",
+        "description": "Relationship to patient",
+        "options": {
+          "spouse": "Spouse",
+          "partner": "Partner",
+          "parent": "Parent",
+          "mother": "Mother",
+          "father": "Father",
+          "child": "Child",
+          "son": "Son",
+          "daughter": "Daughter",
+          "sibling": "Sibling",
+          "brother": "Brother",
+          "sister": "Sister",
+          "grandparent": "Grandparent",
+          "grandmother": "Grandmother",
+          "grandfather": "Grandfather",
+          "grandchild": "Grandchild",
+          "grandson": "Grandson",
+          "granddaughter": "Granddaughter",
+          "aunt": "Aunt",
+          "uncle": "Uncle",
+          "cousin": "Cousin",
+          "friend": "Friend",
+          "neighbor": "Neighbor",
+          "caregiver": "Caregiver",
+          "guardian": "Guardian",
+          "other": "Other"
+        }
+      },
+      "primaryPhone": {
+        "label": "Primary Phone",
+        "placeholder": "e.g., (555) 123-4567",
+        "description": "Primary phone number"
+      },
+      "secondaryPhone": {
+        "label": "Secondary Phone",
+        "placeholder": "e.g., (555) 987-6543",
+        "description": "Optional secondary phone number"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "e.g., john.smith@email.com",
+        "description": "Optional email address"
+      },
+      "address": {
+        "label": "Address",
+        "placeholder": "e.g., 123 Main St, City, State 12345",
+        "description": "Contact's address (optional)"
+      },
+      "isPrimary": {
+        "label": "Primary Emergency Contact",
+        "description": "This person will be contacted first in emergencies"
+      },
+      "isActive": {
+        "label": "Active Contact",
+        "description": "This contact is currently available"
+      },
+      "notes": {
+        "placeholder": "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')",
+        "description": "Any additional notes about this contact"
+      }
+    }
+  },
+  "insurance": {
+    "form": {
+      "dividers": {
+        "basicInfo": "Basic Insurance Information",
+        "memberInfo": "Member Information",
+        "coveragePeriodStatus": "Coverage Period & Status",
+        "contactInfo": "Contact Information",
+        "coverageDetails": "Coverage Details",
+        "additionalInfo": "Additional Information"
+      },
+      "insuranceType": {
+        "label": "Insurance Type",
+        "placeholder": "Select insurance type",
+        "description": "Type of insurance coverage",
+        "options": {
+          "medical": "🏥 Medical Insurance",
+          "dental": "🦷 Dental Insurance",
+          "vision": "👁️ Vision Insurance",
+          "prescription": "💊 Prescription Insurance"
+        }
+      },
+      "companyName": {
+        "label": "Insurance Company",
+        "placeholder": "e.g., Blue Cross Blue Shield",
+        "description": "Name of the insurance company"
+      },
+      "planName": {
+        "label": "Plan Name",
+        "placeholder": "e.g., PPO Gold Plus",
+        "description": "Name of the specific insurance plan"
+      },
+      "employerGroup": {
+        "label": "Employer/Group Sponsor",
+        "placeholder": "e.g., ABC Corporation, Self-Employed",
+        "description": "Company or organization providing the insurance (if applicable)"
+      },
+      "memberName": {
+        "label": "Member Name",
+        "placeholder": "e.g., John Doe",
+        "description": "Name as it appears on the insurance card"
+      },
+      "memberId": {
+        "label": "Member ID",
+        "placeholder": "e.g., ABC123456789",
+        "description": "Member ID number from insurance card"
+      },
+      "policyHolderName": {
+        "label": "Policy Holder Name",
+        "placeholder": "e.g., Jane Doe (leave blank if same as member)",
+        "description": "Name of policy holder (if different from member)"
+      },
+      "relationshipToHolder": {
+        "label": "Relationship to Holder",
+        "placeholder": "Select relationship",
+        "description": "Your relationship to the policy holder",
+        "options": {
+          "self": "Self",
+          "spouse": "Spouse",
+          "child": "Child",
+          "dependent": "Dependent",
+          "other": "Other"
+        }
+      },
+      "groupNumber": {
+        "label": "Group Number",
+        "placeholder": "e.g., GRP123",
+        "description": "Group number (if applicable)"
+      },
+      "effectiveDate": {
+        "label": "Effective Date",
+        "placeholder": "Select effective date",
+        "description": "Date when coverage begins"
+      },
+      "expirationDate": {
+        "label": "Expiration Date",
+        "placeholder": "Select expiration date",
+        "description": "Date when coverage ends (if known)"
+      },
+      "status": {
+        "placeholder": "Select status",
+        "description": "Current status of the insurance",
+        "options": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "expired": "Expired",
+          "pending": "Pending"
+        }
+      },
+      "isPrimary": {
+        "label": "Primary Insurance",
+        "description": "Check if this is your primary insurance (for medical only)"
+      },
+      "customerServicePhone": {
+        "label": "Customer Service Phone",
+        "placeholder": "e.g., 1-800-123-4567",
+        "description": "Customer service phone number"
+      },
+      "preauthPhone": {
+        "label": "Pre-authorization Phone",
+        "description": "Phone number for pre-authorizations"
+      },
+      "providerServicesPhone": {
+        "label": "Provider Services Phone",
+        "description": "Phone number for provider services"
+      },
+      "websiteUrl": {
+        "label": "Website URL",
+        "placeholder": "e.g., https://member.insurance.com",
+        "description": "Member portal or website URL"
+      },
+      "claimsAddress": {
+        "label": "Claims Address",
+        "placeholder": "Enter claims mailing address...",
+        "description": "Address for submitting claims"
+      },
+      "primaryCarePhysician": {
+        "label": "Primary Care Physician",
+        "placeholder": "e.g., Dr. Smith",
+        "description": "Name of your primary care physician"
+      },
+      "deductibleIndividual": {
+        "label": "Individual Deductible",
+        "placeholder": "e.g., 1000",
+        "description": "Annual deductible amount for individual"
+      },
+      "deductibleFamily": {
+        "label": "Family Deductible",
+        "placeholder": "e.g., 2000",
+        "description": "Annual deductible amount for family"
+      },
+      "copayPrimaryCare": {
+        "label": "Primary Care Copay",
+        "placeholder": "e.g., 25",
+        "description": "Copay amount for primary care visits"
+      },
+      "copaySpecialist": {
+        "label": "Specialist Copay",
+        "placeholder": "e.g., 50",
+        "description": "Copay amount for specialist visits"
+      },
+      "copayEmergencyRoom": {
+        "label": "Emergency Room Copay",
+        "placeholder": "e.g., 200",
+        "description": "Copay amount for emergency room visits"
+      },
+      "copayUrgentCare": {
+        "label": "Urgent Care Copay",
+        "placeholder": "e.g., 75",
+        "description": "Copay amount for urgent care visits"
+      },
+      "planType": {
+        "label": "Plan Type",
+        "placeholder": "Select plan type",
+        "description": "Type of medical insurance plan",
+        "options": {
+          "ppo": "PPO (Preferred Provider Organization)",
+          "hmo": "HMO (Health Maintenance Organization)",
+          "epo": "EPO (Exclusive Provider Organization)",
+          "pos": "POS (Point of Service)",
+          "hdhp": "HDHP (High Deductible Health Plan)",
+          "indemnity": "Indemnity (Fee-for-Service)"
+        }
+      },
+      "dentalPlanType": {
+        "label": "Dental Plan Type",
+        "placeholder": "Select dental plan type",
+        "description": "Type of dental insurance plan",
+        "options": {
+          "dppo": "DPPO (Dental Preferred Provider Organization)",
+          "dhmo": "DHMO (Dental Health Maintenance Organization)",
+          "discount": "Discount Plan"
+        }
+      },
+      "annualMaximum": {
+        "label": "Annual Maximum Benefit",
+        "placeholder": "e.g., 1500",
+        "description": "Maximum annual benefit amount"
+      },
+      "preventiveCoverage": {
+        "label": "Preventive Coverage %",
+        "placeholder": "e.g., 100",
+        "description": "Coverage percentage for preventive care"
+      },
+      "basicCoverage": {
+        "label": "Basic Coverage %",
+        "placeholder": "e.g., 80",
+        "description": "Coverage percentage for basic procedures"
+      },
+      "majorCoverage": {
+        "label": "Major Coverage %",
+        "placeholder": "e.g., 50",
+        "description": "Coverage percentage for major procedures"
+      },
+      "visionPlanType": {
+        "label": "Vision Plan Type",
+        "placeholder": "Select vision plan type",
+        "description": "Type of vision insurance plan",
+        "options": {
+          "visionPpo": "Vision PPO",
+          "visionHmo": "Vision HMO",
+          "visionDiscount": "Vision Discount Plan"
+        }
+      },
+      "examCopay": {
+        "label": "Exam Copay",
+        "placeholder": "e.g., 10",
+        "description": "Copay amount for eye exams"
+      },
+      "frameAllowance": {
+        "label": "Frame Allowance",
+        "placeholder": "e.g., 150",
+        "description": "Annual allowance for frames"
+      },
+      "lensCoverage": {
+        "label": "Lens Coverage",
+        "placeholder": "e.g., 100% covered",
+        "description": "Coverage details for lenses"
+      },
+      "contactAllowance": {
+        "label": "Contact Lens Allowance",
+        "description": "Annual allowance for contact lenses"
+      },
+      "prescriptionPlanType": {
+        "label": "Prescription Plan Type",
+        "placeholder": "Select prescription plan type",
+        "description": "Type of prescription drug plan",
+        "options": {
+          "formulary": "Formulary-Based Plan",
+          "tieredCopay": "Tiered Copay Plan",
+          "medicarePartD": "Medicare Part D",
+          "integrated": "Integrated with Medical"
+        }
+      },
+      "binNumber": {
+        "label": "BIN Number",
+        "placeholder": "e.g., 123456",
+        "description": "Bank Identification Number for pharmacy"
+      },
+      "pcnNumber": {
+        "label": "PCN Number",
+        "placeholder": "e.g., ABC123",
+        "description": "Processor Control Number"
+      },
+      "rxgroup": {
+        "label": "RX Group",
+        "placeholder": "e.g., RXGRP123",
+        "description": "Prescription group number"
+      },
+      "copayGeneric": {
+        "label": "Generic Copay",
+        "description": "Copay amount for generic medications"
+      },
+      "copayBrand": {
+        "label": "Brand Name Copay",
+        "placeholder": "e.g., 30",
+        "description": "Copay amount for brand name medications"
+      },
+      "copaySpecialty": {
+        "label": "Specialty Copay",
+        "description": "Copay amount for specialty medications"
+      },
+      "pharmacyNetworkInfo": {
+        "label": "Pharmacy Network Info",
+        "placeholder": "Enter pharmacy network details...",
+        "description": "Information about preferred pharmacy networks"
+      },
+      "notes": {
+        "placeholder": "Additional information about this insurance...",
+        "description": "Any additional details or notes"
       }
     }
   }

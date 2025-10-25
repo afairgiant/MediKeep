@@ -20,6 +20,7 @@ import {
   IconFileText,
   IconNotes,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -40,6 +41,7 @@ const ImmunizationFormWrapper = ({
   isLoading = false,
   statusMessage,
 }) => {
+  const { t } = useTranslation('common');
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,7 +101,7 @@ const ImmunizationFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || "Saving immunization..."} />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('immunizations.form.savingImmunization', 'Saving immunization...')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -107,18 +109,18 @@ const ImmunizationFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                Basic Info
+                {t('immunizations.form.tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
-                Administration
+                {t('immunizations.form.tabs.administration', 'Administration')}
               </Tabs.Tab>
               {editingImmunization && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  Documents
+                  {t('immunizations.form.tabs.documents', 'Documents')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                Notes
+                {t('immunizations.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -128,73 +130,73 @@ const ImmunizationFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Vaccine Name"
+                      label={t('immunizations.form.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
                       onChange={handleTextInputChange('vaccine_name')}
-                      placeholder="e.g., Flu Shot, COVID-19, Tdap"
+                      placeholder={t('immunizations.form.vaccineNamePlaceholder', 'e.g., Flu Shot, COVID-19, Tdap')}
                       required
-                      description="Common name for the vaccine"
+                      description={t('immunizations.form.vaccineNameDesc', 'Common name for the vaccine')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Formal/Trade Name"
+                      label={t('immunizations.form.tradeName', 'Formal/Trade Name')}
                       value={formData.vaccine_trade_name || ''}
                       onChange={handleTextInputChange('vaccine_trade_name')}
-                      placeholder="e.g., Flublok TRIV 2025-2026 PFS"
-                      description="Complete formal name from vaccine documentation"
+                      placeholder={t('immunizations.form.tradeNamePlaceholder', 'e.g., Flublok TRIV 2025-2026 PFS')}
+                      description={t('immunizations.form.tradeNameDesc', 'Complete formal name from vaccine documentation')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Manufacturer"
+                      label={t('immunizations.form.manufacturer', 'Manufacturer')}
                       value={formData.manufacturer || ''}
                       onChange={handleTextInputChange('manufacturer')}
-                      placeholder="Enter manufacturer"
-                      description="Vaccine manufacturer"
+                      placeholder={t('immunizations.form.manufacturerPlaceholder', 'Enter manufacturer')}
+                      description={t('immunizations.form.manufacturerDesc', 'Vaccine manufacturer')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <NumberInput
-                      label="Dose Number"
+                      label={t('immunizations.form.doseNumber', 'Dose Number')}
                       value={formData.dose_number || ''}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'dose_number', value: value || '' } });
                       }}
-                      placeholder="Enter dose number"
-                      description="Which dose in the series"
+                      placeholder={t('immunizations.form.doseNumberPlaceholder', 'Enter dose number')}
+                      description={t('immunizations.form.doseNumberDesc', 'Which dose in the series')}
                       min={1}
                       max={10}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Lot Number"
+                      label={t('immunizations.form.lotNumber', 'Lot Number')}
                       value={formData.lot_number || ''}
                       onChange={handleTextInputChange('lot_number')}
-                      placeholder="Enter lot number"
-                      description="Vaccine lot number"
+                      placeholder={t('immunizations.form.lotNumberPlaceholder', 'Enter lot number')}
+                      description={t('immunizations.form.lotNumberDesc', 'Vaccine lot number')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="NDC Number"
+                      label={t('immunizations.form.ndcNumber', 'NDC Number')}
                       value={formData.ndc_number || ''}
                       onChange={handleTextInputChange('ndc_number')}
-                      placeholder="e.g., 12345-6789-01"
-                      description="National Drug Code"
+                      placeholder={t('immunizations.form.ndcNumberPlaceholder', 'e.g., 12345-6789-01')}
+                      description={t('immunizations.form.ndcNumberDesc', 'National Drug Code')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label="Expiration Date"
+                      label={t('immunizations.form.expirationDate', 'Expiration Date')}
                       value={parseDateInput(formData.expiration_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'expiration_date', value: formattedDate } });
                       }}
-                      placeholder="Select expiration date"
-                      description="When the vaccine expires"
+                      placeholder={t('immunizations.form.expirationDatePlaceholder', 'Select expiration date')}
+                      description={t('immunizations.form.expirationDateDesc', 'When the vaccine expires')}
                       clearable
                       firstDayOfWeek={0}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
@@ -203,17 +205,17 @@ const ImmunizationFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        Tags
+                        {t('immunizations.form.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
-                        Add tags to categorize and organize immunizations
+                        {t('immunizations.form.tagsDesc', 'Add tags to categorize and organize immunizations')}
                       </Text>
                       <TagInput
                         value={formData.tags || []}
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder="Add tags..."
+                        placeholder={t('immunizations.form.tagsPlaceholder', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -227,14 +229,14 @@ const ImmunizationFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label="Date Administered"
+                      label={t('immunizations.form.dateAdministered', 'Date Administered')}
                       value={parseDateInput(formData.date_administered)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'date_administered', value: formattedDate } });
                       }}
-                      placeholder="Select administration date"
-                      description="When the vaccine was administered"
+                      placeholder={t('immunizations.form.dateAdministeredPlaceholder', 'Select administration date')}
+                      description={t('immunizations.form.dateAdministeredDesc', 'When the vaccine was administered')}
                       required
                       clearable
                       firstDayOfWeek={0}
@@ -244,23 +246,23 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label="Administration Site"
+                      label={t('immunizations.form.adminSite', 'Administration Site')}
                       value={formData.site || null}
                       data={[
-                        { value: 'left_arm', label: 'Left Arm' },
-                        { value: 'right_arm', label: 'Right Arm' },
-                        { value: 'left_thigh', label: 'Left Thigh' },
-                        { value: 'right_thigh', label: 'Right Thigh' },
-                        { value: 'left_deltoid', label: 'Left Deltoid' },
-                        { value: 'right_deltoid', label: 'Right Deltoid' },
-                        { value: 'oral', label: 'Oral' },
-                        { value: 'nasal', label: 'Nasal' },
+                        { value: 'left_arm', label: t('immunizations.form.siteLeftArm', 'Left Arm') },
+                        { value: 'right_arm', label: t('immunizations.form.siteRightArm', 'Right Arm') },
+                        { value: 'left_thigh', label: t('immunizations.form.siteLeftThigh', 'Left Thigh') },
+                        { value: 'right_thigh', label: t('immunizations.form.siteRightThigh', 'Right Thigh') },
+                        { value: 'left_deltoid', label: t('immunizations.form.siteLeftDeltoid', 'Left Deltoid') },
+                        { value: 'right_deltoid', label: t('immunizations.form.siteRightDeltoid', 'Right Deltoid') },
+                        { value: 'oral', label: t('immunizations.form.siteOral', 'Oral') },
+                        { value: 'nasal', label: t('immunizations.form.siteNasal', 'Nasal') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'site', value: value || '' } });
                       }}
-                      placeholder="Select administration site"
-                      description="Where vaccine was administered"
+                      placeholder={t('immunizations.form.adminSitePlaceholder', 'Select administration site')}
+                      description={t('immunizations.form.adminSiteDesc', 'Where vaccine was administered')}
                       clearable
                       searchable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -268,21 +270,21 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label="Administration Route"
+                      label={t('immunizations.form.adminRoute', 'Administration Route')}
                       value={formData.route || null}
                       data={[
-                        { value: 'intramuscular', label: 'Intramuscular (IM)' },
-                        { value: 'subcutaneous', label: 'Subcutaneous (SC)' },
-                        { value: 'intradermal', label: 'Intradermal (ID)' },
-                        { value: 'oral', label: 'Oral' },
-                        { value: 'nasal', label: 'Nasal' },
-                        { value: 'intravenous', label: 'Intravenous (IV)' },
+                        { value: 'intramuscular', label: t('immunizations.form.routeIM', 'Intramuscular (IM)') },
+                        { value: 'subcutaneous', label: t('immunizations.form.routeSC', 'Subcutaneous (SC)') },
+                        { value: 'intradermal', label: t('immunizations.form.routeID', 'Intradermal (ID)') },
+                        { value: 'oral', label: t('immunizations.form.routeOral', 'Oral') },
+                        { value: 'nasal', label: t('immunizations.form.routeNasal', 'Nasal') },
+                        { value: 'intravenous', label: t('immunizations.form.routeIV', 'Intravenous (IV)') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'route', value: value || '' } });
                       }}
-                      placeholder="Select administration route"
-                      description="Method of administration"
+                      placeholder={t('immunizations.form.adminRoutePlaceholder', 'Select administration route')}
+                      description={t('immunizations.form.adminRouteDesc', 'Method of administration')}
                       clearable
                       searchable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -290,23 +292,23 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Location/Facility"
+                      label={t('immunizations.form.location', 'Location/Facility')}
                       value={formData.location || ''}
                       onChange={handleTextInputChange('location')}
-                      placeholder="e.g., CVS Pharmacy, Hospital, Clinic"
-                      description="Where vaccine was administered"
+                      placeholder={t('immunizations.form.locationPlaceholder', 'e.g., CVS Pharmacy, Hospital, Clinic')}
+                      description={t('immunizations.form.locationDesc', 'Where vaccine was administered')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label="Practitioner"
+                      label={t('immunizations.form.practitioner', 'Practitioner')}
                       value={formData.practitioner_id ? formData.practitioner_id.toString() : null}
                       data={practitionerOptions}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder="Select administering practitioner"
-                      description="Healthcare provider who administered vaccine"
+                      placeholder={t('immunizations.form.practitionerPlaceholder', 'Select administering practitioner')}
+                      description={t('immunizations.form.practitionerDesc', 'Healthcare provider who administered vaccine')}
                       clearable
                       searchable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -335,11 +337,11 @@ const ImmunizationFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label="Clinical Notes"
+                  label={t('immunizations.form.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder="Enter clinical notes, reactions, or additional details"
-                  description="Additional information about this immunization"
+                  placeholder={t('immunizations.form.clinicalNotesPlaceholder', 'Enter clinical notes, reactions, or additional details')}
+                  description={t('immunizations.form.clinicalNotesDesc', 'Additional information about this immunization')}
                   rows={5}
                   minRows={3}
                   autosize
@@ -351,13 +353,13 @@ const ImmunizationFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              Cancel
+              {t('buttons.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.vaccine_name?.trim() || !formData.date_administered}
             >
-              {editingImmunization ? 'Update' : 'Create'} Immunization
+              {editingImmunization ? t('immunizations.form.updateImmunization', 'Update Immunization') : t('immunizations.form.createImmunization', 'Create Immunization')}
             </SubmitButton>
           </Group>
         </Stack>

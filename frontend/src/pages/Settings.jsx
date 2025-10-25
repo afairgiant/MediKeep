@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Header } from '../components/adapters';
 import Container from '../components/layout/Container';
 import { Card, Button } from '../components/ui';
@@ -16,6 +17,7 @@ import { toast } from 'react-toastify';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
+  const { t } = useTranslation('common');
   const { user, updateSessionTimeout } = useAuth();
   const {
     preferences: userPreferences,
@@ -311,7 +313,7 @@ const Settings = () => {
   if (!user) {
     return (
       <Container>
-        <Header title="Settings" subtitle="Loading..." showBackButton={true} />
+        <Header title={t('settings.title', 'Settings')} subtitle={t('labels.loading', 'Loading...')} showBackButton={true} />
       </Container>
     );
   }
@@ -319,8 +321,8 @@ const Settings = () => {
   return (
     <Container>
       <Header
-        title="Settings"
-        subtitle="Manage your application preferences and settings"
+        title={t('settings.title', 'Settings')}
+        subtitle={t('settings.subtitle', 'Manage your application preferences and settings')}
         showBackButton={true}
       />
 
@@ -328,18 +330,18 @@ const Settings = () => {
         {/* Security Settings Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">Security</h3>
+            <h3 className="settings-section-title">{t('settings.sections.security', 'Security')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">Password</div>
+                <div className="settings-option-title">{t('settings.security.password.title', 'Password')}</div>
                 <div className="settings-option-description">
-                  Change your account password to keep your account secure
+                  {t('settings.security.password.description', 'Change your account password to keep your account secure')}
                 </div>
               </div>
               <div className="settings-option-control">
                 <Button variant="secondary" onClick={handleOpenPasswordModal}>
-                  Change Password
+                  {t('settings.security.password.button', 'Change Password')}
                 </Button>
               </div>
             </div>
@@ -349,19 +351,18 @@ const Settings = () => {
         {/* Account Management Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">Account Management</h3>
+            <h3 className="settings-section-title">{t('settings.sections.accountManagement', 'Account Management')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">Delete Account</div>
+                <div className="settings-option-title">{t('settings.account.deleteAccount.title', 'Delete Account')}</div>
                 <div className="settings-option-description">
-                  Permanently delete your account and all associated medical
-                  data. This action cannot be undone.
+                  {t('settings.account.deleteAccount.description', 'Permanently delete your account and all associated medical data. This action cannot be undone.')}
                 </div>
               </div>
               <div className="settings-option-control">
                 <Button variant="danger" onClick={handleOpenDeleteAccountModal}>
-                  Delete Account
+                  {t('settings.account.deleteAccount.button', 'Delete Account')}
                 </Button>
               </div>
             </div>
@@ -371,14 +372,14 @@ const Settings = () => {
         {/* System Information Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">System Information</h3>
+            <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">Application Version</div>
+                <div className="settings-option-title">{t('settings.system.version.title', 'Application Version')}</div>
                 <div className="settings-option-description">
                   {loadingVersion ? (
-                    'Loading version information...'
+                    t('settings.system.version.loading', 'Loading version information...')
                   ) : versionInfo &&
                     versionInfo.app_name &&
                     versionInfo.version ? (
@@ -388,11 +389,11 @@ const Settings = () => {
                     </span>
                   ) : versionInfo ? (
                     <span>
-                      <strong>{versionInfo.app_name || 'Unknown App'}</strong> v
-                      {versionInfo.version || 'Unknown Version'}
+                      <strong>{versionInfo.app_name || t('settings.system.version.unknownApp', 'Unknown App')}</strong> v
+                      {versionInfo.version || t('settings.system.version.unknownVersion', 'Unknown Version')}
                     </span>
                   ) : (
-                    'Version information unavailable'
+                    t('settings.system.version.unavailable', 'Version information unavailable')
                   )}
                 </div>
               </div>
@@ -403,19 +404,18 @@ const Settings = () => {
         {/* Application Preferences Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">Application Preferences</h3>
+            <h3 className="settings-section-title">{t('settings.sections.preferences', 'Application Preferences')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">Unit System</div>
+                <div className="settings-option-title">{t('settings.preferences.unitSystem.title', 'Unit System')}</div>
                 <div className="settings-option-description">
-                  Choose whether to display measurements in Imperial (pounds,
-                  feet, °F) or Metric (kilograms, centimeters, °C) units
+                  {t('settings.preferences.unitSystem.description', 'Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units')}
                 </div>
               </div>
               <div className="settings-option-control">
                 {loadingPreferences ? (
-                  <div className="settings-loading">Loading...</div>
+                  <div className="settings-loading">{t('labels.loading', 'Loading...')}</div>
                 ) : (
                   <div className="settings-radio-group">
                     <label className="settings-radio-option">
@@ -428,7 +428,7 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        Imperial (lbs, feet, °F)
+                        {t('settings.preferences.unitSystem.imperial', 'Imperial (lbs, feet, °F)')}
                       </span>
                     </label>
 
@@ -442,7 +442,7 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        Metric (kg, cm, °C)
+                        {t('settings.preferences.unitSystem.metric', 'Metric (kg, cm, °C)')}
                       </span>
                     </label>
                   </div>
@@ -453,14 +453,14 @@ const Settings = () => {
             {/* Session Timeout Option */}
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">Session Timeout</div>
+                <div className="settings-option-title">{t('settings.preferences.sessionTimeout.title', 'Session Timeout')}</div>
                 <div className="settings-option-description">
-                  Set the duration of inactivity before your session expires (in minutes)
+                  {t('settings.preferences.sessionTimeout.description', 'Set the duration of inactivity before your session expires (in minutes)')}
                 </div>
               </div>
               <div className="settings-option-control">
                 {loadingPreferences ? (
-                  <span className="settings-value-placeholder">Loading...</span>
+                  <span className="settings-value-placeholder">{t('labels.loading', 'Loading...')}</span>
                 ) : (
                   <div className="settings-timeout-control">
                     <input
@@ -511,7 +511,7 @@ const Settings = () => {
                       }}
                     />
                     <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
-                      minutes (5-1440)
+                      {t('settings.preferences.sessionTimeout.range', 'minutes (5-1440)')}
                     </span>
                   </div>
                 )}
@@ -523,9 +523,9 @@ const Settings = () => {
         {/* Document Storage Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">Document Storage</h3>
+            <h3 className="settings-section-title">{t('settings.sections.documentStorage', 'Document Storage')}</h3>
             <div className="settings-section-description">
-              Configure how your medical documents are stored and managed
+              {t('settings.documents.description', 'Configure how your medical documents are stored and managed')}
             </div>
 
             <PaperlessSettings
@@ -536,10 +536,9 @@ const Settings = () => {
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">File Cleanup</div>
+                <div className="settings-option-title">{t('settings.documents.cleanup.title', 'File Cleanup')}</div>
                 <div className="settings-option-description">
-                  Clean up out-of-sync files and resolve document storage inconsistencies. 
-                  This will reset failed uploads, clear orphaned tasks, and fix database sync issues.
+                  {t('settings.documents.cleanup.description', 'Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.')}
                 </div>
               </div>
               <div className="settings-option-control">
@@ -549,7 +548,7 @@ const Settings = () => {
                   disabled={cleaningFiles || loadingPreferences}
                   loading={cleaningFiles}
                 >
-                  {cleaningFiles ? 'Cleaning...' : 'Cleanup Files'}
+                  {cleaningFiles ? t('settings.documents.cleanup.cleaning', 'Cleaning...') : t('settings.documents.cleanup.button', 'Cleanup Files')}
                 </Button>
               </div>
             </div>
@@ -562,7 +561,7 @@ const Settings = () => {
             <div className="settings-actions">
               <div className="settings-actions-info">
                 <div className="settings-changes-indicator">
-                  You have unsaved changes
+                  {t('settings.actions.unsavedChanges', 'You have unsaved changes')}
                 </div>
               </div>
 
@@ -572,7 +571,7 @@ const Settings = () => {
                   onClick={handleResetPreferences}
                   disabled={savingPreferences}
                 >
-                  Reset Changes
+                  {t('settings.actions.reset', 'Reset Changes')}
                 </Button>
 
                 <Button
@@ -580,7 +579,7 @@ const Settings = () => {
                   disabled={savingPreferences}
                   loading={savingPreferences}
                 >
-                  {savingPreferences ? 'Saving...' : 'Save All Changes'}
+                  {savingPreferences ? t('settings.actions.saving', 'Saving...') : t('settings.actions.save', 'Save All Changes')}
                 </Button>
               </div>
             </div>

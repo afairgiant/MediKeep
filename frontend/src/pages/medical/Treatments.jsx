@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -33,6 +34,7 @@ import {
 } from '@mantine/core';
 
 const Treatments = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -315,14 +317,14 @@ const Treatments = () => {
   return (
     <>
       <Container size="xl" py="md">
-        <PageHeader title="Treatments" icon="🩹" />
+        <PageHeader title={t('treatments.title', 'Treatments')} icon="🩹" />
 
         <Stack gap="lg">
           {error && (
             <Alert
               variant="light"
               color="red"
-              title="Error"
+              title={t('labels.error', 'Error')}
               withCloseButton
               onClose={clearError}
             >
@@ -333,20 +335,20 @@ const Treatments = () => {
             <Alert
               variant="light"
               color="orange"
-              title="Conditions Loading Error"
+              title={t('treatments.conditionsLoadingError', 'Conditions Loading Error')}
             >
               {conditionsError}
             </Alert>
           )}
           {successMessage && (
-            <Alert variant="light" color="green" title="Success">
+            <Alert variant="light" color="green" title={t('labels.success', 'Success')}>
               {successMessage}
             </Alert>
           )}
 
           <Group justify="space-between" align="center">
             <Button variant="filled" onClick={handleAddTreatment}>
-              + Add Treatment
+              {t('treatments.addTreatment', '+ Add Treatment')}
             </Button>
 
             <ViewToggle
@@ -379,16 +381,16 @@ const Treatments = () => {
               <Stack align="center" gap="md">
                 <Text size="3rem">🩹</Text>
                 <Text size="xl" fw={600}>
-                  No Treatments Found
+                  {t('treatments.noTreatmentsFound', 'No Treatments Found')}
                 </Text>
                 <Text ta="center" c="dimmed">
                   {dataManagement.hasActiveFilters
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Start by adding your first treatment.'}
+                    ? t('treatments.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                    : t('treatments.startAdding', 'Start by adding your first treatment.')}
                 </Text>
                 {!dataManagement.hasActiveFilters && (
                   <Button variant="filled" onClick={handleAddTreatment}>
-                    Add Your First Treatment
+                    {t('treatments.addFirstTreatment', 'Add Your First Treatment')}
                   </Button>
                 )}
               </Stack>

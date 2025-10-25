@@ -21,6 +21,7 @@ import {
   IconStethoscope,
   IconEye,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { symptomApi } from '../../services/api/symptomApi';
 import { SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
@@ -59,6 +60,7 @@ const getSeverityColor = (occurrences) => {
  * Uses the new two-level hierarchy API
  */
 const SymptomCalendar = ({ patientId, hidden }) => {
+  const { t } = useTranslation('common');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -236,7 +238,15 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     year: 'numeric',
   });
   const days = getDaysInMonth(currentDate);
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = [
+    t('symptoms.calendar.weekDays.sun', 'Sun'),
+    t('symptoms.calendar.weekDays.mon', 'Mon'),
+    t('symptoms.calendar.weekDays.tue', 'Tue'),
+    t('symptoms.calendar.weekDays.wed', 'Wed'),
+    t('symptoms.calendar.weekDays.thu', 'Thu'),
+    t('symptoms.calendar.weekDays.fri', 'Fri'),
+    t('symptoms.calendar.weekDays.sat', 'Sat'),
+  ];
 
   // Memoize all cell data calculations
   const cellData = useMemo(() => {
@@ -300,7 +310,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     <Paper p="md" withBorder>
       <Stack gap="md">
         <Group justify="space-between">
-          <Title order={3}>Symptom Calendar</Title>
+          <Title order={3}>{t('symptoms.calendar.title', 'Symptom Calendar')}</Title>
           <Group gap="xs">
             <ActionIcon variant="subtle" onClick={handlePreviousMonth}>
               <IconChevronLeft size={18} />
@@ -379,7 +389,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                       </Badge>
                       {hasOngoing && (
                         <Badge size="xs" color="blue" variant="dot">
-                          Ongoing
+                          {t('symptoms.calendar.ongoing', 'Ongoing')}
                         </Badge>
                       )}
                     </Group>
@@ -394,7 +404,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
           <Center p="xl">
             <Stack align="center">
               <IconStethoscope size={48} stroke={1.5} color="gray" />
-              <Text c="dimmed">No symptom episodes recorded this month</Text>
+              <Text c="dimmed">{t('symptoms.calendar.noEpisodes', 'No symptom episodes recorded this month')}</Text>
             </Stack>
           </Center>
         )}
@@ -404,11 +414,11 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={`Symptom Episodes on ${selectedDate}`}
+        title={t('symptoms.calendar.episodesOn', 'Symptom Episodes on {{date}}', { date: selectedDate })}
         size="lg"
       >
         {selectedOccurrences.length === 0 ? (
-          <Text c="dimmed">No occurrences found for this date</Text>
+          <Text c="dimmed">{t('symptoms.calendar.noOccurrences', 'No occurrences found for this date')}</Text>
         ) : (
           <Stack gap="md">
             {selectedOccurrences.map((occurrence, idx) => (
@@ -429,7 +439,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                       {occurrence.pain_scale !== null &&
                         occurrence.pain_scale !== undefined && (
                           <Badge color="red" variant="outline" size="sm">
-                            Pain: {occurrence.pain_scale}/10
+                            {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}/10
                           </Badge>
                         )}
                     </Group>
@@ -439,33 +449,33 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                       leftSection={<IconEye size={14} />}
                       onClick={() => handleViewSymptom(occurrence.symptom_id)}
                     >
-                      View Symptom
+                      {t('symptoms.calendar.viewSymptom', 'View Symptom')}
                     </Button>
                   </Group>
 
                   {occurrence.duration && (
                     <Text size="sm">
-                      <strong>Duration:</strong> {occurrence.duration}
+                      <strong>{t('symptoms.calendar.duration', 'Duration')}:</strong> {occurrence.duration}
                     </Text>
                   )}
                   {occurrence.location && (
                     <Text size="sm">
-                      <strong>Location:</strong> {occurrence.location}
+                      <strong>{t('symptoms.calendar.location', 'Location')}:</strong> {occurrence.location}
                     </Text>
                   )}
                   {occurrence.time_of_day && (
                     <Text size="sm">
-                      <strong>Time of Day:</strong> {occurrence.time_of_day}
+                      <strong>{t('symptoms.calendar.timeOfDay', 'Time of Day')}:</strong> {occurrence.time_of_day}
                     </Text>
                   )}
                   {occurrence.resolved_date && (
                     <Text size="sm" c="green">
-                      <strong>Resolved:</strong> {new Date(occurrence.resolved_date).toLocaleDateString()}
+                      <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {new Date(occurrence.resolved_date).toLocaleDateString()}
                     </Text>
                   )}
                   {!occurrence.resolved_date && (
                     <Badge size="sm" color="blue" variant="light">
-                      Ongoing
+                      {t('symptoms.calendar.ongoing', 'Ongoing')}
                     </Badge>
                   )}
                   {occurrence.notes && (
@@ -476,7 +486,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
 
                   <Divider />
                   <Text size="xs" c="dimmed">
-                    Occurrence ID: {occurrence.occurrence_id}
+                    {t('symptoms.calendar.occurrenceId', 'Occurrence ID')}: {occurrence.occurrence_id}
                   </Text>
                 </Stack>
               </Paper>

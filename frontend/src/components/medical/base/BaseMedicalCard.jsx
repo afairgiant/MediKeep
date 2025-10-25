@@ -110,7 +110,7 @@ const BaseMedicalCard = ({
                 </Text>
                 {field.render ? field.render(field.value) : (
                   <Text size="sm" style={field.style || {}}>
-                    {field.value || 'Not specified'}
+                    {field.value || t('labels.notSpecified', 'Not specified')}
                   </Text>
                 )}
               </Group>

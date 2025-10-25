@@ -36,8 +36,10 @@ import { useDisclosure } from '@mantine/hooks';
 import { apiService } from '../../services/api';
 import logger from '../../services/logger';
 import { PageHeader } from '../../components';
+import { useTranslation } from 'react-i18next';
 
 const TagManagement = () => {
+  const { t } = useTranslation('common');
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,7 +74,7 @@ const TagManagement = () => {
         tagCount: (response.data || response || []).length
       });
     } catch (err) {
-      setError('Failed to load tags');
+      setError(t('tagManagement.errors.loadFailed'));
       logger.error('tag_management_load_error', {
         message: 'Failed to load tag management data',
         error: err
@@ -89,20 +91,20 @@ const TagManagement = () => {
   // Create new tag
   const handleCreateTag = async () => {
     if (!newTagName.trim()) return;
-    
+
     try {
       const response = await apiService.post('/tags/create', { tag: newTagName });
-      setSuccessMessage(response.message || `Successfully created tag "${newTagName}"`);
+      setSuccessMessage(t('tagManagement.success.created', { tag: newTagName }));
       setNewTagName('');
       closeCreateModal();
       fetchTags(); // Refresh the list
-      
+
       logger.info('tag_created', {
         message: 'Tag created successfully',
         tagName: newTagName
       });
     } catch (err) {
-      setError('Failed to create tag');
+      setError(t('tagManagement.errors.createFailed'));
       logger.error('tag_create_error', {
         message: 'Failed to create tag',
         tagName: newTagName,
@@ -114,13 +116,13 @@ const TagManagement = () => {
   // Edit/rename tag (replace all instances)
   const handleEditTag = async () => {
     if (!editTagName.trim() || !editingTag) return;
-    
+
     try {
       const response = await apiService.put(`/tags/rename?old_tag=${encodeURIComponent(editingTag.tag)}&new_tag=${encodeURIComponent(editTagName)}`);
-      setSuccessMessage(response.message || `Successfully renamed "${editingTag.tag}" to "${editTagName}"`);
+      setSuccessMessage(t('tagManagement.success.renamed', { oldTag: editingTag.tag, newTag: editTagName }));
       closeEditModal();
       fetchTags(); // Refresh the list
-      
+
       logger.info('tag_renamed', {
         message: 'Tag renamed successfully',
         oldTag: editingTag.tag,
@@ -128,7 +130,7 @@ const TagManagement = () => {
         recordsUpdated: response.records_updated
       });
     } catch (err) {
-      setError('Failed to rename tag');
+      setError(t('tagManagement.errors.renameFailed'));
       logger.error('tag_rename_error', {
         message: 'Failed to rename tag',
         oldTag: editingTag.tag,
@@ -141,20 +143,20 @@ const TagManagement = () => {
   // Delete tag (remove from all records)
   const handleDeleteTag = async () => {
     if (!deletingTag) return;
-    
+
     try {
       const response = await apiService.delete(`/tags/delete?tag=${encodeURIComponent(deletingTag.tag)}`);
-      setSuccessMessage(response.message || `Successfully deleted tag "${deletingTag.tag}"`);
+      setSuccessMessage(t('tagManagement.success.deleted', { tag: deletingTag.tag }));
       closeDeleteModal();
       fetchTags(); // Refresh the list
-      
+
       logger.info('tag_deleted', {
         message: 'Tag deleted successfully',
         tag: deletingTag.tag,
         recordsUpdated: response.records_updated
       });
     } catch (err) {
-      setError('Failed to delete tag');
+      setError(t('tagManagement.errors.deleteFailed'));
       logger.error('tag_delete_error', {
         message: 'Failed to delete tag',
         tag: deletingTag.tag,
@@ -166,13 +168,13 @@ const TagManagement = () => {
   // Replace tag with another tag
   const handleReplaceTag = async () => {
     if (!replaceWithTag.trim() || !replacingTag) return;
-    
+
     try {
       const response = await apiService.put(`/tags/replace?old_tag=${encodeURIComponent(replacingTag.tag)}&new_tag=${encodeURIComponent(replaceWithTag)}`);
-      setSuccessMessage(response.message || `Successfully replaced "${replacingTag.tag}" with "${replaceWithTag}"`);
+      setSuccessMessage(t('tagManagement.success.replaced', { oldTag: replacingTag.tag, newTag: replaceWithTag }));
       closeReplaceModal();
       fetchTags(); // Refresh the list
-      
+
       logger.info('tag_replaced', {
         message: 'Tag replaced successfully',
         oldTag: replacingTag.tag,
@@ -180,7 +182,7 @@ const TagManagement = () => {
         recordsUpdated: response.records_updated
       });
     } catch (err) {
-      setError('Failed to replace tag');
+      setError(t('tagManagement.errors.replaceFailed'));
       logger.error('tag_replace_error', {
         message: 'Failed to replace tag',
         oldTag: replacingTag.tag,
@@ -216,7 +218,7 @@ const TagManagement = () => {
         <Center h={300}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading tags...</Text>
+            <Text>{t('tagManagement.loading')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -225,14 +227,14 @@ const TagManagement = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Tag Management" icon="🏷️" />
+      <PageHeader title={t('tagManagement.title')} icon={t('tagManagement.icon')} />
       
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={() => setError(null)}
@@ -245,7 +247,7 @@ const TagManagement = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             withCloseButton
             onClose={() => setSuccessMessage(null)}
@@ -260,13 +262,13 @@ const TagManagement = () => {
               <Title order={3}>
                 <Group gap="xs">
                   <IconTag size={20} />
-                  All Tags ({filteredTags.length})
+                  {t('tagManagement.allTags')} ({filteredTags.length})
                 </Group>
               </Title>
-              
+
               <Group>
                 <TextInput
-                  placeholder="Search tags..."
+                  placeholder={t('tagManagement.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   leftSection={<IconSearch size={16} />}
@@ -276,7 +278,7 @@ const TagManagement = () => {
                   onClick={openCreateModal}
                   variant="light"
                 >
-                  Create Tag
+                  {t('tagManagement.createTag')}
                 </Button>
               </Group>
             </Group>
@@ -288,11 +290,11 @@ const TagManagement = () => {
                 <Stack align="center" gap="md">
                   <IconTag size={48} stroke={1} color="gray" />
                   <Stack align="center" gap="xs">
-                    <Title order={4}>No tags found</Title>
+                    <Title order={4}>{t('tagManagement.noTags')}</Title>
                     <Text c="dimmed" ta="center">
                       {searchQuery
-                        ? 'No tags match your search.'
-                        : 'Start using tags in your medical records to see them here.'}
+                        ? t('tagManagement.noTagsSearch')
+                        : t('tagManagement.noTagsDescription')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -301,10 +303,10 @@ const TagManagement = () => {
               <Table highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>Tag Name</Table.Th>
-                    <Table.Th>Usage Count</Table.Th>
-                    <Table.Th>Used In</Table.Th>
-                    <Table.Th width="120">Actions</Table.Th>
+                    <Table.Th>{t('tagManagement.table.tagName')}</Table.Th>
+                    <Table.Th>{t('tagManagement.table.usageCount')}</Table.Th>
+                    <Table.Th>{t('tagManagement.table.usedIn')}</Table.Th>
+                    <Table.Th width="120">{t('tagManagement.table.actions')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -349,7 +351,7 @@ const TagManagement = () => {
                                 openEditModal();
                               }}
                             >
-                              Rename Tag
+                              {t('tagManagement.menu.rename')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={<IconReplace size={14} />}
@@ -359,7 +361,7 @@ const TagManagement = () => {
                                 openReplaceModal();
                               }}
                             >
-                              Replace With...
+                              {t('tagManagement.menu.replace')}
                             </Menu.Item>
                             <Menu.Divider />
                             <Menu.Item
@@ -370,7 +372,7 @@ const TagManagement = () => {
                                 openDeleteModal();
                               }}
                             >
-                              Delete Tag
+                              {t('tagManagement.menu.delete')}
                             </Menu.Item>
                           </Menu.Dropdown>
                         </Menu>
@@ -388,22 +390,22 @@ const TagManagement = () => {
       <Modal
         opened={createModalOpened}
         onClose={closeCreateModal}
-        title="Create New Tag"
+        title={t('tagManagement.createModal.title')}
       >
         <Stack>
           <TextInput
-            label="Tag Name"
-            placeholder="Enter tag name..."
+            label={t('tagManagement.createModal.label')}
+            placeholder={t('tagManagement.createModal.placeholder')}
             value={newTagName}
             onChange={(e) => setNewTagName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
           />
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeCreateModal}>
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button onClick={handleCreateTag} disabled={!newTagName.trim()}>
-              Create Tag
+              {t('tagManagement.createModal.submit')}
             </Button>
           </Group>
         </Stack>
@@ -413,25 +415,25 @@ const TagManagement = () => {
       <Modal
         opened={editModalOpened}
         onClose={closeEditModal}
-        title={`Rename Tag: ${editingTag?.tag}`}
+        title={`${t('tagManagement.editModal.title')}: ${editingTag?.tag}`}
       >
         <Stack>
           <TextInput
-            label="New Tag Name"
-            placeholder="Enter new tag name..."
+            label={t('tagManagement.editModal.label')}
+            placeholder={t('tagManagement.editModal.placeholder')}
             value={editTagName}
             onChange={(e) => setEditTagName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleEditTag()}
           />
           <Text size="sm" c="dimmed">
-            This will rename the tag across all {editingTag?.usage_count} records.
+            {t('tagManagement.editModal.description', { count: editingTag?.usage_count })}
           </Text>
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeEditModal}>
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button onClick={handleEditTag} disabled={!editTagName.trim()}>
-              Rename Tag
+              {t('tagManagement.editModal.submit')}
             </Button>
           </Group>
         </Stack>
@@ -441,22 +443,21 @@ const TagManagement = () => {
       <Modal
         opened={deleteModalOpened}
         onClose={closeDeleteModal}
-        title="Delete Tag"
+        title={t('tagManagement.deleteModal.title')}
       >
         <Stack>
           <Text>
-            Are you sure you want to delete the tag "
-            <strong>{deletingTag?.tag}</strong>"?
+            {t('tagManagement.deleteModal.message', { tag: deletingTag?.tag })}
           </Text>
           <Text size="sm" c="dimmed">
-            This will remove the tag from all {deletingTag?.usage_count} records. This action cannot be undone.
+            {t('tagManagement.deleteModal.description', { count: deletingTag?.usage_count })}
           </Text>
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeDeleteModal}>
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button color="red" onClick={handleDeleteTag}>
-              Delete Tag
+              {t('tagManagement.deleteModal.submit')}
             </Button>
           </Group>
         </Stack>
@@ -466,25 +467,29 @@ const TagManagement = () => {
       <Modal
         opened={replaceModalOpened}
         onClose={closeReplaceModal}
-        title={`Replace Tag: ${replacingTag?.tag}`}
+        title={`${t('tagManagement.replaceModal.title')}: ${replacingTag?.tag}`}
       >
         <Stack>
           <TextInput
-            label="Replace With"
-            placeholder="Enter replacement tag name..."
+            label={t('tagManagement.replaceModal.label')}
+            placeholder={t('tagManagement.replaceModal.placeholder')}
             value={replaceWithTag}
             onChange={(e) => setReplaceWithTag(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleReplaceTag()}
           />
           <Text size="sm" c="dimmed">
-            This will replace "{replacingTag?.tag}" with "{replaceWithTag}" across all {replacingTag?.usage_count} records.
+            {t('tagManagement.replaceModal.description', {
+              oldTag: replacingTag?.tag,
+              newTag: replaceWithTag,
+              count: replacingTag?.usage_count
+            })}
           </Text>
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeReplaceModal}>
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button onClick={handleReplaceTag} disabled={!replaceWithTag.trim()}>
-              Replace Tag
+              {t('tagManagement.replaceModal.submit')}
             </Button>
           </Group>
         </Stack>

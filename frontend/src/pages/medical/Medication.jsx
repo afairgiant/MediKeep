@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Button,
@@ -54,6 +55,7 @@ import {
 import logger from '../../services/logger';
 
 const Medication = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -371,7 +373,7 @@ const Medication = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading medications...</Text>
+            <Text>{t('medications.loading', 'Loading medications...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -380,14 +382,14 @@ const Medication = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Medications" icon="💊" />
+      <PageHeader title={t('medications.title', 'Medications')} icon="💊" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('medications.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -401,7 +403,7 @@ const Medication = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('medications.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -416,7 +418,7 @@ const Medication = () => {
             onClick={handleAddMedication}
             size="md"
           >
-            Add New Medication
+            {t('medications.addNew', 'Add New Medication')}
           </Button>
 
           <ViewToggle
@@ -434,7 +436,7 @@ const Medication = () => {
                 size={16}
                 style={{ verticalAlign: 'middle', marginRight: 4 }}
               />
-              Quick Filter:
+              {t('medications.quickFilter', 'Quick Filter')}:
             </Text>
             <Button
               variant={
@@ -447,7 +449,7 @@ const Medication = () => {
                 dataManagement.updateFilter('medicationType', 'all')
               }
             >
-              All Types
+              {t('medications.allTypes', 'All Types')}
               <Badge size="xs" ml={6} variant="filled" color="dark">
                 {medications.length}
               </Badge>
@@ -599,11 +601,11 @@ const Medication = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No medications or supplements found</Title>
+                    <Title order={3}>{t('medications.noMedications', 'No medications or supplements found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Medication" to get started.'}
+                        ? t('medications.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                        : t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>

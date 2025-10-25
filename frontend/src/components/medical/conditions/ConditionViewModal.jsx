@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   Tabs,
@@ -33,6 +34,7 @@ const ConditionViewModal = ({
   onPractitionerClick,
   onError,
 }) => {
+  const { t } = useTranslation('common');
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or condition changes
@@ -110,9 +112,9 @@ const ConditionViewModal = ({
     }
 
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return `${duration} (ended)`;
+      return t('conditions.card.durationEnded', '{{duration}} (ended)', { duration });
     } else {
-      return `${duration} (ongoing)`;
+      return t('conditions.card.durationOngoing', '{{duration}} (ongoing)', { duration });
     }
   };
 
@@ -123,7 +125,7 @@ const ConditionViewModal = ({
       title={
         <Group>
           <Text fw={600} size="lg">
-            {condition.diagnosis || 'Condition Details'}
+            {condition.diagnosis || t('conditions.modal.title', 'Condition Details')}
           </Text>
           <StatusBadge status={condition.status} />
         </Group>
@@ -135,16 +137,16 @@ const ConditionViewModal = ({
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-            Overview
+            {t('conditions.modal.tabs.overview', 'Overview')}
           </Tabs.Tab>
           <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-            Clinical Details
+            {t('conditions.modal.tabs.clinical', 'Clinical Details')}
           </Tabs.Tab>
           <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            Notes
+            {t('conditions.modal.tabs.notes', 'Notes')}
           </Tabs.Tab>
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-            Documents
+            {t('conditions.modal.tabs.documents', 'Documents')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -154,32 +156,32 @@ const ConditionViewModal = ({
             <Stack gap="lg">
               {/* Basic Information */}
               <div>
-                <Title order={4} mb="sm">Basic Information</Title>
+                <Title order={4} mb="sm">{t('conditions.modal.sections.basicInfo', 'Basic Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Diagnosis</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.diagnosis', 'Diagnosis')}</Text>
                     <Text size="sm" c={condition.diagnosis ? 'inherit' : 'dimmed'}>
-                      {condition.diagnosis || 'Not specified'}
+                      {condition.diagnosis || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Condition Name</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.conditionName', 'Condition Name')}</Text>
                     <Text size="sm" c={condition.condition_name ? 'inherit' : 'dimmed'}>
-                      {condition.condition_name || 'Not specified'}
+                      {condition.condition_name || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Severity</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.severity', 'Severity')}</Text>
                     <Badge
                       color={condition.severity ? getSeverityColor(condition.severity) : 'gray'}
                       variant={condition.severity ? 'filled' : 'light'}
                       size="sm"
                     >
-                      {condition.severity || 'Not specified'}
+                      {condition.severity || t('labels.notSpecified', 'Not specified')}
                     </Badge>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Status</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('labels.status', 'Status')}</Text>
                     <StatusBadge status={condition.status} />
                   </Stack>
                 </SimpleGrid>
@@ -187,23 +189,23 @@ const ConditionViewModal = ({
 
               {/* Timeline */}
               <div>
-                <Title order={4} mb="sm">Timeline</Title>
+                <Title order={4} mb="sm">{t('conditions.modal.sections.timeline', 'Timeline')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Onset Date</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.onsetDate', 'Onset Date')}</Text>
                     <Text size="sm" c={condition.onset_date ? 'inherit' : 'dimmed'}>
-                      {condition.onset_date ? formatDate(condition.onset_date) : 'Not specified'}
+                      {condition.onset_date ? formatDate(condition.onset_date) : t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">End Date</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.endDate', 'End Date')}</Text>
                     <Text size="sm" c={condition.end_date ? 'inherit' : 'dimmed'}>
-                      {condition.end_date ? formatDate(condition.end_date) : 'Not specified'}
+                      {condition.end_date ? formatDate(condition.end_date) : t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   {condition.onset_date && (
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Duration</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.duration', 'Duration')}</Text>
                       <Text size="sm">{getConditionDuration(condition.onset_date, condition.end_date, condition.status)}</Text>
                     </Stack>
                   )}
@@ -212,10 +214,10 @@ const ConditionViewModal = ({
 
               {/* Related Medication & Practitioner */}
               <div>
-                <Title order={4} mb="sm">Related Information</Title>
+                <Title order={4} mb="sm">{t('conditions.modal.sections.relatedInfo', 'Related Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Related Medication</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.relatedMedication', 'Related Medication')}</Text>
                     {condition.medication_id ? (
                       <Text
                         size="sm"
@@ -232,11 +234,11 @@ const ConditionViewModal = ({
                           `Medication #${condition.medication_id}`}
                       </Text>
                     ) : (
-                      <Text size="sm" c="dimmed">No medication linked</Text>
+                      <Text size="sm" c="dimmed">{t('conditions.modal.noMedicationLinked', 'No medication linked')}</Text>
                     )}
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Practitioner</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.practitioner', 'Practitioner')}</Text>
                     {condition.practitioner_id ? (
                       <Text
                         size="sm"
@@ -253,7 +255,7 @@ const ConditionViewModal = ({
                           `Practitioner #${condition.practitioner_id}`}
                       </Text>
                     ) : (
-                      <Text size="sm" c="dimmed">No practitioner assigned</Text>
+                      <Text size="sm" c="dimmed">{t('conditions.modal.noPractitionerAssigned', 'No practitioner assigned')}</Text>
                     )}
                   </Stack>
                 </SimpleGrid>
@@ -262,7 +264,7 @@ const ConditionViewModal = ({
               {/* Tags Section */}
               {condition.tags && condition.tags.length > 0 && (
                 <div>
-                  <Title order={4} mb="sm">Tags</Title>
+                  <Title order={4} mb="sm">{t('conditions.modal.sections.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {condition.tags.map((tag, index) => (
                       <Badge
@@ -288,24 +290,24 @@ const ConditionViewModal = ({
             <Stack gap="lg">
               {/* Medical Codes */}
               <div>
-                <Title order={4} mb="sm">Medical Codes</Title>
+                <Title order={4} mb="sm">{t('conditions.modal.sections.medicalCodes', 'Medical Codes')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">ICD-10 Code</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.icd10Code', 'ICD-10 Code')}</Text>
                     <Text size="sm" c={condition.icd10_code ? 'inherit' : 'dimmed'}>
-                      {condition.icd10_code || 'Not specified'}
+                      {condition.icd10_code || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">SNOMED Code</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.snomedCode', 'SNOMED Code')}</Text>
                     <Text size="sm" c={condition.snomed_code ? 'inherit' : 'dimmed'}>
-                      {condition.snomed_code || 'Not specified'}
+                      {condition.snomed_code || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                    <Text fw={500} size="sm" c="dimmed">Code Description</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.codeDescription', 'Code Description')}</Text>
                     <Text size="sm" c={condition.code_description ? 'inherit' : 'dimmed'}>
-                      {condition.code_description || 'Not specified'}
+                      {condition.code_description || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                 </SimpleGrid>
@@ -320,9 +322,9 @@ const ConditionViewModal = ({
             <Stack gap="lg">
               {/* Clinical Notes */}
               <div>
-                <Title order={4} mb="sm">Clinical Notes</Title>
+                <Title order={4} mb="sm">{t('conditions.modal.sections.clinicalNotes', 'Clinical Notes')}</Title>
                 <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
-                  {condition.notes || 'No clinical notes available'}
+                  {condition.notes || t('conditions.modal.noNotesAvailable', 'No clinical notes available')}
                 </Text>
               </div>
             </Stack>
@@ -344,10 +346,10 @@ const ConditionViewModal = ({
       {/* Action Buttons */}
       <Group justify="flex-end" gap="sm" mt="lg">
         <Button variant="default" onClick={onClose}>
-          Close
+          {t('buttons.close', 'Close')}
         </Button>
         <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-          Edit
+          {t('buttons.edit', 'Edit')}
         </Button>
       </Group>
     </Modal>

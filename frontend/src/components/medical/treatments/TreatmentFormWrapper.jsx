@@ -19,6 +19,7 @@ import {
   IconFileText,
   IconNotes,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -41,6 +42,8 @@ const TreatmentFormWrapper = ({
   practitionersLoading = false,
   isLoading = false,
 }) => {
+  const { t } = useTranslation('common');
+
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,7 +98,7 @@ const TreatmentFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message="Saving treatment..." />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('treatments.form.savingTreatment', 'Saving treatment...')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -103,18 +106,18 @@ const TreatmentFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                Basic Info
+                {t('treatments.form.tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
-                Schedule & Dosage
+                {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
               </Tabs.Tab>
               {editingTreatment && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  Documents
+                  {t('treatments.form.tabs.documents', 'Documents')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                Notes
+                {t('treatments.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -124,46 +127,46 @@ const TreatmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Treatment Name"
+                      label={t('treatments.form.treatmentName', 'Treatment Name')}
                       value={formData.treatment_name || ''}
                       onChange={handleTextInputChange('treatment_name')}
-                      placeholder="Enter treatment name"
+                      placeholder={t('treatments.form.enterTreatmentName', 'Enter treatment name')}
                       required
-                      description="Name of the treatment"
+                      description={t('treatments.form.treatmentNameDesc', 'Name of the treatment')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Treatment Type"
+                      label={t('treatments.form.treatmentType', 'Treatment Type')}
                       value={formData.treatment_type || ''}
                       onChange={handleTextInputChange('treatment_type')}
-                      placeholder="e.g., Physical Therapy, Surgery"
-                      description="Type or category of treatment"
+                      placeholder={t('treatments.form.treatmentTypePlaceholder', 'e.g., Physical Therapy, Surgery')}
+                      description={t('treatments.form.treatmentTypeDesc', 'Type or category of treatment')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label="Status"
+                      label={t('treatments.form.status', 'Status')}
                       value={formData.status || null}
                       data={[
-                        { value: 'planned', label: 'Planned' },
-                        { value: 'active', label: 'Active' },
-                        { value: 'on-hold', label: 'On Hold' },
-                        { value: 'completed', label: 'Completed' },
-                        { value: 'cancelled', label: 'Cancelled' },
+                        { value: 'planned', label: t('treatments.form.statusPlanned', 'Planned') },
+                        { value: 'active', label: t('treatments.form.statusActive', 'Active') },
+                        { value: 'on-hold', label: t('treatments.form.statusOnHold', 'On Hold') },
+                        { value: 'completed', label: t('treatments.form.statusCompleted', 'Completed') },
+                        { value: 'cancelled', label: t('treatments.form.statusCancelled', 'Cancelled') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder="Select status"
-                      description="Current treatment status"
+                      placeholder={t('treatments.form.selectStatus', 'Select status')}
+                      description={t('treatments.form.statusDesc', 'Current treatment status')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label="Related Condition"
+                      label={t('treatments.form.relatedCondition', 'Related Condition')}
                       value={formData.condition_id || null}
                       data={conditionsOptions.map(condition => ({
                         value: condition.id.toString(),
@@ -172,8 +175,8 @@ const TreatmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'condition_id', value: value || '' } });
                       }}
-                      placeholder="Select condition"
-                      description="Link this treatment to a condition"
+                      placeholder={t('treatments.form.selectCondition', 'Select condition')}
+                      description={t('treatments.form.relatedConditionDesc', 'Link this treatment to a condition')}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -182,7 +185,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label="Practitioner"
+                      label={t('treatments.form.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitionersOptions.map(prac => ({
                         value: prac.id.toString(),
@@ -191,8 +194,8 @@ const TreatmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder="Select practitioner"
-                      description="Healthcare provider administering treatment"
+                      placeholder={t('treatments.form.selectPractitioner', 'Select practitioner')}
+                      description={t('treatments.form.practitionerDesc', 'Healthcare provider administering treatment')}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -201,11 +204,11 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label="Description"
+                      label={t('treatments.form.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
-                      placeholder="Describe the treatment"
-                      description="Brief description of the treatment"
+                      placeholder={t('treatments.form.descriptionPlaceholder', 'Describe the treatment')}
+                      description={t('treatments.form.descriptionDesc', 'Brief description of the treatment')}
                       rows={3}
                       minRows={2}
                       autosize
@@ -214,17 +217,17 @@ const TreatmentFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        Tags
+                        {t('treatments.form.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
-                        Add tags to categorize and organize treatments
+                        {t('treatments.form.tagsDesc', 'Add tags to categorize and organize treatments')}
                       </Text>
                       <TagInput
                         value={formData.tags || []}
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder="Add tags..."
+                        placeholder={t('treatments.form.tagsPlaceholder', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -238,14 +241,14 @@ const TreatmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label="Start Date"
+                      label={t('treatments.form.startDate', 'Start Date')}
                       value={parseDateInput(formData.start_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'start_date', value: formattedDate } });
                       }}
-                      placeholder="Select start date"
-                      description="When treatment begins"
+                      placeholder={t('treatments.form.selectStartDate', 'Select start date')}
+                      description={t('treatments.form.startDateDesc', 'When treatment begins')}
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
@@ -254,14 +257,14 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label="End Date"
+                      label={t('treatments.form.endDate', 'End Date')}
                       value={parseDateInput(formData.end_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'end_date', value: formattedDate } });
                       }}
-                      placeholder="Select end date"
-                      description="When treatment ends (if applicable)"
+                      placeholder={t('treatments.form.selectEndDate', 'Select end date')}
+                      description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
                       clearable
                       firstDayOfWeek={0}
                       minDate={parseDateInput(formData.start_date) || undefined}
@@ -270,20 +273,20 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Dosage/Amount"
+                      label={t('treatments.form.dosageAmount', 'Dosage/Amount')}
                       value={formData.dosage || ''}
                       onChange={handleTextInputChange('dosage')}
-                      placeholder="e.g., 10mg, 1 session"
-                      description="Amount or dosage per treatment"
+                      placeholder={t('treatments.form.dosagePlaceholder', 'e.g., 10mg, 1 session')}
+                      description={t('treatments.form.dosageDesc', 'Amount or dosage per treatment')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label="Frequency"
+                      label={t('treatments.form.frequency', 'Frequency')}
                       value={formData.frequency || ''}
                       onChange={handleTextInputChange('frequency')}
-                      placeholder="e.g., Daily, Twice weekly"
-                      description="How often treatment is administered"
+                      placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
+                      description={t('treatments.form.frequencyDesc', 'How often treatment is administered')}
                     />
                   </Grid.Col>
                 </Grid>
@@ -309,11 +312,11 @@ const TreatmentFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label="Treatment Notes"
+                  label={t('treatments.form.treatmentNotes', 'Treatment Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder="Enter treatment notes, observations, or additional details"
-                  description="Additional information about this treatment"
+                  placeholder={t('treatments.form.notesPlaceholder', 'Enter treatment notes, observations, or additional details')}
+                  description={t('treatments.form.notesDesc', 'Additional information about this treatment')}
                   rows={5}
                   minRows={3}
                   autosize
@@ -325,13 +328,13 @@ const TreatmentFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              Cancel
+              {t('treatments.form.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.treatment_name?.trim()}
             >
-              {editingTreatment ? 'Update' : 'Create'} Treatment
+              {editingTreatment ? t('treatments.form.updateTreatment', 'Update Treatment') : t('treatments.form.createTreatment', 'Create Treatment')}
             </SubmitButton>
           </Group>
         </Stack>

@@ -30,8 +30,10 @@ import { CategoryTabs, TemplateManager } from '../../components/reports';
 import { useCustomReports } from '../../hooks/useCustomReports';
 import { useReportTemplates } from '../../hooks/useReportTemplates';
 import logger from '../../services/logger';
+import { useTranslation } from 'react-i18next';
 
 const ReportBuilder = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -105,19 +107,19 @@ const ReportBuilder = () => {
 
   // Category display names mapping
   const categoryDisplayNames = {
-    'medications': 'Medications',
-    'conditions': 'Conditions',
-    'procedures': 'Procedures',
-    'lab_results': 'Lab Results',
-    'immunizations': 'Immunizations',
-    'allergies': 'Allergies',
-    'treatments': 'Treatments',
-    'encounters': 'Visits',
-    'vitals': 'Vitals',
-    'practitioners': 'Practitioners',
-    'pharmacies': 'Pharmacies',
-    'emergency_contacts': 'Emergency Contacts',
-    'family_history': 'Family History',
+    'medications': t('reportBuilder.categories.medications'),
+    'conditions': t('reportBuilder.categories.conditions'),
+    'procedures': t('reportBuilder.categories.procedures'),
+    'lab_results': t('reportBuilder.categories.lab_results'),
+    'immunizations': t('reportBuilder.categories.immunizations'),
+    'allergies': t('reportBuilder.categories.allergies'),
+    'treatments': t('reportBuilder.categories.treatments'),
+    'encounters': t('reportBuilder.categories.encounters'),
+    'vitals': t('reportBuilder.categories.vitals'),
+    'practitioners': t('reportBuilder.categories.practitioners'),
+    'pharmacies': t('reportBuilder.categories.pharmacies'),
+    'emergency_contacts': t('reportBuilder.categories.emergency_contacts'),
+    'family_history': t('reportBuilder.categories.family_history'),
   };
 
   // Handle template save
@@ -146,8 +148,8 @@ const ReportBuilder = () => {
       
       // Load template selections (this would need to be implemented in the hook)
       notifications.show({
-        title: 'Template Loaded',
-        message: `Template "${template.name}" has been loaded.`,
+        title: t('reportBuilder.notifications.templateLoaded'),
+        message: t('reportBuilder.notifications.templateLoadedMessage', { name: template.name }),
         color: 'blue',
         autoClose: 5000,
       });
@@ -168,7 +170,7 @@ const ReportBuilder = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading report builder...</Text>
+            <Text>{t('reportBuilder.loading')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -177,7 +179,7 @@ const ReportBuilder = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Custom Report Builder" icon="📊" />
+      <PageHeader title={t('reportBuilder.title')} icon={t('reportBuilder.icon')} />
 
       <Stack gap="lg">
         {/* Error alerts */}
@@ -185,7 +187,7 @@ const ReportBuilder = () => {
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={() => {
@@ -201,9 +203,9 @@ const ReportBuilder = () => {
         <Paper shadow="sm" p="lg" radius="md" withBorder>
           <Group justify="space-between" mb="md">
             <Stack gap={4}>
-              <Title order={3}>Report Configuration</Title>
+              <Title order={3}>{t('reportBuilder.configuration.title')}</Title>
               <Text c="dimmed" size="sm">
-                Select medical records to include in your custom report
+                {t('reportBuilder.configuration.description')}
               </Text>
             </Stack>
             
@@ -223,7 +225,7 @@ const ReportBuilder = () => {
                 variant="outline"
                 onClick={openSettingsModal}
               >
-                Settings
+                {t('reportBuilder.buttons.settings')}
               </Button>
 
               {hasSelections && (
@@ -233,7 +235,7 @@ const ReportBuilder = () => {
                   loading={isGenerating}
                   disabled={!hasSelections}
                 >
-                  Generate Report ({selectedCount} records)
+                  {t('reportBuilder.buttons.generateReport', { count: selectedCount })}
                 </Button>
               )}
             </Group>
@@ -243,7 +245,7 @@ const ReportBuilder = () => {
           {hasSelections && (
             <Box mb="md">
               <Group justify="space-between" mb={4}>
-                <Text size="sm" fw={500}>Records Selected</Text>
+                <Text size="sm" fw={500}>{t('reportBuilder.progress.recordsSelected')}</Text>
                 <Text size="sm" c="dimmed">{selectedCount} / {dataSummary?.total_records || 0}</Text>
               </Group>
               <Progress 
@@ -256,10 +258,10 @@ const ReportBuilder = () => {
 
           {/* Selection controls */}
           <Group justify="space-between" mb="md">
-            <Button 
-              size="xs" 
-              variant="subtle" 
-              color="blue" 
+            <Button
+              size="xs"
+              variant="subtle"
+              color="blue"
               onClick={() => {
                 // Select all records from all categories
                 availableCategories.forEach(category => {
@@ -271,11 +273,11 @@ const ReportBuilder = () => {
               }}
               disabled={!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0}
             >
-              Select All Records
+              {t('reportBuilder.buttons.selectAll')}
             </Button>
             {hasSelections && (
               <Button size="xs" variant="subtle" color="red" onClick={clearSelections}>
-                Clear All Selections
+                {t('reportBuilder.buttons.clearSelections')}
               </Button>
             )}
           </Group>
@@ -301,13 +303,13 @@ const ReportBuilder = () => {
               <Stack align="center" gap="md">
                 <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
                 <Stack align="center" gap="xs">
-                  <Title order={3}>No Medical Data Available</Title>
+                  <Title order={3}>{t('reportBuilder.noData.title')}</Title>
                   <Text c="dimmed" ta="center">
-                    Add some medical records first to use the report builder.
+                    {t('reportBuilder.noData.description')}
                   </Text>
                 </Stack>
                 <Button onClick={() => navigate('/medications')}>
-                  Add Medical Records
+                  {t('reportBuilder.buttons.addRecords')}
                 </Button>
               </Stack>
             </Center>
@@ -320,34 +322,34 @@ const ReportBuilder = () => {
       <Modal
         opened={showSettingsModal}
         onClose={closeSettingsModal}
-        title="Report Settings"
+        title={t('reportBuilder.settingsModal.title')}
         size="md"
       >
         <Stack gap="md">
           <TextInput
-            label="Report Title"
+            label={t('reportBuilder.settingsModal.reportTitle.label')}
             value={reportSettings.report_title}
             onChange={(event) => updateReportSettings({ report_title: event.target.value })}
           />
-          
+
           <Stack gap="sm">
             <Switch
-              label="Include Patient Information"
-              description="Add demographic and contact information"
+              label={t('reportBuilder.settingsModal.includePatientInfo.label')}
+              description={t('reportBuilder.settingsModal.includePatientInfo.description')}
               checked={reportSettings.include_patient_info}
               onChange={(event) => updateReportSettings({ include_patient_info: event.currentTarget.checked })}
             />
 
             <Switch
-              label="Include Profile Picture"
-              description="Add patient photo to the report header"
+              label={t('reportBuilder.settingsModal.includeProfilePicture.label')}
+              description={t('reportBuilder.settingsModal.includeProfilePicture.description')}
               checked={reportSettings.include_profile_picture}
               onChange={(event) => updateReportSettings({ include_profile_picture: event.currentTarget.checked })}
             />
 
             <Switch
-              label="Include Summary Statistics"
-              description="Add overview and statistics section"
+              label={t('reportBuilder.settingsModal.includeSummary.label')}
+              description={t('reportBuilder.settingsModal.includeSummary.description')}
               checked={reportSettings.include_summary}
               onChange={(event) => updateReportSettings({ include_summary: event.currentTarget.checked })}
             />
@@ -355,7 +357,7 @@ const ReportBuilder = () => {
 
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={closeSettingsModal}>
-              Close
+              {t('buttons.close')}
             </Button>
           </Group>
         </Stack>

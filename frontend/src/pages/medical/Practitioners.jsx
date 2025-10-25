@@ -36,6 +36,7 @@ import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import frontendLogger from '../../services/frontendLogger';
+import { useTranslation } from 'react-i18next';
 
 // Modular components
 import PractitionerCard from '../../components/medical/practitioners/PractitionerCard';
@@ -43,6 +44,7 @@ import PractitionerViewModal from '../../components/medical/practitioners/Practi
 import PractitionerFormWrapper from '../../components/medical/practitioners/PractitionerFormWrapper';
 
 const Practitioners = () => {
+  const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,11 +81,11 @@ const Practitioners = () => {
   // Handle global error state
   useEffect(() => {
     if (practitionersError) {
-      setError('Failed to load practitioners. Please try again.');
+      setError(t('practitioners.errors.loadFailed', 'Failed to load practitioners. Please try again.'));
     } else {
       setError('');
     }
-  }, [practitionersError]);
+  }, [practitionersError, t]);
 
   const handleAddPractitioner = () => {
     setEditingPractitioner(null);
@@ -244,7 +246,7 @@ const Practitioners = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading practitioners...</Text>
+            <Text>{t('practitioners.loading', 'Loading practitioners...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -254,14 +256,14 @@ const Practitioners = () => {
   return (
     <>
     <Container size="xl" py="md">
-      <PageHeader title="Healthcare Practitioners" icon="👨‍⚕️" />
+      <PageHeader title={t('practitioners.title', 'Healthcare Practitioners')} icon="👨‍⚕️" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('common.labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={() => setError('')}
@@ -275,7 +277,7 @@ const Practitioners = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('common.labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -290,7 +292,7 @@ const Practitioners = () => {
             onClick={handleAddPractitioner}
             size="md"
           >
-            Add New Practitioner
+            {t('practitioners.actions.addNew', 'Add New Practitioner')}
           </Button>
 
           <ViewToggle
@@ -329,11 +331,11 @@ const Practitioners = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No healthcare practitioners found</Title>
+                    <Title order={3}>{t('practitioners.empty.title', 'No healthcare practitioners found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Practitioner" to get started.'}
+                        ? t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')
+                        : t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -354,7 +356,7 @@ const Practitioners = () => {
                         onView={handleViewPractitioner}
                         navigate={navigate}
                         onError={(error) => {
-                          setError('An error occurred. Please try again.');
+                          setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
                           frontendLogger.logError('PractitionerCard error', {
                             practitionerId: practitioner.id,
                             error: error.message,
@@ -371,13 +373,13 @@ const Practitioners = () => {
               <ResponsiveTable
                 data={filteredPractitioners}
                 columns={[
-                  { header: 'Name', accessor: 'name', priority: 'high', width: 200 },
-                  { header: 'Specialty', accessor: 'specialty', priority: 'high', width: 150 },
-                  { header: 'Practice', accessor: 'practice', priority: 'low', width: 150 },
-                  { header: 'Phone', accessor: 'phone_number', priority: 'low', width: 150 },
-                  { header: 'Rating', accessor: 'rating', priority: 'low', width: 150 }
+                  { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                  { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                  { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice', priority: 'low', width: 150 },
+                  { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                  { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 150 }
                 ]}
-                tableName="Healthcare Practitioners"
+                tableName={t('practitioners.title', 'Healthcare Practitioners')}
                 onView={handleViewPractitioner}
                 onEdit={handleEditPractitioner}
                 onDelete={handleDeletePractitioner}
@@ -402,7 +404,7 @@ const Practitioners = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={
-          editingPractitioner ? 'Edit Practitioner' : 'Add New Practitioner'
+          editingPractitioner ? t('practitioners.form.editTitle', 'Edit Practitioner') : t('practitioners.form.addTitle', 'Add New Practitioner')
         }
         formData={formData}
         onInputChange={handleInputChange}
