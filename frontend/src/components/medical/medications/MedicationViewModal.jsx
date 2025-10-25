@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   Badge,
@@ -34,6 +35,8 @@ const MedicationViewModal = ({
   onFileUploadComplete,
   practitioners = [],
 }) => {
+  const { t } = useTranslation('common');
+
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -46,7 +49,7 @@ const MedicationViewModal = ({
 
   const getMedicationPurpose = (medication) => {
     const indication = medication?.indication?.trim();
-    return indication || 'No indication specified';
+    return indication || t('medications.fields.noIndication', 'No indication specified');
   };
 
   const getPractitionerDisplay = (medication) => {
@@ -79,7 +82,7 @@ const MedicationViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={`${medication.medication_name} - Details`}
+      title={`${medication.medication_name} - ${t('medications.modal.details', 'Details')}`}
       size="xl"
       centered
       zIndex={2000}
@@ -119,16 +122,16 @@ const MedicationViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              Overview
+              {t('medications.modal.tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
-              Dosage & Refills
+              {t('medications.modal.tabs.dosageRefills', 'Dosage & Refills')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              Notes
+              {t('medications.modal.tabs.notes', 'Notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              Documents
+              {t('medications.modal.tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -137,28 +140,28 @@ const MedicationViewModal = ({
             <Box mt="md">
               <Stack gap="lg">
                 <div>
-                  <Title order={4} mb="sm">Basic Information</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.basicInfo', 'Basic Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Medication Name</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.medicationName', 'Medication Name')}</Text>
                       <Text size="sm">{medication.medication_name}</Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Purpose/Indication</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.purposeIndication', 'Purpose/Indication')}</Text>
                       <Text size="sm" c={medication.indication ? 'inherit' : 'dimmed'}>
                         {getMedicationPurpose(medication)}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Status</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('labels.status', 'Status')}</Text>
                       <div>
                         <StatusBadge status={medication.status} />
                       </div>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Medication Type</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.medicationType', 'Medication Type')}</Text>
                       <Text size="sm" c={medication.medication_type ? 'inherit' : 'dimmed'}>
-                        {medication.medication_type || 'Not specified'}
+                        {medication.medication_type || t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -166,18 +169,18 @@ const MedicationViewModal = ({
 
                 {/* Dates Section */}
                 <div>
-                  <Title order={4} mb="sm">Timeline</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.timeline', 'Timeline')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Start Date</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.fields.startDate', 'Start Date')}</Text>
                       <Text size="sm" c={medication.start_date ? 'inherit' : 'dimmed'}>
-                        {medication.start_date ? formatDate(medication.start_date) : 'Not specified'}
+                        {medication.start_date ? formatDate(medication.start_date) : t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">End Date</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.fields.endDate', 'End Date')}</Text>
                       <Text size="sm" c={medication.end_date ? 'inherit' : 'dimmed'}>
-                        {medication.end_date ? formatDate(medication.end_date) : 'Ongoing'}
+                        {medication.end_date ? formatDate(medication.end_date) : t('medications.modal.ongoing', 'Ongoing')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -185,22 +188,22 @@ const MedicationViewModal = ({
 
                 {/* Prescriber Section */}
                 <div>
-                  <Title order={4} mb="sm">Prescriber & Pharmacy</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.prescriberPharmacy', 'Prescriber & Pharmacy')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Prescribing Doctor</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.fields.prescriber', 'Prescriber')}</Text>
                       <Text size="sm" c={practitionerDisplay ? 'inherit' : 'dimmed'}>
-                        {practitionerDisplay || 'Not specified'}
+                        {practitionerDisplay || t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Pharmacy</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.fields.pharmacy', 'Pharmacy')}</Text>
                       <Text size="sm" c={medication.pharmacy ? 'inherit' : 'dimmed'}>
                         {medication.pharmacy
                           ? (typeof medication.pharmacy === 'object'
                               ? medication.pharmacy.name || medication.pharmacy.brand || 'Pharmacy'
                               : medication.pharmacy)
-                          : 'Not specified'}
+                          : t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -209,7 +212,7 @@ const MedicationViewModal = ({
                 {/* Tags Section */}
                 {medication.tags && medication.tags.length > 0 && (
                   <div>
-                    <Title order={4} mb="sm">Tags</Title>
+                    <Title order={4} mb="sm">{t('medications.modal.sections.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {medication.tags.map((tag, index) => (
                         <Badge
@@ -234,30 +237,30 @@ const MedicationViewModal = ({
             <Box mt="md">
               <Stack gap="lg">
                 <div>
-                  <Title order={4} mb="sm">Dosage Information</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.dosageInfo', 'Dosage Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Dosage</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.dosage', 'Dosage')}</Text>
                       <Text size="sm" c={medication.dosage ? 'inherit' : 'dimmed'}>
-                        {medication.dosage || 'Not specified'}
+                        {medication.dosage || t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Frequency</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.fields.frequency', 'Frequency')}</Text>
                       <Text size="sm" c={medication.frequency ? 'inherit' : 'dimmed'}>
-                        {medication.frequency || 'Not specified'}
+                        {medication.frequency || t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Route</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.fields.route', 'Route')}</Text>
                       <Text size="sm" c={medication.route ? 'inherit' : 'dimmed'}>
-                        {medication.route || 'Not specified'}
+                        {medication.route || t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">Form</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.form', 'Form')}</Text>
                       <Text size="sm" c={medication.form ? 'inherit' : 'dimmed'}>
-                        {medication.form || 'Not specified'}
+                        {medication.form || t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -296,27 +299,27 @@ const MedicationViewModal = ({
             <Box mt="md">
               <Stack gap="lg">
                 <div>
-                  <Title order={4} mb="sm">Additional Notes</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.additionalNotes', 'Additional Notes')}</Title>
                   <Paper withBorder p="sm" bg="gray.1">
                     <Text
                       size="sm"
                       style={{ whiteSpace: 'pre-wrap' }}
                       c={medication.notes ? 'inherit' : 'dimmed'}
                     >
-                      {medication.notes || 'No notes available'}
+                      {medication.notes || t('medications.modal.noNotes', 'No notes available')}
                     </Text>
                   </Paper>
                 </div>
 
                 <div>
-                  <Title order={4} mb="sm">Side Effects</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.sideEffects', 'Side Effects')}</Title>
                   <Paper withBorder p="sm" bg="gray.1">
                     <Text
                       size="sm"
                       style={{ whiteSpace: 'pre-wrap' }}
                       c={medication.side_effects ? 'inherit' : 'dimmed'}
                     >
-                      {medication.side_effects || 'No side effects reported'}
+                      {medication.side_effects || t('medications.modal.noSideEffects', 'No side effects reported')}
                     </Text>
                   </Paper>
                 </div>
@@ -328,7 +331,7 @@ const MedicationViewModal = ({
           <Tabs.Panel value="documents">
             <Box mt="md">
               <Stack gap="md">
-                <Title order={4}>Attached Documents</Title>
+                <Title order={4}>{t('medications.modal.sections.attachedDocuments', 'Attached Documents')}</Title>
                 <DocumentManagerWithProgress
                   entityType="medication"
                   entityId={medication.id}
@@ -367,10 +370,10 @@ const MedicationViewModal = ({
               }, 100);
             }}
           >
-            Edit Medication
+            {t('medications.modal.editMedication', 'Edit Medication')}
           </Button>
           <Button variant="filled" onClick={onClose}>
-            Close
+            {t('buttons.close', 'Close')}
           </Button>
         </Group>
       </Stack>

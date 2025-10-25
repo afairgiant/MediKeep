@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, Group } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
 import { formatDate } from '../../../utils/helpers';
@@ -15,6 +16,8 @@ const TreatmentCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('treatment_card_error', {
       message: 'Error in TreatmentCard',
@@ -58,7 +61,7 @@ const TreatmentCard = ({
       badges.push({
         label: treatment.condition?.diagnosis ||
                 getConditionName(treatment.condition_id) ||
-                `Condition #${treatment.condition_id}`,
+                t('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id }),
         color: 'teal',
         clickable: true,
         onClick: () => handleConditionClick(treatment.condition_id)
@@ -77,29 +80,29 @@ const TreatmentCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Start Date',
+        label: t('treatments.card.startDate', 'Start Date'),
         value: treatment.start_date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('treatments.card.notSpecified', 'Not specified')
       },
       {
-        label: 'End Date',
+        label: t('treatments.card.endDate', 'End Date'),
         value: treatment.end_date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('treatments.card.notSpecified', 'Not specified')
       },
       {
-        label: 'Amount',
+        label: t('treatments.card.amount', 'Amount'),
         value: treatment.dosage,
-        render: (value) => value || 'Not specified'
+        render: (value) => value || t('treatments.card.notSpecified', 'Not specified')
       },
       {
-        label: 'Frequency',
+        label: t('treatments.card.frequency', 'Frequency'),
         value: treatment.frequency,
-        render: (value) => value || 'Not specified'
+        render: (value) => value || t('treatments.card.notSpecified', 'Not specified')
       },
       {
-        label: 'Description',
+        label: t('treatments.card.description', 'Description'),
         value: treatment.description,
-        render: (value) => value || 'Not specified',
+        render: (value) => value || t('treatments.card.notSpecified', 'Not specified'),
         style: { flex: 1 }
       }
     ].filter(field => field.value); // Only show fields with values
@@ -118,7 +121,7 @@ const TreatmentCard = ({
     const customContent = treatment.condition_id ? (
       <Group gap="xs" style={{ marginBottom: '8px' }}>
         <Text size="sm" c="dimmed">
-          Related Condition:
+          {t('treatments.card.relatedCondition', 'Related Condition')}:
         </Text>
         <Text
           size="sm"
@@ -126,11 +129,11 @@ const TreatmentCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => handleConditionClick(treatment.condition_id)}
-          title="View condition details"
+          title={t('treatments.card.viewConditionDetails', 'View condition details')}
         >
           {treatment.condition?.diagnosis ||
            getConditionName(treatment.condition_id) ||
-           `Condition #${treatment.condition_id}`}
+           t('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id })}
         </Text>
       </Group>
     ) : null;
@@ -138,7 +141,7 @@ const TreatmentCard = ({
     return (
       <BaseMedicalCard
         title={titleContent}
-        subtitle="Medical Treatment"
+        subtitle={t('treatments.card.subtitle', 'Medical Treatment')}
         badges={badges.filter(badge => !badge.clickable)} // Only include non-clickable badges
         fields={fields}
         notes={treatment.notes}

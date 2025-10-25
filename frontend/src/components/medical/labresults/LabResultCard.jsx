@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
@@ -18,6 +19,8 @@ const LabResultCard = React.memo(({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('lab_result_card_error', {
       message: 'Error in LabResultCard',
@@ -53,44 +56,44 @@ const LabResultCard = React.memo(({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Test Code',
+        label: t('labResults.card.testCode', 'Test Code'),
         value: labResult.test_code
       },
       {
-        label: 'Type',
+        label: t('labResults.card.type', 'Type'),
         value: labResult.test_type,
         render: (value) => value ? (
           <Badge variant="light" color="cyan" size="sm">
             {value}
           </Badge>
-        ) : 'Not specified'
+        ) : t('labResults.card.notSpecified', 'Not specified')
       },
       {
-        label: 'Facility',
+        label: t('labResults.card.facility', 'Facility'),
         value: labResult.facility
       },
       {
-        label: 'Ordered',
+        label: t('labResults.card.ordered', 'Ordered'),
         value: labResult.ordered_date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('labResults.card.notSpecified', 'Not specified')
       },
       {
-        label: 'Completed',
+        label: t('labResults.card.completed', 'Completed'),
         value: labResult.completed_date,
-        render: (value) => value ? formatDate(value) : 'Not completed'
+        render: (value) => value ? formatDate(value) : t('labResults.card.notCompleted', 'Not completed')
       },
       {
-        label: 'Result',
+        label: t('labResults.card.result', 'Result'),
         value: labResult.labs_result,
         render: (value) => value ? (
           <StatusBadge status={value} />
-        ) : 'Pending'
+        ) : t('labResults.card.pending', 'Pending')
       },
       {
-        label: 'Doctor',
+        label: t('labResults.card.doctor', 'Doctor'),
         value: labResult.practitioner_id,
         render: (value) => {
-          if (!value) return 'Not specified';
+          if (!value) return t('labResults.card.notSpecified', 'Not specified');
 
           const practitionerName = practitioner?.name || `Practitioner ID: ${value}`;
           return (
@@ -99,7 +102,7 @@ const LabResultCard = React.memo(({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title="View practitioner details"
+              title={t('labResults.card.viewPractitioner', 'View practitioner details')}
             >
               {practitionerName}
             </Text>

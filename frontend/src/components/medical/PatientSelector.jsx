@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Select,
   Group,
@@ -54,6 +55,7 @@ import PatientSharingModal from './PatientSharingModal';
 import PatientAvatar from '../shared/PatientAvatar';
 
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
+  const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
   const { user: currentUser } = useAuth();
 
@@ -597,21 +599,21 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       return (
         <Badge size="xs" color="blue" variant="light">
           <IconUserCheck size="0.7rem" style={{ marginRight: 4 }} />
-          Self
+          {t('patientSelector.badges.self', 'Self')}
         </Badge>
       );
     }
-    
+
     // Check if this is a shared patient (not owned by current user)
     if (!isPatientOwned(patient)) {
       return (
         <Badge size="xs" color="green" variant="light">
           <IconShare size="0.7rem" style={{ marginRight: 4 }} />
-          Shared
+          {t('patientSelector.badges.shared', 'Shared')}
         </Badge>
       );
     }
-    
+
     return null;
   };
 
@@ -660,7 +662,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     return (
       <Alert
         icon={<IconAlertCircle size="1rem" />}
-        title="Failed to load patients"
+        title={t('patientSelector.errors.loadFailed', 'Failed to load patients')}
         color="red"
         variant="light"
       >
@@ -672,7 +674,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           onClick={refreshPatients}
           mt="sm"
         >
-          Retry
+          {t('patientSelector.buttons.retry', 'Retry')}
         </Button>
       </Alert>
     );
@@ -714,7 +716,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {(combinedLoading || externalLoading) && <Loader size="xs" />}
         
         {/* Expand button */}
-        <Tooltip label="Expand patient selector">
+        <Tooltip label={t('patientSelector.tooltips.expand', 'Expand patient selector')}>
           <ActionIcon
             variant="subtle"
             color={getIconColor('blue')}
@@ -730,7 +732,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {/* Quick patient switch menu */}
         <Menu shadow="md" width={300} position="bottom-start">
           <Menu.Target>
-            <Tooltip label="Switch patient">
+            <Tooltip label={t('patientSelector.tooltips.switchPatient', 'Switch patient')}>
               <ActionIcon
                 variant="subtle"
                 color={getIconColor('gray')}
@@ -742,9 +744,9 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               </ActionIcon>
             </Tooltip>
           </Menu.Target>
-          
+
           <Menu.Dropdown>
-            <Menu.Label>Switch to Patient</Menu.Label>
+            <Menu.Label>{t('patientSelector.labels.switchTo', 'Switch to Patient')}</Menu.Label>
             {patients.map((patient) => {
               const patientPhoto = getPatientPhoto(patient);
               return (
@@ -785,7 +787,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               leftSection={<IconPlus size="0.8rem" />}
               onClick={openCreateModal}
             >
-              Add New Patient
+              {t('patientSelector.buttons.addNew', 'Add New Patient')}
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
@@ -800,12 +802,12 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         <Group justify="space-between" align="center">
           <Title order={4} c="blue">
             <IconUsers size="1.2rem" style={{ marginRight: 8 }} />
-            Patient Selector
+            {t('patientSelector.title', 'Patient Selector')}
           </Title>
-          
+
           <Group gap="xs">
             {/* Minimize button */}
-            <Tooltip label="Minimize to one line">
+            <Tooltip label={t('patientSelector.tooltips.minimize', 'Minimize to one line')}>
               <ActionIcon
                 variant="light"
                 color="gray"
@@ -815,8 +817,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 <IconChevronUp size="1rem" />
               </ActionIcon>
             </Tooltip>
-            
-            <Tooltip label="Refresh patients">
+
+            <Tooltip label={t('patientSelector.tooltips.refresh', 'Refresh patients')}>
               <ActionIcon
                 variant="light"
                 color="blue"
@@ -827,8 +829,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 <IconRefresh size="1rem" />
               </ActionIcon>
             </Tooltip>
-            
-            <Tooltip label="Add new patient">
+
+            <Tooltip label={t('patientSelector.tooltips.addNew', 'Add new patient')}>
               <ActionIcon
                 variant="light"
                 color="green"
@@ -845,7 +847,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {activePatient && (
           <Box>
             <Text size="sm" c="dimmed" mb="xs">
-              Currently viewing:
+              {t('patientSelector.labels.currentlyViewing', 'Currently viewing:')}
             </Text>
             <Group gap="sm" p="sm" style={{ borderRadius: 8, position: 'relative' }}
               styles={(theme) => ({
@@ -872,7 +874,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   )}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  Born: {activePatient.birth_date}
+                  {t('patientSelector.labels.born', 'Born')}: {activePatient.birth_date}
                 </Text>
               </div>
               {getPatientBadge(activePatient)}
@@ -911,28 +913,28 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                  <Menu.Label>Patient Actions</Menu.Label>
-                  
+                  <Menu.Label>{t('patientSelector.labels.patientActions', 'Patient Actions')}</Menu.Label>
+
                   {/* Edit is available for owned patients only */}
                   {isPatientOwned(activePatient) && (
                     <Menu.Item
                       leftSection={<IconEdit size="0.9rem" />}
                       onClick={() => editPatient(activePatient)}
                     >
-                      Edit Patient
+                      {t('patientSelector.buttons.editPatient', 'Edit Patient')}
                     </Menu.Item>
                   )}
-                  
+
                   {/* Share is available for owned patients only */}
                   {isPatientOwned(activePatient) && (
                     <Menu.Item
                       leftSection={<IconShare size="0.9rem" />}
                       onClick={() => sharePatient(activePatient)}
                     >
-                      Share Patient
+                      {t('patientSelector.buttons.sharePatient', 'Share Patient')}
                     </Menu.Item>
                   )}
-                  
+
                   {/* Show different actions based on ownership */}
                   {isPatientOwned(activePatient) ? (
                     // For owned patients: show delete option (except self-record)
@@ -944,7 +946,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                           color="red"
                           onClick={() => deletePatient(activePatient)}
                         >
-                          Delete Patient
+                          {t('patientSelector.buttons.deletePatient', 'Delete Patient')}
                         </Menu.Item>
                       </>
                     )
@@ -957,7 +959,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                         color="orange"
                         onClick={() => removeSharedAccess(activePatient)}
                       >
-                        Remove Access
+                        {t('patientSelector.buttons.removeAccess', 'Remove Access')}
                       </Menu.Item>
                     </>
                   )}
@@ -970,11 +972,15 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {/* Patient Selector */}
         <Box>
           <Text size="sm" c="dimmed" mb="xs">
-            {externalLoading ? 'Switching patient...' : 'Switch to another patient:'}
+            {externalLoading
+              ? t('patientSelector.labels.switching', 'Switching patient...')
+              : t('patientSelector.labels.switchTo', 'Switch to another patient:')}
           </Text>
-          
+
           <Select
-            placeholder={externalLoading ? "Loading..." : "Select a patient to switch to..."}
+            placeholder={externalLoading
+              ? t('patientSelector.placeholders.loading', 'Loading...')
+              : t('patientSelector.placeholders.select', 'Select a patient to switch to...')}
             data={selectData}
             value={activePatient?.id?.toString() || ''}
             onChange={(value) => value && switchPatient(parseInt(value))}
@@ -994,21 +1000,21 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               <Group gap="xs">
                 <IconUser size="1rem" />
                 <Text size="sm">
-                  Owned: <Text span fw={500}>{stats.owned_count}</Text>
+                  {t('patientSelector.stats.owned', 'Owned')}: <Text span fw={500}>{stats.owned_count}</Text>
                 </Text>
               </Group>
-              
+
               <Group gap="xs">
                 <IconShare size="1rem" />
                 <Text size="sm">
-                  Shared: <Text span fw={500}>{stats.sharing_stats?.shared_with_me || 0}</Text>
+                  {t('patientSelector.stats.shared', 'Shared')}: <Text span fw={500}>{stats.sharing_stats?.shared_with_me || 0}</Text>
                 </Text>
               </Group>
-              
+
               <Group gap="xs">
                 <IconUsers size="1rem" />
                 <Text size="sm">
-                  Total: <Text span fw={500}>{stats.accessible_count}</Text>
+                  {t('patientSelector.stats.total', 'Total')}: <Text span fw={500}>{stats.accessible_count}</Text>
                 </Text>
               </Group>
             </Flex>
@@ -1019,11 +1025,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {!combinedLoading && patients.length === 0 && (
           <Alert
             icon={<IconAlertCircle size="1rem" />}
-            title="No patients found"
+            title={t('patientSelector.errors.noPatients', 'No patients found')}
             color="yellow"
             variant="light"
           >
-            You don't have access to any patients yet. Create a new patient to get started.
+            {t('patientSelector.messages.noAccess', "You don't have access to any patients yet. Create a new patient to get started.")}
           </Alert>
         )}
       </Stack>
@@ -1032,7 +1038,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       <Modal
         opened={createModalOpened}
         onClose={closeCreateModal}
-        title="Create New Patient"
+        title={t('patientSelector.modals.createTitle', 'Create New Patient')}
         size="lg"
         padding="lg"
       >
@@ -1059,7 +1065,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           closeEditModal();
           setEditingPatient(null);
         }}
-        title="Edit Patient"
+        title={t('patientSelector.modals.editTitle', 'Edit Patient')}
         size="lg"
         padding="lg"
       >

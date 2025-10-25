@@ -1,6 +1,7 @@
 {
   "menu": {
     "dashboard": "Tableau de bord",
+    "backToDashboard": "Retour au tableau de bord",
     "patients": "Patients",
     "medicalRecords": "Dossiers médicaux",
     "settings": "Paramètres",
@@ -44,5 +45,122 @@
     "symptoms": "Symptômes",
     "practitioners": "Praticiens",
     "pharmacies": "Pharmacies"
+  },
+  "dashboard": {
+    "title": "Tableau de bord MediKeep",
+    "subtitle": "Gérez vos informations de santé en toute sécurité",
+    "hello": "Bonjour",
+    "loading": "Chargement de votre tableau de bord médical...",
+    "sections": {
+      "coreMedical": "Informations médicales principales",
+      "treatments": "Traitements et procédures",
+      "healthMonitoring": "Surveillance de la santé",
+      "prevention": "Prévention & Historique",
+      "additionalResources": "Ressources supplémentaires",
+      "recentActivity": "Activité récente"
+    },
+    "stats": {
+      "totalRecords": "Total des dossiers",
+      "activeMedications": "Médicaments actifs",
+      "labResults": "Résultats d'analyse",
+      "procedures": "Procédures"
+    },
+    "modules": {
+      "patientInfo": "Informations du patient",
+      "medications": "Médicaments",
+      "labResults": "Résultats d'analyse",
+      "treatments": "Traitements",
+      "procedures": "Procédures",
+      "vitalSigns": "Signes vitaux",
+      "symptoms": "Symptômes",
+      "conditions": "Conditions",
+      "allergies": "Allergies",
+      "immunizations": "Immunisations",
+      "visitHistory": "Historique des visites",
+      "familyHistory": "Antécédents familiaux",
+      "insurance": "Assurance",
+      "emergencyContacts": "Contacts d'urgence",
+      "exportRecords": "Exporter les dossiers",
+      "practitioners": "Praticiens",
+      "pharmacies": "Pharmacies",
+      "adminDashboard": "Tableau de bord admin"
+    },
+    "activity": {
+      "noActivity": "Aucune activité récente",
+      "noActivityDescription": "Vos activités de dossier médical apparaîtront ici",
+      "lastUpdated": "Dernière mise à jour"
+    },
+    "search": {
+      "placeholder": "Rechercher des dossiers médicaux..."
+    }
+  },
+  "invitations": {
+    "title": "Invitations",
+    "lastUpdated": "Dernière mise à jour",
+    "from": "De",
+    "viewAll": "Voir toutes les {{count}} invitations",
+    "noPending": "Aucune invitation en attente",
+    "noPendingDescription": "Les nouvelles invitations de partage apparaîtront ici",
+    "manageAll": "Gérer toutes les invitations",
+    "sharePatient": "Partager le patient",
+    "confirmTitle": "Confirmer l'acceptation de l'invitation",
+    "confirmQuestion": "Êtes-vous sûr de vouloir accepter cette invitation?",
+    "confirmDescription": "En acceptant, vous aurez accès aux informations médicales partagées.",
+    "acceptButton": "Accepter l'invitation",
+    "types": {
+      "familyHistory": "Antécédents familiaux",
+      "patientRecord": "Dossier patient"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Créé",
+      "updated": "Mis à jour",
+      "deleted": "Supprimé",
+      "added": "Ajouté",
+      "modified": "Modifié",
+      "removed": "Retiré",
+      "completed": "Terminé",
+      "cancelled": "Annulé",
+      "scheduled": "Planifié",
+      "viewed": "Consulté"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Dossiers médicaux",
+      "careAndTreatment": "Soins & Traitements",
+      "misc": "Divers",
+      "tools": "Outils",
+      "administration": "Administration"
+    },
+    "items": {
+      "patientInfo": "Informations du patient",
+      "medications": "Médicaments",
+      "labResults": "Résultats d'analyse",
+      "conditions": "Conditions",
+      "allergies": "Allergies",
+      "vitalSigns": "Signes vitaux",
+      "symptoms": "Symptômes",
+      "treatments": "Traitements",
+      "procedures": "Procédures",
+      "immunizations": "Immunisations",
+      "visitHistory": "Historique des visites",
+      "familyHistory": "Antécédents familiaux",
+      "practitioners": "Praticiens",
+      "pharmacies": "Pharmacies",
+      "insurance": "Assurance",
+      "emergencyContacts": "Contacts d'urgence",
+      "tagManagement": "Gestion des tags",
+      "customReports": "Rapports personnalisés",
+      "exportRecords": "Exporter les dossiers",
+      "settings": "Paramètres",
+      "adminDashboard": "Tableau de bord admin",
+      "dataModels": "Modèles de données",
+      "backupManagement": "Gestion des sauvegardes",
+      "systemHealth": "État du système",
+      "language": "Langue",
+      "theme": "Thème"
+    }
   }
 }

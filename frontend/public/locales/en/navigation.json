@@ -1,6 +1,7 @@
 {
   "menu": {
     "dashboard": "Dashboard",
+    "backToDashboard": "Back to Dashboard",
     "patients": "Patients",
     "medicalRecords": "Medical Records",
     "settings": "Settings",
@@ -44,5 +45,122 @@
     "symptoms": "Symptoms",
     "practitioners": "Practitioners",
     "pharmacies": "Pharmacies"
+  },
+  "dashboard": {
+    "title": "MediKeep Dashboard",
+    "subtitle": "Manage your health information securely",
+    "hello": "Hello",
+    "loading": "Loading your medical dashboard...",
+    "sections": {
+      "coreMedical": "Core Medical Information",
+      "treatments": "Treatments and Procedures",
+      "healthMonitoring": "Health Monitoring",
+      "prevention": "Prevention & History",
+      "additionalResources": "Additional Resources",
+      "recentActivity": "Recent Activity"
+    },
+    "stats": {
+      "totalRecords": "Total Records",
+      "activeMedications": "Active Medications",
+      "labResults": "Lab Results",
+      "procedures": "Procedures"
+    },
+    "modules": {
+      "patientInfo": "Patient Information",
+      "medications": "Medications",
+      "labResults": "Lab Results",
+      "treatments": "Treatments",
+      "procedures": "Procedures",
+      "vitalSigns": "Vital Signs",
+      "symptoms": "Symptoms",
+      "conditions": "Conditions",
+      "allergies": "Allergies",
+      "immunizations": "Immunizations",
+      "visitHistory": "Visit History",
+      "familyHistory": "Family History",
+      "insurance": "Insurance",
+      "emergencyContacts": "Emergency Contacts",
+      "exportRecords": "Export Records",
+      "practitioners": "Practitioners",
+      "pharmacies": "Pharmacies",
+      "adminDashboard": "Admin Dashboard"
+    },
+    "activity": {
+      "noActivity": "No recent activity",
+      "noActivityDescription": "Your medical record activities will appear here",
+      "lastUpdated": "Last updated"
+    },
+    "search": {
+      "placeholder": "Search medical records..."
+    }
+  },
+  "invitations": {
+    "title": "Invitations",
+    "lastUpdated": "Last updated",
+    "from": "From",
+    "viewAll": "View all {{count}} invitations",
+    "noPending": "No pending invitations",
+    "noPendingDescription": "New sharing invitations will appear here",
+    "manageAll": "Manage All Invitations",
+    "sharePatient": "Share Patient",
+    "confirmTitle": "Confirm Invitation Acceptance",
+    "confirmQuestion": "Are you sure you want to accept this invitation?",
+    "confirmDescription": "By accepting, you will gain access to view the shared medical information.",
+    "acceptButton": "Accept Invitation",
+    "types": {
+      "familyHistory": "Family History",
+      "patientRecord": "Patient Record"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "added": "Added",
+      "modified": "Modified",
+      "removed": "Removed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "scheduled": "Scheduled",
+      "viewed": "Viewed"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Medical Records",
+      "careAndTreatment": "Care & Treatment",
+      "misc": "Misc.",
+      "tools": "Tools",
+      "administration": "Administration"
+    },
+    "items": {
+      "patientInfo": "Patient Info",
+      "medications": "Medications",
+      "labResults": "Lab Results",
+      "conditions": "Conditions",
+      "allergies": "Allergies",
+      "vitalSigns": "Vital Signs",
+      "symptoms": "Symptoms",
+      "treatments": "Treatments",
+      "procedures": "Procedures",
+      "immunizations": "Immunizations",
+      "visitHistory": "Visit History",
+      "familyHistory": "Family History",
+      "practitioners": "Practitioners",
+      "pharmacies": "Pharmacies",
+      "insurance": "Insurance",
+      "emergencyContacts": "Emergency Contacts",
+      "tagManagement": "Tag Management",
+      "customReports": "Custom Reports",
+      "exportRecords": "Export Records",
+      "settings": "Settings",
+      "adminDashboard": "Admin Dashboard",
+      "dataModels": "Data Models",
+      "backupManagement": "Backup Management",
+      "systemHealth": "System Health",
+      "language": "Language",
+      "theme": "Theme"
+    }
   }
 }

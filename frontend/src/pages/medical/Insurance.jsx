@@ -36,6 +36,7 @@ import InsuranceViewModal from '../../components/medical/insurance/InsuranceView
 import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import { useTranslation } from 'react-i18next';
 import {
   Badge,
   Button,
@@ -55,6 +56,7 @@ import {
 } from '@mantine/core';
 
 const Insurance = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -553,13 +555,13 @@ const Insurance = () => {
   return (
     <Container size="xl">
       <PageHeader
-        title="Insurance"
-        description="Manage your insurance information and digital cards"
+        title={t('insurance.title', 'Insurance')}
+        description={t('insurance.description', 'Manage your insurance information and digital cards')}
       />
 
       <Group justify="space-between" align="center">
         <Button variant="filled" onClick={handleAddNew}>
-          + Add New Insurance
+          {t('insurance.actions.addNew', '+ Add New Insurance')}
         </Button>
 
         <ViewToggle
@@ -668,7 +670,7 @@ const Insurance = () => {
             setFormData(initializeFormData());
           }
         }}
-        title={editingInsurance ? 'Edit Insurance' : 'Add New Insurance'}
+        title={editingInsurance ? t('insurance.form.editTitle', 'Edit Insurance') : t('insurance.form.addTitle', 'Add New Insurance')}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}

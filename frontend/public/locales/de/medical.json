@@ -120,20 +120,73 @@
 	},
 	"allergies": {
 		"title": "Allergien",
+		"addNew": "Neue Allergie hinzufügen",
+		"addTitle": "Neue Allergie hinzufügen",
+		"editTitle": "Allergie bearbeiten",
+		"tabs": {
+			"basicInfo": "Grundinformationen",
+			"reactionDetails": "Reaktionsdetails",
+			"documents": "Dokumente",
+			"notes": "Notizen"
+		},
+		"messages": {
+			"loading": "Allergien werden geladen...",
+			"saving": "Allergie wird gespeichert..."
+		},
+		"emptyState": {
+			"title": "Keine Allergien gefunden",
+			"noData": "Klicken Sie auf \"Neue Allergie hinzufügen\", um zu beginnen.",
+			"filtered": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen."
+		},
 		"allergen": {
 			"label": "Allergen",
-			"placeholder": "z. B. Penicillin, Erdnüsse, Latex",
-			"description": "Welche Substanz die allergische Reaktion auslöst"
+			"placeholder": "Allergennamen eingeben",
+			"description": "Name des Allergens"
+		},
+		"allergyType": {
+			"label": "Allergie-Typ",
+			"placeholder": "Allergie-Typ auswählen",
+			"description": "Kategorie der Allergie",
+			"options": {
+				"food": "Nahrungsmittel",
+				"medication": "Medikament",
+				"environmental": "Umwelt",
+				"insect": "Insekt",
+				"other": "Andere"
+			}
+		},
+		"severity": {
+			"description": "Schweregrad der allergischen Reaktion"
+		},
+		"status": {
+			"description": "Aktueller Allergiestatus"
+		},
+		"onsetDate": {
+			"label": "Erstauftreten",
+			"placeholder": "Datum des Erstauftretens auswählen",
+			"description": "Wann die Allergie erstmals festgestellt wurde"
+		},
+		"relatedMedication": {
+			"label": "Verwandtes Medikament",
+			"placeholder": "Medikament auswählen",
+			"description": "Medikament, das diese Allergie verursacht"
+		},
+		"reactionType": {
+			"label": "Reaktionstyp",
+			"placeholder": "Reaktionstyp auswählen",
+			"description": "Art der allergischen Reaktion",
+			"options": {
+				"skin": "Hautreaktion",
+				"respiratory": "Atemwege",
+				"gastrointestinal": "Magen-Darm",
+				"anaphylaxis": "Anaphylaxie",
+				"other": "Andere"
+			}
 		},
 		"reaction": {
 			"label": "Reaktion",
-			"placeholder": "z. B. Hautausschlag, Anaphylaxie, Schwellung",
-			"description": "Was passiert bei Exposition gegenüber diesem Allergen"
-		},
-		"relatedMedication": {
-			"label": "Verwandtes Medikament (optional)",
-			"placeholder": "Wähle ein Medikament, mit dem diese Allergie zusammenhängt",
-			"description": "Verknüpfe diese Allergie mit einem bestimmten Medikament, falls zutreffend"
+			"placeholder": "Beschreiben Sie die allergische Reaktion",
+			"description": "Symptome und Details der Reaktion"
 		}
 	},
 	"conditions": {
@@ -777,6 +830,21 @@
 				"label": "Typische Auslöser",
 				"placeholder": "Gängige Auslöser hinzufügen (Stress, Wetter, Lebensmittel, etc.)",
 				"description": "Was dieses Symptom typischerweise auslöst"
+			},
+			"status": {
+				"label": "Gesamtstatus",
+				"placeholder": "Status auswählen",
+				"description": "Aktueller Gesamtstatus dieses Symptoms"
+			},
+			"statusOptions": {
+				"active": "Aktiv - Derzeit auftretend",
+				"resolved": "Aufgelöst - Nicht mehr auftretend",
+				"recurring": "Wiederkehrend - Kommt und geht"
+			},
+			"generalNotes": {
+				"label": "Allgemeine Notizen",
+				"placeholder": "Gesamtnotizen zu diesem Symptom...",
+				"description": "Allgemeine Informationen über Muster, Historie oder Beobachtungen"
 			}
 		},
 		"occurrence": {
@@ -794,6 +862,21 @@
 				"label": "Schmerzskala (0-10)",
 				"placeholder": "0 = kein Schmerz, 10 = schlimmster Schmerz",
 				"description": "Schmerzstärke von 0 (kein Schmerz) bis 10 (stärkster vorstellbarer Schmerz)"
+			},
+			"duration": {
+				"label": "Dauer",
+				"placeholder": "z.B. 2 Stunden, 30 Minuten, den ganzen Tag",
+				"description": "Wie lange dauerte diese Episode"
+			},
+			"location": {
+				"label": "Ort",
+				"placeholder": "z.B. Linke Schläfe, Unterer Rücken, Ganzer Körper",
+				"description": "Wo an Ihrem Körper spürten Sie dies"
+			},
+			"impactLevel": {
+				"label": "Auswirkung auf das tägliche Leben",
+				"placeholder": "Auswirkungsgrad auswählen",
+				"description": "Wie stark beeinträchtigte dies Ihre täglichen Aktivitäten"
 			},
 			"impactLevelOptions": {
 				"noImpact": "Keine Auswirkung - Normale Funktion möglich",
@@ -826,6 +909,555 @@
 				"label": "Notizen zur Auflösung",
 				"placeholder": "Wie wurde diese Episode gelöst...",
 				"description": "Details darüber, wie die Episode endete oder behandelt wurde"
+			},
+			"additionalNotes": {
+				"label": "Zusätzliche Notizen",
+				"placeholder": "Weitere Details zu dieser Episode...",
+				"description": "Alle anderen relevanten Informationen zu diesem Vorkommnis"
+			}
+		}
+	},
+	"familyHistory": {
+			"form": {
+				"member": {
+					"name": {
+						"label": "Vollständiger Name",
+						"placeholder": "Name des Familienmitglieds eingeben",
+						"description": "Vollständiger Name des Familienmitglieds"
+					},
+					"relationship": {
+						"label": "Beziehung",
+						"placeholder": "Beziehung auswählen",
+						"description": "Beziehung zu Ihnen"
+					},
+					"gender": {
+						"label": "Geschlecht",
+						"placeholder": "Geschlecht auswählen",
+						"description": "Geschlecht des Familienmitglieds"
+					},
+					"birthYear": {
+						"label": "Geburtsjahr",
+						"placeholder": "z.B. 1950",
+						"description": "Geburtsjahr des Familienmitglieds (optional)"
+					},
+					"deceased": {
+						"label": "Verstorben",
+						"description": "Geben Sie an, ob dieses Familienmitglied verstorben ist"
+					},
+					"deathYear": {
+						"label": "Sterbejahr",
+						"placeholder": "z.B. 2020",
+						"description": "Jahr des Todes (falls zutreffend)"
+					},
+					"notes": {
+						"label": "Notizen",
+						"placeholder": "Zusätzliche Informationen über dieses Familienmitglied...",
+						"description": "Alle weiteren relevanten Details"
+					},
+					"relationshipOptions": {
+						"father": "Vater",
+						"mother": "Mutter",
+						"son": "Sohn",
+						"daughter": "Tochter",
+						"brother": "Bruder",
+						"sister": "Schwester",
+						"grandfather_paternal": "Großvater (väterlicherseits)",
+						"grandmother_paternal": "Großmutter (väterlicherseits)",
+						"grandfather_maternal": "Großvater (mütterlicherseits)",
+						"grandmother_maternal": "Großmutter (mütterlicherseits)",
+						"uncle_paternal": "Onkel (väterlicherseits)",
+						"aunt_paternal": "Tante (väterlicherseits)",
+						"uncle_maternal": "Onkel (mütterlicherseits)",
+						"aunt_maternal": "Tante (mütterlicherseits)",
+						"cousin": "Cousin/Cousine",
+						"nephew": "Neffe",
+						"niece": "Nichte",
+						"grandson": "Enkel",
+						"granddaughter": "Enkelin",
+						"other": "Andere"
+					},
+					"genderOptions": {
+						"male": "Männlich",
+						"female": "Weiblich"
+					}
+				},
+				"condition": {
+					"conditionName": {
+						"label": "Name der Erkrankung",
+						"placeholder": "z.B. Diabetes, Herzerkrankung, Krebs",
+						"description": "Name der medizinischen Erkrankung"
+					},
+					"conditionType": {
+						"label": "Erkrankungstyp",
+						"placeholder": "Kategorie auswählen",
+						"description": "Kategorie der Erkrankung"
+					},
+					"severity": {
+						"label": "Schweregrad",
+						"placeholder": "Schweregrad auswählen",
+						"description": "Schwere der Erkrankung"
+					},
+					"diagnosisAge": {
+						"label": "Alter bei Diagnose",
+						"placeholder": "z.B. 45",
+						"description": "Alter des Familienmitglieds bei der Diagnose"
+					},
+					"status": {
+						"label": "Status",
+						"placeholder": "Status auswählen",
+						"description": "Aktueller Status der Erkrankung"
+					},
+					"icd10Code": {
+						"label": "ICD-10-Code",
+						"placeholder": "z.B. E11.9",
+						"description": "Medizinischer Diagnosecode (optional)"
+					},
+					"notes": {
+						"label": "Notizen",
+						"placeholder": "Zusätzliche Details zu dieser Erkrankung...",
+						"description": "Alle weiteren relevanten Informationen"
+					},
+					"typeOptions": {
+						"cardiovascular": "Kardiovaskulär - Herz & Blutgefäße",
+						"cancer": "Krebs - Bösartige Neubildungen",
+						"diabetes": "Diabetes - Blutzuckererkrankungen",
+						"respiratory": "Respiratorisch - Lungenerkrankungen",
+						"neurological": "Neurologisch - Nerven- & Hirnerkrankungen",
+						"mental_health": "Psychische Gesundheit - Psychiatrische Erkrankungen",
+						"autoimmune": "Autoimmun - Immunsystemerkrankungen",
+						"genetic": "Genetisch - Vererbte Erkrankungen",
+						"musculoskeletal": "Muskuloskeletal - Knochen & Muskeln",
+						"endocrine": "Endokrin - Hormonelle Erkrankungen",
+						"gastrointestinal": "Gastrointestinal - Verdauungssystem",
+						"kidney": "Nieren - Nierenerkrankungen",
+						"liver": "Leber - Lebererkrankungen",
+						"blood": "Blut - Hämatologische Erkrankungen",
+						"other": "Andere"
+					},
+					"severityOptions": {
+						"mild": "💛 Leicht - Geringe Auswirkung",
+						"moderate": "🧡 Mäßig - Moderate Auswirkung",
+						"severe": "❤️ Schwer - Erhebliche Auswirkung",
+						"fatal": "🖤 Tödlich - Todesursache"
+					},
+					"statusOptions": {
+						"active": "Aktiv - Andauernde Erkrankung",
+						"managed": "Verwaltet - Unter Kontrolle mit Behandlung",
+						"resolved": "Aufgelöst - Nicht mehr vorhanden",
+						"fatal": "Tödlich - Todesursache"
+					}
+			}
+		}
+	},
+	"practitioners": {
+		"form": {
+			"name": {
+				"label": "Vollständiger Name",
+				"placeholder": "Dr. med. Anna Müller",
+				"description": "Vollständiger Name des Arztes inklusive Titel"
+			},
+			"specialty": {
+				"label": "Medizinisches Fachgebiet",
+				"placeholder": "Fachgebiete durchsuchen oder eigenes eingeben...",
+				"description": "Aus Liste auswählen oder eigenes Fachgebiet eingeben"
+			},
+			"practice": {
+				"label": "Praxis/Krankenhaus",
+				"placeholder": "Städtisches Krankenhaus",
+				"description": "Arbeitsplatz oder medizinische Einrichtung"
+			},
+			"phone": {
+				"label": "Telefonnummer",
+				"placeholder": "(555) 123-4567",
+				"description": "Primäre Kontaktnummer"
+			},
+			"website": {
+				"label": "Webseite",
+				"placeholder": "https://www.beispiel.de",
+				"description": "Professionelle Webseite oder Praxisseite"
+			},
+			"rating": {
+				"label": "Bewertung"
+			}
+		}
+	},
+	"pharmacies": {
+		"form": {
+			"brand": {
+				"label": "Apothekenkette",
+				"placeholder": "Apothekenkette oder Typ auswählen",
+				"description": "Große Apothekenkette oder unabhängiger Typ"
+			},
+			"name": {
+				"label": "Apothekenname",
+				"placeholder": "CVS Apotheke - Hauptstraße",
+				"description": "Spezifischer Name oder Standortkennung"
+			},
+			"locationDivider": "Standortinformationen",
+			"streetAddress": {
+				"label": "Straßenadresse",
+				"placeholder": "Hauptstraße 123",
+				"description": "Physische Straßenadresse"
+			},
+			"city": {
+				"label": "Stadt",
+				"placeholder": "München",
+				"description": "Stadt"
+			},
+			"storeNumber": {
+				"label": "Filialnummer",
+				"placeholder": "z.B. 1234, #5678, Filiale A",
+				"description": "Interne Filialkennung"
+			},
+			"phone": {
+				"label": "Telefonnummer",
+				"placeholder": "(555) 123-4567",
+				"description": "Primäre Telefonnummer der Apotheke"
+			}
+		}
+	},
+	"emergencyContacts": {
+		"form": {
+			"name": {
+				"label": "Vollständiger Name",
+				"placeholder": "z.B. Max Mustermann",
+				"description": "Vollständiger Name des Notfallkontakts"
+			},
+			"relationship": {
+				"label": "Beziehung",
+				"placeholder": "Beziehung auswählen",
+				"description": "Beziehung zum Patienten",
+				"options": {
+					"spouse": "Ehepartner",
+					"partner": "Partner",
+					"parent": "Elternteil",
+					"mother": "Mutter",
+					"father": "Vater",
+					"child": "Kind",
+					"son": "Sohn",
+					"daughter": "Tochter",
+					"sibling": "Geschwister",
+					"brother": "Bruder",
+					"sister": "Schwester",
+					"grandparent": "Großelternteil",
+					"grandmother": "Großmutter",
+					"grandfather": "Großvater",
+					"grandchild": "Enkelkind",
+					"grandson": "Enkel",
+					"granddaughter": "Enkelin",
+					"aunt": "Tante",
+					"uncle": "Onkel",
+					"cousin": "Cousin/Cousine",
+					"friend": "Freund",
+					"neighbor": "Nachbar",
+					"caregiver": "Betreuer",
+					"guardian": "Vormund",
+					"other": "Sonstiges"
+				}
+			},
+			"primaryPhone": {
+				"label": "Haupttelefon",
+				"placeholder": "z.B. (555) 123-4567",
+				"description": "Haupttelefonnummer"
+			},
+			"secondaryPhone": {
+				"label": "Zweites Telefon",
+				"placeholder": "z.B. (555) 987-6543",
+				"description": "Optionale zweite Telefonnummer"
+			},
+			"email": {
+				"label": "E-Mail-Adresse",
+				"placeholder": "z.B. max.mustermann@email.com",
+				"description": "Optionale E-Mail-Adresse"
+			},
+			"address": {
+				"label": "Adresse",
+				"placeholder": "z.B. Hauptstraße 123, Stadt, PLZ 12345",
+				"description": "Adresse des Kontakts (optional)"
+			},
+			"isPrimary": {
+				"label": "Haupt-Notfallkontakt",
+				"description": "Diese Person wird im Notfall zuerst kontaktiert"
+			},
+			"isActive": {
+				"label": "Aktiver Kontakt",
+				"description": "Dieser Kontakt ist derzeit verfügbar"
+			},
+			"notes": {
+				"placeholder": "Zusätzliche Informationen (z.B. 'Nur werktags erreichbar', 'Spricht Spanisch')",
+				"description": "Zusätzliche Notizen zu diesem Kontakt"
+			}
+		}
+	},
+	"insurance": {
+		"form": {
+			"dividers": {
+				"basicInfo": "Grundlegende Versicherungsinformationen",
+				"memberInfo": "Mitgliedsinformationen",
+				"coveragePeriodStatus": "Versicherungszeitraum & Status",
+				"contactInfo": "Kontaktinformationen",
+				"coverageDetails": "Leistungsdetails",
+				"additionalInfo": "Zusätzliche Informationen"
+			},
+			"insuranceType": {
+				"label": "Versicherungsart",
+				"placeholder": "Versicherungsart auswählen",
+				"description": "Art der Versicherungsdeckung",
+				"options": {
+					"medical": "🏥 Krankenversicherung",
+					"dental": "🦷 Zahnversicherung",
+					"vision": "👁️ Sehkraftversicherung",
+					"prescription": "💊 Rezeptversicherung"
+				}
+			},
+			"companyName": {
+				"label": "Versicherungsgesellschaft",
+				"placeholder": "z.B. AOK Bayern",
+				"description": "Name der Versicherungsgesellschaft"
+			},
+			"planName": {
+				"label": "Planname",
+				"placeholder": "z.B. Premium Plus",
+				"description": "Name des spezifischen Versicherungsplans"
+			},
+			"employerGroup": {
+				"label": "Arbeitgeber/Gruppensponsor",
+				"placeholder": "z.B. ABC GmbH, Selbständig",
+				"description": "Firma oder Organisation, die die Versicherung bereitstellt (falls zutreffend)"
+			},
+			"memberName": {
+				"label": "Mitgliedsname",
+				"placeholder": "z.B. Max Mustermann",
+				"description": "Name wie auf der Versicherungskarte angegeben"
+			},
+			"memberId": {
+				"label": "Mitgliedsnummer",
+				"placeholder": "z.B. ABC123456789",
+				"description": "Mitgliedsnummer von der Versicherungskarte"
+			},
+			"policyHolderName": {
+				"label": "Versicherungsnehmer",
+				"placeholder": "z.B. Erika Mustermann (leer lassen wenn gleich wie Mitglied)",
+				"description": "Name des Versicherungsnehmers (falls abweichend vom Mitglied)"
+			},
+			"relationshipToHolder": {
+				"label": "Beziehung zum Versicherungsnehmer",
+				"placeholder": "Beziehung auswählen",
+				"description": "Ihre Beziehung zum Versicherungsnehmer",
+				"options": {
+					"self": "Selbst",
+					"spouse": "Ehepartner",
+					"child": "Kind",
+					"dependent": "Abhängig",
+					"other": "Sonstiges"
+				}
+			},
+			"groupNumber": {
+				"label": "Gruppennummer",
+				"placeholder": "z.B. GRP123",
+				"description": "Gruppennummer (falls zutreffend)"
+			},
+			"effectiveDate": {
+				"label": "Gültigkeitsdatum",
+				"placeholder": "Gültigkeitsdatum auswählen",
+				"description": "Datum, an dem die Versicherung beginnt"
+			},
+			"expirationDate": {
+				"label": "Ablaufdatum",
+				"placeholder": "Ablaufdatum auswählen",
+				"description": "Datum, an dem die Versicherung endet (falls bekannt)"
+			},
+			"status": {
+				"placeholder": "Status auswählen",
+				"description": "Aktueller Status der Versicherung",
+				"options": {
+					"active": "Aktiv",
+					"inactive": "Inaktiv",
+					"expired": "Abgelaufen",
+					"pending": "Ausstehend"
+				}
+			},
+			"isPrimary": {
+				"label": "Hauptversicherung",
+				"description": "Ankreuzen, wenn dies Ihre Hauptversicherung ist (nur für Krankenversicherung)"
+			},
+			"customerServicePhone": {
+				"label": "Kundenservice-Telefon",
+				"placeholder": "z.B. 0800-123-4567",
+				"description": "Kundenservice-Telefonnummer"
+			},
+			"preauthPhone": {
+				"label": "Vorabgenehmigungstelefon",
+				"description": "Telefonnummer für Vorabgenehmigungen"
+			},
+			"providerServicesPhone": {
+				"label": "Anbieterservice-Telefon",
+				"description": "Telefonnummer für Anbieterservices"
+			},
+			"websiteUrl": {
+				"label": "Website-URL",
+				"placeholder": "z.B. https://mitglied.versicherung.de",
+				"description": "Mitgliederportal oder Website-URL"
+			},
+			"claimsAddress": {
+				"label": "Schadensmeldungsadresse",
+				"placeholder": "Schadensmeldungsadresse eingeben...",
+				"description": "Adresse für die Einreichung von Ansprüchen"
+			},
+			"primaryCarePhysician": {
+				"label": "Hausarzt",
+				"placeholder": "z.B. Dr. Schmidt",
+				"description": "Name Ihres Hausarztes"
+			},
+			"deductibleIndividual": {
+				"label": "Selbstbehalt Einzelperson",
+				"placeholder": "z.B. 1000",
+				"description": "Jährlicher Selbstbehalt für Einzelpersonen"
+			},
+			"deductibleFamily": {
+				"label": "Selbstbehalt Familie",
+				"placeholder": "z.B. 2000",
+				"description": "Jährlicher Selbstbehalt für Familien"
+			},
+			"copayPrimaryCare": {
+				"label": "Hausarztzuzahlung",
+				"placeholder": "z.B. 25",
+				"description": "Zuzahlungsbetrag für Hausarztbesuche"
+			},
+			"copaySpecialist": {
+				"label": "Facharztzuzahlung",
+				"placeholder": "z.B. 50",
+				"description": "Zuzahlungsbetrag für Facharztbesuche"
+			},
+			"copayEmergencyRoom": {
+				"label": "Notaufnahmezuzahlung",
+				"placeholder": "z.B. 200",
+				"description": "Zuzahlungsbetrag für Notaufnahmebesuche"
+			},
+			"copayUrgentCare": {
+				"label": "Notfallzuzahlung",
+				"placeholder": "z.B. 75",
+				"description": "Zuzahlungsbetrag für Notfallbesuche"
+			},
+			"planType": {
+				"label": "Plantyp",
+				"placeholder": "Plantyp auswählen",
+				"description": "Art des Krankenversicherungsplans",
+				"options": {
+					"ppo": "PPO (Bevorzugte Anbieterorganisation)",
+					"hmo": "HMO (Gesundheitserhaltungsorganisation)",
+					"epo": "EPO (Exklusive Anbieterorganisation)",
+					"pos": "POS (Point of Service)",
+					"hdhp": "HDHP (Gesundheitsplan mit hohem Selbstbehalt)",
+					"indemnity": "Schadenersatz (Gebühr für Service)"
+				}
+			},
+			"dentalPlanType": {
+				"label": "Zahnplantyp",
+				"placeholder": "Zahnplantyp auswählen",
+				"description": "Art des Zahnversicherungsplans",
+				"options": {
+					"dppo": "DPPO (Zahnärztliche Bevorzugte Anbieterorganisation)",
+					"dhmo": "DHMO (Zahnärztliche Gesundheitserhaltungsorganisation)",
+					"discount": "Rabattplan"
+				}
+			},
+			"annualMaximum": {
+				"label": "Jährliches Maximum",
+				"placeholder": "z.B. 1500",
+				"description": "Maximaler jährlicher Leistungsbetrag"
+			},
+			"preventiveCoverage": {
+				"label": "Vorsorgeabdeckung %",
+				"placeholder": "z.B. 100",
+				"description": "Deckungsprozentsatz für Vorsorgeleistungen"
+			},
+			"basicCoverage": {
+				"label": "Basisabdeckung %",
+				"placeholder": "z.B. 80",
+				"description": "Deckungsprozentsatz für Grundbehandlungen"
+			},
+			"majorCoverage": {
+				"label": "Hauptabdeckung %",
+				"placeholder": "z.B. 50",
+				"description": "Deckungsprozentsatz für Hauptbehandlungen"
+			},
+			"visionPlanType": {
+				"label": "Sehkraftplantyp",
+				"placeholder": "Sehkraftplantyp auswählen",
+				"description": "Art des Sehkraftversicherungsplans",
+				"options": {
+					"visionPpo": "Sehkraft PPO",
+					"visionHmo": "Sehkraft HMO",
+					"visionDiscount": "Sehkraft Rabattplan"
+				}
+			},
+			"examCopay": {
+				"label": "Untersuchungszuzahlung",
+				"placeholder": "z.B. 10",
+				"description": "Zuzahlungsbetrag für Augenuntersuchungen"
+			},
+			"frameAllowance": {
+				"label": "Brillenfassungzuschuss",
+				"placeholder": "z.B. 150",
+				"description": "Jährlicher Zuschuss für Brillenfassungen"
+			},
+			"lensCoverage": {
+				"label": "Linsenabdeckung",
+				"placeholder": "z.B. 100% gedeckt",
+				"description": "Deckungsdetails für Linsen"
+			},
+			"contactAllowance": {
+				"label": "Kontaktlinsenzuschuss",
+				"description": "Jährlicher Zuschuss für Kontaktlinsen"
+			},
+			"prescriptionPlanType": {
+				"label": "Rezeptplantyp",
+				"placeholder": "Rezeptplantyp auswählen",
+				"description": "Art des Arzneimittelplans",
+				"options": {
+					"formulary": "Formularbasierter Plan",
+					"tieredCopay": "Gestaffelter Zuzahlungsplan",
+					"medicarePartD": "Medicare Teil D",
+					"integrated": "Integriert mit medizinischer Versicherung"
+				}
+			},
+			"binNumber": {
+				"label": "BIN-Nummer",
+				"placeholder": "z.B. 123456",
+				"description": "Bankidentifikationsnummer für Apotheke"
+			},
+			"pcnNumber": {
+				"label": "PCN-Nummer",
+				"placeholder": "z.B. ABC123",
+				"description": "Prozessorkontrollnummer"
+			},
+			"rxgroup": {
+				"label": "RX-Gruppe",
+				"placeholder": "z.B. RXGRP123",
+				"description": "Rezeptgruppennummer"
+			},
+			"copayGeneric": {
+				"label": "Generikum-Zuzahlung",
+				"description": "Zuzahlungsbetrag für generische Medikamente"
+			},
+			"copayBrand": {
+				"label": "Markenname-Zuzahlung",
+				"placeholder": "z.B. 30",
+				"description": "Zuzahlungsbetrag für Markenmedikamente"
+			},
+			"copaySpecialty": {
+				"label": "Spezialitäten-Zuzahlung",
+				"description": "Zuzahlungsbetrag für Spezialmedikamente"
+			},
+			"pharmacyNetworkInfo": {
+				"label": "Apothekennetzwerkinfo",
+				"placeholder": "Apothekennetzwerkdetails eingeben...",
+				"description": "Informationen über bevorzugte Apothekennetzwerke"
+			},
+			"notes": {
+				"placeholder": "Zusätzliche Informationen über diese Versicherung...",
+				"description": "Weitere Details oder Notizen"
 			}
 		}
 	}

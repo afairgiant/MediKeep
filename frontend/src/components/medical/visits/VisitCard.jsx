@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge, Text, Group, Box, Divider } from '@mantine/core';
 import { IconCalendar } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
@@ -18,6 +19,8 @@ const VisitCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('visit_card_error', {
       message: 'Error in VisitCard',
@@ -32,7 +35,7 @@ const VisitCard = ({
   };
 
   const getPractitionerDisplay = (practitionerId) => {
-    if (!practitionerId) return 'No practitioner assigned';
+    if (!practitionerId) return t('visits.card.noPractitionerAssigned', 'No practitioner assigned');
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(practitionerId)
@@ -40,7 +43,7 @@ const VisitCard = ({
     if (practitioner) {
       return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
     }
-    return `Practitioner ID: ${practitionerId}`;
+    return t('visits.card.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
   };
 
   const getConditionDetails = (conditionId) => {
@@ -112,25 +115,25 @@ const VisitCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Date',
+        label: t('labels.date', 'Date'),
         value: visit.date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('labels.notSpecified', 'Not specified')
       },
       {
-        label: 'Practitioner',
+        label: t('labels.practitioner', 'Practitioner'),
         value: visit.practitioner_id,
         render: (value) => {
-          if (!value) return 'No practitioner assigned';
-          
+          if (!value) return t('visits.card.noPractitionerAssigned', 'No practitioner assigned');
+
           const practitionerDisplay = getPractitionerDisplay(value);
           if (practitioner) {
             return (
-              <Text 
+              <Text
                 size="sm"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('practitioner', value, navigate)}
-                title="View practitioner details"
+                title={t('visits.card.viewPractitioner', 'View practitioner details')}
               >
                 {practitionerDisplay}
               </Text>
@@ -140,32 +143,32 @@ const VisitCard = ({
         }
       },
       {
-        label: 'Chief Complaint',
+        label: t('visits.card.chiefComplaint', 'Chief Complaint'),
         value: visit.chief_complaint
       },
       {
-        label: 'Location',
+        label: t('visits.card.location', 'Location'),
         value: visit.location
       },
       {
-        label: 'Duration',
+        label: t('visits.card.duration', 'Duration'),
         value: visit.duration_minutes,
-        render: (value) => value ? `${value} minutes` : 'Not specified'
+        render: (value) => value ? t('visits.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('labels.notSpecified', 'Not specified')
       }
     ];
 
     // Add related condition if exists
     if (condition) {
       fields.push({
-        label: 'Related Condition',
+        label: t('visits.card.relatedCondition', 'Related Condition'),
         value: condition.id,
         render: (value) => (
-          <Text 
+          <Text
             size="sm"
             c="blue"
             style={{ cursor: 'pointer', textDecoration: 'underline' }}
             onClick={() => navigateToEntity('condition', value, navigate)}
-            title="View condition details"
+            title={t('visits.card.viewCondition', 'View condition details')}
           >
             {condition.diagnosis}
           </Text>
@@ -185,7 +188,7 @@ const VisitCard = ({
             }}
           >
             <Text size="sm" c="dimmed" mb="xs">
-              📋 Diagnosis/Assessment
+              📋 {t('visits.card.diagnosisAssessment', 'Diagnosis/Assessment')}
             </Text>
             <Text size="sm">
               {visit.diagnosis}
@@ -202,7 +205,7 @@ const VisitCard = ({
             }}
           >
             <Text size="sm" c="dimmed" mb="xs">
-              💊 Treatment Plan
+              💊 {t('visits.card.treatmentPlan', 'Treatment Plan')}
             </Text>
             <Text size="sm">
               {visit.treatment_plan}
@@ -219,7 +222,7 @@ const VisitCard = ({
             }}
           >
             <Text size="sm" c="dimmed" mb="xs">
-              📅 Follow-up Instructions
+              📅 {t('visits.card.followUpInstructions', 'Follow-up Instructions')}
             </Text>
             <Text size="sm">
               {visit.follow_up_instructions}
@@ -235,7 +238,7 @@ const VisitCard = ({
           <Group gap="xs">
             <IconCalendar size={20} color="var(--mantine-color-blue-6)" />
             <Text fw={600} size="lg">
-              {visit.reason || 'General Visit'}
+              {visit.reason || t('visits.card.generalVisit', 'General Visit')}
             </Text>
           </Group>
         }

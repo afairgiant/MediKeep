@@ -1,6 +1,7 @@
 // React and routing
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // API and utilities
 import patientApi from '../../services/api/patientApi';
@@ -44,6 +45,7 @@ import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -339,18 +341,18 @@ const PatientInfo = () => {
   const getGenderDisplay = gender => {
     switch (gender?.toUpperCase()) {
       case 'M':
-        return 'Male';
+        return t('patientInfo.gender.male', 'Male');
       case 'F':
-        return 'Female';
+        return t('patientInfo.gender.female', 'Female');
       case 'OTHER':
-        return 'Other';
+        return t('labels.other', 'Other');
       default:
-        return 'Not specified';
+        return t('patientInfo.notSpecified', 'Not specified');
     }
   };
 
   const getPractitionerDisplay = physicianId => {
-    if (!physicianId) return 'Not assigned';
+    if (!physicianId) return t('patientInfo.notAssigned', 'Not assigned');
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(physicianId)
@@ -364,9 +366,9 @@ const PatientInfo = () => {
   if (loading) {
     return (
       <Container size="xl" py="md">
-        <PageHeader title="Patient Information" icon="📋" />
+        <PageHeader title={t('patientInfo.title', 'Patient Information')} icon="📋" />
         <Stack align="center" gap="md" py="xl">
-          <Text size="lg">Loading patient information...</Text>
+          <Text size="lg">{t('patientInfo.loading', 'Loading patient information...')}</Text>
         </Stack>
       </Container>
     );
@@ -375,14 +377,12 @@ const PatientInfo = () => {
   return (
     <>
       <Container size="xl" py="md">
-        <PageHeader title="Patient Information" icon="📋" />
+        <PageHeader title={t('patientInfo.title', 'Patient Information')} icon="📋" />
 
         <Stack gap="lg">
           {isNewUser && (
-            <Alert variant="light" color="blue" title="Welcome to MediKeep!">
-              Your account has been created successfully. Please complete your
-              patient profile below to get started with managing your medical
-              records.
+            <Alert variant="light" color="blue" title={t('patientInfo.welcome.title', 'Welcome to MediKeep!')}>
+              {t('patientInfo.welcome.message', 'Your account has been created successfully. Please complete your patient profile below to get started with managing your medical records.')}
             </Alert>
           )}
 
@@ -391,7 +391,7 @@ const PatientInfo = () => {
             <Alert
               variant="light"
               color="red"
-              title="Error"
+              title={t('patientInfo.error', 'Error')}
               withCloseButton
               onClose={() => setError('')}
             >
@@ -403,10 +403,10 @@ const PatientInfo = () => {
             <Stack gap="md">
               <Group justify="space-between" align="center">
                 <Text size="xl" fw={600}>
-                  Personal Information
+                  {t('patientInfo.personalInfo', 'Personal Information')}
                 </Text>
                 <Button variant="filled" size="sm" onClick={handleEditPatient}>
-                  Edit Profile
+                  {t('patientInfo.editProfile', 'Edit Profile')}
                 </Button>
               </Group>
 
@@ -437,17 +437,17 @@ const PatientInfo = () => {
 
                   <div className="detail-row">
                     <div className="detail-group">
-                      <label>First Name:</label>
-                      <span>{patientData.first_name || 'Not provided'}</span>
+                      <label>{t('patientInfo.fields.firstName', 'First Name')}:</label>
+                      <span>{patientData.first_name || t('patientInfo.notProvided', 'Not provided')}</span>
                     </div>
                     <div className="detail-group">
-                      <label>Last Name:</label>
-                      <span>{patientData.last_name || 'Not provided'}</span>
+                      <label>{t('patientInfo.fields.lastName', 'Last Name')}:</label>
+                      <span>{patientData.last_name || t('patientInfo.notProvided', 'Not provided')}</span>
                     </div>
                   </div>
                   <div className="detail-row">
                     <div className="detail-group">
-                      <label>Birth Date:</label>
+                      <label>{t('patientInfo.fields.birthDate', 'Birth Date')}:</label>
                       <span>
                         {formatDate(
                           patientData.birth_date,
@@ -456,13 +456,13 @@ const PatientInfo = () => {
                       </span>
                     </div>
                     <div className="detail-group">
-                      <label>Gender:</label>
+                      <label>{t('patientInfo.fields.gender', 'Gender')}:</label>
                       <span>{getGenderDisplay(patientData.gender)}</span>
                     </div>
                   </div>
                   {patientData.relationship_to_self && (
                     <div className="detail-group full-width">
-                      <label>Relationship to You:</label>
+                      <label>{t('patientInfo.fields.relationship', 'Relationship to You')}:</label>
                       <span>
                         {patientData.relationship_to_self
                           .split('_')
@@ -472,16 +472,16 @@ const PatientInfo = () => {
                     </div>
                   )}
                   <div className="detail-group full-width">
-                    <label>Address:</label>
-                    <span>{patientData.address || 'Not provided'}</span>
+                    <label>{t('patientInfo.fields.address', 'Address')}:</label>
+                    <span>{patientData.address || t('patientInfo.notProvided', 'Not provided')}</span>
                   </div>
                   <div className="detail-row">
                     <div className="detail-group">
-                      <label>Blood Type:</label>
-                      <span>{patientData.blood_type || 'Not provided'}</span>
+                      <label>{t('patientInfo.fields.bloodType', 'Blood Type')}:</label>
+                      <span>{patientData.blood_type || t('patientInfo.notProvided', 'Not provided')}</span>
                     </div>
                     <div className="detail-group">
-                      <label>Height:</label>
+                      <label>{t('patientInfo.fields.height', 'Height')}:</label>
                       <span>
                         {patientData.height
                           ? formatMeasurement(
@@ -493,13 +493,13 @@ const PatientInfo = () => {
                               'height',
                               unitSystem
                             )
-                          : 'Not provided'}
+                          : t('patientInfo.notProvided', 'Not provided')}
                       </span>
                     </div>
                   </div>
                   <div className="detail-row">
                     <div className="detail-group">
-                      <label>Weight:</label>
+                      <label>{t('patientInfo.fields.weight', 'Weight')}:</label>
                       <span>
                         {patientData.weight
                           ? formatMeasurement(
@@ -511,11 +511,11 @@ const PatientInfo = () => {
                               'weight',
                               unitSystem
                             )
-                          : 'Not provided'}
+                          : t('patientInfo.notProvided', 'Not provided')}
                       </span>
                     </div>
                     <div className="detail-group">
-                      <label>Primary Care Physician:</label>
+                      <label>{t('patientInfo.fields.physician', 'Primary Care Physician')}:</label>
                       <span>
                         {getPractitionerDisplay(patientData.physician_id)}
                       </span>
@@ -523,7 +523,7 @@ const PatientInfo = () => {
                   </div>
                   {patientData.id && (
                     <div className="detail-group">
-                      <label>Patient ID:</label>
+                      <label>{t('patientInfo.fields.patientId', 'Patient ID')}:</label>
                       <span>{patientData.id}</span>
                     </div>
                   )}
@@ -531,13 +531,13 @@ const PatientInfo = () => {
               ) : (
                 <Stack align="center" gap="md" py="xl">
                   <Text size="lg" fw={500}>
-                    No Patient Profile Found
+                    {t('patientInfo.noProfile', 'No Patient Profile Found')}
                   </Text>
                   <Text ta="center" c="dimmed">
-                    Please create your patient profile to get started.
+                    {t('patientInfo.createPrompt', 'Please create your patient profile to get started.')}
                   </Text>
                   <Button variant="filled" onClick={handleEditPatient}>
-                    Create Profile
+                    {t('patientInfo.createProfile', 'Create Profile')}
                   </Button>
                 </Stack>
               )}
@@ -551,7 +551,7 @@ const PatientInfo = () => {
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
         title={
-          editingItem ? 'Edit Patient Information' : 'Create Patient Profile'
+          editingItem ? t('patientInfo.editTitle', 'Edit Patient Information') : t('patientInfo.createTitle', 'Create Patient Profile')
         }
         formData={formData}
         onInputChange={handleInputChange}

@@ -2,6 +2,7 @@ import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -38,6 +39,9 @@ import { useResponsive } from '../../hooks/useResponsive';
 const Allergies = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
+  const { t: tErrors } = useTranslation('errors');
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
@@ -238,7 +242,7 @@ const Allergies = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading allergies...</Text>
+            <Text>{t('allergies.messages.loading', 'Loading allergies...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -247,14 +251,14 @@ const Allergies = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Allergies" icon="⚠️" />
+      <PageHeader title={t('allergies.title')} icon="⚠️" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={tErrors('title.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -268,7 +272,7 @@ const Allergies = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={tErrors('title.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -283,7 +287,7 @@ const Allergies = () => {
             onClick={handleAddAllergy}
             size="md"
           >
-            Add New Allergy
+            {t('allergies.addNew', 'Add New Allergy')}
           </Button>
 
           <ViewToggle
@@ -315,7 +319,7 @@ const Allergies = () => {
         <AllergyFormWrapper
           isOpen={showAddForm}
           onClose={resetForm}
-          title={editingAllergy ? 'Edit Allergy' : 'Add New Allergy'}
+          title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('allergies.addTitle', 'Add New Allergy')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -340,11 +344,11 @@ const Allergies = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No allergies found</Title>
+                    <Title order={3}>{t('allergies.emptyState.title', 'No allergies found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Allergy" to get started.'}
+                        ? t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')
+                        : t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -383,16 +387,16 @@ const Allergies = () => {
               <ResponsiveTable
                 data={processedAllergies}
                 columns={[
-                  { header: 'Allergen', accessor: 'allergen', priority: 'high', width: 150 },
-                  { header: 'Reaction', accessor: 'reaction', priority: 'high', width: 180 },
-                  { header: 'Severity', accessor: 'severity', priority: 'high', width: 100 },
-                  { header: 'Onset Date', accessor: 'onset_date', priority: 'medium', width: 120 },
-                  { header: 'Medication', accessor: 'medication_name', priority: 'low', width: 150 },
-                  { header: 'Status', accessor: 'status', priority: 'medium', width: 100 },
-                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
+                  { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
+                  { header: t('common.fields.severity.label'), accessor: 'severity', priority: 'high', width: 100 },
+                  { header: t('allergies.onsetDate.label'), accessor: 'onset_date', priority: 'medium', width: 120 },
+                  { header: t('allergies.relatedMedication.label'), accessor: 'medication_name', priority: 'low', width: 150 },
+                  { header: t('common.fields.status.label'), accessor: 'status', priority: 'medium', width: 100 },
+                  { header: t('common.fields.notes.label'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName="Allergies"
+                tableName={t('allergies.title')}
                 onView={handleViewAllergy}
                 onEdit={handleEditAllergy}
                 onDelete={handleDeleteAllergy}

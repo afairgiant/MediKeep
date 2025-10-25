@@ -6,6 +6,7 @@ import logger from '../../services/logger';
 
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
   Button,
@@ -52,83 +53,84 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { VITAL_FILTER_TYPES } from '../../constants/vitalFilters';
 
-// Quick stats card configurations with Mantine icons and filter mappings
-const STATS_CONFIGS = {
-  blood_pressure: {
-    title: 'Blood Pressure',
-    icon: IconHeart,
-    getValue: stats =>
-      stats.avg_systolic_bp && stats.avg_diastolic_bp
-        ? `${Math.round(stats.avg_systolic_bp)}/${Math.round(stats.avg_diastolic_bp)}`
-        : 'N/A',
-    getUnit: () => 'mmHg',
-    getCategory: () => null,
-    color: 'red',
-    filterType: VITAL_FILTER_TYPES.WITH_BLOOD_PRESSURE,
-    description: 'Click to filter records with blood pressure'
-  },
-  heart_rate: {
-    title: 'Heart Rate',
-    icon: IconActivity,
-    getValue: stats =>
-      stats.avg_heart_rate ? Math.round(stats.avg_heart_rate) : 'N/A',
-    getUnit: () => 'BPM',
-    getCategory: stats => {
-      if (!stats.avg_heart_rate) return null;
-      const hr = stats.avg_heart_rate;
-      if (hr < 60) return 'Low';
-      if (hr > 100) return 'High';
-      return 'Normal';
-    },
-    color: 'blue',
-    filterType: VITAL_FILTER_TYPES.WITH_HEART_RATE,
-    description: 'Click to filter records with heart rate'
-  },
-  temperature: {
-    title: 'Latest Temperature',
-    icon: IconTrendingUp,
-    getValue: stats =>
-      stats.current_temperature ? stats.current_temperature.toFixed(1) : 'N/A',
-    getUnit: () => '°F',
-    getCategory: stats => {
-      if (!stats.current_temperature) return null;
-      const temp = stats.current_temperature;
-      if (temp < 97.0) return 'Low';
-      if (temp > 99.5) return 'High';
-      return 'Normal';
-    },
-    color: 'green',
-    filterType: VITAL_FILTER_TYPES.WITH_TEMPERATURE,
-    description: 'Click to filter records with temperature'
-  },
-  weight: {
-    title: 'Latest Weight',
-    icon: IconTrendingUp,
-    getValue: stats =>
-      stats.current_weight ? stats.current_weight.toFixed(1) : 'N/A',
-    getUnit: () => 'lbs',
-    getCategory: () => null,
-    color: 'violet',
-    filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
-    description: 'Click to filter records with weight measurements'
-  },
-  bmi: {
-    title: 'BMI',
-    icon: IconChartBar,
-    getValue: stats =>
-      stats.current_bmi ? stats.current_bmi.toFixed(1) : 'N/A',
-    getUnit: () => '',
-    getCategory: () => null,
-    color: 'yellow',
-    filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
-    description: 'Click to filter records with weight measurements'
-  },
-};
-
 const Vitals = () => {
+  const { t } = useTranslation('common');
+
+  // Quick stats card configurations with Mantine icons and filter mappings
+  const STATS_CONFIGS = useMemo(() => ({
+    blood_pressure: {
+      title: t('vitals.stats.bloodPressure', 'Blood Pressure'),
+      icon: IconHeart,
+      getValue: stats =>
+        stats.avg_systolic_bp && stats.avg_diastolic_bp
+          ? `${Math.round(stats.avg_systolic_bp)}/${Math.round(stats.avg_diastolic_bp)}`
+          : t('labels.notAvailable', 'N/A'),
+      getUnit: () => t('vitals.units.mmHg', 'mmHg'),
+      getCategory: () => null,
+      color: 'red',
+      filterType: VITAL_FILTER_TYPES.WITH_BLOOD_PRESSURE,
+      description: t('vitals.stats.bloodPressureDesc', 'Click to filter records with blood pressure')
+    },
+    heart_rate: {
+      title: t('vitals.stats.heartRate', 'Heart Rate'),
+      icon: IconActivity,
+      getValue: stats =>
+        stats.avg_heart_rate ? Math.round(stats.avg_heart_rate) : t('labels.notAvailable', 'N/A'),
+      getUnit: () => t('vitals.units.bpm', 'BPM'),
+      getCategory: stats => {
+        if (!stats.avg_heart_rate) return null;
+        const hr = stats.avg_heart_rate;
+        if (hr < 60) return t('vitals.categories.low', 'Low');
+        if (hr > 100) return t('vitals.categories.high', 'High');
+        return t('vitals.categories.normal', 'Normal');
+      },
+      color: 'blue',
+      filterType: VITAL_FILTER_TYPES.WITH_HEART_RATE,
+      description: t('vitals.stats.heartRateDesc', 'Click to filter records with heart rate')
+    },
+    temperature: {
+      title: t('vitals.stats.temperature', 'Latest Temperature'),
+      icon: IconTrendingUp,
+      getValue: stats =>
+        stats.current_temperature ? stats.current_temperature.toFixed(1) : t('labels.notAvailable', 'N/A'),
+      getUnit: () => t('vitals.units.fahrenheit', '°F'),
+      getCategory: stats => {
+        if (!stats.current_temperature) return null;
+        const temp = stats.current_temperature;
+        if (temp < 97.0) return t('vitals.categories.low', 'Low');
+        if (temp > 99.5) return t('vitals.categories.high', 'High');
+        return t('vitals.categories.normal', 'Normal');
+      },
+      color: 'green',
+      filterType: VITAL_FILTER_TYPES.WITH_TEMPERATURE,
+      description: t('vitals.stats.temperatureDesc', 'Click to filter records with temperature')
+    },
+    weight: {
+      title: t('vitals.stats.weight', 'Latest Weight'),
+      icon: IconTrendingUp,
+      getValue: stats =>
+        stats.current_weight ? stats.current_weight.toFixed(1) : t('labels.notAvailable', 'N/A'),
+      getUnit: () => t('vitals.units.lbs', 'lbs'),
+      getCategory: () => null,
+      color: 'violet',
+      filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
+      description: t('vitals.stats.weightDesc', 'Click to filter records with weight measurements')
+    },
+    bmi: {
+      title: t('vitals.stats.bmi', 'BMI'),
+      icon: IconChartBar,
+      getValue: stats =>
+        stats.current_bmi ? stats.current_bmi.toFixed(1) : t('labels.notAvailable', 'N/A'),
+      getUnit: () => '',
+      getCategory: () => null,
+      color: 'yellow',
+      filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
+      description: t('vitals.stats.bmiDesc', 'Click to filter records with weight measurements')
+    },
+  }), [t]);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Page configuration
   const pageConfig = getMedicalPageConfig('vitals');
 
@@ -433,7 +435,7 @@ const Vitals = () => {
       <Center h="50vh">
         <Stack align="center" gap="md">
           <Loader size="lg" />
-          <Text>Loading vital signs...</Text>
+          <Text>{t('vitals.loading', 'Loading vital signs...')}</Text>
         </Stack>
       </Center>
     );
@@ -446,9 +448,9 @@ const Vitals = () => {
         <Stack align="center" gap="lg">
           <IconHeart size={64} stroke={1} color="var(--mantine-color-gray-5)" />
           <Stack align="center" gap="xs">
-            <Title order={3}>No Patient Selected</Title>
+            <Title order={3}>{t('vitals.noPatientSelected', 'No Patient Selected')}</Title>
             <Text c="dimmed" ta="center">
-              Please select a patient to view and manage vital signs.
+              {t('vitals.selectPatientPrompt', 'Please select a patient to view and manage vital signs.')}
             </Text>
           </Stack>
         </Stack>
@@ -458,14 +460,14 @@ const Vitals = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Vital Signs" icon="❤️" />
+      <PageHeader title={t('vitals.title', 'Vital Signs')} icon="❤️" />
 
       <Stack gap="lg">
         {vitalsError && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -478,7 +480,7 @@ const Vitals = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -493,7 +495,7 @@ const Vitals = () => {
             onClick={handleAddNew}
             size="md"
           >
-            Add New Vital Signs
+            {t('vitals.addNew', 'Add New Vital Signs')}
           </Button>
         </Group>
 
@@ -506,9 +508,9 @@ const Vitals = () => {
           <Paper shadow="sm" p="lg" radius="md" mb="lg">
             <Group justify="space-between" mb="md">
               <Box>
-                <Title order={3}>Health Summary</Title>
+                <Title order={3}>{t('vitals.healthSummary', 'Health Summary')}</Title>
                 <Text c="dimmed" size="sm">
-                  Latest readings and averages • Click any card to filter table below
+                  {t('vitals.summaryDescription', 'Latest readings and averages • Click any card to filter table below')}
                 </Text>
               </Box>
               <Button
@@ -518,7 +520,7 @@ const Vitals = () => {
                 loading={isLoadingStats}
                 size="sm"
               >
-                Refresh
+                {t('buttons.refresh', 'Refresh')}
               </Button>
             </Group>
 
@@ -527,7 +529,7 @@ const Vitals = () => {
                 <Stack align="center" gap="md">
                   <Loader size="md" />
                   <Text size="sm" c="dimmed">
-                    Loading statistics...
+                    {t('vitals.loadingStats', 'Loading statistics...')}
                   </Text>
                 </Stack>
               </Center>
@@ -536,12 +538,12 @@ const Vitals = () => {
                 variant="light"
                 color="red"
                 icon={<IconAlertTriangle size={16} />}
-                title="Failed to load statistics"
+                title={t('vitals.statsLoadError', 'Failed to load statistics')}
               >
                 <Group justify="space-between" align="center">
                   <Text size="sm">{statsError}</Text>
                   <Button variant="filled" size="xs" onClick={loadStats}>
-                    Try Again
+                    {t('buttons.tryAgain', 'Try Again')}
                   </Button>
                 </Group>
               </Alert>
@@ -556,9 +558,9 @@ const Vitals = () => {
                       leftSection="🔍"
                       style={{ cursor: 'pointer' }}
                       onClick={clearFilters}
-                      title="Click to clear filter"
+                      title={t('vitals.clearFilter', 'Click to clear filter')}
                     >
-                      Filtered by: {Object.values(STATS_CONFIGS).find(config => config.filterType === filters.category)?.title || filters.category}
+                      {t('vitals.filteredBy', 'Filtered by')}: {Object.values(STATS_CONFIGS).find(config => config.filterType === filters.category)?.title || filters.category}
                     </Badge>
                   </Group>
                 )}
@@ -583,9 +585,9 @@ const Vitals = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={4}>No Data Available</Title>
+                    <Title order={4}>{t('vitals.noDataAvailable', 'No Data Available')}</Title>
                     <Text c="dimmed" ta="center">
-                      Record some vitals to see statistics here
+                      {t('vitals.recordVitalsPrompt', 'Record some vitals to see statistics here')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -617,7 +619,7 @@ const Vitals = () => {
         <VitalFormWrapper
           isOpen={showForm}
           onClose={handleFormCancel}
-          title={editingVitals ? 'Edit Vital Signs' : 'Add New Vital Signs'}
+          title={editingVitals ? t('vitals.editTitle', 'Edit Vital Signs') : t('vitals.addTitle', 'Add New Vital Signs')}
           editingVital={editingVitals}
           patientId={currentPatient?.id}
           practitionerId={null}

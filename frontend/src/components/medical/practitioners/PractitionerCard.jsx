@@ -4,6 +4,7 @@ import { IconStethoscope, IconUser, IconStar } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
+import { useTranslation } from 'react-i18next';
 
 const PractitionerCard = ({
   practitioner,
@@ -13,6 +14,8 @@ const PractitionerCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('practitioner_card_error', {
       message: 'Error in PractitionerCard',
@@ -71,17 +74,17 @@ const PractitionerCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Practice',
+        label: t('practitioners.card.practice', 'Practice'),
         value: practitioner.practice,
-        render: (value) => value || 'Not specified'
+        render: (value) => value || t('common.labels.notSpecified', 'Not specified')
       },
       {
-        label: 'Phone',
+        label: t('practitioners.card.phone', 'Phone'),
         value: practitioner.phone_number,
-        render: (value) => value ? formatPhoneNumber(value) : 'Not specified'
+        render: (value) => value ? formatPhoneNumber(value) : t('common.labels.notSpecified', 'Not specified')
       },
       {
-        label: 'Website',
+        label: t('practitioners.card.website', 'Website'),
         value: practitioner.website,
         render: (value) => value ? (
           <Anchor
@@ -91,12 +94,12 @@ const PractitionerCard = ({
             size="sm"
             c="blue"
           >
-            Visit Website
+            {t('practitioners.card.visitWebsite', 'Visit Website')}
           </Anchor>
-        ) : 'Not specified'
+        ) : t('common.labels.notSpecified', 'Not specified')
       },
       {
-        label: 'Rating',
+        label: t('practitioners.card.rating', 'Rating'),
         value: practitioner.rating,
         render: (value) => {
           if (value !== null && value !== undefined) {
@@ -113,7 +116,7 @@ const PractitionerCard = ({
               </Group>
             );
           }
-          return 'Not specified';
+          return t('common.labels.notSpecified', 'Not specified');
         }
       }
     ];
@@ -131,7 +134,7 @@ const PractitionerCard = ({
             {practitioner.name}
           </Group>
         }
-        subtitle="Healthcare Practitioner"
+        subtitle={t('practitioners.card.subtitle', 'Healthcare Practitioner')}
         badges={badges}
         fields={fields}
         onView={() => onView(practitioner)}

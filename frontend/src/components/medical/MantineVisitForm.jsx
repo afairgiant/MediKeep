@@ -21,9 +21,11 @@ import {
   IconNotes,
   IconFileText,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { visitFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange } from '../../utils/dateUtils';
+import { translateFieldConfig } from '../../utils/formFieldTranslations';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -44,6 +46,8 @@ const MantineVisitForm = ({
   statusMessage,
   children,
 }) => {
+  const { t } = useTranslation('common');
+
   // Tab state management
   const [activeTab, setActiveTab] = useState('info');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,31 +99,34 @@ const MantineVisitForm = ({
       return null; // Skip dividers in tabbed layout
     }
 
+    // Translate the field configuration
+    const translatedField = translateFieldConfig(field, t);
+
     const commonProps = {
-      key: field.name,
-      label: field.label,
-      placeholder: field.placeholder,
-      required: field.required,
-      description: field.description,
+      key: translatedField.name,
+      label: translatedField.label,
+      placeholder: translatedField.placeholder,
+      required: translatedField.required,
+      description: translatedField.description,
       error: null,
     };
 
     // Get dynamic options
-    let options = field.options;
-    if (field.dynamicOptions === 'practitioners') {
+    let options = translatedField.options;
+    if (translatedField.dynamicOptions === 'practitioners') {
       options = practitionerOptions;
-    } else if (field.dynamicOptions === 'conditions') {
+    } else if (translatedField.dynamicOptions === 'conditions') {
       options = conditionOptions;
     }
 
-    switch (field.type) {
+    switch (translatedField.type) {
       case 'text':
         return (
           <TextInput
             {...commonProps}
-            value={formData[field.name] || ''}
-            onChange={handleTextInputChange(field.name)}
-            maxLength={field.maxLength}
+            value={formData[translatedField.name] || ''}
+            onChange={handleTextInputChange(translatedField.name)}
+            maxLength={translatedField.maxLength}
           />
         );
 
@@ -127,13 +134,13 @@ const MantineVisitForm = ({
         return (
           <Select
             {...commonProps}
-            value={formData[field.name] || null}
+            value={formData[translatedField.name] || null}
             data={options || []}
             onChange={(value) => {
-              onInputChange({ target: { name: field.name, value: value || '' } });
+              onInputChange({ target: { name: translatedField.name, value: value || '' } });
             }}
-            searchable={field.searchable}
-            clearable={field.clearable}
+            searchable={translatedField.searchable}
+            clearable={translatedField.clearable}
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
@@ -142,13 +149,13 @@ const MantineVisitForm = ({
         return (
           <DateInput
             {...commonProps}
-            value={formData[field.name] ? new Date(formData[field.name]) : null}
+            value={formData[translatedField.name] ? new Date(formData[translatedField.name]) : null}
             onChange={(date) => {
               const formattedDate = formatDateInputChange(date);
-              onInputChange({ target: { name: field.name, value: formattedDate } });
+              onInputChange({ target: { name: translatedField.name, value: formattedDate } });
             }}
             valueFormat="YYYY-MM-DD"
-            maxDate={field.maxDate && typeof field.maxDate === 'function' ? field.maxDate() : field.maxDate}
+            maxDate={translatedField.maxDate && typeof translatedField.maxDate === 'function' ? translatedField.maxDate() : translatedField.maxDate}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
@@ -157,11 +164,11 @@ const MantineVisitForm = ({
         return (
           <NumberInput
             {...commonProps}
-            value={formData[field.name] || ''}
-            onChange={(value) => onInputChange({ target: { name: field.name, value } })}
-            min={field.min}
-            max={field.max}
-            step={field.step}
+            value={formData[translatedField.name] || ''}
+            onChange={(value) => onInputChange({ target: { name: translatedField.name, value } })}
+            min={translatedField.min}
+            max={translatedField.max}
+            step={translatedField.step}
           />
         );
 
@@ -169,33 +176,33 @@ const MantineVisitForm = ({
         return (
           <Textarea
             {...commonProps}
-            value={formData[field.name] || ''}
-            onChange={handleTextInputChange(field.name)}
-            minRows={field.minRows || 3}
-            maxRows={field.maxRows || 6}
+            value={formData[translatedField.name] || ''}
+            onChange={handleTextInputChange(translatedField.name)}
+            minRows={translatedField.minRows || 3}
+            maxRows={translatedField.maxRows || 6}
           />
         );
 
       case 'custom':
-        if (field.component === 'TagInput') {
+        if (translatedField.component === 'TagInput') {
           return (
-            <Box key={field.name}>
+            <Box key={translatedField.name}>
               <Text size="sm" fw={500} mb="xs">
-                {field.label}
-                {field.required && <span style={{ color: 'red' }}> *</span>}
+                {translatedField.label}
+                {translatedField.required && <span style={{ color: 'red' }}> *</span>}
               </Text>
-              {field.description && (
+              {translatedField.description && (
                 <Text size="xs" c="dimmed" mb="xs">
-                  {field.description}
+                  {translatedField.description}
                 </Text>
               )}
               <TagInput
-                value={formData[field.name] || []}
+                value={formData[translatedField.name] || []}
                 onChange={(tags) => {
-                  onInputChange({ target: { name: field.name, value: tags } });
+                  onInputChange({ target: { name: translatedField.name, value: tags } });
                 }}
-                placeholder={field.placeholder}
-                maxTags={field.maxTags}
+                placeholder={translatedField.placeholder}
+                maxTags={translatedField.maxTags}
               />
             </Box>
           );
@@ -233,7 +240,7 @@ const MantineVisitForm = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message="Saving visit..." />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('visits.form.savingVisit', 'Saving visit...')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -241,18 +248,18 @@ const MantineVisitForm = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="info" leftSection={<IconInfoCircle size={16} />}>
-                Visit Info
+                {t('visits.form.tabs.visitInfo', 'Visit Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-                Clinical
+                {t('visits.form.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
               {editingVisit && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  Documents
+                  {t('visits.form.tabs.documents', 'Documents')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                Notes
+                {t('visits.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -283,7 +290,7 @@ const MantineVisitForm = ({
               <Tabs.Panel value="documents">
                 <Box mt="md">
                   <Stack gap="md">
-                    <Title order={4}>Attached Documents</Title>
+                    <Title order={4}>{t('visits.viewModal.attachedDocuments', 'Attached Documents')}</Title>
                     <DocumentManagerWithProgress
                       entityType="visit"
                       entityId={editingVisit.id}
@@ -317,10 +324,10 @@ const MantineVisitForm = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
-              Cancel
+              {t('buttons.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
-              {editingVisit ? 'Update Visit' : 'Add Visit'}
+              {editingVisit ? t('visits.form.updateVisit', 'Update Visit') : t('visits.form.addVisit', 'Add Visit')}
             </Button>
           </Group>
         </Stack>

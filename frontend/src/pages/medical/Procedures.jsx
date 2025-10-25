@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
@@ -13,8 +14,8 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
-import { 
-  ERROR_MESSAGES, 
+import {
+  ERROR_MESSAGES,
   SUCCESS_MESSAGES,
   getUserFriendlyError
 } from '../../constants/errorMessages';
@@ -41,6 +42,7 @@ import {
 } from '@mantine/core';
 
 const Procedures = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -481,9 +483,9 @@ const Procedures = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading procedures...</Text>
+            <Text>{t('procedures.loadingProcedures', 'Loading procedures...')}</Text>
             <Text size="sm" c="dimmed">
-              If this takes too long, please refresh the page
+              {t('procedures.loadingRefresh', 'If this takes too long, please refresh the page')}
             </Text>
           </Stack>
         </Center>
@@ -494,14 +496,14 @@ const Procedures = () => {
   return (
     <>
       <Container size="xl" py="md">
-        <PageHeader title="Procedures" icon="🔬" />
+        <PageHeader title={t('procedures.title', 'Procedures')} icon="🔬" />
 
         <Stack gap="lg">
           {error && (
             <Alert
               variant="light"
               color="red"
-              title="Error"
+              title={t('procedures.error', 'Error')}
               withCloseButton
               onClose={clearError}
             >
@@ -509,14 +511,14 @@ const Procedures = () => {
             </Alert>
           )}
           {successMessage && (
-            <Alert variant="light" color="green" title="Success">
+            <Alert variant="light" color="green" title={t('procedures.success', 'Success')}>
               {successMessage}
             </Alert>
           )}
 
           <Group justify="space-between" align="center">
             <Button variant="filled" onClick={handleAddProcedure}>
-              + Add Procedure
+              {t('procedures.addProcedure', '+ Add Procedure')}
             </Button>
 
             <ViewToggle
@@ -548,16 +550,16 @@ const Procedures = () => {
               <Stack align="center" gap="md">
                 <Text size="3rem">🔬</Text>
                 <Text size="xl" fw={600}>
-                  No Procedures Found
+                  {t('procedures.noProceduresFound', 'No Procedures Found')}
                 </Text>
                 <Text ta="center" c="dimmed">
                   {dataManagement.hasActiveFilters
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Start by adding your first procedure.'}
+                    ? t('procedures.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                    : t('procedures.startAdding', 'Start by adding your first procedure.')}
                 </Text>
                 {!dataManagement.hasActiveFilters && (
                   <Button variant="filled" onClick={handleAddProcedure}>
-                    Add Your First Procedure
+                    {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
                   </Button>
                 )}
               </Stack>
@@ -611,7 +613,7 @@ const Procedures = () => {
       <ProcedureFormWrapper
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
-        title={editingProcedure ? 'Edit Procedure' : 'Add New Procedure'}
+        title={editingProcedure ? t('procedures.editProcedure', 'Edit Procedure') : t('procedures.addNewProcedure', 'Add New Procedure')}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
@@ -629,7 +631,7 @@ const Procedures = () => {
         {/* Form Loading Overlay */}
         <FormLoadingOverlay
           visible={isBlocking}
-          message={statusMessage?.title || 'Processing...'}
+          message={statusMessage?.title || t('procedures.processing', 'Processing...')}
           submessage={statusMessage?.message}
           type={statusMessage?.type || 'loading'}
         />

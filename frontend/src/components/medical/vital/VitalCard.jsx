@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatDate } from '../../../utils/helpers';
@@ -14,6 +15,8 @@ const VitalCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('vital_card_error', {
       message: 'Error in VitalCard',
@@ -30,54 +33,54 @@ const VitalCard = ({
   try {
     // Generate badges based on vital properties
     const badges = [];
-    
+
     // Add measurement type badges
     if (vital.systolic_bp && vital.diastolic_bp) {
-      badges.push({ label: 'Blood Pressure', color: 'red' });
+      badges.push({ label: t('vitals.stats.bloodPressure', 'Blood Pressure'), color: 'red' });
     }
     if (vital.heart_rate) {
-      badges.push({ label: 'Heart Rate', color: 'blue' });
+      badges.push({ label: t('vitals.stats.heartRate', 'Heart Rate'), color: 'blue' });
     }
     if (vital.temperature) {
-      badges.push({ label: 'Temperature', color: 'green' });
+      badges.push({ label: t('vitals.stats.temperature', 'Temperature'), color: 'green' });
     }
     if (vital.weight) {
-      badges.push({ label: 'Weight', color: 'violet' });
+      badges.push({ label: t('vitals.stats.weight', 'Weight'), color: 'violet' });
     }
 
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Recorded Date',
+        label: t('vitals.card.recordedDate', 'Recorded Date'),
         value: vital.recorded_date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('labels.notSpecified', 'Not specified')
       },
       {
-        label: 'Blood Pressure',
-        value: vital.systolic_bp && vital.diastolic_bp 
-          ? `${vital.systolic_bp}/${vital.diastolic_bp} mmHg`
+        label: t('vitals.stats.bloodPressure', 'Blood Pressure'),
+        value: vital.systolic_bp && vital.diastolic_bp
+          ? `${vital.systolic_bp}/${vital.diastolic_bp} ${t('vitals.units.mmHg', 'mmHg')}`
           : null,
-        render: (value) => value || 'Not recorded'
+        render: (value) => value || t('vitals.card.notRecorded', 'Not recorded')
       },
       {
-        label: 'Heart Rate',
+        label: t('vitals.stats.heartRate', 'Heart Rate'),
         value: vital.heart_rate,
-        render: (value) => value ? `${value} BPM` : 'Not recorded'
+        render: (value) => value ? `${value} ${t('vitals.units.bpm', 'BPM')}` : t('vitals.card.notRecorded', 'Not recorded')
       },
       {
-        label: 'Temperature',
+        label: t('vitals.stats.temperature', 'Temperature'),
         value: vital.temperature,
-        render: (value) => value ? `${value}°F` : 'Not recorded'
+        render: (value) => value ? `${value}${t('vitals.units.fahrenheit', '°F')}` : t('vitals.card.notRecorded', 'Not recorded')
       },
       {
-        label: 'Weight',
+        label: t('vitals.stats.weight', 'Weight'),
         value: vital.weight,
-        render: (value) => value ? `${value} lbs` : 'Not recorded'
+        render: (value) => value ? `${value} ${t('vitals.units.lbs', 'lbs')}` : t('vitals.card.notRecorded', 'Not recorded')
       },
       {
-        label: 'Oxygen Saturation',
+        label: t('vitals.card.oxygenSaturation', 'Oxygen Saturation'),
         value: vital.oxygen_saturation,
-        render: (value) => value ? `${value}%` : 'Not recorded'
+        render: (value) => value ? `${value}%` : t('vitals.card.notRecorded', 'Not recorded')
       }
     ].filter(field => field.value !== null && field.value !== undefined);
 
@@ -85,10 +88,10 @@ const VitalCard = ({
     if (vital.practitioner_id) {
       const practitioner = practitioners.find(p => p.id === vital.practitioner_id);
       fields.push({
-        label: 'Recorded By',
+        label: t('vitals.card.recordedBy', 'Recorded By'),
         value: vital.practitioner_id,
         render: (value) => {
-          if (!value) return 'Not specified';
+          if (!value) return t('labels.notSpecified', 'Not specified');
           return (
             <Text
               size="sm"
@@ -104,14 +107,14 @@ const VitalCard = ({
     }
 
     // Generate a display title
-    const title = vital.recorded_date 
-      ? `Vitals - ${formatDate(vital.recorded_date)}`
-      : 'Vital Signs Record';
+    const title = vital.recorded_date
+      ? `${t('vitals.title', 'Vitals')} - ${formatDate(vital.recorded_date)}`
+      : t('vitals.card.title', 'Vital Signs Record');
 
     return (
       <BaseMedicalCard
         title={title}
-        subtitle={vital.location ? `Location: ${vital.location}` : null}
+        subtitle={vital.location ? `${t('vitals.card.location', 'Location')}: ${vital.location}` : null}
         badges={badges}
         fields={fields}
         notes={vital.notes}

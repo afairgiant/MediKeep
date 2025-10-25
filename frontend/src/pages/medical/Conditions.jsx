@@ -2,6 +2,7 @@ import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -59,6 +60,7 @@ import {
 } from '../../components/medical/conditions';
 
 const Conditions = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -330,7 +332,7 @@ const Conditions = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading conditions...</Text>
+            <Text>{t('conditions.loading', 'Loading conditions...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -339,14 +341,14 @@ const Conditions = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Medical Conditions" icon="🩺" />
+      <PageHeader title={t('conditions.title', 'Medical Conditions')} icon="🩺" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -360,7 +362,7 @@ const Conditions = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -375,7 +377,7 @@ const Conditions = () => {
             onClick={handleAddCondition}
             size="md"
           >
-            Add New Condition
+            {t('conditions.addNew', 'Add New Condition')}
           </Button>
 
           <ViewToggle
@@ -407,7 +409,7 @@ const Conditions = () => {
         <ConditionFormWrapper
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          title={editingCondition ? 'Edit Condition' : 'Add New Condition'}
+          title={editingCondition ? t('conditions.editTitle', 'Edit Condition') : t('conditions.addTitle', 'Add New Condition')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -433,11 +435,11 @@ const Conditions = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No medical conditions found</Title>
+                    <Title order={3}>{t('conditions.noResults', 'No medical conditions found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Condition" to get started.'}
+                        ? t('conditions.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                        : t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -474,16 +476,16 @@ const Conditions = () => {
               <ResponsiveTable
                 data={filteredConditions}
                 columns={[
-                  { header: 'Condition', accessor: 'diagnosis', priority: 'high', width: 200 },
-                  { header: 'Severity', accessor: 'severity', priority: 'high', width: 120 },
-                  { header: 'Onset Date', accessor: 'onset_date', priority: 'medium', width: 130 },
-                  { header: 'End Date', accessor: 'end_date', priority: 'low', width: 130 },
-                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
-                  { header: 'ICD-10', accessor: 'icd10_code', priority: 'low', width: 100 },
-                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('conditions.table.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
+                  { header: t('conditions.table.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
+                  { header: t('conditions.table.onsetDate', 'Onset Date'), accessor: 'onset_date', priority: 'medium', width: 130 },
+                  { header: t('conditions.table.endDate', 'End Date'), accessor: 'end_date', priority: 'low', width: 130 },
+                  { header: t('conditions.table.status', 'Status'), accessor: 'status', priority: 'high', width: 100 },
+                  { header: t('conditions.table.icd10', 'ICD-10'), accessor: 'icd10_code', priority: 'low', width: 100 },
+                  { header: t('conditions.table.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName="Conditions"
+                tableName={t('conditions.title', 'Conditions')}
                 onView={handleViewCondition}
                 onEdit={handleEditCondition}
                 onDelete={handleDeleteCondition}

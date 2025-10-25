@@ -25,6 +25,7 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { usePharmacies } from '../../hooks/useGlobalData';
+import { useTranslation } from 'react-i18next';
 
 // Modular components
 import PharmacyCard from '../../components/medical/pharmacy/PharmacyCard';
@@ -32,6 +33,7 @@ import PharmacyViewModal from '../../components/medical/pharmacy/PharmacyViewMod
 import PharmacyFormWrapper from '../../components/medical/pharmacy/PharmacyFormWrapper';
 
 const Pharmacies = () => {
+  const { t } = useTranslation('common');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -68,9 +70,9 @@ const Pharmacies = () => {
   // Handle global error
   useEffect(() => {
     if (globalError) {
-      setError('Failed to load pharmacies. Please try again.');
+      setError(t('pharmacies.errors.loadFailed', 'Failed to load pharmacies. Please try again.'));
     }
-  }, [globalError]);
+  }, [globalError, t]);
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -211,7 +213,7 @@ const Pharmacies = () => {
         <Center py="xl">
           <Stack align="center" gap="md">
             <Loader size="lg" />
-            <Text size="lg">Loading pharmacies...</Text>
+            <Text size="lg">{t('pharmacies.loading', 'Loading pharmacies...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -221,14 +223,14 @@ const Pharmacies = () => {
   return (
     <>
     <Container size="xl" py="md">
-      <PageHeader title="Pharmacies" icon="💊" />
+      <PageHeader title={t('pharmacies.title', 'Pharmacies')} icon="💊" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('common.labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={() => setError('')}
@@ -242,7 +244,7 @@ const Pharmacies = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('common.labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -257,7 +259,7 @@ const Pharmacies = () => {
             onClick={handleAddPharmacy}
             size="md"
           >
-            Add New Pharmacy
+            {t('pharmacies.actions.addNew', 'Add New Pharmacy')}
           </Button>
         </Group>
 
@@ -290,11 +292,11 @@ const Pharmacies = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No pharmacies found</Title>
+                    <Title order={3}>{t('pharmacies.empty.title', 'No pharmacies found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Pharmacy" to get started.'}
+                        ? t('pharmacies.empty.filtered', 'Try adjusting your search or filter criteria.')
+                        : t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -322,7 +324,7 @@ const Pharmacies = () => {
       <PharmacyFormWrapper
         isOpen={showModal}
         onClose={resetForm}
-        title={editingPharmacy ? 'Edit Pharmacy' : 'Add New Pharmacy'}
+        title={editingPharmacy ? t('pharmacies.form.editTitle', 'Edit Pharmacy') : t('pharmacies.form.addTitle', 'Add New Pharmacy')}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}

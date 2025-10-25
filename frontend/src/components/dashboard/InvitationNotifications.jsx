@@ -1,6 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Title,
@@ -39,6 +40,8 @@ import { formatDateTime } from '../../utils/helpers';
 import { useCacheManager, useCurrentPatient } from '../../hooks/useGlobalData';
 
 const InvitationNotifications = () => {
+  const { t } = useTranslation('navigation');
+  const { t: tCommon } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
   const { invalidatePatientList } = useCacheManager();
   const { patient: currentPatient } = useCurrentPatient();
@@ -84,8 +87,8 @@ const InvitationNotifications = () => {
       await invitationApi.respondToInvitation(invitation.id, response);
       
       notifications.show({
-        title: `Invitation ${response}`,
-        message: `Successfully ${response} the invitation`,
+        title: t(`invitations.notification.${response}Title`, `Invitation ${response}`),
+        message: t(`invitations.notification.${response}Message`, `Successfully ${response} the invitation`),
         color: response === 'accepted' ? 'green' : 'orange',
         icon: response === 'accepted' ? <IconCheck size="1rem" /> : <IconX size="1rem" />
       });
@@ -137,9 +140,9 @@ const InvitationNotifications = () => {
   const getInvitationTypeDisplay = (type) => {
     switch (type) {
       case 'family_history_share':
-        return 'Family History';
+        return t('invitations.types.familyHistory', 'Family History');
       case 'patient_share':
-        return 'Patient Record';
+        return t('invitations.types.patientRecord', 'Patient Record');
       default:
         return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
@@ -165,7 +168,7 @@ const InvitationNotifications = () => {
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Group justify="space-between" mb="md">
           <Title order={3} size="h4">
-            Invitations
+            {t('invitations.title', 'Invitations')}
           </Title>
         </Group>
         <Center py="md">
@@ -181,7 +184,7 @@ const InvitationNotifications = () => {
         <Group justify="space-between" mb="md">
           <Group gap="xs">
             <Title order={3} size="h4">
-              Invitations
+              {t('invitations.title', 'Invitations')}
             </Title>
             {pendingInvitations.length > 0 && (
               <Badge color="orange" size="sm" variant="filled">
@@ -210,7 +213,7 @@ const InvitationNotifications = () => {
 
         {lastUpdate && (
           <Text size="xs" c="dimmed" mb="sm">
-            Last updated: {lastUpdate.toLocaleTimeString()}
+            {t('invitations.lastUpdated', 'Last updated')}: {lastUpdate.toLocaleTimeString()}
           </Text>
         )}
 
@@ -246,7 +249,7 @@ const InvitationNotifications = () => {
                           {invitation.title}
                         </Text>
                         <Text size="xs" c="dimmed">
-                          From: {invitation.sent_by?.name}
+                          {t('invitations.from', 'From')}: {invitation.sent_by?.name}
                         </Text>
                       </div>
                     </Group>
@@ -289,7 +292,7 @@ const InvitationNotifications = () => {
                 onClick={openInvitationManager}
                 rightSection={<IconChevronRight size="0.8rem" />}
               >
-                View all {pendingInvitations.length} invitations
+                {t('invitations.viewAll', 'View all {{count}} invitations', { count: pendingInvitations.length })}
               </Button>
             )}
           </Stack>
@@ -300,10 +303,10 @@ const InvitationNotifications = () => {
                 <IconBell size={20} />
               </ThemeIcon>
               <Text size="sm" fw={500} c="dimmed" ta="center">
-                No pending invitations
+                {t('invitations.noPending', 'No pending invitations')}
               </Text>
               <Text size="xs" c="dimmed" ta="center">
-                New sharing invitations will appear here
+                {t('invitations.noPendingDescription', 'New sharing invitations will appear here')}
               </Text>
             </Stack>
           </Paper>
@@ -318,7 +321,7 @@ const InvitationNotifications = () => {
             mt="sm"
             fullWidth
           >
-            Manage All Invitations
+            {t('invitations.manageAll', 'Manage All Invitations')}
           </Button>
         )}
 
@@ -330,7 +333,7 @@ const InvitationNotifications = () => {
           mt="xs"
           fullWidth
         >
-          Share Patient
+          {t('invitations.sharePatient', 'Share Patient')}
         </Button>
       </Card>
 
@@ -356,13 +359,13 @@ const InvitationNotifications = () => {
           closeConfirmModal();
           setSelectedInvitation(null);
         }}
-        title="Confirm Invitation Acceptance"
+        title={t('invitations.confirmTitle', 'Confirm Invitation Acceptance')}
         centered
         size="md"
       >
         <Stack gap="md">
           <Text size="sm">
-            Are you sure you want to accept this invitation?
+            {t('invitations.confirmQuestion', 'Are you sure you want to accept this invitation?')}
           </Text>
           
           {selectedInvitation && (
@@ -385,11 +388,11 @@ const InvitationNotifications = () => {
               </Stack>
             </Paper>
           )}
-          
+
           <Text size="xs" c="dimmed">
-            By accepting, you will gain access to view the shared medical information.
+            {t('invitations.confirmDescription', 'By accepting, you will gain access to view the shared medical information.')}
           </Text>
-          
+
           <Group justify="flex-end" gap="sm">
             <Button
               variant="subtle"
@@ -398,14 +401,14 @@ const InvitationNotifications = () => {
                 setSelectedInvitation(null);
               }}
             >
-              Cancel
+              {tCommon('buttons.cancel')}
             </Button>
             <Button
               color="green"
               onClick={handleConfirmAccept}
               leftSection={<IconCheck size="1rem" />}
             >
-              Accept Invitation
+              {t('invitations.acceptButton', 'Accept Invitation')}
             </Button>
           </Group>
         </Stack>

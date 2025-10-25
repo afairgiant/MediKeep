@@ -39,8 +39,10 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
+import { useTranslation } from 'react-i18next';
 
 const EmergencyContacts = () => {
+  const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
@@ -253,7 +255,7 @@ const EmergencyContacts = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading emergency contacts...</Text>
+            <Text>{t('emergencyContacts.page.loading')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -263,14 +265,14 @@ const EmergencyContacts = () => {
   return (
     <>
       <Container size="xl" py="md">
-      <PageHeader title="Emergency Contacts" icon="📞" />
+      <PageHeader title={t('emergencyContacts.title')} icon="📞" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -284,7 +286,7 @@ const EmergencyContacts = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -299,7 +301,7 @@ const EmergencyContacts = () => {
             onClick={handleAddContact}
             size="md"
           >
-            Add Emergency Contact
+            {t('emergencyContacts.actions.addNew')}
           </Button>
 
           <ViewToggle
@@ -336,11 +338,11 @@ const EmergencyContacts = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No emergency contacts found</Title>
+                    <Title order={3}>{t('emergencyContacts.page.noContacts')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : "It's important to have emergency contacts available in case of medical emergencies."}
+                        ? t('emergencyContacts.page.filterDescription')
+                        : t('emergencyContacts.page.noContactsDescription')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -382,7 +384,7 @@ const EmergencyContacts = () => {
                                 >
                                   <Group gap="xs">
                                     <IconStar size={12} />
-                                    PRIMARY
+                                    {t('emergencyContacts.card.primary')}
                                   </Group>
                                 </Badge>
                               )}
@@ -391,7 +393,7 @@ const EmergencyContacts = () => {
                                 variant="light"
                                 size="sm"
                               >
-                                {contact.is_active ? 'Active' : 'Inactive'}
+                                {contact.is_active ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
                               </Badge>
                             </Group>
                           </Group>
@@ -400,7 +402,7 @@ const EmergencyContacts = () => {
                         <Stack gap="md" mt="md">
                           <Group justify="space-between">
                             <Text size="sm" c="dimmed">
-                              Relationship:
+                              {t('emergencyContacts.card.relationship')}
                             </Text>
                             <Badge
                               color={getRelationshipColor(contact.relationship)}
@@ -414,7 +416,7 @@ const EmergencyContacts = () => {
 
                           <Group justify="space-between">
                             <Text size="sm" c="dimmed">
-                              Phone:
+                              {t('emergencyContacts.card.phone')}
                             </Text>
                             <Anchor
                               href={`tel:${contact.phone_number}`}
@@ -428,7 +430,7 @@ const EmergencyContacts = () => {
                           {contact.secondary_phone && (
                             <Group justify="space-between">
                               <Text size="sm" c="dimmed">
-                                Secondary Phone:
+                                {t('emergencyContacts.card.secondaryPhone')}
                               </Text>
                               <Anchor
                                 href={`tel:${contact.secondary_phone}`}
@@ -443,7 +445,7 @@ const EmergencyContacts = () => {
                           {contact.email && (
                             <Group justify="space-between">
                               <Text size="sm" c="dimmed">
-                                Email:
+                                {t('emergencyContacts.card.email')}
                               </Text>
                               <Anchor
                                 href={`mailto:${contact.email}`}
@@ -458,7 +460,7 @@ const EmergencyContacts = () => {
                           {contact.address && (
                             <Group justify="space-between">
                               <Text size="sm" c="dimmed">
-                                Address:
+                                {t('emergencyContacts.card.address')}
                               </Text>
                               <Text size="sm" fw={500}>
                                 {contact.address}
@@ -477,7 +479,7 @@ const EmergencyContacts = () => {
                             }}
                           >
                             <Text size="sm" c="dimmed" mb="xs">
-                              📝 Notes
+                              {t('emergencyContacts.card.notes')}
                             </Text>
                             <Text size="sm">
                               {contact.notes}
@@ -493,14 +495,14 @@ const EmergencyContacts = () => {
                               size="xs"
                               onClick={() => handleViewContact(contact)}
                             >
-                              View
+                              {t('buttons.view')}
                             </Button>
                             <Button
                               variant="filled"
                               size="xs"
                               onClick={() => handleEditContact(contact)}
                             >
-                              Edit
+                              {t('buttons.edit')}
                             </Button>
                             <Button
                               variant="filled"
@@ -508,7 +510,7 @@ const EmergencyContacts = () => {
                               size="xs"
                               onClick={() => handleDeleteContact(contact.id)}
                             >
-                              Delete
+                              {t('buttons.delete')}
                             </Button>
                           </Group>
                         </Stack>
@@ -522,15 +524,15 @@ const EmergencyContacts = () => {
               <ResponsiveTable
                 data={filteredContacts}
                 columns={[
-                  { header: 'Name', accessor: 'name', priority: 'high', width: 200 },
-                  { header: 'Relationship', accessor: 'relationship', priority: 'high', width: 150 },
-                  { header: 'Phone', accessor: 'phone_number', priority: 'low', width: 150 },
-                  { header: 'Email', accessor: 'email', priority: 'medium', width: 150 },
-                  { header: 'Primary', accessor: 'is_primary', priority: 'high', width: 150 },
-                  { header: 'Status', accessor: 'is_active', priority: 'low', width: 150 }
+                  { header: t('emergencyContacts.table.name'), accessor: 'name', priority: 'high', width: 200 },
+                  { header: t('emergencyContacts.table.relationship'), accessor: 'relationship', priority: 'high', width: 150 },
+                  { header: t('emergencyContacts.table.phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                  { header: t('emergencyContacts.table.email'), accessor: 'email', priority: 'medium', width: 150 },
+                  { header: t('emergencyContacts.table.primary'), accessor: 'is_primary', priority: 'high', width: 150 },
+                  { header: t('emergencyContacts.table.status'), accessor: 'is_active', priority: 'low', width: 150 }
                 ]}
                 patientData={currentPatient}
-                tableName="Emergency Contacts"
+                tableName={t('emergencyContacts.page.tableName')}
                 onView={handleViewContact}
                 onEdit={handleEditContact}
                 onDelete={handleDeleteContact}
@@ -570,7 +572,7 @@ const EmergencyContacts = () => {
                       <Badge color="yellow" variant="filled" size="sm">
                         <Group gap="xs">
                           <IconStar size={12} />
-                          Primary
+                          {t('emergencyContacts.table.primary')}
                         </Group>
                       </Badge>
                     ) : (
@@ -582,7 +584,7 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {value ? 'Active' : 'Inactive'}
+                      {value ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
                     </Badge>
                   ),
                 }}
@@ -598,7 +600,7 @@ const EmergencyContacts = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={
-          editingContact ? 'Edit Emergency Contact' : 'Add Emergency Contact'
+          editingContact ? t('emergencyContacts.form.editTitle') : t('emergencyContacts.form.addTitle')
         }
         formData={formData}
         onInputChange={handleInputChange}
@@ -612,9 +614,9 @@ const EmergencyContacts = () => {
         onClose={handleCloseViewModal}
         title={
           <Group gap="xs">
-            <Text size="lg">🚨</Text>
+            <Text size="lg">{t('emergencyContacts.viewModal.icon')}</Text>
             <Text size="lg" fw={600}>
-              Emergency Contact Details
+              {t('emergencyContacts.viewModal.title')}
             </Text>
           </Group>
         }
@@ -648,7 +650,7 @@ const EmergencyContacts = () => {
                       <Badge color="yellow" variant="filled" size="sm">
                         <Group gap="xs">
                           <IconStar size={12} />
-                          PRIMARY
+                          {t('emergencyContacts.card.primary')}
                         </Group>
                       </Badge>
                     )}
@@ -657,7 +659,7 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {viewingContact.is_active ? 'Active' : 'Inactive'}
+                      {viewingContact.is_active ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
                     </Badge>
                   </Group>
                 </Stack>
@@ -667,13 +669,13 @@ const EmergencyContacts = () => {
             {/* Contact Information */}
             <Card withBorder p="md" radius="md">
               <Title order={4} mb="md">
-                📞 Contact Information
+                {t('emergencyContacts.viewModal.contactInfo')}
               </Title>
               <Grid>
                 <Grid.Col span={6}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      Primary Phone
+                      {t('emergencyContacts.viewModal.primaryPhone')}
                     </Text>
                     <Anchor
                       href={`tel:${viewingContact.phone_number}`}
@@ -688,7 +690,7 @@ const EmergencyContacts = () => {
                 <Grid.Col span={6}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      Secondary Phone
+                      {t('emergencyContacts.viewModal.secondaryPhone')}
                     </Text>
                     {viewingContact.secondary_phone ? (
                       <Anchor
@@ -701,7 +703,7 @@ const EmergencyContacts = () => {
                       </Anchor>
                     ) : (
                       <Text size="md" c="dimmed">
-                        Not specified
+                        {t('labels.notSpecified')}
                       </Text>
                     )}
                   </Stack>
@@ -709,7 +711,7 @@ const EmergencyContacts = () => {
                 <Grid.Col span={6}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      Email Address
+                      {t('emergencyContacts.viewModal.emailAddress')}
                     </Text>
                     {viewingContact.email ? (
                       <Anchor
@@ -722,7 +724,7 @@ const EmergencyContacts = () => {
                       </Anchor>
                     ) : (
                       <Text size="md" c="dimmed">
-                        Not specified
+                        {t('labels.notSpecified')}
                       </Text>
                     )}
                   </Stack>
@@ -730,7 +732,7 @@ const EmergencyContacts = () => {
                 <Grid.Col span={12}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      Address
+                      {t('emergencyContacts.viewModal.address')}
                     </Text>
                     {viewingContact.address ? (
                       <Text size="md" fw={500}>
@@ -738,7 +740,7 @@ const EmergencyContacts = () => {
                       </Text>
                     ) : (
                       <Text size="md" c="dimmed">
-                        Not specified
+                        {t('labels.notSpecified')}
                       </Text>
                     )}
                   </Stack>
@@ -749,7 +751,7 @@ const EmergencyContacts = () => {
             {/* Notes */}
             <Card withBorder p="md" radius="md">
               <Title order={4} mb="md">
-                📝 Notes
+                {t('emergencyContacts.viewModal.notes')}
               </Title>
               {viewingContact.notes ? (
                 <Text size="md">
@@ -757,7 +759,7 @@ const EmergencyContacts = () => {
                 </Text>
               ) : (
                 <Text size="md" c="dimmed">
-                  No notes available
+                  {t('emergencyContacts.viewModal.noNotes')}
                 </Text>
               )}
             </Card>
@@ -765,7 +767,7 @@ const EmergencyContacts = () => {
             {/* Action Buttons */}
             <Group justify="flex-end" gap="md">
               <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                Close
+                {t('buttons.close')}
               </Button>
               <Button
                 variant="filled"
@@ -775,7 +777,7 @@ const EmergencyContacts = () => {
                   handleEditContact(viewingContact);
                 }}
               >
-                Edit Contact
+                {t('emergencyContacts.viewModal.editContact')}
               </Button>
             </Group>
           </Stack>

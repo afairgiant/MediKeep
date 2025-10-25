@@ -15,6 +15,7 @@ import {
 import { IconEdit, IconStar } from '@tabler/icons-react';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
+import { useTranslation } from 'react-i18next';
 
 const PractitionerViewModal = ({
   isOpen,
@@ -23,6 +24,8 @@ const PractitionerViewModal = ({
   onEdit,
   navigate
 }) => {
+  const { t } = useTranslation('common');
+
   if (!isOpen || !practitioner) return null;
 
   const handleEdit = () => {
@@ -53,7 +56,7 @@ const PractitionerViewModal = ({
       title={
         <Group>
           <Text size="lg" fw={600}>
-            Practitioner Details
+            {t('practitioners.viewModal.title', 'Practitioner Details')}
           </Text>
           {practitioner.specialty && (
             <Badge
@@ -83,7 +86,7 @@ const PractitionerViewModal = ({
               <Stack gap="xs" style={{ flex: 1 }}>
                 <Title order={3}>{practitioner.name}</Title>
                 <Text size="sm" c="dimmed">
-                  Healthcare Practitioner
+                  {t('practitioners.viewModal.subtitle', 'Healthcare Practitioner')}
                 </Text>
               </Stack>
             </Group>
@@ -95,34 +98,34 @@ const PractitionerViewModal = ({
             <Card withBorder p="md" h="100%">
               <Stack gap="sm">
                 <Text fw={600} size="sm" c="dimmed">
-                  PRACTICE INFORMATION
+                  {t('practitioners.viewModal.practiceInfo', 'PRACTICE INFORMATION')}
                 </Text>
                 <Divider />
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Practice:
+                    {t('practitioners.viewModal.practice', 'Practice')}:
                   </Text>
                   <Text
                     size="sm"
                     c={practitioner.practice ? 'inherit' : 'dimmed'}
                   >
-                    {practitioner.practice || 'Not specified'}
+                    {practitioner.practice || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Specialty:
+                    {t('practitioners.viewModal.specialty', 'Specialty')}:
                   </Text>
                   <Text
                     size="sm"
                     c={practitioner.specialty ? 'inherit' : 'dimmed'}
                   >
-                    {practitioner.specialty || 'Not specified'}
+                    {practitioner.specialty || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Phone:
+                    {t('practitioners.viewModal.phone', 'Phone')}:
                   </Text>
                   <Text
                     size="sm"
@@ -130,7 +133,7 @@ const PractitionerViewModal = ({
                   >
                     {practitioner.phone_number
                       ? formatPhoneNumber(practitioner.phone_number)
-                      : 'Not specified'}
+                      : t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>
@@ -141,12 +144,12 @@ const PractitionerViewModal = ({
             <Card withBorder p="md" h="100%">
               <Stack gap="sm">
                 <Text fw={600} size="sm" c="dimmed">
-                  CONTACT & RATING
+                  {t('practitioners.viewModal.contactRating', 'CONTACT & RATING')}
                 </Text>
                 <Divider />
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Website:
+                    {t('practitioners.viewModal.website', 'Website')}:
                   </Text>
                   <Text
                     size="sm"
@@ -160,16 +163,16 @@ const PractitionerViewModal = ({
                         size="sm"
                         c="blue"
                       >
-                        Visit Website
+                        {t('practitioners.viewModal.visitWebsite', 'Visit Website')}
                       </Anchor>
                     ) : (
-                      'Not specified'
+                      t('common.labels.notSpecified', 'Not specified')
                     )}
                   </Text>
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Rating:
+                    {t('practitioners.viewModal.rating', 'Rating')}:
                   </Text>
                   <Text
                     size="sm"
@@ -193,7 +196,7 @@ const PractitionerViewModal = ({
                         </Text>
                       </Group>
                     ) : (
-                      'Not specified'
+                      t('common.labels.notSpecified', 'Not specified')
                     )}
                   </Text>
                 </Group>
@@ -205,10 +208,10 @@ const PractitionerViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            Close
+            {t('common.buttons.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            Edit Practitioner
+            {t('practitioners.viewModal.editButton', 'Edit Practitioner')}
           </Button>
         </Group>
       </Stack>

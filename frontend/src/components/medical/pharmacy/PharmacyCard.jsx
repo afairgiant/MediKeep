@@ -3,6 +3,7 @@ import { Badge, Text, Group, Anchor } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
+import { useTranslation } from 'react-i18next';
 
 const PharmacyCard = ({
   pharmacy,
@@ -12,6 +13,8 @@ const PharmacyCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('pharmacy_card_error', {
       message: 'Error in PharmacyCard',
@@ -35,46 +38,46 @@ const PharmacyCard = ({
     // Generate dynamic fields for pharmacy information
     const fields = [
       {
-        label: 'Address',
+        label: t('pharmacies.card.address', 'Address'),
         value: pharmacy.street_address,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value || 'Not specified'}
+            {value || t('common.labels.notSpecified', 'Not specified')}
           </Text>
         )
       },
       {
-        label: 'City',
+        label: t('pharmacies.card.city', 'City'),
         value: pharmacy.city,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value || 'Not specified'}
+            {value || t('common.labels.notSpecified', 'Not specified')}
           </Text>
         )
       },
       {
-        label: 'Store Number',
+        label: t('pharmacies.card.storeNumber', 'Store Number'),
         value: pharmacy.store_number,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value || 'Not specified'}
+            {value || t('common.labels.notSpecified', 'Not specified')}
           </Text>
         )
       },
       {
-        label: 'Phone',
+        label: t('pharmacies.card.phone', 'Phone'),
         value: pharmacy.phone_number,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value ? formatPhoneNumber(value) : 'Not specified'}
+            {value ? formatPhoneNumber(value) : t('common.labels.notSpecified', 'Not specified')}
           </Text>
         )
       },
       {
-        label: 'Website',
+        label: t('pharmacies.card.website', 'Website'),
         value: pharmacy.website,
         render: (value) => {
-          if (!value) return <Text size="sm" c="dimmed">Not specified</Text>;
+          if (!value) return <Text size="sm" c="dimmed">{t('common.labels.notSpecified', 'Not specified')}</Text>;
           return (
             <Anchor
               href={value.startsWith('http') ? value : `https://${value}`}
@@ -83,7 +86,7 @@ const PharmacyCard = ({
               size="sm"
               c="blue"
             >
-              Visit Website
+              {t('pharmacies.card.visitWebsite', 'Visit Website')}
             </Anchor>
           );
         }

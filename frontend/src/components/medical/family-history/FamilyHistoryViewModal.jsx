@@ -18,6 +18,7 @@ import {
   IconX
 } from '@tabler/icons-react';
 import { useMantineColorScheme } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
 
@@ -48,6 +49,7 @@ const FamilyHistoryViewModal = ({
   onDeleteCondition,
   onError
 }) => {
+  const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
 
   const handleError = (error, action) => {
@@ -174,11 +176,11 @@ const FamilyHistoryViewModal = ({
         title={
           <Group>
             <Text size="lg" fw={600}>
-              {member.name} - Family Medical History
+              {t('familyHistory.viewModal.title', '{{name}} - Family Medical History', { name: member.name })}
             </Text>
             {member.is_shared && (
               <Badge color="blue" variant="light" size="sm">
-                Shared
+                {t('familyHistory.card.shared', 'Shared')}
               </Badge>
             )}
           </Group>
@@ -195,7 +197,7 @@ const FamilyHistoryViewModal = ({
                 {member.name}
                 {member.is_shared && (
                   <Badge color="blue" variant="light" size="sm" ml="xs">
-                    Shared
+                    {t('familyHistory.card.shared', 'Shared')}
                   </Badge>
                 )}
               </Text>
@@ -206,13 +208,13 @@ const FamilyHistoryViewModal = ({
                   disabled={member.is_shared}
                   title={
                     member.is_shared
-                      ? 'Cannot edit shared family member'
-                      : 'Edit family member'
+                      ? t('familyHistory.viewModal.cannotEditShared', 'Cannot edit shared family member')
+                      : t('familyHistory.viewModal.editMember', 'Edit family member')
                   }
                   aria-label={
                     member.is_shared
-                      ? 'Cannot edit shared family member'
-                      : 'Edit family member'
+                      ? t('familyHistory.viewModal.cannotEditShared', 'Cannot edit shared family member')
+                      : t('familyHistory.viewModal.editMember', 'Edit family member')
                   }
                   style={
                     member.is_shared
@@ -227,43 +229,43 @@ const FamilyHistoryViewModal = ({
 
             <Stack gap="xs">
               <Text size="sm">
-                <strong>Relationship:</strong>{' '}
+                <strong>{t('familyHistory.viewModal.relationship', 'Relationship')}:</strong>{' '}
                 {member.relationship?.replace('_', ' ')}
               </Text>
               {member.gender && (
                 <Text size="sm">
-                  <strong>Gender:</strong> {member.gender}
+                  <strong>{t('familyHistory.card.gender', 'Gender')}:</strong> {member.gender}
                 </Text>
               )}
               {member.birth_year && (
                 <Text size="sm">
-                  <strong>Birth Year:</strong> {member.birth_year}
-                  {age && ` (Age ${age})`}
+                  <strong>{t('familyHistory.card.birthYear', 'Birth Year')}:</strong> {member.birth_year}
+                  {age && ` (${t('familyHistory.card.age', 'Age')} ${age})`}
                 </Text>
               )}
               {member.is_deceased && member.death_year && (
                 <Text size="sm">
-                  <strong>Death Year:</strong> {member.death_year}
+                  <strong>{t('familyHistory.card.deathYear', 'Death Year')}:</strong> {member.death_year}
                 </Text>
               )}
               {member.is_shared && member.shared_by && (
                 <Text size="sm">
-                  <strong>Shared By:</strong> {member.shared_by.name || 'Unknown'}
+                  <strong>{t('familyHistory.card.sharedBy', 'Shared By')}:</strong> {member.shared_by.name || t('familyHistory.table.unknown', 'Unknown')}
                 </Text>
               )}
               {member.is_shared && member.shared_at && (
                 <Text size="sm">
-                  <strong>Shared At:</strong> {new Date(member.shared_at).toLocaleDateString()}
+                  <strong>{t('familyHistory.viewModal.sharedAt', 'Shared At')}:</strong> {new Date(member.shared_at).toLocaleDateString()}
                 </Text>
               )}
               {member.is_shared && member.sharing_note && (
                 <Text size="sm">
-                  <strong>Sharing Note:</strong> {member.sharing_note}
+                  <strong>{t('familyHistory.viewModal.sharingNote', 'Sharing Note')}:</strong> {member.sharing_note}
                 </Text>
               )}
               {member.notes && (
                 <Text size="sm">
-                  <strong>Notes:</strong> {member.notes}
+                  <strong>{t('labels.notes', 'Notes')}:</strong> {member.notes}
                 </Text>
               )}
             </Stack>
@@ -273,7 +275,7 @@ const FamilyHistoryViewModal = ({
           <Card withBorder p="md">
             <Group justify="space-between" mb="md">
               <Text fw={500} size="lg">
-                Medical Conditions
+                {t('familyHistory.card.medicalConditions', 'Medical Conditions')}
               </Text>
               <Button
                 size="xs"
@@ -283,13 +285,13 @@ const FamilyHistoryViewModal = ({
                 disabled={member.is_shared}
                 title={
                   member.is_shared
-                    ? 'Cannot add conditions to shared family member'
-                    : 'Add medical condition'
+                    ? t('familyHistory.viewModal.cannotAddConditionsShared', 'Cannot add conditions to shared family member')
+                    : t('familyHistory.viewModal.addCondition', 'Add medical condition')
                 }
                 aria-label={
                   member.is_shared
-                    ? 'Cannot add conditions to shared family member'
-                    : 'Add medical condition'
+                    ? t('familyHistory.viewModal.cannotAddConditionsShared', 'Cannot add conditions to shared family member')
+                    : t('familyHistory.viewModal.addCondition', 'Add medical condition')
                 }
                 style={
                   member.is_shared
@@ -297,7 +299,7 @@ const FamilyHistoryViewModal = ({
                     : {}
                 }
               >
-                Add Condition
+                {t('familyHistory.card.addCondition', 'Add Condition')}
               </Button>
             </Group>
 
@@ -307,7 +309,7 @@ const FamilyHistoryViewModal = ({
                 c="dimmed"
                 style={{ textAlign: 'center', padding: '2rem 0' }}
               >
-                No medical conditions recorded
+                {t('familyHistory.card.noConditionsRecorded', 'No medical conditions recorded')}
               </Text>
             ) : (
               <Stack gap="md">
@@ -347,13 +349,13 @@ const FamilyHistoryViewModal = ({
                           disabled={member.is_shared}
                           title={
                             member.is_shared
-                              ? 'Cannot edit conditions of shared family member'
-                              : 'Edit condition'
+                              ? t('familyHistory.viewModal.cannotEditConditionsShared', 'Cannot edit conditions of shared family member')
+                              : t('familyHistory.viewModal.editCondition', 'Edit condition')
                           }
                           aria-label={
                             member.is_shared
-                              ? 'Cannot edit conditions of shared family member'
-                              : 'Edit condition'
+                              ? t('familyHistory.viewModal.cannotEditConditionsShared', 'Cannot edit conditions of shared family member')
+                              : t('familyHistory.viewModal.editCondition', 'Edit condition')
                           }
                           style={
                             member.is_shared
@@ -361,7 +363,7 @@ const FamilyHistoryViewModal = ({
                               : {}
                           }
                         >
-                          Edit
+                          {t('buttons.edit', 'Edit')}
                         </Button>
                         <Button
                           size="xs"
@@ -371,13 +373,13 @@ const FamilyHistoryViewModal = ({
                           disabled={member.is_shared}
                           title={
                             member.is_shared
-                              ? 'Cannot delete conditions of shared family member'
-                              : 'Delete condition'
+                              ? t('familyHistory.viewModal.cannotDeleteConditionsShared', 'Cannot delete conditions of shared family member')
+                              : t('familyHistory.viewModal.deleteCondition', 'Delete condition')
                           }
                           aria-label={
                             member.is_shared
-                              ? 'Cannot delete conditions of shared family member'
-                              : 'Delete condition'
+                              ? t('familyHistory.viewModal.cannotDeleteConditionsShared', 'Cannot delete conditions of shared family member')
+                              : t('familyHistory.viewModal.deleteCondition', 'Delete condition')
                           }
                           style={
                             member.is_shared
@@ -385,14 +387,14 @@ const FamilyHistoryViewModal = ({
                               : {}
                           }
                         >
-                          Delete
+                          {t('buttons.delete', 'Delete')}
                         </Button>
                       </Group>
                     </Group>
 
                     {condition.diagnosis_age && (
                       <Text size="sm" c="dimmed" mb="xs">
-                        Diagnosed at age {condition.diagnosis_age}
+                        {t('familyHistory.card.diagnosedAtAge', 'Diagnosed at age {{age}}', { age: condition.diagnosis_age })}
                       </Text>
                     )}
 
@@ -410,15 +412,15 @@ const FamilyHistoryViewModal = ({
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>
-              Close
+              {t('buttons.close', 'Close')}
             </Button>
             {!member.is_shared && (
-              <Button 
-                variant="filled" 
-                onClick={handleEdit} 
+              <Button
+                variant="filled"
+                onClick={handleEdit}
                 leftSection={<IconEdit size={16} />}
               >
-                Edit Family Member
+                {t('familyHistory.viewModal.editFamilyMember', 'Edit Family Member')}
               </Button>
             )}
           </Group>

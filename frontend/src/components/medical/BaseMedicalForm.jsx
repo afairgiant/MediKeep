@@ -18,12 +18,15 @@ import {
   Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { ResponsiveModal } from '../adapters';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStrategy';
 import { TagInput } from '../common/TagInput';
+import { translateFieldConfig } from '../../utils/formFieldTranslations';
 import logger from '../../services/logger';
 
 // Initialize medical form layout strategy
@@ -87,12 +90,16 @@ const BaseMedicalForm = ({
   // Get responsive state if not provided by HOC
   const responsiveFromHook = useResponsive();
   const responsiveState = responsive || responsiveFromHook;
-  
-  const { 
-    handleTextInputChange, 
-    handleSelectChange, 
-    handleDateChange, 
-    handleNumberChange 
+
+  // Translation hooks
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
+
+  const {
+    handleTextInputChange,
+    handleSelectChange,
+    handleDateChange,
+    handleNumberChange
   } = useFormHandlers(onInputChange);
   
   // Calculate responsive layout configuration
@@ -280,6 +287,9 @@ const BaseMedicalForm = ({
 
   // Main renderField function now uses smaller callbacks - much simpler with fewer dependencies
   const renderField = useCallback((fieldConfig) => {
+    // Translate field configuration (labels, placeholders, descriptions, options)
+    const translatedFieldConfig = translateFieldConfig(fieldConfig, t);
+
     const {
       name,
       type,
@@ -291,13 +301,13 @@ const BaseMedicalForm = ({
       required = false,
       maxLength,
       minLength,
-    } = fieldConfig;
+    } = translatedFieldConfig;
 
     // Get dynamic options if specified
-    const selectOptions = dynamicOptionsKey 
+    const selectOptions = dynamicOptionsKey
       ? dynamicOptions[dynamicOptionsKey] || []
       : options;
-     
+
     // Check if this dynamic option is loading
     const isFieldLoading = dynamicOptionsKey && loadingStates[dynamicOptionsKey];
 
@@ -556,7 +566,7 @@ const BaseMedicalForm = ({
         logger.warn(`Unknown field type: ${type} for field: ${name}`);
         return null;
     }
-  }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange]);
+  }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange, t]);
 
   // Group fields by row based on responsive column configuration
   const groupFieldsIntoRows = useCallback((fields) => {
@@ -691,7 +701,7 @@ const BaseMedicalForm = ({
                 justifyContent: 'center',
               }}
             >
-              Cancel
+              {tCommon('buttons.cancel')}
             </Button>
             <Button
               type="submit"

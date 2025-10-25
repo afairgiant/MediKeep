@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Paper,
@@ -48,6 +49,7 @@ import {
 } from '../../components/medical/immunizations';
 
 const Immunization = () => {
+  const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
@@ -272,7 +274,7 @@ const Immunization = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading immunizations...</Text>
+            <Text>{t('immunizations.loadingImmunizations', 'Loading immunizations...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -281,14 +283,14 @@ const Immunization = () => {
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title="Immunizations" icon="💉" />
+      <PageHeader title={t('immunizations.title', 'Immunizations')} icon="💉" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('immunizations.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -302,7 +304,7 @@ const Immunization = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('immunizations.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -317,7 +319,7 @@ const Immunization = () => {
             onClick={handleAddImmunization}
             size="md"
           >
-            Add New Immunization
+            {t('immunizations.addImmunization', 'Add New Immunization')}
           </Button>
 
           <ViewToggle
@@ -348,7 +350,7 @@ const Immunization = () => {
           isOpen={showAddForm}
           onClose={resetForm}
           title={
-            editingImmunization ? 'Edit Immunization' : 'Add New Immunization'
+            editingImmunization ? t('immunizations.editImmunization', 'Edit Immunization') : t('immunizations.addNewImmunization', 'Add New Immunization')
           }
           formData={formData}
           onInputChange={handleInputChange}
@@ -378,11 +380,11 @@ const Immunization = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No immunizations found</Title>
+                    <Title order={3}>{t('immunizations.noImmunizationsFound', 'No immunizations found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Immunization" to get started.'}
+                        ? t('immunizations.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                        : t('immunizations.clickToGetStarted', 'Click "Add New Immunization" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -413,23 +415,23 @@ const Immunization = () => {
               <ResponsiveTable
                 data={processedImmunizations}
                 columns={[
-                  { header: 'Vaccine Name', accessor: 'vaccine_name', priority: 'high', width: 200 },
+                  { header: t('immunizations.table.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
                   {
-                    header: 'Date Administered',
+                    header: t('immunizations.table.dateAdministered', 'Date Administered'),
                     accessor: 'date_administered',
                     priority: 'high',
                     width: 150
                   },
-                  { header: 'Dose Number', accessor: 'dose_number', priority: 'medium', width: 100 },
-                  { header: 'Manufacturer', accessor: 'manufacturer', priority: 'medium', width: 150 },
-                  { header: 'Site', accessor: 'site', priority: 'low', width: 100 },
-                  { header: 'Route', accessor: 'route', priority: 'low', width: 100 },
-                  { header: 'Lot Number', accessor: 'lot_number', priority: 'low', width: 120 },
-                  { header: 'Expiration Date', accessor: 'expiration_date', priority: 'medium', width: 130 },
-                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('immunizations.table.doseNumber', 'Dose Number'), accessor: 'dose_number', priority: 'medium', width: 100 },
+                  { header: t('immunizations.table.manufacturer', 'Manufacturer'), accessor: 'manufacturer', priority: 'medium', width: 150 },
+                  { header: t('immunizations.table.site', 'Site'), accessor: 'site', priority: 'low', width: 100 },
+                  { header: t('immunizations.table.route', 'Route'), accessor: 'route', priority: 'low', width: 100 },
+                  { header: t('immunizations.table.lotNumber', 'Lot Number'), accessor: 'lot_number', priority: 'low', width: 120 },
+                  { header: t('immunizations.table.expirationDate', 'Expiration Date'), accessor: 'expiration_date', priority: 'medium', width: 130 },
+                  { header: t('immunizations.table.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName="Immunizations"
+                tableName={t('immunizations.title', 'Immunizations')}
                 onView={handleViewImmunization}
                 onEdit={handleEditImmunization}
                 onDelete={handleDeleteImmunization}

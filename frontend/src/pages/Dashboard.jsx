@@ -2,6 +2,7 @@ import logger from '../services/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Grid,
@@ -74,6 +75,8 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('navigation');
+  const { t: tCommon } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
   const {
     user: authUser,
@@ -294,49 +297,49 @@ const Dashboard = () => {
   const dashboardStatsCards = dashboardStats
     ? [
         {
-          label: 'Total Records',
+          label: t('dashboard.stats.totalRecords', 'Total Records'),
           value: dashboardStats.total_records?.toString() || '0',
           color: 'blue',
         },
         {
-          label: 'Active Medications',
+          label: t('dashboard.stats.activeMedications', 'Active Medications'),
           value: dashboardStats.active_medications?.toString() || '0',
           color: 'green',
         },
         {
-          label: 'Lab Results',
+          label: t('dashboard.stats.labResults', 'Lab Results'),
           value: dashboardStats.total_lab_results?.toString() || '0',
           color: 'orange',
         },
         {
-          label: 'Procedures',
+          label: t('dashboard.stats.procedures', 'Procedures'),
           value: dashboardStats.total_procedures?.toString() || '0',
           color: 'purple',
         },
       ]
     : [
-        { label: 'Total Records', value: '0', color: 'blue' },
-        { label: 'Active Medications', value: '0', color: 'green' },
-        { label: 'Lab Results', value: '0', color: 'orange' },
-        { label: 'Procedures', value: '0', color: 'purple' },
+        { label: t('dashboard.stats.totalRecords', 'Total Records'), value: '0', color: 'blue' },
+        { label: t('dashboard.stats.activeMedications', 'Active Medications'), value: '0', color: 'green' },
+        { label: t('dashboard.stats.labResults', 'Lab Results'), value: '0', color: 'orange' },
+        { label: t('dashboard.stats.procedures', 'Procedures'), value: '0', color: 'purple' },
       ];
 
   // Core medical modules - organized in 2x2 grid sections like the schematic
   const coreModules = [
     {
-      title: 'Patient Information',
+      title: t('dashboard.modules.patientInfo', 'Patient Information'),
       icon: IconUser,
       color: 'blue',
       link: '/patients/me',
     },
     {
-      title: 'Medications',
+      title: t('dashboard.modules.medications', 'Medications'),
       icon: IconPill,
       color: 'green',
       link: '/medications',
     },
     {
-      title: 'Lab Results',
+      title: t('dashboard.modules.labResults', 'Lab Results'),
       icon: IconFlask,
       color: 'teal',
       link: '/lab-results',
@@ -345,13 +348,13 @@ const Dashboard = () => {
 
   const treatmentModules = [
     {
-      title: 'Treatments',
+      title: t('dashboard.modules.treatments', 'Treatments'),
       icon: IconClipboardList,
       color: 'cyan',
       link: '/treatments',
     },
     {
-      title: 'Procedures',
+      title: t('dashboard.modules.procedures', 'Procedures'),
       icon: IconMedicalCross,
       color: 'indigo',
       link: '/procedures',
@@ -360,25 +363,25 @@ const Dashboard = () => {
 
   const monitoringModules = [
     {
-      title: 'Vital Signs',
+      title: t('dashboard.modules.vitalSigns', 'Vital Signs'),
       icon: IconHeartbeat,
       color: 'red',
       link: '/vitals',
     },
     {
-      title: 'Symptoms',
+      title: t('dashboard.modules.symptoms', 'Symptoms'),
       icon: IconStethoscope,
       color: 'blue',
       link: '/symptoms',
     },
     {
-      title: 'Conditions',
+      title: t('dashboard.modules.conditions', 'Conditions'),
       icon: IconBrain,
       color: 'pink',
       link: '/conditions',
     },
     {
-      title: 'Allergies',
+      title: t('dashboard.modules.allergies', 'Allergies'),
       icon: IconAlertTriangle,
       color: 'orange',
       link: '/allergies',
@@ -387,19 +390,19 @@ const Dashboard = () => {
 
   const preventionModules = [
     {
-      title: 'Immunizations',
+      title: t('dashboard.modules.immunizations', 'Immunizations'),
       icon: IconVaccine,
       color: 'purple',
       link: '/immunizations',
     },
     {
-      title: 'Visit History',
+      title: t('dashboard.modules.visitHistory', 'Visit History'),
       icon: IconCalendarEvent,
       color: 'yellow',
       link: '/visits',
     },
     {
-      title: 'Family History',
+      title: t('dashboard.modules.familyHistory', 'Family History'),
       icon: IconUsers,
       color: 'grape',
       link: '/family-history',
@@ -409,31 +412,31 @@ const Dashboard = () => {
   // Additional resources
   const additionalModules = [
     {
-      title: 'Insurance',
+      title: t('dashboard.modules.insurance', 'Insurance'),
       icon: IconShield,
       color: 'violet',
       link: '/insurance',
     },
     {
-      title: 'Emergency Contacts',
+      title: t('dashboard.modules.emergencyContacts', 'Emergency Contacts'),
       icon: IconPhoneCall,
       color: 'red',
       link: '/emergency-contacts',
     },
     {
-      title: 'Export Records',
+      title: t('dashboard.modules.exportRecords', 'Export Records'),
       icon: IconFileExport,
       color: 'violet',
       link: '/export',
     },
     {
-      title: 'Practitioners',
+      title: t('dashboard.modules.practitioners', 'Practitioners'),
       icon: IconUser,
       color: 'blue',
       link: '/practitioners',
     },
     {
-      title: 'Pharmacies',
+      title: t('dashboard.modules.pharmacies', 'Pharmacies'),
       icon: IconBuilding,
       color: 'green',
       link: '/pharmacies',
@@ -443,7 +446,7 @@ const Dashboard = () => {
   // Add admin dashboard if user is admin
   if (isAdmin) {
     additionalModules.unshift({
-      title: 'Admin Dashboard',
+      title: t('dashboard.modules.adminDashboard', 'Admin Dashboard'),
       icon: IconSettings,
       color: 'dark',
       link: '/admin',
@@ -527,6 +530,7 @@ const Dashboard = () => {
     const actionColor = getActionBadgeColor(activity.action);
     const tooltip = getActivityTooltip(activity);
     const formattedDescription = formatActivityDescription(activity);
+    const actionDisplayName = t(`activity.actions.${activity.action?.toLowerCase()}`, activity.action);
 
     const handleClick = e => {
       if (isClickable && navigationUrl) {
@@ -599,7 +603,7 @@ const Dashboard = () => {
                   radius="sm"
                   leftSection={ActionIcon && <ActionIcon size={10} />}
                 >
-                  {activity.action}
+                  {actionDisplayName}
                 </Badge>
 
                 {/* Clickable indicator */}
@@ -634,13 +638,13 @@ const Dashboard = () => {
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Group justify="space-between" mb="md">
         <Title order={3} size="h4">
-          Recent Activity
+          {t('dashboard.sections.recentActivity', 'Recent Activity')}
         </Title>
       </Group>
 
       {lastActivityUpdate && (
         <Text size="xs" c="dimmed" mb="sm">
-          Last updated: {lastActivityUpdate.toLocaleTimeString()}
+          {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString()}
         </Text>
       )}
 
@@ -672,10 +676,10 @@ const Dashboard = () => {
               <IconAlertCircle size={20} />
             </ThemeIcon>
             <Text size="sm" fw={500} c="dimmed" ta="center">
-              No recent activity
+              {t('dashboard.activity.noActivity', 'No recent activity')}
             </Text>
             <Text size="xs" c="dimmed" ta="center">
-              Your medical record activities will appear here
+              {t('dashboard.activity.noActivityDescription', 'Your medical record activities will appear here')}
             </Text>
           </Stack>
         </Paper>
@@ -695,7 +699,7 @@ const Dashboard = () => {
             maw={400}
             animate
           />
-          <Text c="dimmed">Loading your medical dashboard...</Text>
+          <Text c="dimmed">{t('dashboard.loading', 'Loading your medical dashboard...')}</Text>
         </Stack>
       </Container>
     );
@@ -752,10 +756,10 @@ const Dashboard = () => {
               <Group justify="space-between" align="center" pr="xl">
                 <div>
                   <Title order={2} size="h3" fw={600} mb={4}>
-                    MediKeep Dashboard
+                    {t('dashboard.title', 'MediKeep Dashboard')}
                   </Title>
                   <Text size="sm" opacity={0.9}>
-                    Manage your health information securely
+                    {t('dashboard.subtitle', 'Manage your health information securely')}
                   </Text>
                 </div>
                 {authUser && (
@@ -764,7 +768,7 @@ const Dashboard = () => {
                     variant="filled"
                     size="lg"
                   >
-                    Hello,{' '}
+                    {t('dashboard.hello', 'Hello')},{' '}
                     {authUser.fullName ||
                       authUser.full_name ||
                       authUser.username}
@@ -812,7 +816,7 @@ const Dashboard = () => {
               >
                 <GlobalSearch
                   patientId={currentPatient?.id}
-                  placeholder="Search medical records..."
+                  placeholder={t('dashboard.search.placeholder', 'Search medical records...')}
                   width="100%"
                 />
               </Box>
@@ -826,7 +830,7 @@ const Dashboard = () => {
                 {/* Core Medical Information */}
                 <div>
                   <Title order={2} size="h3" mb="md">
-                    Core Medical Information
+                    {t('dashboard.sections.coreMedical', 'Core Medical Information')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                     {coreModules.map((module, index) => (
@@ -838,7 +842,7 @@ const Dashboard = () => {
                 {/* Treatments and Procedures */}
                 <div>
                   <Title order={2} size="h3" mb="md">
-                    Treatments and Procedures
+                    {t('dashboard.sections.treatments', 'Treatments and Procedures')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     {treatmentModules.map((module, index) => (
@@ -850,7 +854,7 @@ const Dashboard = () => {
                 {/* Health Monitoring */}
                 <div>
                   <Title order={2} size="h3" mb="md">
-                    Health Monitoring
+                    {t('dashboard.sections.healthMonitoring', 'Health Monitoring')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
                     {monitoringModules.map((module, index) => (
@@ -862,7 +866,7 @@ const Dashboard = () => {
                 {/* Prevention & History */}
                 <div>
                   <Title order={2} size="h3" mb="md">
-                    Prevention & History
+                    {t('dashboard.sections.prevention', 'Prevention & History')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
                     {preventionModules.map((module, index) => (
@@ -878,7 +882,7 @@ const Dashboard = () => {
                 {/* Additional Resources */}
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                   <Title order={3} size="h4" mb="md">
-                    Additional Resources
+                    {t('dashboard.sections.additionalResources', 'Additional Resources')}
                   </Title>
                   <Stack gap="xs">
                     {additionalModules.map((module, index) => {

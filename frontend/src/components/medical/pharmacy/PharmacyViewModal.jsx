@@ -15,6 +15,7 @@ import {
 import { IconEdit } from '@tabler/icons-react';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
+import { useTranslation } from 'react-i18next';
 
 const PharmacyViewModal = ({
   isOpen,
@@ -23,6 +24,8 @@ const PharmacyViewModal = ({
   onEdit,
   navigate,
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('pharmacy_view_modal_error', {
       message: 'Error in PharmacyViewModal',
@@ -58,7 +61,7 @@ const PharmacyViewModal = ({
       title={
         <Group>
           <Text size="lg" fw={600}>
-            Pharmacy Details
+            {t('pharmacies.viewModal.title', 'Pharmacy Details')}
           </Text>
           {pharmacy.brand && (
             <Badge color="blue" variant="light" size="lg">
@@ -84,7 +87,7 @@ const PharmacyViewModal = ({
               <Stack gap="xs" style={{ flex: 1 }}>
                 <Title order={3}>{pharmacy.name}</Title>
                 <Text size="sm" c="dimmed">
-                  Pharmacy
+                  {t('pharmacies.viewModal.subtitle', 'Pharmacy')}
                 </Text>
               </Stack>
             </Group>
@@ -96,37 +99,37 @@ const PharmacyViewModal = ({
             <Card withBorder p="md" h="100%">
               <Stack gap="sm">
                 <Text fw={600} size="sm" c="dimmed">
-                  LOCATION
+                  {t('pharmacies.viewModal.location', 'LOCATION')}
                 </Text>
                 <Divider />
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Address:
+                    {t('pharmacies.viewModal.address', 'Address')}:
                   </Text>
                   <Text
                     size="sm"
                     c={pharmacy.street_address ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.street_address || 'Not specified'}
+                    {pharmacy.street_address || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    City:
+                    {t('pharmacies.viewModal.city', 'City')}:
                   </Text>
                   <Text size="sm" c={pharmacy.city ? 'inherit' : 'dimmed'}>
-                    {pharmacy.city || 'Not specified'}
+                    {pharmacy.city || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Store #:
+                    {t('pharmacies.viewModal.storeNumber', 'Store #')}:
                   </Text>
                   <Text
                     size="sm"
                     c={pharmacy.store_number ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.store_number || 'Not specified'}
+                    {pharmacy.store_number || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>
@@ -137,12 +140,12 @@ const PharmacyViewModal = ({
             <Card withBorder p="md" h="100%">
               <Stack gap="sm">
                 <Text fw={600} size="sm" c="dimmed">
-                  CONTACT INFORMATION
+                  {t('pharmacies.viewModal.contact', 'CONTACT INFORMATION')}
                 </Text>
                 <Divider />
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Phone:
+                    {t('pharmacies.viewModal.phone', 'Phone')}:
                   </Text>
                   <Text
                     size="sm"
@@ -150,12 +153,12 @@ const PharmacyViewModal = ({
                   >
                     {pharmacy.phone_number
                       ? formatPhoneNumber(pharmacy.phone_number)
-                      : 'Not specified'}
+                      : t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    Website:
+                    {t('pharmacies.viewModal.website', 'Website')}:
                   </Text>
                   <Text size="sm" c={pharmacy.website ? 'inherit' : 'dimmed'}>
                     {pharmacy.website ? (
@@ -170,10 +173,10 @@ const PharmacyViewModal = ({
                         size="sm"
                         c="blue"
                       >
-                        Visit Website
+                        {t('pharmacies.viewModal.visitWebsite', 'Visit Website')}
                       </Anchor>
                     ) : (
-                      'Not specified'
+                      t('common.labels.notSpecified', 'Not specified')
                     )}
                   </Text>
                 </Group>
@@ -189,10 +192,10 @@ const PharmacyViewModal = ({
             onClick={handleEdit}
             leftSection={<IconEdit size={16} />}
           >
-            Edit Pharmacy
+            {t('pharmacies.viewModal.editButton', 'Edit Pharmacy')}
           </Button>
           <Button variant="filled" size="xs" onClick={handleClose}>
-            Close
+            {t('common.buttons.close', 'Close')}
           </Button>
         </Group>
       </Stack>

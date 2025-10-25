@@ -20,6 +20,7 @@ import {
   IconCalendar,
   IconShieldCheck,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -50,6 +51,7 @@ import VisitViewModal from '../../components/medical/visits/VisitViewModal';
 import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 
 const Visits = () => {
+  const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState('cards');
   const navigate = useNavigate();
   const location = useLocation();
@@ -565,7 +567,7 @@ const Visits = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading visits...</Text>
+            <Text>{t('visits.loadingVisits', 'Loading visits...')}</Text>
           </Stack>
         </Center>
       </Container>
@@ -577,14 +579,14 @@ const Visits = () => {
   return (
     <>
     <Container size="xl" py="md">
-      <PageHeader title="Medical Visits" icon="📅" />
+      <PageHeader title={t('visits.title', 'Medical Visits')} icon="📅" />
 
       <Stack gap="lg">
         {error && (
           <Alert
             variant="light"
             color="red"
-            title="Error"
+            title={t('visits.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -598,7 +600,7 @@ const Visits = () => {
           <Alert
             variant="light"
             color="green"
-            title="Success"
+            title={t('visits.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >
@@ -613,7 +615,7 @@ const Visits = () => {
             onClick={handleAddVisit}
             size="md"
           >
-            Add New Visit
+            {t('visits.addVisit', 'Add New Visit')}
           </Button>
 
           <ViewToggle
@@ -652,11 +654,11 @@ const Visits = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>No medical visits found</Title>
+                    <Title order={3}>{t('visits.noVisitsFound', 'No medical visits found')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? 'Try adjusting your search or filter criteria.'
-                        : 'Click "Add New Visit" to get started.'}
+                        ? t('visits.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
+                        : t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -687,14 +689,14 @@ const Visits = () => {
               <ResponsiveTable
                 data={filteredVisits}
                 columns={[
-                  { header: 'Visit Date', accessor: 'date', priority: 'high', width: 120 },
-                  { header: 'Reason', accessor: 'reason', priority: 'high', width: 150 },
-                  { header: 'Visit Type', accessor: 'visit_type', priority: 'medium', width: 120 },
-                  { header: 'Facility', accessor: 'location', priority: 'medium', width: 150 },
-                  { header: 'Practitioner', accessor: 'practitioner_name', priority: 'medium', width: 200 },
-                  { header: 'Related Condition', accessor: 'condition_name', priority: 'low', width: 200 },
-                  { header: 'Diagnosis', accessor: 'diagnosis', priority: 'medium', width: 150 },
-                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 }
+                  { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },
+                  { header: t('visits.table.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
+                  { header: t('visits.table.visitType', 'Visit Type'), accessor: 'visit_type', priority: 'medium', width: 120 },
+                  { header: t('visits.table.facility', 'Facility'), accessor: 'location', priority: 'medium', width: 150 },
+                  { header: t('labels.practitioner', 'Practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 200 },
+                  { header: t('visits.table.relatedCondition', 'Related Condition'), accessor: 'condition_name', priority: 'low', width: 200 },
+                  { header: t('visits.table.diagnosis', 'Diagnosis'), accessor: 'diagnosis', priority: 'medium', width: 150 },
+                  { header: t('labels.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 }
                 ]}
                 patientData={currentPatient}
                 tableName="Visit History"
@@ -726,7 +728,7 @@ const Visits = () => {
       <VisitFormWrapper
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
-        title={editingVisit ? 'Edit Visit' : 'Add New Visit'}
+        title={editingVisit ? t('visits.editVisit', 'Edit Visit') : t('visits.addNewVisit', 'Add New Visit')}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}

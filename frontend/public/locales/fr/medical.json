@@ -36,6 +36,7 @@
       },
       "status": {
         "label": "Statut",
+        "placeholder": "Sélectionnez le statut",
         "description": "Statut actuel"
       },
       "severity": {
@@ -120,20 +121,73 @@
   },
   "allergies": {
     "title": "Allergies",
+    "addNew": "Ajouter une nouvelle allergie",
+    "addTitle": "Ajouter une nouvelle allergie",
+    "editTitle": "Modifier l'allergie",
+    "tabs": {
+      "basicInfo": "Informations de base",
+      "reactionDetails": "Détails de la réaction",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "messages": {
+      "loading": "Chargement des allergies...",
+      "saving": "Enregistrement de l'allergie..."
+    },
+    "emptyState": {
+      "title": "Aucune allergie trouvée",
+      "noData": "Cliquez sur \"Ajouter une nouvelle allergie\" pour commencer.",
+      "filtered": "Essayez d'ajuster vos critères de recherche ou de filtrage."
+    },
     "allergen": {
       "label": "Allergène",
-      "placeholder": "ex : Pénicilline, cacahuètes, latex",
-      "description": "Quelle substance cause la réaction allergique"
+      "placeholder": "Entrez le nom de l'allergène",
+      "description": "Nom de l'allergène"
     },
-    "reaction": {
-      "label": "Réaction",
-      "placeholder": "ex : eczéma, choc anaphylactique, gonflements",
-      "description": "Ce qui se produit en cas d'exposition à l'allergène"
+    "allergyType": {
+      "label": "Type d'allergie",
+      "placeholder": "Sélectionnez le type d'allergie",
+      "description": "Catégorie d'allergie",
+      "options": {
+        "food": "Alimentaire",
+        "medication": "Médicament",
+        "environmental": "Environnementale",
+        "insect": "Insecte",
+        "other": "Autre"
+      }
+    },
+    "severity": {
+      "description": "Sévérité de la réaction allergique"
+    },
+    "status": {
+      "description": "Statut actuel de l'allergie"
+    },
+    "onsetDate": {
+      "label": "Date de survenue",
+      "placeholder": "Sélectionnez la date de survenue",
+      "description": "Quand l'allergie a été identifiée pour la première fois"
     },
     "relatedMedication": {
-      "label": "Médicament lié (optionnel)",
-      "placeholder": "Sélectionnez un médicament se rapportant à cette allergie",
-      "description": "Connectez cette allergie à un médicament spécifique si applicable"
+      "label": "Médicament lié",
+      "placeholder": "Sélectionnez un médicament",
+      "description": "Médicament qui cause cette allergie"
+    },
+    "reactionType": {
+      "label": "Type de réaction",
+      "placeholder": "Sélectionnez le type de réaction",
+      "description": "Type de réaction allergique",
+      "options": {
+        "skin": "Réaction cutanée",
+        "respiratory": "Respiratoire",
+        "gastrointestinal": "Gastro-intestinale",
+        "anaphylaxis": "Anaphylaxie",
+        "other": "Autre"
+      }
+    },
+    "reaction": {
+      "label": "Description de la réaction",
+      "placeholder": "Décrivez la réaction allergique",
+      "description": "Symptômes et détails de la réaction"
     }
   },
   "conditions": {
@@ -777,6 +831,21 @@
         "label": "Déclencheurs communs",
         "placeholder": "Ajoutez les déclencheurs communs (stress, météo, aliments, etc.)",
         "description": "Ce qui déclenche typiquement ce symptôme"
+      },
+      "status": {
+        "label": "Statut Global",
+        "placeholder": "Sélectionnez le statut",
+        "description": "Statut global actuel de ce symptôme"
+      },
+      "statusOptions": {
+        "active": "Actif - Actuellement présent",
+        "resolved": "Résolu - N'est plus présent",
+        "recurring": "Récurrent - Va et vient"
+      },
+      "generalNotes": {
+        "label": "Notes Générales",
+        "placeholder": "Notes générales sur ce symptôme...",
+        "description": "Informations générales sur les tendances, l'historique ou les observations"
       }
     },
     "occurrence": {
@@ -794,6 +863,21 @@
         "label": "Echelle de la douleur (0-10)",
         "placeholder": "0 = Aucune douleur, 10 = Pire douleur",
         "description": "Notez le niveau de douleur allant de 0 (aucune douleur) à 10 (la pire douleur qui soit)"
+      },
+      "duration": {
+        "label": "Durée",
+        "placeholder": "par ex. 2 heures, 30 minutes, toute la journée",
+        "description": "Combien de temps a duré cette crise"
+      },
+      "location": {
+        "label": "Emplacement",
+        "placeholder": "par ex. Tempe gauche, Bas du dos, Corps entier",
+        "description": "Où dans votre corps avez-vous ressenti cela"
+      },
+      "impactLevel": {
+        "label": "Impact sur la vie quotidienne",
+        "placeholder": "Sélectionnez le niveau d'impact",
+        "description": "Dans quelle mesure cela a-t-il affecté vos activités quotidiennes"
       },
       "impactLevelOptions": {
         "noImpact": "Aucun impact - Fonctionnalité normale",
@@ -826,6 +910,555 @@
         "label": "Notes sur la résolution",
         "placeholder": "Comment s'est résolue la crise...",
         "description": "Détails sur la fin ou le traitement de cette crise"
+      },
+      "additionalNotes": {
+        "label": "Notes supplémentaires",
+        "placeholder": "Détails supplémentaires sur cette crise...",
+        "description": "Toute autre information pertinente sur cette occurrence"
+      }
+    }
+  },
+  "familyHistory": {
+      "form": {
+        "member": {
+          "name": {
+            "label": "Nom complet",
+            "placeholder": "Entrez le nom du membre de la famille",
+            "description": "Nom complet du membre de la famille"
+          },
+          "relationship": {
+            "label": "Relation",
+            "placeholder": "Sélectionnez la relation",
+            "description": "Relation avec vous"
+          },
+          "gender": {
+            "label": "Genre",
+            "placeholder": "Sélectionnez le genre",
+            "description": "Genre du membre de la famille"
+          },
+          "birthYear": {
+            "label": "Année de naissance",
+            "placeholder": "par ex. 1950",
+            "description": "Année de naissance du membre de la famille (optionnel)"
+          },
+          "deceased": {
+            "label": "Décédé",
+            "description": "Indiquez si ce membre de la famille est décédé"
+          },
+          "deathYear": {
+            "label": "Année de décès",
+            "placeholder": "par ex. 2020",
+            "description": "Année de décès (le cas échéant)"
+          },
+          "notes": {
+            "label": "Notes",
+            "placeholder": "Informations supplémentaires sur ce membre de la famille...",
+            "description": "Tous autres détails pertinents"
+          },
+          "relationshipOptions": {
+            "father": "Père",
+            "mother": "Mère",
+            "son": "Fils",
+            "daughter": "Fille",
+            "brother": "Frère",
+            "sister": "Sœur",
+            "grandfather_paternal": "Grand-père (paternel)",
+            "grandmother_paternal": "Grand-mère (paternelle)",
+            "grandfather_maternal": "Grand-père (maternel)",
+            "grandmother_maternal": "Grand-mère (maternelle)",
+            "uncle_paternal": "Oncle (paternel)",
+            "aunt_paternal": "Tante (paternelle)",
+            "uncle_maternal": "Oncle (maternel)",
+            "aunt_maternal": "Tante (maternelle)",
+            "cousin": "Cousin/Cousine",
+            "nephew": "Neveu",
+            "niece": "Nièce",
+            "grandson": "Petit-fils",
+            "granddaughter": "Petite-fille",
+            "other": "Autre"
+          },
+          "genderOptions": {
+            "male": "Masculin",
+            "female": "Féminin"
+          }
+        },
+        "condition": {
+          "conditionName": {
+            "label": "Nom de la condition",
+            "placeholder": "par ex. Diabète, Maladie cardiaque, Cancer",
+            "description": "Nom de la condition médicale"
+          },
+          "conditionType": {
+            "label": "Type de condition",
+            "placeholder": "Sélectionnez la catégorie",
+            "description": "Catégorie de la condition"
+          },
+          "severity": {
+            "label": "Gravité",
+            "placeholder": "Sélectionnez la gravité",
+            "description": "Gravité de la condition"
+          },
+          "diagnosisAge": {
+            "label": "Âge au diagnostic",
+            "placeholder": "par ex. 45",
+            "description": "Âge du membre de la famille lors du diagnostic"
+          },
+          "status": {
+            "label": "Statut",
+            "placeholder": "Sélectionnez le statut",
+            "description": "Statut actuel de la condition"
+          },
+          "icd10Code": {
+            "label": "Code CIM-10",
+            "placeholder": "par ex. E11.9",
+            "description": "Code de diagnostic médical (optionnel)"
+          },
+          "notes": {
+            "label": "Notes",
+            "placeholder": "Détails supplémentaires sur cette condition...",
+            "description": "Toute autre information pertinente"
+          },
+          "typeOptions": {
+            "cardiovascular": "Cardiovasculaire - Cœur et vaisseaux sanguins",
+            "cancer": "Cancer - Tumeurs malignes",
+            "diabetes": "Diabète - Troubles de la glycémie",
+            "respiratory": "Respiratoire - Maladies pulmonaires",
+            "neurological": "Neurologique - Troubles nerveux et cérébraux",
+            "mental_health": "Santé mentale - Conditions psychiatriques",
+            "autoimmune": "Auto-immun - Troubles du système immunitaire",
+            "genetic": "Génétique - Conditions héréditaires",
+            "musculoskeletal": "Musculo-squelettique - Os et muscles",
+            "endocrine": "Endocrinien - Troubles hormonaux",
+            "gastrointestinal": "Gastro-intestinal - Système digestif",
+            "kidney": "Rein - Maladies rénales",
+            "liver": "Foie - Maladies hépatiques",
+            "blood": "Sang - Troubles hématologiques",
+            "other": "Autre"
+          },
+          "severityOptions": {
+            "mild": "💛 Léger - Impact mineur",
+            "moderate": "🧡 Modéré - Impact modéré",
+            "severe": "❤️ Sévère - Impact significatif",
+            "fatal": "🖤 Fatal - Cause du décès"
+          },
+          "statusOptions": {
+            "active": "Actif - Condition en cours",
+            "managed": "Géré - Sous contrôle avec traitement",
+            "resolved": "Résolu - Plus présent",
+            "fatal": "Fatal - Cause du décès"
+          }
+      }
+    }
+  },
+  "practitioners": {
+    "form": {
+      "name": {
+        "label": "Nom Complet",
+        "placeholder": "Dr. Marie Dupont",
+        "description": "Nom complet du médecin avec titre"
+      },
+      "specialty": {
+        "label": "Spécialité Médicale",
+        "placeholder": "Rechercher des spécialités ou saisir une personnalisée...",
+        "description": "Sélectionner dans la liste ou saisir une spécialité personnalisée"
+      },
+      "practice": {
+        "label": "Cabinet/Hôpital",
+        "placeholder": "Hôpital Général de la Ville",
+        "description": "Lieu de travail ou établissement médical"
+      },
+      "phone": {
+        "label": "Numéro de Téléphone",
+        "placeholder": "(555) 123-4567",
+        "description": "Numéro de contact principal"
+      },
+      "website": {
+        "label": "Site Web",
+        "placeholder": "https://www.exemple.fr",
+        "description": "Site web professionnel ou page du cabinet"
+      },
+      "rating": {
+        "label": "Évaluation"
+      }
+    }
+  },
+  "pharmacies": {
+    "form": {
+      "brand": {
+        "label": "Chaîne de Pharmacie",
+        "placeholder": "Sélectionnez la chaîne de pharmacie ou le type",
+        "description": "Grande chaîne de pharmacie ou type indépendant"
+      },
+      "name": {
+        "label": "Nom de la Pharmacie",
+        "placeholder": "CVS Pharmacie - Rue Principale",
+        "description": "Nom spécifique ou identifiant de localisation"
+      },
+      "locationDivider": "Informations de Localisation",
+      "streetAddress": {
+        "label": "Adresse",
+        "placeholder": "123 Rue Principale",
+        "description": "Adresse physique"
+      },
+      "city": {
+        "label": "Ville",
+        "placeholder": "Paris",
+        "description": "Ville"
+      },
+      "storeNumber": {
+        "label": "Numéro de Magasin",
+        "placeholder": "par ex. 1234, #5678, Magasin A",
+        "description": "Identifiant interne du magasin"
+      },
+      "phone": {
+        "label": "Numéro de Téléphone",
+        "placeholder": "(555) 123-4567",
+        "description": "Numéro de téléphone principal de la pharmacie"
+      }
+    }
+  },
+  "emergencyContacts": {
+    "form": {
+      "name": {
+        "label": "Nom Complet",
+        "placeholder": "ex. Jean Dupont",
+        "description": "Nom complet du contact d'urgence"
+      },
+      "relationship": {
+        "label": "Relation",
+        "placeholder": "Sélectionner la relation",
+        "description": "Relation avec le patient",
+        "options": {
+          "spouse": "Conjoint",
+          "partner": "Partenaire",
+          "parent": "Parent",
+          "mother": "Mère",
+          "father": "Père",
+          "child": "Enfant",
+          "son": "Fils",
+          "daughter": "Fille",
+          "sibling": "Fratrie",
+          "brother": "Frère",
+          "sister": "Sœur",
+          "grandparent": "Grand-parent",
+          "grandmother": "Grand-mère",
+          "grandfather": "Grand-père",
+          "grandchild": "Petit-enfant",
+          "grandson": "Petit-fils",
+          "granddaughter": "Petite-fille",
+          "aunt": "Tante",
+          "uncle": "Oncle",
+          "cousin": "Cousin/Cousine",
+          "friend": "Ami",
+          "neighbor": "Voisin",
+          "caregiver": "Soignant",
+          "guardian": "Tuteur",
+          "other": "Autre"
+        }
+      },
+      "primaryPhone": {
+        "label": "Téléphone Principal",
+        "placeholder": "ex. (555) 123-4567",
+        "description": "Numéro de téléphone principal"
+      },
+      "secondaryPhone": {
+        "label": "Téléphone Secondaire",
+        "placeholder": "ex. (555) 987-6543",
+        "description": "Numéro de téléphone secondaire optionnel"
+      },
+      "email": {
+        "label": "Adresse E-mail",
+        "placeholder": "ex. jean.dupont@email.com",
+        "description": "Adresse e-mail optionnelle"
+      },
+      "address": {
+        "label": "Adresse",
+        "placeholder": "ex. 123 Rue Principale, Ville, Code Postal 12345",
+        "description": "Adresse du contact (optionnel)"
+      },
+      "isPrimary": {
+        "label": "Contact d'Urgence Principal",
+        "description": "Cette personne sera contactée en premier en cas d'urgence"
+      },
+      "isActive": {
+        "label": "Contact Actif",
+        "description": "Ce contact est actuellement disponible"
+      },
+      "notes": {
+        "placeholder": "Informations supplémentaires (ex. 'Disponible en semaine uniquement', 'Parle espagnol')",
+        "description": "Notes supplémentaires sur ce contact"
+      }
+    }
+  },
+  "insurance": {
+    "form": {
+      "dividers": {
+        "basicInfo": "Informations de Base sur l'Assurance",
+        "memberInfo": "Informations sur le Membre",
+        "coveragePeriodStatus": "Période de Couverture & Statut",
+        "contactInfo": "Informations de Contact",
+        "coverageDetails": "Détails de la Couverture",
+        "additionalInfo": "Informations Supplémentaires"
+      },
+      "insuranceType": {
+        "label": "Type d'Assurance",
+        "placeholder": "Sélectionner le type d'assurance",
+        "description": "Type de couverture d'assurance",
+        "options": {
+          "medical": "🏥 Assurance Maladie",
+          "dental": "🦷 Assurance Dentaire",
+          "vision": "👁️ Assurance Vision",
+          "prescription": "💊 Assurance Médicaments"
+        }
+      },
+      "companyName": {
+        "label": "Compagnie d'Assurance",
+        "placeholder": "p.ex., Mutuelle Générale",
+        "description": "Nom de la compagnie d'assurance"
+      },
+      "planName": {
+        "label": "Nom du Plan",
+        "placeholder": "p.ex., Premium Plus",
+        "description": "Nom du plan d'assurance spécifique"
+      },
+      "employerGroup": {
+        "label": "Employeur/Sponsor de Groupe",
+        "placeholder": "p.ex., Société ABC, Travailleur Autonome",
+        "description": "Entreprise ou organisation fournissant l'assurance (le cas échéant)"
+      },
+      "memberName": {
+        "label": "Nom du Membre",
+        "placeholder": "p.ex., Jean Dupont",
+        "description": "Nom tel qu'il apparaît sur la carte d'assurance"
+      },
+      "memberId": {
+        "label": "Numéro de Membre",
+        "placeholder": "p.ex., ABC123456789",
+        "description": "Numéro de membre de la carte d'assurance"
+      },
+      "policyHolderName": {
+        "label": "Nom du Titulaire de la Police",
+        "placeholder": "p.ex., Marie Dupont (laisser vide si identique au membre)",
+        "description": "Nom du titulaire de la police (si différent du membre)"
+      },
+      "relationshipToHolder": {
+        "label": "Relation avec le Titulaire",
+        "placeholder": "Sélectionner la relation",
+        "description": "Votre relation avec le titulaire de la police",
+        "options": {
+          "self": "Soi-même",
+          "spouse": "Conjoint",
+          "child": "Enfant",
+          "dependent": "Personne à charge",
+          "other": "Autre"
+        }
+      },
+      "groupNumber": {
+        "label": "Numéro de Groupe",
+        "placeholder": "p.ex., GRP123",
+        "description": "Numéro de groupe (le cas échéant)"
+      },
+      "effectiveDate": {
+        "label": "Date d'Effet",
+        "placeholder": "Sélectionner la date d'effet",
+        "description": "Date à laquelle la couverture commence"
+      },
+      "expirationDate": {
+        "label": "Date d'Expiration",
+        "placeholder": "Sélectionner la date d'expiration",
+        "description": "Date à laquelle la couverture se termine (si connue)"
+      },
+      "status": {
+        "placeholder": "Sélectionner le statut",
+        "description": "Statut actuel de l'assurance",
+        "options": {
+          "active": "Actif",
+          "inactive": "Inactif",
+          "expired": "Expiré",
+          "pending": "En Attente"
+        }
+      },
+      "isPrimary": {
+        "label": "Assurance Primaire",
+        "description": "Cocher s'il s'agit de votre assurance primaire (pour l'assurance maladie uniquement)"
+      },
+      "customerServicePhone": {
+        "label": "Téléphone Service Client",
+        "placeholder": "p.ex., 01-800-123-4567",
+        "description": "Numéro de téléphone du service client"
+      },
+      "preauthPhone": {
+        "label": "Téléphone Pré-autorisation",
+        "description": "Numéro de téléphone pour les pré-autorisations"
+      },
+      "providerServicesPhone": {
+        "label": "Téléphone Services Fournisseur",
+        "description": "Numéro de téléphone pour les services aux fournisseurs"
+      },
+      "websiteUrl": {
+        "label": "URL du Site Web",
+        "placeholder": "p.ex., https://membre.assurance.fr",
+        "description": "Portail membre ou URL du site web"
+      },
+      "claimsAddress": {
+        "label": "Adresse des Réclamations",
+        "placeholder": "Saisir l'adresse d'envoi des réclamations...",
+        "description": "Adresse pour soumettre les réclamations"
+      },
+      "primaryCarePhysician": {
+        "label": "Médecin Traitant",
+        "placeholder": "p.ex., Dr. Martin",
+        "description": "Nom de votre médecin traitant"
+      },
+      "deductibleIndividual": {
+        "label": "Franchise Individuelle",
+        "placeholder": "p.ex., 1000",
+        "description": "Montant de la franchise annuelle pour un individu"
+      },
+      "deductibleFamily": {
+        "label": "Franchise Familiale",
+        "placeholder": "p.ex., 2000",
+        "description": "Montant de la franchise annuelle pour une famille"
+      },
+      "copayPrimaryCare": {
+        "label": "Ticket Modérateur Médecin Traitant",
+        "placeholder": "p.ex., 25",
+        "description": "Montant du ticket modérateur pour les consultations chez le médecin traitant"
+      },
+      "copaySpecialist": {
+        "label": "Ticket Modérateur Spécialiste",
+        "placeholder": "p.ex., 50",
+        "description": "Montant du ticket modérateur pour les consultations chez un spécialiste"
+      },
+      "copayEmergencyRoom": {
+        "label": "Ticket Modérateur Urgences",
+        "placeholder": "p.ex., 200",
+        "description": "Montant du ticket modérateur pour les visites aux urgences"
+      },
+      "copayUrgentCare": {
+        "label": "Ticket Modérateur Soins Urgents",
+        "placeholder": "p.ex., 75",
+        "description": "Montant du ticket modérateur pour les soins urgents"
+      },
+      "planType": {
+        "label": "Type de Plan",
+        "placeholder": "Sélectionner le type de plan",
+        "description": "Type de plan d'assurance maladie",
+        "options": {
+          "ppo": "PPO (Organisation de Fournisseurs Préférés)",
+          "hmo": "HMO (Organisation de Maintien de la Santé)",
+          "epo": "EPO (Organisation de Fournisseurs Exclusifs)",
+          "pos": "POS (Point de Service)",
+          "hdhp": "HDHP (Plan de Santé à Franchise Élevée)",
+          "indemnity": "Indemnité (Frais de Service)"
+        }
+      },
+      "dentalPlanType": {
+        "label": "Type de Plan Dentaire",
+        "placeholder": "Sélectionner le type de plan dentaire",
+        "description": "Type de plan d'assurance dentaire",
+        "options": {
+          "dppo": "DPPO (Organisation de Fournisseurs Dentaires Préférés)",
+          "dhmo": "DHMO (Organisation de Maintien de la Santé Dentaire)",
+          "discount": "Plan de Réduction"
+        }
+      },
+      "annualMaximum": {
+        "label": "Maximum Annuel",
+        "placeholder": "p.ex., 1500",
+        "description": "Montant maximum des prestations annuelles"
+      },
+      "preventiveCoverage": {
+        "label": "Couverture Préventive %",
+        "placeholder": "p.ex., 100",
+        "description": "Pourcentage de couverture pour les soins préventifs"
+      },
+      "basicCoverage": {
+        "label": "Couverture de Base %",
+        "placeholder": "p.ex., 80",
+        "description": "Pourcentage de couverture pour les soins de base"
+      },
+      "majorCoverage": {
+        "label": "Couverture Majeure %",
+        "placeholder": "p.ex., 50",
+        "description": "Pourcentage de couverture pour les soins majeurs"
+      },
+      "visionPlanType": {
+        "label": "Type de Plan Vision",
+        "placeholder": "Sélectionner le type de plan vision",
+        "description": "Type de plan d'assurance vision",
+        "options": {
+          "visionPpo": "Vision PPO",
+          "visionHmo": "Vision HMO",
+          "visionDiscount": "Plan de Réduction Vision"
+        }
+      },
+      "examCopay": {
+        "label": "Ticket Modérateur Examen",
+        "placeholder": "p.ex., 10",
+        "description": "Montant du ticket modérateur pour les examens de la vue"
+      },
+      "frameAllowance": {
+        "label": "Allocation Monture",
+        "placeholder": "p.ex., 150",
+        "description": "Allocation annuelle pour les montures"
+      },
+      "lensCoverage": {
+        "label": "Couverture Verres",
+        "placeholder": "p.ex., 100% couvert",
+        "description": "Détails de la couverture pour les verres"
+      },
+      "contactAllowance": {
+        "label": "Allocation Lentilles de Contact",
+        "description": "Allocation annuelle pour les lentilles de contact"
+      },
+      "prescriptionPlanType": {
+        "label": "Type de Plan Médicaments",
+        "placeholder": "Sélectionner le type de plan médicaments",
+        "description": "Type de plan d'assurance médicaments",
+        "options": {
+          "formulary": "Plan Basé sur Formulaire",
+          "tieredCopay": "Plan à Ticket Modérateur Échelonné",
+          "medicarePartD": "Medicare Partie D",
+          "integrated": "Intégré avec l'Assurance Maladie"
+        }
+      },
+      "binNumber": {
+        "label": "Numéro BIN",
+        "placeholder": "p.ex., 123456",
+        "description": "Numéro d'identification bancaire pour la pharmacie"
+      },
+      "pcnNumber": {
+        "label": "Numéro PCN",
+        "placeholder": "p.ex., ABC123",
+        "description": "Numéro de contrôle du processeur"
+      },
+      "rxgroup": {
+        "label": "Groupe RX",
+        "placeholder": "p.ex., RXGRP123",
+        "description": "Numéro de groupe de prescription"
+      },
+      "copayGeneric": {
+        "label": "Ticket Modérateur Générique",
+        "description": "Montant du ticket modérateur pour les médicaments génériques"
+      },
+      "copayBrand": {
+        "label": "Ticket Modérateur Marque",
+        "placeholder": "p.ex., 30",
+        "description": "Montant du ticket modérateur pour les médicaments de marque"
+      },
+      "copaySpecialty": {
+        "label": "Ticket Modérateur Spécialité",
+        "description": "Montant du ticket modérateur pour les médicaments spécialisés"
+      },
+      "pharmacyNetworkInfo": {
+        "label": "Info Réseau Pharmacie",
+        "placeholder": "Saisir les détails du réseau de pharmacies...",
+        "description": "Informations sur les réseaux de pharmacies préférés"
+      },
+      "notes": {
+        "placeholder": "Informations supplémentaires sur cette assurance...",
+        "description": "Détails ou notes supplémentaires"
       }
     }
   }

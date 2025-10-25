@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatDate } from '../../../utils/helpers';
@@ -23,6 +24,8 @@ const ConditionCard = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
+
   const handleError = (error) => {
     logger.error('condition_card_error', {
       message: 'Error in ConditionCard',
@@ -92,9 +95,9 @@ const ConditionCard = ({
 
     // Add appropriate suffix based on condition status
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return `${duration} (ended)`;
+      return t('conditions.card.durationEnded', '{{duration}} (ended)', { duration });
     } else {
-      return `${duration} (ongoing)`;
+      return t('conditions.card.durationOngoing', '{{duration}} (ongoing)', { duration });
     }
   };
 
@@ -128,29 +131,29 @@ const ConditionCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: 'Onset Date',
+        label: t('conditions.card.onsetDate', 'Onset Date'),
         value: condition.onset_date,
-        render: (value) => value ? formatDate(value) : 'Not specified'
+        render: (value) => value ? formatDate(value) : t('labels.notSpecified', 'Not specified')
       },
       {
-        label: 'Duration',
+        label: t('conditions.card.duration', 'Duration'),
         value: condition.onset_date,
-        render: () => condition.onset_date 
+        render: () => condition.onset_date
           ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
-          : 'Not specified'
+          : t('labels.notSpecified', 'Not specified')
       },
       condition.end_date && {
-        label: 'End Date',
+        label: t('conditions.card.endDate', 'End Date'),
         value: condition.end_date,
         render: (value) => formatDate(value)
       },
       condition.snomed_code && {
-        label: 'SNOMED Code',
+        label: t('conditions.card.snomedCode', 'SNOMED Code'),
         value: condition.snomed_code,
         render: (value) => value
       },
       condition.code_description && {
-        label: 'Code Description',
+        label: t('conditions.card.codeDescription', 'Code Description'),
         value: condition.code_description,
         render: (value) => value,
         align: 'flex-start',

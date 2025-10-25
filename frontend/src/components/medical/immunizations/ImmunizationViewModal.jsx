@@ -18,6 +18,7 @@ import {
   IconFileText,
   IconEdit,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -32,6 +33,7 @@ const ImmunizationViewModal = ({
   navigate,
   onError
 }) => {
+  const { t } = useTranslation('common');
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or immunization changes
@@ -68,7 +70,7 @@ const ImmunizationViewModal = ({
       title={
         <Group>
           <Text fw={600} size="lg">
-            {immunization.vaccine_name || 'Immunization Details'}
+            {immunization.vaccine_name || t('immunizations.viewModal.title', 'Immunization Details')}
           </Text>
           {immunization.dose_number && (
             <Badge
@@ -76,7 +78,7 @@ const ImmunizationViewModal = ({
               variant="filled"
               size="sm"
             >
-              Dose {immunization.dose_number}
+              {t('immunizations.viewModal.dose', 'Dose {{number}}', { number: immunization.dose_number })}
             </Badge>
           )}
         </Group>
@@ -88,16 +90,16 @@ const ImmunizationViewModal = ({
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-            Overview
+            {t('immunizations.viewModal.tabs.overview', 'Overview')}
           </Tabs.Tab>
           <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
-            Administration
+            {t('immunizations.viewModal.tabs.administration', 'Administration')}
           </Tabs.Tab>
           <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            Notes
+            {t('immunizations.viewModal.tabs.notes', 'Notes')}
           </Tabs.Tab>
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-            Documents
+            {t('immunizations.viewModal.tabs.documents', 'Documents')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -107,50 +109,50 @@ const ImmunizationViewModal = ({
             <Stack gap="lg">
               {/* Vaccine Information */}
               <div>
-                <Title order={4} mb="sm">Vaccine Information</Title>
+                <Title order={4} mb="sm">{t('immunizations.viewModal.vaccineInfo', 'Vaccine Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Vaccine Name</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.vaccineName', 'Vaccine Name')}</Text>
                     <Text size="sm">{immunization.vaccine_name}</Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Trade Name</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.tradeName', 'Trade Name')}</Text>
                     <Text size="sm" c={immunization.vaccine_trade_name ? 'inherit' : 'dimmed'}>
-                      {immunization.vaccine_trade_name || 'Not specified'}
+                      {immunization.vaccine_trade_name || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Manufacturer</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.manufacturer', 'Manufacturer')}</Text>
                     <Text size="sm" c={immunization.manufacturer ? 'inherit' : 'dimmed'}>
-                      {immunization.manufacturer || 'Not specified'}
+                      {immunization.manufacturer || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Dose Number</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.doseNumber', 'Dose Number')}</Text>
                     <Badge
                       color={getDoseColor(immunization.dose_number)}
                       variant="filled"
                       size="sm"
                     >
-                      {immunization.dose_number ? `Dose #${immunization.dose_number}` : 'Not specified'}
+                      {immunization.dose_number ? t('immunizations.viewModal.doseHash', 'Dose #{{number}}', { number: immunization.dose_number }) : t('labels.notSpecified', 'Not specified')}
                     </Badge>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Lot Number</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.lotNumber', 'Lot Number')}</Text>
                     <Text size="sm" c={immunization.lot_number ? 'inherit' : 'dimmed'}>
-                      {immunization.lot_number || 'Not specified'}
+                      {immunization.lot_number || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">NDC Number</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.ndcNumber', 'NDC Number')}</Text>
                     <Text size="sm" c={immunization.ndc_number ? 'inherit' : 'dimmed'}>
-                      {immunization.ndc_number || 'Not specified'}
+                      {immunization.ndc_number || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Expiration Date</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.expirationDate', 'Expiration Date')}</Text>
                     <Text size="sm" c={immunization.expiration_date ? 'inherit' : 'dimmed'}>
-                      {immunization.expiration_date ? formatDate(immunization.expiration_date) : 'Not specified'}
+                      {immunization.expiration_date ? formatDate(immunization.expiration_date) : t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                 </SimpleGrid>
@@ -159,7 +161,7 @@ const ImmunizationViewModal = ({
               {/* Tags Section */}
               {immunization.tags && immunization.tags.length > 0 && (
                 <div>
-                  <Title order={4} mb="sm">Tags</Title>
+                  <Title order={4} mb="sm">{t('labels.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {immunization.tags.map((tag, index) => (
                       <Badge
@@ -184,34 +186,34 @@ const ImmunizationViewModal = ({
           <Box mt="md">
             <Stack gap="lg">
               <div>
-                <Title order={4} mb="sm">Administration Details</Title>
+                <Title order={4} mb="sm">{t('immunizations.viewModal.adminDetails', 'Administration Details')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Date Administered</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.dateAdministered', 'Date Administered')}</Text>
                     <Text size="sm" c={immunization.date_administered ? 'inherit' : 'dimmed'}>
-                      {immunization.date_administered ? formatDate(immunization.date_administered) : 'Not specified'}
+                      {immunization.date_administered ? formatDate(immunization.date_administered) : t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Administration Site</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.adminSite', 'Administration Site')}</Text>
                     <Text size="sm" c={immunization.site ? 'inherit' : 'dimmed'}>
-                      {immunization.site || 'Not specified'}
+                      {immunization.site || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Route</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.route', 'Route')}</Text>
                     <Text size="sm" c={immunization.route ? 'inherit' : 'dimmed'}>
-                      {immunization.route || 'Not specified'}
+                      {immunization.route || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Location/Facility</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.locationFacility', 'Location/Facility')}</Text>
                     <Text size="sm" c={immunization.location ? 'inherit' : 'dimmed'}>
-                      {immunization.location || 'Not specified'}
+                      {immunization.location || t('labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">Practitioner</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('labels.practitioner', 'Practitioner')}</Text>
                     {immunization.practitioner_id ? (
                       <Text
                         size="sm"
@@ -219,12 +221,12 @@ const ImmunizationViewModal = ({
                         c="blue"
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => navigateToEntity('practitioner', immunization.practitioner_id, navigate)}
-                        title="View practitioner details"
+                        title={t('immunizations.viewModal.viewPractitioner', 'View practitioner details')}
                       >
-                        {practitioner?.name || `Practitioner ID: ${immunization.practitioner_id}`}
+                        {practitioner?.name || t('immunizations.viewModal.practitionerId', 'Practitioner ID: {{id}}', { id: immunization.practitioner_id })}
                       </Text>
                     ) : (
-                      <Text size="sm" c="dimmed">Not specified</Text>
+                      <Text size="sm" c="dimmed">{t('labels.notSpecified', 'Not specified')}</Text>
                     )}
                   </Stack>
                 </SimpleGrid>
@@ -238,9 +240,9 @@ const ImmunizationViewModal = ({
           <Box mt="md">
             <Stack gap="lg">
               <div>
-                <Title order={4} mb="sm">Clinical Notes</Title>
+                <Title order={4} mb="sm">{t('labels.clinicalNotes', 'Clinical Notes')}</Title>
                 <Text size="sm" c={immunization.notes ? 'inherit' : 'dimmed'}>
-                  {immunization.notes || 'No notes available'}
+                  {immunization.notes || t('labels.noNotesAvailable', 'No notes available')}
                 </Text>
               </div>
             </Stack>
@@ -262,10 +264,10 @@ const ImmunizationViewModal = ({
       {/* Action Buttons */}
       <Group justify="flex-end" gap="sm" mt="lg">
         <Button variant="default" onClick={onClose}>
-          Close
+          {t('buttons.close', 'Close')}
         </Button>
         <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-          Edit
+          {t('buttons.edit', 'Edit')}
         </Button>
       </Group>
     </Modal>
