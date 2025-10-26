@@ -67,6 +67,7 @@ def verify_patient_ownership(
     entity_name: str,
     db: Optional[Session] = None,
     current_user: Optional[Any] = None,
+    permission: str = 'view',
 ) -> None:
     """
     Verify that a medical record belongs to a patient accessible by the current user.
@@ -79,6 +80,7 @@ def verify_patient_ownership(
         entity_name: Name of the entity type for error messages
         db: Database session (optional, for multi-patient access checking)
         current_user: Current user object (optional, for multi-patient access checking)
+        permission: Required permission level ('view', 'edit', 'full')
 
     Raises:
         HTTPException: 404 if object doesn't belong to user or user doesn't have access
@@ -90,6 +92,7 @@ def verify_patient_ownership(
         record_type=entity_name.lower(),
         db=db,
         current_user=current_user,
+        permission=permission,
     )
 
 
@@ -212,9 +215,12 @@ def handle_update_with_logging(
     user_id: int,
     entity_name: str,
     request: Optional[Request] = None,
+    current_user_patient_id: int = None,
+    current_user: Any = None,
+    permission: str = 'edit',
 ) -> Any:
     """
-    Handle entity update with standardized logging.
+    Handle entity update with standardized logging and ownership verification.
 
     Args:
         db: Database session
@@ -225,12 +231,15 @@ def handle_update_with_logging(
         user_id: Current user ID
         entity_name: Name of entity type for logging
         request: Request object for additional logging
+        current_user_patient_id: Current user's patient ID (for ownership verification)
+        current_user: Current user object (for multi-patient access verification)
+        permission: Required permission level (default: 'edit')
 
     Returns:
         Updated entity object
 
     Raises:
-        HTTPException: If entity not found or update fails
+        HTTPException: If entity not found, user lacks permission, or update fails
     """
     user_ip = request.client.host if request and request.client else "unknown"
 
@@ -239,8 +248,19 @@ def handle_update_with_logging(
         entity_obj = crud_obj.get(db=db, id=entity_id)
         handle_not_found(entity_obj, entity_name, request)
 
+        # SECURITY FIX: Verify user has permission to update this record
+        if current_user_patient_id is not None:
+            verify_patient_ownership(
+                obj=entity_obj,
+                current_user_patient_id=current_user_patient_id,
+                entity_name=entity_name,
+                db=db,
+                current_user=current_user,
+                permission=permission,
+            )
+
         patient_id = getattr(entity_obj, "patient_id", None)
-        
+
         updated_entity = crud_obj.update(db=db, db_obj=entity_obj, obj_in=obj_in)
 
         # Log successful update
@@ -274,9 +294,12 @@ def handle_delete_with_logging(
     user_id: int,
     entity_name: str,
     request: Optional[Request] = None,
+    current_user_patient_id: int = None,
+    current_user: Any = None,
+    permission: str = 'edit',
 ) -> dict[str, str]:
     """
-    Handle entity deletion with standardized logging.
+    Handle entity deletion with standardized logging and ownership verification.
 
     Args:
         db: Database session
@@ -286,18 +309,32 @@ def handle_delete_with_logging(
         user_id: Current user ID
         entity_name: Name of entity type for logging
         request: Request object for additional logging
+        current_user_patient_id: Current user's patient ID (for ownership verification)
+        current_user: Current user object (for multi-patient access verification)
+        permission: Required permission level (default: 'edit')
 
     Returns:
         Success response dict
 
     Raises:
-        HTTPException: If entity not found or deletion fails
+        HTTPException: If entity not found, user lacks permission, or deletion fails
     """
     user_ip = request.client.host if request and request.client else "unknown"
 
     # Get existing entity
     entity_obj = crud_obj.get(db=db, id=entity_id)
     handle_not_found(entity_obj, entity_name)
+
+    # SECURITY FIX: Verify user has permission to delete this record
+    if current_user_patient_id is not None:
+        verify_patient_ownership(
+            obj=entity_obj,
+            current_user_patient_id=current_user_patient_id,
+            entity_name=entity_name,
+            db=db,
+            current_user=current_user,
+            permission=permission,
+        )
 
     patient_id = getattr(entity_obj, "patient_id", None)
 

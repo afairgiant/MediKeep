@@ -180,6 +180,8 @@ def update_symptom(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update symptom definition."""
     return handle_update_with_logging(
@@ -191,6 +193,8 @@ def update_symptom(
         user_id=current_user_id,
         entity_name="Symptom",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -201,6 +205,8 @@ def delete_symptom(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete a symptom definition (and all its occurrences via cascade)."""
     return handle_delete_with_logging(
@@ -211,6 +217,8 @@ def delete_symptom(
         user_id=current_user_id,
         entity_name="Symptom",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 

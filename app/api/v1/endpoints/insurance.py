@@ -147,6 +147,8 @@ def update_insurance(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update insurance record."""
     updated_insurance = handle_update_with_logging(
@@ -158,6 +160,8 @@ def update_insurance(
         user_id=current_user_id,
         entity_name="Insurance",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
     return updated_insurance
@@ -170,6 +174,8 @@ def delete_insurance(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete insurance record."""
     return handle_delete_with_logging(
@@ -180,6 +186,8 @@ def delete_insurance(
         user_id=current_user_id,
         entity_name="Insurance",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -191,30 +199,24 @@ def update_insurance_status(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update insurance status only."""
-    with handle_database_errors(request=request):
-        insurance_obj = insurance.get(db=db, id=insurance_id)
-        handle_not_found(insurance_obj, "Insurance", request)
+    updated_insurance = handle_update_with_logging(
+        db=db,
+        crud_obj=insurance,
+        entity_id=insurance_id,
+        obj_in=status_update,
+        entity_type=EntityType.INSURANCE,
+        user_id=current_user_id,
+        entity_name="Insurance",
+        request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
+    )
 
-        # Verify patient ownership using current user
-        current_user = deps.get_current_user_obj(db=db, user_id=current_user_id)
-        verify_patient_ownership(
-            insurance_obj, current_user.patient_record.id, "insurance"
-        )
-
-        updated_insurance = handle_update_with_logging(
-            db=db,
-            crud_obj=insurance,
-            entity_id=insurance_id,
-            obj_in=status_update,
-            entity_type=EntityType.INSURANCE,
-            user_id=current_user_id,
-            entity_name="Insurance",
-            request=request,
-        )
-
-        return updated_insurance
+    return updated_insurance
 
 
 @router.patch("/{insurance_id}/set-primary", response_model=Insurance)

@@ -18,7 +18,7 @@ from app.api.v1.endpoints.utils import (
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.emergency_contact import emergency_contact
 from app.models.activity_log import EntityType
-from app.models.models import EmergencyContact
+from app.models.models import EmergencyContact, User
 from app.schemas.emergency_contact import (
     EmergencyContactCreate,
     EmergencyContactResponse,
@@ -154,6 +154,8 @@ def update_emergency_contact(
     emergency_contact_id: int,
     emergency_contact_in: EmergencyContactUpdate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Update an emergency contact."""
@@ -166,6 +168,8 @@ def update_emergency_contact(
         user_id=current_user_id,
         entity_name="Emergency Contact",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -176,6 +180,8 @@ def delete_emergency_contact(
     db: Session = Depends(deps.get_db),
     emergency_contact_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Delete an emergency contact."""
@@ -187,6 +193,8 @@ def delete_emergency_contact(
         user_id=current_user_id,
         entity_name="Emergency Contact",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 

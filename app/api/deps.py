@@ -541,6 +541,7 @@ def verify_patient_record_access(
     record_type: str = "record",
     db: Optional[Session] = None,
     current_user: Optional[User] = None,
+    permission: str = 'view',
 ) -> None:
     """
     Verify that a medical record belongs to a patient accessible by the current user.
@@ -554,9 +555,11 @@ def verify_patient_record_access(
         record_type: Type of record for error message (e.g., "medication", "allergy")
         db: Database session (optional, required for multi-patient access checking)
         current_user: Current user object (optional, required for multi-patient access checking)
+        permission: Required permission level ('view', 'edit', 'full')
 
     Raises:
         NotFoundException: If record doesn't belong to user or user doesn't have access
+        ForbiddenException: If user has access but insufficient permissions
     """
     # If db and current_user are provided, use proper multi-patient access checking
     if db is not None and current_user is not None:
@@ -571,9 +574,10 @@ def verify_patient_record_access(
                 request=None
             )
 
-        # Check if user has access to this patient (covers ownership + sharing)
+        # Check if user has access to this patient with required permission level
         access_service = PatientAccessService(db)
-        if not access_service.can_access_patient(current_user, patient_record, permission='view'):
+        if not access_service.can_access_patient(current_user, patient_record, permission):
+            # Return 404 to avoid leaking information about existence of records
             raise NotFoundException(
                 message=f"{record_type.title()} not found",
                 request=None

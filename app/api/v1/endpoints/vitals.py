@@ -19,6 +19,7 @@ from app.api.v1.endpoints.utils import (
 )
 from app.crud.vitals import vitals
 from app.models.activity_log import EntityType
+from app.models.models import User
 from app.schemas.vitals import VitalsCreate, VitalsResponse, VitalsStats, VitalsUpdate
 
 router = APIRouter()
@@ -147,6 +148,8 @@ def update_vitals(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update vitals reading."""
     return handle_update_with_logging(
@@ -158,6 +161,8 @@ def update_vitals(
         user_id=current_user_id,
         entity_name="Vitals",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -168,6 +173,8 @@ def delete_vitals(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete a vitals reading."""
     return handle_delete_with_logging(
@@ -178,6 +185,8 @@ def delete_vitals(
         user_id=current_user_id,
         entity_name="Vitals",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 

@@ -19,6 +19,7 @@ from app.api.v1.endpoints.utils import (
 )
 from app.crud.procedure import procedure
 from app.models.activity_log import EntityType
+from app.models.models import User
 from app.schemas.procedure import (
     ProcedureCreate,
     ProcedureResponse,
@@ -158,6 +159,8 @@ def update_procedure(
     procedure_id: int,
     procedure_in: ProcedureUpdate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Update a procedure.
@@ -171,6 +174,8 @@ def update_procedure(
         user_id=current_user_id,
         entity_name="Procedure",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -181,6 +186,8 @@ def delete_procedure(
     db: Session = Depends(deps.get_db),
     procedure_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Delete a procedure.
@@ -193,6 +200,8 @@ def delete_procedure(
         user_id=current_user_id,
         entity_name="Procedure",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
