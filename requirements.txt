@@ -45,6 +45,7 @@ pydantic==2.11.5
 pydantic_core==2.33.2
 pytest==7.4.3
 pytest-asyncio==0.21.1
+pytest-html==4.1.1
 python-dateutil>=2.8.2
 python-dotenv==1.1.0
 python-jose==3.4.0

@@ -83,6 +83,7 @@ uploads/
 .env.development.local
 .env.test.local
 .env.production.local
+test-report.html
 
 npm-debug.log*
 yarn-debug.log*
@@ -143,3 +144,7 @@ dist/
 
 # Runtime directories
 /temp/
+
+.gitignore
+test_database.db-shm
+report.html
