@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -120,17 +121,24 @@ class CRUDEmergencyContact(
         """
         Get all active emergency contacts for a patient.
 
+        Returns contacts ordered by primary status (primary first),
+        then alphabetically by name.
+
         Args:
             db: Database session
             patient_id: ID of the patient
 
         Returns:
-            List of active emergency contacts
+            List of active emergency contacts ordered by is_primary DESC, name ASC
         """
-        return self.query(
-            db=db,
-            filters={"patient_id": patient_id, "is_active": True},
-            order_by=[("-is_primary", "name")],
+        return (
+            db.query(self.model)
+            .filter(
+                self.model.patient_id == patient_id,
+                self.model.is_active == True
+            )
+            .order_by(desc(self.model.is_primary), self.model.name)
+            .all()
         )
 
 
