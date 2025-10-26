@@ -319,6 +319,12 @@ class TestMedicationAPI:
                 "medication_name": "Acetaminophen",
                 "dosage": "500mg",
                 "status": "stopped"
+            },
+            {
+                "patient_id": user_with_patient["patient"].id,
+                "medication_name": "Aspirin Low Dose",
+                "dosage": "81mg",
+                "status": "stopped"
             }
         ]
 
@@ -354,9 +360,35 @@ class TestMedicationAPI:
         assert response.status_code == 200
         data = response.json()
         # Should return only medications with "Aspirin" in the name
+        assert len(data) >= 2  # Both Aspirin (active) and Aspirin Low Dose (stopped)
+        for med in data:
+            assert "aspirin" in med["medication_name"].lower()
+
+        # Test COMBINED filtering: name + status=active
+        # Should return only active medications with "Aspirin" in the name
+        response = client.get(
+            "/api/v1/medications/?name=Aspirin&status=active",
+            headers=authenticated_headers
+        )
+        assert response.status_code == 200
+        data = response.json()
         assert len(data) >= 1
         for med in data:
             assert "aspirin" in med["medication_name"].lower()
+            assert med["status"] == "active"
+
+        # Test COMBINED filtering: name + status=stopped
+        # Should return only stopped medications with "Aspirin" in the name
+        response = client.get(
+            "/api/v1/medications/?name=Aspirin&status=stopped",
+            headers=authenticated_headers
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) >= 1
+        for med in data:
+            assert "aspirin" in med["medication_name"].lower()
+            assert med["status"] == "stopped"
 
     def test_medication_pagination(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test medication pagination."""

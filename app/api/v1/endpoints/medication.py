@@ -109,18 +109,24 @@ def read_medications(
                     for med in medications
                     if name.lower() in getattr(med, "medication_name", "").lower()
                 ]
-        elif status and status == "active":
-            # Use optimized method for active medications
-            medications = medication.get_active_by_patient(
-                db=db, patient_id=target_patient_id
+        elif name and status:
+            # Combined name and status filtering
+            filters = {"patient_id": target_patient_id, "status": status}
+            medications = medication.query(
+                db=db,
+                filters=filters,
+                search={"field": "medication_name", "term": name},
+                skip=skip,
+                limit=limit,
+                load_relations=["practitioner", "pharmacy", "condition"],
             )
         elif name:
-            # Filter by medication name
+            # Filter by medication name only (no status filter)
             medications = medication.get_by_name(
                 db=db, name=name, patient_id=target_patient_id, skip=skip, limit=limit
             )
         elif status:
-            # Filter by status (other than active)
+            # Filter by status (includes active, stopped, etc.)
             medications = medication.query(
                 db=db,
                 filters={"patient_id": target_patient_id, "status": status},
