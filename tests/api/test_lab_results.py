@@ -97,7 +97,7 @@ class TestLabResultsAPI:
         }
 
         upload_response = client.post(
-            f"/api/v1/lab-results/{lab_result_id}/files/",
+            f"/api/v1/lab-results/{lab_result_id}/files",
             files=files,
             headers=authenticated_headers
         )
@@ -283,7 +283,7 @@ class TestLabResultsAPI:
         }
 
         upload_response = client.post(
-            f"/api/v1/lab-results/{lab_result_id}/files/",
+            f"/api/v1/lab-results/{lab_result_id}/files",
             files=files,
             headers=authenticated_headers
         )
