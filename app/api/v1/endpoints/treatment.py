@@ -19,6 +19,7 @@ from app.api.v1.endpoints.utils import (
 )
 from app.crud.treatment import treatment
 from app.models.activity_log import EntityType
+from app.models.models import User
 from app.schemas.treatment import (
     TreatmentCreate,
     TreatmentResponse,
@@ -161,6 +162,8 @@ def update_treatment(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update a treatment."""
     return handle_update_with_logging(
@@ -172,6 +175,8 @@ def update_treatment(
         user_id=current_user_id,
         entity_name="Treatment",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -182,6 +187,8 @@ def delete_treatment(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete a treatment."""
     return handle_delete_with_logging(
@@ -192,6 +199,8 @@ def delete_treatment(
         user_id=current_user_id,
         entity_name="Treatment",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 

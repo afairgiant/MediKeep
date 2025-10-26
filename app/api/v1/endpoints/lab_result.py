@@ -224,6 +224,8 @@ def update_lab_result(
     request: Request,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """Update an existing lab result."""
     return handle_update_with_logging(
@@ -235,6 +237,8 @@ def update_lab_result(
         user_id=current_user_id,
         entity_name="Lab result",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -245,12 +249,25 @@ def delete_lab_result(
     request: Request,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """Delete a lab result and associated files."""
     with handle_database_errors(request=request):
         # Custom deletion logic to handle associated files
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
+
+        # SECURITY FIX: Verify user has permission to delete this record
+        from app.api.v1.endpoints.utils import verify_patient_ownership
+        verify_patient_ownership(
+            obj=db_lab_result,
+            current_user_patient_id=current_user_patient_id,
+            entity_name="Lab result",
+            db=db,
+            current_user=current_user,
+            permission='edit',
+        )
         # Log the deletion activity BEFORE deleting
         from app.api.activity_logging import log_delete
         from app.core.logging.config import get_logger

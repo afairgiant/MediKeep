@@ -167,6 +167,8 @@ def update_medication(
     medication_id: int,
     medication_in: MedicationUpdate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update a medication."""
     updated_medication = handle_update_with_logging(
@@ -178,6 +180,8 @@ def update_medication(
         user_id=current_user_id,
         entity_name="Medication",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
     # Return with relationships loaded
@@ -193,6 +197,8 @@ def delete_medication(
     db: Session = Depends(deps.get_db),
     medication_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete a medication."""
     return handle_delete_with_logging(
@@ -203,6 +209,8 @@ def delete_medication(
         user_id=current_user_id,
         entity_name="Medication",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 

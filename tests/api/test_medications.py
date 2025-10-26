@@ -289,18 +289,14 @@ class TestMedicationAPI:
         )
         assert response.status_code == 404
 
-        # User2 tries to update User1's medication - should fail
-        # TODO: PRODUCTION BUG - This currently returns 200 (succeeds) instead of 404
-        # See TECHNICAL_DEBT.md: "Patient Data Isolation Bypass in UPDATE Endpoints"
-        # This is a CRITICAL SECURITY VULNERABILITY that needs to be fixed
+        # User2 tries to update User1's medication - should fail with 404
         update_response = client.put(
             f"/api/v1/medications/{medication_id}",
             json={"dosage": "200mg"},
             headers=headers2
         )
-        # TEMPORARY: Expecting 200 due to production bug (should be 404)
-        assert update_response.status_code == 200, \
-            "SECURITY BUG: User2 can update User1's medication! This should return 404."
+        assert update_response.status_code == 404, \
+            "User2 should NOT be able to update User1's medication"
 
     def test_medication_search_and_filtering(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test medication search and filtering capabilities."""

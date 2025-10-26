@@ -18,6 +18,7 @@ from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
 from app.crud.allergy import allergy
 from app.models.activity_log import EntityType
+from app.models.models import User
 from app.schemas.allergy import (
     AllergyCreate,
     AllergyResponse,
@@ -158,6 +159,8 @@ def update_allergy(
     allergy_id: int,
     allergy_in: AllergyUpdate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Update an allergy record.
@@ -171,6 +174,8 @@ def update_allergy(
         user_id=current_user_id,
         entity_name="Allergy",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 
@@ -181,6 +186,8 @@ def delete_allergy(
     db: Session = Depends(deps.get_db),
     allergy_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Delete an allergy record.
@@ -193,6 +200,8 @@ def delete_allergy(
         user_id=current_user_id,
         entity_name="Allergy",
         request=request,
+        current_user=current_user,
+        current_user_patient_id=current_user_patient_id,
     )
 
 

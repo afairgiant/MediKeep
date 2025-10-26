@@ -455,6 +455,10 @@ class TestAllergiesAPI:
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
         )
+        # Set active patient for multi-patient system
+        user1_data["user"].active_patient_id = patient1.id
+        db_session.commit()
+        db_session.refresh(user1_data["user"])
         headers1 = create_user_token_headers(user1_data["user"].username)
 
         user2_data = create_random_user(db_session)
@@ -467,6 +471,10 @@ class TestAllergiesAPI:
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
         )
+        # Set active patient for multi-patient system
+        user2_data["user"].active_patient_id = patient2.id
+        db_session.commit()
+        db_session.refresh(user2_data["user"])
         headers2 = create_user_token_headers(user2_data["user"].username)
 
         # User1 creates an allergy
@@ -476,7 +484,7 @@ class TestAllergiesAPI:
             "reaction": "Confidential reaction",
             "onset_date": "2023-01-15",
             "status": "active",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": patient1.id
         }
 
         create_response = client.post(
