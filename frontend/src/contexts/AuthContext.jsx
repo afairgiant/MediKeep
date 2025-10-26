@@ -153,9 +153,11 @@ export function AuthProvider({ children }) {
         const storedToken = await secureStorage.getItem('token');
         const storedUser = await secureStorage.getItem('user');
         const storedExpiry = await secureStorage.getItem('tokenExpiry');
+        const storedSessionTimeout = await secureStorage.getItem('sessionTimeoutMinutes');
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
+          const sessionTimeoutMinutes = storedSessionTimeout ? parseInt(storedSessionTimeout) : 30;
 
           if (!isTokenExpired(tokenExpiry)) {
             // Token is still valid, verify with server
@@ -165,9 +167,10 @@ export function AuthProvider({ children }) {
                 tokenExpiry: tokenExpiry,
                 currentTime: Date.now(),
                 hoursUntilExpiry: ((tokenExpiry - Date.now()) / (1000 * 60 * 60)).toFixed(2),
+                sessionTimeoutMinutes: sessionTimeoutMinutes,
                 timestamp: new Date().toISOString()
               });
-              
+
               const user = await authService.getCurrentUser();
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -175,6 +178,7 @@ export function AuthProvider({ children }) {
                   user,
                   token: storedToken,
                   tokenExpiry,
+                  sessionTimeoutMinutes,
                 },
               });
               
@@ -272,7 +276,17 @@ export function AuthProvider({ children }) {
 
     initializeAuth();
   }, []);
-  // Auto-refresh token before expiry
+  // Auto-refresh token before expiry - DISABLED
+  // NOTE: Token refresh is not implemented on the backend (see simpleAuthService.js:324-328)
+  // This auto-refresh logic was causing users to be logged out 5 minutes before their
+  // actual token expiration because the refresh would fail and trigger a logout.
+  // The JWT tokens are now set to the full user-configured timeout duration,
+  // and users will be logged out only when:
+  // 1. The token actually expires (not 5 minutes early), OR
+  // 2. Inactivity timeout is reached (managed by the activity tracking below)
+  //
+  // If token refresh is implemented in the future, uncomment this code.
+  /*
   useEffect(() => {
     if (!state.isAuthenticated || !state.tokenExpiry) {
       return;
@@ -290,7 +304,7 @@ export function AuthProvider({ children }) {
             dispatch({ type: AUTH_ACTIONS.LOGOUT });
             return;
           }
-          
+
           const refreshResult = await authService.refreshToken();
           if (refreshResult.success) {
             dispatch({
@@ -324,6 +338,7 @@ export function AuthProvider({ children }) {
       return () => clearTimeout(refreshTimer);
     }
   }, [state.tokenExpiry, state.isAuthenticated]);
+  */
 
   // Enhanced activity tracking for auto-logout with proper error handling
   useEffect(() => {
@@ -337,7 +352,7 @@ export function AuthProvider({ children }) {
         const timeSinceLastActivity = Date.now() - state.lastActivity;
         // Use user's custom timeout or fallback to config
         const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
-        
+
         if (timeSinceLastActivity > sessionTimeoutMs) {
           secureActivityLogger.logSessionEvent({
             action: 'session_expired',
@@ -345,7 +360,15 @@ export function AuthProvider({ children }) {
             timeSinceLastActivity,
             sessionTimeout: sessionTimeoutMs
           });
-          
+
+          logger.warn('Session expired due to inactivity', {
+            category: 'auth_session_expired',
+            timeSinceLastActivity: Math.floor(timeSinceLastActivity / 1000),
+            sessionTimeoutMinutes: state.sessionTimeoutMinutes || 30,
+            userId: state.user?.id,
+            timestamp: new Date().toISOString()
+          });
+
           toast.info('Session expired due to inactivity');
           clearAuthData();
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -407,7 +430,8 @@ export function AuthProvider({ children }) {
     secureStorage.removeItem('token');
     secureStorage.removeItem('user');
     secureStorage.removeItem('tokenExpiry');
-    
+    secureStorage.removeItem('sessionTimeoutMinutes');
+
     // Clear any cached app data to ensure fresh data on next login
     const cacheKeys = Object.keys(localStorage).filter(key => 
       key.startsWith('appData_') || 
@@ -566,13 +590,21 @@ export function AuthProvider({ children }) {
         isExpired: tokenExpiry < Date.now()
       });
 
+      // Get session timeout from result or use default
+      const sessionTimeoutMinutes = (isSSO ? 30 : result?.sessionTimeoutMinutes) || 30;
+
       // Store in localStorage - MUST await to prevent race conditions
       await updateStoredToken(token, tokenExpiry);
       await updateStoredUser(user);
+      await secureStorage.setItem('sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
 
-      // Get session timeout from result or use default
-      const sessionTimeoutMinutes = (isSSO ? 30 : result?.sessionTimeoutMinutes) || 30;
-      
+      logger.info('Session timeout stored', {
+        category: 'auth_session_timeout',
+        sessionTimeoutMinutes: sessionTimeoutMinutes,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
+
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: {
