@@ -120,7 +120,7 @@ def read_immunizations(
         return immunizations
 
 
-@router.get("/{immunization_id}", response_model=ImmunizationWithRelations)
+@router.get("/{immunization_id}", response_model=ImmunizationResponse)
 def read_immunization(
     *,
     request: Request,
@@ -129,11 +129,13 @@ def read_immunization(
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Get immunization by ID with related information - only allows access to user's own immunizations."""
+    """Get immunization by ID - only allows access to user's own immunizations.
+
+    Note: Relations (patient, practitioner) not loaded to avoid serialization issues.
+    Use practitioner_id to fetch practitioner details separately if needed.
+    """
     with handle_database_errors(request=request):
-        immunization_obj = immunization.get_with_relations(
-            db=db, record_id=immunization_id, relations=["patient", "practitioner"]
-        )
+        immunization_obj = immunization.get(db=db, id=immunization_id)
         handle_not_found(immunization_obj, "Immunization", request)
         verify_patient_ownership(immunization_obj, current_user_patient_id, "immunization")
 
