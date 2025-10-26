@@ -72,6 +72,7 @@ def read_medications(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     name: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
@@ -82,13 +83,16 @@ def read_medications(
     with handle_database_errors(request=request):
         if tags:
             # Use tag filtering with patient constraint
+            filters = {"patient_id": target_patient_id}
+            if status:
+                filters["status"] = status
             medications = medication.get_multi_with_tag_filters(
                 db,
                 tags=tags,
                 tag_match_all=tag_match_all,
-                patient_id=target_patient_id,
                 skip=skip,
                 limit=limit,
+                **filters
             )
             # Load relationships manually for tag-filtered results
             for med in medications:
@@ -98,6 +102,32 @@ def read_medications(
                     db.refresh(med, ["pharmacy"])
                 if hasattr(med, 'condition_id') and med.condition_id:
                     db.refresh(med, ["condition"])
+            # Apply name filter manually if both tags and name are specified
+            if name:
+                medications = [
+                    med
+                    for med in medications
+                    if name.lower() in getattr(med, "medication_name", "").lower()
+                ]
+        elif status and status == "active":
+            # Use optimized method for active medications
+            medications = medication.get_active_by_patient(
+                db=db, patient_id=target_patient_id
+            )
+        elif name:
+            # Filter by medication name
+            medications = medication.get_by_name(
+                db=db, name=name, patient_id=target_patient_id, skip=skip, limit=limit
+            )
+        elif status:
+            # Filter by status (other than active)
+            medications = medication.query(
+                db=db,
+                filters={"patient_id": target_patient_id, "status": status},
+                skip=skip,
+                limit=limit,
+                load_relations=["practitioner", "pharmacy", "condition"],
+            )
         else:
             # Use regular patient filtering
             medications = medication.get_by_patient(
@@ -107,14 +137,6 @@ def read_medications(
                 limit=limit,
                 load_relations=["practitioner", "pharmacy", "condition"],
             )
-
-        # Apply name filter if provided
-        if name:
-            medications = [
-                med
-                for med in medications
-                if name.lower() in getattr(med, "medication_name", "").lower()
-            ]
 
         log_data_access(
             logger,
