@@ -169,7 +169,7 @@ class TestAllergiesAPI:
                 headers=authenticated_headers
             )
 
-        # Get all allergies (API doesn't support status filtering)
+        # Get all allergies - should return both active and inactive
         response = client.get(
             "/api/v1/allergies/",
             headers=authenticated_headers
@@ -184,6 +184,21 @@ class TestAllergiesAPI:
         # Check both statuses exist
         statuses = {a["status"] for a in created_allergens}
         assert statuses == {"active", "inactive"}
+
+        # Test status filtering - should return only active allergies
+        response = client.get(
+            "/api/v1/allergies/?status=active",
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should only return active allergies
+        active_allergens = [allergy for allergy in data if allergy["allergen"] in ["Active Allergen", "Inactive Allergen"]]
+        assert len(active_allergens) == 1
+        assert active_allergens[0]["allergen"] == "Active Allergen"
+        assert active_allergens[0]["status"] == "active"
 
     def test_get_critical_allergies(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test filtering for critical (severe/life-threatening) allergies."""
@@ -427,7 +442,7 @@ class TestAllergiesAPI:
 
         # Search for allergies containing "cillin"
         response = client.get(
-            "/api/v1/allergies/?search=cillin",
+            "/api/v1/allergies/?allergen=cillin",
             headers=authenticated_headers
         )
 
