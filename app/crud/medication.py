@@ -36,25 +36,32 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate], T
         )
 
     def get_by_name(
-        self, db: Session, *, name: str, skip: int = 0, limit: int = 100
+        self, db: Session, *, name: str, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
     ) -> List[Medication]:
         """
-        Get medications by name (partial match).
+        Get medications by name (partial match), optionally filtered by patient.
 
         Args:
             db: Database session
             name: Medication name to search for
+            patient_id: Optional patient ID to filter by
             skip: Number of records to skip
             limit: Maximum number of records to return
 
         Returns:
             List of medications matching the name
         """
+        filters = {}
+        if patient_id:
+            filters["patient_id"] = patient_id
+
         return self.query(
             db=db,
+            filters=filters,
             search={"field": "medication_name", "term": name},
             skip=skip,
             limit=limit,
+            load_relations=["practitioner", "pharmacy", "condition"],
         )
 
     def deactivate(self, db: Session, *, db_obj: Medication) -> Medication:

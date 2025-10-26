@@ -300,11 +300,7 @@ class TestMedicationAPI:
 
     def test_medication_search_and_filtering(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test medication search and filtering capabilities."""
-        # TODO: PRODUCTION BUG - Search and status filtering don't work
-        # See TECHNICAL_DEBT.md: "Medication Search Parameter Ignored"
-        # This test is adjusted to reflect current broken behavior
-
-        # Create multiple medications
+        # Create multiple medications with different statuses
         medications = [
             {
                 "patient_id": user_with_patient["patient"].id,
@@ -317,50 +313,82 @@ class TestMedicationAPI:
                 "medication_name": "Ibuprofen",
                 "dosage": "200mg",
                 "status": "active"
+            },
+            {
+                "patient_id": user_with_patient["patient"].id,
+                "medication_name": "Acetaminophen",
+                "dosage": "500mg",
+                "status": "stopped"
+            },
+            {
+                "patient_id": user_with_patient["patient"].id,
+                "medication_name": "Aspirin Low Dose",
+                "dosage": "81mg",
+                "status": "stopped"
             }
         ]
 
-        created_count = 0
+        created_ids = []
         for med_data in medications:
             response = client.post(
                 "/api/v1/medications/",
                 json=med_data,
                 headers=authenticated_headers
             )
-            if response.status_code == 201:
-                created_count += 1
+            if response.status_code == 200:
+                created_ids.append(response.json()["id"])
 
-        # Get all medications (filtering doesn't work in production)
-        response = client.get(
-            "/api/v1/medications/",
-            headers=authenticated_headers
-        )
-
-        assert response.status_code == 200
-        data = response.json()
-        # Should have at least created_count medications (may have more from previous tests)
-        assert len(data) >= created_count
-        total_meds = len(data)
-
-        # PRODUCTION BUG: Status filtering doesn't work - returns all medications
+        # Test status filtering - should return only active medications
         response = client.get(
             "/api/v1/medications/?status=active",
             headers=authenticated_headers
         )
         assert response.status_code == 200
         data = response.json()
-        # BUG: Returns all medications regardless of status filter
-        assert len(data) == total_meds
+        # Should only return active medications
+        active_meds = [med for med in data if med["status"] == "active"]
+        assert len(active_meds) >= 2
+        # Verify all returned medications are active
+        for med in data:
+            assert med["status"] == "active"
 
-        # PRODUCTION BUG: Search doesn't work - returns all medications
+        # Test name filtering - should return only medications matching the name
         response = client.get(
-            "/api/v1/medications/?search=Aspirin",
+            "/api/v1/medications/?name=Aspirin",
             headers=authenticated_headers
         )
         assert response.status_code == 200
         data = response.json()
-        # BUG: Should return 1, but returns all medications
-        assert len(data) == total_meds
+        # Should return only medications with "Aspirin" in the name
+        assert len(data) >= 2  # Both Aspirin (active) and Aspirin Low Dose (stopped)
+        for med in data:
+            assert "aspirin" in med["medication_name"].lower()
+
+        # Test COMBINED filtering: name + status=active
+        # Should return only active medications with "Aspirin" in the name
+        response = client.get(
+            "/api/v1/medications/?name=Aspirin&status=active",
+            headers=authenticated_headers
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) >= 1
+        for med in data:
+            assert "aspirin" in med["medication_name"].lower()
+            assert med["status"] == "active"
+
+        # Test COMBINED filtering: name + status=stopped
+        # Should return only stopped medications with "Aspirin" in the name
+        response = client.get(
+            "/api/v1/medications/?name=Aspirin&status=stopped",
+            headers=authenticated_headers
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) >= 1
+        for med in data:
+            assert "aspirin" in med["medication_name"].lower()
+            assert med["status"] == "stopped"
 
     def test_medication_pagination(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test medication pagination."""
