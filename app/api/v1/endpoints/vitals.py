@@ -55,15 +55,56 @@ def read_vitals(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
+    vital_type: Optional[str] = Query(None, description="Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)"),
+    start_date: Optional[str] = Query(None, description="Start date for date range filter (ISO format)"),
+    end_date: Optional[str] = Query(None, description="End date for date range filter (ISO format)"),
+    days: Optional[int] = Query(None, description="Get readings from last N days"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve vitals readings for the current user or specified patient (Phase 1 support)."""
+    """
+    Retrieve vitals readings for the current user or specified patient (Phase 1 support).
+
+    Supports filtering by:
+    - vital_type: Specific vital type (e.g., blood_pressure, heart_rate)
+    - start_date/end_date: Date range filtering
+    - days: Recent readings (e.g., last 30 days)
+    """
 
     with handle_database_errors(request=request):
-        vitals_list = vitals.get_by_patient(
-            db=db, patient_id=target_patient_id, skip=skip, limit=limit
-        )
+        # Apply filters based on query parameters
+        if days is not None:
+            # Get recent readings
+            vitals_list = vitals.get_recent_readings(
+                db=db, patient_id=target_patient_id, days=days
+            )
+        elif start_date and end_date:
+            # Date range filtering
+            from datetime import datetime
+            start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            vitals_list = vitals.get_by_patient_date_range(
+                db=db,
+                patient_id=target_patient_id,
+                start_date=start_dt,
+                end_date=end_dt,
+                skip=skip,
+                limit=limit
+            )
+        elif vital_type:
+            # Filter by vital type
+            vitals_list = vitals.get_by_vital_type(
+                db=db,
+                patient_id=target_patient_id,
+                vital_type=vital_type,
+                skip=skip,
+                limit=limit
+            )
+        else:
+            # Get all vitals
+            vitals_list = vitals.get_by_patient(
+                db=db, patient_id=target_patient_id, skip=skip, limit=limit
+            )
 
         log_data_access(
             logger,
