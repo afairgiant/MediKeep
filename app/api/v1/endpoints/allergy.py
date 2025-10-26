@@ -62,6 +62,7 @@ def read_allergies(
     limit: int = Query(default=100, le=100),
     severity: Optional[str] = Query(None),
     allergen: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
@@ -78,6 +79,8 @@ def read_allergies(
             filters = {"patient_id": target_patient_id}
             if severity:
                 filters["severity"] = severity
+            if status:
+                filters["status"] = status
             allergies = allergy.get_multi_with_tag_filters(
                 db,
                 tags=tags,
@@ -92,6 +95,28 @@ def read_allergies(
                     allrg for allrg in allergies
                     if allergen.lower() in getattr(allrg, "allergen", "").lower()
                 ]
+        elif status and status == "active":
+            # Use optimized method for active allergies
+            allergies = allergy.get_active_allergies(
+                db=db, patient_id=target_patient_id
+            )
+        elif severity and status:
+            # Combined severity and status filtering
+            allergies = allergy.query(
+                db=db,
+                filters={"patient_id": target_patient_id, "severity": severity.lower(), "status": status},
+                order_by="onset_date",
+                order_desc=True,
+            )
+        elif allergen and status:
+            # Combined allergen and status filtering
+            allergies = allergy.query(
+                db=db,
+                filters={"patient_id": target_patient_id, "status": status},
+                search={"field": "allergen", "term": allergen},
+                order_by="severity",
+                order_desc=True,
+            )
         elif severity:
             allergies = allergy.get_by_severity(
                 db, severity=severity, patient_id=target_patient_id
@@ -99,6 +124,14 @@ def read_allergies(
         elif allergen:
             allergies = allergy.get_by_allergen(
                 db, allergen=allergen, patient_id=target_patient_id
+            )
+        elif status:
+            # Filter by status (other than active)
+            allergies = allergy.query(
+                db=db,
+                filters={"patient_id": target_patient_id, "status": status},
+                order_by="onset_date",
+                order_desc=True,
             )
         else:
             allergies = allergy.get_by_patient(
