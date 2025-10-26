@@ -89,7 +89,7 @@ class TestEmergencyContactAPI:
             created_contacts.append(response.json())
 
         # Get contacts for patient
-        response = authenticated_client.get(f"/api/v1/emergency-contacts/?patient_id={patient.id}")
+        response = authenticated_client.get("/api/v1/emergency-contacts/")
 
         assert response.status_code == 200
         data = response.json()
@@ -262,7 +262,7 @@ class TestEmergencyContactAPI:
             assert response.status_code == 200
 
         # Get active contacts only
-        response = authenticated_client.get(f"/api/v1/emergency-contacts/?patient_id={patient.id}&is_active=true")
+        response = authenticated_client.get("/api/v1/emergency-contacts/?is_active=true")
 
         assert response.status_code == 200
         data = response.json()
@@ -330,7 +330,7 @@ class TestEmergencyContactAPI:
         patient = test_patient_for_contacts
 
         # Test without authentication
-        response = client.get(f"/api/v1/emergency-contacts/?patient_id={patient.id}")
+        response = client.get("/api/v1/emergency-contacts/")
         assert response.status_code == 401
 
         # Test creating contact without auth
